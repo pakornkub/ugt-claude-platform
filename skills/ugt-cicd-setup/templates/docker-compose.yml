@@ -1,0 +1,60 @@
+# Production compose — deployed by Jenkins on the `main` branch.
+# Jenkins always runs `docker-compose up -d --no-build`, so the build: section
+# is never used at deploy time; NEXT_PUBLIC_* are passed via --build-arg in the
+# Jenkinsfile Docker Build stage.
+#
+# Placeholders: __PROJECT_NAME__, __PORT_PROD__, __BASE_PATH_PROD__
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    image: __PROJECT_NAME__:latest
+    # Image is built locally by Jenkins — never pull from Docker Hub
+    pull_policy: never
+    container_name: __PROJECT_NAME__
+    restart: unless-stopped
+    ports:
+      # Host port comes from .env (APP_PORT) with a default; container port is
+      # always 3000
+      - '${APP_PORT:-__PORT_PROD__}:3000'
+    networks:
+      - proxy-network
+    environment:
+      # Runtime secrets — read from .env (copied from the Jenkins Secret File
+      # credential at deploy time). NEVER bake secrets into image layers, and
+      # NEVER put NEXT_PUBLIC_* / client-side vars here (no effect at runtime).
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # Add the project's runtime secrets below, e.g.:
+      # AUTH_SECRET: ${AUTH_SECRET}
+      # SMTP_HOST: ${SMTP_HOST}
+      # SMTP_PORT: ${SMTP_PORT:-25}
+      # SMTP_FROM: ${SMTP_FROM}
+      # SENTRY_DSN: ${SENTRY_DSN:-}
+    healthcheck:
+      # Always 127.0.0.1 (NOT localhost — Alpine resolves it to IPv6 ::1) and
+      # always internal port 3000 (container-internal, not the host port)
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000__BASE_PATH_PROD__/api/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  # Shared reverse-proxy network on the Docker host (created once, externally)
+  proxy-network:
+    external: true

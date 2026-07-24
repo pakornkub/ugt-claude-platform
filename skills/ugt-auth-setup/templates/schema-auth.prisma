@@ -1,0 +1,152 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth + RBAC models — paste this block into prisma/schema.prisma.
+// Column/table @map names follow the org MSSQL convention (PascalCase; auth
+// tables singular as Better Auth expects, log tables plural).
+// `@db.NVarChar(Max)` annotations are MSSQL-specific — adjust for other providers.
+// After pasting: npx prisma migrate dev --name auth-rbac && npx prisma generate
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Better Auth core ────────────────────────────────────────────────────────
+
+model user {
+  id            String    @id @default(cuid())              @map("Id")
+  name          String                                       @map("Name")
+  email         String    @unique                            @map("Email")
+  emailVerified Boolean   @default(false)                    @map("EmailVerified")
+  image         String?   @db.NVarChar(Max)                  @map("Image")
+  createdAt     DateTime  @default(now())                    @map("CreatedAt")
+  updatedAt     DateTime  @updatedAt                         @map("UpdatedAt")
+
+  // Auth — last login method: "sso" | "ldap" | "local"
+  authType     String  @default("local") @map("AuthType")
+
+  // RBAC — each user has at most one role
+  roleId       String?                                       @map("RoleId")
+  userRole     role?    @relation(fields: [roleId], references: [id])
+
+  // Directory username (sAMAccountName / preferred_username) — used as the LDAP
+  // upsert key and to link SSO logins back to the directory identity.
+  ldapUsername String?  @unique                              @map("LdapUsername")
+
+  // EXTENSION POINT: add org/HR custom fields here (e.g. employee code,
+  // department, job title) and sync them in lib/auth.ts databaseHooks +
+  // lib/actions/auth.ts ldapLoginAction.
+
+  sessions session[]
+  accounts account[]
+
+  @@map("User")
+}
+
+model session {
+  id        String   @id @default(cuid()) @map("Id")
+  expiresAt DateTime                       @map("ExpiresAt")
+  token     String   @unique              @map("Token")
+  createdAt DateTime @default(now())      @map("CreatedAt")
+  updatedAt DateTime @updatedAt           @map("UpdatedAt")
+  ipAddress String?                        @map("IpAddress")
+  userAgent String?  @db.NVarChar(Max)    @map("UserAgent")
+  userId    String                         @map("UserId")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Session")
+}
+
+model account {
+  id                    String    @id @default(cuid())  @map("Id")
+  accountId             String                           @map("AccountId")
+  providerId            String                           @map("ProviderId")
+  userId                String                           @map("UserId")
+  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.NVarChar(Max)     @map("AccessToken")
+  refreshToken          String?   @db.NVarChar(Max)     @map("RefreshToken")
+  idToken               String?   @db.NVarChar(Max)     @map("IdToken")
+  accessTokenExpiresAt  DateTime?                        @map("AccessTokenExpiresAt")
+  refreshTokenExpiresAt DateTime?                        @map("RefreshTokenExpiresAt")
+  scope                 String?                          @map("Scope")
+  password              String?   @db.NVarChar(Max)     @map("Password")
+  createdAt             DateTime  @default(now())        @map("CreatedAt")
+  updatedAt             DateTime  @updatedAt             @map("UpdatedAt")
+
+  @@unique([providerId, accountId])
+  @@map("Account")
+}
+
+model verification {
+  id         String    @id @default(cuid()) @map("Id")
+  identifier String                          @map("Identifier")
+  value      String    @db.NVarChar(Max)    @map("VerificationValue")
+  expiresAt  DateTime                        @map("ExpiresAt")
+  createdAt  DateTime? @default(now())       @map("CreatedAt")
+  updatedAt  DateTime? @updatedAt            @map("UpdatedAt")
+
+  @@map("Verification")
+}
+
+// ─── RBAC ────────────────────────────────────────────────────────────────────
+// user (1) ── (0..1) role (1) ── (M) rolePermission (M) ── (1) permission
+
+model role {
+  id          String   @id @default(cuid()) @map("Id")
+  name        String   @unique              @map("Name")
+  description String?  @db.NVarChar(Max)   @map("Description")
+  isSystem    Boolean  @default(false)      @map("IsSystem")  // system roles (admin) cannot be deleted
+  createdAt   DateTime @default(now())      @map("CreatedAt")
+  updatedAt   DateTime @updatedAt           @map("UpdatedAt")
+
+  users       user[]
+  permissions rolePermission[]
+
+  @@map("Role")
+}
+
+model permission {
+  id    String @id @default(cuid()) @map("Id")
+  key   String @unique              @map("PermKey")   // e.g. "users:read" — KEY is T-SQL reserved
+  label String                      @map("Label")     // human-readable label
+  group String                      @map("GroupName") // grouping for UI — GROUP is T-SQL reserved
+
+  roles rolePermission[]
+
+  @@map("Permission")
+}
+
+model rolePermission {
+  roleId       String @map("RoleId")
+  permissionId String @map("PermissionId")
+
+  role         role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("RolePermission")
+}
+
+// ─── Rate Limiting ───────────────────────────────────────────────────────────
+// Required by Better Auth when rateLimit.storage = "database".
+// GOTCHA (Better Auth v1): the primary key MUST be `id String @id` and `key`
+// MUST be nullable — Better Auth sends an `id` field on insert; using
+// `key String @id` instead throws `Unknown argument 'id'` at runtime.
+
+model rateLimit {
+  id          String  @id          @map("Id")
+  key         String?              @map("BucketKey")    // KEY is T-SQL reserved
+  count       Int                  @map("RequestCount") // COUNT is a T-SQL aggregate function
+  lastRequest BigInt               @map("LastRequest")
+
+  @@map("RateLimit")
+}
+
+// ─── Audit Log ───────────────────────────────────────────────────────────────
+// Written on login.success / login.failed / logout / logout.sso and after every
+// privileged mutation (org contract).
+
+model activityLog {
+  id        Int      @id @default(autoincrement()) @map("Id")
+  userId    String   @map("UserId")
+  action    String   @map("Action")
+  detail    String?  @db.NVarChar(Max) @map("Detail")
+  createdAt DateTime @default(now()) @map("CreatedAt")
+
+  @@map("ActivityLogs")
+}
