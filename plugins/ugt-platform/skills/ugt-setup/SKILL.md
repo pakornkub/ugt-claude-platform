@@ -2,11 +2,13 @@
 name: ugt-setup
 description: >
   Use when a user wants to prepare an existing web project (often AI-generated)
-  for real deployment with org standards — "ทำให้ deploy ได้", "ติดตั้งระบบ
-  login/SSO", "ต่อ database", "ทำ CI/CD", or any combination — and it is not yet
-  clear which pieces they need. Routes to ugt-database-setup, ugt-auth-setup,
-  and ugt-cicd-setup in the correct order. Don't use when the user already
-  names exactly one area (→ invoke that skill directly).
+  for real deployment with org standards — "ทำให้ deploy ได้", "ยังใช้งานจริงไม่ได้",
+  "ติดตั้งระบบ login/SSO", "ต่อ database", "ทำ CI/CD", or any combination — and it
+  is not yet clear which pieces they need. Routes to ugt-database-setup,
+  ugt-quality-setup, ugt-auth-setup, and ugt-cicd-setup in the correct order and
+  installs the harness files (CLAUDE.md, .claude/rules, .claude/state).
+  Don't use when the user already names exactly one area (→ invoke that skill
+  directly).
 ---
 
 # UGT Setup — ตัวแม่ติดตั้งระบบมาตรฐานองค์กร
@@ -19,18 +21,24 @@ description: >
 | Skill ลูก | ติดตั้ง |
 | --- | --- |
 | `ugt-database-setup` | SQL Server ผ่าน Prisma + naming convention |
+| `ugt-quality-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
 | `ugt-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
-| `ugt-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy |
+| `ugt-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
+
+`ugt-clean-code` ไม่อยู่ในลำดับติดตั้ง — มันโหลดเองเมื่อมีการแก้ไฟล์ `.ts`/`.tsx`
+(`paths` frontmatter) ไม่ต้องเรียกจากที่นี่
 
 ## Workflow
 
 ### 1. ตรวจโปรเจคก่อนถาม
 
-อ่าน `package.json` (หรือไฟล์ manifest ของ stack) และโครงไฟล์ เพื่อรู้:
+อ่าน `package.json` และโครงไฟล์ เพื่อรู้:
 
-- Framework อะไร (Next.js / Node อื่น / ไม่ใช่ Node) — มีผลกับ template ที่ใช้ได้ตรง ๆ vs ต้อง adapt
-- มีของเดิมอยู่แล้วไหม: Prisma/ORM อื่น, ระบบ auth ใด ๆ, Jenkinsfile/Dockerfile
-  — **ถ้ามีของเดิม ห้ามทับเงียบ ๆ** ให้รายงานสิ่งที่เจอและถามก่อน
+- เป็น Next.js App Router จริงไหม — skill ชุดนี้ทำมาสำหรับ stack นี้เท่านั้น
+  (TS/React/Next.js + Prisma/SQL Server + Keycloak + Jenkins + SonarQube)
+  ถ้าไม่ใช่ ให้บอกผู้ใช้ตรง ๆ ว่าใช้ไม่ได้ **ห้ามพยายาม adapt เอง**
+- มีของเดิมอยู่แล้วไหม: Prisma/ORM อื่น, ระบบ auth ใด ๆ, vitest/jest/eslint,
+  Jenkinsfile/Dockerfile — **ถ้ามีของเดิม ห้ามทับเงียบ ๆ** ให้รายงานสิ่งที่เจอและถามก่อน
 
 ### 2. Interview — ถามรวบเป็นชุดเดียว
 
@@ -38,7 +46,7 @@ description: >
 
 **เลือก module:**
 
-1. ติดตั้งอะไรบ้าง? Database / Auth / CI (เลือกได้หลายอัน — default: ทั้งสาม)
+1. ติดตั้งอะไรบ้าง? Database / Quality (test+lint) / Auth / CI (เลือกได้หลายอัน — default: ทั้งสี่)
 2. [ถ้าเลือก Auth] เปิดวิธี login ไหนบ้าง? SSO / LDAP / Local (default: SSO อย่างเดียว)
 
 **Identity กลาง (ใช้ร่วมทุก module — ถามครั้งเดียว อย่าให้ skill ลูกถามซ้ำ):**
@@ -56,14 +64,17 @@ description: >
 ### 3. ติดตั้งตามลำดับ (ห้ามสลับ)
 
 ```
-Database → Auth → CI
+Database → Quality → Auth → CI
 ```
 
 - **Auth ต้องมาหลัง Database** — Better Auth เก็บ user/session/account ใน Prisma
+- **Quality มาก่อน CI** — pipeline เรียก `lint`/`format:check`/`test:coverage` ตามชื่อตรง ๆ
+  ถ้ายังไม่มี script พวกนี้ pipeline จะแดงที่ stage ที่ 3 ทันทีตั้งแต่ push แรก
 - **CI มาท้ายสุด** — pipeline ต้องรู้ว่ามี DB ไหม (migrate stage) และต้อง build ผ่านก่อน
 - Module ที่ไม่ได้เลือกก็ข้ามไป แต่ลำดับของที่เหลือคงเดิม
-- แต่ละ module: invoke skill ลูก (`ugt-database-setup` / `ugt-auth-setup` / `ugt-cicd-setup`)
-  แล้วทำตาม SKILL.md ของตัวนั้น — ส่งคำตอบ interview ที่ถามไว้แล้วลงไป อย่าถามผู้ใช้ซ้ำ
+- แต่ละ module: invoke skill ลูก (`ugt-database-setup` / `ugt-quality-setup` /
+  `ugt-auth-setup` / `ugt-cicd-setup`) แล้วทำตาม SKILL.md ของตัวนั้น —
+  ส่งคำตอบ interview ที่ถามไว้แล้วลงไป อย่าถามผู้ใช้ซ้ำ
 
 ### 4. ปิดงาน
 
@@ -82,5 +93,6 @@ Database → Auth → CI
 | --- | --- |
 | ตรวจของเดิมในโปรเจคก่อนถาม | ทับ Prisma/auth/Jenkinsfile เดิมโดยไม่บอก |
 | ถาม interview รวบชุดเดียว (รวมคำถามของ skill ลูก) | ถามทีละข้อ / ให้ skill ลูกถามซ้ำ |
-| ลำดับ Database → Auth → CI เสมอ | ติดตั้ง auth ก่อนมี DB |
+| ลำดับ Database → Quality → Auth → CI เสมอ | ติดตั้ง auth ก่อนมี DB / ทำ CI ก่อนมี test script |
+| ไม่ใช่ Next.js → บอกตรง ๆ ว่าใช้ไม่ได้ | ดัดแปลง asset ไปใช้กับ stack อื่นเอง |
 | สรุปไฟล์ที่แก้ + ของที่ต้องขอ admin ตอนจบ | จบงานเงียบ ๆ โดยไม่มี checklist |

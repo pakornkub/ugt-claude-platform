@@ -18,9 +18,9 @@ Skill นี้ติดตั้ง SQL Server ให้โปรเจคท�
 convention ของตาราง/คอลัมน์/SP/function, env validation ด้วย t3-env และ pattern
 raw SQL ที่ปลอดภัย รายละเอียดเชิงลึกอยู่ใน `references/` — โค้ดตั้งต้นอยู่ใน `assets/`
 
-## Org Contract (บังคับทุก stack — ไม่ใช่เฉพาะ Next.js/Prisma)
+## Org Standards
 
-ต่อให้โปรเจคปลายทางไม่ใช้ Prisma เลย มาตรฐานระดับ database เหล่านี้ยังบังคับใช้:
+มาตรฐานระดับ database ที่ทุกโปรเจคต้องเหมือนกัน:
 
 | สิ่งที่ตั้งชื่อ                  | Convention                          | ตัวอย่าง                                |
 | -------------------------------- | ----------------------------------- | --------------------------------------- |
@@ -47,9 +47,8 @@ SELECT-only เสมอ — ห้าม INSERT/UPDATE/DELETE จาก app; �
 1. **ชื่อ database** และมีอยู่แล้วหรือสร้างใหม่? (มีอยู่แล้ว → introspect/`migrate resolve`; ใหม่ → `migrate dev` ตั้งแต่ต้น)
 2. **Server/instance + port** ที่จะต่อ (dev กับ prod แยกกันไหม)
 3. ต้องเรียก **stored procedure** หรือ **linked server** ไหม? (มีผลกับ `requestTimeout` และ pattern raw SQL)
-4. Stack ของโปรเจคคืออะไร? (Next.js / Node อื่น / ไม่ใช่ Node — ดูหัวข้อ Adapting ด้านล่าง)
 
-## Setup Steps (Next.js / Node — reference implementation)
+## Setup Steps
 
 ### 1. ติดตั้ง dependencies
 
@@ -58,9 +57,7 @@ npm install @prisma/client @prisma/adapter-mssql @t3-oss/env-nextjs zod
 npm install --save-dev prisma tsx dotenv
 ```
 
-(โปรเจค Node ที่ไม่ใช่ Next.js → ใช้ `@t3-oss/env-core` แทน `@t3-oss/env-nextjs`)
-
-### 2. Copy templates แล้วแทนที่ placeholders
+### 2. Copy assets แล้วแทนที่ placeholders
 
 | Template                            | ปลายทาง                 |
 | ----------------------------------- | ----------------------- |
@@ -115,11 +112,6 @@ filtered unique index ที่ Prisma express ไม่ได้, flow deploy) 
 Pattern บังคับ: **sanitize ก่อน parameterize เสมอ**, เรียก SP ด้วย
 `$executeRaw\`EXEC usp_Name ${p1}, ${p2}\``, linked server = SELECT-only →
 `references/raw-sql-and-sp.md`
-
-## Adapting to other frameworks
-
-- **Node framework อื่น** (Express, Fastify, NestJS, Remix ฯลฯ): Prisma ใช้ได้เหมือนกันทุกอย่าง — เปลี่ยนแค่ `@t3-oss/env-nextjs` → `@t3-oss/env-core` และ path alias `@/lib/*` ตามโปรเจค
-- **Stack ที่ไม่ใช่ Node** (.NET, Python, Java): Org Contract ด้านบนยังบังคับใช้ครบ (naming + audit columns + `usp_*` + read-only prefix) — implement ด้วย ORM ของ stack นั้น (EF Core, SQLAlchemy, ...) และเก็บ connection string ใน env ที่ validate ตอน startup เช่นเดียวกัน
 
 ## Quick Rules
 

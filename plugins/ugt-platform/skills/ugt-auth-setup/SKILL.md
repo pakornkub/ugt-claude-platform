@@ -31,19 +31,21 @@ Skill นี้ติดตั้งระบบ login มาตรฐานอ�
 
 - `references/auth-flows.md` — ทุก flow + gotcha ที่เคย debug มาแล้ว (**อ่านก่อนแก้โค้ด auth เสมอ**)
 - `references/rbac.md` — data model, guard pattern, bootstrap, การเพิ่ม permission ภายหลัง
+- `references/audit-logging.md` — action naming, write pattern, กฎ payload (PDPA), retention, viewer API
 - `references/keycloak-client.md` — วิธีขอ/สร้าง Keycloak client สำหรับโปรเจกต์ใหม่
 
-## 2. Org Contract (framework-agnostic)
+## 2. Org Standards
 
-กติกากลางขององค์กร — ใช้ framework ไหนก็ต้องเป็นแบบนี้:
+กติกากลางขององค์กร:
 
 1. **Keycloak เครื่องเดียวทั้งองค์กร** — realm กลาง sync กับ AD;
    **แต่ละโปรเจกต์มี client ของตัวเอง** (Client ID = ชื่อโปรเจกต์) ห้ามใช้ client ร่วมกัน
 2. **OIDC Authorization Code + PKCE (S256)** เท่านั้น — ไม่ใช้ implicit / direct access grants
 3. **Session: อายุ 8 ชั่วโมง, refresh เมื่อเหลือ 30 นาที** (`expiresIn: 8h`, `updateAge: 30m`)
 4. **Audit log ทุกครั้ง**: `login.success` / `login.failed` / `logout` / `logout.sso`
-   ลงตาราง ActivityLog (non-blocking — ห้าม throw จน login พัง)
+   ลงตาราง ActivityLogs (non-blocking — ห้าม throw จน login พัง)
    และทุก privileged mutation ต้องเขียน audit log หลังสำเร็จ
+   — กฎครบ (action naming, payload ที่ห้ามเก็บ, retention) อยู่ใน `references/audit-logging.md`
 5. **RBAC shape**: `user (1)──(0..1) role (1)──(M:N) permission` —
    permission key รูปแบบ `resource:action`, role ที่ `isSystem: true` ลบไม่ได้,
    guard ทุก mutation ตามลำดับ **session → permission → action → audit log**
@@ -71,7 +73,7 @@ Skill นี้ติดตั้งระบบ login มาตรฐานอ�
 singleton + migrate ใช้งานได้) เพราะ Better Auth เก็บ user/session/account ใน Prisma
 ถ้ายังไม่มี ให้หยุดและทำ database ก่อน
 
-## 5. Setup steps (Next.js reference implementation)
+## 5. Setup steps
 
 ### 5.1 Dependencies
 
@@ -139,20 +141,7 @@ npx shadcn@latest add button input label tabs card sonner   # UI ของ login
    ไม่เรียก `signOut()` จาก auth-client
 4. Deploy ครั้งแรก: login → เข้า `/admin/setup` → กดปุ่ม → ได้ Administrator role
 
-## 6. Adapting to other frameworks
-
-Better Auth มี integration กับ framework อื่น (SvelteKit, Nuxt, Remix, Express, Hono, …)
-— **Org Contract ข้อ 1–7 บังคับใช้เหมือนเดิมทุกข้อ** สิ่งที่ต้อง map เอง:
-
-- route handler catch-all (`assets/route.ts`) → handler ของ framework นั้น
-- `proxy.ts` → middleware/guard ของ framework (หลักการเดิม: เช็ค cookie presence
-  ที่ edge, `getSessionCookie` + `cookiePrefix`)
-- Server Actions → endpoint/form action ของ framework — โครง
-  session → permission → action → audit log คงเดิม
-- การ derive `SESSION_COOKIE_NAME` (app prefix + `__Secure-`) เป็นของ Better Auth เอง
-  ไม่ผูกกับ Next.js — ใช้ได้ทุก framework
-
-## 7. Placeholders ที่ใช้ในทุกไฟล์
+## 6. Placeholders ที่ใช้ในทุกไฟล์
 
 | Placeholder | ความหมาย | ตัวอย่าง |
 | --- | --- | --- |
@@ -165,7 +154,7 @@ Better Auth มี integration กับ framework อื่น (SvelteKit, Nuxt
 | `<company-domain>` | โดเมนอีเมล/UPN ขององค์กร | `company.co.th` |
 | `<app-host>` | host ที่ deploy แอปจริง | — |
 
-## 8. Quick Rules — DO / DON'T
+## 7. Quick Rules — DO / DON'T
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
@@ -184,7 +173,7 @@ Better Auth มี integration กับ framework อื่น (SvelteKit, Nuxt
 | proxy: `url.pathname = '/login'` (app-relative) | `url.pathname = basePath + '/login'` (basePath ซ้ำ) |
 | ลบ DB session ด้วย raw token (strip signature ก่อน) | ลบด้วย signed token (ลบไม่เจอ) |
 
-## 9. Verification Checklist
+## 8. Verification Checklist
 
 หลังติดตั้งเสร็จ ตรวจตามนี้ก่อนปิดงาน:
 

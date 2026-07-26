@@ -14,7 +14,7 @@
 
 ## B. กฎเหล็ก: client-side vars = build args เท่านั้น
 
-`NEXT_PUBLIC_*` (หรือ client-side var ของ framework ใด ๆ) ถูก **inline เข้า
+`NEXT_PUBLIC_*` ถูก **inline เข้า
 JS bundle ตอน compile** — ใส่เป็น runtime `environment:` ใน compose =
 ไม่มีผลใด ๆ (bundle มี `undefined` baked ไปแล้ว)
 

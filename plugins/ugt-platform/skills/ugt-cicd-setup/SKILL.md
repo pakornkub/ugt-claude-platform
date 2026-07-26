@@ -7,8 +7,9 @@ description: >
   sonar-project.properties, Dockerfile/docker-compose for CI, wiring Jenkins
   credentials, or debugging CI failures during initial pipeline setup
   (Quality Gate hangs, OWASP timeouts, deploy health-check failures).
-  Don't use for writing code that passes the gate (→ sonarqube-clean-code in
-  the project) or DB/auth setup (→ ugt-database-setup / ugt-auth-setup).
+  Don't use for writing code that passes the gate (→ ugt-clean-code), for
+  installing the test/lint tooling the pipeline calls (→ ugt-quality-setup), or
+  for DB/auth setup (→ ugt-database-setup / ugt-auth-setup).
 ---
 
 # UGT CI/CD Setup
@@ -24,14 +25,14 @@ OWASP Dependency Check + Docker two-image build/deploy** — สกัดจา�
 
 | ที่                                     | เนื้อหา                                                          |
 | --------------------------------------- | ---------------------------------------------------------------- |
-| `assets/`                            | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml — copy แล้วแทน placeholder |
+| `assets/`                            | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml, api-health-route.ts — copy แล้วแทน placeholder |
 | `references/jenkins-one-time-setup.md`  | สิ่งที่ admin ต้องเตรียมฝั่ง Jenkins server (plugins/tools/credentials/webhook/snap-Docker gotcha) |
 | `references/sonarqube-setup.md`         | สร้าง project, token, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md`           | two-image deploy, migrate-then-deploy, health poll, build-arg rule |
 
-## 2. Org Contract (framework-agnostic)
+## 2. Org Standards
 
-สัญญากลางที่ **ทุก project ต้องมีเหมือนกัน** ไม่ว่า stack ไหน:
+สัญญากลางที่ **ทุก project ต้องมีเหมือนกัน**:
 
 ### 2.1 Stages (ครบ 10 ตามลำดับ)
 
@@ -86,9 +87,9 @@ OWASP publisher: **fail** เมื่อ CRITICAL ≥ 1 · **unstable** เม�
 
 ### 2.6 กฎ client-side vars
 
-ตัวแปรที่ inline เข้า bundle ตอน compile (`NEXT_PUBLIC_*` หรือเทียบเท่าของ
-stack อื่น) ต้องเป็น **`--build-arg` ตอน docker build เท่านั้น** — ใส่เป็น
-runtime environment = ไม่มีผล (รายละเอียด → `references/docker-deploy.md`)
+ตัวแปร `NEXT_PUBLIC_*` ถูก inline เข้า bundle ตอน compile → ต้องส่งเป็น
+**`--build-arg` ตอน docker build เท่านั้น** ใส่เป็น runtime environment
+ไม่มีผล (รายละเอียด → `references/docker-deploy.md`)
 
 ### 2.7 CI env
 
@@ -108,9 +109,9 @@ runtime environment = ไม่มีผล (รายละเอียด → 
 6. **Deploy target** — Docker host ไหน, Jenkins อยู่เครื่องเดียวกับ Docker
    daemon หรือใช้ socket mount, มี `docker-compose` v1 หรือ v2
 
-## 4. Setup Steps (Node/Next.js reference)
+## 4. Setup Steps
 
-### 4.1 Copy templates → project root
+### 4.1 Copy assets → project root
 
 ```
 assets/Jenkinsfile                → Jenkinsfile
@@ -119,7 +120,13 @@ assets/Dockerfile                 → Dockerfile
 assets/docker-compose.yml         → docker-compose.yml
 assets/docker-compose.dev.yml     → docker-compose.dev.yml
 assets/owasp-suppressions.xml     → owasp-suppressions.xml
+assets/api-health-route.ts        → app/api/health/route.ts
 ```
+
+> **`/api/health` ไม่ใช่ของเสริม** — Dockerfile `HEALTHCHECK` และ healthcheck ใน compose
+> ทั้งสองไฟล์ยิงไปที่ path นี้ ถ้าไม่มี route จริง container จะไม่เคยขึ้น `healthy`
+> แล้ว stage Deploy จะ fail ที่ขั้น poll `docker inspect` ทุกครั้ง (ดู `references/docker-deploy.md`)
+> ถ้าโปรเจคมี route นี้อยู่แล้ว ให้ตรวจว่ามันไม่ต้อง login และไม่คืน version/commit ออกไป
 
 ### 4.2 แทน placeholders (ทั้งหมดมีเท่านี้)
 
@@ -142,7 +149,8 @@ assets/owasp-suppressions.xml     → owasp-suppressions.xml
 
 - ไม่มี DB → ลบทุก block ที่ comment `[DB]` (prisma generate ใน Install +
   Dockerfile, builder image build, migrate step ใน Deploy, `DATABASE_URL`
-  ใน compose)
+  ใน compose, **และ block `[DB]` ใน `app/api/health/route.ts`** — ลบแล้ว health
+  ยังคืน `ok` ถูกต้องเพราะ `every()` บน check ว่างคืน `true`)
 - ไม่มี Sentry → ลบทุกจุดที่ marker `[SENTRY]`: Jenkinsfile (comment block +
   บรรทัดเปิด `withCredentials` sentry-dsn + closing brace ที่ mark
   `[SENTRY] end withCredentials` + build-arg DSN ×2 — **คง docker build block
@@ -154,7 +162,7 @@ assets/owasp-suppressions.xml     → owasp-suppressions.xml
 - vitest ต้องเปิด JUnit reporter เมื่อ `CI=true` (ดู comment ใน template
   Unit Tests stage)
 
-### 4.4 ปรับ next.config (Next.js reference)
+### 4.4 ปรับ next.config
 
 - **`output: 'standalone'` จำเป็น** — Dockerfile copy `.next/standalone` ถ้า
   next.config ไม่เปิด standalone → `COPY` fail (ดู
@@ -162,9 +170,6 @@ assets/owasp-suppressions.xml     → owasp-suppressions.xml
   `output: process.env.CI ? 'standalone' : undefined`
 - ถ้า deploy ใต้ basePath (คำตอบ interview ข้อ 3) → ต่อสาย
   `basePath: process.env.NEXT_PUBLIC_BASE_PATH` ใน next.config ด้วย
-
-stack อื่น: ไม่มีขั้นนี้ตรง ๆ — เทียบเท่า = ทำ build artifact ให้
-self-contained ตามที่ Dockerfile ของ stack นั้นคาดหวัง (ดู §5)
 
 ### 4.5 ฝั่ง server — ส่งรายการให้ admin
 
@@ -177,28 +182,9 @@ self-contained ตามที่ Dockerfile ของ stack นั้นคา�
 
 ### 4.6 ทดสอบ
 
-Push `develop` → ดู pipeline วิ่งครบ 10 stages → เช็ค Verification Checklist §7
+Push `develop` → ดู pipeline วิ่งครบ 10 stages → เช็ค Verification Checklist §6
 
-## 5. Adapting to Other Frameworks
-
-**Stage list ใน §2.1 คือ contract** — เปลี่ยนได้แค่คำสั่งข้างใน stage:
-
-| Stage        | Node/Next.js                     | เทียบเท่า stack อื่น                        |
-| ------------ | -------------------------------- | ------------------------------------------- |
-| Install      | `npm ci` (+ prisma generate)     | `mvn dependency:resolve` / `pip install` / `dotnet restore` |
-| Code Quality | eslint / prettier / tsc          | checkstyle / ruff+black / `dotnet format`   |
-| Unit Tests   | vitest → junit.xml + lcov        | surefire / pytest --junitxml + coverage     |
-| Build        | `npm run build`                  | `mvn package` / `docker`-only build         |
-| OWASP DC     | เหมือนเดิม (scan filesystem)     | เหมือนเดิม — ปรับ `--exclude` paths         |
-| Sonar        | sonar-scanner CLI + lcov         | Maven/Gradle plugin / `dotnet sonarscanner` — coverage property ต่อภาษา (→ `references/sonarqube-setup.md` §G) |
-| Quality Gate | เหมือนเดิมทุก stack              | —                                           |
-| Docker Build | build args = `NEXT_PUBLIC_*`     | build args = ตัวแปร client-side ของ stack   |
-| Deploy       | migrate = prisma                 | migrate = flyway/liquibase/alembic — pattern เดิม: migrate ก่อน compose up |
-
-Quality Gate thresholds, branch model, credential naming, secret rules —
-**ใช้เหมือนเดิมทุก stack**
-
-## 6. Quick Rules
+## 5. Quick Rules
 
 | DO ✅                                                        | DON'T ❌                                                      |
 | ------------------------------------------------------------ | ------------------------------------------------------------- |
@@ -214,7 +200,7 @@ Quality Gate thresholds, branch model, credential naming, secret rules —
 | migrate ก่อน `compose up` — fail = ไม่ deploy                | deploy ก่อนแล้วค่อย migrate                                   |
 | ทุก suppression/CPD exclusion มี rationale comment           | suppress ล่วงหน้าโดยไม่มี finding จริง                        |
 
-## 7. Verification Checklist
+## 6. Verification Checklist
 
 **ไฟล์ใน repo:**
 
@@ -226,6 +212,8 @@ Quality Gate thresholds, branch model, credential naming, secret rules —
       (sonar-scanner fail ทันทีถ้า path ไม่มี) ·
       CPD/multicriteria เริ่มว่าง (มีแต่ example ใน comment)
 - [ ] owasp-suppressions.xml ว่าง (skeleton) อยู่ที่ root
+- [ ] `app/api/health/route.ts` มีอยู่จริง · เรียกได้โดยไม่ต้อง login ·
+      คืน 200 เมื่อปกติ / 503 เมื่อ DB ล่ม · ไม่มี version/commit ใน response
 - [ ] compose ทั้งสองไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
       healthcheck ใช้ `127.0.0.1` + basePath ถูก env
 - [ ] `package.json` มี scripts: `lint`, `format:check`, `test:coverage`,

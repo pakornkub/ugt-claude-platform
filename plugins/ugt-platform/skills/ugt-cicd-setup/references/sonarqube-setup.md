@@ -78,8 +78,7 @@ function FooTab() { return <EntityTab<FooRow> fetchFn={fetchFoo} ... />; }
 ```
 
 > แนวเขียนโค้ดให้ผ่าน gate ตั้งแต่ scan แรก (modern-JS idioms, `Readonly<>`
-> props, NOSONAR placement) → skill **`sonarqube-clean-code`** ในโปรเจกต์
-> ปลายทาง — คนละหน้าที่กับ skill นี้
+> props, NOSONAR placement) → skill **`ugt-clean-code`** — คนละหน้าที่กับ skill นี้
 
 ## F. OWASP DC plugin integration
 
@@ -96,16 +95,9 @@ sonar.dependencyCheck.severity.medium=4.0
 sonar.dependencyCheck.severity.low=0.0
 ```
 
-## G. ภาษาอื่นที่ไม่ใช่ TS/JS
+## G. Coverage property
 
-`sonar-project.properties` เปลี่ยนตาม stack:
-
-| Stack   | Coverage property                          | หมายเหตุ                              |
-| ------- | ------------------------------------------ | ------------------------------------- |
-| TS/JS   | `sonar.javascript.lcov.reportPaths`        | lcov จาก vitest/jest `--coverage`     |
-| Java    | `sonar.coverage.jacoco.xmlReportPaths`     | มัก scan ผ่าน Maven/Gradle plugin แทน sonar-scanner CLI |
-| Python  | `sonar.python.coverage.reportPaths`        | coverage.xml จาก pytest-cov           |
-| .NET    | ใช้ `dotnet sonarscanner` begin/end        | ไม่ใช้ sonar-project.properties       |
-
-โครง exclusions/tests/gate เดิมใช้ได้ทุกภาษา — เปลี่ยนเฉพาะ path และ
-coverage format
+`sonar.javascript.lcov.reportPaths=coverage/lcov.info` — ไฟล์นี้มาจาก
+`npm run test:coverage` ซึ่ง `ugt-quality-setup` ตั้ง reporter `lcov` ไว้ให้แล้ว
+ถ้า path นี้ไม่มีไฟล์จริง Sonar จะรายงาน `new_coverage` เป็น 0% แล้ว Quality Gate
+block ทุก build โดยไม่มี error ที่ชี้ต้นเหตุ
