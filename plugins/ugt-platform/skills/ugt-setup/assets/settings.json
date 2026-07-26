@@ -1,0 +1,27 @@
+{
+  "extraKnownMarketplaces": {
+    "ugt": {
+      "source": {
+        "source": "github",
+        "repo": "<org>/ugt-claude-platform"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ugt-standard@ugt": true
+  },
+  "permissions": {
+    "deny": [
+      "Read(.env.production)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(rm -rf *)"
+    ],
+    "ask": [
+      "Bash(npx prisma migrate*)",
+      "Bash(npx prisma db push*)",
+      "Bash(docker compose*)",
+      "Bash(docker-compose*)"
+    ]
+  }
+}
