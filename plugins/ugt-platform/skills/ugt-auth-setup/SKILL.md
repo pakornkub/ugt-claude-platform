@@ -26,7 +26,7 @@ Skill นี้ติดตั้งระบบ login มาตรฐานอ�
 ทุกวิธีลงเอยที่ **session เดียวกันของ Better Auth + Prisma** พร้อม RBAC
 (role → permission) และหน้า first-admin bootstrap (`/admin/setup`)
 
-โค้ดจริงอยู่ใน `templates/` — ปรับ placeholder แล้ว copy เข้าโปรเจกต์ได้เลย
+โค้ดจริงอยู่ใน `assets/` — ปรับ placeholder แล้ว copy เข้าโปรเจกต์ได้เลย
 รายละเอียดเชิงลึกอยู่ใน `references/`:
 
 - `references/auth-flows.md` — ทุก flow + gotcha ที่เคย debug มาแล้ว (**อ่านก่อนแก้โค้ด auth เสมอ**)
@@ -89,27 +89,27 @@ npx shadcn@latest add button input label tabs card sonner   # UI ของ login
 
 | Template | ปลายทาง | เมื่อไร |
 | --- | --- | --- |
-| `templates/lib-auth.ts` | `lib/auth.ts` | เสมอ |
-| `templates/lib-auth-client.ts` | `lib/auth-client.ts` | เสมอ |
-| `templates/lib-actions-auth.ts` | `lib/actions/auth.ts` | เสมอ (ลบ action ของ method ที่ไม่เปิด) |
-| `templates/lib-ldap.ts` | `lib/ldap.ts` | เฉพาะ LDAP |
-| `templates/route.ts` | `app/api/auth/[...all]/route.ts` | เสมอ |
-| `templates/proxy.ts` | `proxy.ts` (root) | เสมอ — Next.js 16 ใช้ `proxy.ts` ไม่ใช่ `middleware.ts` |
-| `templates/login-form.tsx` | `components/login-form.tsx` | เสมอ (ลบ section ตาม method ที่เลือก) |
-| `templates/lib-permissions.ts` | `lib/permissions.ts` | เสมอ |
-| `templates/lib-get-user-permissions.ts` | `lib/get-user-permissions.ts` | เสมอ |
-| `templates/admin-setup/layout.tsx` | `app/(admin-setup)/layout.tsx` | เสมอ |
-| `templates/admin-setup/page.tsx` | `app/(admin-setup)/admin/setup/page.tsx` | เสมอ |
-| `templates/admin-setup/admin-setup-form.tsx` | `components/admin-setup-form.tsx` | เสมอ |
-| `templates/admin-setup/admin-setup-action.ts` | `lib/actions/admin-setup.ts` | เสมอ |
-| `templates/env.example` | merge เข้า `.env.example` + `.env.local` | เสมอ (ตัด var ของ method ที่ไม่เปิด) |
+| `assets/lib-auth.ts` | `lib/auth.ts` | เสมอ |
+| `assets/lib-auth-client.ts` | `lib/auth-client.ts` | เสมอ |
+| `assets/lib-actions-auth.ts` | `lib/actions/auth.ts` | เสมอ (ลบ action ของ method ที่ไม่เปิด) |
+| `assets/lib-ldap.ts` | `lib/ldap.ts` | เฉพาะ LDAP |
+| `assets/route.ts` | `app/api/auth/[...all]/route.ts` | เสมอ |
+| `assets/proxy.ts` | `proxy.ts` (root) | เสมอ — Next.js 16 ใช้ `proxy.ts` ไม่ใช่ `middleware.ts` |
+| `assets/login-form.tsx` | `components/login-form.tsx` | เสมอ (ลบ section ตาม method ที่เลือก) |
+| `assets/lib-permissions.ts` | `lib/permissions.ts` | เสมอ |
+| `assets/lib-get-user-permissions.ts` | `lib/get-user-permissions.ts` | เสมอ |
+| `assets/admin-setup/layout.tsx` | `app/(admin-setup)/layout.tsx` | เสมอ |
+| `assets/admin-setup/page.tsx` | `app/(admin-setup)/admin/setup/page.tsx` | เสมอ |
+| `assets/admin-setup/admin-setup-form.tsx` | `components/admin-setup-form.tsx` | เสมอ |
+| `assets/admin-setup/admin-setup-action.ts` | `lib/actions/admin-setup.ts` | เสมอ |
+| `assets/env.example` | merge เข้า `.env.example` + `.env.local` | เสมอ (ตัด var ของ method ที่ไม่เปิด) |
 
 ทุก template มี marker `[METHOD: SSO|LDAP|LOCAL]` — ลบ section ของ method
 ที่ไม่ได้เลือกออกให้หมด (import ด้วย)
 
 ### 5.3 Schema + migrate
 
-1. Paste `templates/schema-auth.prisma` เข้า `prisma/schema.prisma`
+1. Paste `assets/schema-auth.prisma` เข้า `prisma/schema.prisma`
    (แก้ `@db.NVarChar(Max)` ถ้าไม่ใช่ MSSQL)
    > **ข้อยกเว้นกฎตั้งชื่อตาราง**: ตาราง core ของ Better Auth (`User`, `Session`,
    > `Account`, `Verification`, `RateLimit`) map เป็นชื่อ**เอกพจน์**ตาม convention
@@ -144,7 +144,7 @@ npx shadcn@latest add button input label tabs card sonner   # UI ของ login
 Better Auth มี integration กับ framework อื่น (SvelteKit, Nuxt, Remix, Express, Hono, …)
 — **Org Contract ข้อ 1–7 บังคับใช้เหมือนเดิมทุกข้อ** สิ่งที่ต้อง map เอง:
 
-- route handler catch-all (`templates/route.ts`) → handler ของ framework นั้น
+- route handler catch-all (`assets/route.ts`) → handler ของ framework นั้น
 - `proxy.ts` → middleware/guard ของ framework (หลักการเดิม: เช็ค cookie presence
   ที่ edge, `getSessionCookie` + `cookiePrefix`)
 - Server Actions → endpoint/form action ของ framework — โครง

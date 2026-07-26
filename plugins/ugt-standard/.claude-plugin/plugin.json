@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-standard",
+  "displayName": "UGT Standard (bundle)",
+  "version": "0.1.0",
+  "description": "ชุดมาตรฐานที่แนะนำสำหรับทีมพัฒนา — ติดตั้งตัวเดียวได้ทั้งความรู้ stack ขององค์กร (ugt-platform) และ pipeline การพัฒนา (superpowers: brainstorming → plan → TDD → code review)",
+  "author": {
+    "name": "UGT DX Team"
+  },
+  "dependencies": [
+    "ugt-platform",
+    { "name": "superpowers", "marketplace": "claude-plugins-official" }
+  ]
+}

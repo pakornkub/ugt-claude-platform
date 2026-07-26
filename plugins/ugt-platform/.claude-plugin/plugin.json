@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-platform",
+  "displayName": "UGT Platform",
+  "version": "0.1.0",
+  "description": "มาตรฐานองค์กรสำหรับโปรเจค Next.js: SQL Server ผ่าน Prisma, login SSO/LDAP/Local + RBAC, test/lint, Jenkins + SonarQube + Docker deploy พร้อมชั้น harness (CLAUDE.md, rules, state, audit log)",
+  "author": {
+    "name": "UGT DX Team"
+  },
+  "keywords": [
+    "nextjs",
+    "prisma",
+    "sqlserver",
+    "keycloak",
+    "jenkins",
+    "sonarqube",
+    "org-standard"
+  ]
+}

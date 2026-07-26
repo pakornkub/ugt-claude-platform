@@ -1,7 +1,7 @@
 # Auth Flows — Better Auth (org standard)
 
 Deep reference for how every login/logout flow works and the gotchas that were
-debugged into the templates. All code here is already present in `templates/` —
+debugged into the templates. All code here is already present in `assets/` —
 this file explains the *why*.
 
 ## How Better Auth signs cookies

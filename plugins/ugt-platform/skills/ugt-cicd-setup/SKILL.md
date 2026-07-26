@@ -24,7 +24,7 @@ OWASP Dependency Check + Docker two-image build/deploy** — สกัดจา�
 
 | ที่                                     | เนื้อหา                                                          |
 | --------------------------------------- | ---------------------------------------------------------------- |
-| `templates/`                            | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml — copy แล้วแทน placeholder |
+| `assets/`                            | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml — copy แล้วแทน placeholder |
 | `references/jenkins-one-time-setup.md`  | สิ่งที่ admin ต้องเตรียมฝั่ง Jenkins server (plugins/tools/credentials/webhook/snap-Docker gotcha) |
 | `references/sonarqube-setup.md`         | สร้าง project, token, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md`           | two-image deploy, migrate-then-deploy, health poll, build-arg rule |
@@ -113,12 +113,12 @@ runtime environment = ไม่มีผล (รายละเอียด → 
 ### 4.1 Copy templates → project root
 
 ```
-templates/Jenkinsfile                → Jenkinsfile
-templates/sonar-project.properties   → sonar-project.properties
-templates/Dockerfile                 → Dockerfile
-templates/docker-compose.yml         → docker-compose.yml
-templates/docker-compose.dev.yml     → docker-compose.dev.yml
-templates/owasp-suppressions.xml     → owasp-suppressions.xml
+assets/Jenkinsfile                → Jenkinsfile
+assets/sonar-project.properties   → sonar-project.properties
+assets/Dockerfile                 → Dockerfile
+assets/docker-compose.yml         → docker-compose.yml
+assets/docker-compose.dev.yml     → docker-compose.dev.yml
+assets/owasp-suppressions.xml     → owasp-suppressions.xml
 ```
 
 ### 4.2 แทน placeholders (ทั้งหมดมีเท่านี้)

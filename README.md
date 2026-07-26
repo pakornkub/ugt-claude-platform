@@ -42,7 +42,7 @@ Claude จะถามว่าต้องการติดตั้งส่�
 ## หลักการออกแบบ
 
 - แต่ละ skill แยก **Org Contract** (มาตรฐานที่ใช้กับทุก framework) ออกจาก
-  **Reference Implementation** (โค้ดตัวอย่าง Next.js จาก ugt-hrms ใน `templates/`)
+  **Reference Implementation** (โค้ดตัวอย่าง Next.js จาก ugt-hrms ใน `assets/`)
 - โปรเจคปลายทางไม่ใช่ Next.js ก็ใช้ได้ — Claude จะยึด contract แล้ว adapt โค้ดตาม stack นั้น
 - ไฟล์ template ทุกไฟล์ผ่านการ sanitize แล้ว (ไม่มีชื่อโปรเจค/hostname/secret จริง)
   จุดที่ต้องแทนค่ามี placeholder กำกับและมีตารางรายการใน SKILL.md ของแต่ละตัว

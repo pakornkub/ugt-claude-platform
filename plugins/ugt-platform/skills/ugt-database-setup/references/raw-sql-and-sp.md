@@ -102,7 +102,7 @@ session guard → permission check → validate input (Zod) → `EXEC` → เ�
 ## 4. requestTimeout สำหรับ SP นาน
 
 Default timeout ของ `mssql` คือ 15 วินาที — SP คำนวณหนัก/dump ข้อมูลจะโดนตัด
-ตั้งใน config ของ adapter (ดู `templates/lib-prisma.ts`):
+ตั้งใน config ของ adapter (ดู `assets/lib-prisma.ts`):
 
 ```ts
 return {

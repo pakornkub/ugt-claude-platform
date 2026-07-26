@@ -9,7 +9,7 @@ has **at most one role**; every role has a set of permissions.
 user (1) ── (0..1) role (1) ── (M) rolePermission (M) ── (1) permission
 ```
 
-Models live in `templates/schema-auth.prisma`. Key points:
+Models live in `assets/schema-auth.prisma`. Key points:
 
 - `user.roleId String?` + `userRole role?` relation — nullable: a user with no
   role has zero permissions.
@@ -104,7 +104,7 @@ Same shape for Server Component page guards (`redirect('/login')` /
 ## First-admin bootstrap flow
 
 Route group `(admin-setup)` → `/admin/setup` (templates in
-`templates/admin-setup/`):
+`assets/admin-setup/`):
 
 1. Layout: any authenticated session may enter (permissions don't exist yet).
 2. Page: `isAdminInitialized()` (`role.count({ where: { isSystem: true } }) > 0`)

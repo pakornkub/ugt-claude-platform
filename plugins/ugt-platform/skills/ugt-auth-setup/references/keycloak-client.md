@@ -56,7 +56,7 @@ No extra client configuration is needed for the org's logout pattern: the app
 performs a **backchannel logout POST** to
 `{KEYCLOAK_ISSUER}/protocol/openid-connect/logout` with
 `client_id + client_secret + refresh_token` (see `ssoLogoutAction` in
-`templates/lib-actions-auth.ts`). The browser is never redirected through
+`assets/lib-actions-auth.ts`). The browser is never redirected through
 Keycloak, so *Valid post logout redirect URIs* can stay empty.
 
 ## TLS gotcha (internal CA)

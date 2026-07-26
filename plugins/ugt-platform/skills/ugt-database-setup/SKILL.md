@@ -16,7 +16,7 @@ description: >
 Skill นี้ติดตั้ง SQL Server ให้โปรเจคที่ยังไม่มี DB (มักเป็นโปรเจค AI-generated)
 ตามมาตรฐานองค์กร: การต่อ connection ผ่าน `@prisma/adapter-mssql`, naming
 convention ของตาราง/คอลัมน์/SP/function, env validation ด้วย t3-env และ pattern
-raw SQL ที่ปลอดภัย รายละเอียดเชิงลึกอยู่ใน `references/` — โค้ดตั้งต้นอยู่ใน `templates/`
+raw SQL ที่ปลอดภัย รายละเอียดเชิงลึกอยู่ใน `references/` — โค้ดตั้งต้นอยู่ใน `assets/`
 
 ## Org Contract (บังคับทุก stack — ไม่ใช่เฉพาะ Next.js/Prisma)
 
@@ -64,11 +64,11 @@ npm install --save-dev prisma tsx dotenv
 
 | Template                            | ปลายทาง                 |
 | ----------------------------------- | ----------------------- |
-| `templates/prisma.config.ts`        | `prisma.config.ts`      |
-| `templates/schema-skeleton.prisma`  | `prisma/schema.prisma`  |
-| `templates/lib-prisma.ts`           | `lib/prisma.ts`         |
-| `templates/lib-env.ts`              | `lib/env.ts`            |
-| `templates/env.example`             | `.env.example` (+ copy เป็น `.env.local` แล้วเติมค่าจริง) |
+| `assets/prisma.config.ts`        | `prisma.config.ts`      |
+| `assets/schema-skeleton.prisma`  | `prisma/schema.prisma`  |
+| `assets/lib-prisma.ts`           | `lib/prisma.ts`         |
+| `assets/lib-env.ts`              | `lib/env.ts`            |
+| `assets/env.example`             | `.env.example` (+ copy เป็น `.env.local` แล้วเติมค่าจริง) |
 
 **แยกไฟล์ env ให้ชัด**: `.env.example` = placeholder ทั่วไปเท่านั้น (commit ได้) ·
 `.env.local` = ค่าจริง (ห้าม commit) — ค่าตามตาราง placeholder ด้านล่างเติมลงใน
