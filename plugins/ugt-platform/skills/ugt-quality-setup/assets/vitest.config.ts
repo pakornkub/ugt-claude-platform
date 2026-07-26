@@ -8,23 +8,25 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    // test ต้องรันได้โดยไม่มี .env จริง — ไม่งั้น CI ต้องถือ secret ไว้แค่เพื่อรัน unit test
+    // Tests must run without a real .env — otherwise CI has to hold secrets
+    // just to run unit tests
     env: { SKIP_ENV_VALIDATION: '1' },
     include: ['**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', '.next', 'e2e/**', '.claude/**'],
-    // JUnit reporter เปิดเฉพาะบน CI — Jenkins stage Unit Tests อ่าน test-results/junit.xml
-    // ถ้าเปิดตลอดเวลา local จะมีไฟล์ report ค้างในโปรเจคทุกครั้งที่รัน test
+    // JUnit reporter only on CI — the Jenkins Unit Tests stage reads
+    // test-results/junit.xml. Enabling it everywhere litters every local run
+    // with report files.
     reporters: process.env.CI ? ['verbose', 'junit'] : ['verbose'],
     outputFile: {
       junit: 'test-results/junit.xml',
     },
     coverage: {
       provider: 'v8',
-      // lcov จำเป็นสำหรับ SonarQube (sonar.javascript.lcov.reportPaths)
+      // lcov is required by SonarQube (sonar.javascript.lcov.reportPaths)
       reporter: ['text', 'html', 'lcov'],
-      // include ต้องครอบ source จริงทั้งหมด — ถ้าใส่แค่ dir ที่มี test อยู่แล้ว
-      // coverage จะสูงปลอมและ Quality Gate (new_coverage ≥ 60%) จะไม่มีความหมาย
-      // ปรับรายการนี้ตาม layout จริงของโปรเจค
+      // include must cover ALL real source — listing only dirs that already
+      // have tests inflates coverage and makes the Quality Gate
+      // (new_coverage >= 60%) meaningless. Adjust to the project's layout.
       include: ['app/**', 'components/**', 'lib/**', 'hooks/**'],
       exclude: ['**/*.d.ts', '**/*.config.*', '**/generated/**'],
     },
@@ -32,8 +34,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, '.'),
-      // `server-only` throw นอก React Server environment → alias เป็น stub ในโปรเจค
-      // ห้าม alias เข้า node_modules/next internals: จะพังใน git worktree ที่ยังไม่ npm install
+      // `server-only` throws outside a React Server environment → alias it to
+      // an in-project stub. Never alias into node_modules/next internals: that
+      // breaks in git worktrees without a full npm install.
       'server-only': resolve(__dirname, 'vitest.server-only-stub.js'),
     },
   },

@@ -1,36 +1,38 @@
 # Project Notes
 
-<!-- 3 หัวข้อนี้ตายตัว ห้ามเพิ่ม/ลบ — อัปเดตด้วย /ugt-checkpoint
-     ไฟล์นี้ commit ไปกับ repo: ห้ามใส่ secret หรือค่าจาก .env -->
+<!-- These 3 sections are fixed — never add or remove sections. Updated via /ugt-checkpoint.
+     This file is committed with the repo: never put secrets or .env values here. -->
 
 ## Error Patterns
 
-อาการ → สาเหตุ → วิธีแก้ ของปัญหาที่เคยเสียเวลาไปแล้ว เพื่อไม่ให้ session หน้าเจอซ้ำ
+Symptom → cause → fix, for problems that already cost real time, so the next
+session doesn't rediscover them.
 
-<!-- ตัวอย่างรูปแบบ:
-- **`npx prisma generate` ขึ้น P1012 หลังเพิ่ม field** → ลืมรัน migrate ก่อน generate
-  → `npx prisma migrate dev --name <ชื่อ>` แล้วค่อย `npx prisma generate` (2026-01-15)
+<!-- Example format:
+- **`npx prisma generate` reports P1012 after adding a field** → forgot to migrate first
+  → `npx prisma migrate dev --name <name>` then `npx prisma generate` (2026-01-15)
 -->
 
-_(ยังไม่มี)_
+_(none yet)_
 
 ## Deviations
 
-จุดที่โปรเจคนี้ **ตั้งใจ** ต่างจากมาตรฐาน `ugt-*` พร้อมเหตุผล — ถ้าไม่บันทึกไว้
-คนถัดไป (หรือ verify script) จะเห็นเป็นความผิดพลาดแล้วไป "แก้" กลับ
+Places where this project **intentionally** differs from the `ugt-*` standards,
+with the reason — unrecorded deviations look like mistakes, and the next person
+(or a verify script) will "fix" them back.
 
-<!-- ตัวอย่าง:
-- ตาราง `LegacyEmp` ไม่มี audit columns — เป็น view ที่ระบบเก่า dump มา แก้ schema ไม่ได้ (2026-02-03)
+<!-- Example:
+- Table `LegacyEmp` has no audit columns — it is a view dumped from the legacy system; schema can't change (2026-02-03)
 -->
 
-_(ยังไม่มี)_
+_(none yet)_
 
 ## Open Questions
 
-คำถามที่ยังไม่มีคำตอบและกำลังบล็อกงานอยู่ + รอใครตอบ
+Unanswered questions currently blocking work + who owes the answer.
 
-<!-- ตัวอย่าง:
-- basePath ของ prod จะเป็น `/hr` หรือ `/hrms` — รอ IT ยืนยัน (ถาม 2026-02-10)
+<!-- Example:
+- Is the prod basePath `/hr` or `/hrms`? — waiting on IT (asked 2026-02-10)
 -->
 
-_(ยังไม่มี)_
+_(none yet)_

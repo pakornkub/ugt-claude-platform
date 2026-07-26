@@ -1,20 +1,20 @@
 {
   "skill_name": "ugt-clean-code",
-  "notes": "skill นี้ output เป็น 'สไตล์การเขียนโค้ด' ซึ่ง skill-creator ระบุว่าเป็น subjective — assertion จึงจำกัดที่ idiom ซึ่งตรวจได้แน่นอนด้วย scripts/verify.mjs ส่วนคุณภาพโดยรวมให้คนดู",
+  "notes": "This skill's output is code style, which skill-creator classifies as subjective — assertions are limited to the deterministically checkable idioms via scripts/verify.mjs; overall quality is judged by a human. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
       "name": "new-component-must-use-modern-idioms",
       "prompt": "เขียน component ตารางแสดงรายการคำขอลาให้หน่อย มี props เป็น list ของ request แล้วมี callback ตอนกดอนุมัติ ต้องแปลง string เป็นตัวเลขสำหรับจำนวนวัน แล้วเอารายการล่าสุดมาโชว์บนสุดด้วย",
-      "expected_output": "component ที่ prop type ครอบ Readonly<> · ใช้ Number.parseInt / arr.at(-1) / ?? / replaceAll ตาม idiom ที่ SonarQube บังคับ · ไม่มี catch (e)",
+      "expected_output": "A component whose prop type is wrapped in Readonly<> · uses Number.parseInt / arr.at(-1) / ?? / replaceAll per the SonarQube-enforced idioms · no catch (e)",
       "assertions": [
-        "node scripts/verify.mjs ของ ugt-clean-code (โหมด --all) exit 0 บนไฟล์ที่สร้างใหม่",
-        "prop type ของ component ครอบด้วย Readonly<>",
-        "ไม่มี parseInt หรือ parseFloat ที่ไม่ได้เรียกผ่าน Number.",
-        "ไม่มีการเข้าถึงสมาชิกท้าย array ด้วย arr[arr.length - 1]",
-        "ไม่มี catch (e) หรือ catch (err)",
-        "ไม่มี typeof x === 'undefined'",
-        "ไม่มี import ซ้ำจาก module เดียวกัน"
+        "node scripts/verify.mjs of ugt-clean-code (--all mode) exits 0 on the newly created files",
+        "The component's prop type is wrapped in Readonly<>",
+        "No parseInt or parseFloat outside Number.",
+        "No last-element access via arr[arr.length - 1]",
+        "No catch (e) or catch (err)",
+        "No typeof x === 'undefined'",
+        "No duplicate imports from the same module"
       ],
       "files": []
     },
@@ -22,12 +22,12 @@
       "id": 2,
       "name": "duplication-refactor-or-exclude-with-reason",
       "prompt": "sonar บอกว่า duplicated lines เกิน 3% เพราะผมมี component ตาราง 3 อันที่โครงเหมือนกันเลยต่างกันแค่ type ของแถวกับ endpoint ที่ยิง จะแก้ยังไงดี",
-      "expected_output": "เสนอ refactor เป็น generic component เดียวที่รับ config เป็น props เป็นทางหลัก และอธิบายว่าเมื่อไหร่ควรใช้ sonar.cpd.exclusions แทน (พร้อมบังคับว่าต้องมี comment เหตุผล) · ต้องระบุว่า NOSONAR ใช้กับ duplication ไม่ได้",
+      "expected_output": "Proposes refactoring into one generic component taking config as props as the primary path, explains when sonar.cpd.exclusions is the right call instead (mandating a rationale comment), and states that NOSONAR cannot fix duplication",
       "assertions": [
-        "ระบุชัดว่า NOSONAR ไม่ช่วยเรื่อง duplication",
-        "เสนอ refactor เป็น generic component เป็นทางเลือกแรก",
-        "ถ้าเสนอ sonar.cpd.exclusions ต้องระบุว่าต้องมี comment อธิบายเหตุผลกำกับ",
-        "ไม่เสนอให้ลดเกณฑ์ Quality Gate หรือปิด duplication check"
+        "States explicitly that NOSONAR does not help with duplication",
+        "Proposes the generic-component refactor as the first option",
+        "If sonar.cpd.exclusions is proposed, requires a rationale comment alongside",
+        "Does not propose lowering the Quality Gate threshold or disabling the duplication check"
       ],
       "files": []
     }

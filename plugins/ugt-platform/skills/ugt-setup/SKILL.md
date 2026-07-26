@@ -17,129 +17,146 @@ description: >
   "ใส่ login SSO", "ตั้ง vitest" go straight to that single skill.
 ---
 
-# UGT Setup — ตัวแม่ติดตั้งระบบมาตรฐานองค์กร
+# UGT Setup — org-standard installer (parent skill)
 
 ## Overview
 
-โปรเจคที่ user สร้างเองด้วย AI มักไม่มี login, database, CI — skill นี้เป็นจุดเริ่ม:
-ตรวจ stack → ถามว่าจะติดตั้งอะไรบ้าง → เรียก skill ลูกตามลำดับที่ถูกต้อง → สรุป + smoke test
+Projects users build with AI usually have no login, no database, no CI. This
+skill is the entry point: inspect the stack → ask what to install → invoke the
+child skills in the correct order → summarize + smoke test.
 
-| Skill ลูก | ติดตั้ง |
+| Child skill | Installs |
 | --- | --- |
-| `ugt-database-setup` | SQL Server ผ่าน Prisma + naming convention |
+| `ugt-database-setup` | SQL Server via Prisma + naming conventions |
 | `ugt-quality-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
 | `ugt-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
-`ugt-clean-code` ไม่อยู่ในลำดับติดตั้ง — มันโหลดเองเมื่อมีการแก้ไฟล์ `.ts`/`.tsx`
-(`paths` frontmatter) ไม่ต้องเรียกจากที่นี่
+`ugt-clean-code` is not part of the install order — it loads itself whenever a
+`.ts`/`.tsx` file is touched (`paths` frontmatter). Do not invoke it from here.
 
 ## Workflow
 
-### 1. ตรวจโปรเจคก่อนถาม
+### 1. Inspect the project before asking
 
-อ่าน `package.json` และโครงไฟล์ เพื่อรู้:
+Read `package.json` and the file layout to learn:
 
-- เป็น Next.js App Router จริงไหม — skill ชุดนี้ทำมาสำหรับ stack นี้เท่านั้น
-  (TS/React/Next.js + Prisma/SQL Server + Keycloak + Jenkins + SonarQube)
-  ถ้าไม่ใช่ ให้บอกผู้ใช้ตรง ๆ ว่าใช้ไม่ได้ **ห้ามพยายาม adapt เอง**
-- มีของเดิมอยู่แล้วไหม: Prisma/ORM อื่น, ระบบ auth ใด ๆ, vitest/jest/eslint,
-  Jenkinsfile/Dockerfile — **ถ้ามีของเดิม ห้ามทับเงียบ ๆ** ให้รายงานสิ่งที่เจอและถามก่อน
+- Is this really Next.js App Router? This skill set is built for exactly this
+  stack (TS/React/Next.js + Prisma/SQL Server + Keycloak + Jenkins + SonarQube).
+  If it is not, say so plainly — **never try to adapt the assets yourself.**
+- What already exists: Prisma or another ORM, any auth system, vitest/jest/
+  eslint, a Jenkinsfile/Dockerfile — **never overwrite existing setup silently.**
+  Report what you found and ask first.
 
-### 2. Interview — ถามรวบเป็นชุดเดียว
+### 2. Interview — one combined batch of questions
 
-ถามทั้งหมดนี้ในข้อความเดียว (ใช้ AskUserQuestion ถ้ามี):
+Ask all of this in a single message (use AskUserQuestion if available):
 
-**เลือก module:**
+**Module selection:**
 
-1. ติดตั้งอะไรบ้าง? Database / Quality (test+lint) / Auth / CI (เลือกได้หลายอัน — default: ทั้งสี่)
-2. [ถ้าเลือก Auth] เปิดวิธี login ไหนบ้าง? SSO / LDAP / Local (default: SSO อย่างเดียว)
+1. What to install? Database / Quality (test+lint) / Auth / CI (multi-select — default: all four)
+2. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
 
-**Identity กลาง (ใช้ร่วมทุก module — ถามครั้งเดียว อย่าให้ skill ลูกถามซ้ำ):**
+**Shared identity (used by every module — ask once, don't let child skills re-ask):**
 
-3. ชื่อโปรเจค kebab-case (เช่น `expense-portal`) + ชื่อแสดงผล
-4. Deploy ใต้ basePath / shared domain ไหม? ถ้าใช่ → basePath prod/dev (เช่น `/expense-portal`, `/expense-portal-dev`)
-5. Host ports prod / dev (เช่น 3000 / 3001)
-6. URL เต็มของแอป prod / dev รวม basePath (เช่น `https://apps.example.com/expense-portal`)
+3. Project name in kebab-case (e.g. `expense-portal`) + display name
+4. Deployed under a basePath / shared domain? If yes → basePath prod/dev
+   (e.g. `/expense-portal`, `/expense-portal-dev`)
+5. Host ports prod / dev (e.g. 3000 / 3001)
+6. Full app URLs prod / dev including basePath (e.g. `https://apps.example.com/expense-portal`)
 
-**คำถามเฉพาะ module ที่เลือก** — **เปิดหัวข้อ Interview ใน SKILL.md ของ skill ลูกทุกตัวที่เลือก
-แล้วรวบคำถามของมันมาถามในชุดเดียวกันนี้** (ตัวอย่างหัวข้อ ไม่ใช่รายการครบ: DB: server,
-ชื่อ DB, มีอยู่แล้วหรือสร้างใหม่, ต้องใช้ SP ไหม · Auth: Keycloak client มีหรือยัง,
-รายละเอียด AD, first admin · CI: มี Sentry?, deploy target)
+**Module-specific questions** — **open the Interview section in the SKILL.md of
+every selected child skill and fold its questions into this same batch**
+(example topics, not the full list: DB: server, database name, existing or new,
+stored procedures needed · Auth: Keycloak client exists yet, AD details, first
+admin · CI: Sentry?, deploy target).
 
-### 3. ติดตั้งตามลำดับ (ห้ามสลับ)
+### 3. Install in order (never reorder)
 
 ```
 Database → Quality → Auth → CI
 ```
 
-- **Auth ต้องมาหลัง Database** — Better Auth เก็บ user/session/account ใน Prisma
-- **Quality มาก่อน CI** — pipeline เรียก `lint`/`format:check`/`test:coverage` ตามชื่อตรง ๆ
-  ถ้ายังไม่มี script พวกนี้ pipeline จะแดงที่ stage ที่ 3 ทันทีตั้งแต่ push แรก
-- **CI มาท้ายสุด** — pipeline ต้องรู้ว่ามี DB ไหม (migrate stage) และต้อง build ผ่านก่อน
-- Module ที่ไม่ได้เลือกก็ข้ามไป แต่ลำดับของที่เหลือคงเดิม
-- แต่ละ module: invoke skill ลูก (`ugt-database-setup` / `ugt-quality-setup` /
-  `ugt-auth-setup` / `ugt-cicd-setup`) แล้วทำตาม SKILL.md ของตัวนั้น —
-  ส่งคำตอบ interview ที่ถามไว้แล้วลงไป อย่าถามผู้ใช้ซ้ำ
+- **Auth must come after Database** — Better Auth stores user/session/account in Prisma.
+- **Quality must come before CI** — the pipeline calls `lint`/`format:check`/
+  `test:coverage` by exact name; without them it goes red at the third stage on
+  the very first push.
+- **CI comes last** — the pipeline needs to know whether a DB exists (migrate
+  stage) and the build must pass first.
+- Skip unselected modules; the relative order of the rest is unchanged.
+- For each module: invoke the child skill (`ugt-database-setup` /
+  `ugt-quality-setup` / `ugt-auth-setup` / `ugt-cicd-setup`) and follow its
+  SKILL.md — pass down the interview answers already collected, never re-ask
+  the user.
 
-### 4. ติดตั้งชั้น harness (ทำเสมอ ไม่ว่าจะเลือก module ไหน)
+### 4. Install the harness layer (always, regardless of module selection)
 
-module ข้างบนติดตั้ง**โค้ด** แต่ความรู้จะหายไปพร้อม session ที่ติดตั้ง — ขั้นนี้ทำให้มันอยู่ต่อ
-ทุกไฟล์ในนี้ **skill เป็นเจ้าของและเขียนทับได้ตอน `/plugin update`** ยกเว้นที่ระบุว่าไม่ทับ
+The modules above install **code**, but the knowledge would vanish with the
+session that installed it — this step is what makes it persist. Every file here
+is **owned by the skill and may be overwritten on `/plugin update`**, except
+where noted.
 
-| Asset | ปลายทาง | ทับได้ไหม |
+| Asset | Destination | Overwritable? |
 | --- | --- | --- |
-| `assets/CLAUDE-block.md` | แทรกใน `CLAUDE.md` ที่ root | **ทับได้เฉพาะในบล็อก `<!-- ugt:start -->` … `<!-- ugt:end -->`** |
-| `assets/rules-ugt-database.md` | `.claude/rules/ugt-database.md` | ทับได้ทั้งไฟล์ |
-| `assets/rules-ugt-auth.md` | `.claude/rules/ugt-auth.md` | ทับได้ทั้งไฟล์ |
-| `assets/rules-ugt-ci.md` | `.claude/rules/ugt-ci.md` | ทับได้ทั้งไฟล์ |
-| `assets/settings.json` | merge เข้า `.claude/settings.json` | merge เฉพาะ key ของเรา |
-| `assets/state-checkpoint.md` | `.claude/state/checkpoint.md` | **สร้างครั้งเดียว ห้ามทับ** |
-| `assets/state-project-notes.md` | `.claude/state/project-notes.md` | **สร้างครั้งเดียว ห้ามทับ** |
+| `assets/CLAUDE-block.md` | inserted into root `CLAUDE.md` | **only between `<!-- ugt:start -->` … `<!-- ugt:end -->`** |
+| `assets/rules-ugt-database.md` | `.claude/rules/ugt-database.md` | whole file |
+| `assets/rules-ugt-auth.md` | `.claude/rules/ugt-auth.md` | whole file |
+| `assets/rules-ugt-ci.md` | `.claude/rules/ugt-ci.md` | whole file |
+| `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
+| `assets/state-checkpoint.md` | `.claude/state/checkpoint.md` | **create once, never overwrite** |
+| `assets/state-project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
 
-วิธีทำ:
+How:
 
-1. **`CLAUDE.md`** — ไม่มีไฟล์ → สร้างใหม่จาก block · มีอยู่แล้ว → หา marker
-   `<!-- ugt:start -->`: เจอ → แทนที่เฉพาะช่วงระหว่าง marker · ไม่เจอ → **แทรกต่อท้าย**
-   ห้ามแตะเนื้อหาเดิมของโปรเจคแม้แต่บรรทัดเดียว · แทนค่า `<project-name>` / `<base-path-prod>` /
-   `<base-path-dev>` จากคำตอบ interview
-   > **ตรวจขนาด**: ถ้ารวมแล้วเกิน ~200 บรรทัด ให้ย้ายเนื้อหาของโปรเจคที่เป็นกฎผูกกับ path
-   > ไปเป็น `.claude/rules/<project>-*.md` แทนที่จะปล่อยให้ CLAUDE.md บวม (ยิ่งยาวยิ่งไม่ถูกทำตาม)
-2. **`.claude/rules/`** — copy เฉพาะไฟล์ของ module ที่ติดตั้งจริง (ไม่ติดตั้ง auth ก็ไม่ต้องมี
-   `ugt-auth.md`) ไฟล์เหล่านี้มี `paths` frontmatter จึงโหลดเองเมื่อ Claude แตะไฟล์ที่ match —
-   ไม่ต้องเขียนใน CLAUDE.md ว่า "ถ้าแก้ไฟล์ X ให้อ่าน Y"
-3. **`.claude/settings.json`** — merge key `extraKnownMarketplaces`, `enabledPlugins`,
-   `permissions` · แทน `<org>` ด้วย GitHub org จริง · ถ้าไฟล์มีอยู่แล้วให้ merge ไม่เขียนทับ
-4. **`.claude/state/`** — สร้างจาก skeleton **ถ้ายังไม่มี** · ถ้ามีอยู่แล้วห้ามแตะ
-   (มันคือความจำของทีม) · เติมวันที่และ module ที่ติดตั้งลงใน `checkpoint.md`
-5. **`.gitignore`** — เพิ่ม `.claude/logs/` (audit log ไม่ต้อง commit) แต่ **`.claude/state/`
-   ต้อง commit** อย่าเผลอ ignore ทั้ง `.claude/`
-6. ถ้าองค์กรยังไม่มี hard boundary ระดับเครื่อง → ชี้ให้ผู้ใช้ส่ง
-   `references/org-managed-settings.md` ให้ทีม IT (skill ติดตั้งส่วนนั้นแทนไม่ได้)
+1. **`CLAUDE.md`** — no file → create it from the block · file exists → look for
+   the `<!-- ugt:start -->` marker: found → replace only the span between the
+   markers · not found → **append** the block. Never touch a single line of the
+   project's own content. Substitute `<project-name>` / `<base-path-prod>` /
+   `<base-path-dev>` from the interview answers.
+   > **Size check**: if the combined file exceeds ~200 lines, move project
+   > content that is path-bound into `.claude/rules/<project>-*.md` instead of
+   > letting CLAUDE.md bloat (longer files get followed less).
+2. **`.claude/rules/`** — copy only the files for modules actually installed
+   (no auth module → no `ugt-auth.md`). These files carry `paths` frontmatter,
+   so the runtime loads them by itself when Claude touches matching files —
+   there is no need to write "if you edit X, read Y" into CLAUDE.md.
+3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`,
+   `enabledPlugins`, `permissions` · replace `<org>` with the real GitHub org ·
+   if the file already exists, merge — do not overwrite.
+4. **`.claude/state/`** — create from the skeletons **only if absent** · if
+   present, do not touch (it is the team's memory) · fill in the date and the
+   installed modules in `checkpoint.md`.
+5. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
+   **`.claude/state/` must be committed** — never ignore `.claude/` wholesale.
+6. If the org has no machine-level hard boundary yet → point the user at
+   `references/org-managed-settings.md` to hand to IT (the skill cannot install
+   that part).
 
-### 5. ปิดงาน
+### 5. Close out
 
-1. **รัน `node <skill-dir>/scripts/verify.mjs` ของทุก module ที่ติดตั้ง** (cwd = root
-   ของโปรเจค) **รวมทั้ง `scripts/verify.mjs` ของ `ugt-setup` เองที่ตรวจชั้น harness**
-   แล้วแก้ทุกข้อที่ ✘ ก่อนปิดงาน — ห้ามรายงานว่าเสร็จโดยยังมี exit code 1 ค้าง
-   จากนั้นไล่ข้อที่เหลือใน Verification Checklist ของแต่ละ skill ที่เครื่องตรวจแทนไม่ได้
-2. สรุปให้ผู้ใช้: ไฟล์ที่เพิ่ม/แก้ทั้งหมด (จัดกลุ่มตาม module), env vars ที่ต้องเติมค่าจริง,
-   สิ่งที่ต้องขอจาก admin (Keycloak client, Jenkins credentials, SonarQube project)
-3. แนบ **smoke-test checklist** ที่ตรงกับสิ่งที่ติดตั้งจริง เช่น:
-   - [ ] `npm run build` ผ่าน
-   - [ ] login ด้วยทุก method ที่เปิด → เข้าหน้า protected ได้ → logout แล้ว cookie หาย
-   - [ ] `/admin/setup` กดครั้งเดียวได้ Administrator
-   - [ ] push `develop` → pipeline เขียวครบ stage
+1. **Run `node <skill-dir>/scripts/verify.mjs` for every installed module**
+   (cwd = project root), **including `ugt-setup`'s own `scripts/verify.mjs`
+   which checks the harness layer.** Fix every ✘ before closing — never report
+   done with an exit code 1 outstanding. Then walk the remaining checklist
+   items in each skill that a machine can't verify.
+2. Summarize for the user: every file added/changed (grouped by module), env
+   vars that need real values, and what must be requested from admins
+   (Keycloak client, Jenkins credentials, SonarQube project).
+3. Attach a **smoke-test checklist** matching what was actually installed, e.g.:
+   - [ ] `npm run build` passes
+   - [ ] login works with every enabled method → protected page reachable → logout clears the cookie
+   - [ ] `/admin/setup` grants Administrator on one click
+   - [ ] push `develop` → pipeline green through all stages
 
 ## Quick Rules
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| ตรวจของเดิมในโปรเจคก่อนถาม | ทับ Prisma/auth/Jenkinsfile เดิมโดยไม่บอก |
-| ถาม interview รวบชุดเดียว (รวมคำถามของ skill ลูก) | ถามทีละข้อ / ให้ skill ลูกถามซ้ำ |
-| ลำดับ Database → Quality → Auth → CI เสมอ | ติดตั้ง auth ก่อนมี DB / ทำ CI ก่อนมี test script |
-| ไม่ใช่ Next.js → บอกตรง ๆ ว่าใช้ไม่ได้ | ดัดแปลง asset ไปใช้กับ stack อื่นเอง |
-| สรุปไฟล์ที่แก้ + ของที่ต้องขอ admin ตอนจบ | จบงานเงียบ ๆ โดยไม่มี checklist |
-| แก้ `CLAUDE.md` เฉพาะในบล็อก `ugt:start/end` | เขียนทับ `CLAUDE.md` ทั้งไฟล์ (เนื้อหาของทีมหาย) |
-| `.claude/state/` มีแล้วห้ามแตะ | reset state ของทีมเพราะเห็นว่าเป็น skeleton |
-| ติดตั้ง harness ทุกครั้ง (ขั้นที่ 4) | ติดตั้งแค่โค้ดแล้วจบ — ความรู้หายไปกับ session |
+| Inspect existing setup before asking | Overwrite existing Prisma/auth/Jenkinsfile silently |
+| One combined interview batch (incl. child-skill questions) | Ask one-by-one / let child skills re-ask |
+| Always Database → Quality → Auth → CI | Install auth before a DB exists / CI before test scripts exist |
+| Not Next.js → say it plainly | Adapt the assets to another stack yourself |
+| Summarize files + admin requests at the end | Finish silently with no checklist |
+| Edit `CLAUDE.md` only inside the `ugt:start/end` block | Rewrite the whole `CLAUDE.md` (team content lost) |
+| Leave existing `.claude/state/` untouched | Reset team state because it "looks like a skeleton" |
+| Install the harness every time (step 4) | Install only code and stop — knowledge dies with the session |

@@ -1,22 +1,23 @@
-# Raw SQL & Stored Procedures — MSSQL ผ่าน Prisma
+# Raw SQL & Stored Procedures — MSSQL via Prisma
 
-Pattern สำหรับงานที่ Prisma Client query ปกติทำไม่ได้: อ่านข้าม linked server,
-เรียก stored procedure, pagination บน view ภายนอก
+Patterns for what normal Prisma Client queries can't do: reading across a
+linked server, calling stored procedures, paginating over external views.
 
-## 1. กฎเหล็ก: sanitize → parameterize (สองชั้นเสมอ)
+## 1. Iron rule: sanitize → parameterize (both layers, always)
 
-`$queryRaw` tagged template ทำ parameterization ให้อยู่แล้ว แต่มาตรฐานองค์กร
-บังคับ **sanitize input ด้วย regex ก่อนทุกครั้ง** เป็น defense-in-depth
-(กันทั้ง injection ที่หลุดจาก refactor ภายหลัง และค่าขยะที่ทำ query พัง):
+`$queryRaw` tagged templates already parameterize, but the org standard
+requires **regex-sanitizing input first** as defense-in-depth (against
+injection that slips in through a later refactor, and against garbage values
+that break the query):
 
 ```ts
 export async function getRecordByCode(code: string): Promise<Row | null> {
-  // ชั้น 1: sanitize — อนุญาตเฉพาะ alphanumeric + _ . -
+  // Layer 1: sanitize — allow only alphanumerics + _ . -
   if (!/^[a-zA-Z0-9_.-]+$/.test(code)) {
     throw new Error('Invalid code format');
   }
 
-  // ชั้น 2: parameterize — tagged template → sp_executesql parameter จริง
+  // Layer 2: parameterize — tagged template → a real sp_executesql parameter
   const rows = await prisma.$queryRaw<Row[]>`
     SELECT TOP 1
       CAST(u.Code     AS VARCHAR(50))    AS Code,
@@ -28,27 +29,29 @@ export async function getRecordByCode(code: string): Promise<Row | null> {
 }
 ```
 
-- **ห้าม** `$queryRawUnsafe` / `$executeRawUnsafe` กับค่าที่มาจากผู้ใช้เด็ดขาด
-- ฟังก์ชัน lookup ที่ล้มเหลวได้โดยไม่ critical → คืน `null`/`[]` ใน `catch`
-  (เช่น linked server ล่มไม่ควรบล็อก flow หลัก) — ฟังก์ชันที่ต้อง fail loud → throw
+- **Never** `$queryRawUnsafe` / `$executeRawUnsafe` with user-supplied values
+- Lookups that may fail non-critically → return `null`/`[]` in `catch`
+  (a downed linked server must not block the main flow) — functions that must
+  fail loud → throw
 
 ## 2. Linked-server read-only view pattern
 
-โปรเจคที่ต้องอ่านข้อมูล master จาก DB อื่นผ่าน linked server:
+For projects reading master data from another DB over a linked server:
 
-- อ้างชื่อเต็ม 4 ส่วน: `<linked-server>.<db>.dbo.<view>`
-- **SELECT-only เด็ดขาด** — ห้าม INSERT/UPDATE/DELETE ผ่าน linked server
-- **`CAST(...)` ทุกคอลัมน์ที่ select** — type metadata ข้าม linked server เชื่อไม่ได้
-  (คอลัมน์ไทย → `NVARCHAR(n)`, รหัส → `VARCHAR(n)`, วันที่ → `CONVERT(VARCHAR(10), x, 23)` ได้ `yyyy-MM-dd`)
-- **เลี่ยง recursive CTE ข้าม linked server** — ดึง edge list มาทั้ง view ครั้งเดียว
-  แล้วคำนวณ (BFS/กราฟ) ใน JS แทน
-- คอลัมน์ที่ view รุ่นเก่าอาจไม่มี → ลอง query เต็มใน `try`, `catch` แล้ว fallback
-  query เฉพาะคอลัมน์ base (คอลัมน์ที่หายให้ `CAST(NULL AS ...)` แทน)
+- Use the full 4-part name: `<linked-server>.<db>.dbo.<view>`
+- **Strictly SELECT-only** — never INSERT/UPDATE/DELETE across a linked server
+- **`CAST(...)` every selected column** — type metadata across a linked server
+  is unreliable (Thai columns → `NVARCHAR(n)`, codes → `VARCHAR(n)`, dates →
+  `CONVERT(VARCHAR(10), x, 23)` gives `yyyy-MM-dd`)
+- **Avoid recursive CTEs across a linked server** — pull the whole edge list
+  once and compute (BFS/graph) in JS instead
+- Columns older view versions may lack → try the full query in `try`, `catch`
+  and fall back to a base-columns query (missing columns become `CAST(NULL AS ...)`)
 
-### Search ด้วย LIKE
+### Search with LIKE
 
 ```ts
-const term = `%${query.trim()}%`;   // wildcard อยู่ฝั่ง JS — ตัว term ยังเป็น parameter
+const term = `%${query.trim()}%`;   // wildcards on the JS side — the term itself stays a parameter
 const rows = await prisma.$queryRaw<Row[]>`
   SELECT TOP 50 ...
   FROM <linked-server>.<db>.dbo.<view> AS u
@@ -57,9 +60,9 @@ const rows = await prisma.$queryRaw<Row[]>`
 `;
 ```
 
-จำกัดผลลัพธ์เสมอ (`TOP 50`) กัน payload บวม
+Always bound the result set (`TOP 50`) against payload bloat.
 
-### Pagination (OFFSET/FETCH + COUNT ขนานกัน)
+### Pagination (OFFSET/FETCH + parallel COUNT)
 
 ```ts
 const offset = (page - 1) * pageSize;
@@ -80,56 +83,60 @@ const [rows, countResult] = await Promise.all([
 return { data: rows, total: Number(countResult[0]?.total ?? 0), page, pageSize };
 ```
 
-หมายเหตุ: `COUNT(*)` กลับมาเป็น `number|bigint` แล้วแต่ driver — ครอบ `Number()` เสมอ
+Note: `COUNT(*)` comes back as `number|bigint` depending on the driver —
+always wrap in `Number()`.
 
-## 3. เรียก Stored Procedure (`EXEC usp_*`)
+## 3. Calling stored procedures (`EXEC usp_*`)
 
-ใช้ `$executeRaw` tagged template — ทุก argument เป็น parameter จริง ไม่มี string ต่อ:
+Use `$executeRaw` tagged templates — every argument becomes a real parameter,
+no string concatenation:
 
 ```ts
 try {
   await prisma.$executeRaw`EXEC usp_RecalculateWeeklySummary ${weekNo}, ${weekYear}`;
 } catch (err) {
-  // log รายละเอียดฝั่ง server สำหรับ DBA — อย่าส่ง SQL error ดิบกลับ client
+  // Log details server-side for the DBA — never return raw SQL errors to the client
   console.error('[recalculate] SP error:', err instanceof Error ? err.message : err);
   return { success: false, error: 'SP_ERROR' };
 }
 ```
 
-กรอบมาตรฐานเมื่อเรียกจาก Server Action (mutation):
-session guard → permission check → validate input (Zod) → `EXEC` → เขียน audit log
+Standard frame when called from a Server Action (mutation):
+session guard → permission check → validate input (Zod) → `EXEC` → audit log
 
-## 4. requestTimeout สำหรับ SP นาน
+## 4. requestTimeout for long-running SPs
 
-Default timeout ของ `mssql` คือ 15 วินาที — SP คำนวณหนัก/dump ข้อมูลจะโดนตัด
-ตั้งใน config ของ adapter (ดู `assets/lib-prisma.ts`):
+The `mssql` default timeout is 15 seconds — heavy recalculation/dump SPs get
+cut off. Set it in the adapter config (see `assets/lib-prisma.ts`):
 
 ```ts
 return {
   server, port, database, user, password,
   options: { encrypt, trustServerCertificate },
-  // เผื่อ stored procedure รันนาน (เช่น recalculation รายสัปดาห์) สูงสุด 5 นาที
+  // allow for long stored procedures (e.g. weekly recalculation), up to 5 minutes
   requestTimeout: 5 * 60 * 1000,
 };
 ```
 
-ตั้งเป็นค่าเดียวทั้ง app — อย่าตั้งรายจุด (adapter config มีที่เดียว)
+Set it once for the whole app — never per call site (the adapter config is the
+single place).
 
 ## 5. SQL fragment helpers (Prisma v7)
 
-ถ้าต้องประกอบ fragment แบบ dynamic อย่า import จาก `@prisma/client` —
-ใช้ runtime helpers:
+For dynamic fragment composition, don't import from `@prisma/client` — use the
+runtime helpers:
 
 ```ts
 import { sqltag, join, empty, raw, type Sql } from '@prisma/client/runtime/client';
 ```
 
-(`raw()` เฉพาะกับค่าที่ hardcode/ผ่าน allowlist แล้วเท่านั้น — ห้ามใช้กับ input ผู้ใช้)
+(`raw()` only with hardcoded/allowlisted values — never with user input.)
 
 ## 6. MSSQL `TIME` column gotcha
 
-Driver `mssql` map คอลัมน์ SQL `TIME(0)` เป็น JS `Date` ที่ anchor `1970-01-01`
-โดย **ค่า wall-clock อยู่ในส่วน UTC** — อ่านด้วย local getters
-(`getHours()`, `toLocaleString()`) จะเพี้ยนตาม timezone เครื่อง
-→ ทำ formatter กลางตัวเดียวที่อ่านผ่าน `getUTCHours()`/`getUTCMinutes()`
-แล้วบังคับให้ทุกจุด format ผ่านตัวนั้นที่ data layer ก่อนถึง UI
+The `mssql` driver maps SQL `TIME(0)` columns to a JS `Date` anchored at
+`1970-01-01` with **the wall-clock value in the UTC part** — reading it with
+local getters (`getHours()`, `toLocaleString()`) shifts it by the machine's
+timezone → write one central formatter that reads via
+`getUTCHours()`/`getUTCMinutes()` and force every call site to format through
+it at the data layer, before the UI.

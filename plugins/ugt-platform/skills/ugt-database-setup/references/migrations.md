@@ -1,24 +1,27 @@
 # Migrations — Prisma + MSSQL
 
-## 1. Flow ปกติ
+## 1. Normal flow
 
 ```bash
-# Dev — สร้าง migration ใหม่จาก diff ของ schema
+# Dev — create a new migration from the schema diff
 npx prisma migrate dev --name <snake_case_description>
-npx prisma generate        # บังคับหลัง migrate ทุกครั้ง — generated client จะ stale
+npx prisma generate        # mandatory after every migrate — the generated client goes stale
 
-# Prod / CI — apply migration ที่มีอยู่ ไม่สร้างใหม่
+# Prod / CI — apply existing migrations, create nothing new
 npx prisma migrate deploy
 ```
 
-- `DATABASE_URL` ถูกอ่านผ่าน `prisma.config.ts` (dotenv โหลด `.env.local` ก่อน `.env`)
-- Seed: กำหนดใน `prisma.config.ts` → `migrations.seed: 'npx tsx prisma/seed.ts'` แล้วรัน `npx prisma db seed`
-- อาการ "build รายงาน implicit `any` เป็นสิบจุดจาก Prisma callback" = generated
-  client stale → รัน `npx prisma generate` ก่อนไปไล่แก้ type รายจุด
+- `DATABASE_URL` is read through `prisma.config.ts` (dotenv loads `.env.local`
+  before `.env`)
+- Seed: define in `prisma.config.ts` → `migrations.seed: 'npx tsx prisma/seed.ts'`
+  then run `npx prisma db seed`
+- Symptom "build reports dozens of implicit `any` from Prisma callbacks" =
+  stale generated client → run `npx prisma generate` before chasing individual
+  type errors
 
-## 2. เขียน migration SQL มือ — ครอบ transaction เสมอ
+## 2. Hand-written migration SQL — always wrap in a transaction
 
-Migration ที่เขียนเอง (ไม่ได้ generate) ให้ใช้กรอบเดียวกับที่ Prisma generate:
+Hand-written migrations use the same frame Prisma generates:
 
 ```sql
 BEGIN TRY
@@ -35,21 +38,22 @@ BEGIN CATCH
 END CATCH;
 ```
 
-## 3. Rename คอลัมน์/ตารางด้วย `sp_rename` (ไม่เสียข้อมูล)
+## 3. Renaming columns/tables with `sp_rename` (no data loss)
 
-**ปัญหา:** เปลี่ยน `@map()` ใน schema แล้วให้ Prisma diff เอง — Prisma มองเป็น
-**DROP คอลัมน์เก่า + ADD คอลัมน์ใหม่ = ข้อมูลหาย**
+**Problem:** change `@map()` in the schema and let Prisma diff it — Prisma sees
+**DROP old column + ADD new column = data gone**.
 
-**วิธีที่ถูก:** migration มือด้วย `EXEC sp_rename` (rename in-place):
+**Correct approach:** a hand-written migration using `EXEC sp_rename`
+(in-place rename):
 
 ```sql
--- migration.sql (โฟลเดอร์ migration ใหม่ ตั้ง timestamp เอง เช่น 20260501000000_rename_columns)
+-- migration.sql (new migration folder with a hand-set timestamp, e.g. 20260501000000_rename_columns)
 BEGIN TRY
 BEGIN TRAN;
 
 EXEC sp_rename 'dbo.Items.id',        'Id',        'COLUMN';
 EXEC sp_rename 'dbo.Items.createdAt', 'CreatedAt', 'COLUMN';
--- reserved word → เติมคำขยาย พร้อมคอมเมนต์
+-- reserved word → qualifier added, with a comment
 EXEC sp_rename 'dbo.Items.key',       'ItemKey',   'COLUMN'; -- key → ItemKey (KEY is T-SQL reserved)
 
 COMMIT TRAN;
@@ -60,11 +64,11 @@ BEGIN CATCH
 END CATCH;
 ```
 
-**ขั้นตอน apply:**
+**Apply steps:**
 
-1. อัปเดต `@map()`/`@@map()` ใน `schema.prisma` ให้ตรงชื่อใหม่
-2. รัน SQL ข้างบนใน SSMS (หรือ `sqlcmd`) กับ database เป้าหมายโดยตรง
-3. บอก Prisma ว่า migration นี้ apply แล้ว — **ห้าม** ให้ `migrate dev` รันเอง:
+1. Update `@map()`/`@@map()` in `schema.prisma` to the new names
+2. Run the SQL above in SSMS (or `sqlcmd`) directly against the target database
+3. Tell Prisma the migration is applied — **never** let `migrate dev` run it:
 
    ```bash
    npx prisma migrate resolve --applied 20260501000000_rename_columns
@@ -72,17 +76,18 @@ END CATCH;
 
 4. `npx prisma generate`
 
-หมายเหตุ: ข้อความ "Caution: Changing any part of an object name could break
-scripts and stored procedures" จาก `sp_rename` เป็น informational — ไม่ใช่ error
-แต่เตือนจริง: ถ้ามี SP/view อ้างชื่อเก่า ต้องไล่แก้ SP ให้ตรงด้วย
+Note: the message "Caution: Changing any part of an object name could break
+scripts and stored procedures" from `sp_rename` is informational, not an
+error — but the warning is real: any SP/view referencing the old name must be
+updated too.
 
-## 4. Filtered (partial) unique index — ข้อจำกัด
+## 4. Filtered (partial) unique indexes — the limitation
 
-Prisma schema **express filtered unique index ของ MSSQL ไม่ได้**
-(เช่น "unique `Year` เฉพาะแถว `IsDeleted = 0`" หรือ "active ได้ปีละ 1 แถว")
-มี 2 ทางเลือก:
+The Prisma schema **cannot express MSSQL filtered unique indexes**
+(e.g. "unique `Year` only where `IsDeleted = 0`", or "one active row per
+year"). Two options:
 
-**ทาง A — เขียน index ใน migration SQL มือ** (บังคับที่ DB จริง):
+**Option A — write the index in hand-written migration SQL** (enforced at the DB):
 
 ```sql
 CREATE UNIQUE NONCLUSTERED INDEX [UX_HolidayLists_Year_NotDeleted]
@@ -90,14 +95,16 @@ CREATE UNIQUE NONCLUSTERED INDEX [UX_HolidayLists_Year_NotDeleted]
   WHERE [IsDeleted] = 0;
 ```
 
-- ใส่ในโฟลเดอร์ migration (มือ) — Prisma จะไม่รู้จัก index นี้ แต่ไม่ลบทิ้ง
-- ข้อควรระวัง: `migrate dev` รอบถัดไปอาจ warn drift — ตรวจ diff ก่อน apply เสมอ
+- Put it in a (hand-written) migration folder — Prisma won't know the index but
+  won't drop it either
+- Caveat: the next `migrate dev` may warn about drift — always inspect the diff
+  before applying
 
-**ทาง B — บังคับที่ application layer** (ที่โปรเจคต้นแบบเลือกใช้):
+**Option B — enforce at the application layer** (what the reference project chose):
 
-- ครอบ logic ใน `prisma.$transaction` เช่น activate ปีใหม่ = de-activate แถวเดิม
-  ทั้งหมดก่อนแล้วค่อย activate แถวเป้าหมาย ใน transaction เดียว
-- คอมเมนต์กำกับใน schema ว่า constraint ถูกบังคับที่ layer ไหน:
+- Wrap the logic in `prisma.$transaction`, e.g. activating a new year =
+  de-activate all existing rows, then activate the target row, in one transaction
+- Annotate the schema with where the constraint is enforced:
 
   ```prisma
   // Partial unique constraints (year uniqueness, max-1 active per year) are
@@ -105,15 +112,16 @@ CREATE UNIQUE NONCLUSTERED INDEX [UX_HolidayLists_Year_NotDeleted]
   // expressed in Prisma schema migrations.
   ```
 
-เลือกทาง A เมื่อมีหลาย writer (SP/job เขียนตารางเดียวกัน) — เลือกทาง B เมื่อ
-app เป็น writer เดียวและอยากได้ error message ที่ควบคุมได้
+Choose A when there are multiple writers (SPs/jobs writing the same table);
+choose B when the app is the only writer and you want controllable error
+messages.
 
-## 5. DB ที่มีอยู่แล้ว (brownfield)
+## 5. Existing databases (brownfield)
 
-1. `npx prisma db pull` เพื่อ introspect → ได้ model ชื่อดิบ
-2. Refactor model/field เป็น camelCase + `@map()`/`@@map()` ตาม convention
-   (ชื่อ DB ไม่เปลี่ยน — เปลี่ยนเฉพาะฝั่ง Prisma)
-3. สร้าง baseline migration แล้ว mark ว่า applied:
+1. `npx prisma db pull` to introspect → models with raw names
+2. Refactor models/fields to camelCase + `@map()`/`@@map()` per convention
+   (DB names unchanged — only the Prisma side changes)
+3. Create a baseline migration and mark it applied:
 
    ```bash
    npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma \
@@ -121,4 +129,5 @@ app เป็น writer เดียวและอยากได้ error mess
    npx prisma migrate resolve --applied 0_init
    ```
 
-4. ถ้าจะ rename ของเดิมใน DB ให้เข้า convention → ใช้เทคนิค `sp_rename` ข้อ 3
+4. To rename existing DB objects into convention → use the `sp_rename`
+   technique from section 3

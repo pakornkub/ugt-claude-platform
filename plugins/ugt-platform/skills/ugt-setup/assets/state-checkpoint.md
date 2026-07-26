@@ -1,25 +1,26 @@
 # Checkpoint
 
-อัปเดตล่าสุด: <YYYY-MM-DD>
+Last updated: <YYYY-MM-DD>
 
-<!-- ไฟล์นี้ commit ไปกับ repo = ความจำของทีม (auto memory ของ Claude อยู่แค่บนเครื่องคนเดียว)
-     CLAUDE.md import ไฟล์นี้เข้า context ทุก session — อัปเดตด้วย /ugt-checkpoint ตอนจบงาน
-     ห้ามใส่ secret หรือค่าจาก .env ที่นี่ -->
+<!-- This file is committed with the repo = the TEAM's memory (Claude's auto memory
+     lives on one machine only). CLAUDE.md imports this file into context every
+     session — update it with /ugt-checkpoint at the end of each work chunk.
+     Never put secrets or .env values here. -->
 
-## กำลังทำ
+## In progress
 
-- ยังไม่มีงานค้าง (ติดตั้ง harness เสร็จ)
+- Nothing in progress (harness install just completed)
 
-## เสร็จแล้ว (ล่าสุดอยู่บนสุด)
+## Done (newest first)
 
-- <YYYY-MM-DD> ติดตั้งมาตรฐานองค์กรด้วย `/ugt-setup` — <ระบุ module ที่ติดตั้ง>
+- <YYYY-MM-DD> Installed org standards via `/ugt-setup` — <list installed modules>
 
-## ต้องทำต่อ
+## Next
 
-- เติมค่าจริงใน `.env.local` ให้ครบ
-- ขอของจาก admin: <Keycloak client / Jenkins credentials / SonarQube project ตามที่ ugt-setup สรุปไว้>
-- รัน smoke test ตาม checklist ที่ `/ugt-setup` ให้มา
+- Fill in real values in `.env.local`
+- Request from admins: <Keycloak client / Jenkins credentials / SonarQube project, per the ugt-setup summary>
+- Run the smoke tests from the `/ugt-setup` checklist
 
-## Decision ที่ตัดสินแล้ว (ห้ามรื้อโดยไม่คุยกับทีม)
+## Decisions taken (do not revisit without talking to the team)
 
-- <YYYY-MM-DD> <ตัดสินอะไร> — **เพราะ** <เหตุผล> · ทางที่ไม่เลือก: <ทางเลือกที่ทิ้งไป>
+- <YYYY-MM-DD> <what was decided> — **because** <reason> · rejected alternative: <what was not chosen>

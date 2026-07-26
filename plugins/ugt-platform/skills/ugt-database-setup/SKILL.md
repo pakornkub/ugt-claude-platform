@@ -16,143 +16,165 @@ description: >
   (→ ugt-cicd-setup).
 ---
 
-# UGT Database Setup — SQL Server ผ่าน Prisma
+# UGT Database Setup — SQL Server via Prisma
 
 ## Overview
 
-Skill นี้ติดตั้ง SQL Server ให้โปรเจคที่ยังไม่มี DB (มักเป็นโปรเจค AI-generated)
-ตามมาตรฐานองค์กร: การต่อ connection ผ่าน `@prisma/adapter-mssql`, naming
-convention ของตาราง/คอลัมน์/SP/function, env validation ด้วย t3-env และ pattern
-raw SQL ที่ปลอดภัย รายละเอียดเชิงลึกอยู่ใน `references/` — โค้ดตั้งต้นอยู่ใน `assets/`
+This skill wires SQL Server into a project that has no DB yet (often
+AI-generated) per org standards: connection through `@prisma/adapter-mssql`,
+table/column/SP/function naming conventions, env validation via t3-env, and
+safe raw-SQL patterns. Deep detail lives in `references/` — starter code in
+`assets/`.
 
 ## Org Standards
 
-มาตรฐานระดับ database ที่ทุกโปรเจคต้องเหมือนกัน:
+Database-level standards every project shares:
 
-| สิ่งที่ตั้งชื่อ                  | Convention                          | ตัวอย่าง                                |
-| -------------------------------- | ----------------------------------- | --------------------------------------- |
-| ตาราง (app-owned)                | **PascalCase พหูพจน์** ไม่มี prefix | `Items`, `LeaveRequests`, `AppSettings` |
-| ตาราง read-only (ระบบภายนอก dump) | prefix เฉพาะกลุ่ม `<EXT>_`          | `<EXT>_WeeklySummary`                   |
-| คอลัมน์                          | **PascalCase**                      | `Id`, `CreatedAt`, `EmpCode`            |
-| Stored procedure                 | `usp_*` (PascalCase ต่อท้าย)        | `usp_RecalculateWeeklySummary`          |
-| Function (scalar/TVF)            | `fn*`                               | `fnGetScheduleActual`                   |
-| View                             | `vw*`                               | `vwEmployee`                            |
-| Reserved word ของ T-SQL          | **ห้ามใช้เป็นชื่อคอลัมน์** — เติมคำขยาย | `key`→`SettingKey`, `group`→`GroupName` |
+| Named object | Convention | Example |
+| --- | --- | --- |
+| Table (app-owned) | **PascalCase plural**, no prefix | `Items`, `LeaveRequests`, `AppSettings` |
+| Read-only table (external system dumps) | group prefix `<EXT>_` | `<EXT>_WeeklySummary` |
+| Column | **PascalCase** | `Id`, `CreatedAt`, `EmpCode` |
+| Stored procedure | `usp_*` (PascalCase after) | `usp_RecalculateWeeklySummary` |
+| Function (scalar/TVF) | `fn*` | `fnGetScheduleActual` |
+| View | `vw*` | `vwEmployee` |
+| T-SQL reserved words | **never as column names** — add a qualifier | `key`→`SettingKey`, `group`→`GroupName` |
 
-**Audit columns มาตรฐาน** — ตาราง master/transaction ที่ app เป็นเจ้าของต้องมี:
+**Standard audit columns** — app-owned master/transaction tables must carry:
 `Id`, `CreatedAt`, `UpdatedAt`, `CreatedBy`, `UpdatedBy`, `IsActive`, `IsDeleted`
-(soft delete — ไม่ hard delete ข้อมูลที่ต้องเก็บประวัติ)
+(soft delete — never hard-delete data that needs history)
 
-**กฎ read-only**: ตารางที่ prefix `<EXT>_` และ view/ตารางบน linked server เป็น
-SELECT-only เสมอ — ห้าม INSERT/UPDATE/DELETE จาก app; ถ้าต้องแก้ค่า ให้สร้าง
-ตาราง override ฝั่ง app แล้ว overlay ตอนอ่าน
+**Read-only rule**: tables prefixed `<EXT>_` and views/tables on a linked
+server are SELECT-only, always — no INSERT/UPDATE/DELETE from the app; to
+adjust values, create an app-side override table and overlay at read time.
 
-รายละเอียดเต็ม (ตาราง reserved words, เหตุผลแต่ละข้อ) → `references/naming-conventions.md`
+Full detail (reserved-word table, rationale per rule) → `references/naming-conventions.md`
 
-## Interview — ถามผู้ใช้ก่อนลงมือ (ถามเป็นชุดเดียว)
+## Interview — ask the user before starting (one batch)
 
-1. **ชื่อ database** และมีอยู่แล้วหรือสร้างใหม่? (มีอยู่แล้ว → introspect/`migrate resolve`; ใหม่ → `migrate dev` ตั้งแต่ต้น)
-2. **Server/instance + port** ที่จะต่อ (dev กับ prod แยกกันไหม)
-3. ต้องเรียก **stored procedure** หรือ **linked server** ไหม? (มีผลกับ `requestTimeout` และ pattern raw SQL)
+1. **Database name**, and does it already exist? (existing → introspect /
+   `migrate resolve`; new → `migrate dev` from the start)
+2. **Server/instance + port** (separate dev and prod?)
+3. Will it call **stored procedures** or read across a **linked server**?
+   (affects `requestTimeout` and the raw-SQL patterns)
 
 ## Setup Steps
 
-### 1. ติดตั้ง dependencies
+### 1. Install dependencies
 
 ```bash
 npm install @prisma/client @prisma/adapter-mssql @t3-oss/env-nextjs zod
 npm install --save-dev prisma tsx dotenv
 ```
 
-### 2. Copy assets แล้วแทนที่ placeholders
+### 2. Copy assets and substitute placeholders
 
-| Template                            | ปลายทาง                 |
-| ----------------------------------- | ----------------------- |
-| `assets/prisma.config.ts`        | `prisma.config.ts`      |
-| `assets/schema-skeleton.prisma`  | `prisma/schema.prisma`  |
-| `assets/lib-prisma.ts`           | `lib/prisma.ts`         |
-| `assets/lib-env.ts`              | `lib/env.ts`            |
-| `assets/env.example`             | `.env.example` (+ copy เป็น `.env.local` แล้วเติมค่าจริง) |
+| Asset | Destination |
+| --- | --- |
+| `assets/prisma.config.ts` | `prisma.config.ts` |
+| `assets/schema-skeleton.prisma` | `prisma/schema.prisma` |
+| `assets/lib-prisma.ts` | `lib/prisma.ts` |
+| `assets/lib-env.ts` | `lib/env.ts` |
+| `assets/env.example` | `.env.example` (+ copy to `.env.local` and fill real values) |
 
-**แยกไฟล์ env ให้ชัด**: `.env.example` = placeholder ทั่วไปเท่านั้น (commit ได้) ·
-`.env.local` = ค่าจริง (ห้าม commit) — ค่าตามตาราง placeholder ด้านล่างเติมลงใน
-`.env.local` เท่านั้น
+**Keep the env files distinct**: `.env.example` = generic placeholders only
+(committable) · `.env.local` = real values (never committed) — the values from
+the placeholder table below go into `.env.local` only.
 
-**Placeholders ที่ต้องแทนที่ทั้งหมด:**
+**All placeholders to substitute:**
 
-| Placeholder       | ความหมาย                                             |
-| ----------------- | ---------------------------------------------------- |
-| `<db-host>`       | hostname/IP ของ SQL Server                           |
-| `<db-port>`       | port (ปกติ `1433`)                                   |
-| `<db-name>`       | ชื่อ database                                        |
-| `<db-user>`       | SQL login                                            |
-| `<db-password>`   | รหัสผ่าน (เฉพาะ `.env.local` — ห้าม commit)          |
-| `<project-name>`  | ชื่อโปรเจค (ใช้ในคอมเมนต์/ชื่อ app)                  |
-| `<EXT>`           | prefix ตาราง read-only ที่ระบบภายนอก populate (ถ้ามี) |
-| `<linked-server>` | ชื่อ linked server (เฉพาะโปรเจคที่อ่านข้าม server)    |
+| Placeholder | Meaning |
+| --- | --- |
+| `<db-host>` | SQL Server hostname/IP |
+| `<db-port>` | port (usually `1433`) |
+| `<db-name>` | database name |
+| `<db-user>` | SQL login |
+| `<db-password>` | password (`.env.local` only — never committed) |
+| `<project-name>` | project name (used in comments/app name) |
+| `<EXT>` | prefix of read-only tables populated externally (if any) |
+| `<linked-server>` | linked-server name (only for projects reading across servers) |
 
-> ถ้าโปรเจค**ไม่มี**ตาราง read-only ภายนอก / linked server → **ลบบรรทัดคอมเมนต์ที่เกี่ยวข้อง**
-> ออกจากไฟล์ที่ copy มา (เช่นคอมเมนต์ `<EXT>_` ในหัวไฟล์ `schema.prisma`) — อย่าปล่อย
-> placeholder `<EXT>` / `<linked-server>` ค้างไว้
+> If the project has **no** external read-only tables / linked server →
+> **delete the related comment lines** from the copied files (e.g. the `<EXT>_`
+> comment at the top of `schema.prisma`) — never leave `<EXT>` /
+> `<linked-server>` placeholders dangling.
 
-### 3. กฎสำคัญ (ผิดแล้วพังตอน generate/build)
+### 3. Critical rules (break these and generate/build fails)
 
-- **`url` อยู่ใน `prisma.config.ts` ที่เดียว** — ห้ามใส่ `url` ใน `datasource` ของ `schema.prisma` (Prisma 7 + driver adapter จะ fail)
-- generator ต้องเป็น **`provider = "prisma-client-js"`** — ไม่ใช่ `"prisma-client"` (ตัวหลังไม่มี MSSQL driver adapter)
-- **`import type sql from 'mssql'`** เท่านั้น — value import ทำ TypeScript พัง (ต้องการแค่ type ของ `sql.config`)
-- ห้ามแตะ `process.env` ตรง ๆ ใน app code — import จาก `@/lib/env` เสมอ (ยกเว้น `prisma.config.ts` ซึ่งรันนอก app)
-- **รัน `npx prisma generate` หลัง `prisma migrate dev` ทุกครั้ง** และหลังแก้ schema ทุกครั้ง
+- **`url` lives in `prisma.config.ts` only** — never put `url` in the
+  `datasource` block of `schema.prisma` (Prisma 7 + driver adapter fails)
+- The generator must be **`provider = "prisma-client-js"`** — not
+  `"prisma-client"` (the latter has no MSSQL driver adapter)
+- **`import type sql from 'mssql'`** only — a value import breaks TypeScript
+  (only the `sql.config` type is needed)
+- Never touch `process.env` directly in app code — always import from
+  `@/lib/env` (exception: `prisma.config.ts`, which runs outside the app)
+- **Run `npx prisma generate` after every `prisma migrate dev`** and after
+  every schema change
 
-### 4. สร้าง schema + migrate
+### 4. Build the schema + migrate
 
-1. เขียน model ตาม convention ในไฟล์ skeleton (model camelCase → `@@map("PascalCasePlural")`, field camelCase → `@map("PascalCase")`, audit columns ครบ)
+1. Write models per the skeleton's conventions (model camelCase →
+   `@@map("PascalCasePlural")`, field camelCase → `@map("PascalCase")`, full
+   audit columns)
 2. `npx prisma migrate dev --name init`
 3. `npx prisma generate`
-4. เช็ค reserved words ก่อน migrate ทุกครั้ง → `references/naming-conventions.md`
+4. Check for reserved words before every migrate → `references/naming-conventions.md`
 
-งาน migration ขั้นสูง (rename คอลัมน์ด้วย `sp_rename` แบบไม่เสียข้อมูล,
-filtered unique index ที่ Prisma express ไม่ได้, flow deploy) →
+Advanced migration work (data-preserving column renames via `sp_rename`,
+filtered unique indexes Prisma can't express, deploy flow) →
 `references/migrations.md`
 
-### 5. Raw SQL / Stored procedures (ถ้าโปรเจคต้องใช้)
+### 5. Raw SQL / stored procedures (if the project needs them)
 
-Pattern บังคับ: **sanitize ก่อน parameterize เสมอ**, เรียก SP ด้วย
-`$executeRaw\`EXEC usp_Name ${p1}, ${p2}\``, linked server = SELECT-only →
+Mandatory pattern: **sanitize before parameterize, always**; call SPs with
+`` $executeRaw`EXEC usp_Name ${p1}, ${p2}` ``; linked server = SELECT-only →
 `references/raw-sql-and-sp.md`
 
 ## Quick Rules
 
-| DO ✅                                                | DON'T ❌                                             |
-| ---------------------------------------------------- | ---------------------------------------------------- |
-| `url` ใน `prisma.config.ts` เท่านั้น                 | `url` ใน `schema.prisma` datasource                  |
-| `provider = "prisma-client-js"`                      | `provider = "prisma-client"`                         |
-| `import type sql from 'mssql'`                       | `import sql from 'mssql'` (value import)             |
-| `import { env } from '@/lib/env'`                    | `process.env.*` ตรง ๆ ใน app code                    |
-| `@@map("PascalCasePlural")` ทุก model                | ปล่อยชื่อตารางเป็น camelCase ตาม model               |
-| `@map("PascalCase")` ทุก field                       | คอลัมน์ camelCase / ใช้ reserved word (`key`, `group`) |
-| sanitize regex ก่อน interpolate ใน `$queryRaw`       | ต่อ string SQL เอง / ข้าม sanitize                   |
-| `$executeRaw\`EXEC usp_X ${a}, ${b}\`` (parameterized) | `$executeRawUnsafe` กับ input ผู้ใช้                |
-| soft delete (`IsDeleted = 1`)                        | hard delete ข้อมูลที่ต้องเก็บประวัติ                 |
-| `npx prisma generate` หลัง migrate ทุกครั้ง          | ปล่อย generated client ค้าง stale                    |
+| DO ✅ | DON'T ❌ |
+| --- | --- |
+| `url` in `prisma.config.ts` only | `url` in the `schema.prisma` datasource |
+| `provider = "prisma-client-js"` | `provider = "prisma-client"` |
+| `import type sql from 'mssql'` | `import sql from 'mssql'` (value import) |
+| `import { env } from '@/lib/env'` | raw `process.env.*` in app code |
+| `@@map("PascalCasePlural")` on every model | camelCase table names leaking from models |
+| `@map("PascalCase")` on every field | camelCase columns / reserved words (`key`, `group`) |
+| sanitize regex before interpolating into `$queryRaw` | hand-built SQL strings / skipped sanitize |
+| `` $executeRaw`EXEC usp_X ${a}, ${b}` `` (parameterized) | `$executeRawUnsafe` with user input |
+| soft delete (`IsDeleted = 1`) | hard-deleting data that needs history |
+| `npx prisma generate` after every migrate | leaving the generated client stale |
 
 ## Verification Checklist
 
-**รันสคริปต์ก่อน** (cwd = root ของโปรเจคปลายทาง, path ชี้ไปที่โฟลเดอร์ skill นี้):
+**Run the script first** (cwd = target project root, path points into this
+skill's folder):
 
 ```bash
 node <skill-dir>/scripts/verify.mjs
 ```
 
-มันตรวจข้อที่เครื่องตรวจได้ทั้งหมดในรายการล่างนี้ให้อัตโนมัติ (exit 1 ถ้าไม่ผ่าน) —
-ที่เหลือคือข้อที่ต้องรันมือ:
+It covers every machine-checkable item below automatically (exit 1 on
+failure) — the rest must be run by hand:
 
-- [ ] `npx prisma validate` ผ่าน
-- [ ] `npx prisma generate` ผ่าน (และรันซ้ำหลัง migrate ทุกครั้ง)
-- [ ] `schema.prisma` ไม่มี `url` ใน datasource; `prisma.config.ts` มี
-- [ ] ไม่มีการเรียก `process.env` ตรง ๆ นอก `lib/env.ts` / `prisma.config.ts`
-- [ ] ทุก model มี `@@map("PascalCasePlural")` และทุก field มี `@map("PascalCase")` — ยกเว้นตาราง auth/RBAC ที่ `ugt-auth-setup` ติดตั้ง ซึ่ง map **เอกพจน์** ทั้งชุด: `User`, `Session`, `Account`, `Verification`, `RateLimit`, `Role`, `Permission`, `RolePermission` (ห้าเป็น convention ของ Better Auth เอง · สามตัวหลังใช้รูปเดียวกันเพราะอยู่ในไฟล์เดียวกันและต้องอ่านคู่กัน) — ตารางเดียวในชุดนั้นที่เป็นพหูพจน์คือ `ActivityLogs`
-- [ ] ไม่มีคอลัมน์ชื่อชน T-SQL reserved word (เช็คกับ `references/naming-conventions.md`)
-- [ ] ตาราง master/transaction มี audit columns ครบ (`Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted`)
-- [ ] raw SQL ทุกจุด: sanitize + parameterize; ไม่มี mutation ลงตาราง/วิว read-only
-- [ ] `.env.local` ไม่ถูก commit; `.env.example` มี placeholder ครบ
-- [ ] Build ผ่านโดยไม่มี DB จริง (`SKIP_ENV_VALIDATION=1` + build-guard ใน `lib/prisma.ts`)
+- [ ] `npx prisma validate` passes
+- [ ] `npx prisma generate` passes (and is re-run after every migrate)
+- [ ] `schema.prisma` has no `url` in the datasource; `prisma.config.ts` has it
+- [ ] no direct `process.env` reads outside `lib/env.ts` / `prisma.config.ts`
+- [ ] every model has `@@map("PascalCasePlural")` and every field
+      `@map("PascalCase")` — except the auth/RBAC tables installed by
+      `ugt-auth-setup`, which map **singular** as a set: `User`, `Session`,
+      `Account`, `Verification`, `RateLimit`, `Role`, `Permission`,
+      `RolePermission` (the five are Better Auth's own convention; the last
+      three share the form because they live in the same file and are read
+      together) — the only plural in that set is `ActivityLogs`
+- [ ] no column name collides with a T-SQL reserved word (check against
+      `references/naming-conventions.md`)
+- [ ] master/transaction tables carry the full audit columns
+      (`Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted`)
+- [ ] all raw SQL: sanitize + parameterize; no mutations against read-only
+      tables/views
+- [ ] `.env.local` is not committed; `.env.example` has all placeholders
+- [ ] build passes with no live DB (`SKIP_ENV_VALIDATION=1` + the build guard
+      in `lib/prisma.ts`)

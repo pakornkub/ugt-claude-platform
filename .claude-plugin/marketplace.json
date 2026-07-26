@@ -1,6 +1,6 @@
 {
   "name": "ugt",
-  "description": "Marketplace มาตรฐานองค์กร UGT สำหรับทีมที่พัฒนาเว็บด้วย Next.js + Prisma/SQL Server + Keycloak + Jenkins + SonarQube",
+  "description": "UGT org-standard marketplace for teams building web apps on Next.js + Prisma/SQL Server + Keycloak + Jenkins + SonarQube",
   "owner": {
     "name": "UGT DX Team"
   },
@@ -9,12 +9,12 @@
     {
       "name": "ugt-platform",
       "source": "./plugins/ugt-platform",
-      "description": "มาตรฐานองค์กรสำหรับโปรเจค Next.js: SQL Server ผ่าน Prisma, login SSO/LDAP/Local + RBAC, test/lint, Jenkins + SonarQube + Docker deploy พร้อมชั้น harness (CLAUDE.md, rules, state, audit log)"
+      "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)"
     },
     {
       "name": "ugt-standard",
       "source": "./plugins/ugt-standard",
-      "description": "ชุดมาตรฐานที่แนะนำ — ติดตั้งตัวเดียวได้ ugt-platform + superpowers (pipeline การพัฒนา)"
+      "description": "The recommended bundle — one install brings ugt-platform + superpowers (the development pipeline)"
     }
   ]
 }

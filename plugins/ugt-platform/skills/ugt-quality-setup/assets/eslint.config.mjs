@@ -5,15 +5,16 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // การประกาศ globalIgnores ทับ default ignores ของ eslint-config-next ทั้งชุด
-  // → ต้องเขียน default เดิมกลับมาด้วย ไม่งั้น eslint จะเริ่ม lint .next/ แล้วช้ามาก
+  // Declaring globalIgnores REPLACES eslint-config-next's default ignore set
+  // → the defaults must be restated here, or eslint starts linting .next/ and
+  // slows to a crawl.
   globalIgnores([
-    // default ของ eslint-config-next:
+    // eslint-config-next defaults:
     '.next/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
-    // ของเราเพิ่ม: coverage report จาก vitest ไม่ใช่ source
+    // ours: vitest coverage reports are not source
     'coverage/**',
   ]),
 ]);

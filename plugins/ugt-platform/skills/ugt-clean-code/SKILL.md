@@ -16,30 +16,32 @@ paths:
   - "**/*.{ts,tsx}"
 ---
 
-# UGT Clean Code — เขียนให้ผ่าน Quality Gate ตั้งแต่สแกนแรก
+# UGT Clean Code — pass the Quality Gate on the first scan
 
-SonarQube ที่ถูกที่สุดคือ violation ที่ไม่เคยถูกสร้าง — ไฟล์นี้คือ checklist
-ก่อนเขียน ไม่ใช่คู่มือแก้ทีหลัง
+The cheapest SonarQube fix is the violation never created — this is a
+before-you-write checklist, not an after-the-fact repair manual.
 
-## Quality Gate ให้คะแนนอย่างไร (อ่านก่อน)
+## How the Quality Gate scores (read first)
 
-Gate วัดบน **new code เท่านั้น** (โค้ดที่เพิ่ม/แก้ใน branch นี้) ตามมาตรฐานองค์กร:
+The gate measures **new code only** (added/changed in this branch), per the org
+standard:
 
-| Condition | Threshold | สิ่งที่ทำให้พลาด |
+| Condition | Threshold | What trips it |
 | --- | --- | --- |
-| `new_violations` | **= 0** | code smell เล็ก ๆ ตัวเดียวก็ block — ไม่มีโควตาให้ |
-| `new_duplicated_lines_density` | **≤ 3%** | copy-paste — **NOSONAR ใช้ไม่ได้กับข้อนี้** |
-| `new_coverage` | **≥ 60%** | เขียนโค้ดใหม่โดยไม่มี test |
-| `new_security_hotspots_reviewed` | **= 100%** | hotspot ที่ยังไม่มีคน review ใน SonarQube UI |
+| `new_violations` | **= 0** | one small code smell blocks — there is no quota |
+| `new_duplicated_lines_density` | **≤ 3%** | copy-paste — **NOSONAR does not work here** |
+| `new_coverage` | **≥ 60%** | new code without tests |
+| `new_security_hotspots_reviewed` | **= 100%** | hotspots not yet reviewed in the SonarQube UI |
 
-สองข้อที่ต้องคิดตอน**เขียน** ไม่ใช่ตอนแก้: `new_violations = 0` ไม่เหลือที่ให้พลาด
-และ duplication ไม่มีทางลัด suppress — ต้องออกแบบไม่ให้ซ้ำตั้งแต่แรก
+Two of these must be thought about **while writing**, not while fixing:
+`new_violations = 0` leaves no room for error, and duplication has no suppress
+shortcut — design it out from the start.
 
-## 1. Modern-JS idioms ที่ SonarQube บังคับ
+## 1. Modern-JS idioms SonarQube enforces
 
-เขียนคอลัมน์ขวาเป็น default ไปเลย
+Write the right column by default.
 
-| ❌ ถูก flag | ✅ เขียนแบบนี้ | Rule |
+| ❌ Flagged | ✅ Write instead | Rule |
 | --- | --- | --- |
 | `str.replace(/x/g, 'y')` | `str.replaceAll('x', 'y')` | S7781 |
 | `parseInt(v, 10)` / `parseFloat(v)` | `Number.parseInt(v, 10)` / `Number.parseFloat(v)` | S7773 |
@@ -48,64 +50,71 @@ Gate วัดบน **new code เท่านั้น** (โค้ดที�
 | `arr[arr.length - 1]` | `arr.at(-1)` | S7755 |
 | `x > 0 ? x : 0` | `Math.max(0, x)` | S7766 |
 | `a !== null ? a : b` / `a ? a : b` | `a ?? b` | S6606 / S7735 |
-| `if (!notReady)` ใน ternary | สลับ branch → เงื่อนไขเชิงบวก | S7735 |
-| `catch (err)` / `catch (e)` | `catch (error_)` หรือ `catch (error)` | S7718 |
-| `value as Foo` ทั้งที่ TS narrow ให้แล้ว | ลบ assertion ออก | S4325 |
-| `void someExpr;` | ลบ expression ที่ตายแล้ว | S3735 |
+| `if (!notReady)` in a ternary | flip the branches → positive condition | S7735 |
+| `catch (err)` / `catch (e)` | `catch (error_)` or `catch (error)` | S7718 |
+| `value as Foo` where TS already narrows | remove the assertion | S4325 |
+| `void someExpr;` | delete the dead expression | S3735 |
 
-**กฎเรื่อง component / type:**
+**Component / type rules:**
 
-| Rule | ข้อบังคับ |
+| Rule | Requirement |
 | --- | --- |
-| S6759 | prop type ของ function component ต้องครอบ `Readonly<>` ทุกตัว — ทั้ง inline object, named interface และ `React.ComponentProps<…>` |
-| S3863 | ห้าม import จาก module เดียวกันสองบรรทัด — รวมเป็น statement เดียว |
-| S1874 | ห้ามใช้ API ที่ deprecated · Zod v4: `z.flattenError(err)` ไม่ใช่ `err.flatten()`, `z.iso.datetime()` ไม่ใช่ `z.string().datetime()` |
-| S3776 | cognitive complexity ≤ 15 — แตก helper ออกจากฟังก์ชันที่ซ้อนลึก/แตกแขนงมาก |
+| S6759 | Wrap every function-component prop type in `Readonly<>` — inline objects, named interfaces, and `React.ComponentProps<…>` alike |
+| S3863 | Never import twice from the same module — merge into one statement |
+| S1874 | No deprecated APIs · Zod v4: `z.flattenError(err)` not `err.flatten()`, `z.iso.datetime()` not `z.string().datetime()` |
+| S3776 | Cognitive complexity ≤ 15 — extract helpers from deeply nested/branchy functions |
 
-**ข้อยกเว้น S6759**: cell renderer ของ TanStack Table ต้องใช้
-`Readonly<CellContext<TRow, unknown>>` เพราะ generic ของ value เป็น `unknown` ที่ระดับ column
+**S6759 exception**: a TanStack Table cell renderer must use
+`Readonly<CellContext<TRow, unknown>>` — the value generic is `unknown` at the
+column level.
 
-## 2. Duplication — ตัวที่ block บ่อยสุดและ suppress ไม่ได้
+## 2. Duplication — the most frequent blocker, and unsuppressable
 
-พอจะ copy block ไหน ให้หยุดแล้วเลือกหนึ่งทาง:
+About to copy a block? Stop and pick one lever:
 
-**A. Refactor (default — เมื่อ DRY ทำให้อ่านง่ายขึ้น):**
+**A. Refactor (default — when DRY improves readability):**
 
-- Zod schema สองตัวใช้ field/refinement ร่วมกัน → แยก field const + predicate function
-  (type ctx ของ `superRefine` เป็น `z.core.$RefinementCtx`) · `path` ใน `.refine()`
-  ต้องเป็น `PropertyKey[]` ที่ mutable — ห้ามใส่ `as const`
-- Component ต่างกันแค่ config (endpoint, label, body) → ทำ component เดียวรับเป็น props
-- Dialog/form ฝาแฝดที่ใช้ schema+field ชุดเดียวกัน → แยก schema module + `<Fields form={form} />`
-- Server action ที่ซ้ำ block guard/notify/create → แยกเป็น `loadX`, `notifyX`, `createX`
+- Two Zod schemas share fields/refinements → extract shared field consts +
+  predicate functions (type the shared `superRefine` ctx as
+  `z.core.$RefinementCtx`) · a `.refine()` options `path` must stay a mutable
+  `PropertyKey[]` — no `as const`
+- Components differing only in config (endpoint, labels, body) → one component
+  taking those as props
+- Twin dialogs/forms sharing schema + fields → a shared schema module +
+  `<Fields form={form} />`
+- Server actions repeating guard/notify/create blocks → extract `loadX`,
+  `notifyX`, `createX` helpers
 
-**B. `sonar.cpd.exclusions` (เมื่อการยัด DRY ทำให้แย่ลง):** CRUD table ที่ type-safe
-และซ้ำโครงแต่ต่าง generic row type, modal body ที่ต่างแค่เนื้อบน shell เดียวกัน,
-DataTable variant, API-route guard ต่อ resource — เพิ่ม path ลง
-`sonar-project.properties` **พร้อม comment ว่าทำไมจึงตั้งใจให้ซ้ำ**
+**B. `sonar.cpd.exclusions` (when forcing DRY makes it worse):** type-safe CRUD
+tables sharing structure but differing in generic row type, content-only modal
+bodies over a shared shell, DataTable variants, per-resource API-route guards —
+add the path to `sonar-project.properties` **with a comment explaining why the
+duplication is intentional**.
 
-> เส้นแบ่ง: ถ้ารวมของซ้ำแล้วต้องใช้ `any`/cast หรือได้ config object 5 พารามิเตอร์
-> ที่อ่านยากกว่าเดิม → exclude · นอกนั้น → refactor
+> The line: if unifying the copies needs `any`/casts or a 5-param config object
+> harder to read than the copies → exclude. Otherwise → refactor.
 
-## 3. Suppress false positive ให้ถูกวิธี
+## 3. Suppressing genuine false positives correctly
 
-### NOSONAR ต้องอยู่ **บรรทัดเดียวกับ** โค้ดที่ถูก flag
+### NOSONAR must sit on the **same line** as the flagged code
 
 ```ts
-// ✅ บรรทัดเดียวกับ arrow/declaration ที่ SonarQube รายงาน
+// ✅ same line as the arrow/declaration SonarQube reports
 cell: ({ row }) => <RiskCell row={row} />, // NOSONAR typescript:S6478 — TanStack renderer
 export function Wizard() { // NOSONAR typescript:S3776 — cohesive state machine
 
-// ❌ บรรทัดถัดไป / JSX block comment → ไม่ suppress
+// ❌ next line / JSX block comment → suppresses nothing
 header: () => (
-  // NOSONAR …          ← ผิด: issue อยู่บรรทัด `() => (` ข้างบน
-{/* NOSONAR … */}       ← ผิด: SonarQube ไม่อ่าน JSX block comment
+  // NOSONAR …          ← wrong: the issue is on the `() => (` line above
+{/* NOSONAR … */}       ← wrong: SonarQube ignores JSX block comments
 ```
 
-### false positive เชิงระบบให้ใช้ `sonar.issue.ignore.multicriteria`
+### Systematic false positives → `sonar.issue.ignore.multicriteria`
 
-เมื่อ rule เดียวยิงทั้งไฟล์/ทั้ง glob เพราะ pattern ของ library (TanStack column
-renderer, react-day-picker slot override, RHF render prop) ให้ suppress ครั้งเดียว
-ใน `sonar-project.properties` แทนการโปรย NOSONAR รายบรรทัดที่พังง่าย:
+When one rule fires across a whole file/glob because of a library pattern
+(TanStack column renderers, react-day-picker slot overrides, RHF render props),
+suppress once in `sonar-project.properties` instead of scattering fragile
+per-line NOSONARs:
 
 ```properties
 sonar.issue.ignore.multicriteria=s6478tables,s4144ot
@@ -115,28 +124,28 @@ sonar.issue.ignore.multicriteria.s4144ot.ruleKey=typescript:S4144
 sonar.issue.ignore.multicriteria.s4144ot.resourceKey=**/ot-approval-list.tsx
 ```
 
-false positive จาก library ที่ควร ignore ด้วย glob: **S6478** (inline component) บน
-`*table*`, `*-tab`, `*-list`, `calendar` · **S4144** (identical implementation) บน
-component ที่ต่างแค่ generic type · **S6848 / S1082** (a11y) บน UI primitive
-ที่ส่ง ARIA ให้ parent จัดการ
+Library false positives worth glob-ignoring: **S6478** (inline component) on
+`*table*`, `*-tab`, `*-list`, `calendar` · **S4144** (identical implementation)
+on generic-type variant components · **S6848 / S1082** (a11y) on UI primitives
+delegating ARIA to a parent.
 
-`console.*` ใน catch แบบ fire-and-forget → `// NOSONAR typescript:S106` บรรทัดเดียวกัน
+`console.*` in fire-and-forget catch blocks → `// NOSONAR typescript:S106`
+on the same line.
 
-## Checklist ก่อน commit
+## Pre-commit checklist
 
-**รันสคริปต์ก่อน** (cwd = root ของโปรเจค) — default ตรวจเฉพาะไฟล์ที่แก้เทียบ HEAD
-ซึ่งตรงกับที่ gate วัด (new code) ใส่ `--all` ถ้าอยากสแกนทั้งโปรเจค:
+**Run the script first** (cwd = project root) — by default it checks only files
+changed vs HEAD, which matches what the gate measures (new code); add `--all`
+to scan the whole project:
 
 ```bash
 node <skill-dir>/scripts/verify.mjs
 ```
 
-
-
-- [ ] ไม่มี `parseInt` / `.replace(/…/g)` / `typeof … 'undefined'` / `arr[len-1]` / ternary เชิงลบ — ใช้ idiom ใหม่แล้ว
-- [ ] prop type ของทุก component ครอบ `Readonly<>`
-- [ ] ไม่มี import ซ้ำจาก module เดียวกัน · ไม่มี Zod API ที่ deprecated
-- [ ] ไม่มี block ที่ copy มา ≥ ~10 บรรทัด — refactor แล้ว หรือใส่ `sonar.cpd.exclusions` พร้อมเหตุผล
-- [ ] NOSONAR ทุกตัวอยู่บรรทัดเดียวกับ issue · false positive เชิงระบบใช้ `multicriteria`
-- [ ] มี test ครอบโค้ดใหม่ (gate ต้องการ `new_coverage` ≥ 60% บน new code)
+- [ ] No `parseInt` / `.replace(/…/g)` / `typeof … 'undefined'` / `arr[len-1]` / negated ternaries — modern idioms used
+- [ ] Every component prop type wrapped in `Readonly<>`
+- [ ] No duplicate imports from one module · no deprecated Zod APIs
+- [ ] No copy-pasted block ≥ ~10 lines — refactored, or in `sonar.cpd.exclusions` with a reason
+- [ ] Every NOSONAR on the **same line** as its issue · systematic FPs via `multicriteria`
+- [ ] Tests cover the new code (the gate needs `new_coverage` ≥ 60% on new code)
 - [ ] `npx tsc --noEmit` + `npm run lint` clean

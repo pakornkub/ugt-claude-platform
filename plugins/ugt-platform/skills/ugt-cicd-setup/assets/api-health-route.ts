@@ -1,17 +1,20 @@
-// Health endpoint ที่ Dockerfile HEALTHCHECK และ compose healthcheck ทั้งสองไฟล์เรียก
-// ถ้าไม่มีไฟล์นี้ container จะไม่เคยขึ้นสถานะ healthy → stage Deploy fail ทุกครั้ง
+// Health endpoint hit by the Dockerfile HEALTHCHECK and both compose healthchecks.
+// Without this file the container never reports healthy → the Deploy stage
+// fails at the docker-inspect poll every time.
 //
-// ต้องเข้าถึงได้โดยไม่ต้อง login — proxy.ts ของ ugt-auth-setup bypass path นี้ไว้แล้ว
+// Must be reachable without login — ugt-auth-setup's proxy.ts already bypasses
+// this path.
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // [DB]
 
-// บังคับ dynamic — ไม่งั้น Next.js จะ prerender เป็น static แล้วสถานะค้างที่ค่าตอน build
+// Force dynamic — otherwise Next.js prerenders it static and the status
+// freezes at its build-time value.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const checks: Record<string, 'ok' | 'error'> = {};
 
-  // [DB] start — ลบทั้ง block นี้ (และ import ด้านบน) ถ้าโปรเจคไม่มี database
+  // [DB] start — delete this whole block (and the import above) if the project has no database
   try {
     await prisma.$queryRaw`SELECT 1`;
     checks.database = 'ok';
@@ -20,15 +23,15 @@ export async function GET() {
   }
   // [DB] end
 
-  // ไม่มี check เลย (โปรเจคไม่มี DB) → every() บน array ว่างคืน true → ok
+  // No checks at all (project without a DB) → every() on an empty array is true → ok
   const ok = Object.values(checks).every((status) => status === 'ok');
 
   return NextResponse.json(
     {
       status: ok ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
-      // ห้ามใส่ version / framework / commit sha — endpoint นี้เปิดสาธารณะ
-      // ข้อมูลพวกนั้นทำให้คนนอกรู้ว่าควรยิงช่องโหว่รุ่นไหน
+      // Never include version / framework / commit sha — this endpoint is public,
+      // and that information tells outsiders which exploits to try.
       checks,
     },
     { status: ok ? 200 : 503 }

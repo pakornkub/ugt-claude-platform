@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Pre-commit checklist ของ ugt-clean-code ในรูปแบบที่รันได้
+// Runnable version of the ugt-clean-code pre-commit checklist
 //
-//   node <path-to-skill>/scripts/verify.mjs          ← ตรวจเฉพาะไฟล์ที่แก้ (ตรงกับที่ gate วัด)
-//   node <path-to-skill>/scripts/verify.mjs --all    ← ตรวจทั้งโปรเจค
+//   node <path-to-skill>/scripts/verify.mjs          ← checks only changed files (matches what the gate measures)
+//   node <path-to-skill>/scripts/verify.mjs --all    ← scans the whole project
 //
-// Quality Gate วัดบน **new code** เท่านั้น ดังนั้น default จึงตรวจเฉพาะไฟล์ที่เปลี่ยน
-// เทียบกับ HEAD (staged + unstaged + untracked) — สแกนทั้งโปรเจคจะได้กำแพง violation
-// ของโค้ดเก่าที่ gate ไม่นับ
+// The Quality Gate measures **new code** only, so the default checks files
+// changed vs HEAD (staged + unstaged + untracked) — scanning the whole project
+// would produce a wall of violations in old code the gate doesn't count.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -49,31 +49,31 @@ let files;
 let scope;
 if (ALL) {
   files = walkAll();
-  scope = `ทั้งโปรเจค (${files.length} ไฟล์)`;
+  scope = `whole project (${files.length} files)`;
 } else {
   const changed = changedFiles();
   if (changed === null) {
     files = walkAll();
-    scope = `ทั้งโปรเจค (${files.length} ไฟล์) — ไม่ใช่ git repo จึงเทียบ HEAD ไม่ได้`;
+    scope = `whole project (${files.length} files) — not a git repo, cannot diff against HEAD`;
   } else {
     files = changed;
-    scope = `ไฟล์ที่แก้เทียบ HEAD (${files.length} ไฟล์) — ใช้ --all เพื่อสแกนทั้งโปรเจค`;
+    scope = `files changed vs HEAD (${files.length} files) — use --all to scan the whole project`;
   }
 }
 
-/** ตัดคอมเมนต์ออกก่อน scan (แต่เก็บบรรทัดไว้เพื่อรายงานเลขบรรทัดถูก) */
+/** Strip line comments before scanning (but keep lines so reported line numbers stay right) */
 const stripComments = (line) => line.replace(/\/\/.*$/, '');
 
 const RULES = [
   {
     id: 'S7773',
-    name: 'parseInt / parseFloat ต้องเรียกผ่าน Number.',
+    name: 'parseInt / parseFloat must go through Number.',
     test: (l) => /(?<!Number\.)\bparse(Int|Float)\s*\(/.test(l),
     fix: 'Number.parseInt(v, 10) / Number.parseFloat(v)',
   },
   {
     id: 'S7781',
-    name: '.replace() ที่ใช้ regex /g ต้องเป็น .replaceAll()',
+    name: '.replace() with a /g regex must be .replaceAll()',
     test: (l) => /\.replace\s*\(\s*\/[^/\n]+\/[a-z]*g/.test(l),
     fix: "str.replaceAll('x', 'y')",
   },
@@ -81,32 +81,32 @@ const RULES = [
     id: 'S7741/S7764',
     name: "typeof … 'undefined'",
     test: (l) => /typeof\s+[\w.]+\s*[!=]==?\s*['"]undefined['"]/.test(l),
-    fix: "x === undefined · globalThis.window !== undefined (แทน typeof window !== 'undefined')",
+    fix: "x === undefined · globalThis.window !== undefined (instead of typeof window !== 'undefined')",
   },
   {
     id: 'S7755',
-    name: 'arr[arr.length - 1] ต้องเป็น arr.at(-1)',
+    name: 'arr[arr.length - 1] must be arr.at(-1)',
     test: (l) => /(\w+)\s*\[\s*\1\s*\.length\s*-\s*1\s*\]/.test(l),
     fix: 'arr.at(-1)',
   },
   {
     id: 'S7718',
-    name: "catch (e) / catch (err) — ต้องเป็น error หรือ error_",
+    name: 'catch (e) / catch (err) — must be error or error_',
     test: (l) => /catch\s*\(\s*(e|err)\s*\)/.test(l),
-    fix: 'catch (error) หรือ catch (error_)',
+    fix: 'catch (error) or catch (error_)',
   },
   {
     id: 'NOSONAR',
-    name: 'NOSONAR ใน JSX block comment (ไม่ suppress อะไรเลย)',
+    name: 'NOSONAR inside a JSX block comment (suppresses nothing)',
     test: (l) => /\{\s*\/\*[^*]*NOSONAR/.test(l),
-    fix: 'ย้ายไปเป็น // NOSONAR บนบรรทัดเดียวกับโค้ดที่ถูก flag',
+    fix: 'move it to // NOSONAR on the same line as the flagged code',
     noStrip: true,
   },
   {
     id: 'NOSONAR',
-    name: 'NOSONAR อยู่บรรทัดเดียวลอย ๆ (ต้องอยู่บรรทัดเดียวกับโค้ด)',
+    name: 'NOSONAR on its own line (must share the line with the code)',
     test: (l) => /^\s*\/\/\s*NOSONAR/.test(l),
-    fix: 'ย้ายไปต่อท้ายบรรทัดของโค้ดที่ SonarQube รายงาน',
+    fix: 'append it to the end of the line SonarQube reports',
     noStrip: true,
   },
 ];
@@ -131,7 +131,7 @@ for (const file of files) {
     }
   });
 
-  // S3863 — import ซ้ำจาก module เดียวกัน
+  // S3863 — duplicate imports from the same module
   const modules = [...body.matchAll(/^\s*import\s[^'"]*from\s*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
   const seen = new Set();
   for (const m of modules) {
@@ -139,43 +139,43 @@ for (const file of files) {
     seen.add(m);
   }
 
-  // S6759 — prop type ของ component ควรครอบ Readonly<> (heuristic → warn)
+  // S6759 — component prop types should be wrapped in Readonly<> (heuristic → warn)
   if (file.endsWith('.tsx')) {
     const propTypes = [...body.matchAll(/\}\s*:\s*(?!Readonly<)([A-Z]\w*Props)\b/g)];
     readonlyWarn += propTypes.length;
   }
 }
 
-// ── รายงาน ────────────────────────────────────────────────────────────────
-console.log(`\nugt-clean-code — verify\nขอบเขต: ${scope}\n`);
+// ── Report ─────────────────────────────────────────────────────────────────
+console.log(`\nugt-clean-code — verify\nScope: ${scope}\n`);
 
 let failed = 0;
 if (files.length === 0) {
-  console.log('  (ไม่มีไฟล์ .ts/.tsx ที่ต้องตรวจ)\n');
+  console.log('  (no .ts/.tsx files to check)\n');
 } else {
   for (const [name, { fix, hits }] of findings) {
     failed++;
-    console.log(`  ✘ ${name} — ${hits.length} จุด`);
+    console.log(`  ✘ ${name} — ${hits.length} hit(s)`);
     for (const h of hits.slice(0, 8)) console.log(`      ${h}`);
-    if (hits.length > 8) console.log(`      … อีก ${hits.length - 8} จุด`);
-    console.log(`      แก้เป็น: ${fix}`);
+    if (hits.length > 8) console.log(`      … and ${hits.length - 8} more`);
+    console.log(`      fix: ${fix}`);
   }
   if (dupImports.length) {
     failed++;
-    console.log(`  ✘ S3863 — import ซ้ำจาก module เดียวกัน (${dupImports.length} จุด)`);
+    console.log(`  ✘ S3863 — duplicate imports from one module (${dupImports.length} hit(s))`);
     for (const d of dupImports.slice(0, 8)) console.log(`      ${d}`);
-    console.log('      แก้เป็น: รวมเป็น import statement เดียว');
+    console.log('      fix: merge into a single import statement');
   }
   if (readonlyWarn) {
-    console.log(`  ! S6759 — พบ prop type ที่ยังไม่ครอบ Readonly<> ประมาณ ${readonlyWarn} จุด`);
-    console.log('      ตรวจด้วยตา: prop type ของ function component ทุกตัวต้องเป็น Readonly<…>');
+    console.log(`  ! S6759 — roughly ${readonlyWarn} prop type(s) not wrapped in Readonly<>`);
+    console.log('      eyeball check: every function-component prop type must be Readonly<…>');
   }
-  if (!failed) console.log('  ✔ ไม่พบ idiom ที่ SonarQube flag ในขอบเขตที่ตรวจ');
+  if (!failed) console.log('  ✔ no SonarQube-flagged idioms found in the checked scope');
 }
 
 console.log(
-  `\n${failed} กลุ่มปัญหา\n` +
-    'ตรวจด้วยเครื่องไม่ได้: duplication ≥ 10 บรรทัด (ให้ scanner จริงบอก) · cognitive complexity ≤ 15 ·\n' +
-    'coverage ของโค้ดใหม่ ≥ 60% · ทุก suppression ต้องมี rationale comment\n'
+  `\n${failed} problem group(s)\n` +
+    'Not machine-checkable here: duplication >= 10 lines (let the real scanner say) · cognitive complexity <= 15 ·\n' +
+    'coverage of new code >= 60% · every suppression carries a rationale comment\n'
 );
 process.exit(failed > 0 ? 1 : 0);

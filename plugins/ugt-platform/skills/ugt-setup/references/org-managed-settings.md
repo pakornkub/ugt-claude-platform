@@ -1,19 +1,23 @@
-# Hard Boundary ระดับองค์กร — เอกสารสำหรับทีม IT (ไม่ใช่ของที่ `/ugt-setup` ติดตั้ง)
+# Org-level Hard Boundary — a document for the IT team (NOT installed by `/ugt-setup`)
 
-> **อ่านก่อน**: ไฟล์นี้เป็นรายการที่ต้องขอจาก IT/ผู้ดูแลเครื่อง — skill ติดตั้งให้ไม่ได้
-> เพราะต้องเขียนไฟล์ในพื้นที่ระบบของทุกเครื่องและแจกด้วย MDM/Group Policy/Ansible
-> ตราบใดที่ยังไม่ได้ deploy สิ่งเหล่านี้ **ถือว่ายังไม่มี hard boundary** อย่าเข้าใจผิดว่ามีแล้ว
+> **Read first**: this is the list of things to request from IT / machine
+> administrators — the skill cannot install it, because it requires writing a
+> file into a system location on every machine and distributing it via
+> MDM/Group Policy/Ansible. Until this is deployed, **there is no hard
+> boundary** — don't mistake this document for having one.
 
-## ทำไมต้องเป็นระดับ managed
+## Why it must be the managed level
 
-กฎที่เขียนใน `CLAUDE.md` หรือใน skill เป็น **คำขอ** ไม่ใช่การบังคับ — doc ของ Claude Code
-ระบุตรงว่า *"Settings rules are enforced by the client regardless of what Claude decides to
-do. CLAUDE.md instructions shape Claude's behavior but are not a hard enforcement layer"*
+Rules written in `CLAUDE.md` or in a skill are **requests**, not enforcement —
+the Claude Code docs state it directly: *"Settings rules are enforced by the
+client regardless of what Claude decides to do. CLAUDE.md instructions shape
+Claude's behavior but are not a hard enforcement layer."*
 
-`managed-settings.json` เป็นชั้นเดียวที่ **user และ project override ไม่ได้** — และ managed
-CLAUDE.md เป็นไฟล์เดียวที่ `claudeMdExcludes` ตัดออกไม่ได้
+`managed-settings.json` is the only layer **neither user nor project settings
+can override** — and a managed CLAUDE.md is the only one `claudeMdExcludes`
+cannot exclude.
 
-## ตำแหน่งไฟล์
+## File locations
 
 | OS | path |
 | --- | --- |
@@ -21,10 +25,11 @@ CLAUDE.md เป็นไฟล์เดียวที่ `claudeMdExcludes` �
 | macOS | `/Library/Application Support/ClaudeCode/managed-settings.json` |
 | Linux / WSL | `/etc/claude-code/managed-settings.json` |
 
-managed CLAUDE.md วางที่โฟลเดอร์เดียวกันในชื่อ `CLAUDE.md` หรือใส่เนื้อหาลงคีย์ `claudeMd`
-ใน `managed-settings.json` ตรง ๆ ก็ได้ (คีย์นี้ถูกอ่านเฉพาะใน managed/policy settings เท่านั้น)
+A managed CLAUDE.md goes in the same folder as `CLAUDE.md`, or put its content
+directly in the `claudeMd` key of `managed-settings.json` (that key is honored
+only in managed/policy settings).
 
-## Template ที่เสนอให้เริ่ม
+## Proposed starting template
 
 ```json
 {
@@ -48,38 +53,42 @@ managed CLAUDE.md วางที่โฟลเดอร์เดียวก�
   "enabledPlugins": {
     "ugt-standard@ugt": true
   },
-  "claudeMd": "ห้าม commit secret ลง git ทุกกรณี · ต้องรัน npm run build ผ่านก่อน push · ข้อมูลพนักงานเป็นข้อมูลส่วนบุคคลตาม PDPA ห้ามส่งออกนอกระบบขององค์กร"
+  "claudeMd": "Never commit secrets to git under any circumstances. npm run build must pass before every push. Employee data is personal data under PDPA — never send it outside org systems."
 }
 ```
 
-ผลที่ได้:
+What this buys:
 
-- **deny** — กฎที่ client บังคับเอง ไม่ผ่านการตัดสินใจของโมเดล และโปรเจคปิดไม่ได้
-- **extraKnownMarketplaces + enabledPlugins** — ทุกเครื่องได้ `ugt-standard` โดยไม่ต้องให้
-  แต่ละคนไปรัน `/plugin marketplace add` เอง
-- **claudeMd** — ข้อความที่อยู่ในทุก session ของทุกโปรเจคบนเครื่องนั้น และ user ตัดออกไม่ได้
+- **deny** — rules the client enforces itself, outside the model's decisions,
+  and projects cannot switch off
+- **extraKnownMarketplaces + enabledPlugins** — every machine gets
+  `ugt-standard` without each person running `/plugin marketplace add`
+- **claudeMd** — text present in every session of every project on the machine,
+  which users cannot exclude
 
-## ตัวเลือกเพิ่มที่ควรพิจารณา
+## Additional options worth considering
 
-| คีย์ | ทำอะไร | ควรใช้เมื่อ |
+| Key | What it does | Use when |
 | --- | --- | --- |
-| `sandbox.enabled` | บังคับ sandbox isolation | ต้องการจำกัดไม่ให้ agent ออกนอก scope ของโปรเจค |
-| `strictKnownMarketplaces` | จำกัดว่าเพิ่ม marketplace อื่นไม่ได้ | ต้องการให้ติดตั้งได้เฉพาะ plugin ที่องค์กรตรวจแล้ว (ต้องใส่คู่กับ `extraKnownMarketplaces` เพราะตัวมันเองไม่ได้ลงทะเบียน marketplace ให้) |
-| `forceLoginMethod` / `forceLoginOrgUUID` | ล็อกวิธี login และ org | ต้องการกันการใช้บัญชีส่วนตัวทำงานของบริษัท |
+| `sandbox.enabled` | Enforce sandbox isolation | You want the agent confined to project scope |
+| `strictKnownMarketplaces` | Restrict which marketplaces can be added | Only org-reviewed plugins allowed (pair with `extraKnownMarketplaces` — it doesn't register marketplaces by itself) |
+| `forceLoginMethod` / `forceLoginOrgUUID` | Lock login method and org | Prevent personal accounts being used for company work |
 
-## สิ่งที่ยังทำไม่ได้ด้วย managed settings
+## What managed settings cannot do yet
 
-**Audit trail ระดับองค์กร** — `managed-settings.json` ไม่มีคีย์สำหรับส่ง log ออกนอกเครื่อง
-ปัจจุบัน `ugt-platform` เขียน audit log ลง `.claude/logs/audit-<วันที่>.jsonl` ในโปรเจค
-(ผ่าน hook `PostToolUse` / `PostToolUseFailure` / `InstructionsLoaded`) ถ้าองค์กรต้องการ
-รวม log ไว้ที่เดียว ต้องเพิ่ม hook ที่ยิง `type: "http"` ไปยัง endpoint กลาง ซึ่งเป็นงาน
-เฟสถัดไปและต้องมีคนดูแล endpoint นั้น
+**Org-wide audit trail** — `managed-settings.json` has no key for shipping logs
+off the machine. Today `ugt-platform` writes audit logs to
+`.claude/logs/audit-<date>.jsonl` inside the project (via the `PostToolUse` /
+`PostToolUseFailure` / `InstructionsLoaded` hooks). Centralizing them requires
+an additional hook posting `type: "http"` to a collector endpoint — a next-phase
+task that needs someone to own that endpoint.
 
-## Checklist สำหรับ IT
+## Checklist for IT
 
-- [ ] เลือกชุด `permissions.deny` ที่จะบังคับ (เริ่มจาก template ข้างบน)
-- [ ] ตัดสินใจว่าจะเปิด `sandbox.enabled` และ `strictKnownMarketplaces` ไหม
-- [ ] เขียน `managed-settings.json` แล้วแจกด้วย MDM / Group Policy / Ansible
-- [ ] ทดสอบบนเครื่องตัวอย่าง: `claude` แล้วดูว่า deny ทำงาน (สั่งสิ่งที่ถูก deny ต้องถูกบล็อก)
-      และ `/plugin` แสดง `ugt-standard` ว่าติดตั้งแล้ว
-- [ ] ประกาศให้ทีมทราบว่ามีกฎอะไรบังคับอยู่ — กฎที่ไม่มีใครรู้จะถูกเข้าใจว่าเป็นบั๊ก
+- [ ] Choose the `permissions.deny` set to enforce (start from the template above)
+- [ ] Decide on `sandbox.enabled` and `strictKnownMarketplaces`
+- [ ] Write `managed-settings.json` and distribute via MDM / Group Policy / Ansible
+- [ ] Test on a sample machine: run `claude`, confirm a denied action is blocked,
+      and `/plugin` shows `ugt-standard` installed
+- [ ] Announce the enforced rules to the team — rules nobody knows about get
+      reported as bugs

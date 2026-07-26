@@ -11,67 +11,83 @@ paths:
   - "components/login-form.tsx"
 ---
 
-<!-- ไฟล์นี้ ugt-auth-setup เป็นเจ้าของ — เขียนทับได้ทั้งไฟล์ตอน /plugin update -->
+<!-- Owned by ugt-auth-setup — may be overwritten wholesale on /plugin update. -->
 
-# กฎ Auth / RBAC (โหลดเมื่อแตะไฟล์ auth, guard, server action)
+# Auth / RBAC rules (loads when touching auth, guards, server actions)
 
-## Cookie prefix — จุดที่พังบ่อยที่สุด
+## Cookie prefix — the single most common breakage
 
-ชื่อ session cookie ต้อง unique ต่อแอปเมื่อหลายแอปอยู่โดเมนเดียวกัน
-derive จาก `NEXT_PUBLIC_BASE_PATH` แล้วใช้ **ให้ตรงกันทั้ง 3 ไฟล์**:
+The session cookie name must be unique per app when several apps share one
+domain. Derive it from `NEXT_PUBLIC_BASE_PATH` and keep it **identical across
+all 3 files**:
 
-| ไฟล์ | ใช้ทำอะไร |
+| File | What uses the prefix |
 | --- | --- |
-| `lib/auth.ts` | `advanced.cookiePrefix` (Better Auth เขียน cookie ด้วยชื่อนี้) |
+| `lib/auth.ts` | `advanced.cookiePrefix` (Better Auth writes cookies with it) |
 | `proxy.ts` | `getSessionCookie(request, { cookiePrefix })` |
-| `lib/actions/auth.ts` | `SESSION_COOKIE_NAME` สำหรับ LDAP set cookie + logout ทั้งสองแบบ |
+| `lib/actions/auth.ts` | `SESSION_COOKIE_NAME` for the LDAP cookie set + both logout actions |
 
-ไม่ตรงกัน = `ERR_TOO_MANY_REDIRECTS` บน production (local ไม่เจอเพราะ http ไม่มี `__Secure-`)
+Mismatch = `ERR_TOO_MANY_REDIRECTS` in production (local never shows it because
+http has no `__Secure-` prefix).
 
-- `BETTER_AUTH_URL` เป็น `https://` → Better Auth เติม `__Secure-` ให้เอง โค้ดเราต้องคำนวณชื่อเดียวกัน
-- **ห้าม hardcode** ชื่อ cookie
+- `BETTER_AUTH_URL` on `https://` → Better Auth prepends `__Secure-` itself;
+  your code must compute the same name
+- **Never hardcode** the cookie name
 
-## API ของ Better Auth ที่เรียกผิดบ่อย
+## Better Auth APIs that get called wrong
 
-- `auth.api.signInEmail(...)` — **ไม่มี** `auth.api.signIn.email(...)`
-- logout: `cookieStore.set(name, '', { maxAge: 0, secure })` — **ห้าม** `cookieStore.delete()`
-  เพราะมันไม่ส่ง `Secure` flag แล้ว browser ปฏิเสธการลบ `__Secure-` cookie (เจอเฉพาะบน https)
-- ลบ DB session ต้อง strip signature ออกจาก token ก่อน (`lastIndexOf('.')`) — DB เก็บ raw token
-- `decodeURIComponent` ค่า cookie จาก `Set-Cookie` ก่อน `cookieStore.set` (ไม่งั้น double-encode → 404)
-- register Keycloak plugin ต้อง guard `env.KEYCLOAK_* &&` ไม่งั้น build ด้วย `SKIP_ENV_VALIDATION=1` crash
-- auth-client: ไม่ส่ง `baseURL`, ส่ง path ผ่าน option `basePath` และอ่าน
-  `process.env.NEXT_PUBLIC_BASE_PATH` ตรง ๆ (อ่านผ่าน `createEnv()` แล้วจะ undefined ใน client bundle)
+- `auth.api.signInEmail(...)` — there is **no** `auth.api.signIn.email(...)`
+- Logout: `cookieStore.set(name, '', { maxAge: 0, secure })` — **never**
+  `cookieStore.delete()`: it omits the `Secure` flag so the browser silently
+  refuses to delete `__Secure-` cookies (https only, so it escapes local testing)
+- Deleting the DB session requires stripping the signature from the token first
+  (`lastIndexOf('.')`) — the DB stores the raw token
+- `decodeURIComponent` the cookie value from `Set-Cookie` before
+  `cookieStore.set` (otherwise double-encoding → 404)
+- Guard Keycloak plugin registration with `env.KEYCLOAK_* &&` or builds with
+  `SKIP_ENV_VALIDATION=1` crash
+- auth-client: pass no `baseURL`; pass the path via the `basePath` option and
+  read `process.env.NEXT_PUBLIC_BASE_PATH` directly (reading through
+  `createEnv()` yields undefined in the client bundle)
 
 ## proxy.ts
 
-- `url.pathname = '/login'` (app-relative) — `clone()` พา basePath มาให้แล้ว ต่อเองจะซ้ำ
-- ต้อง bypass `/_next/` (ไม่งั้น static asset ได้ HTML redirect → `Unexpected token '<'`)
-  และ `/api/health` (ไม่งั้น healthcheck ถูกเด้งไป `/login` → container ไม่ healthy)
-- ที่ edge ใช้ `getSessionCookie()` (เช็คว่ามี cookie เท่านั้น) — `auth.api.getSession()` ต้องใช้ DB ใช้ที่ edge ไม่ได้
+- `url.pathname = '/login'` (app-relative) — `clone()` already carries the
+  basePath; appending it yourself duplicates it
+- Must bypass `/_next/` (else static assets get an HTML redirect →
+  `Unexpected token '<'`) and `/api/health` (else the healthcheck bounces to
+  `/login` → container never healthy)
+- At the edge use `getSessionCookie()` (presence check only) —
+  `auth.api.getSession()` needs the DB and is not edge-safe
 
-## Server Action ที่มีสิทธิ์ — ลำดับตายตัว
+## Privileged Server Actions — fixed order
 
 ```
-1. session   → ไม่มี session ตอบ Unauthorized
-2. permission → hasPermission(perms, PERMISSIONS.X) ไม่ผ่านตอบ Forbidden
-3. action     → domain check แล้วทำงานจริง
-4. audit log  → เขียนหลังสำเร็จ (ไม่ใช่ก่อน) แบบ non-blocking `.catch(() => {})`
+1. session    → no session: return Unauthorized
+2. permission → hasPermission(perms, PERMISSIONS.X) fails: return Forbidden
+3. action     → domain checks, then the real work
+4. audit log  → written after success (not before), non-blocking `.catch(() => {})`
 ```
 
-- permission key เป็น `resource:action` และมาจาก constant ใน `lib/permissions.ts` เท่านั้น
-- โหลด permission ฝั่ง server แล้วส่งเป็น props — ห้ามเรียก `getUserPermissions` จาก Client Component
-- UI ให้ **ซ่อน** ปุ่มที่ไม่มีสิทธิ์ (ไม่ใช่ disable) แต่ UI เป็นแค่ UX — guard ที่ action คือขอบเขตความปลอดภัยจริง
-- role ที่ `isSystem: true` ลบไม่ได้ทุกเส้นทาง
+- Permission keys are `resource:action` and come only from constants in `lib/permissions.ts`
+- Load permissions server-side and pass as props — never call
+  `getUserPermissions` from a Client Component
+- **Hide** buttons the user lacks permission for (don't disable) — but UI is
+  UX only; the action-level guard is the security boundary
+- Roles with `isSystem: true` cannot be deleted through any code path
 
 ## Audit log
 
-- action เป็น `<resource>.<verb>` จาก constant · **ห้ามเก็บ password/secret/token หรือ PII
-  ที่ไม่ควรกว้างใน `detail`** (สิทธิ์อ่าน log มักกว้างกว่าสิทธิ์อ่านข้อมูลต้นทาง)
-- `ActivityLogs` เป็น append-only — ห้าม UPDATE/DELETE จาก app code
-- login/logout ต้องเขียนแบบ non-blocking เสมอ (audit ล้มแล้ว login พังคือความล้มเหลวที่แย่กว่า)
+- Actions are `<resource>.<verb>` from constants · **never store
+  passwords/secrets/tokens or over-broad PII in `detail`** (log readers usually
+  outnumber data readers)
+- `ActivityLogs` is append-only — no UPDATE/DELETE from app code
+- login/logout writes must be non-blocking (an audit failure that breaks login
+  is the worse failure)
 
 ## LDAP
 
-- ใช้ `ldapts` (ห้าม `ldapjs` — deprecated ไม่มี types)
-- bind เป็น UPN (`user@DOMAIN`) และ escape filter ตาม RFC 4515 (backslash ก่อน)
-- session ที่สร้างเองต้อง HMAC-sign ด้วย Web Crypto ก่อน set cookie ไม่งั้น Better Auth reject → redirect loop
+- Use `ldapts` (never `ldapjs` — deprecated, no types)
+- Bind as UPN (`user@DOMAIN`) and escape filters per RFC 4515 (backslash first)
+- Self-created sessions must be HMAC-signed via Web Crypto before setting the
+  cookie, or Better Auth rejects it → redirect loop

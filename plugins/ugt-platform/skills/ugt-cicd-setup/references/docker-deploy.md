@@ -1,22 +1,22 @@
-# Docker Build & Deploy — รายละเอียดเชิงลึก
+# Docker Build & Deploy — deep detail
 
-## A. Two-Image Pattern (build 2 images ทุกครั้ง)
+## A. Two-Image Pattern (build 2 images every run)
 
-| Image                                | Target    | ใช้ทำอะไร                                                            |
-| ------------------------------------ | --------- | -------------------------------------------------------------------- |
-| `__PROJECT_NAME__:<BUILD_NUMBER>-builder` | `builder` | `docker run ... prisma migrate deploy` ตอน deploy (มี `node_modules/` + `prisma/migrations/`) |
-| `__PROJECT_NAME__:latest` + `:<BUILD_NUMBER>` | runner    | image จริงที่ docker-compose deploy (standalone, เล็ก)               |
+| Image | Target | Purpose |
+| --- | --- | --- |
+| `__PROJECT_NAME__:<BUILD_NUMBER>-builder` | `builder` | `docker run ... prisma migrate deploy` at deploy time (has `node_modules/` + `prisma/migrations/`) |
+| `__PROJECT_NAME__:latest` + `:<BUILD_NUMBER>` | runner | the real image docker-compose deploys (standalone, small) |
 
-- Tag ด้วย `BUILD_NUMBER` เสมอ (ไม่ใช่ `latest` เดี่ยว ๆ) → rollback ได้
-- `--network host` จำเป็น: `npm run build` ของ Next.js fetch ของจาก internet
-  (เช่น Google Fonts) — ไม่มี network = build fail
-- ถ้า project **ไม่มี database** → ตัด builder image build + migrate step ทิ้ง
+- Always tag with `BUILD_NUMBER` (not bare `latest`) → rollback possible
+- `--network host` is required: Next.js `npm run build` fetches from the
+  internet (e.g. Google Fonts) — no network = build fails
+- Project **without a database** → cut the builder image build + migrate step
 
-## B. กฎเหล็ก: client-side vars = build args เท่านั้น
+## B. Iron rule: client-side vars = build args only
 
-`NEXT_PUBLIC_*` ถูก **inline เข้า
-JS bundle ตอน compile** — ใส่เป็น runtime `environment:` ใน compose =
-ไม่มีผลใด ๆ (bundle มี `undefined` baked ไปแล้ว)
+`NEXT_PUBLIC_*` is **inlined into the JS bundle at compile time** — setting it
+as runtime `environment:` in compose does nothing (the bundle already has
+`undefined` baked in).
 
 ```yaml
 # ❌ WRONG — ignored by Next.js
@@ -27,85 +27,86 @@ services:
 ```
 
 ```groovy
-// ✅ CORRECT — --build-arg ใน Docker Build stage
+// ✅ CORRECT — --build-arg in the Docker Build stage
 sh """docker build --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} ..."""
 ```
 
-ค่าที่ต่างกันตาม branch (basePath, appUrl) resolve ใน `script {}` ของ stage —
-**ไม่ใช่** global `environment {}` (global = ค่าเดียวทุก branch → dev ได้ค่า prod)
+Branch-dependent values (basePath, appUrl) resolve inside the stage's
+`script {}` — **not** the global `environment {}` (global = one value for every
+branch → dev gets prod values).
 
-ค่า secret ฝั่ง client (เช่น Sentry DSN) → Jenkins Secret Text credential +
-`withCredentials` — ห้าม hardcode ใน Jenkinsfile (โผล่ใน SCM history)
+Client-side secrets (e.g. the Sentry DSN) → Jenkins Secret Text credential +
+`withCredentials` — never hardcoded in the Jenkinsfile (it lands in SCM history).
 
 ## C. Deploy sequence: migrate → compose up → health poll
 
 ```
 cp $ENV_FILE .env                        # Secret File credential → workspace
   ↓
-[DB] docker run --rm ...-builder prisma migrate deploy   # migrate ก่อน deploy
-  ↓                                      # migrate fail = ไม่ deploy (no partial deploy)
+[DB] docker run --rm ...-builder prisma migrate deploy   # migrate BEFORE deploy
+  ↓                                      # migrate fail = no deploy (no partial deploy)
 docker-compose -f <file> up -d --no-build
   ↓
-poll: docker inspect .State.Health.Status  # จนกว่า healthy (max 24×10s = 4 นาที)
+poll: docker inspect .State.Health.Status  # until healthy (max 24×10s = 4 min)
 ```
 
-### DATABASE_URL extraction — ทำไมต้อง `tr -d '"\r'`
+### DATABASE_URL extraction — why `tr -d '"\r'`
 
-`.env` ที่แก้บน Windows มี CRLF และค่าอาจครอบด้วย quotes —
-`docker --env-file` **ไม่** strip ทั้งสองอย่าง ผลคือ DATABASE_URL มี `"` กับ
-`\r` ติดไป → Prisma connection error:
+A `.env` edited on Windows carries CRLF and values may be quoted —
+`docker --env-file` strips **neither**, so DATABASE_URL arrives with `"` and
+`\r` attached → Prisma connection error:
 
 ```sh
 DB_URL=$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
 ```
 
-### `--no-build` — ห้ามลืม
+### `--no-build` — never forget it
 
-ไม่ใส่ = compose rebuild image เองจาก `build:` section **โดยไม่มี**
-`NEXT_PUBLIC_*` build args → ได้ bundle พัง ๆ deploy ทับของดี
+Omit it and compose rebuilds the image from its `build:` section **without**
+the `NEXT_PUBLIC_*` build args → a broken bundle deployed over a good one.
 
-### Health poll — ใช้ `docker inspect` ไม่ใช่ wget จาก Jenkins
+### Health poll — `docker inspect`, not wget from Jenkins
 
-Poll `.State.Health.Status` ของ container → ผลตรงกับ HEALTHCHECK จริงของ
-container เอง (wget จาก Jenkins อาจ false positive เรื่อง network/proxy)
-`unhealthy` = exit 1 ทันที ไม่รอครบ 4 นาที
+Poll the container's own `.State.Health.Status` → matches the container's real
+HEALTHCHECK (wget from Jenkins can false-positive on network/proxy issues).
+`unhealthy` = exit 1 immediately, don't wait out the 4 minutes.
 
 ## D. Compose conventions
 
-| Convention                        | เหตุผล                                                                  |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| `pull_policy: never`              | image build local — ไม่งั้น compose พยายาม pull `latest` จาก Docker Hub |
-| `ports: '${APP_PORT:-<port>}:3000'` | host port override ได้จาก `.env` — กัน port ชนบน host เดียวกัน          |
-| แยก compose file prod/dev         | ชื่อ image/container/port/healthcheck path ต่างกัน                      |
-| `restart: unless-stopped`         | container ฟื้นเองหลัง host reboot                                       |
-| resource limits (cpu/memory)      | กัน container เดียวกิน host                                             |
-| `proxy-network` external          | ทุก app แชร์ network เดียวกับ reverse proxy (สร้างครั้งเดียวบน host)    |
-| logging json-file 10m×3           | กัน log โต unbounded                                                    |
+| Convention | Why |
+| --- | --- |
+| `pull_policy: never` | image is built locally — otherwise compose tries to pull `latest` from Docker Hub |
+| `ports: '${APP_PORT:-<port>}:3000'` | host port overridable from `.env` — avoids port clashes on a shared host |
+| separate prod/dev compose files | image/container names, ports, healthcheck paths differ |
+| `restart: unless-stopped` | container recovers after a host reboot |
+| resource limits (cpu/memory) | one container can't starve the host |
+| `proxy-network` external | every app shares one network with the reverse proxy (created once on the host) |
+| logging json-file 10m×3 | logs can't grow unbounded |
 
 ## E. Healthcheck gotchas
 
-- **`127.0.0.1` ไม่ใช่ `localhost`** — Alpine resolve `localhost` เป็น `::1`
-  (IPv6) แต่ Node ฟัง IPv4 → "Connection refused" ทั้งที่ app ปกติ
-- **port 3000 เสมอ** (container-internal) — ไม่ใช่ host port
-- **path hardcode** ใน Dockerfile `HEALTHCHECK` — env var substitution ใช้ใน
-  syntax นั้นไม่ได้; compose healthcheck ของแต่ละ env override Dockerfile อีกที
-  (dev compose ใช้ dev basePath)
-- `start_period: 60s` — ให้เวลา app boot ก่อนเริ่มนับ fail
+- **`127.0.0.1`, not `localhost`** — Alpine resolves `localhost` to `::1`
+  (IPv6) while Node listens on IPv4 → "Connection refused" though the app is fine
+- **Always port 3000** (container-internal) — never the host port
+- **Path is hardcoded** in the Dockerfile `HEALTHCHECK` — env-var substitution
+  doesn't work in that syntax; each env's compose healthcheck overrides the
+  Dockerfile (dev compose uses the dev basePath)
+- `start_period: 60s` — give the app time to boot before failures count
 
-## F. Dockerfile gotchas (ห้ามลบ)
+## F. Dockerfile gotchas (never delete)
 
-| Directive                   | Stage   | เหตุผล                                                                                     |
-| --------------------------- | ------- | ------------------------------------------------------------------------------------------ |
-| `ENV HUSKY=0`               | deps    | `npm ci` รัน `prepare` → husky; ไม่มี `.git` ใน Docker → fail                             |
-| `ENV CI=true`               | builder | next.config gate standalone output ด้วย `CI` — ไม่มี = `.next/standalone/` ไม่ถูกสร้าง → runner `COPY` fail |
-| `ENV SKIP_ENV_VALIDATION=1` | builder | env schema validate ตอน import; runtime secrets ไม่มีตอน build                            |
-| `RUN npx prisma generate`   | builder | [DB] Prisma client ต้อง generate ใหม่ใน image (.dockerignore ตัด generated client ออก)     |
-| non-root user (`nextjs`)    | runner  | security baseline                                                                          |
+| Directive | Stage | Why |
+| --- | --- | --- |
+| `ENV HUSKY=0` | deps | `npm ci` runs `prepare` → husky; no `.git` in Docker → fail |
+| `ENV CI=true` | builder | next.config gates standalone output on `CI` — without it `.next/standalone/` never exists → runner `COPY` fails |
+| `ENV SKIP_ENV_VALIDATION=1` | builder | env schema validates at import; runtime secrets don't exist at build time |
+| `RUN npx prisma generate` | builder | [DB] the Prisma client must be regenerated inside the image (.dockerignore excludes the generated client) |
+| non-root user (`nextjs`) | runner | security baseline |
 
-> `SKIP_ENV_VALIDATION` อยู่ได้เฉพาะ **CI + build stage** — ห้ามตั้งใน
-> production container (จะข้าม startup validation, พลาด secret หายไม่รู้ตัว)
+> `SKIP_ENV_VALIDATION` belongs to **CI + build stages only** — never in the
+> production container (it would skip startup validation and mask missing secrets).
 
-## G. Reverse proxy + basePath (แบบ subpath ต่อ app)
+## G. Reverse proxy + basePath (subpath per app)
 
 ```
 https://<domain>__BASE_PATH_PROD__  ← nginx (TLS termination)
@@ -115,12 +116,13 @@ http://127.0.0.1:__PORT_PROD____BASE_PATH_PROD__
 container (port 3000, basePath = __BASE_PATH_PROD__)
 ```
 
-ข้อควรระวังฝั่ง env vars:
+Env-var caveats:
 
-- URL ของ auth library (cookie domain / OAuth callback) มักต้องเป็น
-  **bare origin ไม่มี basePath** (`https://<domain>`) — ใส่ basePath แล้ว
-  cookie/callback ผิด domain
-- `NEXT_PUBLIC_APP_URL` = URL เต็มรวม basePath (ใช้ใน links/sitemap)
-- ถ้า service ภายในใช้ internal CA cert ที่ Node ไม่ trust →
-  `NODE_TLS_REJECT_UNAUTHORIZED: '0'` ใน compose ได้ **เฉพาะ intranet ปิด
-  ทั้งหมด** — ห้ามใช้ถ้า app ออก internet ได้ (ปิด TLS verification ทั้งระบบ)
+- Auth-library URLs (cookie domain / OAuth callback) usually need the
+  **bare origin without the basePath** (`https://<domain>`) — adding the
+  basePath breaks the cookie/callback domain
+- `NEXT_PUBLIC_APP_URL` = the full URL including basePath (used in links/sitemap)
+- If internal services use an internal-CA cert Node doesn't trust →
+  `NODE_TLS_REJECT_UNAUTHORIZED: '0'` in compose is acceptable **only on a
+  fully closed intranet** — never if the app can reach the internet (it
+  disables TLS verification globally)

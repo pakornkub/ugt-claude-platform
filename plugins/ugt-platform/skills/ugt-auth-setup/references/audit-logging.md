@@ -1,25 +1,32 @@
-# Audit Logging — ActivityLogs (org contract ข้อ 4)
+# Audit Logging — ActivityLogs (org contract item 4)
 
-ตาราง `ActivityLogs` เป็น **append-only** บันทึกว่าใครทำอะไรเมื่อไหร่ ทุกโปรเจคต้องมี
-schema อยู่ใน `assets/schema-auth.prisma` แล้ว — ไฟล์นี้อธิบายกฎการเขียน อ่าน และเก็บ
+The `ActivityLogs` table is **append-only**: who did what, when. Every project
+must have it. The schema ships in `assets/schema-auth.prisma` — this file
+covers the write, read, and retention rules.
 
 ## Quick Rules
 
-- เขียน log **ทุกครั้ง** ที่มี privileged/sensitive action: export ข้อมูล, เปลี่ยน setting,
-  create/update/delete user, จัดการ role/permission, login/logout
-- **เขียนหลังงานหลักสำเร็จเท่านั้น** — ไม่ใช่ก่อน (ไม่งั้นได้ log ของงานที่ fail)
-- **audit log ล้มต้องไม่ทำให้งานหลักล้ม** — path ที่ critical ใช้ fire-and-forget + `.catch(() => {})`
-- **ห้ามเก็บ password / secret / token / PII ที่ไม่ mask ใน `detail`** — audit log
-  ที่เก็บ payload มั่วคือช่องรั่วข้อมูลส่วนบุคคล และคนที่มีสิทธิ์อ่าน log มักกว้างกว่าคนที่มีสิทธิ์อ่านข้อมูลต้นทาง
-- action เป็น `<resource>.<verb>` ตัวเล็กทั้งหมด คั่นด้วยจุด — และประกาศเป็น **constant** ไม่ใช่ raw string
-- **export route เป็นข้อยกเว้น**: log **ก่อน** เริ่ม stream เพราะหยุด stream กลางทางไม่ได้
+- Write a log entry for **every** privileged/sensitive action: data export,
+  settings change, user create/update/delete, role/permission management,
+  login/logout
+- **Write only after the primary operation succeeds** — never before (or you
+  log operations that failed)
+- **An audit-log failure must never fail the primary operation** — critical
+  paths use fire-and-forget + `.catch(() => {})`
+- **Never store passwords / secrets / tokens / unmasked PII in `detail`** — an
+  audit log with careless payloads is a personal-data leak, and log readers
+  usually outnumber the people allowed to read the source data
+- Actions are `<resource>.<verb>`, all lowercase, dot-separated — declared as
+  **constants**, never raw strings
+- **Export routes are the one exception**: log **before** streaming starts,
+  because a stream can't be interrupted once begun
 
-## Schema (มาใน `assets/schema-auth.prisma` แล้ว)
+## Schema (already in `assets/schema-auth.prisma`)
 
 ```prisma
 model activityLog {
   id        Int      @id @default(autoincrement()) @map("Id")
-  userId    String   @map("UserId")   // ไม่มี FK — user ถูกลบได้ ประวัติต้องอยู่
+  userId    String   @map("UserId")   // no FK — users can be deleted; history must survive
   action    String   @map("Action")   // dot-namespaced: "users.delete", "export.excel"
   detail    String?  @db.NVarChar(Max) @map("Detail")  // JSON string, nullable
   createdAt DateTime @default(now()) @map("CreatedAt")
@@ -28,11 +35,13 @@ model activityLog {
 }
 ```
 
-- **ทำไมไม่มี FK บน `userId`** — ลบ user ได้โดยไม่เสียประวัติ เก็บเป็น string
-  แล้วไป enrich ชื่อตอนอ่านด้วย batch lookup
-- **ทำไม `NVarChar(Max)`** — ขนาด payload เดาไม่ได้ (filter, จำนวนแถว, array) ไม่ต้องการให้ถูกตัด
-- ตารางนี้เป็นข้อยกเว้นของกฎ audit columns มาตรฐาน (ไม่มี `UpdatedAt`/`IsDeleted`)
-  เพราะ append-only — **ห้าม UPDATE หรือ DELETE จาก app code**
+- **Why no FK on `userId`** — users can be deleted without losing history;
+  store the string and enrich the name at read time via batch lookup
+- **Why `NVarChar(Max)`** — payload size is unpredictable (filters, row counts,
+  arrays); avoid truncation
+- This table is exempt from the standard audit-column rule (no
+  `UpdatedAt`/`IsDeleted`) because it is append-only — **never UPDATE or DELETE
+  it from app code**
 
 ## Action naming
 
@@ -52,20 +61,21 @@ export const AUDIT_ACTIONS = {
 } as const;
 ```
 
-สี่ตัวแรกเป็น**ข้อบังคับขององค์กร** (contract ข้อ 4) — `assets/lib-auth.ts` และ
-`assets/lib-actions-auth.ts` เขียนให้แล้ว · ที่เหลือเพิ่มตามโดเมนของโปรเจค
+The first four are **org-mandated** (contract item 4) — `assets/lib-auth.ts`
+and `assets/lib-actions-auth.ts` already write them. Add the rest per the
+project's domain.
 
 ```ts
-// ✅ dot-namespaced ชัดเจน
+// ✅ dot-namespaced, precise
 'users.delete'  ·  'export.excel'  ·  'settings.update'
 
-// ❌ กำกวม / ไม่ namespace
-'export'  ·  'update'  ·  'เปลี่ยน setting'
+// ❌ vague / un-namespaced
+'export'  ·  'update'  ·  'changed settings'
 ```
 
 ## Write pattern
 
-### แบบ sequential (default) — log หลังงานหลักสำเร็จ
+### Sequential (default) — log after the primary operation succeeds
 
 ```ts
 export async function deleteUserAction(userId: string) {
@@ -77,10 +87,10 @@ export async function deleteUserAction(userId: string) {
     return { success: false, error: 'Forbidden' };
   }
 
-  // 1. งานหลักก่อน
+  // 1. Primary operation first
   await prisma.user.delete({ where: { id: userId } });
 
-  // 2. audit log หลังสำเร็จ
+  // 2. Audit log after success
   await prisma.activityLog.create({
     data: {
       userId: session.user.id,
@@ -94,30 +104,31 @@ export async function deleteUserAction(userId: string) {
 ```
 
 ```ts
-// ❌ สลับลำดับ — ได้ log ของงานที่ยังไม่เกิด (หรือ fail)
+// ❌ reversed order — logs an operation that hasn't happened (or failed)
 await prisma.activityLog.create({ ... });
 await prisma.user.delete({ ... });
 ```
 
-### แบบ non-blocking — path ที่ audit ต้องไม่บล็อกผู้ใช้
+### Non-blocking — paths where audit must never block the user
 
 ```ts
 const [result] = await Promise.all([
   prisma.appSetting.upsert({ ... }),
   prisma.activityLog
     .create({ data: { userId: session.user.id, action: AUDIT_ACTIONS.SETTINGS_UPDATE, detail } })
-    .catch(() => {}), // ← กลืน error โดยตั้งใจ
+    .catch(() => {}), // ← swallow intentionally
 ]);
 ```
 
 ```ts
-// ❌ ไม่ await และไม่ catch → unhandled promise rejection
+// ❌ no await and no catch → unhandled promise rejection
 prisma.activityLog.create({ ... });
 ```
 
-login/logout ทุกเส้นทางต้องใช้แบบ non-blocking — audit log ล้มแล้ว login พังคือความล้มเหลวที่แย่กว่า
+Every login/logout path must use the non-blocking form — an audit failure that
+breaks login is the worse failure.
 
-### Export route — log ก่อน stream
+### Export routes — log before streaming
 
 ```ts
 await prisma.activityLog.create({
@@ -130,30 +141,32 @@ await prisma.activityLog.create({
 return new Response(buffer, { headers: { 'Content-Type': '...' } });
 ```
 
-## `detail` payload — ใส่อะไรได้/ไม่ได้
+## The `detail` payload — allowed and forbidden
 
-เก็บเป็น JSON ที่มีบริบทพอให้สืบย้อนได้ว่าเกิดอะไรขึ้น แต่ไม่ใช่สำเนาของข้อมูลเอง
+Structured JSON with enough context to reconstruct what happened — never a copy
+of the data itself.
 
-| ประเภท action | field ที่ควรมี | ห้ามมี |
+| Action type | Recommended fields | Forbidden |
 | --- | --- | --- |
-| Export | `{ filters, sort, rowCount }` | ตัวข้อมูลที่ export |
-| เปลี่ยน setting | `{ previousValue, newValue }` | secret/connection string |
-| จัดการ user | `{ targetUserId, targetEmail }` | password, password hash, token |
-| Login | `{ method: 'sso' \| 'ldap' \| 'local' }` | password ที่กรอกผิด, session token |
+| Export | `{ filters, sort, rowCount }` | the exported data itself |
+| Settings change | `{ previousValue, newValue }` | secrets/connection strings |
+| User management | `{ targetUserId, targetEmail }` | passwords, hashes, tokens |
+| Login | `{ method: 'sso' \| 'ldap' \| 'local' }` | the mistyped password, session tokens |
 
 ```ts
-// ✅ มีโครงสร้าง สืบย้อนได้
+// ✅ structured, reproducible
 detail: JSON.stringify({ filters: { status: 'active' }, rowCount: 42 });
 
-// ❌ เป็นประโยคเปล่า สืบอะไรไม่ได้
-detail: 'ผู้ใช้ export ข้อมูลด้วย filter บางอย่าง';
+// ❌ prose, untraceable
+detail: 'User exported data with some filters';
 
-// ❌ มีข้อมูลที่ห้ามเก็บ
+// ❌ forbidden content
 detail: JSON.stringify({ password: 'abc123' });
 ```
 
-**PDPA/ความเป็นส่วนตัว**: ก่อนใส่ field ที่เป็นข้อมูลบุคคล ถามว่า "ถ้าคนที่มีสิทธิ์
-`audit-logs:read` เห็น field นี้ ยอมรับได้ไหม" — สิทธิ์อ่าน log มักกว้างกว่าสิทธิ์อ่านข้อมูลต้นทาง
+**PDPA/privacy check**: before adding a personal-data field, ask "would it be
+acceptable for everyone holding `audit-logs:read` to see this field?" — log
+access is usually broader than source-data access.
 
 ## Viewer API
 
@@ -171,14 +184,14 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10));
   const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit') ?? '20', 10)));
 
-  // ค้นด้วยชื่อผู้ใช้: resolve เป็น userId ก่อน (อย่า LIKE บน userId)
+  // Username search: resolve to userIds first (never LIKE on userId)
   let userIdFilter: string[] | undefined;
   if (username) {
     const matching = await prisma.user.findMany({
       where: { OR: [{ name: { contains: username } }, { ldapUsername: { contains: username } }] },
       select: { id: true },
     });
-    // sentinel: ถ้าไม่เจอใครเลย ต้องบังคับให้ผลลัพธ์ว่าง
+    // Sentinel: when nobody matches, the result must be forced empty
     userIdFilter = matching.length > 0 ? matching.map((u) => u.id) : ['__no_match__'];
   }
 
@@ -187,7 +200,7 @@ export async function GET(req: NextRequest) {
     prisma.activityLog.count({ where }),
   ]);
 
-  // enrich ชื่อผู้ใช้แบบ batch — ห้าม N+1
+  // Enrich user names in one batch — no N+1
   const uniqueUserIds = [...new Set(logs.map((l) => l.userId))];
   const users = await prisma.user.findMany({
     where: { id: { in: uniqueUserIds } },
@@ -207,32 +220,33 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-**ทำไมต้องมี sentinel `'__no_match__'`** — ถ้าค้นชื่อแล้วไม่เจอใคร แล้วส่ง
-`userId: { in: [] }` ผลที่ได้อาจกลายเป็น "ไม่กรอง" แล้วคืนทุกแถว การใส่ id ที่ไม่มีจริง
-บังคับให้ผลลัพธ์ว่างอย่างถูกต้อง
+**Why the `'__no_match__'` sentinel** — when a username search matches nobody
+and you pass `userId: { in: [] }`, some query paths treat that as "no filter"
+and return every row. A non-existent id forces a correctly empty result.
 
-Permission ที่ต้องมีใน `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'`
-(guard ทั้งหน้า viewer และ API route — ดู `rbac.md`)
+Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'`
+(guards both the viewer page and the API route — see `rbac.md`).
 
 ## Retention
 
-- กำหนดระยะเก็บขั้นต่ำไว้ในเอกสารโปรเจค (เช่น 180 วัน)
-- schema ไม่มี `expiresAt`/soft-delete → ใช้ scheduled job ฝั่ง DB ลบของเก่า:
+- Define a minimum retention window in the project docs (e.g. 180 days)
+- The schema has no `expiresAt`/soft-delete → use a DB-side scheduled job:
 
 ```sql
 -- SQL Agent job
 DELETE FROM ActivityLogs WHERE CreatedAt < DATEADD(day, -180, GETDATE());
 ```
 
-- **ห้ามลบแถวจาก application code**
+- **Never delete rows from application code**
 
-### Viewer API ต้องบังคับ cutoff ใน WHERE ด้วย
+### The viewer API must also enforce the cutoff in its WHERE clause
 
-job ลบเป็นรอบ ๆ แต่ระหว่างรอบยังมีแถวเก่าค้างอยู่ → API ต้องกรองที่ query time ด้วย
-ไม่งั้นข้อมูลที่ประกาศว่า "เก็บ 180 วัน" จะถูกอ่านได้นานกว่านั้น:
+The cleanup job runs on a schedule — between runs, stale rows still exist. The
+API must filter at query time too, or data declared "kept 180 days" stays
+readable longer:
 
 ```ts
-// ✅ API บังคับเพดาน 180 วันเองไม่ว่า job จะรันเมื่อไหร่
+// ✅ the API enforces the 180-day floor regardless of the job schedule
 const retentionCutoff = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 const where = {
   createdAt: {
@@ -241,16 +255,16 @@ const where = {
   },
 };
 
-// ❌ ไม่มีเพดาน → อ่านแถวเก่าได้จนกว่า job จะรัน
+// ❌ no floor → old rows queryable until the job happens to run
 const where = { createdAt: { gte: fromDate ? new Date(fromDate) : undefined } };
 ```
 
 ## Checklist
 
-- [ ] เขียน log **หลัง** งานหลักสำเร็จ (ยกเว้น export route ที่ log ก่อน stream)
-- [ ] path ที่ critical (login/logout) ใช้ `.catch(() => {})` ไม่ใช่ `await` เปล่า
-- [ ] action ทุกตัวมาจาก constant ใน `lib/audit-actions.ts` ไม่มี raw string
-- [ ] `detail` เป็น JSON ที่มีโครงสร้าง · ไม่มี password/secret/token · ไม่มี PII ที่ไม่ควรกว้าง
-- [ ] Viewer API: guard ด้วย `audit-logs:read` · sentinel เมื่อค้นไม่เจอ · enrich ชื่อแบบ batch · บังคับ retention cutoff
-- [ ] ไม่มีโค้ดที่ UPDATE หรือ DELETE `ActivityLogs`
-- [ ] มี scheduled job ลบของเก่า และระยะเก็บถูกบันทึกไว้ในเอกสารโปรเจค
+- [ ] Logs written **after** the primary operation succeeds (except export routes, which log before streaming)
+- [ ] Critical paths (login/logout) use `.catch(() => {})`, not a bare `await`
+- [ ] Every action comes from a constant in `lib/audit-actions.ts` — no raw strings
+- [ ] `detail` is structured JSON · no passwords/secrets/tokens · no over-broad PII
+- [ ] Viewer API: guarded by `audit-logs:read` · sentinel on empty username search · batch name enrichment · retention cutoff enforced
+- [ ] No code UPDATEs or DELETEs `ActivityLogs`
+- [ ] A scheduled cleanup job exists and the retention window is documented in the project

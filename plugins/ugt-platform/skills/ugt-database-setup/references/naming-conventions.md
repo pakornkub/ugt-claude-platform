@@ -1,11 +1,11 @@
-# Naming Conventions — SQL Server (ฉบับเต็ม)
+# Naming Conventions — SQL Server (full version)
 
-มาตรฐานการตั้งชื่อ object ทุกชนิดใน database ขององค์กร ใช้ได้กับทุก stack —
-ตัวอย่าง Prisma ประกอบเพราะเป็น reference implementation
+Naming standards for every object type in org databases. The Prisma examples
+illustrate the reference implementation.
 
-## 1. ตาราง (Tables)
+## 1. Tables
 
-**DB จริง: PascalCase พหูพจน์ — Prisma model: camelCase เอกพจน์ + `@@map()` เสมอ**
+**Real DB: PascalCase plural — Prisma model: camelCase singular + `@@map()` always**
 
 ```prisma
 model rolePermission {
@@ -14,28 +14,31 @@ model rolePermission {
 }
 ```
 
-| ✅                       | ❌                        |
-| ------------------------ | ------------------------- |
-| `@@map("Users")`         | `@@map("user")`           |
+| ✅ | ❌ |
+| --- | --- |
+| `@@map("Users")` | `@@map("user")` |
 | `@@map("RolePermissions")` | `@@map("rolePermission")` |
-| `@@map("HolidayItems")`  | `@@map("holiday_items")`  |
+| `@@map("HolidayItems")` | `@@map("holiday_items")` |
 
-### ตาราง read-only ที่ระบบภายนอก populate
+### Read-only tables populated by external systems
 
-ตารางที่ **SQL Server Agent Job / ETL / SP ภายนอก** เป็นคน INSERT (app อ่านอย่างเดียว)
-ใช้ prefix เฉพาะกลุ่ม เช่น `<EXT>_` (เลือก prefix สั้น ๆ ประจำโปรเจคหนึ่งตัวแล้วคงที่):
+Tables that a **SQL Server Agent Job / ETL / external SP** INSERTs into (the
+app only reads) take a group prefix such as `<EXT>_` (pick one short prefix per
+project and keep it fixed):
 
-- `<EXT>_WeeklySummary`, `<EXT>_AccessDetail` → SELECT-only จากฝั่ง app
-- ตารางที่ app เป็นเจ้าของ (เขียนเองได้) → **ไม่มี prefix** — `HolidayLists`, `AppSettings`
-- prefix คือสัญญาณ ownership: เห็น prefix = ห้ามเขียน, ต้องมีตาราง override ฝั่ง app ถ้าจะแก้ค่า
+- `<EXT>_WeeklySummary`, `<EXT>_AccessDetail` → SELECT-only from the app side
+- App-owned tables (the app may write) → **no prefix** — `HolidayLists`, `AppSettings`
+- The prefix is an ownership signal: see the prefix = never write; to adjust a
+  value, create an app-side override table
 
-**Append-only override pattern** (เมื่อ source read-only ถูก re-populate ทุกวัน):
-สร้างตาราง `*Overrides` ฝั่ง app, ไม่ update/delete แถวเดิม — insert ใหม่เสมอ,
-ตอนอ่านให้ resolver กลางเลือกแถว `CreatedAt` ล่าสุด overlay ทับค่า raw
+**Append-only override pattern** (when the read-only source is re-populated daily):
+create an app-side `*Overrides` table; never update/delete existing rows —
+always insert a new one; at read time a central resolver picks the latest
+`CreatedAt` row and overlays it on the raw value.
 
-## 2. คอลัมน์ (Columns)
+## 2. Columns
 
-**DB จริง: PascalCase — Prisma field: camelCase + `@map()` ทุก field**
+**Real DB: PascalCase — Prisma field: camelCase + `@map()` on every field**
 
 ```prisma
 model user {
@@ -47,74 +50,79 @@ model user {
 }
 ```
 
-### Audit columns มาตรฐาน
+### Standard audit columns
 
-ตาราง master / transaction ที่ app เป็นเจ้าของ ต้องมีชุดนี้:
+App-owned master / transaction tables must carry this set:
 
-| คอลัมน์     | Type (Prisma)                          | หมายเหตุ                                  |
-| ----------- | -------------------------------------- | ----------------------------------------- |
-| `Id`        | `String @id @default(cuid())` หรือ `Int @id @default(autoincrement())` | PK เสมอชื่อ `Id` |
-| `CreatedAt` | `DateTime @default(now())`             |                                           |
-| `UpdatedAt` | `DateTime @updatedAt`                  |                                           |
-| `CreatedBy` | `String`                               | user id / login ของผู้สร้าง               |
-| `UpdatedBy` | `String?`                              | nullable — แถวใหม่ยังไม่เคยแก้            |
-| `IsActive`  | `Boolean @default(true)`               | เปิด/ปิดการใช้งาน (master data)           |
-| `IsDeleted` | `Boolean @default(false)`              | soft delete — ห้าม hard delete ข้อมูลที่ต้องเก็บประวัติ |
+| Column | Type (Prisma) | Notes |
+| --- | --- | --- |
+| `Id` | `String @id @default(cuid())` or `Int @id @default(autoincrement())` | PK is always named `Id` |
+| `CreatedAt` | `DateTime @default(now())` | |
+| `UpdatedAt` | `DateTime @updatedAt` | |
+| `CreatedBy` | `String` | user id / login of the creator |
+| `UpdatedBy` | `String?` | nullable — a new row has never been edited |
+| `IsActive` | `Boolean @default(true)` | enable/disable (master data) |
+| `IsDeleted` | `Boolean @default(false)` | soft delete — never hard-delete data that needs history |
 
-ตาราง key/value หรือ log ที่ semantics ไม่ครบ (เช่น settings ที่มีแต่การแก้)
-ตัดเหลือเฉพาะที่มีความหมายได้ (`UpdatedAt`/`UpdatedBy`) — แต่ห้ามเปลี่ยนชื่อ
+Key/value or log tables whose semantics don't cover the full set (e.g. settings
+that only ever get edited) may trim to the meaningful subset
+(`UpdatedAt`/`UpdatedBy`) — but never rename the columns.
 
-### T-SQL reserved words — ห้ามใช้เป็นชื่อคอลัมน์
+### T-SQL reserved words — never as column names
 
-แก้โดย **เติมคำขยาย** ไม่ใช่ใส่ `[bracket]` หนีไปเรื่อย ๆ ตัวอย่างที่เจอบ่อย:
+Fix by **adding a qualifier**, not by hiding behind `[brackets]`. Frequent
+offenders:
 
-| Reserved       | ใช้แทน (ตามบริบท)              | เหตุผล                          |
-| -------------- | ------------------------------ | ------------------------------- |
-| `key`          | `SettingKey`, `BucketKey`, `PermKey` | `KEY` เป็น reserved keyword |
-| `value`        | `SettingValue`, `VerificationValue` | `VALUE` semi-reserved      |
-| `group`        | `GroupName`                    | `GROUP` (GROUP BY)              |
-| `count`        | `RequestCount`, `ItemCount`    | `COUNT` เป็น aggregate function |
-| `order`        | `SortOrder`                    | `ORDER` (ORDER BY)              |
-| `day`, `month`, `year` (ระวัง) | `DayOfMonth`, `MonthName` | `DAY()`/`MONTH()`/`YEAR()` เป็น built-in function — `Year` เดี่ยว ๆ ใช้ได้แต่ถ้าคู่กับชื่อ function อื่นให้เติมคำขยาย |
-| `user`, `session` (ชื่อตาราง) | ใช้ได้เมื่อ quote ผ่าน Prisma แต่พหูพจน์ (`Users`, `Sessions`) เลี่ยงชนได้ในตัว | |
+| Reserved | Use instead (per context) | Why |
+| --- | --- | --- |
+| `key` | `SettingKey`, `BucketKey`, `PermKey` | `KEY` is a reserved keyword |
+| `value` | `SettingValue`, `VerificationValue` | `VALUE` is semi-reserved |
+| `group` | `GroupName` | `GROUP` (GROUP BY) |
+| `count` | `RequestCount`, `ItemCount` | `COUNT` is an aggregate function |
+| `order` | `SortOrder` | `ORDER` (ORDER BY) |
+| `day`, `month`, `year` (careful) | `DayOfMonth`, `MonthName` | `DAY()`/`MONTH()`/`YEAR()` are built-in functions — bare `Year` is fine, but qualify when paired with another function name |
+| `user`, `session` (table names) | Fine when quoted via Prisma, but plurals (`Users`, `Sessions`) avoid the clash altogether | |
 
-ใน schema ให้คอมเมนต์กำกับทุกจุดที่เลี่ยง reserved word:
+In the schema, annotate every reserved-word workaround:
 
 ```prisma
 key   String @unique @map("PermKey")   // KEY is T-SQL reserved
 group String         @map("GroupName") // GROUP is T-SQL reserved
 ```
 
-### Type mapping ที่ใช้ประจำ
+### Common type mappings
 
-| ข้อมูล                          | Prisma attribute            |
-| ------------------------------- | --------------------------- |
-| ข้อความยาว / JSON blob          | `@db.NVarChar(Max)`         |
-| ข้อความไทย (จำกัดความยาว)       | `@db.NVarChar(200)` ฯลฯ — ใช้ `NVarChar` เสมอเมื่อมีภาษาไทย |
-| รหัส/code                       | `@db.NVarChar(50)`          |
-| ทศนิยม (วัน/ชั่วโมง)            | `@db.Decimal(5, 1)` ตาม precision จริง |
-| วันที่ล้วน (ไม่มีเวลา)          | `DateTime @db.Date`         |
+| Data | Prisma attribute |
+| --- | --- |
+| Long text / JSON blob | `@db.NVarChar(Max)` |
+| Thai text (bounded length) | `@db.NVarChar(200)` etc. — always `NVarChar` when Thai is involved |
+| Codes | `@db.NVarChar(50)` |
+| Decimals (days/hours) | `@db.Decimal(5, 1)` per actual precision |
+| Date only (no time) | `DateTime @db.Date` |
 
 ## 3. Stored Procedures
 
-- Prefix **`usp_`** + PascalCase บอก action: `usp_RecalculateWeeklySummary`, `usp_DumpAccessDetail`
-- ห้ามใช้ `sp_` (ชนกับ system procedures ของ SQL Server และโดน scan master DB ก่อน)
-- SP ที่อ่าน config จากตาราง app: อ่านผ่านคอลัมน์จริง เช่น `SELECT SettingValue FROM dbo.AppSettings WHERE [SettingKey] = '...'` — ชื่อคอลัมน์ต้อง sync กับ `@map()` ใน schema
+- Prefix **`usp_`** + PascalCase naming the action: `usp_RecalculateWeeklySummary`, `usp_DumpAccessDetail`
+- Never `sp_` (collides with SQL Server system procedures and gets the master
+  DB scanned first)
+- SPs reading app-table config must use the real column names, e.g.
+  `SELECT SettingValue FROM dbo.AppSettings WHERE [SettingKey] = '...'` —
+  column names must stay in sync with `@map()` in the schema
 
 ## 4. Functions / Views
 
-| ชนิด                  | Prefix | ตัวอย่าง                     |
-| --------------------- | ------ | ---------------------------- |
-| Scalar / table-valued function | `fn`   | `fnGetScheduleActual(@EmpCode)` |
-| View                  | `vw`   | `vwEmployee`                 |
+| Kind | Prefix | Example |
+| --- | --- | --- |
+| Scalar / table-valued function | `fn` | `fnGetScheduleActual(@EmpCode)` |
+| View | `vw` | `vwEmployee` |
 
-View บน linked server = read-only เสมอ (ดู `raw-sql-and-sp.md`)
+Views on a linked server are always read-only (see `raw-sql-and-sp.md`).
 
-## 5. Index / Constraint (ตอนเขียน migration SQL เอง)
+## 5. Indexes / Constraints (when writing migration SQL by hand)
 
-ตามรูปแบบที่ Prisma generate ให้ เพื่อความสม่ำเสมอ:
+Follow the shapes Prisma generates, for consistency:
 
 - PK: `<Table>_pkey` — `CONSTRAINT [HolidayLists_pkey] PRIMARY KEY CLUSTERED ([Id])`
 - Default: `<Table>_<Column>_df` — `CONSTRAINT [HolidayLists_IsActive_df] DEFAULT 0`
 - FK: `<Table>_<Column>_fkey`
-- Filtered unique index (เขียนมือ): `UX_<Table>_<Columns>_<เงื่อนไข>`
+- Filtered unique index (hand-written): `UX_<Table>_<Columns>_<condition>`

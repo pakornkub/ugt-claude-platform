@@ -16,88 +16,96 @@ description: >
   repo, not in one project's notes.
 ---
 
-# UGT Checkpoint — บันทึก state ให้ session หน้าและให้คนอื่นในทีม
+# UGT Checkpoint — record state for the next session and for teammates
 
-## ทำไมต้องมีไฟล์นี้ ในเมื่อ Claude มี auto memory อยู่แล้ว
+## Why these files exist when Claude already has auto memory
 
-auto memory (`~/.claude/projects/<repo>/memory/`) เป็นของ **เครื่องคนนั้นคนเดียว** —
-doc ระบุชัดว่า *"Auto memory is machine-local... Files are not shared across machines"*
-ดังนั้นสิ่งที่ทีมต้องรู้ร่วมกันต้องอยู่ในไฟล์ที่ commit ไปกับ repo
+Auto memory (`~/.claude/projects/<repo>/memory/`) belongs to **one person's
+machine** — the docs state it plainly: *"Auto memory is machine-local... Files
+are not shared across machines"*. Anything the team must know together has to
+live in files committed to the repo.
 
-| ที่เก็บ | เนื้อหา | ใครเห็น |
+| Location | Contents | Visible to |
 | --- | --- | --- |
-| `.claude/state/checkpoint.md` | สถานะงานปัจจุบัน + decision ที่ตัดสินไปแล้ว | ทุกคนที่ clone repo |
-| `.claude/state/project-notes.md` | Error Patterns · Deviations · Open Questions | ทุกคนที่ clone repo |
-| auto memory | ความชอบ/นิสัยการทำงานของคนใช้เครื่องนั้น | คนนั้น เครื่องนั้น |
+| `.claude/state/checkpoint.md` | Current work state + decisions already taken | Everyone who clones the repo |
+| `.claude/state/project-notes.md` | Error Patterns · Deviations · Open Questions | Everyone who clones the repo |
+| auto memory | Personal preferences/habits of that machine's user | That person, that machine |
 
-**เมื่อขัดกัน ให้ยึดไฟล์ที่ commit** — auto memory อาจเป็นของเก่าหรือของคนอื่น
+**On conflict, the committed files win** — auto memory may be stale or someone
+else's.
 
-## เขียน checkpoint (ตอนจบงาน)
+## Writing the checkpoint (end of a work chunk)
 
-1. อ่าน `.claude/state/checkpoint.md` เดิมก่อน — **อัปเดต ไม่ใช่เขียนทับทิ้ง**
-   ประวัติของ decision มีค่า
-2. อัปเดตให้ตรงกับความจริง ณ ตอนนี้ ตามโครงนี้ (คงหัวข้อไว้ทั้งหมด อย่าเพิ่ม/ลบหัวข้อ):
+1. Read the existing `.claude/state/checkpoint.md` first — **update it, never
+   rewrite it from scratch.** Decision history has value.
+2. Bring it up to date with reality, using this structure (keep every section;
+   add or remove none):
 
 ```markdown
 # Checkpoint
 
-อัปเดตล่าสุด: YYYY-MM-DD
+Last updated: YYYY-MM-DD
 
-## กำลังทำ
-- <งานที่ค้างอยู่จริง ๆ พร้อมไฟล์ที่แตะไว้ครึ่งทาง — ถ้าไม่มี ให้เขียนว่า "ไม่มีงานค้าง">
+## In progress
+- <work genuinely mid-flight, with the files touched halfway — or "Nothing in progress">
 
-## เสร็จแล้ว (ล่าสุดอยู่บนสุด)
-- YYYY-MM-DD <สิ่งที่เสร็จ + ไฟล์หลักที่เกี่ยว>
+## Done (newest first)
+- YYYY-MM-DD <what finished + the main files involved>
 
-## ต้องทำต่อ
-- <งานถัดไปที่รู้แล้วว่าต้องทำ เรียงตามลำดับที่ควรทำ>
+## Next
+- <known upcoming work, in the order it should happen>
 
-## Decision ที่ตัดสินแล้ว (ห้ามรื้อโดยไม่คุยกับทีม)
-- YYYY-MM-DD <ตัดสินอะไร> — **เพราะ** <เหตุผล> · ทางที่ไม่เลือก: <ทางเลือกที่ทิ้งไป>
+## Decisions taken (do not revisit without talking to the team)
+- YYYY-MM-DD <what was decided> — **because** <reason> · rejected alternative: <what was not chosen>
 ```
 
-3. เขียนสิ่งที่ **สืบย้อนได้** — ชื่อไฟล์ ชื่อฟังก์ชัน เลข PR ไม่ใช่ "แก้บั๊กหน้า user"
-4. `Decision` ต้องมี **เหตุผล + ทางที่ไม่เลือก** เสมอ ไม่งั้นอีกสามเดือนจะมีคนรื้อมันโดยไม่รู้ว่าเคยชั่งน้ำหนักมาแล้ว
-5. ไม่ต้องใส่สิ่งที่ git บอกได้อยู่แล้ว (diff, ชื่อ commit) — ใส่เฉพาะสิ่งที่อ่านจากโค้ดไม่ได้
+3. Write things that are **traceable** — file names, function names, PR numbers;
+   not "fixed the user page".
+4. Every `Decision` entry needs **the reason + the rejected alternative** —
+   otherwise someone re-litigates it in three months without knowing it was
+   already weighed.
+5. Skip anything git already records (diffs, commit names) — record only what
+   cannot be read from the code.
 
-## เขียน project-notes (ตอนเจอ error หรือเจอของแปลก)
+## Writing project-notes (on hitting an error or an oddity)
 
-`.claude/state/project-notes.md` มี **3 หัวข้อตายตัว** ห้ามเพิ่ม:
+`.claude/state/project-notes.md` has **3 fixed sections**, never more:
 
-| หัวข้อ | ใส่อะไร | ตัวอย่างที่ถูก |
+| Section | Contents | Good example |
 | --- | --- | --- |
-| **Error Patterns** | อาการ → สาเหตุ → วิธีแก้ ที่เคยเสียเวลาไปแล้ว | "`prisma generate` ขึ้น P1012 หลังเพิ่ม field → ลืมรัน migrate ก่อน → รัน `migrate dev` แล้ว `generate`" |
-| **Deviations** | จุดที่โปรเจคนี้**ตั้งใจ**ต่างจากมาตรฐาน `ugt-*` พร้อมเหตุผล | "ตาราง `LegacyEmp` ไม่มี audit columns เพราะเป็น view ที่ dump มาจากระบบเก่า" |
-| **Open Questions** | คำถามที่ยังไม่มีคำตอบและบล็อกงานอยู่ + รอใครตอบ | "basePath ของ prod จะเป็น `/hr` หรือ `/hrms` — รอ IT ยืนยัน" |
+| **Error Patterns** | Symptom → cause → fix, for problems that already cost time | "`prisma generate` reports P1012 after adding a field → forgot to migrate first → run `migrate dev`, then `generate`" |
+| **Deviations** | Places this project **intentionally** differs from the `ugt-*` standards, with the reason | "Table `LegacyEmp` has no audit columns because it is a view dumped from the legacy system" |
+| **Open Questions** | Unanswered questions blocking work + who owes the answer | "Is the prod basePath `/hr` or `/hrms` — waiting on IT" |
 
-## ความรู้ใหม่ควรไปไว้ที่ไหน — triage 3 ทาง
+## Where new knowledge goes — the 3-way triage
 
-ก่อนเขียนอะไรลง `project-notes.md` ถามก่อนว่าความรู้นี้จริงกับใคร:
+Before writing anything into `project-notes.md`, ask who the knowledge is true for:
 
-| ความรู้ | ไปไว้ที่ | ห้ามทำ |
+| Knowledge | Goes to | Never do |
 | --- | --- | --- |
-| จริงเฉพาะโปรเจคนี้ | `project-notes.md` (หรือ `.claude/rules/<project>-*.md` ถ้าเป็นกฎผูกกับ path) | — |
-| จริงกับทุกโปรเจคที่ใช้ stack เดียวกัน (gotcha ของ Prisma/Keycloak/Jenkins) | **เปิด PR เข้า `ugt-claude-platform`** แล้ว bump version | แก้ไฟล์ skill ที่ติดตั้งมา — มันอยู่ใน plugin cache ที่ path เปลี่ยนทุก update และจะถูกลบ |
-| เป็นความชอบส่วนตัวของคนใช้ | ปล่อยให้ auto memory จัดการเอง | ยัดลงไฟล์ที่ commit ให้คนอื่นต้องรับด้วย |
+| True only for this project | `project-notes.md` (or `.claude/rules/<project>-*.md` if it's a path-bound rule) | — |
+| True for every project on this stack (Prisma/Keycloak/Jenkins gotcha) | **Open a PR against `ugt-claude-platform`**, then bump the version | Edit installed skill files — they live in the plugin cache, whose path changes on every update and gets deleted |
+| A personal preference of the current user | Leave it to auto memory | Force it into committed files everyone else must carry |
 
-**ห้ามสร้าง `.claude/skills/ugt-<ชื่อเดิม>/` ทับ skill ของ platform** — ทำได้ทางเทคนิค
-แต่จะได้ความรู้สองชุดที่ต่างกันโดยไม่มีใครรู้ว่ากำลังใช้อันไหน ถ้าต้อง extend
-ให้สร้าง skill **ชื่อใหม่** เช่น `.claude/skills/<project>-payroll-rules/`
+**Never create `.claude/skills/ugt-<same-name>/` shadowing a platform skill** —
+it works mechanically, but produces two diverging sets of knowledge with nobody
+knowing which one is active. To extend, create a skill under a **new** name,
+e.g. `.claude/skills/<project>-payroll-rules/`.
 
 ## Quick Rules
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| อ่านไฟล์เดิมก่อนแล้วอัปเดต | เขียนทับทั้งไฟล์ (ประวัติ decision หาย) |
-| Decision มีเหตุผล + ทางที่ไม่เลือก | "ตัดสินใจใช้ X" ลอย ๆ |
-| อ้างชื่อไฟล์/ฟังก์ชันจริง | เขียนกว้าง ๆ ว่า "ปรับปรุงหน้า user" |
-| gotcha ที่ใช้ได้ทุกโปรเจค → PR เข้า platform | เก็บไว้ในโปรเจคเดียวแล้วให้โปรเจคอื่นเจอซ้ำ |
-| ใส่วันที่ทุกรายการ | ปล่อยไม่มีวันที่ (อีกปีจะไม่รู้ว่าอันไหนยังจริง) |
+| Read the existing file, then update | Rewrite the whole file (decision history lost) |
+| Decisions carry reason + rejected alternative | A bare "decided to use X" |
+| Reference real file/function names | Vague "improved the user page" |
+| Stack-wide gotcha → PR to the platform | Keep it in one project and let others rediscover it |
+| Date every entry | Undated entries (in a year nobody knows what still holds) |
 
 ## Verification
 
-- [ ] `.claude/state/checkpoint.md` มีทั้ง 4 หัวข้อ และ "อัปเดตล่าสุด" เป็นวันนี้
-- [ ] `.claude/state/project-notes.md` มี 3 หัวข้อตายตัวครบ
-- [ ] ทุกรายการที่เพิ่มมีวันที่ · Decision มีเหตุผลกำกับ
-- [ ] ไม่มี secret / ค่าจาก `.env` หลุดลงไฟล์เหล่านี้ (มันถูก commit)
-- [ ] `CLAUDE.md` ยัง `@.claude/state/checkpoint.md` อยู่ (ไม่งั้น session หน้าไม่เห็น)
+- [ ] `.claude/state/checkpoint.md` has all 4 sections and "Last updated" is today
+- [ ] `.claude/state/project-notes.md` has the 3 fixed sections
+- [ ] Every added entry is dated · every Decision has its reason
+- [ ] No secrets / `.env` values in these files (they are committed)
+- [ ] `CLAUDE.md` still imports `@.claude/state/checkpoint.md` (or the next session won't see it)

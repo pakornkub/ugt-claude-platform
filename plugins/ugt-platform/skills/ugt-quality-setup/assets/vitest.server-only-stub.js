@@ -1,5 +1,5 @@
-// Stub ของ package `server-only` สำหรับ vitest — ของจริง throw นอก React Server
-// environment ทำให้ import โมดูลฝั่ง server เข้ามาทดสอบตรง ๆ ไม่ได้
-// เก็บไว้ในโปรเจคเอง (ไม่ alias เข้า node_modules/next internals) เพื่อให้ resolve ได้
-// แม้รันใน git worktree ที่ยังไม่มี node_modules เต็ม
+// Stub for the `server-only` package under vitest — the real one throws outside
+// a React Server environment, which blocks importing server modules directly in
+// tests. Kept inside the project (not aliased into node_modules/next internals)
+// so it resolves even in git worktrees without a full node_modules install.
 export {};

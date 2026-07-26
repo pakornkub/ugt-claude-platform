@@ -1,69 +1,70 @@
-# Jenkins One-Time Setup (ทำครั้งเดียวต่อ server / ต่อ project)
+# Jenkins One-Time Setup (once per server / once per project)
 
-สิ่งที่ต้องให้ admin เตรียมฝั่ง Jenkins ก่อน pipeline จะรันผ่าน แบ่งเป็น
-**ระดับ server** (ครั้งเดียวต่อ Jenkins instance) และ **ระดับ project**
-(ทำใหม่ทุก project)
+What the admin must prepare on the Jenkins side before the pipeline can pass,
+split into **server level** (once per Jenkins instance) and **project level**
+(repeated for every project).
 
 ---
 
-## A. ระดับ server (ครั้งเดียว)
+## A. Server level (once)
 
-### A1. Plugins ที่ต้องติดตั้ง
+### A1. Required plugins
 
 Manage Jenkins → Plugins → Available:
 
-| Plugin                   | ใช้กับ                                    |
-| ------------------------ | ----------------------------------------- |
-| NodeJS Plugin            | `tools { nodejs 'NodeJS-22' }`            |
-| SonarQube Scanner        | `withSonarQubeEnv` + `waitForQualityGate` |
-| OWASP Dependency-Check   | `dependencyCheck` + `dependencyCheckPublisher` |
-| JUnit Plugin             | publish `test-results/junit.xml`          |
-| HTML Publisher           | publish coverage HTML report              |
-| Email Extension          | `emailext` (HTML email — `mail` ธรรมดาไม่รองรับ HTML) |
-| Pipeline                 | Declarative Pipeline core                 |
-| Git Plugin               | `checkout scm`                            |
+| Plugin | Used by |
+| --- | --- |
+| NodeJS Plugin | `tools { nodejs 'NodeJS-22' }` |
+| SonarQube Scanner | `withSonarQubeEnv` + `waitForQualityGate` |
+| OWASP Dependency-Check | `dependencyCheck` + `dependencyCheckPublisher` |
+| JUnit Plugin | publishing `test-results/junit.xml` |
+| HTML Publisher | publishing the coverage HTML report |
+| Email Extension | `emailext` (HTML email — plain `mail` doesn't support HTML) |
+| Pipeline | Declarative Pipeline core |
+| Git Plugin | `checkout scm` |
 
-### A2. Tools (ชื่อต้องตรงกับ Jenkinsfile เป๊ะ ๆ)
+### A2. Tools (names must match the Jenkinsfile exactly)
 
 Manage Jenkins → Tools:
 
-| Tool type         | Name (exact)        | Version   |
-| ----------------- | ------------------- | --------- |
-| NodeJS            | `NodeJS-22`         | Node 22.x |
-| SonarQube Scanner | `SonarQube-Scanner` | Latest    |
-| Dependency-Check  | `Dependency-Check`  | Latest (Install automatically) |
+| Tool type | Name (exact) | Version |
+| --- | --- | --- |
+| NodeJS | `NodeJS-22` | Node 22.x |
+| SonarQube Scanner | `SonarQube-Scanner` | Latest |
+| Dependency-Check | `Dependency-Check` | Latest (Install automatically) |
 
-> ชื่อ tool ผิด capitalization = `sonar-scanner: command not found` /
-> dependencyCheck step หา installation ไม่เจอ
+> A mis-capitalized tool name = `sonar-scanner: command not found` / the
+> dependencyCheck step can't find its installation.
 
 ### A3. SonarQube server config
 
 Manage Jenkins → System → SonarQube servers → Add:
 
-- Name: `SonarQube` (ต้องตรงกับ `withSonarQubeEnv('SonarQube')` ใน Jenkinsfile)
+- Name: `SonarQube` (must match `withSonarQubeEnv('SonarQube')` in the Jenkinsfile)
 - Server URL: `http://<sonarqube-host>:9000`
-- Server authentication token: credential ประเภท Secret Text ที่เก็บ
-  **Global Analysis Token** ของ SonarQube (ดู `sonarqube-setup.md`)
+- Server authentication token: a Secret Text credential holding the SonarQube
+  **Global Analysis Token** (see `sonarqube-setup.md`)
 
 ### A4. Global environment variables
 
 Manage Jenkins → System → Global properties → Environment variables:
 
-| Variable       | ค่า                                      |
-| -------------- | ---------------------------------------- |
-| `NOTIFY_EMAIL` | ผู้รับ email แจ้งผล pipeline             |
-| `SMTP_FROM`    | from address ของ email (ใช้ใน `emailext`) |
+| Variable | Value |
+| --- | --- |
+| `NOTIFY_EMAIL` | recipient of pipeline result emails |
+| `SMTP_FROM` | from-address for those emails (used in `emailext`) |
 
-พร้อมตั้ง SMTP ที่ Manage Jenkins → System → Extended E-mail Notification
+Also configure SMTP at Manage Jenkins → System → Extended E-mail Notification.
 
-### A5. Docker บน Jenkins host — ⚠️ snap Docker gotcha
+### A5. Docker on the Jenkins host — ⚠️ the snap-Docker gotcha
 
-ถ้า Docker บน host ติดตั้งผ่าน **snap** (พบบน Ubuntu Core 24) การ bind-mount
-`/usr/bin/docker` เข้า Jenkins container **ใช้ไม่ได้** — snap sandbox binary
-ของตัวเอง ต้อง build custom Jenkins image ที่มี Docker CLI ในตัว:
+If Docker on the host was installed via **snap** (seen on Ubuntu Core 24),
+bind-mounting `/usr/bin/docker` into the Jenkins container **does not work** —
+snap sandboxes its own binary. Build a custom Jenkins image with the Docker CLI
+inside:
 
 ```dockerfile
-# jenkins/Dockerfile — build ครั้งเดียวบน Jenkins host
+# jenkins/Dockerfile — built once on the Jenkins host
 FROM jenkins/jenkins:lts
 
 USER root
@@ -71,8 +72,8 @@ RUN apt-get update && \
     apt-get install -y docker.io && \
     rm -rf /var/lib/apt/lists/*
 
-# CRITICAL: GID ของ group docker ใน container ต้องตรงกับของ HOST
-# เช็คบน host: getent group docker | cut -d: -f3
+# CRITICAL: the docker group GID inside the container must match the HOST's
+# check on the host: getent group docker | cut -d: -f3
 RUN groupmod -g <host-docker-gid> docker && \
     usermod -aG docker jenkins
 
@@ -90,91 +91,90 @@ docker run -d \
   jenkins-custom:latest
 ```
 
-**ทำไมต้อง match GID:** `/var/run/docker.sock` บน host เป็นของ group `docker`
-ที่มี GID เฉพาะ ถ้า GID ใน container ไม่ตรง → Docker CLI ได้
-"permission denied" บน socket ทั้งที่ mount แล้ว
+**Why the GID must match:** `/var/run/docker.sock` on the host belongs to the
+host's `docker` group with a specific GID; a mismatched GID in the container
+gets "permission denied" on the socket even though it's mounted.
 
-### A6. NVD data strategy (`--noupdate` ใน pipeline)
+### A6. NVD data strategy (`--noupdate` in the pipeline)
 
-Jenkinsfile template รัน dependency-check ด้วย `--noupdate` = สแกนจาก
-**NVD cache บนเครื่องเท่านั้น** ไม่ download update ระหว่าง pipeline
-(เร็ว + กัน rate limit) — แปลว่าต้องมีข้อมูล NVD ในเครื่องอยู่ก่อน ไม่งั้น
-first run บน Jenkins ใหม่ = สแกนกับ DB ว่างเปล่า (ผ่านหมดแบบหลอก ๆ)
-เลือกอย่างใดอย่างหนึ่ง:
+The Jenkinsfile template runs dependency-check with `--noupdate` = scan against
+the **local NVD cache only**, no downloads mid-pipeline (fast + avoids rate
+limits) — which means NVD data must already exist on the machine, or the first
+run on a fresh Jenkins scans against an empty DB (everything passes,
+deceptively). Pick one:
 
-1. **แนะนำ:** สร้าง Jenkins job แยก (freestyle/pipeline, cron เช่น
-   `H 2 * * *`) รัน `dependency-check --updateonly` (ใส่ NVD API key จาก
-   credential `nvd` ผ่าน `--nvdApiKey`) — update cache ทุกคืน ให้ pipeline
-   หลักใช้ `--noupdate` ได้ตลอด
-2. หรือ **ลบ `--noupdate` ออกชั่วคราว** ใน first run เพื่อ download NVD
-   เต็มชุด (⚠️ 60–90 นาที — timeout 90 นาทีใน stage เผื่อไว้แล้ว)
-   เสร็จแล้วใส่กลับ
+1. **Recommended:** a separate Jenkins job (freestyle/pipeline, cron e.g.
+   `H 2 * * *`) running `dependency-check --updateonly` (NVD API key from the
+   `nvd` credential via `--nvdApiKey`) — refreshes the cache nightly so the
+   main pipeline can keep `--noupdate` forever
+2. Or **temporarily remove `--noupdate`** for the first run to download the
+   full NVD set (⚠️ 60–90 minutes — the stage's 90-minute timeout allows for
+   it), then put it back
 
 ### A7. docker-compose v1 vs v2
 
-Server บางเครื่องมีเฉพาะ **`docker-compose`** (v1 standalone) ไม่มี
-`docker compose` (v2 plugin) — Jenkinsfile template ใช้ `docker-compose`
-(v1) เป็นค่าตั้งต้น เช็คก่อนด้วย:
+Some servers only have **`docker-compose`** (v1 standalone), not
+`docker compose` (v2 plugin) — the Jenkinsfile template defaults to
+`docker-compose` (v1). Check first:
 
 ```bash
 docker-compose version   # v1 standalone
 docker compose version   # v2 plugin
 ```
 
-ถ้ามีเฉพาะ v2 ให้แก้ Deploy stage เป็น `docker compose` (เว้นวรรค)
+v2-only host → change the Deploy stage to `docker compose` (with the space).
 
 ---
 
-## B. ระดับ project (ทำใหม่ทุก project)
+## B. Project level (every project)
 
 ### B1. Credentials
 
 Manage Jenkins → Credentials → (global) → Add Credentials:
 
-| Credential ID               | Type        | ค่า                                                                                          |
-| --------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
-| `nvd`                       | Secret text | NVD API key (ขอฟรีที่ nvd.nist.gov) — ไม่มี = OWASP DC ช้ามาก (rate limit 5 req/30s)         |
-| `env-__PROJECT_NAME__`      | Secret file | upload ไฟล์ `.env.production` — Deploy stage จะ `cp` เป็น `.env`                            |
-| `env-__PROJECT_NAME__-dev`  | Secret file | upload `.env.development` — โครงเดียวกับ prod แต่ **DATABASE_URL แยก DB + auth secret ใหม่** |
-| `sentry-dsn-__PROJECT_NAME__` | Secret text | ค่า `NEXT_PUBLIC_SENTRY_DSN` (ถ้า project ใช้ Sentry) — prod/dev ใช้ DSN เดียวกัน แยก environment ด้วย `SENTRY_ENVIRONMENT` runtime var |
+| Credential ID | Type | Value |
+| --- | --- | --- |
+| `nvd` | Secret text | NVD API key (free at nvd.nist.gov) — without it OWASP DC is extremely slow (rate limit 5 req/30s) |
+| `env-__PROJECT_NAME__` | Secret file | upload `.env.production` — the Deploy stage `cp`s it to `.env` |
+| `env-__PROJECT_NAME__-dev` | Secret file | upload `.env.development` — same shape as prod but **separate DATABASE_URL + fresh auth secrets** |
+| `sentry-dsn-__PROJECT_NAME__` | Secret text | the `NEXT_PUBLIC_SENTRY_DSN` value (if the project uses Sentry) — prod/dev share one DSN, split by the `SENTRY_ENVIRONMENT` runtime var |
 
-> `nvd` เป็น credential ระดับ server ใช้ร่วมกันได้ทุก project —
-> สร้างครั้งเดียวพอ
+> `nvd` is a server-level credential shared by every project — create it once.
 
-**ข้อห้ามเรื่อง secret ใน Jenkinsfile:** เวลาใช้ secret ใน `sh` ให้ shell
-เป็นคน expand (`"$VAR"` ใน single-quoted Groovy string) — **ห้าม** interpolate
-ผ่าน Groovy (`"${VAR}"` ใน double-quoted string) เพราะค่าจะโผล่ใน build log
-และ Jenkins จะเตือน "secret passed via Groovy String interpolation"
-ไฟล์ชั่วคราวที่มี secret (เช่น `dc-nvd.properties`) ต้องลบใน `post { always }`
+**Secrets in the Jenkinsfile:** let the shell expand them (`"$VAR"` inside
+single-quoted Groovy strings) — **never** Groovy interpolation (`"${VAR}"` in
+double-quoted strings), which prints the value into the build log and triggers
+Jenkins' "secret passed via Groovy String interpolation" warning. Temp files
+holding secrets (e.g. `dc-nvd.properties`) must be deleted in `post { always }`.
 
 ### B2. Pipeline job config
 
-- สร้าง job แบบ Pipeline (หรือ Multibranch Pipeline) ชี้ repo + branch
-  `main` และ `develop`
-- **ปิด "Lightweight checkout"** — Configure → Pipeline → SCM → uncheck
-  ไม่งั้น Jenkins fetch เฉพาะ Jenkinsfile → stage อื่นเจอ workspace ไม่ครบ /
-  pipeline รันโค้ดเก่า
-- Branch detection ใน Jenkinsfile รองรับทั้งสองแบบอยู่แล้ว:
+- Create a Pipeline (or Multibranch Pipeline) job pointing at the repo +
+  branches `main` and `develop`
+- **Disable "Lightweight checkout"** — Configure → Pipeline → SCM → uncheck.
+  Otherwise Jenkins fetches only the Jenkinsfile → later stages find an
+  incomplete workspace / the pipeline runs stale code
+- Branch detection in the Jenkinsfile already handles both job types:
   `def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())`
-  (Multibranch ให้ `BRANCH_NAME` ตรง ๆ · Pipeline ธรรมดาให้ `GIT_BRANCH` =
-  `origin/main` ต้อง strip prefix)
+  (Multibranch provides `BRANCH_NAME` directly · plain Pipeline provides
+  `GIT_BRANCH` = `origin/main`, needing the prefix stripped)
 
 ### B3. GitHub webhook
 
 GitHub repo → Settings → Webhooks → Add webhook:
 
-| Field        | ค่า                                             |
-| ------------ | ----------------------------------------------- |
-| Payload URL  | `http://<jenkins-host>:8080/github-webhook/`    |
-| Content type | `application/json`                              |
-| Events       | Just the push event                             |
+| Field | Value |
+| --- | --- |
+| Payload URL | `http://<jenkins-host>:8080/github-webhook/` |
+| Content type | `application/json` |
+| Events | Just the push event |
 
-ถ้า Jenkins อยู่ internal network ที่ GitHub เข้าไม่ถึง → ใช้
-`pollSCM('H/5 * * * *')` ใน `triggers {}` แทน
+If Jenkins sits on an internal network GitHub can't reach → use
+`pollSCM('H/5 * * * *')` in `triggers {}` instead.
 
-### B4. Reverse proxy (nginx) สำหรับ dev environment
+### B4. Reverse proxy (nginx) for the dev environment
 
-เพิ่ม `location` block บน Docker host ให้ dev container:
+Add a `location` block on the Docker host for the dev container:
 
 ```nginx
 location __BASE_PATH_DEV__ {
@@ -188,15 +188,15 @@ location __BASE_PATH_DEV__ {
 
 ---
 
-## C. Pitfalls ที่เจอบ่อย
+## C. Frequent pitfalls
 
-| อาการ                                            | สาเหตุ                                                       | แก้                                                                             |
-| ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `docker: command not found` ใน Jenkins           | Docker CLI ไม่มีใน Jenkins container                         | custom image (ข้อ A5)                                                           |
-| `permission denied /var/run/docker.sock`         | GID group docker ไม่ตรง host                                 | `groupmod -g <host-gid> docker` ใน custom image                                 |
-| `waitForQualityGate` ค้างไม่จบ                   | SonarQube webhook ไม่ได้ตั้ง                                 | SonarQube → Administration → Webhooks → `http://<jenkins-host>:8080/sonarqube-webhook/` |
-| Quality Gate ผ่านตลอดทั้งที่มี issue             | `sonar.sources` path ผิด                                     | เช็ค path relative จาก workspace root                                           |
-| OWASP DC ช้ามาก (ชั่วโมง+)                       | ไม่มี NVD API key / first run                                | สร้าง credential `nvd` · first run ยอมรอ (cache แล้วรอบถัดไป ~5 นาที)          |
-| CVE ที่ suppress แล้วยัง fail build              | ใช้ grep XML ดิบ (จับ `<suppressedVulnerabilities>` ด้วย)    | ใช้ `dependencyCheckPublisher` เท่านั้น — นับเฉพาะ CVE ที่ไม่ถูก suppress       |
-| Jenkinsfile ไม่อัปเดต / pipeline รันโค้ดเก่า     | Lightweight checkout เปิดอยู่                                | ปิดตาม B2                                                                       |
-| `cleanWs` ลบไฟล์กลางคัน                          | วางไว้ใน stage                                               | วางเฉพาะ `post { always {} }` ระดับ pipeline                                    |
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `docker: command not found` in Jenkins | Docker CLI missing in the Jenkins container | custom image (A5) |
+| `permission denied /var/run/docker.sock` | docker group GID mismatch with the host | `groupmod -g <host-gid> docker` in the custom image |
+| `waitForQualityGate` hangs forever | SonarQube webhook not configured | SonarQube → Administration → Webhooks → `http://<jenkins-host>:8080/sonarqube-webhook/` |
+| Quality Gate always passes despite issues | wrong `sonar.sources` path | check paths relative to the workspace root |
+| OWASP DC extremely slow (hours) | no NVD API key / first run | create the `nvd` credential · accept the first-run wait (cached → ~5 min after) |
+| Suppressed CVEs still fail the build | grepping raw XML (counts `<suppressedVulnerabilities>` too) | use `dependencyCheckPublisher` only — it counts unsuppressed CVEs |
+| Jenkinsfile changes don't apply / stale code runs | Lightweight checkout enabled | disable per B2 |
+| `cleanWs` deletes files mid-run | placed inside a stage | only in the pipeline-level `post { always {} }` |

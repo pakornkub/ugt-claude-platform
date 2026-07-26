@@ -1,17 +1,18 @@
-# SonarQube Setup (one-time ต่อ environment) + Suppression Strategy
+# SonarQube Setup (one-time per environment) + Suppression Strategy
 
-## A. สร้าง Project (แยก prod/dev)
+## A. Create the projects (prod/dev split)
 
-แต่ละ branch มี SonarQube project ของตัวเองเพื่อแยก metrics:
+Each branch gets its own SonarQube project so the metrics stay separate:
 
 SonarQube → Projects → Create Project → Manually:
 
-| Branch    | Project key            | Display name                    |
-| --------- | ---------------------- | ------------------------------- |
-| `main`    | `__PROJECT_NAME__`     | `__PROJECT_DISPLAY_NAME__`      |
+| Branch | Project key | Display name |
+| --- | --- | --- |
+| `main` | `__PROJECT_NAME__` | `__PROJECT_DISPLAY_NAME__` |
 | `develop` | `__PROJECT_NAME__-dev` | `__PROJECT_DISPLAY_NAME__ (Dev)` |
 
-ค่าใน `sonar-project.properties` เป็นแค่ default — Jenkinsfile override ตอน scan:
+Values in `sonar-project.properties` are only defaults — the Jenkinsfile
+overrides them at scan time:
 
 ```groovy
 withSonarQubeEnv('SonarQube') {
@@ -20,76 +21,77 @@ withSonarQubeEnv('SonarQube') {
 }
 ```
 
-## B. Tokens — ประเภทสำคัญ
+## B. Tokens — the types matter
 
-| ใช้กับ                              | ประเภท token               | เก็บที่                                        |
-| ----------------------------------- | -------------------------- | ---------------------------------------------- |
-| Jenkins scanner (`withSonarQubeEnv`) | **Global Analysis Token**  | Jenkins Secret Text credential → ผูกใน Manage Jenkins → System → SonarQube servers |
-| MCP server / SonarLint / API ส่วนตัว | **USER token** เท่านั้น    | เครื่อง dev (นอก Git)                          |
+| Used by | Token type | Stored where |
+| --- | --- | --- |
+| Jenkins scanner (`withSonarQubeEnv`) | **Global Analysis Token** | Jenkins Secret Text credential → bound in Manage Jenkins → System → SonarQube servers |
+| MCP server / SonarLint / personal API | **USER token** only | the dev machine (outside Git) |
 
-สร้างที่: My Account → Security → Generate Token
+Create at: My Account → Security → Generate Token
 
-## C. Quality Gate — org standard thresholds
+## C. Quality Gate — org-standard thresholds
 
-Quality Gates → Create (หรือใช้ gate กลางขององค์กร) → Conditions **on New Code**:
+Quality Gates → Create (or use the org's central gate) → Conditions **on New Code**:
 
-| Condition                        | Threshold | หมายเหตุ                          |
-| -------------------------------- | --------- | --------------------------------- |
-| `new_coverage`                   | ≥ 60%     | coverage ของโค้ดใหม่              |
-| `new_violations`                 | = 0       | issue ใหม่ทุก severity ต้องเป็นศูนย์ |
-| `new_duplicated_lines_density`   | ≤ 3%      | duplication ในโค้ดใหม่            |
-| `new_security_hotspots_reviewed` | = 100%    | hotspot ทุกตัวต้องถูก review      |
+| Condition | Threshold | Notes |
+| --- | --- | --- |
+| `new_coverage` | ≥ 60% | coverage of new code |
+| `new_violations` | = 0 | new issues of every severity must be zero |
+| `new_duplicated_lines_density` | ≤ 3% | duplication in new code |
+| `new_security_hotspots_reviewed` | = 100% | every hotspot must be reviewed |
 
-Assign gate ให้ **ทั้ง** project prod และ dev
+Assign the gate to **both** the prod and dev projects.
 
-Pipeline block ที่ `waitForQualityGate abortPipeline: true` — gate ไม่ผ่าน =
-build abort ไม่มีข้อยกเว้น
+The pipeline blocks at `waitForQualityGate abortPipeline: true` — gate fails =
+build aborts, no exceptions.
 
-## D. Webhook → Jenkins (จำเป็น ไม่งั้น waitForQualityGate ค้าง)
+## D. Webhook → Jenkins (required — without it waitForQualityGate hangs)
 
 Administration → Webhooks → Create:
 
 - Name: `Jenkins`
 - URL: `http://<jenkins-host>:8080/sonarqube-webhook/`
 
-## E. Suppression Strategy — 3 ชั้น เลือกให้ถูก
+## E. Suppression strategy — 3 layers, pick correctly
 
-| กลไก                                | ผล                                        | ใช้เมื่อ                                                                  |
-| ----------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------- |
-| `sonar.exclusions`                  | ไฟล์ไม่ถูก analyze เลย                    | generated code, build output, migrations, config, test scaffolding — **ห้ามใช้กับ production logic** |
-| `sonar.cpd.exclusions`              | ยัง scan bug/smell แต่ไม่ scan duplication | production code ที่ตั้งใจมีโครงซ้ำ (parallel components ต่างกันแค่ generic type) |
-| `sonar.issue.ignore.multicriteria`  | ปิด rule เฉพาะ scope ไฟล์                 | false positive ของ library pattern (เช่น TanStack inline cell renderers)  |
+| Mechanism | Effect | Use for |
+| --- | --- | --- |
+| `sonar.exclusions` | file is never analyzed at all | generated code, build output, migrations, config, test scaffolding — **never production logic** |
+| `sonar.cpd.exclusions` | bugs/smells still scanned, duplication is not | production code with intentionally parallel structure (components differing only in generic type) |
+| `sonar.issue.ignore.multicriteria` | one rule off for a file scope | library-pattern false positives (e.g. TanStack inline cell renderers) |
 
-**กติกาเหล็ก:** ทุก entry ใน `cpd.exclusions` และ `multicriteria` ต้องมี
-**comment เหตุผล** กำกับในไฟล์ — เพิ่มได้เฉพาะหลัง review finding จริงแล้ว
-ตัดสินว่า intentional/false positive ไม่ใช่เพิ่มกันไว้ล่วงหน้า
+**Iron rule:** every entry in `cpd.exclusions` and `multicriteria` carries a
+**rationale comment** in the file — added only after reviewing a real finding
+and judging it intentional/false-positive, never preemptively.
 
-### ป้องกัน duplication ตั้งแต่เขียน (ดีกว่า suppress)
+### Prevent duplication while writing (better than suppressing)
 
-SonarQube จับ block ซ้ำ 10+ บรรทัดข้ามไฟล์ — ถ้ากำลัง copy component แล้วเปลี่ยน
-แค่ type/label ให้หยุดแล้ว extract generic ก่อน:
+SonarQube flags any 10+-line block duplicated across files — about to copy a
+component and change only types/labels? Stop and extract a generic first:
 
 ```tsx
 // ✅ one generic component + thin typed wrappers
 function EntityTab<TRow extends BaseRow>({ fetchFn, deleteAction, ... }) { ... }
 function FooTab() { return <EntityTab<FooRow> fetchFn={fetchFoo} ... />; }
 
-// ❌ two 100+ line components ต่างกันแค่ type names
+// ❌ two 100+ line components differing only in type names
 ```
 
-> แนวเขียนโค้ดให้ผ่าน gate ตั้งแต่ scan แรก (modern-JS idioms, `Readonly<>`
-> props, NOSONAR placement) → skill **`ugt-clean-code`** — คนละหน้าที่กับ skill นี้
+> Writing code that passes the gate on the first scan (modern-JS idioms,
+> `Readonly<>` props, NOSONAR placement) → the **`ugt-clean-code`** skill —
+> a different job from this file.
 
 ## F. OWASP DC plugin integration
 
-- ติดตั้ง plugin **Dependency-Check** ใน SonarQube (Marketplace)
-- Plugin v6+ (SonarQube 2025.x) อ่าน **JSON report เท่านั้น** — Jenkinsfile
-  ต้องมี `--format JSON` และ properties ต้องชี้:
+- Install the **Dependency-Check** plugin in SonarQube (Marketplace)
+- Plugin v6+ (SonarQube 2025.x) reads the **JSON report only** — the
+  Jenkinsfile must pass `--format JSON` and the properties must point at:
 
 ```properties
 sonar.dependencyCheck.jsonReportPath=dc-report/dependency-check-report.json
 sonar.dependencyCheck.htmlReportPath=dc-report/dependency-check-report.html
-# threshold เป็นคะแนน CVSS (0–10) ไม่ใช่ชื่อ severity
+# thresholds are CVSS scores (0–10), not severity names
 sonar.dependencyCheck.severity.high=7.0
 sonar.dependencyCheck.severity.medium=4.0
 sonar.dependencyCheck.severity.low=0.0
@@ -97,7 +99,7 @@ sonar.dependencyCheck.severity.low=0.0
 
 ## G. Coverage property
 
-`sonar.javascript.lcov.reportPaths=coverage/lcov.info` — ไฟล์นี้มาจาก
-`npm run test:coverage` ซึ่ง `ugt-quality-setup` ตั้ง reporter `lcov` ไว้ให้แล้ว
-ถ้า path นี้ไม่มีไฟล์จริง Sonar จะรายงาน `new_coverage` เป็น 0% แล้ว Quality Gate
-block ทุก build โดยไม่มี error ที่ชี้ต้นเหตุ
+`sonar.javascript.lcov.reportPaths=coverage/lcov.info` — this file comes from
+`npm run test:coverage`, whose `lcov` reporter `ugt-quality-setup` already
+configures. If the path holds no real file, Sonar reports `new_coverage` as 0%
+and the Quality Gate blocks every build with no error pointing at the cause.

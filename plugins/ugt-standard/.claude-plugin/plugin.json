@@ -3,7 +3,7 @@
   "name": "ugt-standard",
   "displayName": "UGT Standard (bundle)",
   "version": "0.1.0",
-  "description": "ชุดมาตรฐานที่แนะนำสำหรับทีมพัฒนา — ติดตั้งตัวเดียวได้ทั้งความรู้ stack ขององค์กร (ugt-platform) และ pipeline การพัฒนา (superpowers: brainstorming → plan → TDD → code review)",
+  "description": "The recommended bundle for dev teams — one install brings both the org's stack knowledge (ugt-platform) and the development pipeline (superpowers: brainstorming → plan → TDD → code review)",
   "author": {
     "name": "UGT DX Team"
   },

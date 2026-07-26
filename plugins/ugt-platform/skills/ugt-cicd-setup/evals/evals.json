@@ -1,23 +1,23 @@
 {
   "skill_name": "ugt-cicd-setup",
-  "notes": "รันบน scaffold Next.js ที่มี script lint/format:check/test:coverage/build ครบแล้ว (ผลลัพธ์ของ ugt-quality-setup) · eval 2 ใช้ scaffold ที่ไม่มี prisma แต่มี @sentry/nextjs · assertion ส่วนใหญ่ตรวจได้ด้วย scripts/verify.mjs",
+  "notes": "Runs on a Next.js scaffold that already has the lint/format:check/test:coverage/build scripts (the output of ugt-quality-setup). Eval 2 uses a scaffold without prisma but with @sentry/nextjs. Most assertions are machine-checkable via scripts/verify.mjs. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
       "name": "with-db-no-sentry-basepath",
       "prompt": "อยากได้ pipeline jenkins ให้โปรเจค my-portal ครับ ใช้ prisma ต่อ sql server ไม่ได้ใช้ sentry นะ deploy prod port 3000 dev port 3001 อยู่ใต้ /my-portal กับ /my-portal-dev บน apps.example.com",
-      "expected_output": "ได้ Jenkinsfile 10 stages + sonar-project.properties + Dockerfile + compose 2 ไฟล์ + owasp-suppressions.xml + app/api/health/route.ts · block [DB] คงไว้ · block [SENTRY] ถูกตัดโดย docker build ข้างในยังอยู่และ Groovy ยัง parse ได้ · ไม่เหลือ placeholder",
+      "expected_output": "Produces the 10-stage Jenkinsfile + sonar-project.properties + Dockerfile + both compose files + owasp-suppressions.xml + app/api/health/route.ts · [DB] blocks kept · [SENTRY] blocks removed with the docker build inside intact and Groovy still parseable · no leftover placeholders",
       "assertions": [
-        "node scripts/verify.mjs ของ ugt-cicd-setup exit 0",
-        "ไม่มี __PLACEHOLDER__ รูปแบบ __*__ เหลือในไฟล์ CI ใดเลย",
-        "Jenkinsfile มี stage ครบ 10 ตัวตามลำดับที่ contract กำหนด",
-        "จำนวน { และ } ใน Jenkinsfile เท่ากัน (Groovy parse ได้หลังตัด block [SENTRY])",
-        "Jenkinsfile ไม่มีการอ้าง credential sentry-dsn-* และไม่มี build-arg NEXT_PUBLIC_SENTRY_DSN",
-        "Jenkinsfile ยังมีขั้น prisma generate และขั้น migrate ก่อน compose up",
-        "app/api/health/route.ts มีอยู่จริง และตรวจ database ด้วย SELECT 1",
-        "docker-compose.yml และ docker-compose.dev.yml ใช้ 127.0.0.1 ใน healthcheck และมี pull_policy: never",
-        "waitForQualityGate มี abortPipeline: true",
-        "ทุก path ใน sonar.sources และ sonar.tests มีอยู่จริงในโปรเจค"
+        "node scripts/verify.mjs of ugt-cicd-setup exits 0",
+        "No __PLACEHOLDER__ of the __*__ form remains in any CI file",
+        "The Jenkinsfile has all 10 stages in the contract order",
+        "Opening and closing brace counts in the Jenkinsfile are equal (Groovy parses after the [SENTRY] removal)",
+        "The Jenkinsfile references no sentry-dsn-* credential and no NEXT_PUBLIC_SENTRY_DSN build-arg",
+        "The Jenkinsfile still has the prisma generate step and the migrate step before compose up",
+        "app/api/health/route.ts exists and checks the database with SELECT 1",
+        "Both docker-compose files use 127.0.0.1 in healthchecks and carry pull_policy: never",
+        "waitForQualityGate carries abortPipeline: true",
+        "Every path in sonar.sources and sonar.tests exists in the project"
       ],
       "files": []
     },
@@ -25,15 +25,15 @@
       "id": 2,
       "name": "no-db-with-sentry-no-basepath",
       "prompt": "โปรเจคนี้เป็นเว็บ static ไม่มี database เลย แต่มี sentry อยู่ ช่วยตั้ง ci/cd ให้ด้วย deploy ที่ root ไม่มี basePath port 3000/3001",
-      "expected_output": "ตัด block [DB] ออกครบทุกจุด (Install, Dockerfile, builder image, migrate step, DATABASE_URL ใน compose, block [DB] ใน health route) · คง [SENTRY] ไว้ · basePath ว่าง health path = /api/health",
+      "expected_output": "Removes every [DB] block (Install, Dockerfile, builder image, migrate step, DATABASE_URL in compose, the [DB] block in the health route) · keeps [SENTRY] · empty basePath, health path = /api/health",
       "assertions": [
-        "node scripts/verify.mjs ของ ugt-cicd-setup exit 0",
-        "Jenkinsfile ไม่มีคำว่า prisma เลย",
-        "docker-compose ทั้งสองไฟล์ไม่มี DATABASE_URL",
-        "Jenkinsfile ยังส่ง NEXT_PUBLIC_SENTRY_DSN เป็น --build-arg (ไม่ใช่ใส่ใน compose environment)",
-        "app/api/health/route.ts ไม่ import prisma และไม่มี block [DB] เหลือ",
-        "healthcheck ใน compose ยิงไปที่ /api/health โดยไม่มี basePath นำหน้า",
-        "จำนวน { และ } ใน Jenkinsfile เท่ากัน"
+        "node scripts/verify.mjs of ugt-cicd-setup exits 0",
+        "The Jenkinsfile contains no mention of prisma",
+        "Neither docker-compose file contains DATABASE_URL",
+        "The Jenkinsfile still passes NEXT_PUBLIC_SENTRY_DSN as a --build-arg (not compose environment)",
+        "app/api/health/route.ts imports no prisma and has no leftover [DB] block",
+        "Compose healthchecks hit /api/health with no basePath prefix",
+        "Opening and closing brace counts in the Jenkinsfile are equal"
       ],
       "files": []
     },
@@ -41,12 +41,12 @@
       "id": 3,
       "name": "diagnose-quality-gate-hang",
       "prompt": "pipeline รันมาถึง stage Quality Gate แล้วค้างอยู่ตรงนั้นเป็นชั่วโมงไม่ยอมจบ sonar เองก็เห็นว่า analysis เสร็จแล้ว ต้องแก้อะไรครับ",
-      "expected_output": "ชี้ไปที่ webhook จาก SonarQube กลับมา Jenkins (/sonarqube-webhook/) ที่ยังไม่ได้ตั้ง ซึ่งทำให้ waitForQualityGate ไม่ได้รับสัญญาณ — ไม่แนะให้ลบ gate หรือถอด abortPipeline ออก",
+      "expected_output": "Points at the missing SonarQube→Jenkins webhook (/sonarqube-webhook/), which leaves waitForQualityGate without its signal — and does not suggest removing the gate or dropping abortPipeline",
       "assertions": [
-        "ระบุว่าสาเหตุคือ webhook SonarQube → Jenkins ที่ /sonarqube-webhook/ ยังไม่ได้ตั้ง",
-        "ไม่แนะนำให้ลบ stage Quality Gate หรือเอา abortPipeline: true ออกเพื่อให้ pipeline ผ่าน",
-        "แนะนำให้มี timeout ครอบ waitForQualityGate",
-        "อ้างถึง references/sonarqube-setup.md หรือ references/jenkins-one-time-setup.md ว่าเป็นงานฝั่ง admin"
+        "Identifies the cause as the unconfigured SonarQube → Jenkins webhook at /sonarqube-webhook/",
+        "Does not suggest deleting the Quality Gate stage or removing abortPipeline: true to get the pipeline through",
+        "Recommends a timeout wrapping waitForQualityGate",
+        "Points at references/sonarqube-setup.md or references/jenkins-one-time-setup.md as admin-side work"
       ],
       "files": []
     }

@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// Audit trail — บันทึกทุก tool call ของ agent ลง .claude/logs/audit-<YYYY-MM-DD>.jsonl
+// Audit trail — appends every agent tool call to .claude/logs/audit-<YYYY-MM-DD>.jsonl
 //
-// เรียกจาก hooks/hooks.json (PostToolUse / PostToolUseFailure / InstructionsLoaded)
-// ทำงานเป็น shell command ล้วน ไม่เรียก LLM → ไม่กินโทเคนและไม่กิน context เลย
+// Invoked from hooks/hooks.json (PostToolUse / PostToolUseFailure / InstructionsLoaded).
+// Pure shell command, no LLM call → zero tokens, zero context cost.
 //
-// **กฎสำคัญ: ห้าม log เนื้อหาไฟล์หรือ tool_input ทั้งก้อน** — input ของ Write/Edit
-// มีโค้ดและอาจมี secret ปนอยู่ ถ้า dump ลงไฟล์ที่ไม่มีใครดูแลก็เท่ากับสร้างที่รั่ว
-// ใหม่ขึ้นมาเอง เก็บแค่ metadata ที่พอสืบย้อนได้ว่า "ใครแตะอะไรเมื่อไหร่"
+// **Key rule: never log file contents or the whole tool_input** — Write/Edit
+// inputs contain code and possibly secrets; dumping them into an unattended
+// file creates a brand-new leak. Keep only the metadata needed to trace
+// "who touched what, when".
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -15,7 +16,7 @@ const MAX_FIELD = 300;
 
 function readStdin() {
   try {
-    // fd 0 = stdin — hook payload มาเป็น JSON ก้อนเดียว
+    // fd 0 = stdin — the hook payload arrives as one JSON blob
     return JSON.parse(readFileSync(0, 'utf8') || '{}');
   } catch {
     return {};
@@ -24,10 +25,10 @@ function readStdin() {
 
 const truncate = (v) => {
   if (typeof v !== 'string') return undefined;
-  return v.length > MAX_FIELD ? `${v.slice(0, MAX_FIELD)}…(ตัด)` : v;
+  return v.length > MAX_FIELD ? `${v.slice(0, MAX_FIELD)}…(truncated)` : v;
 };
 
-/** ดึงเฉพาะ field ที่ปลอดภัยพอจะเก็บ — ไม่เอา content / old_string / new_string */
+/** Extract only fields safe to keep — never content / old_string / new_string */
 function safeSummary(event) {
   const input = event.tool_input ?? {};
   const out = {};
@@ -36,7 +37,7 @@ function safeSummary(event) {
   if (input.pattern) out.pattern = truncate(String(input.pattern));
   if (input.url) out.url = truncate(String(input.url));
   if (input.description) out.description = truncate(String(input.description));
-  // Write/Edit: บอกแค่ขนาดที่เปลี่ยน ไม่เก็บตัวเนื้อหา
+  // Write/Edit: record only the size of the change, never the content
   for (const key of ['content', 'new_string']) {
     if (typeof input[key] === 'string') out.bytes = (out.bytes ?? 0) + input[key].length;
   }
@@ -52,8 +53,8 @@ const record = {
   ...safeSummary(event),
 };
 
-// InstructionsLoaded — บันทึกว่า instruction ไฟล์ไหนถูกโหลดจริงเมื่อไหร่
-// (ใช้ตอบคำถาม "ทำไม Claude ไม่ทำตามกฎ" ได้ตรงจุดที่สุด: กฎถูกโหลดหรือเปล่า)
+// InstructionsLoaded — records which instruction file loaded, and when.
+// This answers "why didn't Claude follow the rule" at its root: did the rule load at all?
 if (event.file_path) record.instructions = String(event.file_path).replace(CWD, '.');
 if (event.error) record.error = truncate(String(event.error));
 
@@ -63,7 +64,7 @@ try {
   const day = record.ts.slice(0, 10);
   appendFileSync(join(dir, `audit-${day}.jsonl`), `${JSON.stringify(record)}\n`, 'utf8');
 } catch {
-  // hook ต้องไม่ทำให้ session พัง — เขียน log ไม่ได้ก็ปล่อยผ่านเงียบ ๆ
+  // A hook must never break the session — if the log can't be written, stay silent.
 }
 
 process.exit(0);

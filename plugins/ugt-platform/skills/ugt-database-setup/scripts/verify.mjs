@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Verification Checklist ของ ugt-database-setup ในรูปแบบที่รันได้
+// Runnable version of the ugt-database-setup Verification Checklist
 //
 //   node <path-to-skill>/scripts/verify.mjs
 //
-// ยึด process.cwd() เป็น root ของโปรเจคเสมอ (ไม่ใช่ที่ที่ script วางอยู่) —
-// script นี้ต้องทำงานได้ทั้งเมื่อ skill มาจาก plugin cache และเมื่อถูก copy เข้าโปรเจค
-// ไฟล์ที่ควรมีแต่หาไม่เจอ = FAIL ไม่ใช่ผ่าน (ตัวตรวจที่หาไฟล์ไม่เจอแล้วบอกว่าผ่านคือตัวตรวจที่โกหก)
+// Always anchors at process.cwd() as the project root (not where the script
+// lives) — this must work whether the skill came from the plugin cache or was
+// copied into a project. A file that should exist but can't be found is a
+// FAIL, never a pass (a checker that can't find its files and reports green is
+// a checker that lies).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -24,7 +26,7 @@ function check(name, fn) {
   }
 }
 
-/** ไล่ไฟล์ source ทั้งโปรเจค (ข้าม dir ที่ไม่ใช่ของเรา) */
+/** Walk all source files in the project (skipping non-source dirs) */
 function sourceFiles(exts = ['.ts', '.tsx']) {
   const skip = new Set([
     'node_modules',
@@ -48,69 +50,71 @@ function sourceFiles(exts = ['.ts', '.tsx']) {
   return out;
 }
 
-// ── 1. ไฟล์ที่ต้องมี ────────────────────────────────────────────────────────
+// ── 1. Required files ──────────────────────────────────────────────────────
 const REQUIRED = ['prisma/schema.prisma', 'prisma.config.ts', 'lib/prisma.ts', 'lib/env.ts'];
-check('ไฟล์หลักครบ', () => {
+check('Core files present', () => {
   const missing = REQUIRED.filter((f) => !has(f));
   return missing.length
-    ? { ok: false, msg: `ไม่พบ: ${missing.join(', ')} — รัน ugt-database-setup ก่อน` }
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-database-setup first` }
     : { ok: true };
 });
 
 const schemaExists = has('prisma/schema.prisma');
 const schema = schemaExists ? read('prisma/schema.prisma') : '';
 
-// ── 2. datasource / generator ───────────────────────────────────────────────
-check('`url` ไม่อยู่ใน datasource ของ schema.prisma', () => {
-  if (!schemaExists) return { ok: false, msg: 'ไม่มี schema.prisma' };
+// ── 2. datasource / generator ──────────────────────────────────────────────
+check('No `url` inside the schema.prisma datasource', () => {
+  if (!schemaExists) return { ok: false, msg: 'No schema.prisma' };
   const ds = schema.match(/datasource\s+\w+\s*\{([\s\S]*?)\}/)?.[1] ?? '';
   return /^\s*url\s*=/m.test(ds)
-    ? { ok: false, msg: 'พบ `url` ใน datasource — Prisma 7 + driver adapter จะ fail' }
+    ? { ok: false, msg: '`url` found in datasource — Prisma 7 + driver adapter will fail' }
     : { ok: true };
 });
 
-check('prisma.config.ts มี url', () => {
-  if (!has('prisma.config.ts')) return { ok: false, msg: 'ไม่มี prisma.config.ts' };
+check('prisma.config.ts carries the url', () => {
+  if (!has('prisma.config.ts')) return { ok: false, msg: 'No prisma.config.ts' };
   return /url\s*:/.test(read('prisma.config.ts'))
     ? { ok: true }
-    : { ok: false, msg: 'prisma.config.ts ไม่มี `url` — connection จะไม่ถูกส่งให้ adapter' };
+    : { ok: false, msg: 'prisma.config.ts has no `url` — the connection never reaches the adapter' };
 });
 
 check('generator provider = "prisma-client-js"', () => {
-  if (!schemaExists) return { ok: false, msg: 'ไม่มี schema.prisma' };
+  if (!schemaExists) return { ok: false, msg: 'No schema.prisma' };
   const gen = schema.match(/generator\s+\w+\s*\{([\s\S]*?)\}/)?.[1] ?? '';
   if (/provider\s*=\s*"prisma-client-js"/.test(gen)) return { ok: true };
-  const found = gen.match(/provider\s*=\s*"([^"]+)"/)?.[1] ?? '(ไม่พบ)';
-  return { ok: false, msg: `provider = "${found}" — ต้องเป็น "prisma-client-js" (ตัวอื่นไม่มี MSSQL driver adapter)` };
+  const found = gen.match(/provider\s*=\s*"([^"]+)"/)?.[1] ?? '(not found)';
+  return { ok: false, msg: `provider = "${found}" — must be "prisma-client-js" (others have no MSSQL driver adapter)` };
 });
 
 // ── 3. process.env ─────────────────────────────────────────────────────────
-// ไฟล์ที่อ่าน process.env ตรง ๆ ได้ตามข้อยกเว้นที่ตั้งใจ:
-// lib/env.ts = จุดเดียวที่ validate · *.config.ts ที่ root, instrumentation, sentry config
-// = รันนอก app runtime (ก่อน env schema มีผล) · test/e2e = รันนอก app
+// Files allowed to read process.env directly, by deliberate exception:
+// lib/env.ts = the single validation point · root *.config.ts, instrumentation,
+// sentry configs = run outside the app runtime (before the env schema applies) ·
+// test/e2e files = run outside the app
 const ENV_ALLOWED = [/^lib\/env\.ts$/, /^[^/]+\.config\.(ts|mjs|js)$/, /^instrumentation.*\.ts$/, /^sentry\..*\.config\.ts$/];
 const ENV_ALLOWED_DIRS = [/^e2e\//, /\.(test|spec)\.tsx?$/];
-check('ไม่มี process.env นอกไฟล์ที่อนุญาต', () => {
+check('No process.env outside the allowlist', () => {
   const offenders = [];
   for (const file of sourceFiles()) {
     const rel = relative(ROOT, file).split('\\').join('/');
     if ([...ENV_ALLOWED, ...ENV_ALLOWED_DIRS].some((re) => re.test(rel))) continue;
     const body = readFileSync(file, 'utf8');
-    // NEXT_PUBLIC_* อ่านตรง ๆ ได้ตามข้อยกเว้นที่ ugt-auth-setup ระบุ (client bundle)
+    // NEXT_PUBLIC_* may be read directly per the ugt-auth-setup exception (client bundle)
     const bad = [...body.matchAll(/process\.env\.(\w+)/g)]
       .map((m) => m[1])
       .filter((v) => !v.startsWith('NEXT_PUBLIC_') && v !== 'CI' && v !== 'NODE_ENV');
     if (bad.length) offenders.push(`${rel} (${[...new Set(bad)].join(', ')})`);
   }
   return offenders.length
-    ? { ok: false, msg: `อ่าน process.env ตรง ๆ: ${offenders.slice(0, 5).join(' · ')}${offenders.length > 5 ? ` …อีก ${offenders.length - 5}` : ''} — import จาก @/lib/env แทน` }
+    ? { ok: false, msg: `Direct process.env reads: ${offenders.slice(0, 5).join(' · ')}${offenders.length > 5 ? ` …and ${offenders.length - 5} more` : ''} — import from @/lib/env instead` }
     : { ok: true };
 });
 
-// ── 4. naming convention ใน schema ─────────────────────────────────────────
-// ตารางที่ ugt-auth-setup ติดตั้ง map ชื่อ **เอกพจน์** — เป็นข้อยกเว้นจากกฎ PascalCase พหูพจน์
-// (core ของ Better Auth ใช้ชื่อเอกพจน์ตาม convention ของ library และตาราง RBAC
-// วางอยู่ข้างกันในไฟล์เดียว จึงใช้รูปเดียวกันทั้งชุด — ดู assets/schema-auth.prisma ของ ugt-auth-setup)
+// ── 4. Schema naming conventions ───────────────────────────────────────────
+// Tables installed by ugt-auth-setup map to **singular** names — the exception
+// to the PascalCase-plural rule (Better Auth core uses singular by its own
+// convention, and the RBAC tables sit next to them in the same file, so the
+// whole set shares the form — see ugt-auth-setup's assets/schema-auth.prisma)
 const BETTER_AUTH_MODELS = new Set([
   'user',
   'session',
@@ -140,27 +144,27 @@ function parseModels() {
 }
 const models = schemaExists ? parseModels() : [];
 
-check('ทุก model มี @@map()', () => {
+check('Every model has @@map()', () => {
   const missing = models.filter((m) => !m.map).map((m) => m.name);
-  return missing.length ? { ok: false, msg: `ไม่มี @@map: ${missing.join(', ')}` } : { ok: true };
+  return missing.length ? { ok: false, msg: `No @@map: ${missing.join(', ')}` } : { ok: true };
 });
 
-check('@@map เป็น PascalCase พหูพจน์ (ยกเว้นตาราง Better Auth)', () => {
+check('@@map is PascalCase plural (Better Auth tables exempt)', () => {
   const bad = models
     .filter((m) => m.map && !BETTER_AUTH_MODELS.has(m.name))
     .filter((m) => !/^[A-Z]/.test(m.map) || !m.map.endsWith('s'))
     .map((m) => `${m.name} -> "${m.map}"`);
   return bad.length
-    ? { ok: false, msg: `ชื่อตารางไม่ใช่ PascalCase พหูพจน์: ${bad.join(', ')}` }
+    ? { ok: false, msg: `Table names not PascalCase plural: ${bad.join(', ')}` }
     : { ok: true };
 });
 
-check('ทุก scalar field มี @map()', () => {
+check('Every scalar field has @map()', () => {
   const bad = [];
   for (const m of models) {
     for (const f of m.fields) {
       if (f.map) continue;
-      // ข้าม relation field และ field ที่ไม่ใช่คอลัมน์จริง
+      // skip relation fields and non-column lines
       if (/@relation|\[\]/.test(f.line)) continue;
       const type = f.line.split(/\s+/)[1] ?? '';
       const isScalar = /^(String|Int|BigInt|Float|Decimal|Boolean|DateTime|Bytes|Json)\??$/.test(type);
@@ -168,13 +172,13 @@ check('ทุก scalar field มี @map()', () => {
     }
   }
   return bad.length
-    ? { ok: false, msg: `ไม่มี @map: ${bad.slice(0, 10).join(', ')}${bad.length > 10 ? ` …อีก ${bad.length - 10}` : ''}` }
+    ? { ok: false, msg: `No @map: ${bad.slice(0, 10).join(', ')}${bad.length > 10 ? ` …and ${bad.length - 10} more` : ''}` }
     : { ok: true };
 });
 
 // ── 5. T-SQL reserved words ────────────────────────────────────────────────
 const RESERVED = ['key', 'value', 'group', 'count', 'order', 'day', 'month', 'user', 'session', 'index', 'check', 'default', 'primary', 'table', 'column', 'view', 'select', 'from', 'where'];
-check('ไม่มีชื่อคอลัมน์ชนคำสงวน T-SQL', () => {
+check('No column name collides with a T-SQL reserved word', () => {
   const bad = [];
   for (const m of models) {
     for (const f of m.fields) {
@@ -183,43 +187,43 @@ check('ไม่มีชื่อคอลัมน์ชนคำสงวน 
     }
   }
   return bad.length
-    ? { ok: false, msg: `คอลัมน์ชนคำสงวน (เติมคำขยาย เช่น key->SettingKey): ${bad.join(', ')}` }
+    ? { ok: false, msg: `Reserved-word columns (add a qualifier, e.g. key->SettingKey): ${bad.join(', ')}` }
     : { ok: true };
 });
 
-// ── 6. audit columns ──────────────────────────────────────────────────────
+// ── 6. Audit columns ───────────────────────────────────────────────────────
 const AUDIT = ['Id', 'CreatedAt', 'UpdatedAt', 'CreatedBy', 'UpdatedBy', 'IsActive', 'IsDeleted'];
-check('audit columns ครบในตารางที่ app เป็นเจ้าของ (warn)', () => {
-  const skip = new Set([...BETTER_AUTH_MODELS, 'activityLog', 'role', 'permission', 'rolePermission']);
+check('Audit columns complete on app-owned tables (warn)', () => {
+  const skip = new Set([...BETTER_AUTH_MODELS, 'activityLog']);
   const incomplete = [];
   for (const m of models) {
     if (skip.has(m.name) || !m.map) continue;
     const cols = m.fields.map((f) => f.map).filter(Boolean);
     const missing = AUDIT.filter((a) => !cols.includes(a));
-    if (missing.length) incomplete.push(`${m.name} (ขาด ${missing.join('/')})`);
+    if (missing.length) incomplete.push(`${m.name} (missing ${missing.join('/')})`);
   }
   return incomplete.length
-    ? { ok: 'warn', msg: `${incomplete.join(' · ')} — ตาราง master/transaction ควรมีครบ ตาราง lookup/join ยกเว้นได้` }
+    ? { ok: 'warn', msg: `${incomplete.join(' · ')} — master/transaction tables should carry the full set; lookup/join tables may be exempt` }
     : { ok: true };
 });
 
-// ── 7. raw SQL ────────────────────────────────────────────────────────────
-check('ไม่มี $queryRawUnsafe / $executeRawUnsafe', () => {
+// ── 7. Raw SQL ─────────────────────────────────────────────────────────────
+check('No $queryRawUnsafe / $executeRawUnsafe', () => {
   const bad = [];
   for (const file of sourceFiles()) {
     const body = readFileSync(file, 'utf8');
     if (/\$(query|execute)RawUnsafe/.test(body)) bad.push(relative(ROOT, file));
   }
   return bad.length
-    ? { ok: false, msg: `ใช้ Unsafe variant: ${bad.join(', ')} — ใช้ tagged template แทน` }
+    ? { ok: false, msg: `Unsafe variants in use: ${bad.join(', ')} — use tagged templates instead` }
     : { ok: true };
 });
 
-// ── 8. env / gitignore ────────────────────────────────────────────────────
-check('.env.example มีอยู่และไม่มีค่าจริงหลุด', () => {
-  if (!has('.env.example')) return { ok: false, msg: 'ไม่มี .env.example' };
+// ── 8. env / gitignore ─────────────────────────────────────────────────────
+check('.env.example exists and leaks no real values', () => {
+  if (!has('.env.example')) return { ok: false, msg: 'No .env.example' };
   const body = read('.env.example');
-  // ค่าที่ไม่มีร่องรอย placeholder เลย = น่าสงสัยว่าเป็นค่าจริง
+  // A value with no trace of a placeholder is suspect
   const PLACEHOLDER = /<|CHANGE[_-]?ME|YOUR[_-]|REPLACE|TODO|xxx|\*\*\*|placeholder|example\.com/i;
   const leaked = body
     .split('\n')
@@ -229,28 +233,28 @@ check('.env.example มีอยู่และไม่มีค่าจริ
       return v && !PLACEHOLDER.test(v);
     });
   return leaked.length
-    ? { ok: false, msg: `.env.example อาจมีค่าจริง: ${leaked.map((l) => l.split('=')[0]).join(', ')}` }
+    ? { ok: false, msg: `.env.example may hold real values: ${leaked.map((l) => l.split('=')[0]).join(', ')}` }
     : { ok: true };
 });
 
-check('.env.local อยู่ใน .gitignore', () => {
-  if (!has('.gitignore')) return { ok: false, msg: 'ไม่มี .gitignore' };
+check('.env.local is gitignored', () => {
+  if (!has('.gitignore')) return { ok: false, msg: 'No .gitignore' };
   const ig = read('.gitignore');
   return /^\.env(\.local|\*)?$/m.test(ig) || ig.includes('.env.local') || ig.includes('.env*')
     ? { ok: true }
-    : { ok: false, msg: '.gitignore ไม่ครอบ .env.local — secret จะถูก commit' };
+    : { ok: false, msg: '.gitignore does not cover .env.local — secrets would be committed' };
 });
 
-check('build guard: lib/prisma.ts รองรับ SKIP_ENV_VALIDATION', () => {
-  if (!has('lib/prisma.ts')) return { ok: false, msg: 'ไม่มี lib/prisma.ts' };
+check('Build guard: lib/prisma.ts survives SKIP_ENV_VALIDATION', () => {
+  if (!has('lib/prisma.ts')) return { ok: false, msg: 'No lib/prisma.ts' };
   const body = read('lib/prisma.ts');
-  // asset ของ ugt-database-setup ใช้รูปแบบ `if (!url) return {} as sql.config`
+  // ugt-database-setup's asset uses the `if (!url) return {} as sql.config` form
   return /SKIP_ENV_VALIDATION|NEXT_PHASE|phase-production-build|!url/.test(body)
     ? { ok: true }
-    : { ok: 'warn', msg: 'ไม่พบ build guard — `npm run build` โดยไม่มี DB จริงอาจ fail' };
+    : { ok: 'warn', msg: 'No build guard found — `npm run build` without a live DB may fail' };
 });
 
-// ── รายงาน ────────────────────────────────────────────────────────────────
+// ── Report ─────────────────────────────────────────────────────────────────
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;
 let warned = 0;
@@ -262,7 +266,7 @@ for (const r of results) {
   console.log(`  ${icon[state]} ${r.name}${r.msg ? `\n      ${r.msg}` : ''}`);
 }
 console.log(
-  `\n${results.length - failed - warned} ผ่าน · ${warned} เตือน · ${failed} ไม่ผ่าน\n` +
-    'ข้อที่ตรวจด้วยเครื่องไม่ได้ (ยังต้องทำมือ): npx prisma validate · npx prisma generate หลัง migrate\n'
+  `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
+    'Not machine-checkable (still manual): npx prisma validate · npx prisma generate after every migrate\n'
 );
 process.exit(failed > 0 ? 1 : 0);

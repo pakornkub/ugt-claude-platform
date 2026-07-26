@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Verification Checklist ของ ugt-cicd-setup ในรูปแบบที่รันได้ (ส่วน "ไฟล์ใน repo")
+// Runnable version of the ugt-cicd-setup Verification Checklist (the "files in repo" part)
 //
 //   node <path-to-skill>/scripts/verify.mjs
 //
-// ยึด process.cwd() เป็น root ของโปรเจค — ไฟล์ที่ควรมีแต่หาไม่เจอ = FAIL ไม่ใช่ผ่าน
-// ตรวจได้เฉพาะฝั่ง repo · ฝั่ง server (Jenkins credentials/tools, SonarQube project,
-// webhook) ต้องให้ admin ยืนยันเอง — ดู §6 ใน SKILL.md
+// Anchors at process.cwd() as the project root — a file that should exist but
+// can't be found is a FAIL, never a pass.
+// Only the repo side is checkable here; the server side (Jenkins
+// credentials/tools, SonarQube projects, webhooks) needs admin confirmation —
+// see §6 in SKILL.md.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -35,28 +37,28 @@ const CI_FILES = [
 const pkg = has('package.json') ? JSON.parse(read('package.json')) : null;
 const jf = has('Jenkinsfile') ? read('Jenkinsfile') : '';
 
-// ── 1. ไฟล์ที่ต้องมี ────────────────────────────────────────────────────────
-check('ไฟล์ CI ครบ', () => {
+// ── 1. Required files ──────────────────────────────────────────────────────
+check('CI files present', () => {
   const missing = CI_FILES.filter((f) => !has(f));
   return missing.length
-    ? { ok: false, msg: `ไม่พบ: ${missing.join(', ')} — รัน ugt-cicd-setup ก่อน` }
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-cicd-setup first` }
     : { ok: true };
 });
 
-check('/api/health มีอยู่จริง', () => {
+check('/api/health exists', () => {
   const candidates = ['app/api/health/route.ts', 'app/api/health/route.tsx', 'src/app/api/health/route.ts'];
   if (!candidates.some((c) => has(c))) {
-    return { ok: false, msg: 'ไม่มี route /api/health — container จะไม่เคยขึ้น healthy → stage Deploy fail' };
+    return { ok: false, msg: 'No /api/health route — the container never reports healthy → Deploy stage fails' };
   }
   const file = candidates.find((c) => has(c));
   const body = read(file);
   return /version|commit|sha/i.test(body) && !/\/\/.*version/i.test(body)
-    ? { ok: 'warn', msg: `${file} อาจคืน version/commit ออกไป — endpoint นี้เปิดสาธารณะ` }
+    ? { ok: 'warn', msg: `${file} may expose version/commit info — this endpoint is public` }
     : { ok: true };
 });
 
-// ── 2. placeholder ค้าง ─────────────────────────────────────────────────────
-check('ไม่เหลือ placeholder __*__', () => {
+// ── 2. Leftover placeholders ───────────────────────────────────────────────
+check('No __*__ placeholders left', () => {
   const found = [];
   for (const f of CI_FILES) {
     if (!has(f)) continue;
@@ -66,7 +68,7 @@ check('ไม่เหลือ placeholder __*__', () => {
   return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
 });
 
-// ── 3. Jenkinsfile — โครงสร้าง ─────────────────────────────────────────────
+// ── 3. Jenkinsfile — structure ─────────────────────────────────────────────
 const STAGES = [
   'Checkout',
   'Install',
@@ -79,40 +81,40 @@ const STAGES = [
   'Docker Build',
   'Deploy',
 ];
-check('Jenkinsfile มี 10 stage ตามลำดับ', () => {
-  if (!jf) return { ok: false, msg: 'ไม่มี Jenkinsfile' };
+check('Jenkinsfile has 10 stages in order', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const names = [...jf.matchAll(/stage\s*\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
   const missing = STAGES.filter((s) => !names.some((n) => n.toLowerCase().includes(s.toLowerCase())));
-  if (missing.length) return { ok: false, msg: `ขาด stage: ${missing.join(', ')} (พบ ${names.length} stage)` };
-  // ตรวจลำดับ
+  if (missing.length) return { ok: false, msg: `Missing stages: ${missing.join(', ')} (found ${names.length})` };
+  // order check
   let cursor = -1;
   for (const s of STAGES) {
     const idx = names.findIndex((n, i) => i > cursor && n.toLowerCase().includes(s.toLowerCase()));
-    if (idx === -1) return { ok: false, msg: `stage "${s}" อยู่ผิดลำดับ` };
+    if (idx === -1) return { ok: false, msg: `Stage "${s}" is out of order` };
     cursor = idx;
   }
   return { ok: true };
 });
 
-check('Quality Gate block pipeline จริง', () => {
-  if (!jf) return { ok: false, msg: 'ไม่มี Jenkinsfile' };
-  if (!/waitForQualityGate/.test(jf)) return { ok: false, msg: 'ไม่มี waitForQualityGate — gate ไม่ block อะไรเลย' };
+check('Quality Gate actually blocks the pipeline', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
+  if (!/waitForQualityGate/.test(jf)) return { ok: false, msg: 'No waitForQualityGate — the gate blocks nothing' };
   return /abortPipeline\s*:\s*true/.test(jf)
     ? { ok: true }
-    : { ok: false, msg: 'waitForQualityGate ไม่มี abortPipeline: true → gate แดงแต่ pipeline เขียวต่อ' };
+    : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
 });
 
-check('post block ครบ (แจ้งผล + cleanWs)', () => {
-  if (!jf) return { ok: false, msg: 'ไม่มี Jenkinsfile' };
+check('post block complete (notifications + cleanWs)', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
-  if (!/emailext/.test(jf)) problems.push('ไม่มี emailext');
-  if (!/cleanWs/.test(jf)) problems.push('ไม่มี cleanWs (workspace บวมทุก build)');
+  if (!/emailext/.test(jf)) problems.push('no emailext');
+  if (!/cleanWs/.test(jf)) problems.push('no cleanWs (workspace grows every build)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('brace ใน Jenkinsfile สมดุล', () => {
-  if (!jf) return { ok: false, msg: 'ไม่มี Jenkinsfile' };
-  // ตัด string/comment ออกก่อนนับ เพื่อไม่ให้ { } ในข้อความรบกวน
+check('Braces balanced in the Jenkinsfile', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
+  // strip strings/comments first so braces inside text don't skew the count
   const stripped = jf
     .replace(/'''[\s\S]*?'''/g, '')
     .replace(/"""[\s\S]*?"""/g, '')
@@ -124,40 +126,40 @@ check('brace ใน Jenkinsfile สมดุล', () => {
   const close = (stripped.match(/\}/g) ?? []).length;
   return open === close
     ? { ok: true }
-    : { ok: false, msg: `{ = ${open} แต่ } = ${close} — Groovy parse ไม่ผ่าน (มักเกิดจากลบ block [SENTRY]/[DB] แล้ว brace เหลือ/ขาด)` };
+    : { ok: false, msg: `{ = ${open} but } = ${close} — Groovy cannot parse (usually a botched [SENTRY]/[DB] block removal)` };
 });
 
-check('ไม่มี Groovy interpolation ของ secret', () => {
-  if (!jf) return { ok: false, msg: 'ไม่มี Jenkinsfile' };
-  // ตัด single-quoted Groovy string ออกก่อน — ใน sh '''…''' ตัว ${VAR} เป็น shell
-  // expansion ที่ถูกต้อง ไม่ใช่ Groovy interpolation ที่รั่วลง log
+check('No Groovy interpolation of secrets', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
+  // Strip single-quoted Groovy strings first — inside sh '''…''' a ${VAR} is
+  // correct shell expansion, not Groovy interpolation leaking into the log
   const groovyInterpolated = jf.replace(/'''[\s\S]*?'''/g, '').replace(/'[^'\n]*'/g, '');
   const bad = [...groovyInterpolated.matchAll(/\$\{[^}]*(SECRET|PASSWORD|TOKEN|NVD|DSN)[^}]*\}/gi)].map(
     (m) => m[0]
   );
   return bad.length
-    ? { ok: false, msg: `secret ถูก interpolate ด้วย Groovy (รั่วลง build log): ${[...new Set(bad)].join(', ')} — ใช้ '$VAR' ให้ shell expand` }
+    ? { ok: false, msg: `Secrets Groovy-interpolated (leak into the build log): ${[...new Set(bad)].join(', ')} — use '$VAR' so the shell expands` }
     : { ok: true };
 });
 
-// ── 4. ความสอดคล้องของ marker [DB] / [SENTRY] กับของจริงในโปรเจค ──────────
-check('[DB] สอดคล้องกับการมี Prisma จริง', () => {
-  if (!jf || !pkg) return { ok: false, msg: 'ไม่มี Jenkinsfile หรือ package.json' };
+// ── 4. [DB] / [SENTRY] consistency with reality ────────────────────────────
+check('[DB] consistent with actual Prisma usage', () => {
+  if (!jf || !pkg) return { ok: false, msg: 'No Jenkinsfile or package.json' };
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const hasPrisma = Boolean(deps.prisma || deps['@prisma/client']);
   const marked = /\[DB\]/.test(jf) || /prisma/i.test(jf);
-  if (hasPrisma && !marked) return { ok: false, msg: 'โปรเจคมี Prisma แต่ Jenkinsfile ไม่มีขั้น prisma/migrate — deploy จะขึ้นโดยไม่ migrate' };
-  if (!hasPrisma && marked) return { ok: false, msg: 'โปรเจคไม่มี Prisma แต่ Jenkinsfile ยังมี block [DB] — stage จะ fail' };
+  if (hasPrisma && !marked) return { ok: false, msg: 'Project has Prisma but the Jenkinsfile has no prisma/migrate steps — deploys will skip migration' };
+  if (!hasPrisma && marked) return { ok: false, msg: 'No Prisma but the Jenkinsfile still carries [DB] blocks — the stage will fail' };
   return { ok: true };
 });
 
-check('[SENTRY] สอดคล้องกับการมี Sentry จริง', () => {
-  if (!jf || !pkg) return { ok: false, msg: 'ไม่มี Jenkinsfile หรือ package.json' };
+check('[SENTRY] consistent with actual Sentry usage', () => {
+  if (!jf || !pkg) return { ok: false, msg: 'No Jenkinsfile or package.json' };
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const hasSentry = Object.keys(deps).some((d) => d.startsWith('@sentry/'));
   const marked = /\[SENTRY\]|SENTRY_DSN/i.test(jf);
-  if (hasSentry && !marked) return { ok: 'warn', msg: 'โปรเจคมี Sentry แต่ Jenkinsfile ไม่ส่ง DSN เป็น build-arg → client-side DSN จะว่าง' };
-  if (!hasSentry && marked) return { ok: false, msg: 'ไม่มี Sentry แต่ Jenkinsfile ยังอ้าง credential sentry-dsn-* — withCredentials จะ fail' };
+  if (hasSentry && !marked) return { ok: 'warn', msg: 'Project has Sentry but the Jenkinsfile passes no DSN build-arg → client-side DSN will be empty' };
+  if (!hasSentry && marked) return { ok: false, msg: 'No Sentry but the Jenkinsfile still references sentry-dsn-* credentials — withCredentials will fail' };
   return { ok: true };
 });
 
@@ -172,8 +174,8 @@ const sonarProp = (key) =>
     .join('=')
     .trim();
 
-check('ทุก path ใน sonar.sources / sonar.tests มีอยู่จริง', () => {
-  if (!sonar) return { ok: false, msg: 'ไม่มี sonar-project.properties' };
+check('Every path in sonar.sources / sonar.tests exists', () => {
+  if (!sonar) return { ok: false, msg: 'No sonar-project.properties' };
   const missing = [];
   for (const key of ['sonar.sources', 'sonar.tests']) {
     const val = sonarProp(key);
@@ -183,77 +185,77 @@ check('ทุก path ใน sonar.sources / sonar.tests มีอยู่จ�
     }
   }
   return missing.length
-    ? { ok: false, msg: `path ไม่มีจริง → sonar-scanner fail ทันที: ${missing.join(' · ')}` }
+    ? { ok: false, msg: `Nonexistent paths → sonar-scanner fails instantly: ${missing.join(' · ')}` }
     : { ok: true };
 });
 
-check('sonar ชี้ lcov ถูกที่', () => {
-  if (!sonar) return { ok: false, msg: 'ไม่มี sonar-project.properties' };
+check('sonar points at the lcov file', () => {
+  if (!sonar) return { ok: false, msg: 'No sonar-project.properties' };
   const val = sonarProp('sonar.javascript.lcov.reportPaths');
-  if (!val) return { ok: false, msg: 'ไม่มี sonar.javascript.lcov.reportPaths → new_coverage = 0% → gate block' };
+  if (!val) return { ok: false, msg: 'No sonar.javascript.lcov.reportPaths → new_coverage = 0% → gate blocks' };
   return val.includes('lcov.info')
     ? { ok: true }
-    : { ok: 'warn', msg: `ค่าที่ตั้งไว้คือ "${val}" — ปกติเป็น coverage/lcov.info` };
+    : { ok: 'warn', msg: `Configured value is "${val}" — normally coverage/lcov.info` };
 });
 
 // ── 6. compose / Dockerfile ────────────────────────────────────────────────
 for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
-  check(`${f} ตั้งค่าถูก`, () => {
-    if (!has(f)) return { ok: false, msg: `ไม่มี ${f}` };
+  check(`${f} configured correctly`, () => {
+    if (!has(f)) return { ok: false, msg: `No ${f}` };
     const body = read(f);
     const problems = [];
     if (/healthcheck/i.test(body) && !body.includes('127.0.0.1')) {
-      problems.push('healthcheck ไม่ได้ใช้ 127.0.0.1 (localhost บน Alpine ไป IPv6 แล้ว fail)');
+      problems.push('healthcheck not using 127.0.0.1 (localhost on Alpine resolves IPv6 and fails)');
     }
     if (!/pull_policy\s*:\s*never/.test(body)) {
-      problems.push('ไม่มี pull_policy: never (compose จะพยายาม pull image ที่ build ในเครื่อง)');
+      problems.push('no pull_policy: never (compose will try to pull a locally-built image)');
     }
-    if (!/APP_PORT/.test(body)) problems.push('ไม่มี APP_PORT ให้ override');
+    if (!/APP_PORT/.test(body)) problems.push('no APP_PORT override');
     return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
   });
 }
 
-check('Dockerfile มี HEALTHCHECK', () => {
-  if (!has('Dockerfile')) return { ok: false, msg: 'ไม่มี Dockerfile' };
+check('Dockerfile has a HEALTHCHECK', () => {
+  if (!has('Dockerfile')) return { ok: false, msg: 'No Dockerfile' };
   return /HEALTHCHECK/.test(read('Dockerfile'))
     ? { ok: true }
-    : { ok: false, msg: 'ไม่มี HEALTHCHECK — Deploy stage poll สถานะ healthy ไม่ได้' };
+    : { ok: false, msg: 'No HEALTHCHECK — the Deploy stage cannot poll for healthy' };
 });
 
-check('next.config เปิด output standalone', () => {
+check('next.config enables standalone output', () => {
   const cfg = ['next.config.ts', 'next.config.mjs', 'next.config.js'].find((f) => has(f));
-  if (!cfg) return { ok: false, msg: 'ไม่พบ next.config.*' };
+  if (!cfg) return { ok: false, msg: 'No next.config.* found' };
   return /output\s*:/.test(read(cfg)) && /standalone/.test(read(cfg))
     ? { ok: true }
-    : { ok: false, msg: `${cfg} ไม่ได้ตั้ง output: 'standalone' — Dockerfile จะ COPY .next/standalone ไม่เจอ` };
+    : { ok: false, msg: `${cfg} does not set output: 'standalone' — the Dockerfile's COPY .next/standalone will fail` };
 });
 
-// ── 7. scripts ที่ pipeline เรียก ──────────────────────────────────────────
-check('npm scripts ที่ pipeline เรียกครบ', () => {
-  if (!pkg) return { ok: false, msg: 'ไม่มี package.json' };
+// ── 7. Scripts the pipeline calls ──────────────────────────────────────────
+check('npm scripts the pipeline calls are present', () => {
+  if (!pkg) return { ok: false, msg: 'No package.json' };
   const missing = ['lint', 'format:check', 'test:coverage', 'build'].filter((s) => !pkg.scripts?.[s]);
   return missing.length
-    ? { ok: false, msg: `ขาด: ${missing.join(', ')} — รัน ugt-quality-setup ก่อน` }
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-quality-setup first` }
     : { ok: true };
 });
 
-check('owasp-suppressions.xml เป็น XML ที่อ่านได้', () => {
-  if (!has('owasp-suppressions.xml')) return { ok: false, msg: 'ไม่มี owasp-suppressions.xml' };
+check('owasp-suppressions.xml is readable XML', () => {
+  if (!has('owasp-suppressions.xml')) return { ok: false, msg: 'No owasp-suppressions.xml' };
   const body = read('owasp-suppressions.xml');
-  if (!/<suppressions/.test(body)) return { ok: false, msg: 'ไม่มี root element <suppressions>' };
+  if (!/<suppressions/.test(body)) return { ok: false, msg: 'No <suppressions> root element' };
   const noReason = [...body.matchAll(/<suppress>([\s\S]*?)<\/suppress>/g)].filter(
     (m) => !/<notes>/.test(m[1])
   ).length;
   return noReason
-    ? { ok: false, msg: `${noReason} suppression ไม่มี <notes> อธิบายเหตุผล` }
+    ? { ok: false, msg: `${noReason} suppression(s) without a <notes> rationale` }
     : { ok: true };
 });
 
-// ── รายงาน ────────────────────────────────────────────────────────────────
+// ── Report ─────────────────────────────────────────────────────────────────
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;
 let warned = 0;
-console.log('\nugt-cicd-setup — verify (ฝั่ง repo)\n');
+console.log('\nugt-cicd-setup — verify (repo side)\n');
 for (const r of results) {
   const state = r.ok === true ? 'true' : r.ok === 'warn' ? 'warn' : 'false';
   if (state === 'false') failed++;
@@ -261,7 +263,7 @@ for (const r of results) {
   console.log(`  ${icon[state]} ${r.name}${r.msg ? `\n      ${r.msg}` : ''}`);
 }
 console.log(
-  `\n${results.length - failed - warned} ผ่าน · ${warned} เตือน · ${failed} ไม่ผ่าน\n` +
-    'ยังต้องให้ admin ยืนยัน: Jenkins tools/credentials/global env · SonarQube project + Quality Gate · webhook สองทาง · ปิด Lightweight checkout\n'
+  `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
+    'Still needs admin confirmation: Jenkins tools/credentials/global env · SonarQube projects + Quality Gate · both webhooks · Lightweight checkout disabled\n'
 );
 process.exit(failed > 0 ? 1 : 0);
