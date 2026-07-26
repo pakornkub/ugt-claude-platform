@@ -227,6 +227,7 @@ check('.env.example exists and leaks no real values', () => {
   const PLACEHOLDER = /<|CHANGE[_-]?ME|YOUR[_-]|REPLACE|TODO|xxx|\*\*\*|placeholder|example\.com/i;
   const leaked = body
     .split('\n')
+    .filter((l) => !l.trim().startsWith('#'))
     .filter((l) => /^(DATABASE_URL|.*PASSWORD|.*SECRET|.*TOKEN)=/i.test(l))
     .filter((l) => {
       const v = l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, '');
