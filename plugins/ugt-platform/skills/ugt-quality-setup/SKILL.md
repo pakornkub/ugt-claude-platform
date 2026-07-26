@@ -121,6 +121,12 @@ CI=true npm run test:coverage && ls test-results/junit.xml coverage/lcov.info
 
 ## Verification Checklist
 
+**รันสคริปต์ก่อน** (cwd = root ของโปรเจคปลายทาง):
+
+```bash
+node <skill-dir>/scripts/verify.mjs
+```
+
 - [ ] `package.json` มี scripts ครบ 4 ตัว: `lint`, `format:check`, `test:coverage`, `build`
 - [ ] `npm run lint` ผ่าน · `npm run format:check` ผ่าน
 - [ ] `CI=true npm run test:coverage` แล้วมี **`test-results/junit.xml`** เกิดขึ้นจริง

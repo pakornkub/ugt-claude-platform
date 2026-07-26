@@ -202,6 +202,15 @@ Push `develop` → ดู pipeline วิ่งครบ 10 stages → เช็
 
 ## 6. Verification Checklist
 
+**รันสคริปต์ก่อน** (cwd = root ของโปรเจคปลายทาง):
+
+```bash
+node <skill-dir>/scripts/verify.mjs
+```
+
+มันตรวจฝั่ง repo ให้ครบ (placeholder, 10 stages, brace สมดุลหลังตัด block, path ใน
+`sonar.sources` มีจริง, compose, health route) — ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+
 **ไฟล์ใน repo:**
 
 - [ ] Jenkinsfile ครบ 10 stages + post (emailext ×4 + cleanWs) — ไม่เหลือ

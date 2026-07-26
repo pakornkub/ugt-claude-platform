@@ -78,7 +78,9 @@ Database → Quality → Auth → CI
 
 ### 4. ปิดงาน
 
-1. รัน Verification Checklist ของทุก skill ลูกที่ติดตั้ง
+1. **รัน `node <skill-dir>/scripts/verify.mjs` ของทุก module ที่ติดตั้ง** (cwd = root
+   ของโปรเจค) แล้วแก้ทุกข้อที่ ✘ ก่อนปิดงาน — ห้ามรายงานว่าเสร็จโดยยังมี exit code 1 ค้าง
+   จากนั้นไล่ข้อที่เหลือใน Verification Checklist ของแต่ละ skill ที่เครื่องตรวจแทนไม่ได้
 2. สรุปให้ผู้ใช้: ไฟล์ที่เพิ่ม/แก้ทั้งหมด (จัดกลุ่มตาม module), env vars ที่ต้องเติมค่าจริง,
    สิ่งที่ต้องขอจาก admin (Keycloak client, Jenkins credentials, SonarQube project)
 3. แนบ **smoke-test checklist** ที่ตรงกับสิ่งที่ติดตั้งจริง เช่น:

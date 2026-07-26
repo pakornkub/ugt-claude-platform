@@ -24,7 +24,7 @@ raw SQL ที่ปลอดภัย รายละเอียดเชิ�
 
 | สิ่งที่ตั้งชื่อ                  | Convention                          | ตัวอย่าง                                |
 | -------------------------------- | ----------------------------------- | --------------------------------------- |
-| ตาราง (app-owned)                | **PascalCase พหูพจน์** ไม่มี prefix | `Users`, `RolePermissions`, `Items`     |
+| ตาราง (app-owned)                | **PascalCase พหูพจน์** ไม่มี prefix | `Items`, `LeaveRequests`, `AppSettings` |
 | ตาราง read-only (ระบบภายนอก dump) | prefix เฉพาะกลุ่ม `<EXT>_`          | `<EXT>_WeeklySummary`                   |
 | คอลัมน์                          | **PascalCase**                      | `Id`, `CreatedAt`, `EmpCode`            |
 | Stored procedure                 | `usp_*` (PascalCase ต่อท้าย)        | `usp_RecalculateWeeklySummary`          |
@@ -130,11 +130,20 @@ Pattern บังคับ: **sanitize ก่อน parameterize เสมอ**,
 
 ## Verification Checklist
 
+**รันสคริปต์ก่อน** (cwd = root ของโปรเจคปลายทาง, path ชี้ไปที่โฟลเดอร์ skill นี้):
+
+```bash
+node <skill-dir>/scripts/verify.mjs
+```
+
+มันตรวจข้อที่เครื่องตรวจได้ทั้งหมดในรายการล่างนี้ให้อัตโนมัติ (exit 1 ถ้าไม่ผ่าน) —
+ที่เหลือคือข้อที่ต้องรันมือ:
+
 - [ ] `npx prisma validate` ผ่าน
 - [ ] `npx prisma generate` ผ่าน (และรันซ้ำหลัง migrate ทุกครั้ง)
 - [ ] `schema.prisma` ไม่มี `url` ใน datasource; `prisma.config.ts` มี
 - [ ] ไม่มีการเรียก `process.env` ตรง ๆ นอก `lib/env.ts` / `prisma.config.ts`
-- [ ] ทุก model มี `@@map("PascalCasePlural")` และทุก field มี `@map("PascalCase")` — ยกเว้นตาราง Better Auth core จาก ugt-auth-setup (`User`, `Session`, …) ที่ map เอกพจน์ตาม convention ของ library นั้น
+- [ ] ทุก model มี `@@map("PascalCasePlural")` และทุก field มี `@map("PascalCase")` — ยกเว้นตาราง auth/RBAC ที่ `ugt-auth-setup` ติดตั้ง ซึ่ง map **เอกพจน์** ทั้งชุด: `User`, `Session`, `Account`, `Verification`, `RateLimit`, `Role`, `Permission`, `RolePermission` (ห้าเป็น convention ของ Better Auth เอง · สามตัวหลังใช้รูปเดียวกันเพราะอยู่ในไฟล์เดียวกันและต้องอ่านคู่กัน) — ตารางเดียวในชุดนั้นที่เป็นพหูพจน์คือ `ActivityLogs`
 - [ ] ไม่มีคอลัมน์ชื่อชน T-SQL reserved word (เช็คกับ `references/naming-conventions.md`)
 - [ ] ตาราง master/transaction มี audit columns ครบ (`Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted`)
 - [ ] raw SQL ทุกจุด: sanitize + parameterize; ไม่มี mutation ลงตาราง/วิว read-only

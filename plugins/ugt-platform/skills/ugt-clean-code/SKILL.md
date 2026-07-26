@@ -122,6 +122,15 @@ component ที่ต่างแค่ generic type · **S6848 / S1082** (a11y
 
 ## Checklist ก่อน commit
 
+**รันสคริปต์ก่อน** (cwd = root ของโปรเจค) — default ตรวจเฉพาะไฟล์ที่แก้เทียบ HEAD
+ซึ่งตรงกับที่ gate วัด (new code) ใส่ `--all` ถ้าอยากสแกนทั้งโปรเจค:
+
+```bash
+node <skill-dir>/scripts/verify.mjs
+```
+
+
+
 - [ ] ไม่มี `parseInt` / `.replace(/…/g)` / `typeof … 'undefined'` / `arr[len-1]` / ternary เชิงลบ — ใช้ idiom ใหม่แล้ว
 - [ ] prop type ของทุก component ครอบ `Readonly<>`
 - [ ] ไม่มี import ซ้ำจาก module เดียวกัน · ไม่มี Zod API ที่ deprecated

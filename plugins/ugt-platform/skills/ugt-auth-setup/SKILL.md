@@ -175,7 +175,14 @@ npx shadcn@latest add button input label tabs card sonner   # UI ของ login
 
 ## 8. Verification Checklist
 
-หลังติดตั้งเสร็จ ตรวจตามนี้ก่อนปิดงาน:
+**รันสคริปต์ก่อน** (cwd = root ของโปรเจคปลายทาง):
+
+```bash
+node <skill-dir>/scripts/verify.mjs
+```
+
+มันตรวจ placeholder ค้าง (รวมตัวที่ซ่อนใน `login-form.tsx`), marker `[METHOD: …]` ที่ยังไม่ถูกลบ,
+cookie prefix ทั้ง 3 ไฟล์, schema, และ API ที่เรียกผิดบ่อย — ที่เหลือต้องกดเองตามนี้:
 
 - [ ] `npm run build` ผ่าน (และผ่านด้วย `SKIP_ENV_VALIDATION=1` ถ้าเปิด SSO)
 - [ ] Login ได้ครบทุก method ที่เลือก แล้วเข้าหน้า protected ได้
