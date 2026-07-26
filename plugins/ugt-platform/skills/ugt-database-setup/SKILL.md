@@ -1,12 +1,19 @@
 ---
 name: ugt-database-setup
 description: >
-  Use when adding SQL Server (MSSQL) to a project via Prisma, wiring a
-  DATABASE_URL connection, applying the org's DB naming conventions
-  (tables/columns/stored procedures/functions), setting up type-safe env
-  validation, writing raw SQL / stored-procedure calls against MSSQL, or
-  fixing MSSQL migration issues (column renames, filtered unique indexes).
-  Don't use for auth tables content (→ ugt-auth-setup) or CI (→ ugt-cicd-setup).
+  Use when a project needs SQL Server through Prisma — "ต่อ database", "ใช้ SQL
+  Server", "ตั้ง prisma", "ยังไม่มี DB เลย" — or when designing any new table,
+  column, stored procedure, view, or migration in an org project, because the
+  naming convention and audit columns here are mandatory and expensive to change
+  after data exists. Also use when writing raw SQL / `EXEC usp_*` calls, reading
+  across a linked server, setting up type-safe env validation, or debugging MSSQL
+  migration problems (column renames that would drop data, filtered unique
+  indexes Prisma can't express, `url` in the wrong place breaking generate).
+  Load it before touching `prisma/schema.prisma` even for a one-field change —
+  a column that collides with a T-SQL reserved word or misses an audit column
+  costs a data migration later.
+  Don't use for the auth/RBAC tables themselves (→ ugt-auth-setup) or CI
+  (→ ugt-cicd-setup).
 ---
 
 # UGT Database Setup — SQL Server ผ่าน Prisma

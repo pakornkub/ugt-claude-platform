@@ -7,6 +7,8 @@ description: >
   pipeline is already failing at the Code Quality / Unit Tests / Quality Gate
   stages because `lint`, `format:check`, or `test:coverage` is missing, produces
   no `test-results/junit.xml`, or reports coverage that SonarQube can't read.
+  Triggers in Thai: "ตั้ง test", "ใส่ vitest", "ยังไม่มี test เลย", "ตั้ง eslint /
+  prettier", "pipeline แดงที่ lint", "coverage ไม่ขึ้นใน sonar".
   Use it proactively before ugt-cicd-setup: the Jenkins pipeline calls these four
   npm scripts by exact name and goes red immediately if any is absent.
   Don't use for writing the tests themselves (that's normal dev work) or for

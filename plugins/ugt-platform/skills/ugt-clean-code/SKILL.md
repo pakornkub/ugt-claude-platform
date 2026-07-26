@@ -9,6 +9,8 @@ description: >
   placement. Load this BEFORE writing or editing any component, server action,
   validation schema, table, or hook — the gate blocks on `new_violations = 0`, so
   a single stray `parseInt` fails the build for the whole team.
+  Use it explicitly too when someone says "sonar ไม่ผ่าน", "แก้ violation",
+  "Quality Gate แดง", "โค้ดซ้ำเยอะ", or asks how to suppress a finding correctly.
   Don't use for Jenkins/SonarQube server or pipeline config (→ ugt-cicd-setup).
 paths:
   - "**/*.{ts,tsx}"

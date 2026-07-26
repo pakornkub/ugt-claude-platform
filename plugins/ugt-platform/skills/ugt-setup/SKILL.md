@@ -1,14 +1,20 @@
 ---
 name: ugt-setup
 description: >
-  Use when a user wants to prepare an existing web project (often AI-generated)
-  for real deployment with org standards — "ทำให้ deploy ได้", "ยังใช้งานจริงไม่ได้",
-  "ติดตั้งระบบ login/SSO", "ต่อ database", "ทำ CI/CD", or any combination — and it
-  is not yet clear which pieces they need. Routes to ugt-database-setup,
-  ugt-quality-setup, ugt-auth-setup, and ugt-cicd-setup in the correct order and
-  installs the harness files (CLAUDE.md, .claude/rules, .claude/state).
-  Don't use when the user already names exactly one area (→ invoke that skill
-  directly).
+  The entry point for turning an existing Next.js project into one that can
+  actually be deployed on the org's infrastructure. Use this whenever someone
+  asks to "ทำให้ deploy ได้", "เอาขึ้น production", "ยังใช้งานจริงไม่ได้",
+  "ทำให้ใช้งานได้จริง", wants to prepare a project they built with AI, or asks
+  for several of database / login / test-lint / CI together. Use it just as
+  readily when they describe the symptom instead of the fix — "โปรเจคยังไม่มี
+  อะไรเลย", "ต้องเตรียมอะไรบ้างก่อนขึ้น server", "ทำตามมาตรฐานบริษัทให้ด้วย" —
+  because that is exactly the case where they don't yet know which pieces they
+  need, and this skill's job is to find out. It interviews once, routes to
+  ugt-database-setup → ugt-quality-setup → ugt-auth-setup → ugt-cicd-setup in
+  dependency order, then installs the harness files (CLAUDE.md block,
+  .claude/rules, .claude/state) so the standards outlive the session.
+  Do NOT use when the request names exactly one area: "ต่อ database", "ทำ CI",
+  "ใส่ login SSO", "ตั้ง vitest" go straight to that single skill.
 ---
 
 # UGT Setup — ตัวแม่ติดตั้งระบบมาตรฐานองค์กร

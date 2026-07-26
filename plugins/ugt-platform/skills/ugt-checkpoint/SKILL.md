@@ -11,6 +11,9 @@ description: >
   contradicts what's actually in the code.
   These two files are committed, so they are the TEAM's memory — separate from
   Claude's own auto memory, which is machine-local and not shared.
+  Don't use it to install anything (→ ugt-setup) or to record a gotcha that is
+  true for every project on this stack — that belongs in a PR to the platform
+  repo, not in one project's notes.
 ---
 
 # UGT Checkpoint — บันทึก state ให้ session หน้าและให้คนอื่นในทีม

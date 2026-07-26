@@ -1,0 +1,50 @@
+{
+  "skill_name": "ugt-setup",
+  "notes": "eval 1-2 รันบน scaffold Next.js เปล่า · eval 3 รันบน scaffold Express (ไม่ใช่ Next.js) · output ของ skill นี้ส่วนหนึ่งอยู่ใน transcript (ลำดับการเรียก skill ลูก) ไม่ใช่ในไฟล์ — grader ต้องอ่าน transcript ด้วย ไม่ใช่ดูแค่ไฟล์ที่ออกมา",
+  "evals": [
+    {
+      "id": 1,
+      "name": "vague-make-it-deployable",
+      "prompt": "โปรเจคนี้ผมทำเองกับ ai จนใช้งานได้ในเครื่องแล้ว แต่ยังเอาขึ้น server จริงไม่ได้ ต้องทำอะไรบ้างครับ ถ้าจะให้ทีมใช้งานจริง",
+      "expected_output": "ตรวจโปรเจคก่อน แล้วถาม interview รวบชุดเดียว (module + identity กลาง + คำถามของ skill ลูกที่เลือก) จากนั้นติดตั้งตามลำดับ Database → Quality → Auth → CI + ชั้น harness แล้วปิดด้วย verify + สรุป + smoke test",
+      "assertions": [
+        "ถามคำถาม interview รวมในข้อความเดียว ไม่ถามทีละข้อหลายรอบ",
+        "คำถามครอบทั้ง module ที่จะติดตั้ง, ชื่อโปรเจค, basePath, port, URL",
+        "รวมคำถามเฉพาะของ skill ลูกที่เลือกไว้ในชุดเดียวกัน ไม่ปล่อยให้ skill ลูกถามซ้ำภายหลัง",
+        "ติดตั้งตามลำดับ Database → Quality → Auth → CI",
+        "ติดตั้งชั้น harness ด้วย: มีบล็อก ugt:start/ugt:end ใน CLAUDE.md, .claude/rules/, .claude/state/, .claude/settings.json",
+        "node scripts/verify.mjs ของ ugt-setup exit 0",
+        "รัน verify.mjs ของทุก module ที่ติดตั้งและรายงานผล",
+        "สรุปตอนจบมีรายการ env ที่ต้องเติมค่าจริง และของที่ต้องขอจาก admin",
+        "แนบ smoke-test checklist ที่ตรงกับ module ที่ติดตั้งจริง"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "single-area-should-not-orchestrate",
+      "prompt": "ต่อ database sql server ให้โปรเจคนี้ด้วยครับ ที่เหลือยังไม่ต้อง",
+      "expected_output": "ไม่เปิด interview เต็มชุดของตัวแม่ ไม่ติดตั้ง auth/quality/CI — ส่งงานให้ ugt-database-setup ตรง ๆ (หรือถ้า ugt-setup ถูกเรียกมาแล้ว ก็ทำเฉพาะส่วน database)",
+      "assertions": [
+        "ไม่ติดตั้ง auth, vitest/eslint หรือไฟล์ CI ใด ๆ",
+        "ไม่ถามคำถามเกี่ยวกับ Keycloak, LDAP, Jenkins หรือ Sentry",
+        "ถามเฉพาะสิ่งที่ ugt-database-setup ต้องรู้ (server, ชื่อ DB, มีอยู่แล้วหรือสร้างใหม่, ใช้ SP ไหม)",
+        "ผลลัพธ์คือไฟล์ของ database เท่านั้น"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "must-refuse-non-nextjs",
+      "prompt": "โปรเจคนี้เป็น express + react ธรรมดาไม่ได้ใช้ next ช่วยติดตั้งมาตรฐานบริษัทให้ด้วยครับ ทั้ง database ทั้ง login ทั้ง ci",
+      "expected_output": "บอกตรง ๆ ว่า skill ชุดนี้ทำมาสำหรับ Next.js App Router เท่านั้นและใช้กับ stack นี้ไม่ได้ · ไม่พยายามดัดแปลง asset เอง · อาจเสนอส่วนที่ยังใช้ได้ (มาตรฐานฝั่ง DB/Jenkins ระดับ contract) แต่ต้องระบุชัดว่าไม่ใช่การติดตั้งอัตโนมัติ",
+      "assertions": [
+        "บอกผู้ใช้ชัดเจนว่า skill ชุดนี้รองรับเฉพาะ Next.js App Router",
+        "ไม่สร้าง proxy.ts, app/api/auth/[...all]/route.ts หรือไฟล์ที่ผูกกับ Next.js ลงในโปรเจค express",
+        "ไม่ดัดแปลง asset ให้เข้ากับ express เอง",
+        "ไม่ติดตั้งอะไรลงโปรเจคโดยไม่ได้บอกข้อจำกัดก่อน"
+      ],
+      "files": []
+    }
+  ]
+}

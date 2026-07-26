@@ -1,0 +1,56 @@
+{
+  "skill_name": "ugt-database-setup",
+  "notes": "รันบน scaffold Next.js เปล่า (มี package.json + app/) ยังไม่มี prisma · assertion เกือบทั้งหมดตรวจได้ด้วย scripts/verify.mjs",
+  "evals": [
+    {
+      "id": 1,
+      "name": "fresh-project-new-database",
+      "prompt": "โปรเจค asset-register ยังไม่มี database เลยครับ ต่อ sql server ให้ด้วย server อยู่ที่ 10.10.1.25 port 1433 database ชื่อ AssetRegister สร้างใหม่ ยังไม่ต้องใช้ stored procedure",
+      "expected_output": "ติดตั้ง prisma + adapter mssql + t3-env · prisma.config.ts ถือ url · schema skeleton ตาม convention · .env.example ที่ commit ได้ + .env.local ที่ไม่ commit · ไม่แตะ process.env ตรง ๆ",
+      "assertions": [
+        "node scripts/verify.mjs ของ ugt-database-setup exit 0",
+        "prisma.config.ts มี url และ prisma/schema.prisma ไม่มี url ใน datasource",
+        "generator ใน schema.prisma ใช้ provider = \"prisma-client-js\"",
+        "lib/prisma.ts ใช้ import type สำหรับ mssql ไม่ใช่ value import",
+        "lib/env.ts เป็นไฟล์เดียวที่อ่าน process.env (ยกเว้น *.config.ts ที่ root)",
+        "ทุก model มี @@map แบบ PascalCase พหูพจน์ และทุก field มี @map",
+        "ทุก model ที่ app เป็นเจ้าของมี audit columns ครบ 7 คอลัมน์",
+        ".env.example ไม่มีรหัสผ่านจริง (มีแต่ placeholder) และ .gitignore ครอบ .env.local",
+        "ไม่มี placeholder <db-host> <db-port> <db-name> เหลือใน .env.local",
+        "ไม่มีคอมเมนต์ที่อ้าง <EXT>_ หรือ <linked-server> ค้างอยู่ เพราะโปรเจคนี้ไม่ได้ใช้"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "existing-db-with-sp-and-linked-server",
+      "prompt": "ต่อ prisma ให้โปรเจค hr-report กับ database ที่มีอยู่แล้วชื่อ HRReport ที่ 10.10.1.30 นะ ต้องเรียก stored procedure ที่ชื่อ usp_RebuildMonthlySummary ด้วย แล้วมีอ่านข้อมูลพนักงานข้าม linked server ชื่อ HRLINK มาด้วย",
+      "expected_output": "ใช้แนวทาง introspect/migrate resolve สำหรับ DB ที่มีอยู่แล้ว · ตั้ง requestTimeout ให้รองรับ SP นาน · pattern เรียก SP ด้วย $executeRaw tagged template · linked server เป็น SELECT-only และ CAST ทุกคอลัมน์",
+      "assertions": [
+        "node scripts/verify.mjs ของ ugt-database-setup exit 0",
+        "ไม่ใช้ prisma migrate dev แบบสร้าง schema ใหม่ทับ database ที่มีข้อมูลอยู่",
+        "lib/prisma.ts ตั้ง requestTimeout สูงกว่า default 15 วินาที",
+        "โค้ดที่เรียก stored procedure ใช้ $executeRaw แบบ tagged template ไม่ใช่ $executeRawUnsafe",
+        "โค้ดที่อ่านข้าม linked server ใช้ชื่อเต็ม 4 ส่วนและมี CAST ทุกคอลัมน์ที่ select",
+        "ไม่มีคำสั่ง INSERT/UPDATE/DELETE ที่ยิงผ่าน linked server",
+        "ฟังก์ชันที่รับ input จากผู้ใช้ sanitize ด้วย regex ก่อน แล้วจึง parameterize"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "reserved-word-column-must-be-renamed",
+      "prompt": "เพิ่มตารางเก็บ config ของแอปให้ด้วย มีคอลัมน์ key, value, group แล้วก็ order สำหรับเรียงลำดับ",
+      "expected_output": "รับคำขอแต่เปลี่ยนชื่อคอลัมน์ที่ชนคำสงวน T-SQL โดยเติมคำขยาย (SettingKey/SettingValue/GroupName/SortOrder) พร้อมคอมเมนต์กำกับ และใส่ audit columns ครบ",
+      "assertions": [
+        "node scripts/verify.mjs ของ ugt-database-setup exit 0",
+        "ไม่มีคอลัมน์ที่ @map เป็น Key, Value, Group หรือ Order ตรง ๆ",
+        "ชื่อที่ใช้แทนเติมคำขยาย เช่น SettingKey / SettingValue / GroupName / SortOrder",
+        "มีคอมเมนต์ใน schema กำกับว่าเลี่ยงคำสงวน T-SQL",
+        "ตารางใหม่มี audit columns ครบและ @@map เป็น PascalCase พหูพจน์",
+        "อธิบายให้ผู้ใช้ทราบว่าเปลี่ยนชื่อคอลัมน์ให้เพราะอะไร ไม่เปลี่ยนแบบเงียบ ๆ"
+      ],
+      "files": []
+    }
+  ]
+}

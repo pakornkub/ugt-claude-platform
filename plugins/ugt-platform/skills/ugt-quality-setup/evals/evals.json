@@ -1,0 +1,39 @@
+{
+  "skill_name": "ugt-quality-setup",
+  "notes": "eval 1 รันบน scaffold Next.js เปล่า · eval 2 รันบน scaffold ที่มี jest + @testing-library/jest-dom ติดตั้งไว้แล้วและมี script test เป็น jest",
+  "evals": [
+    {
+      "id": 1,
+      "name": "no-test-infra-at-all",
+      "prompt": "โปรเจคนี้ยังไม่มี test ไม่มี lint อะไรเลยครับ เดี๋ยวจะทำ jenkins ต่อ ช่วยตั้งให้ครบก่อน",
+      "expected_output": "ติดตั้ง vitest (+setup +server-only stub) / eslint / prettier / husky+lint-staged · เพิ่ม script ตามชื่อที่ pipeline เรียก · vitest ออก junit เมื่อ CI=true และ coverage lcov",
+      "assertions": [
+        "node scripts/verify.mjs ของ ugt-quality-setup exit 0",
+        "package.json มี script ชื่อ lint, format:check, test:coverage, build ครบ",
+        "vitest.config.ts เปิด junit reporter เฉพาะเมื่อ process.env.CI",
+        "vitest.config.ts ตั้ง outputFile.junit เป็น test-results/junit.xml",
+        "coverage reporter มี lcov อยู่ในรายการ",
+        "coverage.include ครอบทุก dir ที่มี source อยู่จริงในโปรเจค",
+        "test.env มี SKIP_ENV_VALIDATION",
+        "alias server-only ชี้ไปไฟล์ stub ในโปรเจค ไม่ใช่ path ใน node_modules",
+        "eslint globalIgnores มี .next/**, out/**, build/**, next-env.d.ts และ coverage/**",
+        ".husky/pre-commit เรียก lint-staged ไม่ใช่ npm test",
+        ".gitignore มีทั้ง coverage และ test-results"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "existing-jest-must-ask-before-replacing",
+      "prompt": "ช่วยตั้ง test ให้ตรงมาตรฐานบริษัทด้วยครับ",
+      "expected_output": "ตรวจพบว่ามี jest อยู่แล้ว จึงรายงานสิ่งที่เจอและถามก่อนว่าจะย้ายเป็น vitest หรือคง jest ไว้แล้วปรับ reporter — ไม่ลบ config เดิมเงียบ ๆ",
+      "assertions": [
+        "รายงานว่าพบ jest ที่ติดตั้งอยู่แล้วก่อนลงมือ",
+        "ถามผู้ใช้ก่อนว่าจะย้ายเป็น vitest หรือคง jest",
+        "ไม่ลบหรือเขียนทับ jest config เดิมโดยไม่ได้รับคำตอบ",
+        "ถ้าเลือกคง jest ต้องอธิบายว่ายังต้องได้ test-results/junit.xml และ coverage/lcov.info เพื่อให้ pipeline อ่านได้"
+      ],
+      "files": []
+    }
+  ]
+}

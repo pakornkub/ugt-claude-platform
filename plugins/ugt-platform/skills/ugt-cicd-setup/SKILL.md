@@ -1,15 +1,20 @@
 ---
 name: ugt-cicd-setup
 description: >
-  Use when adding the org-standard CI/CD to an existing project: Jenkins
-  pipeline, SonarQube analysis + Quality Gate, OWASP Dependency Check, or
-  Docker build/deploy — including creating a Jenkinsfile,
-  sonar-project.properties, Dockerfile/docker-compose for CI, wiring Jenkins
-  credentials, or debugging CI failures during initial pipeline setup
-  (Quality Gate hangs, OWASP timeouts, deploy health-check failures).
-  Don't use for writing code that passes the gate (→ ugt-clean-code), for
-  installing the test/lint tooling the pipeline calls (→ ugt-quality-setup), or
-  for DB/auth setup (→ ugt-database-setup / ugt-auth-setup).
+  Use when a project needs the org-standard delivery pipeline — "ทำ CI/CD",
+  "ตั้ง Jenkins", "deploy ด้วย docker", "ต่อ SonarQube", "ยัง deploy มือทุกครั้ง" —
+  producing the Jenkinsfile (10 stages), sonar-project.properties, Dockerfile,
+  both compose files, the OWASP suppression file, and the `/api/health` route the
+  healthcheck depends on. Also use when the pipeline itself misbehaves during
+  setup, because the causes are documented here: Quality Gate that never
+  finishes (missing SonarQube→Jenkins webhook), OWASP stage timing out, container
+  never reaching `healthy`, `COPY .next/standalone` failing, client-side env vars
+  empty in the browser bundle, or a Groovy parse error after removing an optional
+  block.
+  Run ugt-quality-setup first — this pipeline calls `lint`, `format:check` and
+  `test:coverage` by exact name and goes red on the third stage without them.
+  Not for writing code that passes the gate (→ ugt-clean-code) or DB/auth setup
+  (→ ugt-database-setup / ugt-auth-setup).
 ---
 
 # UGT CI/CD Setup

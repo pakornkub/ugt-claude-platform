@@ -1,13 +1,20 @@
 ---
 name: ugt-auth-setup
 description: >
-  Use when adding a login system to a project — SSO (Keycloak), AD/LDAP login,
-  or local email/password via Better Auth; when setting up session cookies,
-  protected routes (proxy/middleware guard), RBAC roles/permissions, or the
-  first-admin bootstrap flow. Also use when debugging login redirect loops,
-  cookie-name mismatches, or Keycloak client configuration.
-  Don't use for DB wiring (→ ugt-database-setup) or CI (→ ugt-cicd-setup).
-  Requires database set up first.
+  Use when a project needs login — "ใส่ระบบ login", "ต่อ SSO", "login ด้วย AD",
+  "ใช้ Keycloak ของบริษัท", "ยังไม่มีระบบสมาชิก" — covering SSO (Keycloak OIDC),
+  AD/LDAP bind, or local email/password via Better Auth, plus session cookies,
+  protected-route guards in `proxy.ts`, RBAC roles/permissions, audit logging, and
+  the first-admin bootstrap page. Use it too for anything touching permissions
+  ("ใครเห็นเมนูนี้ได้", "เพิ่ม role", "guard หน้านี้") since every privileged
+  Server Action must follow session → permission → action → audit log.
+  Reach for it immediately on these symptoms, which all have documented causes
+  here: `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain, login
+  working locally but looping in production, logout that doesn't stick on https,
+  static assets returning `Unexpected token '<'`, or Keycloak rejecting the
+  redirect URI.
+  Requires the database set up first (→ ugt-database-setup). Not for CI
+  (→ ugt-cicd-setup).
 ---
 
 # UGT Auth Setup — SSO / LDAP / Local + RBAC
