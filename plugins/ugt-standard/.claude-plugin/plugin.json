@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ugt-standard",
   "displayName": "UGT Standard (bundle)",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "The recommended bundle for dev teams — one install brings both the org's stack knowledge (ugt-platform) and the development pipeline (superpowers: brainstorming → plan → TDD → code review)",
   "author": {
     "name": "UGT DX Team"
