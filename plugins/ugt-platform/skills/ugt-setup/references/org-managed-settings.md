@@ -47,7 +47,7 @@ only in managed/policy settings).
   },
   "extraKnownMarketplaces": {
     "ugt": {
-      "source": { "source": "github", "repo": "<org>/ugt-claude-platform" }
+      "source": { "source": "github", "repo": "pakornkub/ugt-claude-platform" }
     }
   },
   "enabledPlugins": {

@@ -31,7 +31,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | โหมด | ทำอย่างไร | ได้อะไร | update ได้ไหม |
 | --- | --- | --- | --- |
-| **C. Marketplace (ทีมพัฒนา — แนะนำ)** | `/plugin marketplace add <org>/ugt-claude-platform` แล้ว `/plugin install ugt-standard@ugt` | ครบทุกอย่าง + superpowers | ✅ `/plugin update` |
+| **C. Marketplace (ทีมพัฒนา — แนะนำ)** | `/plugin marketplace add pakornkub/ugt-claude-platform` แล้ว `/plugin install ugt-standard@ugt` | ครบทุกอย่าง + superpowers | ✅ `/plugin update` |
 | **B. Copy plugin ลงโปรเจคที่ส่งมอบ** | copy โฟลเดอร์ `plugins/ugt-platform` ไปวางเป็น `<โปรเจค>/.claude/skills/ugt-platform/` (โหลดเป็น plugin อัตโนมัติเพราะมี `.claude-plugin/plugin.json` — ต้องกดยอมรับ workspace trust ครั้งแรก) | skills + hooks ครบ ไม่ต้องแตะ marketplace | ❌ copy ใหม่เอง |
 | **A. Copy skill เดี่ยว** | copy `plugins/ugt-platform/skills/<ชื่อ>` ไปวางใน `.claude/skills/` | เฉพาะ skill นั้น (ไม่มี hook) | ❌ |
 

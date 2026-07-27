@@ -121,7 +121,8 @@ How:
    so the runtime loads them by itself when Claude touches matching files —
    there is no need to write "if you edit X, read Y" into CLAUDE.md.
 3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`,
-   `enabledPlugins`, `permissions` · replace `<org>` with the real GitHub org ·
+   `enabledPlugins`, `permissions` (the marketplace repo is already set to
+   `pakornkub/ugt-claude-platform`) ·
    if the file already exists, merge — do not overwrite.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the

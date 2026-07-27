@@ -3,7 +3,7 @@
     "ugt": {
       "source": {
         "source": "github",
-        "repo": "<org>/ugt-claude-platform"
+        "repo": "pakornkub/ugt-claude-platform"
       }
     }
   },
