@@ -1,0 +1,52 @@
+{
+  "skill_name": "ugt-nextjs-auth-setup",
+  "notes": "Runs on a bare Next.js scaffold with prisma + lib/prisma.ts + lib/env.ts already installed (the output of ugt-nextjs-database-setup), except eval 3 which needs a scaffold with no prisma at all. Machine-checkable assertions use scripts/verify.mjs as the grader. Prompts stay in Thai: they simulate real user input.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "sso-plus-ldap-drop-local",
+      "prompt": "โปรเจค expense-portal ผมเป็น next.js ต่อ prisma กับ sql server ไว้แล้วนะ ตอนนี้ยังไม่มีหน้า login เลย อยากได้ SSO ของบริษัท แล้วขอ login ด้วย AD ด้วยเพราะพวก outsource ไม่มี account ใน keycloak ส่วน email/password ไม่ต้องมีนะไม่อยากดูแลรหัสผ่านเอง เดี๋ยว deploy ใต้ /expense-portal บน apps.example.com",
+      "expected_output": "Installs auth complete for SSO + LDAP only (LOCAL removed everywhere) · cookie prefix derived from the basePath and identical across lib/auth.ts, proxy.ts, lib/actions/auth.ts · no leftover placeholders · closing summary lists what to request from the Keycloak admin",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0",
+        "No [METHOD: marker remains in any file",
+        "No <project-name> remains anywhere, including inside components/login-form.tsx",
+        "components/login-form.tsx has no local email/password section and no orphaned imports from it",
+        "lib/actions/auth.ts has no localLoginAction",
+        "lib/ldap.ts exists and package.json has ldapts, not ldapjs",
+        "cookiePrefix in lib/auth.ts derives from NEXT_PUBLIC_BASE_PATH, not a literal",
+        "prisma/schema.prisma has a rateLimit model with id as @id and key as String?",
+        "user/session/account/verification/role/permission/rolePermission map to singular names and activityLog maps to ActivityLogs",
+        "The closing report states a Keycloak client must be requested, with a redirect URI that includes the basePath"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "diagnose-redirect-loop-shared-domain",
+      "prompt": "ช่วยดูให้หน่อย โปรเจค tooling-dashboard ทำ login SSO เสร็จแล้ว รันในเครื่องเข้าได้ปกติ แต่พอ deploy ขึ้น server จริงแล้วเข้าเว็บไม่ได้เลย chrome ขึ้น ERR_TOO_MANY_REDIRECTS อยู่ที่ apps.example.com/tooling-dashboard ในเครื่องนั้นมีแอปอื่นของทีมอยู่ด้วยหลายตัว",
+      "expected_output": "Diagnoses colliding session cookies (multiple apps sharing one cookie name at path=/ on the same domain) and fixes it by deriving the cookie prefix from the basePath consistently across all 3 places (including the __Secure- rule on https) — not a single-file patch, and never by disabling the guard",
+      "assertions": [
+        "Identifies the cause as session-cookie name collision between apps on the same domain",
+        "Fixes all of lib/auth.ts, proxy.ts, and lib/actions/auth.ts, not just one file",
+        "Explains that an https BETTER_AUTH_URL makes Better Auth prepend __Secure- and the code must compute the same name",
+        "Does not suggest disabling the proxy.ts guard or removing the cookie check to silence the symptom",
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 after the fix"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "must-stop-when-no-database",
+      "prompt": "ใส่ระบบ login SSO ให้โปรเจคนี้ด้วยครับ",
+      "expected_output": "Inspects and finds the project has no Prisma/database, so it stops and says the database must come first (pointing at ugt-nextjs-database-setup) instead of installing auth on top",
+      "assertions": [
+        "Creates no lib/auth.ts or any other auth file before the database is ready",
+        "Tells the user clearly the database must be set up first because Better Auth stores user/session/account in Prisma",
+        "Points at ugt-nextjs-database-setup as the next step",
+        "Does not guess a DATABASE_URL or invent a schema on its own"
+      ],
+      "files": []
+    }
+  ]
+}

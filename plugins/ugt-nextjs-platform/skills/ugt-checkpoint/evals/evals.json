@@ -1,0 +1,36 @@
+{
+  "skill_name": "ugt-checkpoint",
+  "notes": "Runs on a fixture where both .claude/state/ files already exist (the output of ugt-nextjs-setup step 4) with some prior content, to test 'update, don't overwrite'. Prompts stay in Thai: they simulate real user input.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "update-not-overwrite",
+      "prompt": "วันนี้ทำเสร็จแล้ว บันทึกไว้ให้ด้วย วันนี้แก้หน้า approve ลาให้กดอนุมัติหลายรายการพร้อมกันได้ ตัดสินใจใช้ transaction เดียวต่อการกดหนึ่งครั้งเพราะไม่อยากให้อนุมัติได้ครึ่ง ๆ ส่วนที่ยังไม่เสร็จคือ email แจ้งเตือน",
+      "expected_output": "Updates checkpoint.md keeping the existing entries, adds new entries under the right sections, records the Decision with its reason and rejected alternative, dates everything, leaves project-notes.md untouched since there is no error pattern",
+      "assertions": [
+        "Pre-existing entries in checkpoint.md are all preserved, none deleted",
+        "Today's finished work is added under 'Done' with a date",
+        "The email notification lands under 'Next', not under 'Done'",
+        "The transaction decision is recorded with its reason",
+        "The 'Last updated' field is changed to today's date",
+        "All 4 checkpoint.md sections remain and no new section is added",
+        "node scripts/verify.mjs of ugt-nextjs-setup exits 0 (state structure still valid)"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "triage-generic-gotcha-upstream",
+      "prompt": "เมื่อกี้เสียเวลาไปชั่วโมงนึง เพราะ prisma generate มันใช้ type เก่าหลังผมแก้ schema แล้วลืมรัน migrate ก่อน อันนี้น่าจะเจอกันทุกคนนะ บันทึกไว้ให้ด้วย",
+      "expected_output": "Records it under the project's Error Patterns, but also states this gotcha is true for every project on the stack and should therefore be a PR to the platform repo, not just one project's notes — and never edits installed skill files",
+      "assertions": [
+        "Records in symptom → cause → fix format with a date",
+        "Writes under Error Patterns, not Deviations or Open Questions",
+        "States the gotcha applies to every project on the stack and should become a PR to the platform repo",
+        "Edits no SKILL.md or any file in the plugin cache",
+        "Creates no .claude/skills/ugt-* shadowing a platform skill"
+      ],
+      "files": []
+    }
+  ]
+}

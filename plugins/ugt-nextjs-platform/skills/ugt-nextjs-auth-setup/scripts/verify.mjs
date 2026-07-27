@@ -1,0 +1,302 @@
+#!/usr/bin/env node
+// Runnable version of the ugt-nextjs-auth-setup Verification Checklist (machine-checkable part)
+//
+//   node <path-to-skill>/scripts/verify.mjs
+//
+// Anchors at process.cwd() as the project root — a file that should exist but
+// can't be found is a FAIL, never a pass.
+// Real flow testing (login via every method, logout clearing the cookie,
+// /admin/setup) cannot be machine-checked — walk §8 of SKILL.md by hand.
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
+
+const ROOT = process.cwd();
+const results = [];
+const p = (...s) => join(ROOT, ...s);
+const has = (...s) => existsSync(p(...s));
+const read = (...s) => readFileSync(p(...s), 'utf8');
+
+/** Strip comments before scanning — otherwise text WARNING against a pattern matches as usage */
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+function check(name, fn) {
+  try {
+    const r = fn();
+    results.push({ name, ...(r ?? { ok: true }) });
+  } catch (error) {
+    results.push({ name, ok: false, msg: error.message });
+  }
+}
+
+function sourceFiles() {
+  const skip = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', 'generated', '.claude']);
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (skip.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (/\.(ts|tsx|prisma)$/.test(entry)) out.push(full);
+    }
+  };
+  walk(ROOT);
+  return out;
+}
+
+const AUTH_FILES = [
+  'lib/auth.ts',
+  'lib/auth-client.ts',
+  'lib/actions/auth.ts',
+  'lib/permissions.ts',
+  'lib/get-user-permissions.ts',
+  'proxy.ts',
+  'app/api/auth/[...all]/route.ts',
+];
+const pkg = has('package.json') ? JSON.parse(read('package.json')) : null;
+const schema = has('prisma/schema.prisma') ? read('prisma/schema.prisma') : '';
+
+// ── 1. Required files ──────────────────────────────────────────────────────
+check('Core auth files present', () => {
+  const missing = AUTH_FILES.filter((f) => !has(f));
+  return missing.length
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-auth-setup first` }
+    : { ok: true };
+});
+
+check('proxy.ts, not middleware.ts', () => {
+  if (has('middleware.ts') && !has('proxy.ts')) {
+    return { ok: false, msg: 'Found middleware.ts — Next.js 16 uses proxy.ts; the guard will never run' };
+  }
+  return { ok: true };
+});
+
+check('First-admin bootstrap page exists', () => {
+  const candidates = [
+    'app/(admin-setup)/admin/setup/page.tsx',
+    'app/admin/setup/page.tsx',
+    'src/app/(admin-setup)/admin/setup/page.tsx',
+  ];
+  return candidates.some((c) => has(c))
+    ? { ok: true }
+    : { ok: false, msg: 'No /admin/setup page — a fresh deployment has no way to mint an Administrator' };
+});
+
+// ── 2. Leftover placeholders (including the one hidden mid-file) ───────────
+const PLACEHOLDERS = [
+  '<project-name>',
+  '<base-path>',
+  '<keycloak-host>',
+  '<realm>',
+  '<ldap-host>',
+  '<ad-base-dn>',
+  '<company-domain>',
+  '<app-host>',
+];
+check('No <...> placeholders left', () => {
+  const found = [];
+  for (const file of sourceFiles()) {
+    const body = readFileSync(file, 'utf8');
+    const hits = PLACEHOLDERS.filter((ph) => body.includes(ph));
+    if (hits.length) found.push(`${relative(ROOT, file)}: ${hits.join(', ')}`);
+  }
+  for (const f of ['.env.local', '.env.example', '.env']) {
+    if (!has(f)) continue;
+    const hits = PLACEHOLDERS.filter((ph) => read(f).includes(ph));
+    if (hits.length) found.push(`${f}: ${hits.join(', ')}`);
+  }
+  return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
+});
+
+check('All [METHOD: …] markers removed', () => {
+  const found = [];
+  for (const file of sourceFiles()) {
+    const body = readFileSync(file, 'utf8');
+    const hits = [...new Set([...body.matchAll(/\[METHOD:\s*[^\]]+\]/g)].map((m) => m[0]))];
+    if (hits.length) found.push(`${relative(ROOT, file)}: ${hits.join(', ')}`);
+  }
+  return found.length
+    ? { ok: false, msg: `Markers remain (sections for unselected methods were not cut): ${found.join(' · ')}` }
+    : { ok: true };
+});
+
+// ── 3. Cookie prefix must match across 3 files ─────────────────────────────
+check('Cookie prefix consistent across all 3 files', () => {
+  const targets = ['lib/auth.ts', 'proxy.ts', 'lib/actions/auth.ts'];
+  const missing = targets.filter((f) => !has(f));
+  if (missing.length) return { ok: false, msg: `Missing files: ${missing.join(', ')}` };
+  const noPrefix = targets.filter((f) => !/cookiePrefix|APP_COOKIE_PREFIX/.test(read(f)));
+  if (noPrefix.length) {
+    return {
+      ok: false,
+      msg: `No cookie-prefix reference in: ${noPrefix.join(', ')} — on a shared domain this is ERR_TOO_MANY_REDIRECTS`,
+    };
+  }
+  // Every file should derive from NEXT_PUBLIC_BASE_PATH, not hardcode
+  const hardcoded = targets.filter((f) => {
+    const body = read(f);
+    return /cookiePrefix\s*:\s*['"][^'"]+['"]/.test(body);
+  });
+  return hardcoded.length
+    ? { ok: false, msg: `Hardcoded cookie prefix in: ${hardcoded.join(', ')} — must derive from NEXT_PUBLIC_BASE_PATH` }
+    : { ok: true };
+});
+
+check('proxy redirects are app-relative', () => {
+  if (!has('proxy.ts')) return { ok: false, msg: 'No proxy.ts' };
+  const body = stripComments(read('proxy.ts'));
+  // Flag only *assignments* to url.pathname that mention basePath on the same line
+  const bad = body
+    .split('\n')
+    .filter((l) => /\burl\.pathname\s*=/.test(l))
+    .filter((l) => /basePath|BASE_PATH/.test(l));
+  return bad.length
+    ? { ok: false, msg: `basePath appended to url.pathname manually → duplicated basePath in the URL (clone() already carries it): ${bad.map((l) => l.trim()).join(' · ')}` }
+    : { ok: true };
+});
+
+check('proxy bypasses /_next/ and /api/health', () => {
+  if (!has('proxy.ts')) return { ok: false, msg: 'No proxy.ts' };
+  const body = read('proxy.ts');
+  const problems = [];
+  if (!body.includes('_next')) problems.push("no /_next/ bypass → static assets get an HTML redirect (Unexpected token '<')");
+  if (!body.includes('/api/health')) problems.push('no /api/health bypass → healthchecks bounce to /login');
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+// ── 4. Frequently mis-called Better Auth APIs ──────────────────────────────
+check('Uses auth.api.signInEmail (not signIn.email)', () => {
+  const bad = sourceFiles().filter((f) => /auth\.api\.signIn\.email/.test(readFileSync(f, 'utf8')));
+  return bad.length
+    ? { ok: false, msg: `${bad.map((f) => relative(ROOT, f)).join(', ')} — that path does not exist in Better Auth` }
+    : { ok: true };
+});
+
+check('Logout avoids cookieStore.delete()', () => {
+  const bad = [];
+  for (const f of ['lib/actions/auth.ts']) {
+    if (!has(f)) continue;
+    if (/cookie(Store)?\s*\.\s*delete\s*\(/.test(stripComments(read(f)))) bad.push(f);
+  }
+  return bad.length
+    ? {
+        ok: false,
+        msg: `${bad.join(', ')} uses cookieStore.delete() — it omits the Secure flag so __Secure- cookies never get deleted on https (use set(name, '', { maxAge: 0, secure }))`,
+      }
+    : { ok: true };
+});
+
+check('Keycloak plugin guarded by env', () => {
+  if (!has('lib/auth.ts')) return { ok: false, msg: 'No lib/auth.ts' };
+  const body = read('lib/auth.ts');
+  if (!/KEYCLOAK/.test(body)) return { ok: 'warn', msg: 'SSO not enabled (no KEYCLOAK_* references)' };
+  return /KEYCLOAK_ISSUER\s*&&|KEYCLOAK_CLIENT_ID\s*&&|\?\s*\[/.test(body)
+    ? { ok: true }
+    : { ok: false, msg: 'keycloak() called without an undefined guard — builds with SKIP_ENV_VALIDATION=1 will crash' };
+});
+
+// ── 5. Schema requirements ─────────────────────────────────────────────────
+check('rateLimit model: id is @id, key is nullable', () => {
+  if (!schema) return { ok: false, msg: 'No prisma/schema.prisma' };
+  const model = schema.match(/model\s+rateLimit\s*\{([\s\S]*?)\n\}/)?.[1];
+  if (!model) return { ok: 'warn', msg: 'No rateLimit model (Better Auth rate limiting not enabled)' };
+  const problems = [];
+  if (!/^\s*id\s+String\s+@id/m.test(model)) problems.push('id is not @id');
+  if (!/^\s*key\s+String\?/m.test(model)) problems.push('key is not nullable');
+  return problems.length
+    ? { ok: false, msg: `${problems.join(' · ')} — Better Auth v1 sends id too, yielding "Unknown argument 'id'"` }
+    : { ok: true };
+});
+
+check('Auth/RBAC tables map singular per convention', () => {
+  if (!schema) return { ok: false, msg: 'No prisma/schema.prisma' };
+  const expect = {
+    user: 'User',
+    session: 'Session',
+    account: 'Account',
+    verification: 'Verification',
+    rateLimit: 'RateLimit',
+    role: 'Role',
+    permission: 'Permission',
+    rolePermission: 'RolePermission',
+    activityLog: 'ActivityLogs',
+  };
+  const wrong = [];
+  for (const [model, want] of Object.entries(expect)) {
+    const body = schema.match(new RegExp(`model\\s+${model}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1];
+    if (!body) continue;
+    const got = body.match(/@@map\("([^"]+)"\)/)?.[1];
+    if (got !== want) wrong.push(`${model} -> "${got ?? '(no @@map)'}" should be "${want}"`);
+  }
+  return wrong.length ? { ok: false, msg: wrong.join(' · ') } : { ok: true };
+});
+
+check('ActivityLogs never UPDATEd/DELETEd from app code', () => {
+  const bad = [];
+  for (const file of sourceFiles()) {
+    const body = readFileSync(file, 'utf8');
+    if (/prisma\.activityLog\.(update|delete|deleteMany|updateMany|upsert)/.test(body)) {
+      bad.push(relative(ROOT, file));
+    }
+  }
+  return bad.length
+    ? { ok: false, msg: `${bad.join(', ')} — the audit table is append-only` }
+    : { ok: true };
+});
+
+// ── 6. Env ─────────────────────────────────────────────────────────────────
+check('BETTER_AUTH_SECRET enforces length >= 32', () => {
+  if (!has('lib/env.ts')) return { ok: false, msg: 'No lib/env.ts' };
+  const body = read('lib/env.ts');
+  if (!body.includes('BETTER_AUTH_SECRET')) return { ok: false, msg: 'lib/env.ts has no BETTER_AUTH_SECRET' };
+  // min(32) or min(32, 'message') both pass
+  return /BETTER_AUTH_SECRET\s*:[^\n]*min\(\s*32\s*[,)]/.test(body)
+    ? { ok: true }
+    : { ok: 'warn', msg: 'No .min(32) found — a short secret weakens the HMAC' };
+});
+
+check('NEXT_PUBLIC_BASE_PATH in client block + runtimeEnv', () => {
+  if (!has('lib/env.ts')) return { ok: false, msg: 'No lib/env.ts' };
+  const body = read('lib/env.ts');
+  if (!body.includes('NEXT_PUBLIC_BASE_PATH')) {
+    return { ok: 'warn', msg: 'NEXT_PUBLIC_BASE_PATH not declared (fine if the project has no basePath)' };
+  }
+  const occurrences = (body.match(/NEXT_PUBLIC_BASE_PATH/g) ?? []).length;
+  return occurrences >= 2
+    ? { ok: true }
+    : { ok: false, msg: 'Declared only once — must appear in both the client block and runtimeEnv or it is undefined at runtime' };
+});
+
+check('ldapts, not ldapjs', () => {
+  if (!pkg) return { ok: false, msg: 'No package.json' };
+  const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+  if (deps.ldapjs) return { ok: false, msg: 'ldapjs in use (deprecated, no types) — switch to ldapts' };
+  const usesLdap = has('lib/ldap.ts');
+  if (usesLdap && !deps.ldapts) return { ok: false, msg: 'lib/ldap.ts exists but ldapts is not installed' };
+  return { ok: true };
+});
+
+check('.env.local not committed', () => {
+  if (!has('.gitignore')) return { ok: false, msg: 'No .gitignore' };
+  const ig = read('.gitignore');
+  return ig.includes('.env.local') || ig.includes('.env*')
+    ? { ok: true }
+    : { ok: false, msg: '.gitignore does not cover .env.local — secrets would land in git' };
+});
+
+// ── Report ─────────────────────────────────────────────────────────────────
+const icon = { true: '✔', false: '✘', warn: '!' };
+let failed = 0;
+let warned = 0;
+console.log('\nugt-nextjs-auth-setup — verify\n');
+for (const r of results) {
+  const state = r.ok === true ? 'true' : r.ok === 'warn' ? 'warn' : 'false';
+  if (state === 'false') failed++;
+  if (state === 'warn') warned++;
+  console.log(`  ${icon[state]} ${r.name}${r.msg ? `\n      ${r.msg}` : ''}`);
+}
+console.log(
+  `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
+    'Not machine-checkable, exercise by hand: login via every method · logout clears cookie + DB session ·\n' +
+    '/admin/setup grants Administrator on one click · ActivityLogs has login.success/logout rows\n'
+);
+process.exit(failed > 0 ? 1 : 0);

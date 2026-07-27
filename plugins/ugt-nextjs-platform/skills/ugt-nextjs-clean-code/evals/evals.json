@@ -1,0 +1,35 @@
+{
+  "skill_name": "ugt-nextjs-clean-code",
+  "notes": "This skill's output is code style, which skill-creator classifies as subjective — assertions are limited to the deterministically checkable idioms via scripts/verify.mjs; overall quality is judged by a human. Prompts stay in Thai: they simulate real user input.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "new-component-must-use-modern-idioms",
+      "prompt": "เขียน component ตารางแสดงรายการคำขอลาให้หน่อย มี props เป็น list ของ request แล้วมี callback ตอนกดอนุมัติ ต้องแปลง string เป็นตัวเลขสำหรับจำนวนวัน แล้วเอารายการล่าสุดมาโชว์บนสุดด้วย",
+      "expected_output": "A component whose prop type is wrapped in Readonly<> · uses Number.parseInt / arr.at(-1) / ?? / replaceAll per the SonarQube-enforced idioms · no catch (e)",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-nextjs-clean-code (--all mode) exits 0 on the newly created files",
+        "The component's prop type is wrapped in Readonly<>",
+        "No parseInt or parseFloat outside Number.",
+        "No last-element access via arr[arr.length - 1]",
+        "No catch (e) or catch (err)",
+        "No typeof x === 'undefined'",
+        "No duplicate imports from the same module"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "duplication-refactor-or-exclude-with-reason",
+      "prompt": "sonar บอกว่า duplicated lines เกิน 3% เพราะผมมี component ตาราง 3 อันที่โครงเหมือนกันเลยต่างกันแค่ type ของแถวกับ endpoint ที่ยิง จะแก้ยังไงดี",
+      "expected_output": "Proposes refactoring into one generic component taking config as props as the primary path, explains when sonar.cpd.exclusions is the right call instead (mandating a rationale comment), and states that NOSONAR cannot fix duplication",
+      "assertions": [
+        "States explicitly that NOSONAR does not help with duplication",
+        "Proposes the generic-component refactor as the first option",
+        "If sonar.cpd.exclusions is proposed, requires a rationale comment alongside",
+        "Does not propose lowering the Quality Gate threshold or disabling the duplication check"
+      ],
+      "files": []
+    }
+  ]
+}

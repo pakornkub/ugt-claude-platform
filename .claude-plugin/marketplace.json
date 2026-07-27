@@ -7,14 +7,14 @@
   "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
   "plugins": [
     {
-      "name": "ugt-platform",
-      "source": "./plugins/ugt-platform",
+      "name": "ugt-nextjs-platform",
+      "source": "./plugins/ugt-nextjs-platform",
       "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)"
     },
     {
-      "name": "ugt-standard",
-      "source": "./plugins/ugt-standard",
-      "description": "The recommended bundle — one install brings ugt-platform + superpowers (the development pipeline)"
+      "name": "ugt-nextjs-standard",
+      "source": "./plugins/ugt-nextjs-standard",
+      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline)"
     }
   ]
 }
