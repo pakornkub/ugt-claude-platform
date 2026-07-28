@@ -1,14 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ugt-nextjs-standard",
-  "displayName": "UGT Standard (bundle)",
-  "version": "1.0.0",
-  "description": "The recommended bundle for dev teams — one install brings both the org's stack knowledge (ugt-nextjs-platform) and the development pipeline (superpowers: brainstorming → plan → TDD → code review)",
+  "displayName": "UGT Next.js Standard (bundle)",
+  "version": "1.1.0",
+  "description": "The recommended bundle for dev teams — one install brings the org's stack knowledge (ugt-nextjs-platform), the development pipeline (superpowers: brainstorming → plan → TDD → code review), and skill-creator for building project skills to the same standard",
   "author": {
     "name": "UGT DX Team"
   },
   "dependencies": [
     "ugt-nextjs-platform",
-    { "name": "superpowers", "marketplace": "claude-plugins-official" }
+    { "name": "superpowers", "marketplace": "claude-plugins-official" },
+    { "name": "skill-creator", "marketplace": "claude-plugins-official" }
   ]
 }

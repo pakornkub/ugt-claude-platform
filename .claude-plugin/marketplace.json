@@ -14,7 +14,7 @@
     {
       "name": "ugt-nextjs-standard",
       "source": "./plugins/ugt-nextjs-standard",
-      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline)"
+      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline) + skill-creator (build project skills to the same standard)"
     }
   ]
 }
