@@ -1,0 +1,94 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-clean-code. S* queries must route to ugt-nextjs-clean-code; N* queries must NOT (their expected target is informational). Emphasis on the two live boundaries: clean-code vs ugt-nextjs-pitfalls (code smell vs runtime bug) and clean-code vs ugt-nextjs-cicd-setup (fixing violations vs Sonar/Jenkins infra).",
+  "method": "3 independent judges, randomized order, masked query ids, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": "2026-07-30",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "100%",
+    "secondary_accuracy": "100%",
+    "note": "optimizer loop terminated at iteration 0 — 60/60 on first run. Both live boundaries held: all runtime-symptom N-cases routed to ugt-nextjs-pitfalls and all Sonar-infra N-cases to ugt-nextjs-cicd-setup, while every violation-fixing S-case (incl. 'pipeline green except new_violations' and 'Quality Gate แดง new_violations') stayed on clean-code."
+  },
+  "queries": {
+    "S1": {
+      "prompt": "sonar ฟ้อง S3776 cognitive complexity เกิน 15 ในฟังก์ชันนี้ ช่วย refactor ที",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S2": {
+      "prompt": "โค้ดซ้ำเกิน 3% Quality Gate ไม่ผ่าน แต่สองไฟล์นี้มันต้องคล้ายกันจริง ๆ ทำไงดี",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S3": {
+      "prompt": "จะ suppress finding ของ sonar ยังไงให้ถูกวิธี NOSONAR ต้องวางตรงไหน",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S4": {
+      "prompt": "sonar บ่นว่า props ไม่ได้ห่อ Readonly แทบทุก component เลย",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S5": {
+      "prompt": "กำลังจะเขียน component ใหม่ อยากให้ผ่าน sonar ตั้งแต่สแกนแรก มีอะไรต้องระวังบ้าง",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S6": {
+      "prompt": "pipeline เขียวหมดยกเว้น new_violations ขึ้น 1 ตัว เป็น parseInt ที่ผมเพิ่งเขียนเอง",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S7": {
+      "prompt": "Quality Gate แดงเพราะ new_violations ไม่เป็นศูนย์ ไล่แก้ยังไงดี",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S8": {
+      "prompt": "sonar ฟ้อง deprecated ตรงที่ใช้ error.flatten() ของ zod",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S9": {
+      "prompt": "ช่วยดูโค้ดผมหน่อยว่ามี idiom เก่า ๆ ที่ sonar จะฟ้องไหม ก่อนจะ push",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "S10": {
+      "prompt": "S4144 ฟ้องว่าสองฟังก์ชันเหมือนกัน แต่มันเป็น generic คนละ type กันจริง ๆ จะ ignore ยังไงให้ถูก",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N1": {
+      "prompt": "หน้าอนุมัติเด้ง error Maximum update depth exceeded",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N2": {
+      "prompt": "วันที่ในรายงานเลื่อนไป 1 วัน เฉพาะรายการที่สร้างตอนกลางคืน",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N3": {
+      "prompt": "ตั้ง SonarQube server กับ Jenkins ให้ scan โปรเจกต์นี้ที",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N4": {
+      "prompt": "pipeline ล้มที่ stage Unit Tests บอกว่าไม่มี junit.xml",
+      "expected": "ugt-nextjs-quality-setup"
+    },
+    "N5": {
+      "prompt": "ตั้ง eslint กับ prettier กับ pre-commit hook ให้โปรเจกต์",
+      "expected": "ugt-nextjs-quality-setup"
+    },
+    "N6": {
+      "prompt": "กดบันทึกแล้วกลับมาหน้า list รายการใหม่ไม่ขึ้น ต้อง refresh เอง",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N7": {
+      "prompt": "sonar scan ใน Jenkins ค้างไม่ยอมจบจน timeout",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N8": {
+      "prompt": "เพิ่มคอลัมน์ status ในตาราง schema ให้หน่อย",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N9": {
+      "prompt": "fetch จากฝั่ง client ขึ้น 404 เฉพาะบน server จริง ใน local ปกติดี",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N10": {
+      "prompt": "อยากเพิ่ม OWASP dependency check เข้า pipeline",
+      "expected": "ugt-nextjs-cicd-setup"
+    }
+  }
+}
