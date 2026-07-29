@@ -129,9 +129,11 @@ How:
    installed modules in `checkpoint.md`.
 5. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
    **`.claude/state/` must be committed** — never ignore `.claude/` wholesale.
-6. If the org has no machine-level hard boundary yet → point the user at
-   `references/org-managed-settings.md` to hand to IT (the skill cannot install
-   that part).
+6. If the org has no machine-level hard boundary yet → point the user at the
+   IT deployment guide `contracts/org-managed-settings.md` in the **ugt-core**
+   plugin (canonical copy:
+   https://github.com/pakornkub/ugt-claude-platform/blob/main/plugins/ugt-core/contracts/org-managed-settings.md)
+   — a human-facing document for the IT team; the skill cannot install that part.
 
 ### 5. Close out
 

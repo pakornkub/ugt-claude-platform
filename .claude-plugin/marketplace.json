@@ -4,8 +4,15 @@
   "owner": {
     "name": "UGT DX Team"
   },
-  "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
+  "allowCrossMarketplaceDependenciesOn": [
+    "claude-plugins-official"
+  ],
   "plugins": [
+    {
+      "name": "ugt-core",
+      "source": "./plugins/ugt-core",
+      "description": "Stack-agnostic foundation: ugt-checkpoint team-state skill, audit-trail hooks, and the normative org contracts (database, delivery, identity, harness). Installed automatically as a dependency of stack platforms."
+    },
     {
       "name": "ugt-nextjs-platform",
       "source": "./plugins/ugt-nextjs-platform",

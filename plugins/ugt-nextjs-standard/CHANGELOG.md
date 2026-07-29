@@ -1,5 +1,11 @@
 # Changelog — ugt-nextjs-standard
 
+## 1.2.0 (2026-07-29)
+
+- Records the new dependency floor after the `ugt-core` split:
+  `ugt-nextjs-platform` is now v2.0.0 and itself depends on `ugt-core` v1.0.0.
+  No dependency change in this manifest — core flows through the platform.
+
 ## 1.1.0 (2026-07-28)
 
 - Add `skill-creator@claude-plugins-official` as a third dependency, so every

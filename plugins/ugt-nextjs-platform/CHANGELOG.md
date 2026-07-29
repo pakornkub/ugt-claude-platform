@@ -1,5 +1,22 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.0.0 (2026-07-29)
+
+**Breaking at the plugin level, invisible at the project level.** The
+stack-agnostic pieces moved to the new `ugt-core` plugin, which this plugin now
+declares as a dependency — `/plugin update` pulls it automatically, and target
+projects need **zero** changes (`/ugt-checkpoint` keeps its name; installed
+CLAUDE.md/rules/state files stay valid untouched).
+
+Moved out (now in ugt-core v1.0.0): `skills/ugt-checkpoint/`,
+`hooks/hooks.json`, `scripts/audit-log.mjs`,
+`references/org-managed-settings.md` (→ `ugt-core/contracts/`). The only
+content edit in the remaining six skills is the IT-doc pointer in
+`ugt-nextjs-setup` step 4.6.
+
+If you consume this plugin by folder copy (README mode B), copy **both**
+`plugins/ugt-core` and `plugins/ugt-nextjs-platform` from now on.
+
 ## 1.0.0 (2026-07-27)
 
 First release. Extracted from a production HRMS project, rebuilt clean — no

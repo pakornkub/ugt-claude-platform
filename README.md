@@ -12,7 +12,8 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | Plugin | คืออะไร |
 | --- | --- |
-| `ugt-nextjs-platform` | ตัวจริง — skills 7 ตัว + hooks (audit log) + harness assets |
+| `ugt-core` | ฐานกลางทุก stack — `ugt-checkpoint`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
+| `ugt-nextjs-platform` | skills 6 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
 | `ugt-nextjs-standard` | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
 
 ### Skills ใน `ugt-nextjs-platform`
@@ -25,14 +26,14 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-auth-setup` | Login SSO/LDAP/Local + RBAC + audit log + admin bootstrap | งาน auth/permission ทุกชนิด |
 | `ugt-nextjs-cicd-setup` | Jenkins 10 stages + SonarQube Gate + OWASP + Docker deploy + `/api/health` | งาน CI/CD + วินิจฉัย pipeline |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก | **โหลดเองอัตโนมัติ**เมื่อแตะไฟล์ `.ts`/`.tsx` |
-| `ugt-checkpoint` | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
+| `ugt-checkpoint` *(มาจาก `ugt-core`)* | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
 
 ## วิธีติดตั้ง — 3 โหมด
 
 | โหมด | ทำอย่างไร | ได้อะไร | update ได้ไหม |
 | --- | --- | --- | --- |
 | **C. Marketplace (ทีมพัฒนา — แนะนำ)** | `/plugin marketplace add pakornkub/ugt-claude-platform` แล้ว `/plugin install ugt-nextjs-standard@ugt` | ครบทุกอย่าง + superpowers | ✅ `/plugin update` |
-| **B. Copy plugin ลงโปรเจคที่ส่งมอบ** | copy โฟลเดอร์ `plugins/ugt-nextjs-platform` ไปวางเป็น `<โปรเจค>/.claude/skills/ugt-nextjs-platform/` (โหลดเป็น plugin อัตโนมัติเพราะมี `.claude-plugin/plugin.json` — ต้องกดยอมรับ workspace trust ครั้งแรก) | skills + hooks ครบ ไม่ต้องแตะ marketplace | ❌ copy ใหม่เอง |
+| **B. Copy plugin ลงโปรเจคที่ส่งมอบ** | copy **ทั้งสองโฟลเดอร์**: `plugins/ugt-core` และ `plugins/ugt-nextjs-platform` ไปวางใน `<โปรเจค>/.claude/skills/` (โหลดเป็น plugin อัตโนมัติเพราะมี `.claude-plugin/plugin.json` — ต้องกดยอมรับ workspace trust ครั้งแรก) | skills + hooks ครบ ไม่ต้องแตะ marketplace | ❌ copy ใหม่เอง |
 | **A. Copy skill เดี่ยว** | copy `plugins/ugt-nextjs-platform/skills/<ชื่อ>` ไปวางใน `.claude/skills/` | เฉพาะ skill นั้น (ไม่มี hook) | ❌ |
 
 โปรเจคที่ผ่าน `/ugt-nextjs-setup` แล้วจะมี `.claude/settings.json` ที่ประกาศ marketplace ไว้ —
@@ -87,4 +88,4 @@ production จริงและ negative case แล้ว) และ `evals/ev
 ผล iteration 1: with-skill 34/34 = 100% vs without-skill 18/34 = 53%)
 
 Hard boundary ระดับองค์กร (บังคับที่ client ไม่ใช่ที่ instruction) → ส่ง
-`plugins/ugt-nextjs-platform/skills/ugt-nextjs-setup/references/org-managed-settings.md` ให้ทีม IT
+`plugins/ugt-core/contracts/org-managed-settings.md` ให้ทีม IT
