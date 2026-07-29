@@ -32,8 +32,9 @@ child skills in the correct order → summarize + smoke test.
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
-`ugt-nextjs-clean-code` is not part of the install order — it loads itself whenever a
-`.ts`/`.tsx` file is touched (`paths` frontmatter). Do not invoke it from here.
+`ugt-nextjs-clean-code` and `ugt-nextjs-pitfalls` are not part of the install
+order — they load themselves whenever matching `.ts`/`.tsx` files are touched
+(`paths` frontmatter). Do not invoke them from here.
 
 ## Workflow
 

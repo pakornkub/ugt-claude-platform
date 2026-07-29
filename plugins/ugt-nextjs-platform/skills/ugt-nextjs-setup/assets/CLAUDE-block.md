@@ -53,7 +53,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | --- | --- |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
 | Build a feature / fix a bug | Normal superpowers pipeline (brainstorming → plan → TDD → review) |
-| Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` loads itself via `paths` — no need to invoke |
+| Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-checkpoint` |
 
 ## Where new knowledge goes

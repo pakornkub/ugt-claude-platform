@@ -26,6 +26,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-auth-setup` | Login SSO/LDAP/Local + RBAC + audit log + admin bootstrap | งาน auth/permission ทุกชนิด |
 | `ugt-nextjs-cicd-setup` | Jenkins 10 stages + SonarQube Gate + OWASP + Docker deploy + `/api/health` | งาน CI/CD + วินิจฉัย pipeline |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก | **โหลดเองอัตโนมัติ**เมื่อแตะไฟล์ `.ts`/`.tsx` |
+| `ugt-nextjs-pitfalls` | กับดักจากบั๊ก production จริง — วันที่เลื่อน, cache ไม่ refresh, basePath 404 | **โหลดเองอัตโนมัติ**เมื่อแตะ `app/` `components/` `lib/` |
 | `ugt-checkpoint` *(มาจาก `ugt-core`)* | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
 
 ## วิธีติดตั้ง — 3 โหมด

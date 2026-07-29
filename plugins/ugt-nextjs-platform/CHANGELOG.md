@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.1.0 (2026-07-29)
+
+New skill **`ugt-nextjs-pitfalls`** — production-bug lessons for feature code,
+distilled from the source HRMS project's bug-fix log and conventions
+(audit: `docs/app-patterns-audit.md`). Auto-loads via `paths` on
+`app/`, `components/`, `lib/` edits, same mechanism as `ugt-nextjs-clean-code`.
+
+- `references/dates-timezones.md` — Date→string binding for MSSQL SP/linked-server
+  params (`toLocalYmd`), anchor-matched getters, wall-clock vs instant
+  formatters, CE-storage + BE-display via central helpers
+- `references/data-fetching.md` — React Query × Server Actions
+  (`revalidatePath` doesn't touch the client cache), dataset filters re-fetch,
+  stable `data` identities (`'use no memo'` × React Compiler), basePath client
+  fetch prefix, API envelope
+- `references/hardening.md` — server-side scope overrides, ownership =
+  identity match, fail-closed gates, cron date-guards, DTO literal unions,
+  effective-value pre-fill, i18n checklist
+- `scripts/verify.mjs` — greppable checks (bare `/api` fetch, empty
+  `SelectItem`, swallow-catches, inline `±543`, anchor-suspect serializers,
+  selectable tables missing `getRowId`)
+
+Curation note: items already covered by framework defaults/docs (RSC-by-default,
+RHF default modes, `getRowId`, adjust-during-render) were kept only as one-line
+Quick Rules or dropped — see the audit's curation pass.
+
 ## 2.0.0 (2026-07-29)
 
 **Breaking at the plugin level, invisible at the project level.** The
