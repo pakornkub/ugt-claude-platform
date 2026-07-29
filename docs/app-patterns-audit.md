@@ -1,9 +1,14 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
-**Date:** 2026-07-29
+**Date:** 2026-07-29 (curation pass added same day)
 **Purpose:** decide whether the knowledge still living only in `ugt-hrms` justifies a new
-`ugt-nextjs-app-patterns` skill in `plugins/ugt-nextjs-platform`. Report only — no skill was
+feature-development skill in `plugins/ugt-nextjs-platform`. Report only — no skill was
 created or modified.
+
+> **Status:** Buckets 1–4 below are the full first-pass inventory (kept as the audit record).
+> The binding conclusion is the **Curation pass** + **Recommendation** sections at the end:
+> proposed skill name **`ugt-nextjs-pitfalls`**, ~15 core items + ~12 Quick Rules rows,
+> 3 reference files.
 
 **Sources audited (in `D:\Project_2026\ugt-hrms`):**
 
@@ -193,44 +198,97 @@ as an org UI kit, which is the real decision the design plugin forces.
 
 ---
 
+## Curation pass — Bucket 1 vs Next.js / library best practices
+
+Second pass over Bucket 1: each item checked against official docs and defaults
+(Next.js App Router, React, React Hook Form, TanStack Query/Table, next-intl, MDN).
+Three verdict groups.
+
+### C1. Framework/library already teaches the correct way → CUT or one line
+
+| Item | Finding |
+| --- | --- |
+| RSC by default (1e) | Verbatim App Router doc guidance; Next 16.3+ even auto-generates agent docs — free coverage (matches the earlier "no vendor skills" decision). **Cut.** |
+| RHF `mode: 'onSubmit'` + `reValidateMode: 'onChange'` (1c) | **These are RHF's library defaults** — the "org standard" restates them. Real rule shrinks to one line: *don't override mode/reValidateMode*. |
+| Adjust-during-render instead of `setState`-in-effect (1a) | Official react.dev pattern AND enforced by `react-hooks/set-state-in-effect` lint — lint catches it; keep one line pointing at the fix. |
+| `getRowId` for selectable tables (1a) | TanStack Table documented recommendation. One Quick Rules row. |
+| Prefix-key invalidation (1a) | Documented TanStack Query partial matching. One row. |
+| Sub-component calls `useTranslations` itself (1d) | Basic React hooks rule. **Cut.** |
+| Check `response.ok` before `.json()` (1e) | MDN fetch basics. Fold into the catch-swallow row. |
+
+### C2. Documented, but a proven trap in this org → one Quick Rules row each
+
+Manual `setError` needs `clearErrors` (prefer `superRefine`) · `SelectItem value=""` →
+`'__none__'` sentinel · ICU literal-brace escape · `getPageCount()`/`totalPages` = 0 on empty
+data · never `catch {}` → empty result (+ check `response.ok`) · `'use no memo'` on
+`useReactTable` · Tailwind v4 renames / no `tailwind.config.ts` · `createMany` without
+`skipDuplicates` on MSSQL · stale Turbopack `.next` cache in worktrees · typed mocks via
+`satisfies` + factories.
+
+### C3. Core — org conventions and stack interactions no docs cover (~15 items)
+
+| Cluster | Items | Why no doc covers it |
+| --- | --- | --- |
+| **Dates × MSSQL** | Date→string binding (`toLocalYmd`), anchor-matched getters, wall-clock vs instant, `Date.UTC` write-back, CE-storage + BE-display helpers | Interaction of `@prisma/adapter-mssql` (tedious/useUTC) × TH server × linked server; BE/CE is a Thai-org convention. The #1 reason this skill should exist. |
+| **React Query × Server Actions** | `revalidatePath` ≠ client cache; refetch-on-filter + shared where-builder | Follows from the org's *architecture choice* (React Query for interactive tables instead of pure RSC) — not derivable from either library's docs. |
+| **`useMemo` on `data` props** | Stable identity for effect-feeding arrays | React Compiler normally auto-memoizes, but TanStack tables force `'use no memo'` → compiler off → manual memo needed exactly in those files. Three-layer interaction, undocumented. |
+| **basePath client fetch** | `${env.NEXT_PUBLIC_BASE_PATH}/api/...` prefix | Next docs cover `next/link` only; silent in dev (`basePath = ''`), 404 in every org deployment. |
+| **API envelope** | `{ success, data }` / `{ success, error }`, camelCase | Pure org convention — Next.js has no opinion; cannot be derived. |
+| **i18n enforcement** | All text via `t()`; keys in both `en.json` + `th.json` | Generic principle, but models hardcode Thai strings constantly — enforcement rule, cheap to state. |
+| **Authorization patterns** | Server-side scope override with session identity; ownership = identity match, never `!viewAll` | OWASP-level principles made concrete with the org's permission model. |
+| **Guarded jobs** | Fail-closed on missing master data; in-code date-guards for destructive cron; DTO literal unions; pre-fill effective values | Production lessons with no upstream doc. |
+
+Dropped in curation (beyond C1): glossary rule (per-project practice), Radix portal gotchas
+group (real but encounter-driven — optional 4th reference if ever wanted), error-banner
+placement (UX → design plugin), minor one-offs (`--overwrite`, `server-only` install,
+SELECT/WHERE mismatch), SonarLint `mcp.json` (→ cicd references), merge-conflict discipline
+(stack-agnostic → `ugt-core`, which now exists as of 2026-07-29).
+
+---
+
 ## Recommendation
 
-**Create `ugt-nextjs-app-patterns` as a new skill.** Bucket 1 holds ~28 non-minor,
-production-proven items with **zero overlap** with the existing six skills, and they cluster
-into coherent themes rather than a grab-bag. Folding them into existing skills fails
-structurally: the existing skills are *setup/installer* skills (run once per project), while
-every Bucket-1 item is *feature-development* knowledge (needed on every table/form/fetch).
-Only `ugt-nextjs-clean-code` has the right "load while coding" shape, and stretching it to
-cover React Query, RHF, i18n, and timezone binding would bury its Sonar focus.
+**Create the skill — proposed name `ugt-nextjs-pitfalls`** (renamed from the working title
+`ugt-nextjs-app-patterns`). Rationale for the name: ~80% of the surviving content is
+production-bug lessons, it inherits the identity of the source files
+(`pitfalls.instructions.md`, bug-fixes), and "pitfall/กับดัก/เจอบั๊กแปลก" are strong trigger
+words. Alternatives considered: `ugt-nextjs-correct-code` (pairs with `clean-code`: clean =
+passes the gate, correct = runs right; weaker trigger), `ugt-nextjs-feature-rules` (covers
+conventions better; bland), `ugt-nextjs-prod-safety` (captures "silent in dev, breaks in
+prod"; sounds ops/security).
 
-Two small exceptions worth folding instead of porting:
+Curation leaves **~15 core items + ~12 Quick Rules rows** — smaller than the first pass but
+with zero overlap against the existing six skills and against what Next.js 16.3+ ships in its
+own agent docs. Folding into existing skills still fails structurally (they are one-shot
+installers; this is load-while-coding, and stretching `clean-code` would bury its Sonar focus).
 
-- **auth addenda** → `ugt-nextjs-auth-setup/references/auth-flows.md`: the RT-026
-  resolve-identity-by-username pattern and the "don't force `ldaps://` on private networks" line.
-- **RT-023 merge-conflict discipline** → stack-agnostic; hold for the future `ugt-core` plugin
-  (or a checkpoint-skill note) rather than app-patterns.
+Two items fold elsewhere instead:
 
-### Proposed outline
+- **auth addenda** → `ugt-nextjs-auth-setup/references/auth-flows.md`: RT-026
+  resolve-identity-by-username; "don't force `ldaps://` on private networks".
+- **RT-023 merge-conflict discipline** → `ugt-core` (exists since 2026-07-29).
+
+### Proposed outline (curated)
 
 ```
-plugins/ugt-nextjs-platform/skills/ugt-nextjs-app-patterns/
-  SKILL.md            # Quick Rules DO/DON'T table + theme index (same shape as clean-code)
+plugins/ugt-nextjs-platform/skills/ugt-nextjs-pitfalls/
+  SKILL.md              # Quick Rules DO/DON'T table (~12 rows, C2 + C1 one-liners)
+                        #   + theme index, same shape as clean-code
   references/
-    data-fetching.md  # 1a: React Query × Server Actions, invalidation, refetch-on-filter,
-                      #     stable identities, getRowId, envelope + response.ok (1e)
-    dates-timezones.md# 1b: Date-binding to MSSQL (toLocalYmd), anchor-matched getters,
-                      #     wall-clock vs instant, BE/CE display helpers, Date-loop aliasing
-    forms.md          # 1c: RHF config, clearErrors, SelectItem sentinel, union DTOs
-    i18n.md           # 1d: t() everywhere, dual-locale keys, ICU braces, sub-components
-    radix-gotchas.md  # 1g: dialog×portal patterns, data-[state=*], 'use no memo', Sonner wiring
-    hardening.md      # 1f: no catch-swallow, scope enforcement, fail-closed gates,
-                      #     cron date-guards, no-op-green-stage audit, log dedup
-                      # 1h stack gotchas fold into the nearest reference or SKILL.md Quick Rules
-  scripts/verify.mjs  # greppable checks: bare fetch('/api', SelectItem value="", data-open:,
-                      #     catch {} return [], .toISOString().slice on query params, inline ±543
+    dates-timezones.md  # Date→string binding to MSSQL (toLocalYmd), anchor-matched getters,
+                        #   wall-clock vs instant, Date.UTC write-back, CE/BE display helpers
+    data-fetching.md    # React Query × Server Actions (org architecture note), invalidation,
+                        #   refetch-on-filter + shared where-builder, stable data identities
+                        #   ('use no memo' × Compiler nuance), basePath fetch, API envelope
+    hardening.md        # scope override with session identity, ownership ≠ !viewAll,
+                        #   fail-closed gates, cron date-guards, DTO unions, effective-value
+                        #   pre-fill, i18n enforcement checklist
+  scripts/verify.mjs    # greppable checks: bare fetch('/api', SelectItem value="",
+                        #   catch {} return [], .toISOString().slice on bound params,
+                        #   inline ±543, missing getRowId on selectable DataTable
 ```
 
-Suggested frontmatter (matching the clean-code precedent — the only other `paths` skill):
+Frontmatter (matching the clean-code precedent — the only other `paths` skill):
 
 ```yaml
 paths:
@@ -239,8 +297,8 @@ paths:
   - "lib/**/*.{ts,tsx}"
 ```
 
-(Not bare `**/*.{ts,tsx}` — app-patterns should not fire on `prisma/`, config files, or
-scripts, where clean-code still applies but app patterns don't.)
+(Not bare `**/*.{ts,tsx}` — the skill should not fire on `prisma/`, config files, or
+scripts, where clean-code still applies but these patterns don't.)
 
 ### Bucket 2 sizing (input for the design-plugin decision)
 
