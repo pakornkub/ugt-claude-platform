@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## 2.1.0 (2026-07-29)
+## 2.1.0 (2026-07-30)
 
 New skill **`ugt-nextjs-pitfalls`** — production-bug lessons for feature code,
 distilled from the source HRMS project's bug-fix log and conventions
