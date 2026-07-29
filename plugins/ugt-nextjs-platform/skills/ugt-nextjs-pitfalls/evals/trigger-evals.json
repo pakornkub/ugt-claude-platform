@@ -1,0 +1,94 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-pitfalls. S* symptom queries must route to ugt-nextjs-pitfalls; N* queries must NOT (their expected target is informational). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke/read first.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": "2026-07-30",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "100%",
+    "secondary_accuracy": "100%",
+    "note": "iteration 0 scored 54/60 (S-side 24/30, N-side 30/30): all 3 judges routed S9 (wrong row selected) and S10 (stale code after edit) to superpowers:systematic-debugging because those two symptoms were missing from the description. Description updated to include both; iteration 1 re-ran 3 fresh judges → 60/60. Optimizer loop terminated at iteration 1."
+  },
+  "queries": {
+    "S1": {
+      "prompt": "หน้ารายงานแสดงวันที่เลื่อนไป 1 วัน แต่เป็นเฉพาะรายการที่สร้างตอนกลางคืน",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S2": {
+      "prompt": "กดบันทึกคำขอแล้วกลับมาหน้า list ยังไม่เห็นรายการใหม่ ต้องรอนานมากถึงจะโผล่",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S3": {
+      "prompt": "fetch ไป api ใช้ได้ใน localhost แต่ขึ้น server จริงแล้ว 404 ทุกเส้น",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S4": {
+      "prompt": "เปิดหน้าอนุมัติแล้วเด้ง error Maximum update depth exceeded",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S5": {
+      "prompt": "ตารางแสดง หน้า 1 จาก 0 ตอนไม่มีข้อมูล",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S6": {
+      "prompt": "เพิ่ม option ว่างใน dropdown แล้วหน้า crash เลย",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S7": {
+      "prompt": "ปีในหน้าจอโชว์ ค.ศ. บ้าง พ.ศ. บ้าง ปนกันมั่ว",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S8": {
+      "prompt": "ระบบอ่านกะพนักงานผิดวัน เหมือนไปอ่านของเมื่อวานทั้งที่ส่งวันที่ถูกแล้ว",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S9": {
+      "prompt": "user บอกติ๊กเลือกแถวในตารางแล้วระบบไปเลือกแถวอื่นแทน",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S10": {
+      "prompt": "แก้โค้ดแล้ว refresh หน้าเว็บยังเห็นโค้ดเก่า ทั้งที่ไฟล์บนดิสก์ถูกแล้ว",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N1": {
+      "prompt": "sonar ไม่ผ่าน ช่วยแก้ violation ที",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N2": {
+      "prompt": "login แล้ววนลูป ERR_TOO_MANY_REDIRECTS บนเครื่อง server",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N3": {
+      "prompt": "เพิ่มตารางใหม่ใน schema พร้อม migration ให้หน่อย",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N4": {
+      "prompt": "ตั้ง vitest กับ eslint ให้โปรเจกต์ที",
+      "expected": "ugt-nextjs-quality-setup"
+    },
+    "N5": {
+      "prompt": "pipeline แดงที่ stage Quality Gate",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N6": {
+      "prompt": "ต่อ sql server เข้าโปรเจกต์ให้หน่อย",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N7": {
+      "prompt": "โค้ดซ้ำเกิน 3% ใน sonar ทำไงดี",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N8": {
+      "prompt": "จบงานวันนี้แล้ว บันทึก checkpoint ไว้ให้ด้วย",
+      "expected": "ugt-checkpoint"
+    },
+    "N9": {
+      "prompt": "อยากเพิ่ม login ด้วย AD ของบริษัท",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N10": {
+      "prompt": "เรียก stored procedure แล้ว timeout ตลอดเลย",
+      "expected": "ugt-nextjs-database-setup"
+    }
+  }
+}

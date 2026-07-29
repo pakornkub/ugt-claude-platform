@@ -25,6 +25,16 @@ Curation note: items already covered by framework defaults/docs (RSC-by-default,
 RHF default modes, `getRowId`, adjust-during-render) were kept only as one-line
 Quick Rules or dropped — see the audit's curation pass.
 
+Trigger evals: `evals/trigger-evals.json` — 20 queries × 3 judges; iteration 0
+= 54/60 (missing "wrong row selected" / "stale code after edit" symptoms in
+the description), description fixed, iteration 1 = 60/60.
+
+Also in this release — `ugt-nextjs-auth-setup/references/auth-flows.md`
+addenda from the same audit: resolve SSO identity by `ldapUsername` (existing
+row's email wins; `unable_to_create_user` on email drift),
+`accountLinking.requireLocalEmailVerified: false` for sync-created users, and
+don't enforce `ldaps://` for private-network AD (3 new gotcha-table rows).
+
 ## 2.0.0 (2026-07-29)
 
 **Breaking at the plugin level, invisible at the project level.** The

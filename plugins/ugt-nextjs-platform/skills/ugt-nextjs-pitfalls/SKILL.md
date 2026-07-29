@@ -9,8 +9,11 @@ description: >
   data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต", stale list until
   reload), a fetch that 404s only in production, "Maximum update depth
   exceeded" pointing at a Radix component, pagination showing "หน้า 1 จาก 0",
-  a Select crashing on an empty value, or Thai text showing the wrong Buddhist
-  year. Loads itself via paths on app/components/lib edits.
+  a Select crashing on an empty value, Thai text showing the wrong Buddhist
+  year, ticking a table row but a different row gets selected ("ติ๊กแถวนึง
+  ได้อีกแถว"), or code edits not showing in the browser while the file on disk
+  is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน" — stale dev cache). Loads itself via
+  paths on app/components/lib edits.
   Don't use for SonarQube/Quality-Gate violations (→ ugt-nextjs-clean-code) or
   installing infrastructure (→ the ugt-nextjs-*-setup skills).
 paths:

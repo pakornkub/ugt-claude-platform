@@ -87,6 +87,23 @@ Historical failure modes this prevents:
    `mapProfileToUser` for custom fields: only standard fields (name, email, image)
    propagate via `overrideUserInfo`.
 
+**Identity is the AD username, not the email.** Better Auth matches the
+existing user by the email `mapProfileToUser` returns — but the AD email and
+the HR/local email can drift apart (e.g. a company domain change), and then
+Better Auth "creates" instead of "links" and dies on a unique constraint
+(`unable_to_create_user`). In `mapProfileToUser`, look up the existing row
+first and let **its** email win:
+
+```ts
+const existing = await prisma.user.findUnique({ where: { ldapUsername } });
+return { email: existing?.email ?? profile.email, ldapUsername, ... };
+```
+
+Pair it with `accountLinking.requireLocalEmailVerified: false` — users created
+by upsert/sync have `emailVerified: false`, and Better Auth's default silently
+blocks linking into unverified users even for trusted providers (the failure
+just moves from `unable_to_create_user` to `account_not_linked`).
+
 **Conditional plugin registration**: the `keycloak()` helper calls `.replace()`
 on the issuer string internally. During `SKIP_ENV_VALIDATION=1` builds the env
 vars are `undefined` and the build crashes — always guard:
@@ -103,6 +120,10 @@ plugins: env.KEYCLOAK_ISSUER && env.KEYCLOAK_CLIENT_ID && env.KEYCLOAK_CLIENT_SE
 2. `ldapBind(username, password)` via `ldapts` — binds as **UPN**
    (`username@LDAP_DOMAIN`), then searches `LDAP_BASE_DN` by `sAMAccountName`
    with **RFC-4515-escaped** filter value (backslash first!)
+   — do **not** enforce `ldaps://` in production: org AD servers on private
+   networks (`ldap://10.x.x.x`) often support plain LDAP only, and a
+   protocol check that throws **before** the bind surfaces as a misleading
+   "Invalid username or password"
 3. `prisma.user.upsert({ where: { ldapUsername } })`
 4. `prisma.session.create({ token: generateId(32), userId, expiresAt })` —
    expiry MUST match `session.expiresIn` in `lib/auth.ts` (8h)
@@ -202,3 +223,6 @@ never `auth.api.getSession()` (needs DB, not Edge-safe).
 | SSO shows "Invalid OAuth configuration" | Node can't verify internal CA cert on Keycloak host | Trust the CA in the runtime (`NODE_EXTRA_CA_CERTS`); last resort `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container |
 | authClient hits `…/<base-path>/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
 | `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
+| SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins |
+| SSO fails `account_not_linked` despite `trustedProviders` | Local user has `emailVerified: false` (created by sync/upsert) | `accountLinking.requireLocalEmailVerified: false` |
+| LDAP always "Invalid username or password" on prod, works in dev | An `ldaps://`-only guard throws before the bind attempt | Allow plain `ldap://` for private-network AD; let the bind itself decide |
