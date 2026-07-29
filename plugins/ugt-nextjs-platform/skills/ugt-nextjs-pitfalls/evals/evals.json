@@ -1,0 +1,38 @@
+{
+  "skill_name": "ugt-nextjs-pitfalls",
+  "method": "3 evals x 2 arms (with_skill vs without_skill), same model both arms, fixture mini-projects; graded against machine-checkable assertions",
+  "iteration_1_result": {
+    "date": "2026-07-30",
+    "with_skill_pass": "9/9 (100%)",
+    "without_skill_pass": "6/9 (67%)",
+    "per_eval": {
+      "date-shift-sp-binding": "with 3/3 vs without 1/3 — baseline found the UTC-binding root cause but still bound a Date (re-anchored via Date.UTC) and defined a private helper in the service file, both against the convention",
+      "stale-list-after-save": "with 3/3 vs without 3/3 — non-discriminating: the model solves this unaided when the symptom is fully described; kept as a regression guard",
+      "new-client-fetch-basepath": "with 3/3 vs without 2/3 — baseline missed the response.ok check; basePath assertion may be soft because the prompt points at lib/env.ts"
+    },
+    "timing": "mean wall-clock with_skill 58.5s vs without_skill 115.0s (~2x faster); tokens ~equal (49.2k vs 46.7k)"
+  },
+  "evals": [
+    {
+      "id": 1,
+      "name": "date-shift-sp-binding",
+      "prompt": "ระบบ OT บน server จริงอ่านกะพนักงานผิดวัน — โค้ดเรียก usp_GetShiftScheduleActual ด้วยวันที่ 2026-06-03 แต่ได้กะของวันที่ 2 มิ.ย. กลับมา ทั้งที่ยิง SP ตรง ๆ ใน SSMS ด้วยวันเดียวกันได้ค่าถูก (server เป็น UTC+7, โปรเจกต์ใช้ @prisma/adapter-mssql) ช่วยหาสาเหตุแล้วแก้ใน lib/shift-service.ts ให้หน่อย แล้วสรุป root cause กับวิธีแก้ลง SOLUTION.md",
+      "expected_output": "Binds SP date params as 'YYYY-MM-DD' strings built with local getters (toLocalYmd-style helper) instead of passing a Date/startOfDay(Date); explanation identifies the mssql adapter binding Date as UTC (−7h) as root cause",
+      "assertions": ["SP date params bound as YYYY-MM-DD strings from LOCAL getters", "No Date object interpolated into $queryRaw", "SOLUTION.md identifies mssql adapter UTC binding as root cause"], "files": ["fixtures/date-shift/"]
+    },
+    {
+      "id": 2,
+      "name": "stale-list-after-save",
+      "prompt": "user บ่นว่ากดบันทึกคำขอลาแล้วระบบพากลับหน้ารายการ แต่รายการที่เพิ่งบันทึกไม่ขึ้น ต้องรอนานมากหรือกด refresh เองถึงจะเห็น ทั้งที่ server action ก็เรียก revalidatePath แล้ว ช่วยแก้ให้รายการอัปเดตทันทีหลังบันทึก แล้วสรุป root cause กับวิธีแก้ลง SOLUTION.md",
+      "expected_output": "Adds queryClient.invalidateQueries with the prefix key ['leave-requests'] in the client submit path; explanation states revalidatePath only touches the server-side cache, not the React Query client cache",
+      "assertions": ["invalidateQueries called after successful save", "prefix key [leave-requests] used", "SOLUTION.md states revalidatePath does not touch React Query cache"], "files": ["fixtures/stale-list/"]
+    },
+    {
+      "id": 3,
+      "name": "new-client-fetch-basepath",
+      "prompt": "เขียน client component ใหม่ components/employee-search.tsx เป็นช่องค้นหาพนักงาน (พิมพ์แล้ว debounce ~300ms) เรียก API GET /api/employees/search?q=... ของโปรเจกต์นี้ แล้วแสดงรายชื่อผลลัพธ์ข้างล่าง โปรเจกต์นี้ deploy ใต้ basePath (ดู lib/env.ts) และ API ทุกตัวคืน envelope มาตรฐานของโปรเจกต์ (ดู app/api/employees/search/route.ts)",
+      "expected_output": "fetch prefixed with env.NEXT_PUBLIC_BASE_PATH imported from @/lib/env (not a bare or hardcoded path); checks response.ok before .json(); unwraps the { success, data } envelope",
+      "assertions": ["fetch prefixed with env.NEXT_PUBLIC_BASE_PATH", "response.ok checked before body use", "success/data envelope unwrapped"], "files": ["fixtures/client-fetch/"]
+    }
+  ]
+}
