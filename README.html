@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGT Claude Platform — Interactive README</title>
+<style>
+  :root{
+    --ink:#1c2733;        /* ตัวอักษรหลัก */
+    --paper:#f7f6f2;      /* พื้นหลัง */
+    --panel:#ffffff;
+    --line:#dcd8cf;
+    --petrol:#0e5f6b;     /* accent หลัก */
+    --petrol-soft:#e3eff0;
+    --amber:#c47a1d;      /* accent รอง */
+    --amber-soft:#f7ecd9;
+    --term-bg:#122028;    /* บล็อกคำสั่ง */
+    --term-fg:#d7e4e6;
+    --ok:#2e7d4f;
+    --mono:"Cascadia Code","Consolas",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e4e7e4; --paper:#161c1f; --panel:#1e262a; --line:#334046;
+      --petrol:#5cc4d0; --petrol-soft:#12333a; --amber:#e0a457; --amber-soft:#3a2d17;
+      --term-bg:#0d1417; --term-fg:#cfe0e2; --ok:#6fc796;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.75 "Segoe UI","Noto Sans Thai",system-ui,sans-serif;
+  }
+  a{color:var(--petrol)}
+  code{font-family:var(--mono); font-size:.86em; background:var(--petrol-soft);
+       padding:.1em .4em; border-radius:4px; white-space:nowrap}
+  .wrap{max-width:960px; margin:0 auto; padding:0 20px}
+
+  /* ---------- hero ---------- */
+  header{border-bottom:3px solid var(--petrol); padding:56px 0 36px;
+         background:linear-gradient(180deg,var(--petrol-soft) 0%,var(--paper) 100%)}
+  .eyebrow{font-family:var(--mono); font-size:.78rem; letter-spacing:.18em;
+           text-transform:uppercase; color:var(--amber); font-weight:600}
+  h1{font-size:clamp(2rem,5vw,3rem); line-height:1.15; margin:.3em 0 .4em; letter-spacing:-.02em}
+  h1 .thin{font-weight:300}
+  .lede{max-width:44em; font-size:1.06rem}
+  .stack-chips{margin-top:18px; display:flex; flex-wrap:wrap; gap:8px}
+  .chip{font-family:var(--mono); font-size:.78rem; border:1px solid var(--line);
+        background:var(--panel); border-radius:999px; padding:3px 12px}
+  .chip.warn{border-color:var(--amber); color:var(--amber)}
+
+  /* ---------- nav ---------- */
+  nav{position:sticky; top:0; z-index:9; background:var(--paper);
+      border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex; gap:4px; overflow-x:auto; padding-top:0; padding-bottom:0}
+  nav a{display:block; padding:12px 14px; text-decoration:none; color:var(--ink);
+        font-size:.9rem; white-space:nowrap; border-bottom:3px solid transparent}
+  nav a:hover{border-bottom-color:var(--amber)}
+
+  section{padding:48px 0 8px}
+  h2{font-size:1.5rem; letter-spacing:-.01em; margin:0 0 6px;
+     display:flex; align-items:baseline; gap:12px}
+  h2 .tag{font-family:var(--mono); font-size:.72rem; color:var(--amber);
+          letter-spacing:.15em; text-transform:uppercase; font-weight:600}
+  .sub{color:color-mix(in srgb,var(--ink) 70%,transparent); max-width:46em; margin-top:0}
+
+  /* ---------- tables ---------- */
+  table{border-collapse:collapse; width:100%; margin:18px 0; background:var(--panel);
+        border:1px solid var(--line); font-size:.92rem}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:var(--petrol-soft); font-weight:600}
+  .table-scroll{overflow-x:auto}
+  .no{color:#b3452e; font-weight:600} .yes{color:var(--ok); font-weight:600}
+
+  /* ---------- terminal blocks ---------- */
+  .term{position:relative; background:var(--term-bg); color:var(--term-fg);
+        border-radius:8px; padding:14px 16px; margin:14px 0;
+        font-family:var(--mono); font-size:.87rem; line-height:1.7; overflow-x:auto}
+  .term .p{color:#7fb8a8; user-select:none}
+  .copy{position:absolute; top:8px; right:8px; border:1px solid #3a5560;
+        background:transparent; color:var(--term-fg); font:inherit; font-size:.72rem;
+        border-radius:6px; padding:3px 10px; cursor:pointer}
+  .copy:hover{background:#24363e}
+  .copy.done{border-color:var(--ok); color:var(--ok)}
+
+  /* ---------- install tabs ---------- */
+  .tabs{display:flex; gap:6px; flex-wrap:wrap; margin:16px 0 0}
+  .tabs button{font:inherit; font-size:.9rem; padding:8px 16px; cursor:pointer;
+        border:1px solid var(--line); background:var(--panel); color:var(--ink);
+        border-radius:8px 8px 0 0; border-bottom:none}
+  .tabs button[aria-selected="true"]{background:var(--petrol); color:#fff; border-color:var(--petrol)}
+  .tabpanel{border:1px solid var(--line); background:var(--panel);
+            border-radius:0 8px 8px 8px; padding:18px 20px}
+  .tabpanel[hidden]{display:none}
+
+  /* ---------- accordion ---------- */
+  details{border:1px solid var(--line); background:var(--panel); border-radius:8px;
+          margin:12px 0; padding:0 18px}
+  summary{cursor:pointer; padding:14px 0; font-weight:600; list-style:none}
+  summary::before{content:"▸ "; color:var(--amber)}
+  details[open] summary::before{content:"▾ "}
+  details ol{margin-top:0}
+  details li{margin:8px 0}
+
+  /* ---------- ugt-mode switcher ---------- */
+  .mode-btns{display:flex; gap:8px; margin:16px 0 4px; flex-wrap:wrap}
+  .mode-btns button{font-family:var(--mono); font-size:.88rem; padding:7px 20px;
+        cursor:pointer; border:1.5px solid var(--line); background:var(--panel);
+        color:var(--ink); border-radius:999px}
+  .mode-btns button.active{border-color:var(--amber); background:var(--amber-soft);
+        color:var(--amber); font-weight:700}
+  #modeTable td.hl{background:var(--amber-soft); font-weight:700}
+  #modeTable td.dim{opacity:.4}
+  .mode-note{font-size:.86rem; color:color-mix(in srgb,var(--ink) 70%,transparent)}
+
+  /* ---------- file tree ---------- */
+  .tree{font-family:var(--mono); font-size:.85rem; line-height:2; background:var(--panel);
+        border:1px solid var(--line); border-radius:8px; padding:14px 18px; overflow-x:auto}
+  .tree .c{color:color-mix(in srgb,var(--ink) 55%,transparent)}
+  .tree b{color:var(--petrol)}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+         gap:12px; margin:18px 0}
+  .stat{border:1px solid var(--line); background:var(--panel); border-radius:8px;
+        padding:14px 16px}
+  .stat .n{font-family:var(--mono); font-size:1.4rem; font-weight:700; color:var(--petrol)}
+  .stat .d{font-size:.84rem; margin-top:2px}
+  .bar{height:6px; border-radius:3px; background:var(--line); margin-top:10px; overflow:hidden}
+  .bar i{display:block; height:100%; background:var(--petrol)}
+  .bar i.vs{background:var(--amber)}
+
+  .callout{border-left:4px solid var(--amber); background:var(--amber-soft);
+           padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0; font-size:.93rem}
+  .callout.ban{border-left-color:#b3452e}
+
+  footer{margin-top:56px; border-top:1px solid var(--line); padding:24px 0 40px;
+         font-size:.85rem; color:color-mix(in srgb,var(--ink) 65%,transparent)}
+  @media (max-width:640px){ th,td{padding:7px 8px; font-size:.85rem} }
+  :focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  @media (prefers-reduced-motion:no-preference){
+    details{transition:background .2s}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Internal plugin marketplace · Claude Code</div>
+    <h1>UGT <span class="thin">Claude Platform</span></h1>
+    <p class="lede">
+      เปลี่ยนโปรเจค Next.js ที่มีอยู่ (รวมถึงโปรเจคที่ user สร้างเองด้วย AI)
+      ให้ <strong>deploy ได้จริงตามมาตรฐานองค์กร</strong> พร้อมชั้น harness
+      ที่ทำให้มาตรฐานคงอยู่ข้าม session — สกัด pattern มาจากโปรเจคจริงที่ผ่าน production แล้ว
+    </p>
+    <div class="stack-chips">
+      <span class="chip">TypeScript / React / Next.js (App Router)</span>
+      <span class="chip">Prisma → SQL Server</span>
+      <span class="chip">Keycloak SSO</span>
+      <span class="chip">Jenkins + SonarQube + Docker</span>
+      <span class="chip warn">stack อื่นใช้ไม่ได้</span>
+    </div>
+  </div>
+</header>
+
+<nav aria-label="สารบัญ"><div class="wrap">
+  <a href="#plugins">Plugins</a>
+  <a href="#skills">Skills</a>
+  <a href="#install">ติดตั้ง</a>
+  <a href="#usecases">Use cases</a>
+  <a href="#daily">งานประจำวัน</a>
+  <a href="#mode">/ugt-mode</a>
+  <a href="#harness">Harness</a>
+  <a href="#update">อัปเดต</a>
+  <a href="#triage">Triage</a>
+  <a href="#quality">คุณภาพ</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="plugins">
+  <h2><span class="tag">01</span> มีอะไรใน marketplace</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Plugin</th><th>เวอร์ชันล่าสุด</th><th>คืออะไร</th></tr>
+    <tr><td><code>ugt-core</code></td><td>1.1.0</td>
+        <td>ฐานกลางทุก stack — <code>ugt-checkpoint</code>, <code>ugt-mode</code>, audit hooks,
+        <code>contracts/</code> (มาตรฐานต้นทางให้ทุก stack อ้าง) —
+        <strong>ไม่ต้องติดตั้งเอง</strong> ไหลมากับ platform อัตโนมัติ</td></tr>
+    <tr><td><code>ugt-nextjs-platform</code></td><td>2.2.0</td>
+        <td>skills 7 ตัวของ stack Next.js + harness assets (depend บน <code>ugt-core</code>)</td></tr>
+    <tr><td><code>ugt-nextjs-standard</code></td><td>1.2.0</td>
+        <td><strong>bundle แนะนำ</strong> — ติดตั้งตัวเดียวได้ platform + superpowers
+        (pipeline: brainstorming → plan → TDD → review) + skill-creator</td></tr>
+  </table></div>
+  <p class="sub">เวอร์ชันจริงล่าสุดดูจาก git tags (<code>&lt;plugin&gt;--v&lt;version&gt;</code>) ·
+     รายละเอียดต่อรุ่นอยู่ใน <code>CHANGELOG.md</code> ของแต่ละ plugin</p>
+</section>
+
+<section id="skills">
+  <h2><span class="tag">02</span> Skills ใน <code>ugt-nextjs-platform</code></h2>
+  <div class="table-scroll"><table>
+    <tr><th>Skill</th><th>ทำอะไร</th><th>เรียกเมื่อไหร่</th></tr>
+    <tr><td><code>ugt-nextjs-setup</code></td><td>ตัวแม่ — interview ครั้งเดียว → ติดตั้ง module ตามลำดับ → ติดตั้ง harness</td><td>คำขอกว้าง ๆ ("ทำให้ deploy ได้")</td></tr>
+    <tr><td><code>ugt-nextjs-database-setup</code></td><td>SQL Server ผ่าน Prisma + naming convention + audit columns</td><td>งาน DB ทุกชนิด รวมแก้ schema</td></tr>
+    <tr><td><code>ugt-nextjs-quality-setup</code></td><td>Vitest (JUnit+lcov) + ESLint + Prettier + pre-commit</td><td>ก่อนทำ CI เสมอ</td></tr>
+    <tr><td><code>ugt-nextjs-auth-setup</code></td><td>Login SSO/LDAP/Local + RBAC + audit log + admin bootstrap</td><td>งาน auth/permission ทุกชนิด</td></tr>
+    <tr><td><code>ugt-nextjs-cicd-setup</code></td><td>Jenkins 10 stages + SonarQube Gate + OWASP + Docker deploy + <code>/api/health</code></td><td>งาน CI/CD + วินิจฉัย pipeline</td></tr>
+    <tr><td><code>ugt-nextjs-clean-code</code></td><td>เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก</td><td><strong>โหลดเอง</strong>เมื่อแตะไฟล์ <code>.ts</code>/<code>.tsx</code></td></tr>
+    <tr><td><code>ugt-nextjs-pitfalls</code></td><td>กับดักจากบั๊ก production จริง — วันที่เลื่อน, cache ไม่ refresh, basePath 404</td><td><strong>โหลดเอง</strong>เมื่อแตะ <code>app/</code> <code>components/</code> <code>lib/</code></td></tr>
+    <tr><td><code>ugt-checkpoint</code> <small>(จาก core)</small></td><td>บันทึก state ของทีมลง <code>.claude/state/</code></td><td>จบงานทุกครั้ง / ส่งต่อ session</td></tr>
+    <tr><td><code>ugt-mode</code> <small>(จาก core)</small></td><td>สลับชุด model ต่อประเภทงานสำหรับ subagent</td><td><code>/ugt-mode &lt;preset&gt;</code> หรือ "โหมดประหยัด" / "โหมด god"</td></tr>
+  </table></div>
+</section>
+
+<section id="install">
+  <h2><span class="tag">03</span> วิธีติดตั้ง — เลือกโหมด</h2>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="c">C · Marketplace (แนะนำ)</button>
+    <button role="tab" aria-selected="false" data-tab="b">B · Copy plugin</button>
+    <button role="tab" aria-selected="false" data-tab="a">A · Copy skill เดี่ยว</button>
+  </div>
+
+  <div class="tabpanel" data-panel="c" role="tabpanel">
+    <p><strong>สำหรับทีมพัฒนา</strong> — ทำครั้งเดียวต่อเครื่อง · update ได้ <span class="yes">✅</span></p>
+    <ol>
+      <li>มีสิทธิ์อ่านรีโปนี้ + login GitHub ในเครื่อง: <code>gh auth login</code></li>
+      <li>เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรันทีละบรรทัด:</li>
+    </ol>
+    <div class="term"><button class="copy">copy</button><span class="p">›</span> /plugin marketplace add pakornkub/ugt-claude-platform
+<span class="p">›</span> /plugin install ugt-nextjs-standard@ugt
+<span class="p">›</span> /reload-plugins</div>
+    <ol start="3">
+      <li>ตอน install เลือก scope <strong>project</strong> ถ้าอยากให้คนที่ clone โปรเจคนั้นได้ตามด้วย ·
+          เลือก <strong>user</strong> ถ้าอยากใช้เองทุกโปรเจคบนเครื่อง</li>
+      <li>เช็คว่าติดแล้ว: พิมพ์ <code>/ugt</code> ต้องเห็น autocomplete รายการ skill ·
+          <code>/plugin</code> ต้องเห็น core + platform + standard ไม่มี error</li>
+    </ol>
+    <div class="callout">
+      รีโปนี้เป็น <strong>private</strong> — ต้องมีสิทธิ์อ่านรีโป + login GitHub ไว้ในเครื่อง ·
+      ถ้าใช้ HTTPS ตั้ง <code>CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1</code> ·
+      แนะนำตั้ง <code>CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1</code>
+      กัน plugin หายชั่วคราวตอน background pull ไม่ผ่าน
+    </div>
+    <p class="sub">โปรเจคที่ผ่าน <code>/ugt-nextjs-setup</code> แล้วจะมี <code>.claude/settings.json</code>
+       ที่ประกาศ marketplace ไว้ — คนที่ clone repo นั้นจะถูกชวนติดตั้ง plugin อัตโนมัติ</p>
+  </div>
+
+  <div class="tabpanel" data-panel="b" role="tabpanel" hidden>
+    <p><strong>สำหรับโปรเจคที่ส่งมอบ</strong> — ได้ skills + hooks ครบ ไม่ต้องแตะ marketplace ·
+       update <span class="no">❌ copy ใหม่เอง</span></p>
+    <p>copy <strong>ทั้งสองโฟลเดอร์</strong>: <code>plugins/ugt-core</code> และ
+       <code>plugins/ugt-nextjs-platform</code> ไปวางใน <code>&lt;โปรเจค&gt;/.claude/skills/</code></p>
+    <p class="sub">โหลดเป็น plugin อัตโนมัติเพราะมี <code>.claude-plugin/plugin.json</code> —
+       ต้องกดยอมรับ workspace trust ครั้งแรก</p>
+  </div>
+
+  <div class="tabpanel" data-panel="a" role="tabpanel" hidden>
+    <p><strong>เฉพาะ skill เดียว</strong> (ไม่มี hook) · update <span class="no">❌</span></p>
+    <p>copy <code>plugins/ugt-nextjs-platform/skills/&lt;ชื่อ&gt;</code>
+       ไปวางใน <code>.claude/skills/</code></p>
+  </div>
+</section>
+
+<section id="usecases">
+  <h2><span class="tag">04</span> ตัวอย่างการใช้งาน — 2 use case หลัก</h2>
+
+  <details open>
+    <summary>Use case 1 · มีโปรเจค Next.js อยู่แล้ว มาเติมมาตรฐาน (retrofit)</summary>
+    <p class="sub">โปรเจคที่ทำกับ AI จนรันในเครื่องได้ แต่ยังไม่มี login / database จริง / CI —
+       จะส่งให้ทีมใช้จริงแล้ว</p>
+    <ol>
+      <li>เปิด Claude Code ที่โปรเจคนั้น แล้วพิมพ์ประโยคเดียว:
+        <div class="term"><button class="copy">copy</button><span class="p">›</span> ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย</div>
+        skill trigger เองจากประโยคกว้าง ๆ แบบนี้ — วัดแล้ว 60/60 · หรือเรียกตรง <code>/ugt-nextjs-setup</code></li>
+      <li>Claude <strong>ตรวจของเดิมก่อนเสมอ</strong> — ถ้ามี Prisma/jest/Jenkinsfile อยู่แล้ว
+          จะรายงานสิ่งที่เจอและถามก่อน ไม่ทับเงียบ ๆ</li>
+      <li>ตอบ <strong>interview ชุดเดียว</strong> เช่น: ติดตั้งครบทั้งสี่ module · login = SSO + LDAP ·
+          ชื่อโปรเจค <code>expense-portal</code> · basePath <code>/expense-portal</code> ·
+          ports 3000/3001 · DB server + ชื่อ database · มี Sentry ไหม</li>
+      <li>รอ Claude ไล่ติดตั้ง <strong>Database → Quality → Auth → CI → harness</strong>
+          แล้วรัน verify script ของทุก module จนเขียว</li>
+      <li>ทำตามสรุปปิดงาน: เติมค่าจริงใน <code>.env.local</code> · เอารายการไปขอ admin
+          (Keycloak client + redirect URI, Jenkins credentials, SonarQube projects) ·
+          push <code>develop</code> แล้วดู pipeline วิ่งครบ 10 stages</li>
+      <li>Smoke test ตาม checklist: <code>npm run build</code> ผ่าน · login ทุก method ·
+          <code>/admin/setup</code> กดครั้งเดียวได้ Administrator</li>
+    </ol>
+  </details>
+
+  <details>
+    <summary>Use case 2 · โปรเจคเพิ่งสร้าง มีแค่โฟลเดอร์ requirement</summary>
+    <p class="sub">โฟลเดอร์ว่าง ๆ ที่มีแต่ <code>docs/</code> (requirement, mockup, business rules) —
+       ยังไม่มีโค้ดสักบรรทัด</p>
+    <ol>
+      <li><strong>อ่าน requirement ก่อน อย่าเพิ่งสร้างอะไร</strong>:
+        <div class="term"><button class="copy">copy</button><span class="p">›</span> อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module/ผู้ใช้กี่แบบ
+  ต้องมีตารางอะไรบ้าง และอะไรที่เอกสารยังไม่บอกแต่จำเป็นต่อการสร้าง</div>
+        คำถามข้อท้ายสำคัญสุด — ได้รายการไปถาม stakeholder ก่อนเขียนโค้ดผิดทิศ</li>
+      <li><strong>Scaffold Next.js เปล่า</strong> (สั่ง AI หรือรันเอง):
+        <div class="term"><button class="copy">copy</button><span class="p">$</span> npx create-next-app@latest . --typescript --app --tailwind --eslint --src-dir --import-alias "@/*" --yes</div>
+        ใช้ <code>--src-dir</code> เพราะ skills ในชุดนี้คาดหวังโครงสร้าง <code>src/</code></li>
+      <li><strong>ติดตั้งมาตรฐานก่อนเขียน feature แรก</strong> — <code>/ugt-nextjs-setup</code>
+          (ตอบ interview จากข้อมูลข้อ 1) — เหตุที่ต้องมาก่อน feature: Quality Gate วัดโค้ดใหม่
+          ตั้งแต่บรรทัดแรก และตาราง domain ถูกกฎ naming/audit columns คุมตั้งแต่ต้น</li>
+      <li><strong>วนสร้าง feature จาก docs</strong> — superpowers รับช่วง
+          (brainstorming → plan → TDD) โดยมี harness ประกบอัตโนมัติ</li>
+      <li>จบ session: <code>/ugt-checkpoint</code> แล้ว commit — คนต่อไปเปิดมาอ่านต่อได้ทันที</li>
+    </ol>
+  </details>
+</section>
+
+<section id="daily">
+  <h2><span class="tag">05</span> งานพัฒนาประจำวัน <small style="font-weight:400">(harness ทำงานเอง ไม่ต้องเรียกอะไร)</small></h2>
+  <div class="table-scroll"><table>
+    <tr><th>เหตุการณ์</th><th>สิ่งที่เกิดเอง</th></tr>
+    <tr><td>งานเล็ก (typo, แก้ doc, one-line fix ที่รู้ตำแหน่ง)</td>
+        <td>ทำตรง ๆ <strong>ข้าม pipeline ของ superpowers</strong> — ไม่เปลือง token (กฎ auto-load ยังทำงานปกติ)</td></tr>
+    <tr><td>สร้าง feature / แก้บั๊ก</td>
+        <td>pipeline superpowers รับไป (brainstorming → plan → TDD → review) เลือก model subagent ตาม <code>/ugt-mode</code></td></tr>
+    <tr><td>แตะไฟล์ <code>.ts</code>/<code>.tsx</code></td>
+        <td><code>ugt-nextjs-clean-code</code> + <code>ugt-nextjs-pitfalls</code> โหลดเอง</td></tr>
+    <tr><td>แตะ <code>prisma/</code> / ไฟล์ auth / Jenkinsfile</td>
+        <td>rules ที่เกี่ยวโหลดเองจาก <code>.claude/rules/</code></td></tr>
+    <tr><td>จบงานทุกครั้ง</td><td>เรียก <code>/ugt-checkpoint</code> แล้ว commit</td></tr>
+    <tr><td>โปรเจคอยู่บน Next.js 16.3+</td>
+        <td><code>next dev</code> เติมบล็อก <code>nextjs-agent-rules</code> + <code>AGENTS.md</code> เอง —
+            <strong>ปล่อยไว้และ commit ไปด้วย</strong> (อยู่ร่วมกับบล็อก ugt ได้โดยออกแบบ)</td></tr>
+  </table></div>
+  <p class="sub">ต้องการติดตั้งทีละส่วนก็เรียก skill ลูกตรง ๆ ได้ (<code>/ugt-nextjs-database-setup</code> ฯลฯ)</p>
+</section>
+
+<section id="mode">
+  <h2><span class="tag">06</span> เลือกชุด model ต่อประเภทงาน — <code>/ugt-mode</code></h2>
+  <p class="sub">โหมดเก็บใน <code>.claude/state/mode.md</code> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
+     ใช้กับ<strong>งานที่ส่งไป subagent เท่านั้น</strong> — model หลักของ session
+     ยังเปลี่ยนด้วย <code>/model</code> ตามปกติ</p>
+
+  <div class="mode-btns" role="group" aria-label="เลือก preset">
+    <button data-mode="easy">easy</button>
+    <button data-mode="default" class="active">default</button>
+    <button data-mode="god">god</button>
+    <button data-mode="all">เทียบทั้งหมด</button>
+  </div>
+  <p class="mode-note" id="modeNote">preset <b>default</b> — สมดุลคุณภาพ/ค่าใช้จ่าย สำหรับงานทั่วไป</p>
+
+  <div class="table-scroll"><table id="modeTable">
+    <tr><th>ประเภทงาน</th><th data-col="easy">easy</th><th data-col="default">default</th><th data-col="god">god</th></tr>
+    <tr><td>Plan / วิเคราะห์ requirement</td><td data-col="easy">opus</td><td data-col="default">fable</td><td data-col="god">fable</td></tr>
+    <tr><td>เขียนโค้ด (feature)</td><td data-col="easy">sonnet</td><td data-col="default">sonnet</td><td data-col="god">opus</td></tr>
+    <tr><td>Review โค้ด</td><td data-col="easy">opus</td><td data-col="default">fable</td><td data-col="god">fable</td></tr>
+    <tr><td>หาสาเหตุบั๊ก (ยังไม่รู้ root cause)</td><td data-col="easy">opus</td><td data-col="default">fable</td><td data-col="god">fable</td></tr>
+    <tr><td>แก้บั๊ก (รู้ root cause แล้ว)</td><td data-col="easy">sonnet</td><td data-col="default">sonnet</td><td data-col="god">opus</td></tr>
+    <tr><td>รันเทส / verify script (mechanical)</td><td data-col="easy">haiku</td><td data-col="default">haiku</td><td data-col="god">haiku</td></tr>
+    <tr><td>Doc / งานเบา</td><td data-col="easy">haiku</td><td data-col="default">haiku</td><td data-col="god">haiku</td></tr>
+  </table></div>
+
+  <div class="term"><button class="copy">copy</button><span class="p">›</span> /ugt-mode god          <span class="p"># งานสำคัญ อัดคุณภาพเต็มที่ (โค้ด+แก้บั๊กใช้ opus)</span>
+<span class="p">›</span> /ugt-mode easy         <span class="p"># งานทั่วไป ประหยัด token</span>
+<span class="p">›</span> /ugt-mode              <span class="p"># ดูโหมดปัจจุบัน</span>
+<span class="p">›</span> โหมดประหยัดหน่อย งานนี้ไม่รีบ   <span class="p"># ประโยคธรรมดาก็ trigger ได้ (= easy)</span></div>
+
+  <p class="sub">หลักที่ทุก preset ยึด: planner/reviewer ไม่อ่อนกว่า coder เสมอ ·
+     แยก "หาสาเหตุ" (แพง ใช้ model แรง) จาก "แก้ตาม plan" (ถูกกว่า) ·
+     งาน mechanical ใช้ haiku ทุกโหมด</p>
+</section>
+
+<section id="harness">
+  <h2><span class="tag">07</span> สิ่งที่ <code>/ugt-nextjs-setup</code> ติดตั้งลงโปรเจค (ชั้น harness)</h2>
+  <div class="tree">
+<b>CLAUDE.md</b>                      <span class="c">← บล็อกกฎองค์กรใน marker &lt;!-- ugt:start/end --&gt; (skill เป็นเจ้าของ)</span><br>
+<b>.claude/rules/</b>ugt-nextjs-*.md  <span class="c">← กฎผูก path — runtime โหลดเองเมื่อแตะไฟล์ที่เกี่ยว</span><br>
+<b>.claude/state/</b>checkpoint.md    <span class="c">← ความจำของทีม (commit) — อัปเดตด้วย /ugt-checkpoint</span><br>
+<b>.claude/state/</b>project-notes.md <span class="c">← Error Patterns · Deviations · Open Questions</span><br>
+<b>.claude/state/</b>mode.md          <span class="c">← ชุด model ต่อประเภทงานของ subagent — สลับด้วย /ugt-mode</span><br>
+<b>.claude/</b>settings.json          <span class="c">← marketplace + plugin + permissions</span><br>
+<b>.claude/logs/</b>                  <span class="c">← audit log จาก hooks (gitignore)</span>
+  </div>
+</section>
+
+<section id="update">
+  <h2><span class="tag">08</span> การอัปเดต (ทีม — โหมด C) · การออกรุ่น (ทีม platform)</h2>
+  <p class="sub">auto-update <strong>ปิดโดย default</strong> สำหรับ marketplace ที่ไม่ใช่ของ Anthropic —
+     เมื่อมีประกาศรุ่นใหม่ รันในโปรเจคไหนก็ได้:</p>
+  <div class="term"><button class="copy">copy</button><span class="p">›</span> /plugin marketplace update ugt
+<span class="p">›</span> /plugin update ugt-nextjs-standard
+<span class="p">›</span> /reload-plugins</div>
+  <ul>
+    <li>dependency ทั้งสาย (core / platform / superpowers / skill-creator) ตามมาเอง</li>
+    <li>อัปเดตแล้ว <strong>ไม่ต้องแก้อะไรในโปรเจค</strong> — ไฟล์ harness ที่ติดตั้งไว้ใช้ต่อได้เสมอ
+        (ถ้ารุ่นใหม่เปลี่ยน rules/CLAUDE-block จะบอกใน CHANGELOG ให้รัน <code>/ugt-nextjs-setup</code>
+        ซ้ำเพื่อ refresh — เนื้อหาของทีมไม่ถูกแตะ)</li>
+    <li>อยากรู้รุ่นที่ใช้อยู่: <code>/plugin</code> แล้วดูเวอร์ชันในรายการ</li>
+  </ul>
+
+  <details>
+    <summary>การออกรุ่น (สำหรับทีม platform)</summary>
+    <ol>
+      <li>รับ PR → merge เข้า <code>main</code></li>
+      <li>bump <code>version</code> ใน <code>.claude-plugin/plugin.json</code> ของ
+          <strong>plugin ที่เปลี่ยน</strong> (เส้นเวอร์ชันแยกกัน) + เพิ่มหัวข้อใน <code>CHANGELOG.md</code></li>
+      <li><code>claude plugin validate ./plugins/&lt;ชื่อ&gt; --strict</code>
+          (และ validate <code>.</code> สำหรับ marketplace)</li>
+      <li>tag ตามแบบ <code>&lt;plugin&gt;--v&lt;version&gt;</code> แล้ว push main พร้อม tag —
+          <strong>ถ้ารุ่นนั้นเพิ่ม dependency ใหม่ ให้ push tag ของ dependency ก่อนตัวที่ depend</strong></li>
+      <li>ประกาศให้ทีมรันคำสั่งอัปเดต</li>
+    </ol>
+    <p class="sub">กติกาเนื้อหา: ทุก skill ต้อง self-contained (ห้ามอ้างไฟล์ข้าม plugin/skill,
+       verify script ยึด <code>process.cwd()</code>), เนื้อหาที่โหลดเข้า context เป็นภาษาอังกฤษ
+       (เว้น trigger phrase), มาตรฐานกลางแก้ที่ <code>plugins/ugt-core/contracts/</code> ก่อนเสมอ</p>
+  </details>
+</section>
+
+<section id="triage">
+  <h2><span class="tag">09</span> ความรู้ใหม่ไปไว้ที่ไหน <small style="font-weight:400">(คู่มือ triage — สำคัญที่สุดในไฟล์นี้)</small></h2>
+  <div class="table-scroll"><table>
+    <tr><th>ความรู้ที่เจอ</th><th>ไปไว้ที่</th><th>ห้ามทำ</th></tr>
+    <tr><td>จริงเฉพาะโปรเจคนั้น (business rule, ตารางแปลก)</td>
+        <td><code>.claude/state/project-notes.md</code> หรือ <code>.claude/rules/&lt;project&gt;-*.md</code></td>
+        <td>—</td></tr>
+    <tr><td>จริงกับทุกโปรเจคบน stack นี้ (gotcha ของ Prisma/Keycloak/Jenkins)</td>
+        <td><strong>เปิด PR เข้ารีโปนี้</strong> → bump version → ทีมอื่นอัปเดตตาม</td>
+        <td class="no">❌ แก้ไฟล์ skill ที่ติดตั้งมา — อยู่ใน plugin cache ที่ถูกลบตอน update และไม่มีใครได้ด้วย</td></tr>
+    <tr><td>ความชอบส่วนตัว</td>
+        <td>ปล่อยให้ auto memory ของ Claude จัดการ</td>
+        <td class="no">❌ ยัดลงไฟล์ที่ commit</td></tr>
+  </table></div>
+  <div class="callout ban">
+    <strong>ห้ามสร้าง <code>.claude/skills/ugt-&lt;ชื่อเดิม&gt;/</code> ทับ skill ของ platform</strong> —
+    จะได้ความรู้สองชุดที่ขัดกันโดยไม่มีใครรู้ว่าใช้อันไหนอยู่ ถ้าต้อง extend ให้ตั้งชื่อใหม่
+    (สร้างด้วย <code>skill-creator</code> ที่มากับ bundle ได้เลย)
+  </div>
+</section>
+
+<section id="quality">
+  <h2><span class="tag">10</span> หลักฐานคุณภาพ</h2>
+  <p class="sub">ทุก skill มี <code>scripts/verify.mjs</code> (แปลง checklist เป็นคำสั่งเดียว —
+     ทดสอบกับโปรเจค production จริงและ negative case แล้ว เคยจับบั๊กจริงได้หลายรอบ) และ <code>evals/</code></p>
+  <div class="stats">
+    <div class="stat"><div class="n">34/34 <small>vs 18/34</small></div>
+      <div class="d">setup/auth/cicd eval — with-skill 100% vs without 53%</div>
+      <div class="bar"><i style="width:100%"></i></div>
+      <div class="bar"><i class="vs" style="width:53%"></i></div></div>
+    <div class="stat"><div class="n">9/9 <small>vs 6/9</small></div>
+      <div class="d">pitfalls eval</div>
+      <div class="bar"><i style="width:100%"></i></div>
+      <div class="bar"><i class="vs" style="width:67%"></i></div></div>
+    <div class="stat"><div class="n">9/9 + 60/60</div>
+      <div class="d">ugt-mode + trigger boundary (20 query × 3 judges รวม keyword traps)</div>
+      <div class="bar"><i style="width:100%"></i></div></div>
+    <div class="stat"><div class="n">60/60</div>
+      <div class="d">trigger boundary ชุดอื่น (วัดซ้ำหลัง rename + pitfalls/clean-code แยกชุด)</div>
+      <div class="bar"><i style="width:100%"></i></div></div>
+  </div>
+  <p class="sub">Hard boundary ระดับองค์กร (บังคับที่ client ไม่ใช่ที่ instruction) →
+     ส่ง <code>plugins/ugt-core/contracts/org-managed-settings.md</code> ให้ทีม IT ·
+     ข้อเสนอรองรับ stack อื่น (Python ฯลฯ) → <code>docs/multi-stack-proposal.md</code></p>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  UGT Claude Platform · private repo <code>pakornkub/ugt-claude-platform</code> ·
+  เนื้อหาตรงกับ README.md — แก้ที่ README.md ก่อนแล้วค่อย sync มาไฟล์นี้
+</div></footer>
+
+<script>
+// ponytail: vanilla JS ~30 บรรทัด พอสำหรับ tabs/copy/mode — ไม่ต้องมี framework
+document.querySelectorAll('.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b===btn));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.hidden = p.dataset.panel!==btn.dataset.tab);
+  });
+});
+
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const text=[...btn.parentNode.childNodes]
+      .filter(n=>n!==btn).map(n=>n.textContent).join('')
+      .split('\n').map(l=>l.replace(/^[›$]\s?/,'').replace(/\s*#.*$/,'')).join('\n').trim();
+    navigator.clipboard.writeText(text).then(()=>{
+      btn.textContent='copied ✓'; btn.classList.add('done');
+      setTimeout(()=>{btn.textContent='copy'; btn.classList.remove('done')},1500);
+    });
+  });
+});
+
+const notes={
+  easy:'preset <b>easy</b> — งานทั่วไป ประหยัด token',
+  default:'preset <b>default</b> — สมดุลคุณภาพ/ค่าใช้จ่าย สำหรับงานทั่วไป',
+  god:'preset <b>god</b> — งานสำคัญ อัดคุณภาพเต็มที่ (โค้ด+แก้บั๊กใช้ opus)',
+  all:'เทียบทุก preset พร้อมกัน'
+};
+document.querySelectorAll('.mode-btns button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const m=btn.dataset.mode;
+    document.querySelectorAll('.mode-btns button').forEach(b=>b.classList.toggle('active',b===btn));
+    document.getElementById('modeNote').innerHTML=notes[m];
+    document.querySelectorAll('#modeTable [data-col]').forEach(c=>{
+      c.classList.remove('hl','dim');
+      if(m!=='all') c.classList.add(c.dataset.col===m?'hl':'dim');
+    });
+  });
+});
+document.querySelector('.mode-btns button[data-mode="default"]').click();
+</script>
+</body>
+</html>
