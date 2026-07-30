@@ -117,6 +117,12 @@ How:
    > **Size check**: if the combined file exceeds ~200 lines, move project
    > content that is path-bound into `.claude/rules/<project>-*.md` instead of
    > letting CLAUDE.md bloat (longer files get followed less).
+   > **Coexisting with Next.js 16.3+**: `next dev` upserts its own managed block
+   > (`<!-- BEGIN:nextjs-agent-rules -->` + an `@AGENTS.md` import) into
+   > CLAUDE.md, preserving everything outside it — same marker technique as
+   > ours. Leave that block alone, commit it (deleting it just recreates an
+   > uncommitted change), and never place the ugt block inside it. Opt-out, if
+   > a project ever needs it: `agentRules: false` in next.config.
 2. **`.claude/rules/`** — copy only the files for modules actually installed
    (no auth module → no `ugt-nextjs-auth.md`). These files carry `paths` frontmatter,
    so the runtime loads them by itself when Claude touches matching files —

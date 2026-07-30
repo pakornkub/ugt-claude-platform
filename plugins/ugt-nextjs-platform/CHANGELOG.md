@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.1.1 (2026-07-30)
+
+- ugt-nextjs-setup: document coexistence with Next.js 16.3+ auto-generated
+  agent files — next dev upserts its own managed block (BEGIN:nextjs-agent-rules
+  + @AGENTS.md import) into CLAUDE.md preserving content outside it (verified
+  against the Next.js ai-agents guide); commit that block, never edit it, and
+  never nest the ugt block inside it. Opt-out: agentRules: false.
+
 ## 2.1.0 (2026-07-30)
 
 New skill **`ugt-nextjs-pitfalls`** — production-bug lessons for feature code,
