@@ -1,5 +1,23 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.2.0 (2026-07-30)
+
+Harness additions for the `/ugt-mode` skill (ugt-core 1.1.0) plus a task-triage
+rule. Existing projects: run `/ugt-nextjs-setup` again to refresh the CLAUDE.md
+block, or just run `/ugt-mode default` once (creates `mode.md`; the block
+import can wait for the next refresh).
+
+- `assets/state-mode.md` — new skeleton → `.claude/state/mode.md` (create once,
+  never overwrite; owned by `/ugt-mode` afterwards): per-task-type subagent
+  model routing, shipped on the `default` preset
+- `assets/CLAUDE-block.md` — new "Model mode" section importing
+  `@.claude/state/mode.md`, and a triage row in "Which skill, when": small
+  tasks (typo, doc edit, config value, one-line fix at a known spot) go
+  directly, skipping the superpowers pipeline — auto-loading rules still apply
+- `ugt-nextjs-setup` — `state-mode.md` added to the step-4 asset table;
+  `scripts/verify.mjs` checks `mode.md` declares a valid mode (warn-only when
+  absent, so pre-2.2.0 installs stay green)
+
 ## 2.1.1 (2026-07-30)
 
 - ugt-nextjs-setup: document coexistence with Next.js 16.3+ auto-generated

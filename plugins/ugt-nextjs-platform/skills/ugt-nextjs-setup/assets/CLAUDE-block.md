@@ -47,10 +47,18 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
   `project-notes.md` immediately, while the details are fresh
 - Keep both files short (~100 lines each) — they load into context every session
 
+## Model mode (subagent routing)
+
+@.claude/state/mode.md
+
+- Follow that table when dispatching subagents · switch preset with
+  `/ugt-mode easy|default|god` · main session model stays the user's `/model`
+
 ## Which skill, when
 
 | Task | How |
 | --- | --- |
+| Small task: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
 | Build a feature / fix a bug | Normal superpowers pipeline (brainstorming → plan → TDD → review) |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |

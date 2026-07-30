@@ -1,0 +1,94 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-mode. S* queries must route to ugt-mode; N* queries must NOT (their expected target is informational). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke/read first.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": "2026-07-30",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "100%",
+    "secondary_accuracy": "59/60",
+    "note": "iteration 0: S-side 30/30 routed to ugt-mode (incl. keyword traps S9/S10); N-side 30/30 did NOT route to ugt-mode — the near-misses held: 'model รถยนต์' (N6) went to pitfalls, 'ประหยัด token เวลาคุย' (N8) to none, 'เปลี่ยน model หลัก' (N1) to none//model. The single secondary miss (judge 2, N6 → systematic-debugging instead of pitfalls) concerns ugt-nextjs-pitfalls' boundary, not ugt-mode's. No description change needed; optimizer loop terminated at iteration 0."
+  },
+  "queries": {
+    "S1": {
+      "prompt": "งานนี้ต้อง demo ให้ผู้บริหารพรุ่งนี้ อัดคุณภาพเต็มที่เลย ใช้ model แรงสุดทุกขั้นตอน",
+      "expected": "ugt-mode"
+    },
+    "S2": {
+      "prompt": "โปรเจคนี้ใกล้หมด quota แล้ว ช่วยปรับให้ประหยัด token หน่อย งานไหนไม่สำคัญใช้ตัวถูก ๆ พอ",
+      "expected": "ugt-mode"
+    },
+    "S3": {
+      "prompt": "ตอนนี้โหมด model ของโปรเจคเราตั้งไว้เป็นอะไรอยู่",
+      "expected": "ugt-mode"
+    },
+    "S4": {
+      "prompt": "ทำไมตอน review ต้องใช้ fable ด้วย เปลืองจัง เปลี่ยนชุด model ให้ถูกลงหน่อย",
+      "expected": "ugt-mode"
+    },
+    "S5": {
+      "prompt": "เปลี่ยนเป็นโหมด god ให้หน่อย",
+      "expected": "ugt-mode"
+    },
+    "S6": {
+      "prompt": "อยากให้ตอนเขียนโค้ดใช้ opus แต่ตอนรันเทสใช้ตัวเล็กพอ จัดให้ที",
+      "expected": "ugt-mode"
+    },
+    "S7": {
+      "prompt": "โหมดประหยัดหน่อย งานช่วงนี้ไม่รีบ",
+      "expected": "ugt-mode"
+    },
+    "S8": {
+      "prompt": "ตั้งค่าให้ทั้งทีมเลย งาน plan ใช้ตัวแรง งานเอกสารใช้ haiku",
+      "expected": "ugt-mode"
+    },
+    "S9": {
+      "prompt": "ถ้าสั่งแก้บั๊กตอนนี้ subagent จะถูก dispatch ด้วย model อะไร",
+      "expected": "ugt-mode"
+    },
+    "S10": {
+      "prompt": "ugt-mode easy",
+      "expected": "ugt-mode"
+    },
+    "N1": {
+      "prompt": "ช่วยเปลี่ยน model หลักของ session นี้เป็น opus ให้หน่อย",
+      "expected": "(no skill — /model is a user command; ugt-mode acceptable as secondary since it documents this boundary)"
+    },
+    "N2": {
+      "prompt": "แก้ typo ใน README ให้หน่อย คำว่า databse ตรง section install",
+      "expected": "(no skill — small task, direct edit)"
+    },
+    "N3": {
+      "prompt": "หน้า list พนักงานโหลดช้ามาก เกิน 10 วิ ช่วยหาสาเหตุที",
+      "expected": "superpowers:systematic-debugging"
+    },
+    "N4": {
+      "prompt": "จบงานวันนี้แล้ว บันทึก state ไว้ให้ทีมด้วย",
+      "expected": "ugt-checkpoint"
+    },
+    "N5": {
+      "prompt": "โค้ดที่เพิ่งเขียนมา over-engineered มาก ช่วย simplify ให้ผ่าน sonar ด้วย",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N6": {
+      "prompt": "dropdown เลือก model รถยนต์ในฟอร์ม validate ไม่ผ่านสักที",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N7": {
+      "prompt": "ช่วยออกแบบ data model ของตาราง leave request ตามมาตรฐานบริษัท",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N8": {
+      "prompt": "อยากให้ Claude ตอบสั้น ๆ ประหยัด token เวลาคุยกัน ตั้งค่ายังไง",
+      "expected": "(no skill — response-style preference, not subagent model routing)"
+    },
+    "N9": {
+      "prompt": "เพิ่ม login แบบ LDAP ให้โปรเจคนี้",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N10": {
+      "prompt": "อยากทำ feature ใหม่ หน้า dashboard สรุปวันลา เริ่มยังไงดี",
+      "expected": "superpowers:brainstorming"
+    }
+  }
+}

@@ -106,6 +106,7 @@ where noted.
 | `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
 | `assets/state-checkpoint.md` | `.claude/state/checkpoint.md` | **create once, never overwrite** |
 | `assets/state-project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
+| `assets/state-mode.md` | `.claude/state/mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-mode` |
 
 How:
 
@@ -133,7 +134,8 @@ How:
    if the file already exists, merge — do not overwrite.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
-   installed modules in `checkpoint.md`.
+   installed modules in `checkpoint.md` · `mode.md` ships with the `default`
+   preset — changing it is `/ugt-mode`'s job, not this skill's.
 5. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
    **`.claude/state/` must be committed** — never ignore `.claude/` wholesale.
 6. If the org has no machine-level hard boundary yet → point the user at the

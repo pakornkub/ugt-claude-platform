@@ -12,8 +12,8 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | Plugin | เวอร์ชันล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-core` | 1.0.0 | ฐานกลางทุก stack — `ugt-checkpoint`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
-| `ugt-nextjs-platform` | 2.1.1 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
+| `ugt-core` | 1.1.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
+| `ugt-nextjs-platform` | 2.2.0 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
 | `ugt-nextjs-standard` | 1.2.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
 
 เวอร์ชันจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดต่อรุ่นอยู่ใน
@@ -31,6 +31,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก | **โหลดเองอัตโนมัติ**เมื่อแตะไฟล์ `.ts`/`.tsx` |
 | `ugt-nextjs-pitfalls` | กับดักจากบั๊ก production จริง — วันที่เลื่อน, cache ไม่ refresh, basePath 404 | **โหลดเองอัตโนมัติ**เมื่อแตะ `app/` `components/` `lib/` |
 | `ugt-checkpoint` *(มาจาก `ugt-core`)* | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
+| `ugt-mode` *(มาจาก `ugt-core`)* | สลับชุด model ต่อประเภทงานสำหรับ subagent (`easy`/`default`/`god`) | `/ugt-mode <preset>` หรือ "โหมดประหยัด" / "โหมด god" |
 
 ## วิธีติดตั้ง — 3 โหมด
 
@@ -109,6 +110,14 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
    ```
    สร้างโปรเจค Next.js ใหม่ในโฟลเดอร์นี้: TypeScript, App Router, Tailwind
    ```
+
+   หรือทำเองโดยไม่ผ่าน AI:
+
+   ```bash
+   npx create-next-app@latest . --typescript --app --tailwind --eslint --src-dir --import-alias "@/*" --yes
+   ```
+
+   (ใช้ `--src-dir` เพราะ skills ในชุดนี้คาดหวังโครงสร้าง `src/`)
 3. **ติดตั้งมาตรฐานก่อนเขียน feature แรก** — `/ugt-nextjs-setup` (ตอบ interview โดยใช้
    ข้อมูลจากข้อ 1 เช่นเปิด login method ตามประเภทผู้ใช้ใน requirement) —
    เหตุที่ต้องมาก่อน feature: Quality Gate วัดโค้ดใหม่ตั้งแต่บรรทัดแรก และตาราง domain
@@ -127,13 +136,43 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | เหตุการณ์ | สิ่งที่เกิดเอง |
 | --- | --- |
-| สร้าง feature / แก้บั๊ก | pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review) |
+| งานเล็ก (typo, แก้ doc, เปลี่ยนค่า config, one-line fix ที่รู้ตำแหน่ง) | ทำตรง ๆ **ข้าม pipeline ของ superpowers** — ไม่เปลือง token กับ brainstorming/plan (กฎ auto-load ยังทำงานปกติ) |
+| สร้าง feature / แก้บั๊ก | pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review) โดยเลือก model ของ subagent ตามตาราง `/ugt-mode` |
 | แตะไฟล์ `.ts`/`.tsx` | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` โหลดเอง |
 | แตะ `prisma/` / ไฟล์ auth / Jenkinsfile | rules ที่เกี่ยวโหลดเองจาก `.claude/rules/` |
 | จบงานทุกครั้ง | เรียก `/ugt-checkpoint` แล้ว commit |
 | โปรเจคอยู่บน Next.js 16.3+ | `next dev` เติมบล็อก `nextjs-agent-rules` + `AGENTS.md` เอง — **ปล่อยไว้และ commit ไปด้วย** (อยู่ร่วมกับบล็อก ugt ได้โดยออกแบบ) |
 
 ต้องการติดตั้งทีละส่วนก็เรียก skill ลูกตรง ๆ ได้ (`/ugt-nextjs-database-setup` ฯลฯ)
+
+### เลือกชุด model ต่อประเภทงาน — `/ugt-mode`
+
+โหมดถูกเก็บใน `.claude/state/mode.md` (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
+และใช้กับ**งานที่ส่งไป subagent เท่านั้น** — model หลักของ session ยังเปลี่ยนด้วย
+`/model` ตามปกติ
+
+| ประเภทงาน | `easy` | `default` | `god` |
+| --- | --- | --- | --- |
+| Plan / วิเคราะห์ requirement | opus | fable | fable |
+| เขียนโค้ด (feature) | sonnet | sonnet | opus |
+| Review โค้ด | opus | fable | fable |
+| หาสาเหตุบั๊ก (ยังไม่รู้ root cause) | opus | fable | fable |
+| แก้บั๊ก (รู้ root cause แล้ว) | sonnet | sonnet | opus |
+| รันเทส / verify script (งาน mechanical) | haiku | haiku | haiku |
+| Doc / งานเบา | haiku | haiku | haiku |
+
+ตัวอย่างการใช้:
+
+```
+/ugt-mode god          ← งานสำคัญ อัดคุณภาพเต็มที่ (โค้ด+แก้บั๊กใช้ opus)
+/ugt-mode easy         ← งานทั่วไป ประหยัด token
+/ugt-mode              ← ดูว่าโหมดปัจจุบันคืออะไร
+โหมดประหยัดหน่อย งานนี้ไม่รีบ   ← ประโยคธรรมดาก็ trigger ได้ (= easy)
+```
+
+หลักที่ทุก preset ยึด: planner/reviewer ไม่อ่อนกว่า coder เสมอ ·
+แยก "หาสาเหตุ" (แพง ใช้ model แรง) จาก "แก้ตาม plan" (ถูกกว่า) ·
+งาน mechanical ใช้ haiku ทุกโหมด
 
 ### สิ่งที่ `/ugt-nextjs-setup` ติดตั้งลงโปรเจค (ชั้น harness)
 
@@ -142,6 +181,7 @@ CLAUDE.md                      ← บล็อกกฎองค์กรใน
 .claude/rules/ugt-nextjs-*.md  ← กฎผูก path — runtime โหลดเองเมื่อแตะไฟล์ที่เกี่ยว
 .claude/state/checkpoint.md    ← ความจำของทีม (commit) — อัปเดตด้วย /ugt-checkpoint
 .claude/state/project-notes.md ← Error Patterns · Deviations · Open Questions
+.claude/state/mode.md          ← ชุด model ต่อประเภทงานของ subagent — สลับด้วย /ugt-mode
 .claude/settings.json          ← marketplace + plugin + permissions
 .claude/logs/                  ← audit log จาก hooks (gitignore)
 ```
@@ -196,8 +236,9 @@ verify script ยึด `process.cwd()`), เนื้อหาที่โห�
 ทุก skill มี `scripts/verify.mjs` (แปลง checklist เป็นคำสั่งเดียว — ทดสอบกับโปรเจค
 production จริงและ negative case แล้ว และเคยจับบั๊กจริงในโปรเจคต้นทางได้หลายรอบ)
 และ `evals/` — ผลวัดที่ผ่านมา: setup/auth/cicd eval **with-skill 34/34 (100%)
-vs without-skill 18/34 (53%)** · pitfalls **9/9 vs 6/9** · trigger boundary
-**60/60** (วัดซ้ำหลัง rename และของ pitfalls/clean-code แยกชุด)
+vs without-skill 18/34 (53%)** · pitfalls **9/9 vs 6/9** · ugt-mode **9/9 +
+trigger boundary 60/60** (20 query × 3 judges รวม keyword traps) · trigger
+boundary ชุดอื่น **60/60** (วัดซ้ำหลัง rename และของ pitfalls/clean-code แยกชุด)
 
 Hard boundary ระดับองค์กร (บังคับที่ client ไม่ใช่ที่ instruction) → ส่ง
 `plugins/ugt-core/contracts/org-managed-settings.md` ให้ทีม IT ·

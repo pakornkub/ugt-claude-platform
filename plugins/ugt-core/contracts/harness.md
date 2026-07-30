@@ -12,6 +12,7 @@ stack; this mechanism is shared.
 | `.claude/rules/ugt-<stack>-*.md` | the stack platform | replaced wholesale; carry `paths:` frontmatter so the runtime loads them only when matching files are touched |
 | `.claude/rules/<project>-*.md` | the project | never touched by the platform |
 | `.claude/state/checkpoint.md`, `.claude/state/project-notes.md` | the team | **created once, never overwritten** — updated via `/ugt-checkpoint` |
+| `.claude/state/mode.md` | the team | **created once** with the `default` preset — rewritten only via `/ugt-mode` |
 | `.claude/settings.json` | shared | key-merge only (`extraKnownMarketplaces`, `enabledPlugins`, `permissions`); never rewritten |
 | `.claude/logs/` | audit hooks | gitignored; `.claude/state/` is committed — never ignore `.claude/` wholesale |
 
@@ -25,6 +26,9 @@ stack; this mechanism is shared.
   Patterns / Deviations / Open Questions); entries are dated; decisions carry
   the rejected alternative; no secrets (the files are committed)
 - Committed state outranks Claude's machine-local auto memory on conflict
+- `mode.md` routes **subagent** model choice per task type (presets:
+  `easy`/`default`/`god`); the main-loop model is the user's `/model` and is
+  never switched by a skill
 
 ## Knowledge triage (3-way)
 
