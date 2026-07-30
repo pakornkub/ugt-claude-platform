@@ -48,31 +48,92 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 โปรเจคที่ผ่าน `/ugt-nextjs-setup` แล้วจะมี `.claude/settings.json` ที่ประกาศ marketplace ไว้ —
 คนที่ clone repo นั้นจะถูกชวนติดตั้ง plugin อัตโนมัติ ไม่ต้องทำอะไรเพิ่ม
 
-## วิธีใช้งาน
+## ขั้นตอนติดตั้ง (ทำครั้งเดียวต่อเครื่อง)
 
-### ครั้งแรกของโปรเจค
+1. มีสิทธิ์อ่านรีโปนี้ + login GitHub ในเครื่อง: `gh auth login`
+2. เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรันทีละบรรทัด:
 
-เปิด Claude Code ในโปรเจคปลายทาง แล้วพิมพ์ตามปกติ — skill trigger เองจาก description
-(ผ่านการวัดแล้ว: trigger ถูก 60/60 judgment) หรือเรียกตรง ๆ:
+   ```
+   /plugin marketplace add pakornkub/ugt-claude-platform
+   /plugin install ugt-nextjs-standard@ugt
+   /reload-plugins
+   ```
 
-```
-/ugt-nextjs-setup
-```
+   (ตอน install เลือก scope **project** ถ้าอยากให้คนที่ clone โปรเจคนั้นได้ตามด้วย ·
+   เลือก **user** ถ้าอยากใช้เองทุกโปรเจคบนเครื่อง)
+3. เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็น autocomplete รายการ skill · `/plugin`
+   ต้องเห็น core + platform + standard ไม่มี error
 
-Claude จะตรวจโปรเจค → ถาม interview **ชุดเดียว** → ติดตั้งตามลำดับ
-**Database → Quality → Auth → CI** → ติดตั้ง harness → รัน verify script ของทุก module
-→ สรุปไฟล์ที่แก้ + ของที่ต้องขอ admin + smoke-test checklist
+## ตัวอย่างการใช้งาน — 2 use case หลัก
 
-ต้องการทีละส่วนก็เรียก skill ลูกตรง ๆ ได้ (`/ugt-nextjs-database-setup` ฯลฯ)
+### Use case 1: มีโปรเจค Next.js อยู่แล้ว มาเติมมาตรฐาน (retrofit)
 
-### งานพัฒนาประจำวัน (harness ทำงานเอง)
+สถานการณ์: โปรเจคที่ทำกับ AI จนรันในเครื่องได้ แต่ยังไม่มี login / database จริง / CI —
+จะส่งให้ทีมใช้จริงแล้ว
 
-- สร้าง feature / แก้บั๊ก → pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review)
-- แตะไฟล์ `.ts`/`.tsx` → `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` โหลดเอง
-- แตะ `prisma/` / ไฟล์ auth / Jenkinsfile → rules ที่เกี่ยวโหลดเองจาก `.claude/rules/`
-- **จบงานทุกครั้ง**: `/ugt-checkpoint` แล้ว commit — session หน้า (ของใครก็ได้) อ่านต่อได้ทันที
-- โปรเจคใช้ Next.js 16.3+: `next dev` จะเติมบล็อก `nextjs-agent-rules` + `AGENTS.md` เอง —
-  **ปล่อยมันไว้และ commit ไปด้วย** (อยู่ร่วมกับบล็อก ugt ได้โดยออกแบบ)
+1. เปิด Claude Code ที่โปรเจคนั้น แล้วพิมพ์ประโยคเดียว:
+
+   ```
+   ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย
+   ```
+
+   (skill trigger เองจากประโยคกว้าง ๆ แบบนี้ — วัดแล้ว 60/60 · หรือเรียกตรง `/ugt-nextjs-setup`)
+2. Claude **ตรวจของเดิมก่อนเสมอ** — ถ้ามี Prisma/jest/Jenkinsfile อยู่แล้วจะรายงานสิ่งที่เจอ
+   และถามก่อน ไม่ทับเงียบ ๆ
+3. ตอบ **interview ชุดเดียว** เช่น: ติดตั้งครบทั้งสี่ module · login = SSO + LDAP ·
+   ชื่อโปรเจค `expense-portal` · basePath `/expense-portal` · ports 3000/3001 ·
+   DB server + ชื่อ database · มี Sentry ไหม
+4. รอ Claude ไล่ติดตั้ง **Database → Quality → Auth → CI → harness** แล้วรัน verify script
+   ของทุก module จนเขียว
+5. ทำตามสรุปปิดงาน: เติมค่าจริงใน `.env.local` · เอารายการไปขอ admin
+   (Keycloak client + redirect URI, Jenkins credentials, SonarQube projects) ·
+   push `develop` แล้วดู pipeline วิ่งครบ 10 stages
+6. Smoke test ตาม checklist ที่ได้: `npm run build` ผ่าน · login ทุก method ·
+   `/admin/setup` กดครั้งเดียวได้ Administrator
+
+### Use case 2: โปรเจคเพิ่งสร้าง มีแค่โฟลเดอร์ requirement
+
+สถานการณ์: โฟลเดอร์ว่าง ๆ ที่มีแต่ `docs/` (requirement, mockup, business rules) —
+ยังไม่มีโค้ดสักบรรทัด
+
+1. **อ่าน requirement ก่อน อย่าเพิ่งสร้างอะไร**:
+
+   ```
+   อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module/ผู้ใช้กี่แบบ
+   ต้องมีตารางอะไรบ้าง และอะไรที่เอกสารยังไม่บอกแต่จำเป็นต่อการสร้าง
+   ```
+
+   คำถามข้อท้ายสำคัญสุด — ได้รายการไปถาม stakeholder ก่อนเขียนโค้ดผิดทิศ
+2. **Scaffold Next.js เปล่า**:
+
+   ```
+   สร้างโปรเจค Next.js ใหม่ในโฟลเดอร์นี้: TypeScript, App Router, Tailwind
+   ```
+3. **ติดตั้งมาตรฐานก่อนเขียน feature แรก** — `/ugt-nextjs-setup` (ตอบ interview โดยใช้
+   ข้อมูลจากข้อ 1 เช่นเปิด login method ตามประเภทผู้ใช้ใน requirement) —
+   เหตุที่ต้องมาก่อน feature: Quality Gate วัดโค้ดใหม่ตั้งแต่บรรทัดแรก และตาราง domain
+   ที่กำลังจะออกแบบจะถูกกฎ naming/audit columns คุมตั้งแต่ต้น
+4. **วนสร้าง feature จาก docs**:
+
+   ```
+   สร้างหน้า <feature แรกตามความสำคัญ> ตาม requirement ใน docs/<ไฟล์>
+   ```
+
+   superpowers รับช่วง (brainstorming → plan → TDD) โดยมี harness ประกบอัตโนมัติ
+   ตามตาราง "งานประจำวัน" ข้างล่าง
+5. จบ session: `/ugt-checkpoint` แล้ว commit — คนต่อไป (หรือตัวเองพรุ่งนี้) เปิดมาอ่านต่อได้ทันที
+
+### งานพัฒนาประจำวัน (harness ทำงานเอง ไม่ต้องเรียกอะไร)
+
+| เหตุการณ์ | สิ่งที่เกิดเอง |
+| --- | --- |
+| สร้าง feature / แก้บั๊ก | pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review) |
+| แตะไฟล์ `.ts`/`.tsx` | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` โหลดเอง |
+| แตะ `prisma/` / ไฟล์ auth / Jenkinsfile | rules ที่เกี่ยวโหลดเองจาก `.claude/rules/` |
+| จบงานทุกครั้ง | เรียก `/ugt-checkpoint` แล้ว commit |
+| โปรเจคอยู่บน Next.js 16.3+ | `next dev` เติมบล็อก `nextjs-agent-rules` + `AGENTS.md` เอง — **ปล่อยไว้และ commit ไปด้วย** (อยู่ร่วมกับบล็อก ugt ได้โดยออกแบบ) |
+
+ต้องการติดตั้งทีละส่วนก็เรียก skill ลูกตรง ๆ ได้ (`/ugt-nextjs-database-setup` ฯลฯ)
 
 ### สิ่งที่ `/ugt-nextjs-setup` ติดตั้งลงโปรเจค (ชั้น harness)
 
