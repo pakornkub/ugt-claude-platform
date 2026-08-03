@@ -28,6 +28,20 @@
         "Mentions /ugt-mode as the subagent-routing alternative"
       ],
       "files": []
+    },
+    {
+      "id": 3,
+      "name": "switch-to-auto",
+      "prompt": "ไม่อยากมานั่งสลับโหมดเอง ให้เลือกความแรง model ตามความยากของแต่ละงานเลย",
+      "expected_output": "Rewrites .claude/state/mode.md wholesale from the auto template verbatim (rule-based rows judged on ambiguity / blast radius / risk domain; mechanical rows stay haiku), confirms auto judges per task at dispatch time without ever rewriting mode.md per task, touches nothing else",
+      "assertions": [
+        "mode.md 'Current mode:' line becomes **auto**",
+        "Non-mechanical rows contain the auto rules (not fixed single models)",
+        "Run-tests/verify and docs rows remain haiku",
+        "Explains judgment happens at dispatch time and mode.md is never rewritten per task",
+        "checkpoint.md and project-notes.md are not modified"
+      ],
+      "files": []
     }
   ]
 }

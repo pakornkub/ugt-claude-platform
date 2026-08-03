@@ -113,9 +113,9 @@ check('mode.md declares a valid model mode', () => {
   if (!has('.claude/state/mode.md')) {
     return { ok: 'warn', msg: 'No .claude/state/mode.md — subagent dispatches inherit the session model; run /ugt-mode default to create it' };
   }
-  return /Current mode:\s*\*\*(easy|default|god)\*\*/.test(read('.claude/state/mode.md'))
+  return /Current mode:\s*\*\*(easy|default|god|auto)\*\*/.test(read('.claude/state/mode.md'))
     ? { ok: true }
-    : { ok: false, msg: 'mode.md has no `Current mode: **easy|default|god**` line — rewrite it with /ugt-mode' };
+    : { ok: false, msg: 'mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-mode' };
 });
 
 check('project-notes.md has the 3 fixed sections', () => {

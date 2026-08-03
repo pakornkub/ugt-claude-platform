@@ -26,9 +26,10 @@ stack; this mechanism is shared.
   Patterns / Deviations / Open Questions); entries are dated; decisions carry
   the rejected alternative; no secrets (the files are committed)
 - Committed state outranks Claude's machine-local auto memory on conflict
-- `mode.md` routes **subagent** model choice per task type (presets:
-  `easy`/`default`/`god`); the main-loop model is the user's `/model` and is
-  never switched by a skill
+- `mode.md` routes **dispatched-work** model choice per task type — subagents
+  and Agent Teams teammates alike (presets: `easy`/`default`/`god`, plus
+  `auto` which judges per task at dispatch time); the main-loop model is the
+  user's `/model` and is never switched by a skill
 
 ## Knowledge triage (3-way)
 

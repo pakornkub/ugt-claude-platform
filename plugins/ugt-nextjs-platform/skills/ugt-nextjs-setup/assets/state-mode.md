@@ -1,11 +1,11 @@
 # Model Mode
 
-<!-- Owned by /ugt-mode — switch with `/ugt-mode easy|default|god`, never edit by hand. -->
+<!-- Owned by /ugt-mode — switch with `/ugt-mode easy|default|god|auto`, never edit by hand. -->
 
 Current mode: **default**
 
-When dispatching a subagent (superpowers pipeline or Agent tool), pass `model:`
-by task type:
+When dispatching a subagent or spawning a teammate (superpowers pipeline,
+Agent tool, or Agent Teams), pass `model:` by task type:
 
 | Task type | Model |
 | --- | --- |
@@ -17,5 +17,5 @@ by task type:
 | Run tests / verify scripts (mechanical) | haiku |
 | Docs / light edits | haiku |
 
-- Subagents only — the main session model is the user's `/model`; never switch it.
+- Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Task type not listed → omit `model:` (the subagent inherits the session model).

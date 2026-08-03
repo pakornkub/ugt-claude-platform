@@ -1,5 +1,32 @@
 # Changelog — ugt-core
 
+## 1.4.0 (2026-08-03)
+
+`ugt-mode` gains the **`auto` preset** and Agent Teams coverage:
+
+- **`auto`** — a fourth preset that judges the model **per task at dispatch
+  time** instead of using a fixed column, on exactly three signals: ambiguity,
+  blast radius (files/modules touched), and risk domain
+  (auth/money/concurrency). E.g. write-code defaults to sonnet but escalates
+  to opus in a risk domain or >5 files. All three design invariants still
+  bind (reviewer never weaker than coder · diagnose ≠ fix · mechanical =
+  haiku). `auto` never rewrites `mode.md` per task and never switches presets
+  by itself — preset switching stays a human command, which is also why an
+  "auto-pick-the-preset" meta-layer was rejected: choosing a preset per task
+  *is* choosing a model per task, and letting it rewrite the committed file
+  per task would churn the whole team's checkout.
+- Wording broadened from "subagents" to **dispatched work** — the same
+  `mode.md` table now explicitly covers Agent Teams teammate spawns (the
+  decision point is identical: the lead picks `model:` at spawn). Agent Teams
+  itself stays out of the plugin deliberately: it is an experimental
+  user-level flag the plugin cannot enable, and the standards are
+  dispatch-agnostic anyway (skills/rules/state load into every teammate via
+  project context).
+- `contracts/harness.md` — `mode.md` bullet updated (dispatched work, `auto`).
+- `evals/evals.json` — new `switch-to-auto` case.
+- The refreshed skeleton asset + CLAUDE-block line ship with
+  `ugt-nextjs-platform` 2.4.0; existing projects just run `/ugt-mode auto`.
+
 ## 1.3.0 (2026-08-03)
 
 Feature-progress board — answers "which features are done" at a glance for

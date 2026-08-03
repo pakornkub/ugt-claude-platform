@@ -1,5 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.4.0 (2026-08-03)
+
+Harness refresh for `/ugt-mode auto` (ugt-core 1.4.0). Existing projects: run
+`/ugt-nextjs-setup` again to refresh the block, or just run `/ugt-mode auto`
+directly — the skill rewrites `mode.md` wholesale anyway.
+
+- `assets/state-mode.md` + `assets/CLAUDE-block.md` — preset list becomes
+  `easy|default|god|auto`; dispatch wording broadened to cover Agent Teams
+  teammate spawns ("dispatching a subagent or spawning a teammate")
+- `scripts/verify.mjs` — the `Current mode:` check accepts `auto`
+
 ## 2.3.0 (2026-08-03)
 
 Two new triage rows in the CLAUDE.md block. Existing projects: run

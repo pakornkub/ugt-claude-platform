@@ -51,8 +51,9 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 @.claude/state/mode.md
 
-- Follow that table when dispatching subagents · switch preset with
-  `/ugt-mode easy|default|god` · main session model stays the user's `/model`
+- Follow that table when dispatching subagents or spawning teammates · switch
+  preset with `/ugt-mode easy|default|god|auto` · main session model stays the
+  user's `/model`
 
 ## Which skill, when
 
