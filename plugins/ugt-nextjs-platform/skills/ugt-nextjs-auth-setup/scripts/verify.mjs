@@ -190,7 +190,7 @@ check('proxy bypasses /_next/ and /api/health', () => {
 
 // ── 4. Frequently mis-called Better Auth APIs ──────────────────────────────
 check('Uses auth.api.signInEmail (not signIn.email)', () => {
-  const bad = sourceFiles().filter((f) => /auth\.api\.signIn\.email/.test(readFileSync(f, 'utf8')));
+  const bad = sourceFiles().filter((f) => /auth\.api\.signIn\.email/.test(stripComments(readFileSync(f, 'utf8'))));
   return bad.length
     ? { ok: false, msg: `${bad.map((f) => relative(ROOT, f)).join(', ')} — that path does not exist in Better Auth` }
     : { ok: true };
