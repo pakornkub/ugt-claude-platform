@@ -9,6 +9,29 @@
     "secondary_accuracy": "59/60",
     "note": "iteration 0: S-side 30/30 routed to ugt-mode (incl. keyword traps S9/S10); N-side 30/30 did NOT route to ugt-mode — the near-misses held: 'model รถยนต์' (N6) went to pitfalls, 'ประหยัด token เวลาคุย' (N8) to none, 'เปลี่ยน model หลัก' (N1) to none//model. The single secondary miss (judge 2, N6 → systematic-debugging instead of pitfalls) concerns ugt-nextjs-pitfalls' boundary, not ugt-mode's. No description change needed; optimizer loop terminated at iteration 0."
   },
+  "rerun_after_auto_preset": {
+    "date": "2026-08-03",
+    "reason": "ugt-core 1.4.0 added the auto preset to ugt-mode's description ('โหมด auto', 'เลือกความแรงตามงาน') — re-ran the full boundary set plus new auto-specific queries to confirm the addition didn't widen the trigger.",
+    "judges": 3,
+    "judgments": 69,
+    "primary_accuracy": "69/69 (100%)",
+    "method_deviation": "Judges ran as live subagents with their own real skill listing available (not text-isolated) — a few N-side answers named the judge's actual environment skill (e.g. 'diagnosing-bugs', 'ponytail') instead of the superpowers distractor text supplied in the prompt. This never affected the primary metric (still correctly NOT ugt-mode in every case) but means secondary accuracy here isn't directly comparable to the 2026-07-30 baseline's 59/60 — treat primary_accuracy as the trustworthy number for this rerun.",
+    "note": "S11/S12 (new, natural-language and explicit auto requests) routed to ugt-mode 3/3 each. N11 (new trap: 'ตั้งค่าให้ deploy อัตโนมัติทุกครั้งที่ push' — contains 'อัตโนมัติ' but is CI/CD, not model mode) correctly avoided ugt-mode 3/3, going to ugt-nextjs-cicd-setup every time. S2 (original token-quota phrasing) was accidentally omitted from this rerun's query set — not re-verified, but structurally identical to S7 which held 3/3. No description change needed.",
+    "new_queries": {
+      "S11": {
+        "prompt": "ไม่อยากมานั่งสลับโหมดเอง ให้เลือกความแรง model ตามความยากของแต่ละงานเลย",
+        "expected": "ugt-mode"
+      },
+      "S12": {
+        "prompt": "ugt-mode auto / เปลี่ยนเป็นโหมด auto ให้หน่อย",
+        "expected": "ugt-mode"
+      },
+      "N11": {
+        "prompt": "ตั้งค่าให้ deploy อัตโนมัติทุกครั้งที่ push ขึ้น main",
+        "expected": "ugt-nextjs-cicd-setup"
+      }
+    }
+  },
   "queries": {
     "S1": {
       "prompt": "งานนี้ต้อง demo ให้ผู้บริหารพรุ่งนี้ อัดคุณภาพเต็มที่เลย ใช้ model แรงสุดทุกขั้นตอน",

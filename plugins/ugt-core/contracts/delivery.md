@@ -3,6 +3,12 @@
 The stage list is the contract: stacks swap the commands inside stages, never
 the stages themselves.
 
+> **Maintenance:** editing this file? `grep` the stack platforms for restated
+> text and update it too — currently `ugt-nextjs-platform`'s
+> `ugt-nextjs-cicd-setup` (primary), `ugt-nextjs-quality-setup` (lint/test
+> stages), and `ugt-nextjs-setup` (summary). Bump the platform's
+> `plugin.json` version and CHANGELOG when you do.
+
 ## Stages (all 10, in order)
 
 ```

@@ -4,6 +4,13 @@ The mechanism every `ugt-<stack>-setup` skill installs into a target project so
 org knowledge survives the session that installed it. The *content* is per
 stack; this mechanism is shared.
 
+> **Maintenance:** editing this file? `grep` the stack platforms for restated
+> text and update it too — currently `ugt-nextjs-platform`'s
+> `ugt-nextjs-setup` (installs the harness: CLAUDE-block, state assets,
+> verify.mjs) and `ugt-core`'s own `ugt-mode`/`ugt-checkpoint` skills (own the
+> `mode.md`/`checkpoint.md` rows). Bump the relevant plugin's `plugin.json`
+> version and CHANGELOG when you do.
+
 ## Files and ownership
 
 | File | Owner | Update rule |

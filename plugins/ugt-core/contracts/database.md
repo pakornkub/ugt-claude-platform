@@ -4,6 +4,12 @@ Normative source for every stack platform. Stack skills restate these rules in
 their own ORM's terms (Prisma `@@map`, SQLAlchemy `__tablename__`, …) — this
 file is what a PR changes first when the standard itself changes.
 
+> **Maintenance:** editing this file? `grep` the stack platforms for restated
+> text and update it too — currently `ugt-nextjs-platform`'s
+> `ugt-nextjs-database-setup` (primary), `ugt-nextjs-setup` (summary), and
+> `ugt-nextjs-pitfalls` (gotchas). Bump the platform's `plugin.json` version
+> and CHANGELOG when you do.
+
 ## Naming
 
 | Object | Convention | Example |

@@ -27,6 +27,21 @@
 - The refreshed skeleton asset + CLAUDE-block line ship with
   `ugt-nextjs-platform` 2.4.0; existing projects just run `/ugt-mode auto`.
 
+Same-day follow-up (no new behavior, verification + maintainability only):
+
+- `evals/trigger-evals.json` — re-ran the boundary set (3 judges) after the
+  description change above, plus new auto-specific queries (natural-language
+  "เลือกความแรงตามงาน", explicit "ugt-mode auto") and a new near-miss trap
+  ("ตั้งค่าให้ deploy อัตโนมัติ..." → correctly `ugt-nextjs-cicd-setup`, not
+  `ugt-mode`, despite sharing the word "อัตโนมัติ"). **69/69 primary accuracy**
+  — the wider description did not widen the trigger. See the
+  `rerun_after_auto_preset` entry in the file for the method deviation note
+  (judges ran with live tool access, not fully text-isolated).
+- All five `contracts/*.md` files gain a **Maintenance** callout naming the
+  exact skill(s) that restate their text and the version-bump step — added
+  after noticing the duplication rule (`contracts/database.md`'s own opening
+  line) had no concrete checklist attached to it.
+
 ## 1.3.0 (2026-08-03)
 
 Feature-progress board — answers "which features are done" at a glance for

@@ -1,5 +1,10 @@
 # Contract — Identity, auth & RBAC (stack-agnostic)
 
+> **Maintenance:** editing this file? `grep` the stack platforms for restated
+> text and update it too — currently `ugt-nextjs-platform`'s
+> `ugt-nextjs-auth-setup` (primary) and `ugt-nextjs-setup` (summary). Bump the
+> platform's `plugin.json` version and CHANGELOG when you do.
+
 ## Keycloak
 
 - **One shared Keycloak server** with a central realm federated to the

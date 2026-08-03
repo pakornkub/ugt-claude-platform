@@ -6,6 +6,11 @@
 > MDM/Group Policy/Ansible. Until this is deployed, **there is no hard
 > boundary** — don't mistake this document for having one.
 
+> **Maintenance:** editing this file? `grep` the stack platforms for restated
+> text and update it too — currently `ugt-nextjs-platform`'s
+> `ugt-nextjs-setup` and `ugt-nextjs-auth-setup` reference this boundary.
+> Bump the platform's `plugin.json` version and CHANGELOG when you do.
+
 ## Why it must be the managed level
 
 Rules written in `CLAUDE.md` or in a skill are **requests**, not enforcement —
