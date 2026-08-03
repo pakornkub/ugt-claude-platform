@@ -12,7 +12,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | Plugin | เวอร์ชันล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-core` | 1.2.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
+| `ugt-core` | 1.3.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
 | `ugt-nextjs-platform` | 2.3.0 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
 | `ugt-nextjs-standard` | 1.3.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `frontend-design` (คุณภาพงาน UI) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
 

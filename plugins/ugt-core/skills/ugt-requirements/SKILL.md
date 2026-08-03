@@ -63,11 +63,16 @@ Output goes to `docs/requirements-brief/` (committed). All content in
 | --- | --- |
 | ระบบทำอะไร | 2–5 sentences, the system's purpose in plain language |
 | ผู้ใช้ / role | Every user type the documents mention, with what each can do |
-| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on |
+| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on → **สถานะ** (initial `☐ todo`; afterwards maintained by `/ugt-checkpoint` — this table is the team's feature-progress board) |
 | ตารางข้อมูล (candidate) | Union of tables/entities implied across features — candidates, not a schema |
 | Cross-cutting | Concerns spanning features: auth, audit, notifications, integrations |
 | Open Questions (ระดับระบบ) | System-wide gaps and conflicts, each phrased as a question a stakeholder can answer |
 | Sources | Every source file: read (with a 1-line description) or `unread` (with reason) |
+
+Status values for the feature table: `☐ todo` · `🔨 in progress` ·
+`⏳ blocked — <what it waits on>` · `✅ done`. This skill only ever writes the
+initial `☐ todo`; updating statuses later is `/ugt-checkpoint`'s job, so the
+board has one writer and cannot drift from the checkpoint.
 
 ### `<NN>-<kebab-feature>.md` — one per feature
 

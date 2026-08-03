@@ -59,12 +59,19 @@ Last updated: YYYY-MM-DD
 - YYYY-MM-DD <what was decided> — **because** <reason> · rejected alternative: <what was not chosen>
 ```
 
-3. Write things that are **traceable** — file names, function names, PR numbers;
+3. **Feature board**: if `docs/requirements-brief/00-overview.md` exists,
+   update the สถานะ column of its feature table to match what just happened
+   (`☐ todo` · `🔨 in progress` · `⏳ blocked — <what it waits on>` ·
+   `✅ done`). This skill is the board's **only** writer after generation, so
+   it cannot drift from the checkpoint — the board answers "which features
+   are done" at a glance; the checkpoint stays the narrative of what happened
+   and why. Touch nothing else in that file.
+4. Write things that are **traceable** — file names, function names, PR numbers;
    not "fixed the user page".
-4. Every `Decision` entry needs **the reason + the rejected alternative** —
+5. Every `Decision` entry needs **the reason + the rejected alternative** —
    otherwise someone re-litigates it in three months without knowing it was
    already weighed.
-5. Skip anything git already records (diffs, commit names) — record only what
+6. Skip anything git already records (diffs, commit names) — record only what
    cannot be read from the code.
 
 ## Writing project-notes (on hitting an error or an oddity)
@@ -107,5 +114,6 @@ e.g. `.claude/skills/<project>-payroll-rules/`.
 - [ ] `.claude/state/checkpoint.md` has all 4 sections and "Last updated" is today
 - [ ] `.claude/state/project-notes.md` has the 3 fixed sections
 - [ ] Every added entry is dated · every Decision has its reason
+- [ ] If `docs/requirements-brief/00-overview.md` exists, its สถานะ column agrees with the checkpoint's In progress/Done
 - [ ] No secrets / `.env` values in these files (they are committed)
 - [ ] `CLAUDE.md` still imports `@.claude/state/checkpoint.md` (or the next session won't see it)

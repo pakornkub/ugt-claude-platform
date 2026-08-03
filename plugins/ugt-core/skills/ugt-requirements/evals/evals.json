@@ -15,7 +15,8 @@
         "Brief prose is written in Thai (identifiers/table names may stay English)",
         "The overview Sources section accounts for all three requirement files",
         "Every feature file has an Open Questions section",
-        "No application code, schema, or scaffold files are written — only the brief"
+        "No application code, schema, or scaffold files are written — only the brief",
+        "The overview feature table has a สถานะ column with every feature initialized to ☐ todo"
       ],
       "files": []
     },

@@ -1,5 +1,25 @@
 # Changelog — ugt-core
 
+## 1.3.0 (2026-08-03)
+
+Feature-progress board — answers "which features are done" at a glance for
+anyone reading the repo, without adding a new file or a third home for state:
+
+- `ugt-requirements` — the overview's feature table gains a **สถานะ** column,
+  initialized `☐ todo` on generation (values: `☐ todo` · `🔨 in progress` ·
+  `⏳ blocked — <reason>` · `✅ done`)
+- `ugt-checkpoint` — becomes the column's **only writer** after generation:
+  step 3 updates the board to match the finished work chunk, and the
+  verification checklist checks board ↔ checkpoint agreement. Single writer =
+  the board cannot silently drift from the checkpoint narrative.
+- One assertion added to each skill's `evals/evals.json` covering the column.
+
+Rejected alternatives, recorded to prevent re-proposal: a separate
+`STATUS.md`/`TASKS.md` board (third home for state, guaranteed drift —
+violates the triage table) and ticking checkboxes inside superpowers plan
+files (another marketplace's skill owns those; task-level detail is the wrong
+altitude for monitoring anyway).
+
 ## 1.2.0 (2026-08-03)
 
 New skill **`ugt-requirements`** — turns a raw requirements folder

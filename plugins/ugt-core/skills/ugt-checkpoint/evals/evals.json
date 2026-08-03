@@ -14,7 +14,8 @@
         "The transaction decision is recorded with its reason",
         "The 'Last updated' field is changed to today's date",
         "All 4 checkpoint.md sections remain and no new section is added",
-        "node scripts/verify.mjs of ugt-nextjs-setup exits 0 (state structure still valid)"
+        "node scripts/verify.mjs of ugt-nextjs-setup exits 0 (state structure still valid)",
+        "If the fixture has docs/requirements-brief/00-overview.md, the สถานะ column is updated to reflect the finished work (and nothing else in that file changes)"
       ],
       "files": []
     },
