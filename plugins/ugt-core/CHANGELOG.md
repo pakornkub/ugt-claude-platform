@@ -1,5 +1,36 @@
 # Changelog — ugt-core
 
+## 1.2.0 (2026-08-03)
+
+New skill **`ugt-requirements`** — turns a raw requirements folder
+(`docs/requirements/`) into a committed Thai-language brief:
+`docs/requirements-brief/00-overview.md` (system purpose, user types, feature
+table with dependencies, candidate tables, cross-cutting, system-level open
+questions, sources coverage) plus one file per feature, each sized for handing
+a single feature to the superpowers pipeline in its own session. Invariants:
+every document conflict is promoted to an Open Question naming both sources
+(never silently resolved) · unreadable files are listed as `unread` (never
+skipped or invented) · inferences are marked `(assumption)` · an existing
+brief is never overwritten without asking · the skill stops at the handoff —
+it never designs or writes code, and never writes `.claude/state/` (open
+questions flow there via `/ugt-checkpoint`).
+
+- The "Which skill, when" row and README use-case update ship with
+  `ugt-nextjs-platform` 2.3.0 (its CLAUDE-block gains a
+  requirements-folder → `/ugt-requirements` row; the read-only row is
+  narrowed so producing the brief routes to the skill while plain questions
+  stay direct)
+
+Evals (skill-creator loop, 2026-08-03): functional `evals/evals.json` —
+with-skill **14/14 assertions vs baseline 7.5/14 (54%)**; the discriminating
+cases: baseline self-resolved the seeded document conflict instead of raising
+it, invented its own output location, and on re-run **overwrote the existing
+brief without asking** (with-skill: asked first, files byte-identical).
+Trigger boundary `evals/trigger-evals.json` — 20 queries × 3 judges =
+**60/60 primary** on iteration 0 (all keyword traps held: `requirements.txt`,
+translate-the-requirements, question-about-existing-brief, dev-time
+estimation).
+
 ## 1.1.0 (2026-07-30)
 
 New skill **`ugt-mode`** — per-task-type model routing for subagents via a

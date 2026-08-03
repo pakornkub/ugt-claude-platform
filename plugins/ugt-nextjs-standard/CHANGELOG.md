@@ -1,5 +1,29 @@
 # Changelog — ugt-nextjs-standard
 
+## 1.3.0 (2026-08-03)
+
+- Add `frontend-design@claude-plugins-official` (Anthropic) as a fourth
+  dependency. The stack ships Tailwind but the platform had no guidance on
+  design quality, so new UI defaulted to generic AI aesthetics. Nothing in
+  the bundle overlaps with it. No `extraKnownMarketplaces` entry needed —
+  `claude-plugins-official` is auto-registered.
+
+`mattpocock-skills` was evaluated for `grilling` / `domain-modeling` and
+**rejected**, recorded here so it isn't re-proposed:
+
+- `grilling` is a strict subset of superpowers' `brainstorming` — the
+  one-question-at-a-time interview is step 3 of brainstorming's 9-step
+  checklist, which additionally writes a spec file, self-reviews it, and gates
+  implementation behind user approval.
+- `domain-modeling` is the one genuine gap, but it writes its glossary and
+  decisions to root `CONTEXT.md` + `docs/adr/`, which duplicates the
+  `## Deviations` / `## Open Questions` sections this platform already
+  installs in `.claude/state/project-notes.md`. Two homes for the same
+  knowledge is exactly what the README's triage table forbids.
+- The rest of the plugin (~21 skills, all loading their descriptions every
+  session) duplicates superpowers on `tdd`, `code-review`, `diagnosing-bugs`
+  and `writing-great-skills`.
+
 ## 1.2.0 (2026-07-29)
 
 - Records the new dependency floor after the `ugt-core` split:

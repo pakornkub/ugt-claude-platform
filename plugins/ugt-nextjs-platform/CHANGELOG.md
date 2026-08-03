@@ -1,5 +1,26 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.3.0 (2026-08-03)
+
+Two new triage rows in the CLAUDE.md block. Existing projects: run
+`/ugt-nextjs-setup` again to refresh the block (project content outside the
+markers is untouched, as always).
+
+- `assets/CLAUDE-block.md` — "Which skill, when" gains a **read-only work**
+  row: answering questions about code/docs/config goes directly, with an
+  explicit note that superpowers' "1% chance → must invoke" rule does not
+  apply to read-only work. Without this, the always-loaded `using-superpowers`
+  dispatcher could pull `brainstorming` into a plain question and start a
+  design interview nobody asked for (observed in practice; the existing
+  "small task" row only covered edits, not reads).
+- `assets/CLAUDE-block.md` — "Which skill, when" also gains a
+  **requirements-folder** row: starting from a requirements folder to produce
+  the committed per-feature brief routes to `/ugt-requirements` (new in
+  ugt-core 1.2.0), then features go to the superpowers pipeline one at a
+  time. The read-only row deliberately excludes brief *production* — a quick
+  question about the docs stays direct, producing the brief artifact is the
+  skill's job.
+
 ## 2.2.0 (2026-07-30)
 
 Harness additions for the `/ugt-mode` skill (ugt-core 1.1.0) plus a task-triage

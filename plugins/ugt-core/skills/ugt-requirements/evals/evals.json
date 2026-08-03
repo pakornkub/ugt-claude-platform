@@ -1,0 +1,47 @@
+{
+  "skill_name": "ugt-requirements",
+  "notes": "Runs on a fixture project whose docs/requirements/ holds 3 Thai documents about an office-supply requisition system, seeded with one deliberate conflict (approval flow: single-level vs two-level above 5,000 THB) and one deliberate gap (no per-requisition item/amount limit stated). Eval 3 uses a fixture variant that already has docs/requirements-brief/. Prompts stay in Thai: they simulate real user input. The grader must read the transcript, not only the produced files.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "happy-path-brief",
+      "prompt": "อ่าน requirement ใน docs/requirements แล้วทำ brief แยกเป็น feature ให้หน่อย",
+      "expected_output": "Creates docs/requirements-brief/00-overview.md plus one numbered file per feature, all in Thai. The overview carries system purpose, user types, feature table with dependencies, candidate tables, cross-cutting concerns, system-level open questions, and a Sources list covering every input file. The seeded approval-flow conflict appears as an open question naming both source documents; the seeded missing-limit gap appears as an open question. Closes with a handoff: build order, blocking questions, and a paste-ready next-step sentence. No application code or schema files are written.",
+      "assertions": [
+        "docs/requirements-brief/00-overview.md exists",
+        "At least 3 feature brief files exist besides the overview (requisition/approval, stock, report)",
+        "The seeded approval conflict (02: single-level for every requisition vs 03: two-level above 5,000 THB) is raised as an Open Question citing both source documents — not silently resolved by picking one version",
+        "At least two genuine gaps the documents never answer are raised as Open Questions (e.g., login method, the ผู้จัดการฝ่าย role missing from 01 user table, per-requisition limits)",
+        "Brief prose is written in Thai (identifiers/table names may stay English)",
+        "The overview Sources section accounts for all three requirement files",
+        "Every feature file has an Open Questions section",
+        "No application code, schema, or scaffold files are written — only the brief"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "boundary-plain-question",
+      "prompt": "ระบบนี้มีผู้ใช้กี่แบบ ดูจากเอกสารใน docs/requirements ให้หน่อย",
+      "expected_output": "Answers the question directly in chat from the documents (four user types) without creating docs/requirements-brief/ or any other file — the skill's own boundary clause says a quick question about the documents is answered directly.",
+      "assertions": [
+        "No files are created or modified — docs/requirements-brief/ does not exist after the run",
+        "The answer names the 4 user types from 01-overview.md",
+        "The answer is given directly in chat — the run does not launch into brief generation"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "rerun-asks-first",
+      "prompt": "requirement มีอัปเดต ช่วยทำ brief ใหม่ให้หน่อย",
+      "expected_output": "Detects that docs/requirements-brief/ already exists, reports what is there, and asks the user whether to regenerate everything or only add new features — it does not silently overwrite the existing brief files.",
+      "assertions": [
+        "The pre-existing brief files (00-overview.md, 01-requisition.md) are NOT modified — byte-identical to the fixture versions",
+        "The final output is a question to the user: regenerate everything vs update only what changed — it reports what the existing brief contains",
+        "No new brief files are written before the user answers"
+      ],
+      "files": []
+    }
+  ]
+}

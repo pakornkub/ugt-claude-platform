@@ -12,9 +12,9 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | Plugin | เวอร์ชันล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-core` | 1.1.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
-| `ugt-nextjs-platform` | 2.2.0 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
-| `ugt-nextjs-standard` | 1.2.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
+| `ugt-core` | 1.2.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
+| `ugt-nextjs-platform` | 2.3.0 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
+| `ugt-nextjs-standard` | 1.3.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `frontend-design` (คุณภาพงาน UI) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
 
 เวอร์ชันจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดต่อรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
@@ -32,6 +32,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-pitfalls` | กับดักจากบั๊ก production จริง — วันที่เลื่อน, cache ไม่ refresh, basePath 404 | **โหลดเองอัตโนมัติ**เมื่อแตะ `app/` `components/` `lib/` |
 | `ugt-checkpoint` *(มาจาก `ugt-core`)* | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
 | `ugt-mode` *(มาจาก `ugt-core`)* | สลับชุด model ต่อประเภทงานสำหรับ subagent (`easy`/`default`/`god`) | `/ugt-mode <preset>` หรือ "โหมดประหยัด" / "โหมด god" |
+| `ugt-requirements` *(มาจาก `ugt-core`)* | อ่าน `docs/requirements/` → เอกสาร brief ภาษาไทยแยกไฟล์ต่อ feature + open questions ที่ต้องถาม stakeholder ก่อนสร้าง | เริ่มโปรเจคจากโฟลเดอร์ requirement / "อ่าน requirement แล้วสรุปแยก feature" |
 
 ## วิธีติดตั้ง — 3 โหมด
 
@@ -97,14 +98,15 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 สถานการณ์: โฟลเดอร์ว่าง ๆ ที่มีแต่ `docs/` (requirement, mockup, business rules) —
 ยังไม่มีโค้ดสักบรรทัด
 
-1. **อ่าน requirement ก่อน อย่าเพิ่งสร้างอะไร**:
+1. **อ่าน requirement ก่อน อย่าเพิ่งสร้างอะไร** — เรียก `/ugt-requirements`
+   (หรือพิมพ์ "อ่าน requirement แล้วทำ brief แยกเป็น feature") → ได้
+   `docs/requirements-brief/` เป็นเอกสารสรุปภาษาไทย แยกไฟล์ต่อ feature
+   พร้อม **Open Questions** ที่เอกสารไม่บอกแต่จำเป็นต่อการสร้าง —
+   เอารายการนี้ไปถาม stakeholder ก่อนเขียนโค้ดผิดทิศ · commit brief เข้า repo
 
-   ```
-   อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module/ผู้ใช้กี่แบบ
-   ต้องมีตารางอะไรบ้าง และอะไรที่เอกสารยังไม่บอกแต่จำเป็นต่อการสร้าง
-   ```
-
-   คำถามข้อท้ายสำคัญสุด — ได้รายการไปถาม stakeholder ก่อนเขียนโค้ดผิดทิศ
+   > ยังไม่ได้ update plugin? paste prompt เดิมแทนได้:
+   > "อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module/ผู้ใช้กี่แบบ
+   > ต้องมีตารางอะไรบ้าง และอะไรที่เอกสารยังไม่บอกแต่จำเป็นต่อการสร้าง"
 2. **Scaffold Next.js เปล่า**:
 
    ```
@@ -136,6 +138,8 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | เหตุการณ์ | สิ่งที่เกิดเอง |
 | --- | --- |
+| งานอ่านอย่างเดียว (ตอบคำถามเรื่องโค้ด/เอกสาร/config — ไม่แก้ไฟล์) | ตอบตรง ๆ **ไม่เข้า pipeline ไม่ brainstorming** — กฎ "1% chance → must invoke" ของ superpowers ไม่ใช้กับงานอ่าน |
+| เริ่มจากโฟลเดอร์ requirement → ต้องการ brief เป็นไฟล์ | `/ugt-requirements` — แล้วค่อยส่งทีละ feature เข้า pipeline ของ superpowers |
 | งานเล็ก (typo, แก้ doc, เปลี่ยนค่า config, one-line fix ที่รู้ตำแหน่ง) | ทำตรง ๆ **ข้าม pipeline ของ superpowers** — ไม่เปลือง token กับ brainstorming/plan (กฎ auto-load ยังทำงานปกติ) |
 | สร้าง feature / แก้บั๊ก | pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review) โดยเลือก model ของ subagent ตามตาราง `/ugt-mode` |
 | แตะไฟล์ `.ts`/`.tsx` | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` โหลดเอง |

@@ -1,0 +1,34 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-requirements. S* queries must route to ugt-requirements; N* queries must NOT — each N names the correct destination instead.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": "2026-08-03",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "100%",
+    "secondary_accuracy": "60/60",
+    "note": "iteration 0: every keyword trap held — requirements.txt (python), translate-the-requirements, question-about-existing-brief, and dev-time estimation all stayed out; every N routed to its correct destination skill"
+  },
+  "queries": {
+    "S1": { "prompt": "อ่าน requirement ใน docs/requirements แล้วทำ brief แยกเป็น feature ให้หน่อย", "expected": "ugt-requirements" },
+    "S2": { "prompt": "โปรเจคใหม่ มีแต่โฟลเดอร์ docs ยังไม่มีโค้ดสักบรรทัด อยากได้เอกสารสรุปว่าระบบต้องทำอะไรบ้าง แยกเป็นฟีเจอร์", "expected": "ugt-requirements" },
+    "S3": { "prompt": "ช่วยสรุป requirement ทั้งหมดเป็นไฟล์ แยกรายฟีเจอร์ จะเอาไปให้ทีมแบ่งงานกันทำคนละ session", "expected": "ugt-requirements" },
+    "S4": { "prompt": "เอกสารใน docs/requirements มันขัดกันเองหลายจุด ช่วยอ่านทั้งหมดแล้วทำ brief ที่ลิสต์ว่าอะไรขัดกับอะไร ต้องถามใครเพิ่ม", "expected": "ugt-requirements" },
+    "S5": { "prompt": "ก่อนเริ่มเขียนโค้ด อยากรู้ว่า requirement ยังขาดอะไรที่ต้องถาม stakeholder ทำเป็นเอกสารเก็บไว้ใน repo เลย", "expected": "ugt-requirements" },
+    "S6": { "prompt": "start from the requirements folder and produce the per-feature brief for this project", "expected": "ugt-requirements" },
+    "S7": { "prompt": "requirement มีอัปเดตจากลูกค้าเมื่อวาน ช่วยทำ brief ใหม่ให้หน่อย", "expected": "ugt-requirements" },
+    "S8": { "prompt": "อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module อะไร ต้องมีตารางอะไรบ้าง อะไรที่เอกสารยังไม่บอก ทำเป็นไฟล์สรุปแยก feature ไว้ใน repo", "expected": "ugt-requirements" },
+    "S9": { "prompt": "ลูกค้าส่ง pdf requirement กับ mockup มาอยู่ใน docs/requirements ช่วยทำ requirements brief หน่อย", "expected": "ugt-requirements" },
+    "S10": { "prompt": "เริ่มโปรเจคจากเอกสาร ช่วยแตก requirement เป็น feature ๆ พร้อมบอกว่าอันไหนควรสร้างก่อน", "expected": "ugt-requirements" },
+    "N1": { "prompt": "ระบบนี้มีผู้ใช้กี่แบบ ดูจากเอกสารใน docs/requirements ให้หน่อย", "expected": "(no skill — quick read-only question, answered directly per the boundary clause)" },
+    "N2": { "prompt": "สร้าง feature จัดการสต็อกตาม docs/requirements-brief/02-stock-management.md", "expected": "superpowers:brainstorming" },
+    "N3": { "prompt": "ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย", "expected": "ugt-nextjs-setup" },
+    "N4": { "prompt": "ช่วยเขียน requirements.txt ให้โปรเจค python นี้หน่อย ใช้ fastapi กับ sqlalchemy", "expected": "(no skill — python dependency file, keyword trap)" },
+    "N5": { "prompt": "จบงานแล้ว บันทึก checkpoint ไว้ให้คนต่อไปหน่อย", "expected": "ugt-checkpoint" },
+    "N6": { "prompt": "จาก brief ที่มีใน docs/requirements-brief ตอบหน่อยว่า feature รายงานต้องมีรายงานกี่ตัว", "expected": "(no skill — reading an existing brief is a plain question)" },
+    "N7": { "prompt": "review โค้ดที่เพิ่งแก้ไปหน่อย ว่าตรงกับ spec ที่คุยกันไว้ไหม", "expected": "superpowers:requesting-code-review" },
+    "N8": { "prompt": "ช่วยแปลเอกสาร requirement ใน docs จากไทยเป็นอังกฤษ ลูกค้าต่างชาติขอ", "expected": "(no skill — translation, keyword trap)" },
+    "N9": { "prompt": "โหมดประหยัดหน่อย งานนี้ไม่รีบ", "expected": "ugt-mode" },
+    "N10": { "prompt": "ช่วยประเมินหน่อยว่าจาก requirement ทั้งหมดนี้ ต้องใช้เวลา dev ประมาณกี่วัน", "expected": "(no skill — estimation question, reads requirements but the output is not a brief)" }
+  }
+}

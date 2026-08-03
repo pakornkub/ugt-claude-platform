@@ -58,6 +58,8 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 | Task | How |
 | --- | --- |
+| Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (the superpowers "1% chance → must invoke" rule does not apply to read-only work) |
+| Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to the superpowers pipeline |
 | Small task: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
 | Build a feature / fix a bug | Normal superpowers pipeline (brainstorming → plan → TDD → review) |
