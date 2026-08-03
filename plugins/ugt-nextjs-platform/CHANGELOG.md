@@ -1,5 +1,41 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.6.0 (2026-08-03)
+
+Real-deployment feedback: `ugt-nextjs-auth-setup` shipped the RBAC data model
+and the permission-check plumbing, but never the pages to actually manage it.
+Confirmed while investigating — `references/rbac.md`'s own documented
+first-admin bootstrap flow redirects to `/admin/users`, and the shipped
+`admin-setup-action.ts` redirected to `/` with an "adjust to your admin
+landing page" comment, because the page it was supposed to land on never
+existed.
+
+- New route group `(admin)` — `/admin/users` (list + inline role assign,
+  can't change your own role), `/admin/roles` (create/edit/delete + a
+  permission-checkbox grid grouped by `permission.group`; the system
+  `Administrator` role can't be edited or deleted), `/admin/audit-logs`
+  (read-only `ActivityLogs` viewer). All three follow the existing
+  session → permission → action → audit-log Server Action contract; the
+  section layout hides nav items per-permission (UI only — every action still
+  gates server-side).
+- New `lib/permissions-sync.ts` (`syncPermissionsIfNeeded`) — `rbac.md`
+  already recommended this upsert-on-request pattern for permissions added to
+  `ALL_PERMISSIONS` after bootstrap; it was never actually shipped as code.
+  Wired into `app/(admin)/layout.tsx`.
+- Bootstrap now redirects to the real `/admin/users` instead of `/` (both
+  `admin-setup-action.ts` and the setup page's "already initialized" check).
+- `scripts/verify.mjs` — checks the three admin pages exist, the bootstrap
+  redirect isn't still pointing at `/`, `syncPermissionsIfNeeded` is both
+  defined and called, and both role mutations check `isSystem`.
+- `references/rbac.md` — new "Ongoing admin pages" section (route table +
+  guards); the permission-sync section now points at the shipped file instead
+  of describing a "recommended pattern" that didn't exist yet.
+- Scope, decided with the user rather than assumed: users page is list +
+  assign-role only, no "create user" button (SSO/LDAP auto-provision on
+  login; Local method has no self-registration in this skeleton either — a
+  known gap, out of scope here) · roles page gets full CRUD with a permission
+  checkbox grid · audit-log viewer included.
+
 ## 2.5.0 (2026-08-03)
 
 Feedback from a real deployment: local `docker compose` testing had no env

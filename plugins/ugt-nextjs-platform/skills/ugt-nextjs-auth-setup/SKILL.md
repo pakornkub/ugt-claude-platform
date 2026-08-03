@@ -4,10 +4,12 @@ description: >
   Use when a project needs login — "ใส่ระบบ login", "ต่อ SSO", "login ด้วย AD",
   "ใช้ Keycloak ของบริษัท", "ยังไม่มีระบบสมาชิก" — covering SSO (Keycloak OIDC),
   AD/LDAP bind, or local email/password via Better Auth, plus session cookies,
-  protected-route guards in `proxy.ts`, RBAC roles/permissions, audit logging, and
-  the first-admin bootstrap page. Use it too for anything touching permissions
-  ("ใครเห็นเมนูนี้ได้", "เพิ่ม role", "guard หน้านี้") since every privileged
-  Server Action must follow session → permission → action → audit log.
+  protected-route guards in `proxy.ts`, RBAC roles/permissions, audit logging,
+  the first-admin bootstrap page, and the ongoing `/admin/users` /
+  `/admin/roles` / `/admin/audit-logs` management pages. Use it too for
+  anything touching permissions ("ใครเห็นเมนูนี้ได้", "เพิ่ม role",
+  "guard หน้านี้", "หน้าจัดการ user/role") since every privileged Server
+  Action must follow session → permission → action → audit log.
   Reach for it immediately on these symptoms, which all have documented causes
   here: `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain, login
   working locally but looping in production, logout that doesn't stick on https,
@@ -32,7 +34,10 @@ methods**:
 | **Local** | Better Auth email/password (`signInEmail`) | optional |
 
 Every method lands in **the same Better Auth + Prisma session**, with RBAC
-(role → permission) and a first-admin bootstrap page (`/admin/setup`).
+(role → permission), a first-admin bootstrap page (`/admin/setup`), and the
+ongoing admin pages to manage it afterward: `/admin/users` (list + assign
+role), `/admin/roles` (CRUD + permission checkboxes), `/admin/audit-logs`
+(read-only viewer).
 
 Real code lives in `assets/` — adjust placeholders and copy straight into the
 project. Deep detail lives in `references/`:
@@ -93,7 +98,8 @@ user/session/account in Prisma. If it isn't, stop and do the database first.
 npm i better-auth zod
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest init    # only if the project has no shadcn yet — creates components.json + lib/utils.ts (the cn() the login form uses)
-npx shadcn@latest add button input label tabs card sonner   # UI for the login/setup forms
+npx shadcn@latest add button input label tabs card sonner   # login/setup forms
+npx shadcn@latest add table select checkbox badge dialog    # the admin pages (users/roles/audit-logs)
 ```
 
 Then mount `<Toaster richColors />` (from sonner) in the root layout
@@ -111,15 +117,30 @@ Then mount `<Toaster richColors />` (from sonner) in the root layout
 | `assets/proxy.ts` | `proxy.ts` (root) | always — Next.js 16 uses `proxy.ts`, not `middleware.ts` |
 | `assets/login-form.tsx` | `components/login-form.tsx` | always (delete sections for unselected methods) |
 | `assets/lib-permissions.ts` | `lib/permissions.ts` | always |
+| `assets/lib-permissions-sync.ts` | `lib/permissions-sync.ts` | always |
 | `assets/lib-get-user-permissions.ts` | `lib/get-user-permissions.ts` | always |
 | `assets/admin-setup/layout.tsx` | `app/(admin-setup)/layout.tsx` | always |
 | `assets/admin-setup/page.tsx` | `app/(admin-setup)/admin/setup/page.tsx` | always |
 | `assets/admin-setup/admin-setup-form.tsx` | `components/admin-setup-form.tsx` | always |
 | `assets/admin-setup/admin-setup-action.ts` | `lib/actions/admin-setup.ts` | always |
+| `assets/admin/layout.tsx` | `app/(admin)/layout.tsx` | always |
+| `assets/admin/admin-nav.tsx` | `components/admin-nav.tsx` | always |
+| `assets/admin/users-page.tsx` | `app/(admin)/admin/users/page.tsx` | always |
+| `assets/admin/users-actions.ts` | `lib/actions/admin-users.ts` | always |
+| `assets/admin/user-role-select.tsx` | `components/user-role-select.tsx` | always |
+| `assets/admin/roles-page.tsx` | `app/(admin)/admin/roles/page.tsx` | always |
+| `assets/admin/roles-actions.ts` | `lib/actions/admin-roles.ts` | always |
+| `assets/admin/role-form.tsx` | `components/role-form.tsx` | always |
+| `assets/admin/roles-manager.tsx` | `components/roles-manager.tsx` | always |
+| `assets/admin/audit-logs-page.tsx` | `app/(admin)/admin/audit-logs/page.tsx` | always |
 | `assets/env.example` | merge into `.env.example` + `.env.local` | always (drop vars for unselected methods) |
 
-Every asset carries `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section
-(imports included) belonging to methods that were not selected.
+The login-method assets (`lib-auth.ts`, `lib-auth-client.ts`,
+`lib-actions-auth.ts`, `login-form.tsx`, `env.example`) carry
+`[METHOD: SSO|LDAP|LOCAL]` markers — delete every section (imports included)
+belonging to methods that were not selected. The RBAC/admin assets
+(`admin-setup/*`, `admin/*`) are method-agnostic — copy them as-is regardless
+of which login methods were chosen.
 
 ### 5.3 Schema + migrate
 
@@ -154,7 +175,12 @@ Every asset carries `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section
    is still present — see `references/auth-flows.md`)
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
-4. First deployment: log in → visit `/admin/setup` → one click → Administrator role
+4. First deployment: log in → visit `/admin/setup` → one click → Administrator
+   role → redirects to `/admin/users`, which now really exists
+5. `app/(admin)/layout.tsx` calls `syncPermissionsIfNeeded()` on every request
+   into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
+   it reaches the database the next time anyone opens an admin page, no
+   migration step needed (see `references/rbac.md`)
 
 ## 6. Placeholders used across the assets
 
@@ -188,6 +214,9 @@ Every asset carries `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section
 | auth-client: no `baseURL`; pass the path via the `basePath` option and read `process.env.NEXT_PUBLIC_BASE_PATH` directly | Pass a URL with a path as `baseURL` / read via `createEnv()` in the client bundle |
 | proxy: `url.pathname = '/login'` (app-relative) | `url.pathname = basePath + '/login'` (duplicates the basePath) |
 | Delete DB sessions by the raw token (strip the signature first) | Delete by the signed token (never matches) |
+| Block edit/delete of `role.isSystem` roles in `admin-roles.ts` | Let the Administrator role's permissions be edited away (locks out everyone) |
+| Block a user changing their own role in `assignUserRoleAction` | Let an admin accidentally demote themselves with no one else to undo it |
+| Call `syncPermissionsIfNeeded()` from `app/(admin)/layout.tsx` | Add to `ALL_PERMISSIONS` and forget the seed reaches the database |
 
 ## 8. Verification Checklist
 
@@ -208,7 +237,19 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
 - [ ] [SSO] after logout, clicking login again → must see the Keycloak page again (backchannel logout works)
 - [ ] Visiting `/login` while logged in → bounces to the dashboard; a protected page without login → bounces to `/login`; API routes without a session → 401 JSON
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
-- [ ] `/admin/setup` works: one click grants Administrator and redirects; revisiting redirects away
+- [ ] `/admin/setup` works: one click grants Administrator and redirects to
+      `/admin/users`; revisiting `/admin/setup` redirects away
+- [ ] `/admin/users`: the Administrator (or any user with `USERS_READ`) sees
+      every user, and can reassign another user's role — but not their own
+      (the dropdown is disabled on their own row)
+- [ ] `/admin/roles`: create a role, check some permission boxes, save →
+      appears in the list with the right permission count; edit and delete
+      work on it; the `Administrator` (system) row has no edit/delete button
+- [ ] A user assigned the new role can reach only what its permissions allow
+      (both UI — the nav item is hidden — and the Server Action, which must
+      still reject a direct call with the wrong permission)
+- [ ] `/admin/audit-logs` shows the `roles.create` / `users.role-assign` rows
+      from the steps above
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
 - [ ] With a basePath: the cookie name in DevTools starts with `<base-path>.` (or `__Secure-<base-path>.` on https)

@@ -48,7 +48,10 @@ const AUTH_FILES = [
   'lib/auth-client.ts',
   'lib/actions/auth.ts',
   'lib/permissions.ts',
+  'lib/permissions-sync.ts',
   'lib/get-user-permissions.ts',
+  'lib/actions/admin-users.ts',
+  'lib/actions/admin-roles.ts',
   'proxy.ts',
   'app/api/auth/[...all]/route.ts',
 ];
@@ -79,6 +82,28 @@ check('First-admin bootstrap page exists', () => {
   return candidates.some((c) => has(c))
     ? { ok: true }
     : { ok: false, msg: 'No /admin/setup page — a fresh deployment has no way to mint an Administrator' };
+});
+
+check('Ongoing admin pages exist (users / roles / audit-logs)', () => {
+  const required = [
+    ['app/(admin)/admin/users/page.tsx', 'app/admin/users/page.tsx'],
+    ['app/(admin)/admin/roles/page.tsx', 'app/admin/roles/page.tsx'],
+    ['app/(admin)/admin/audit-logs/page.tsx', 'app/admin/audit-logs/page.tsx'],
+  ];
+  const missing = required.filter((candidates) => !candidates.some((c) => has(c)));
+  return missing.length
+    ? { ok: false, msg: `Missing: ${missing.map((c) => c[0]).join(', ')} — the RBAC data model exists but nobody can manage it` }
+    : { ok: true };
+});
+
+check('Bootstrap redirects into a page that actually exists', () => {
+  for (const f of ['lib/actions/admin-setup.ts', 'app/(admin-setup)/admin/setup/page.tsx']) {
+    if (!has(f)) continue;
+    if (/redirect\(\s*['"]\/['"]\s*\)/.test(stripComments(read(f)))) {
+      return { ok: 'warn', msg: `${f} redirects to '/' — if that's not a real admin landing page, point it at '/admin/users' instead` };
+    }
+  }
+  return { ok: true };
 });
 
 // ── 2. Leftover placeholders (including the one hidden mid-file) ───────────
@@ -273,6 +298,28 @@ check('ldapts, not ldapjs', () => {
   const usesLdap = has('lib/ldap.ts');
   if (usesLdap && !deps.ldapts) return { ok: false, msg: 'lib/ldap.ts exists but ldapts is not installed' };
   return { ok: true };
+});
+
+check('syncPermissionsIfNeeded is actually called', () => {
+  if (!has('lib/permissions-sync.ts')) return { ok: false, msg: 'No lib/permissions-sync.ts' };
+  const called = sourceFiles().some(
+    (f) => f !== p('lib/permissions-sync.ts') && /syncPermissionsIfNeeded\s*\(/.test(readFileSync(f, 'utf8'))
+  );
+  return called
+    ? { ok: true }
+    : { ok: false, msg: 'Defined but never called — new ALL_PERMISSIONS entries will never reach the database' };
+});
+
+check('System roles protected from edit + delete', () => {
+  if (!has('lib/actions/admin-roles.ts')) return { ok: false, msg: 'No lib/actions/admin-roles.ts' };
+  const body = read('lib/actions/admin-roles.ts');
+  const problems = [];
+  if (!/isSystem/.test(body)) problems.push('no isSystem check at all');
+  if (!/updateRoleAction[\s\S]*?isSystem/.test(body)) problems.push('updateRoleAction does not check isSystem');
+  if (!/deleteRoleAction[\s\S]*?isSystem/.test(body)) problems.push('deleteRoleAction does not check isSystem');
+  return problems.length
+    ? { ok: false, msg: `${problems.join(' · ')} — a system role's permissions could be edited away, locking everyone out` }
+    : { ok: true };
 });
 
 check('.env.local not committed', () => {

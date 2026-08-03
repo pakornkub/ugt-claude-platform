@@ -117,12 +117,35 @@ Route group `(admin-setup)` → `/admin/setup` (templates in
    5. `redirect('/admin/users')`
 
 Operational flow for a fresh deployment: first person logs in (any method) →
-visits `/admin/setup` → clicks once → becomes Administrator.
+visits `/admin/setup` → clicks once → becomes Administrator → lands on
+`/admin/users`, described below.
+
+## Ongoing admin pages (route group `(admin)`, templates in `assets/admin/`)
+
+Everything after bootstrap — managing who has what, day to day:
+
+| Route | What it does | Guard |
+| --- | --- | --- |
+| `/admin/users` | List users, assign/unassign a role inline (`UserRoleSelect`) | view: `USERS_READ` · change: `USERS_UPDATE` |
+| `/admin/roles` | Create/edit/delete roles with a permission-checkbox grid, grouped by `permission.group` | `ROLES_READ` / `_CREATE` / `_UPDATE` / `_DELETE` |
+| `/admin/audit-logs` | Read-only `ActivityLogs` viewer | `AUDIT_LOGS_READ` |
+
+`app/(admin)/layout.tsx` is the section-level guard (same derived-permission
+pattern as the example in "UI-level guards" above) plus the sidebar
+(`AdminNav`, which hides links the user lacks the permission for — UI hiding
+only, every action still re-checks server-side).
+
+**A user cannot change their own role** (`assignUserRoleAction`) and **a
+system role's permissions cannot be edited or the role deleted**
+(`updateRoleAction` / `deleteRoleAction` both check `isSystem`) — both rules
+exist for the same reason: without them, an admin can lock everyone (including
+themselves) out with one click and no one left with `ROLES_UPDATE` to undo it.
 
 ## Adding permissions after bootstrap
 
 The bootstrap seeds once. Permissions added to `ALL_PERMISSIONS` later must be
-**upserted** (safe to re-run) and attached to system roles:
+**upserted** (safe to re-run) and attached to system roles — shipped as
+`lib/permissions-sync.ts`'s `syncPermissionsIfNeeded()`:
 
 ```ts
 await prisma.$transaction(
@@ -136,11 +159,11 @@ await prisma.$transaction(
 );
 ```
 
-Recommended pattern: run a `syncPermissionsIfNeeded()` helper in the admin
-section layout so navigating to any admin page applies new permissions —
-no manual migration needed. Note the sync only upserts by key; **renaming** a
-key requires a manual SQL `UPDATE` on the permission table or users silently
-lose the permission.
+`app/(admin)/layout.tsx` calls it on every request into the admin section, so
+navigating to any admin page applies new permissions — no manual migration
+needed. Note the sync only upserts by key; **renaming** a key requires a
+manual SQL `UPDATE` on the permission table or users silently lose the
+permission.
 
 ## Pitfalls
 

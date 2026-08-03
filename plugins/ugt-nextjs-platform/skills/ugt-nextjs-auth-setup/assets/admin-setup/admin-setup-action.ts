@@ -65,5 +65,5 @@ export async function initializeAdminAction(): Promise<{
     data: { roleId: adminRole.id },
   });
 
-  redirect('/'); // adjust to your admin landing page
+  redirect('/admin/users'); // shipped by ugt-nextjs-auth-setup's (admin) route group
 }

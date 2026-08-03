@@ -6,7 +6,7 @@ import { AdminSetupForm } from '@/components/admin-setup-form';
 export default async function AdminSetupPage() {
   // If admin already set up, skip this page
   const ready = await isAdminInitialized();
-  if (ready) redirect('/'); // adjust to your admin landing page
+  if (ready) redirect('/admin/users');
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
