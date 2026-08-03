@@ -183,6 +183,7 @@ Every asset carries `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
 | Use `ldapts` | `ldapjs` (deprecated, no types) |
+| `NODE_TLS_REJECT_UNAUTHORIZED=0` only in `.env.local`/`.env.dev` for internal-CA Keycloak/LDAP, local dev only | Uncomment it in `.env.example` by default, or in `.env`/the prod Jenkins credential (disables TLS verification for the whole process) |
 | `rateLimit` model: `id String @id` + nullable `key String?` | `key` as `@id` (Better Auth v1 sends `id` → `Unknown argument 'id'`) |
 | auth-client: no `baseURL`; pass the path via the `basePath` option and read `process.env.NEXT_PUBLIC_BASE_PATH` directly | Pass a URL with a path as `baseURL` / read via `createEnv()` in the client bundle |
 | proxy: `url.pathname = '/login'` (app-relative) | `url.pathname = basePath + '/login'` (duplicates the basePath) |

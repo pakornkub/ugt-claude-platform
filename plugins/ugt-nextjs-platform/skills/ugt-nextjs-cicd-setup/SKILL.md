@@ -34,6 +34,7 @@ Skill layout:
 | `references/jenkins-one-time-setup.md` | what the admin prepares on the Jenkins server (plugins/tools/credentials/webhook/snap-Docker gotcha) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule |
+| `references/external-config-handoff.md` | the three docs above, pulled into **one table** with this project's real substituted names — what actually gets handed to the admin |
 
 ## 2. Org Standards
 
@@ -179,7 +180,32 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 - If deploying under a basePath (interview answer 3) → also wire
   `basePath: process.env.NEXT_PUBLIC_BASE_PATH` in next.config
 
-### 4.5 Server side — hand the list to the admin
+### 4.5 Local env files for `docker compose` testing
+
+`.env.local` (from database/auth setup) is read by `next dev` — it is **not**
+read by `docker compose`, which auto-loads a file literally named `.env` in
+the compose file's directory. To let a developer run the prod-shaped and
+dev-shaped compose files locally without waiting on a Jenkins deploy, create
+two more files alongside `.env.local`, **both gitignored, both real values,
+neither ever committed**:
+
+| File | Copy of | Add/override |
+| --- | --- | --- |
+| `.env` | `.env.local` | `APP_PORT=__PORT_PROD__` |
+| `.env.dev` | `.env.local` | `APP_PORT=__PORT_DEV__` + point `DATABASE_URL` at the dev DB if it differs |
+
+Run with `docker compose up` (reads `.env` automatically) and
+`docker compose -f docker-compose.dev.yml --env-file .env.dev up`
+(`.dev.yml` doesn't auto-load a same-named env file — pass `--env-file`
+explicitly).
+
+Ensure `.gitignore` has all of: `.env`, `.env.dev`, `.env.local`, `.env*.local`
+— and that `.env.example` is **not** matched by any of those patterns (add
+`!.env.example` if the project's `.gitignore` uses a broad `.env*` rule). A
+bare `.env` full of real values committed to git is a leaked-secrets incident,
+not a style nit.
+
+### 4.6 Server side — hand the list to the admin
 
 - Jenkins: plugins, tools (`NodeJS-22` / `SonarQube-Scanner` /
   `Dependency-Check` — names must match exactly), credentials, global env vars,
@@ -187,8 +213,12 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   **`references/jenkins-one-time-setup.md`**
 - SonarQube: projects ×2 (prod/dev), Global Analysis Token, Quality Gate per
   §2.3, webhook back to Jenkins → **`references/sonarqube-setup.md`**
+- Fill in **`references/external-config-handoff.md`**'s table template with
+  this project's actual substituted values (project name, ports, basePaths,
+  credential IDs) and hand that single table to the admin — don't make them
+  cross-reference three separate documents to find one project's names.
 
-### 4.6 Test
+### 4.7 Test
 
 Push `develop` → watch the pipeline run all 10 stages → check the Verification
 Checklist §6
@@ -206,6 +236,8 @@ Checklist §6
 | Tag images with `BUILD_NUMBER` | Bare `latest` (no rollback) |
 | Healthcheck on `127.0.0.1` + poll `docker inspect` | `localhost` (Alpine → IPv6) / wget from Jenkins |
 | `SKIP_ENV_VALIDATION=1` for CI/build only | Setting it in the production container |
+| `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
+| `NODE_TLS_REJECT_UNAUTHORIZED=0` in local `.env.local`/`.env.dev` only, if at all | Ever in `env-<project>` / `env-<project>-dev` (the prod/dev Jenkins credentials) |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 
@@ -237,8 +269,11 @@ server side still needs admin confirmation.
       healthcheck uses `127.0.0.1` + the right basePath per env
 - [ ] `package.json` has scripts: `lint`, `format:check`, `test:coverage`,
       `build` · the test runner emits `test-results/junit.xml` when `CI=true`
+- [ ] `.env` and `.env.dev` exist locally with `APP_PORT` set, and both are
+      gitignored (`git check-ignore .env .env.dev` — exit 0, they're ignored)
 
-**Server side (admin confirms):**
+**Server side (admin confirms) — `references/external-config-handoff.md` filled
+in and handed over covers this list by exact project name; the items:**
 
 - [ ] Jenkins tools named exactly: `NodeJS-22`, `SonarQube-Scanner`,
       `Dependency-Check` · SonarQube server named `SonarQube`

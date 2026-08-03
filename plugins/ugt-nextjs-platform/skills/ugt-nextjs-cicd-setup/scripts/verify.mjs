@@ -239,6 +239,22 @@ check('npm scripts the pipeline calls are present', () => {
     : { ok: true };
 });
 
+check('.env / .env.dev are gitignored (and .env.example is not)', () => {
+  if (!has('.gitignore')) return { ok: false, msg: 'No .gitignore — .env/.env.dev/.env.local would be committable' };
+  const lines = read('.gitignore').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  const ignoresLiteral = (name) => lines.includes(name) || lines.includes(`/${name}`);
+  const broadEnvGlob = lines.some((l) => /^\.env\*$/.test(l));
+  const exampleExempted = lines.includes('!.env.example') || lines.includes('!/.env.example');
+  const missing = ['.env', '.env.dev', '.env.local'].filter(
+    (name) => !ignoresLiteral(name) && !broadEnvGlob
+  );
+  if (missing.length) return { ok: false, msg: `.gitignore doesn't cover: ${missing.join(', ')} — real secrets could be committed` };
+  if (broadEnvGlob && !exampleExempted) {
+    return { ok: false, msg: '.gitignore has a broad ".env*" rule with no "!.env.example" negation — the committable template would be ignored too' };
+  }
+  return { ok: true };
+});
+
 check('owasp-suppressions.xml is readable XML', () => {
   if (!has('owasp-suppressions.xml')) return { ok: false, msg: 'No owasp-suppressions.xml' };
   const body = read('owasp-suppressions.xml');

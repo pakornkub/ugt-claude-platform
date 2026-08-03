@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.5.0 (2026-08-03)
+
+Feedback from a real deployment: local `docker compose` testing had no env
+file to read, and the admin handoff at the end of setup was three separate
+documents instead of one table with this project's actual names.
+
+- **`ugt-nextjs-cicd-setup`** — new step 4.5 creates local `.env` (mirrors
+  `.env.local` + `APP_PORT=<prod port>`) and `.env.dev` (+ `APP_PORT=<dev
+  port>`), both gitignored, so `docker compose up` / `docker compose -f
+  docker-compose.dev.yml --env-file .env.dev up` work locally without a
+  Jenkins deploy. `docker compose` auto-loads a file literally named `.env` —
+  it never reads `.env.local`, which is why this was missing.
+- New `references/external-config-handoff.md` — the Jenkins credential list,
+  SonarQube project/gate setup, and Keycloak client request, previously three
+  separate reference docs, collapsed into **one table** using the same
+  `__PROJECT_NAME__`-style placeholders the skill already substitutes
+  elsewhere, so the admin gets exact names instead of a prose summary. Wired
+  into `ugt-nextjs-setup`'s close-out step as the mandated final output.
+- `scripts/verify.mjs` — new check that `.env`/`.env.dev`/`.env.local` are
+  gitignored and `.env.example` isn't accidentally caught by a broad
+  `.env*` rule.
+- **`ugt-nextjs-auth-setup`** — `assets/env.example` gains a commented-out
+  `NODE_TLS_REJECT_UNAUTHORIZED=0` for local dev against an internal-CA
+  Keycloak/LDAP (the gotcha was already documented in
+  `references/keycloak-client.md` but never actually in the template).
+  Off by default, loud warning against ever uncommenting it in `.env`/the
+  prod Jenkins credential — it disables TLS verification process-wide, not
+  just for one connection.
+
 ## 2.4.0 (2026-08-03)
 
 Harness refresh for `/ugt-mode auto` (ugt-core 1.4.0). Existing projects: run

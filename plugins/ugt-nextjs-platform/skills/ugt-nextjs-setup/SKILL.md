@@ -151,9 +151,14 @@ How:
    which checks the harness layer.** Fix every ✘ before closing — never report
    done with an exit code 1 outstanding. Then walk the remaining checklist
    items in each skill that a machine can't verify.
-2. Summarize for the user: every file added/changed (grouped by module), env
-   vars that need real values, and what must be requested from admins
-   (Keycloak client, Jenkins credentials, SonarQube project).
+2. Summarize for the user: every file added/changed (grouped by module) and
+   env vars that need real values. If CI was installed, close with the
+   **rendered `references/external-config-handoff.md` table** from
+   `ugt-nextjs-cicd-setup` (values substituted, not `__PLACEHOLDER__`) — this
+   is the single external-config table handed to admins, covering Jenkins +
+   SonarQube + Keycloak by exact name, not a prose list. If CI was not
+   installed but Auth was, still surface its Keycloak client row from that
+   same table (SSO needs a client either way).
 3. Attach a **smoke-test checklist** matching what was actually installed, e.g.:
    - [ ] `npm run build` passes
    - [ ] login works with every enabled method → protected page reachable → logout clears the cookie
