@@ -1,5 +1,23 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.8.2 (2026-08-04)
+
+`ugt-nextjs-design-setup`: the org now has its own **canonical shadcn
+preset** (authored in the shadcn configurator, then verified by a live init
+run) — init becomes
+`printf '<name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 -b radix --template next --pointer --yes`
+for greenfield (scaffolds the Next app too — no separate create-next-app),
+same command without `--template next` for existing projects. Verified
+output: `radix-mira` + `lucide` + `rtl:false` + menu default/solid/subtle +
+neutral. Two live findings baked into the docs: **`-b radix` is mandatory**
+(the preset code was authored on the Base UI side — without the flag it
+yields `base-mira` and the Radix kit breaks), and `--template next` has a
+project-name prompt `--yes` doesn't cover (hence the `printf` pipe). The
+generic `--preset mira -b radix` invocation stays documented as fallback.
+Post-init verification expanded: `rtl: false` + `menuColor: "default"` join
+the lucide check. DESIGN.template §1 now records the menu agreement
+(Default / Solid / Subtle) from the preset.
+
 ## 2.8.1 (2026-08-04)
 
 `ugt-nextjs-design-setup` hardening from the first behavioral eval run

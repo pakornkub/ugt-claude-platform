@@ -101,12 +101,31 @@ each with a recorded decision — never silently reformat the project.
 1. `docs/DESIGN.md` from the template — fill every `{{...}}`, including the
    ugt-core contract version in the header; seed the decision log (ส่วน 10)
    with today's มติ. Create `docs/design-questions.md` (empty skeleton).
-2. shadcn init if none yet — the working invocation (eval-verified; there is
-   NO `--style radix-mira` flag):
-   `npx shadcn@latest init --preset mira -b radix` → produces
-   `"style": "radix-mira"`. **Then fix two things the preset gets wrong**:
-   set `components.json` `iconLibrary` to `"lucide"` (mira defaults to
-   `hugeicons`) and uninstall any `@hugeicons/*` deps it added.
+2. shadcn init if none yet — **the org preset (canonical, มติ 2026-08-04;
+   verified 2026-08-04: produces `radix-mira` + `lucide` + `rtl:false` +
+   menu default/solid/subtle + neutral)**:
+
+   ```bash
+   # โปรเจคใหม่ล้วน — scaffolds the Next app too (no separate create-next-app):
+   printf '<project-name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 -b radix --template next --pointer --yes
+   # โปรเจคเดิมที่มี Next.js แล้ว:
+   npx shadcn@latest init --preset b1ZzrZbs0 -b radix --pointer --yes
+   ```
+
+   (a custom preset code from the shadcn configurator: mira family,
+   single-repo, no RTL, pointer on buttons. **`-b radix` is mandatory** —
+   the preset was authored on the Base UI side; without it you get
+   `base-mira` and the whole Radix kit breaks. The `printf` pipe answers
+   `--template next`'s project-name prompt, which `--yes` does not cover.
+   Fallback if the code ever stops resolving:
+   `npx shadcn@latest init --preset mira -b radix` — there is NO
+   `--style radix-mira` flag.)
+   **After init, verify `components.json`** — expected: `style` in the
+   radix-mira family · `iconLibrary: "lucide"` (mira presets default to
+   `hugeicons` — fix and uninstall any `@hugeicons/*` deps) · `rtl: false` ·
+   `menuColor: "default"`. If the org preset writes a different `style`
+   string than `radix-mira`, update `scripts/verify.mjs`'s expectation in
+   the same change — never leave the two disagreeing.
    Windows note: very deep project paths break the CLI's ESM loader with a
    misleading `ERR_PACKAGE_IMPORT_NOT_DEFINED` (chalk) — run from a short
    path; never from a `subst` drive (realpath guard misfires).

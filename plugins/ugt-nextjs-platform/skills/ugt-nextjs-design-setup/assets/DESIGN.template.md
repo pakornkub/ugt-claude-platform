@@ -40,6 +40,8 @@
   ใช้ผ่าน `StatusBadge` เท่านั้น (tone + icon บังคับ)
 - **สีปุ่ม action**: ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/Import=
   เขียวทึบ · ในตารางใช้ variant `soft-*`
+- **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
+  translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
 
 ## 2. Typography
 
