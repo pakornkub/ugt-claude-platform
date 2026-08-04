@@ -80,7 +80,14 @@ Ask all of these **in a single message** before doing anything:
 2. **Deployed under a basePath / shared domain?** If yes → what basePath (e.g. `/<base-path>`)
 3. **[If SSO] Does a Keycloak client exist yet?**
    - exists → request `KEYCLOAK_ISSUER` / `CLIENT_ID` / `CLIENT_SECRET`
-   - not yet → follow `references/keycloak-client.md` (the redirect URI must be known before requesting)
+   - not yet → follow `references/keycloak-client.md` (the redirect URI must
+     be known before requesting) — and **render the request as a project
+     file `docs/admin-handoff.md`** (Thai, real substituted values, the
+     settings table + exact redirect URIs + a fill-in "ค่าที่ต้องส่งกลับ"
+     section for `KEYCLOAK_ISSUER`/`CLIENT_SECRET`) so the user forwards a
+     file to the Keycloak admin, not a chat snippet. If
+     `docs/admin-handoff.md` already exists (e.g. cicd-setup wrote it),
+     update its Keycloak section instead of overwriting the file.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
 5. **Who is the first admin?** (first person to log in visits `/admin/setup` and becomes Administrator with one click)
 

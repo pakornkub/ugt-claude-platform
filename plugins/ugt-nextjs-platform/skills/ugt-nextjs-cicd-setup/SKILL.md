@@ -213,10 +213,19 @@ not a style nit.
   **`references/jenkins-one-time-setup.md`**
 - SonarQube: projects ×2 (prod/dev), Global Analysis Token, Quality Gate per
   §2.3, webhook back to Jenkins → **`references/sonarqube-setup.md`**
-- Fill in **`references/external-config-handoff.md`**'s table template with
-  this project's actual substituted values (project name, ports, basePaths,
-  credential IDs) and hand that single table to the admin — don't make them
-  cross-reference three separate documents to find one project's names.
+- **Render `assets/admin-handoff.template.md` → write it to the project as
+  `docs/admin-handoff.md`** with every `{{...}}` substituted (project name,
+  ports, basePaths, credential IDs, URLs) and every section for an unselected
+  system deleted (no Sentry → no Sentry row; no SSO → no Keycloak section;
+  not the first project on the server → no server-level appendix). This is
+  the **standard handoff file** the user forwards to the admin/DevOps team:
+  plain-Thai steps, exact names, and a fill-in "ค่าที่ต้องส่งกลับ" section
+  the admin completes and returns. Tell the user explicitly: "ส่งไฟล์
+  `docs/admin-handoff.md` ให้ทีม admin ได้เลย แล้วรอค่าตอบกลับมาใส่
+  `.env.local`". A chat summary is fine too, but the file is the deliverable
+  — don't make admins copy names out of a chat log or cross-reference three
+  documents. (The raw per-system detail stays in
+  `references/external-config-handoff.md` + the two setup references.)
 
 ### 4.7 Test
 

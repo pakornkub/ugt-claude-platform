@@ -160,13 +160,16 @@ How:
    done with an exit code 1 outstanding. Then walk the remaining checklist
    items in each skill that a machine can't verify.
 2. Summarize for the user: every file added/changed (grouped by module) and
-   env vars that need real values. If CI was installed, close with the
-   **rendered `references/external-config-handoff.md` table** from
-   `ugt-nextjs-cicd-setup` (values substituted, not `__PLACEHOLDER__`) — this
-   is the single external-config table handed to admins, covering Jenkins +
-   SonarQube + Keycloak by exact name, not a prose list. If CI was not
-   installed but Auth was, still surface its Keycloak client row from that
-   same table (SSO needs a client either way).
+   env vars that need real values. **Admin handoff is a FILE, not a chat
+   message**: if CI was installed, `ugt-nextjs-cicd-setup` has already
+   written `docs/admin-handoff.md` (from its
+   `assets/admin-handoff.template.md` — plain-Thai steps + exact names +
+   fill-in return section covering Jenkins + SonarQube + Keycloak); confirm
+   it exists, has no `{{...}}` left, and tell the user to forward that file
+   to the admin/DevOps team and wait for the returned values to fill
+   `.env.local`. If CI was NOT installed but Auth was, render the same
+   template with only the Keycloak section into `docs/admin-handoff.md`
+   (SSO needs a client either way).
 3. Attach a **smoke-test checklist** matching what was actually installed, e.g.:
    - [ ] `npm run build` passes
    - [ ] login works with every enabled method → protected page reachable → logout clears the cookie

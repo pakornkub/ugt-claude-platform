@@ -1,5 +1,31 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.9.2 (2026-08-05)
+
+**Admin handoff becomes a standard FILE, not a chat message.** The external
+setup work (Jenkins credentials/job/webhook, SonarQube projects/gate/webhook,
+Keycloak client) was already surfaced with exact project-specific names — but
+as a rendered table in chat, which users then had to copy for their admin
+team. Now:
+
+- New asset `ugt-nextjs-cicd-setup/assets/admin-handoff.template.md` — a
+  plain-Thai, step-by-step handoff document: 1-minute overview table,
+  per-system sections (exact credential IDs / project keys / Client ID /
+  redirect URIs generated to match the project's settings), a fill-in
+  **"ค่าที่ต้องส่งกลับ"** section the admin completes and returns (secrets
+  explicitly routed to a secure channel, never into the file), and a closing
+  checklist. Sections for unselected systems are deleted, not left blank;
+  server-level first-project setup is an optional appendix.
+- cicd-setup close-out now **writes `docs/admin-handoff.md`** into the
+  project and tells the user to forward that file; chat summary is
+  secondary. Raw per-system detail stays in the existing references.
+- Parent `ugt-nextjs-setup` close-out: confirms the file exists with no
+  `{{...}}` left; Auth-without-CI renders the Keycloak-only version.
+- auth-setup (solo run, SSO client not yet created): renders its Keycloak
+  request from `references/keycloak-client.md` into the same
+  `docs/admin-handoff.md` (updating the section if the file already exists)
+  — stays self-contained, no cross-skill file reference.
+
 ## 2.9.1 (2026-08-04)
 
 `ugt-nextjs-design-setup`: polish from behavioral eval **iteration-2** on
