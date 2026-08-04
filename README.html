@@ -229,6 +229,24 @@
   .flow em{color:var(--ink-faint);font-style:normal}
   .scenario ul{padding-left:20px;color:var(--ink-soft);font-size:.92rem;display:flex;flex-direction:column;gap:6px}
 
+  /* ============ installed-files list ============ */
+  .files{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px 0;box-shadow:var(--shadow);overflow-x:auto;
+  }
+  .files .row{
+    display:flex;gap:14px;align-items:baseline;padding:9px 22px;
+    border-bottom:1px dashed var(--line);white-space:nowrap;
+  }
+  .files .row:last-child{border-bottom:none}
+  .files code{font-family:var(--mono);font-size:.86rem;font-weight:700;color:var(--accent-text);min-width:300px}
+  .files span{color:var(--ink-soft);font-size:.88rem}
+  .files .group{padding:12px 22px 4px;font-size:.78rem;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase}
+  @media (max-width:720px){
+    .files .row{white-space:normal;flex-direction:column;gap:3px}
+    .files code{min-width:0}
+  }
+
   /* ============ ugt-mode preset switcher ============ */
   .mode-head{margin-top:34px}
   .mode-chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 14px}
@@ -618,6 +636,28 @@
         highlight(2);
       })();
     </script>
+  </div>
+</section>
+
+<!-- ================= INSTALLED FILES ================= -->
+<section id="installed" aria-labelledby="installed-title">
+  <div class="wrap">
+    <span class="kicker reveal">โปร่งใส ตรวจได้</span>
+    <h2 id="installed-title" class="reveal">สิ่งที่ <span class="inline-code">/ugt-nextjs-setup</span> ติดตั้งลงโปรเจค</h2>
+    <p class="lead reveal">ไฟล์ทุกตัวเปิดอ่านได้ commit กับ repo — ไม่มีอะไรซ่อน</p>
+    <div class="files reveal">
+      <div class="group">ชั้นความรู้ (harness — ทำให้มาตรฐานอยู่ข้าม session)</div>
+      <div class="row"><code>CLAUDE.md</code><span>บล็อกกฎองค์กรใน marker <span class="inline-code">&lt;!-- ugt:start/end --&gt;</span> — แก้เฉพาะในบล็อก เนื้อหาทีมไม่ถูกแตะ</span></div>
+      <div class="row"><code>.claude/rules/ugt-nextjs-*.md</code><span>กฎผูก path — โหลดเองเมื่อแตะไฟล์ที่เกี่ยว (โค้ด / ฐานข้อมูล / auth / CI / ดีไซน์)</span></div>
+      <div class="row"><code>.claude/state/checkpoint.md</code><span>ความจำของทีม (commit) — อัปเดตด้วย <span class="inline-code">/ugt-checkpoint</span></span></div>
+      <div class="row"><code>.claude/state/project-notes.md</code><span>Error Patterns · Deviations · Open Questions ของโปรเจค</span></div>
+      <div class="row"><code>.claude/state/mode.md</code><span>ชุดความแรง AI ต่อประเภทงาน — สลับด้วย <span class="inline-code">/ugt-mode</span></span></div>
+      <div class="row"><code>.claude/settings.json</code><span>marketplace + plugin + permissions</span></div>
+      <div class="row"><code>.claude/logs/</code><span>audit log อัตโนมัติ (gitignore — ไม่ commit)</span></div>
+      <div class="group">เอกสารที่ module สร้างให้</div>
+      <div class="row"><code>docs/DESIGN.md</code><span>ข้อตกลงดีไซน์ของโปรเจค — ทุกการตัดสินใจพร้อมวันที่ (จากตัวช่วยดีไซน์)</span></div>
+      <div class="row"><code>docs/admin-handoff.md</code><span>เอกสารส่งต่อทีม admin/DevOps — ขั้นตอน + ชื่อที่ต้องตั้งเป๊ะ ๆ + ช่องกรอกค่าตอบกลับ</span></div>
+    </div>
   </div>
 </section>
 
