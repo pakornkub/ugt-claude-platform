@@ -1,18 +1,18 @@
 {
   "skill_name": "ugt-nextjs-design-setup",
-  "notes": "Evals 1-2 run on a bare create-next-app scaffold (App Router, no shadcn). Eval 3 needs a scaffold pre-seeded with components.json style 'base-mira', a components/ui/button.tsx, and a page containing a hardcoded hex color and a raw <table>. Eval 4 runs on a project already set up by this skill but with an older ugt-core version recorded in docs/DESIGN.md. Machine-checkable assertions use scripts/verify.mjs and scripts/check-contrast.mjs as graders. Prompts stay in Thai: they simulate real user input.",
+  "notes": "Evals 1-2 run on a bare create-next-app scaffold (App Router, no shadcn). Eval 3 needs a scaffold pre-seeded with components.json style 'radix-mira' (a non-standard base — the deviation under test), a components/ui/button.tsx, and a page containing a hardcoded hex color and a raw <table>. Eval 4 runs on a project already set up by this skill but with an older ugt-core version recorded in docs/DESIGN.md. Machine-checkable assertions use scripts/verify.mjs and scripts/check-contrast.mjs as graders. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
       "name": "fresh-project-all-defaults",
       "prompt": "โปรเจค tooling-portal เพิ่งสร้างใหม่ ยังไม่มี UI อะไรเลย ทำข้อตกลง design ให้หน่อย เอาตามมาตรฐานทั้งหมด",
-      "expected_output": "Runs the fast path: no per-question interrogation beyond genuine gaps · generates docs/DESIGN.md with every answer recorded (including accepted defaults) and today's มติ row · installs radix-mira shadcn config, org tokens (indigo primary, semantic-6 status set), Inter + Noto Sans Thai, harness rule · runs check-contrast and verify before closing",
+      "expected_output": "Runs the fast path: no per-question interrogation beyond genuine gaps · generates docs/DESIGN.md with every answer recorded (including accepted defaults) and today's มติ row · installs base-mira shadcn config, org tokens (indigo primary, semantic-6 status set), Inter + Noto Sans Thai, harness rule · runs check-contrast and verify before closing",
       "assertions": [
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0",
         "node scripts/check-contrast.mjs exits 0",
         "docs/DESIGN.md contains no {{PLACEHOLDER}} and has a มติ row dated today",
         "docs/DESIGN.md header records the ugt-core contract version",
-        "components.json style is radix-mira",
+        "components.json style is base-mira",
         "app/globals.css has --status-coral (the semantic-6 set, not a generic success/warning pair)",
         ".claude/rules/ugt-nextjs-design.md exists with paths frontmatter",
         "The closing summary lists installed files and the smoke checklist"
@@ -37,10 +37,10 @@
       "id": 3,
       "name": "existing-project-scan-and-deviations",
       "prompt": "โปรเจคนี้ทำกับ AI มาสักพักแล้ว UI มีอยู่หลายหน้า อยากให้เข้ามาตรฐาน design ของบริษัท ช่วยจัดให้หน่อย",
-      "expected_output": "Scans BEFORE asking (components.json, globals.css, layout, hardcoded colors, raw tables) · presents a draft agreement from what the code actually does plus a numbered conflict list (base-mira preset, hex color, raw <table>) · asks the grandfather/migrate question · fills DESIGN.md §9 Deviations · does NOT reformat or overwrite existing components silently",
+      "expected_output": "Scans BEFORE asking (components.json, globals.css, layout, hardcoded colors, raw tables) · presents a draft agreement from what the code actually does plus a numbered conflict list (radix-mira preset, hex color, raw <table>) · asks the grandfather/migrate question · fills DESIGN.md §9 Deviations · does NOT reformat or overwrite existing components silently",
       "assertions": [
         "The scan findings are presented before any interview question",
-        "docs/DESIGN.md §9 lists the base-mira preset, the hardcoded hex, and the raw <table> with a recorded decision each",
+        "docs/DESIGN.md §9 lists the radix-mira preset, the hardcoded hex, and the raw <table> with a recorded decision each",
         "No existing components/ui/ file was overwritten without an explicit diff-and-ask",
         "The existing pages' code was not mass-reformatted in this run",
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 OR every remaining ✘ corresponds to a grandfathered deviation recorded in §9"

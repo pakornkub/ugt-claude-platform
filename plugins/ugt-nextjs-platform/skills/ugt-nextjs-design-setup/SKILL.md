@@ -120,17 +120,27 @@ each with a recorded decision — never silently reformat the project.
    project-name prompt, which `--yes` does not cover. Fallback if the code
    ever stops resolving: `npx shadcn@latest init --preset mira` — there is
    NO `--style base-mira` flag.)
-   **After init, verify `components.json`** — expected: `style:
-   "base-mira"` · `iconLibrary: "lucide"` (mira presets can default to
-   `hugeicons` — fix and uninstall any `@hugeicons/*` deps) · `rtl: false` ·
-   `menuColor: "default"`. If the org preset ever writes a different
-   `style` string than `base-mira`, update `scripts/verify.mjs`'s
+   **After init**: rename `package.json`'s `"name"` (the template writes
+   `next-app`) to the project slug · verify `components.json` — expected:
+   `style: "base-mira"` · `iconLibrary: "lucide"` (mira presets can default
+   to `hugeicons` — fix and uninstall any `@hugeicons/*` deps) ·
+   `rtl: false` · `menuColor: "default"`. If the org preset ever writes a
+   different `style` string than `base-mira`, update `scripts/verify.mjs`'s
    expectation in the same change — never leave the two disagreeing.
-   Windows note: very deep project paths break the CLI's ESM loader with a
-   misleading `ERR_PACKAGE_IMPORT_NOT_DEFINED` (chalk) — run from a short
-   path; never from a `subst` drive (realpath guard misfires).
+   If the init dies mid-install (postinstall spawn errors happen in
+   sandboxes) it can leave a scaffold **without `components.json`** — run
+   `npm install`, then re-run the init in existing-project mode (no
+   `--template`).
+   **Windows: work from a short path as the primary flow, not a fallback**
+   — deep paths (~>180 chars) break BOTH the shadcn CLI (misleading
+   `ERR_PACKAGE_IMPORT_NOT_DEFINED` chalk error) AND `next build`
+   (Turbopack filesystem MAX_PATH; junctions don't help). Scaffold, run
+   every CLI/build step at a short real path, then move the project. Never
+   a `subst` drive (realpath guard misfires).
    Merge `assets/globals.tokens.css` into `app/globals.css` (replace the
-   `:root`/`.dark` token blocks; keep any project-specific `@layer` content)
+   `:root`/`.dark` token blocks; keep any project/preset `@layer` rules —
+   e.g. the preset's button `cursor: pointer` — and keep preset `@theme`
+   vars: re-point `--font-heading` at the font-sans variables)
    · substitute `{{PRIMARY}}`/`{{PRIMARY_DARK}}` from interview answers
    (dark ring tokens derive from `{{PRIMARY_DARK}}` automatically).
 3. Fonts + providers in `app/layout.tsx` — the exact wiring:
@@ -163,18 +173,25 @@ each with a recorded decision — never silently reformat the project.
    doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
    registry uses it) · `next-intl` only when ภาษา = th+en.
-5. Copy the org UI kit from `assets/ui/` into `components/ui/` and
+5. **App shell FIRST, then variants**: install the shadcn block named in
+   `references/layout-shells.md` (never hand-composed) **before** touching
+   `button.tsx` — `add <block>` prompts per existing file (even with
+   `--yes`; pipe `yes n |` to decline in headless runs) and answering `y`
+   would silently wipe just-applied variants. Then prune the block's demo
+   debris per layout-shells.md.
+6. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
-   th+en only; `theme-provider`/`theme-toggle` (dark mode = มี) and
-   `language-switcher` (th+en) from `assets/components/` — list + provenance
-   in `references/conventions.md` §Kit). Apply `assets/ui/button-variants.md`
-   to the installed `components/ui/button.tsx` — the sanctioned `success` /
+   th+en only; `theme-toggle` (dark mode = มี) and `language-switcher`
+   (th+en) from `assets/components/` — list + provenance in
+   `references/conventions.md` §Kit). **theme-provider: the preset scaffold
+   already ships `components/theme-provider.tsx` (a superset of our asset)
+   — keep the registry's file; the asset is only a fallback for projects
+   that somehow lack it.** Apply `assets/ui/button-variants.md` to the
+   installed `components/ui/button.tsx` — the sanctioned `success` /
    `soft-*` variants **and the `field` variant (mandatory: the kit's
    date-picker uses it and today's registry button doesn't ship it — build
    breaks without it)**. Never overwrite an existing same-name file
    silently — diff and ask.
-6. App shell per the interview answer — build from the shadcn block named in
-   `references/layout-shells.md`, never hand-composed.
 7. Run `node <skill-dir>/scripts/check-contrast.mjs` (cwd = project root) —
    every ✘ pair must be fixed before closing.
 8. Install the harness rule: copy `assets/rules-ugt-nextjs-design.md` →

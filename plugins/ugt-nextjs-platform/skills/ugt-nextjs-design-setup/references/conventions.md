@@ -151,7 +151,7 @@ table→card · row selection + bulk bar · built-in Empty state.
 | `ui/page-shell.tsx` · `ui/detail-dialog-shell.tsx` · `ui/detail-row.tsx` · `ui/detail-section.tsx` | HRMS | |
 | `ui/query-state.tsx` · `ui/truncated-text.tsx` | HRMS | query-state needs `ui/callout` |
 | `ui/callout.tsx` | HRMS | page-level banner; tones reuse `TONE_STYLES` |
-| `components/theme-provider.tsx` | standard next-themes wrapper | ship with theme-toggle when dark mode = มี; wraps app in layout.tsx |
+| `components/theme-provider.tsx` | standard next-themes wrapper | **fallback only** — the org preset scaffold ships its own (superset: hotkey + disableTransitionOnChange); keep the registry's file when present |
 | `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |
 | `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |

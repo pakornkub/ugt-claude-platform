@@ -9,6 +9,19 @@ registry) or `npx shadcn@latest add <block>`.
 | คำตอบข้อ 5 | ฐาน | หมายเหตุ |
 | --- | --- | --- |
 | Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) |
+
+**After installing a `sidebar-*` block — mandatory cleanup** (the block ships
+a demo, not an app shell; both eval runs independently needed these steps):
+
+1. Move the `SidebarProvider`+`SidebarInset` composition out of the block's
+   demo *page* into `app/(app)/layout.tsx` — the shell wraps the route
+   group, not one page.
+2. Delete the demo sample files: `team-switcher`, `nav-projects`,
+   `nav-main`'s sample data, the demo `app/dashboard/page.tsx`.
+3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
+   `/` — remove/redirect the root one.
+4. Rebuild `app-sidebar.tsx` per the org rules below (Thai menu, app-name
+   header, nav-user footer, longest-prefix highlight).
 | Topbar | no dedicated block — compose from `navigation-menu` + the org rules; the reference implementation is gov-boi-smart's header (blue navbar) | User menu = `DropdownMenu` มุมขวาสุด |
 | Sidebar + Topbar | `sidebar-07` + a slim header (`site-header` pattern จาก HRMS) | Header ใส่ breadcrumb + actions ของหน้า |
 | Landing page (ข้อ 6 = มี) | pick a marketing block/template from the registry at implement time | Landing ใช้ token ชุดเดียวกัน — ห้ามธีมแยก |

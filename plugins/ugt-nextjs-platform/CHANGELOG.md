@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.9.1 (2026-08-04)
+
+`ugt-nextjs-design-setup`: polish from behavioral eval **iteration-2** on
+the base-mira preset — both runs passed everything (verify 14/14, contrast
+30/30 first-try, `next build` green with zero kit TS errors → the Base UI
+port is proven on real projects; 9+ of iteration-1's 12 frictions confirmed
+fixed by two agents independently). This release closes the six minor
+frictions that remained, all doc-level:
+
+- **Windows short-path is now the primary flow**, not a footnote — deep
+  paths break both the shadcn CLI and Turbopack builds (MAX_PATH; junctions
+  don't help): scaffold + run all CLI/build steps at a short real path,
+  then move. Plus a recovery line for `--template next` dying mid-install
+  (re-run init in existing-project mode after `npm install`).
+- **Install order flipped: shell block BEFORE button variants** —
+  `add <block>` prompts per existing file even with `--yes` (headless:
+  `yes n |`), and a `y` would silently wipe just-applied variants.
+- **theme-provider**: keep the preset scaffold's own file (superset of our
+  asset — hotkey + disableTransitionOnChange); the asset is fallback only.
+- layout-shells.md: mandatory `sidebar-*` block cleanup steps (move
+  Provider composition into `app/(app)/layout.tsx`, delete demo samples,
+  resolve the root `app/page.tsx` collision).
+- globals.tokens.css ships `--font-heading: var(--font-sans)` and the merge
+  instruction keeps preset `@layer`/`@theme` additions (cursor-pointer
+  rule).
+- Init step renames `package.json` `"name"` from the template's `next-app`.
+- evals.json updated to the base-mira standard (eval-3's deviation fixture
+  flips to radix-mira — the old standard is now the deviation under test).
+
 ## 2.9.0 (2026-08-04)
 
 `ugt-nextjs-design-setup`: **standard base flips to `base-mira` (Base UI)**,
