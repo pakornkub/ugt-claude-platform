@@ -229,6 +229,21 @@
   .flow em{color:var(--ink-faint);font-style:normal}
   .scenario ul{padding-left:20px;color:var(--ink-soft);font-size:.92rem;display:flex;flex-direction:column;gap:6px}
 
+  /* ============ ugt-mode preset switcher ============ */
+  .mode-head{margin-top:34px}
+  .mode-chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 14px}
+  .mode-chip{
+    font-family:var(--mono);font-size:.85rem;font-weight:600;
+    padding:7px 16px;border-radius:999px;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--panel);color:var(--ink-soft);
+    transition:all .18s ease;
+  }
+  .mode-chip:hover{border-color:var(--accent);color:var(--accent-text)}
+  .mode-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mode-table td:not(:first-child),.mode-table th:not(:first-child){text-align:center;font-family:var(--mono);font-size:.86rem}
+  .mode-table .hl{background:var(--accent-soft);font-weight:700;color:var(--accent-text)}
+  .mode-table .dim{color:var(--ink-faint)}
+
   /* ============ Tables ============ */
   .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow-sm)}
   table{width:100%;border-collapse:collapse;font-size:.93rem;min-width:560px}
@@ -551,12 +566,58 @@
         </tbody>
       </table>
     </div>
+    <h3 class="mode-head reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-mode</span></h3>
+    <p class="reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
+      ใช้กับ<strong>งานที่ส่งไปตัวช่วยย่อยเท่านั้น</strong> — model หลักของ session ยังเปลี่ยนด้วย <span class="inline-code">/model</span> ตามปกติ</p>
+    <div class="mode-chips reveal" role="tablist" aria-label="เลือก preset">
+      <button class="mode-chip" data-col="1" role="tab">easy</button>
+      <button class="mode-chip active" data-col="2" role="tab" aria-selected="true">default</button>
+      <button class="mode-chip" data-col="3" role="tab">god</button>
+      <button class="mode-chip" data-col="0" role="tab">เทียบทั้งหมด</button>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="mode-table" id="modeTable">
+        <thead><tr><th>ประเภทงาน</th><th>easy</th><th>default</th><th>god</th></tr></thead>
+        <tbody>
+          <tr><td>Plan / วิเคราะห์ requirement</td><td>opus</td><td>fable</td><td>fable</td></tr>
+          <tr><td>เขียนโค้ด (feature)</td><td>sonnet</td><td>sonnet</td><td>opus</td></tr>
+          <tr><td>Review โค้ด</td><td>opus</td><td>fable</td><td>fable</td></tr>
+          <tr><td>หาสาเหตุบั๊ก (ยังไม่รู้ root cause)</td><td>opus</td><td>fable</td><td>fable</td></tr>
+          <tr><td>แก้บั๊ก (รู้ root cause แล้ว)</td><td>sonnet</td><td>sonnet</td><td>opus</td></tr>
+          <tr><td>รันเทส / verify script (งาน mechanical)</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
+          <tr><td>Doc / งานเบา</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p class="foot-note reveal">
-      <strong>เลือกความแรงของ AI ตามงาน</strong>: <span class="inline-code">/ugt-mode god</span> (งานสำคัญ อัดเต็มที่) ·
-      <span class="inline-code">/ugt-mode easy</span> (งานทั่วไป ประหยัด) ·
-      <span class="inline-code">/ugt-mode auto</span> (ให้เลือกเองตามความยากรายงาน) —
-      โหมดถูก commit กับ repo ทั้งทีมได้โหมดเดียวกัน
+      <span class="inline-code">/ugt-mode god</span> งานสำคัญ อัดเต็มที่ ·
+      <span class="inline-code">/ugt-mode easy</span> งานทั่วไป ประหยัด ·
+      <span class="inline-code">/ugt-mode auto</span> ให้เลือกความแรงเองเป็นรายงานตามความยาก ·
+      พิมพ์ประโยคธรรมดา "โหมดประหยัดหน่อย งานนี้ไม่รีบ" ก็ได้ —
+      หลักที่ทุกโหมดยึด: คนตรวจไม่อ่อนกว่าคนเขียน · แยก "หาสาเหตุ" (ใช้ตัวแรง) จาก "แก้ตามแผน" (ตัวถูกกว่า) · งาน mechanical ใช้ haiku เสมอ
     </p>
+    <script>
+      (function(){
+        var table = document.getElementById('modeTable');
+        var chips = document.querySelectorAll('.mode-chip');
+        function highlight(col){
+          table.querySelectorAll('tr').forEach(function(tr){
+            [].forEach.call(tr.children, function(cell, i){
+              cell.classList.remove('hl','dim');
+              if (col !== 0 && i > 0) cell.classList.add(i === col ? 'hl' : 'dim');
+            });
+          });
+        }
+        chips.forEach(function(chip){
+          chip.addEventListener('click', function(){
+            chips.forEach(function(c){ c.classList.remove('active'); c.removeAttribute('aria-selected'); });
+            chip.classList.add('active'); chip.setAttribute('aria-selected','true');
+            highlight(Number(chip.dataset.col));
+          });
+        });
+        highlight(2);
+      })();
+    </script>
   </div>
 </section>
 
