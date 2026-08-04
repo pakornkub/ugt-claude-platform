@@ -166,7 +166,7 @@
 
   /* ============ Cards ============ */
   .grid{display:grid;gap:20px}
-  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
   .card{
     background:#fff;border:1px solid var(--line);border-radius:var(--radius);
     padding:26px;box-shadow:var(--shadow-sm);position:relative;
@@ -261,7 +261,7 @@
   }
 
   /* ============ Evidence stats ============ */
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
   .stat{
     background:#fff;border:1px solid var(--line);border-radius:var(--radius);
     padding:24px 22px;box-shadow:var(--shadow-sm);text-align:center;
@@ -310,7 +310,7 @@
   /* ============ Responsive ============ */
   @media (max-width:900px){
     .grid.cols-3{grid-template-columns:1fr}
-    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     section{padding:56px 0}
     .badge{top:14px;right:14px}
   }
