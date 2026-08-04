@@ -1,9 +1,10 @@
-// source: gov-boi-smart lib/table-query.ts — installed by ugt-nextjs-design-setup
-// (ต้องมี lib/pagination.ts ที่ export firstParam อยู่ในโปรเจกต์ด้วย)
-// แปลง searchParams เป็นสถานะตาราง (sort + filter รายคอลัมน์) และแปลงกลับ — pure ทั้งไฟล์
+// source: ugt-hrms (port/adapt จาก gov-boi-smart) — installed by ugt-nextjs-design-setup (org UI kit)
+// port มาจาก gov-boi-smart `lib/table-query.ts` (แบบแผนเดียวกันทั้ง org)
+//
 // allowlist คือประตูความปลอดภัย: ค่าจาก URL ต้องไม่ถึง orderBy/where ของ Prisma
 // โดยไม่ผ่านรายชื่อฟิลด์ที่หน้านั้นประกาศไว้ · คีย์แปลกปลอมถูกทิ้งเงียบ ไม่ throw
-// (ผู้ใช้แก้ URL มั่วไม่ควรได้หน้า error)
+// (ผู้ใช้แก้ URL มั่วไม่ควรได้หน้า error) · คีย์คอลัมน์ = `accessorKey` ของ
+// column def และต้องตรงกับชื่อฟิลด์ Prisma
 import { firstParam } from '@/lib/pagination';
 
 export const FILTER_PREFIX = 'f_';

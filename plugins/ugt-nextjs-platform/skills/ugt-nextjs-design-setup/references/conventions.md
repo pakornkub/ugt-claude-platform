@@ -72,12 +72,14 @@ options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
 table→card · row selection + bulk bar · built-in Empty state.
 
-> **Kit status**: the shipped `ui/data-table.tsx` is the HRMS build (client
-> mode + `serverPagination` + mobile cards). The full merge (URL-state server
-> mode, per-column popover filter, dnd, prefs — the gov-boi options) is being
-> built and tested inside ugt-hrms first per มติ 2026-08-04; this asset gets
-> replaced when it lands. Until then, server-mode tables follow gov-boi's
-> `table-query` pattern (included in `lib/`).
+> **Kit status**: the shipped `ui/data-table.tsx` IS the full option set —
+> built and tested inside ugt-hrms (per มติ 2026-08-04; ugt-hrms PR #166,
+> 62/62 tests) then synced here. Server mode = pass `serverQuery`
+> ({ query, baseParams, fields }) parsed via `lib/table-query.ts`; per-column
+> filter UI is auto-suppressed on tables that pass `serverPagination` without
+> `serverQuery` (partial-page guard). Prefs persist only when the `id` prop
+> is given. Future improvements happen in ugt-hrms first, then sync back —
+> one direction only.
 
 ## Feedback
 

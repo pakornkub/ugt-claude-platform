@@ -1,5 +1,26 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.8.0 (2026-08-04)
+
+`ugt-nextjs-design-setup`: the **full-option DataTable** lands, closing
+2.7.0's known gap — built and tested inside ugt-hrms first (PR #166: 10 new
+tests, components/ui 62/62, tsc + next build clean), then synced back as the
+asset (de-i18n'd to Thai literals like the rest of the kit):
+
+- Server mode done right: new `serverQuery` prop — sort/filter/paginate all
+  through URL state (`lib/table-query.ts`); legacy `serverPagination`-only
+  tables get per-column filter UI suppressed (partial-page guard).
+- Per-column popover filter + active-filter chips (per-chip ✕ + clear-all),
+  multi-column AND.
+- Column drag-reorder (dependency-free, keyboard-accessible) + hide/show
+  (Settings2 popover) + localStorage prefs via the new `id` prop
+  (`lib/table-prefs.ts`) + reset-to-default.
+- Page size default 10, options 10/20/50; `lib/pagination.ts` upgraded to
+  the HRMS-adapted version (`parsePageSize` clamps URL-supplied sizes to the
+  option set).
+- Trigger-evals baseline recorded: 42/42 primary across 3 judges
+  (text-isolated, 7 distractors) — no description change needed.
+
 ## 2.7.0 (2026-08-04)
 
 New skill: **`ugt-nextjs-design-setup`** — the design agreement installer,

@@ -1,8 +1,12 @@
-'use client';
+// source: ugt-hrms (port/adapt จาก gov-boi-smart) — installed by ugt-nextjs-design-setup (org UI kit)
 
-// source: gov-boi-smart lib/table-prefs.ts — installed by ugt-nextjs-design-setup
 // จำลำดับคอลัมน์และคอลัมน์ที่ซ่อนของตารางแต่ละหน้าไว้ใน localStorage
-// เป็นรสนิยมของผู้ใช้ ไม่ใช่ผลลัพธ์ข้อมูล จึงไม่ต้องอยู่ใน URL และไม่ต้องมีตาราง DB
+// port มาจาก gov-boi-smart `lib/table-prefs.ts` — เป็นรสนิยมของผู้ใช้
+// ไม่ใช่ผลลัพธ์ข้อมูล จึงไม่ต้องอยู่ใน URL และไม่ต้องมีตาราง DB
+//
+// ปรับจากต้นทาง: รับ `defaultHidden` (มาจาก `initialColumnVisibility` ของ
+// DataTable) — ตารางที่ยังไม่เคยบันทึก prefs จะได้เริ่มด้วยคอลัมน์ซ่อนชุดเดิม
+// ไม่ใช่โชว์ทุกคอลัมน์
 //
 // localStorage เป็น external store จึงอ่านผ่าน useSyncExternalStore ไม่ใช่ setState ใน useEffect
 // (React 19 ห้ามไว้ — eslint react-hooks/set-state-in-effect) · getServerSnapshot คืนลำดับ
@@ -25,6 +29,17 @@ export function normalizeOrder(saved: unknown, keys: readonly string[]): string[
   return [...unique, ...keys.filter((k) => !unique.includes(k))];
 }
 
+// ย้าย from ไปยังตำแหน่งของ to (pure) · ต้องจำ index ของ to ก่อนถอด from ออก
+// ไม่งั้นตอนลากไปทางขวา index จะเลื่อนแล้วไปวางหน้า to แทนที่จะวางหลัง
+export function moveKey(order: readonly string[], from: string, to: string): string[] {
+  const next = [...order];
+  if (from === to || !next.includes(from) || !next.includes(to)) return next;
+  const target = next.indexOf(to);
+  next.splice(next.indexOf(from), 1);
+  next.splice(target, 0, from);
+  return next;
+}
+
 const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
@@ -40,9 +55,9 @@ function subscribe(listener: () => void) {
 // ไม่งั้น re-render วนไม่จบ · เทียบด้วยสตริงดิบจึงจับได้ทั้งการเขียนของเราและของแท็บอื่น
 const cache = new Map<string, { raw: string | null; value: TablePrefs }>();
 
-function readPrefs(tableId: string, keysDep: string): TablePrefs {
+function readPrefs(tableId: string, keysDep: string, hiddenDep: string): TablePrefs {
   const raw = localStorage.getItem(prefsKey(tableId));
-  const cacheId = `${tableId}|${keysDep}`;
+  const cacheId = `${tableId}|${keysDep}|${hiddenDep}`;
   const hit = cache.get(cacheId);
   if (hit && hit.raw === raw) return hit.value;
 
@@ -57,30 +72,41 @@ function readPrefs(tableId: string, keysDep: string): TablePrefs {
     order: normalizeOrder(saved.order, keys),
     hidden: Array.isArray(saved.hidden)
       ? saved.hidden.filter((k): k is string => typeof k === 'string' && keys.includes(k))
-      : [],
+      : splitDep(hiddenDep),
   };
   cache.set(cacheId, { raw, value });
   return value;
 }
 
+// '' .split(',') ให้ [''] ไม่ใช่ [] — ต้องกันเอง
+function splitDep(dep: string): string[] {
+  return dep ? dep.split(',') : [];
+}
+
 // server ไม่มี localStorage — คืนลำดับ default (ต้อง cache ด้วย ไม่งั้น snapshot ไม่นิ่ง)
 const defaults = new Map<string, TablePrefs>();
 
-function readDefault(keysDep: string): TablePrefs {
-  const hit = defaults.get(keysDep);
+function readDefault(keysDep: string, hiddenDep: string): TablePrefs {
+  const cacheId = `${keysDep}|${hiddenDep}`;
+  const hit = defaults.get(cacheId);
   if (hit) return hit;
-  const value: TablePrefs = { order: keysDep.split(','), hidden: [] };
-  defaults.set(keysDep, value);
+  const value: TablePrefs = { order: splitDep(keysDep), hidden: splitDep(hiddenDep) };
+  defaults.set(cacheId, value);
   return value;
 }
 
-export function useTablePrefs(tableId: string, keys: readonly string[]) {
+export function useTablePrefs(
+  tableId: string,
+  keys: readonly string[],
+  defaultHidden: readonly string[] = []
+) {
   // ponytail: ใช้ join(',') เป็น dep แทนการบังคับให้ caller memo array — คีย์คอลัมน์ห้ามมีจุลภาค
   const keysDep = keys.join(',');
+  const hiddenDep = defaultHidden.join(',');
   const prefs = useSyncExternalStore(
     subscribe,
-    useCallback(() => readPrefs(tableId, keysDep), [tableId, keysDep]),
-    useCallback(() => readDefault(keysDep), [keysDep])
+    useCallback(() => readPrefs(tableId, keysDep, hiddenDep), [tableId, keysDep, hiddenDep]),
+    useCallback(() => readDefault(keysDep, hiddenDep), [keysDep, hiddenDep])
   );
 
   // localStorage คือ state จริง — เขียนไม่สำเร็จ = การตั้งค่านั้นไม่ถูกจำและหน้าจอไม่ขยับ
@@ -93,15 +119,9 @@ export function useTablePrefs(tableId: string, keys: readonly string[]) {
     for (const listener of listeners) listener();
   };
 
-  // ย้าย from ไปยังตำแหน่งของ to · ต้องจำ index ของ to ก่อนถอด from ออก
-  // ไม่งั้นตอนลากไปทางขวา index จะเลื่อนแล้วไปวางหน้า to แทนที่จะวางหลัง
   const move = (from: string, to: string) => {
     if (from === to) return;
-    const order = [...prefs.order];
-    const target = order.indexOf(to);
-    order.splice(order.indexOf(from), 1);
-    order.splice(target, 0, from);
-    persist({ ...prefs, order });
+    persist({ ...prefs, order: moveKey(prefs.order, from, to) });
   };
 
   const toggle = (key: string) =>
