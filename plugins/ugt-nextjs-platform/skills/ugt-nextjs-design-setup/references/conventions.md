@@ -108,10 +108,11 @@ table→card · row selection + bulk bar · built-in Empty state.
 > ({ query, baseParams, fields }) parsed via `lib/table-query.ts`; per-column
 > filter UI is auto-suppressed on tables that pass `serverPagination` without
 > `serverQuery` (partial-page guard). Prefs persist only when the `id` prop
-> is given. Future improvements happen in ugt-hrms first, then sync back —
-> one direction only. **Sync cost since มติ base-mira**: ugt-hrms is
-> radix-mira, so every sync ports `asChild` → Base UI `render` (grep
-> `asChild` must be 0 in the shipped asset).
+> is given. **Since มติ 2026-08-04**: ugt-hrms and gov-boi-smart were the
+> *source material* — their job is done. This plugin's copy is now the
+> standalone source of truth for the kit; future improvements are made here
+> directly (no sync-back obligation). The kit is Base UI (`render` prop) —
+> grep `asChild` must stay 0 in shipped assets.
 
 ## Feedback
 
