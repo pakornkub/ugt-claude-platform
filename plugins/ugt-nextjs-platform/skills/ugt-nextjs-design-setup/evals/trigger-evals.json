@@ -2,8 +2,13 @@
   "purpose": "Trigger-boundary set for ugt-nextjs-design-setup. S* queries must route to this skill; N* queries must NOT (expected target noted). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke/read first.",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers + frontend-design distractors",
   "baseline_result": {
-    "date": null,
-    "note": "Baseline not yet run — run after the skill ships (same 3-judge protocol as ugt-mode's set)."
+    "date": "2026-08-04",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "42/42 (100%)",
+    "secondary_accuracy": "39/42",
+    "method_note": "Text-isolated: judges read a compiled listing (11 real skills + 7 distractors: 5 superpowers + frontend-design + impeccable), 14 queries each in a per-judge randomized order, expected answers never shown.",
+    "note": "iteration 0: S-side 21/21 routed to ugt-nextjs-design-setup (incl. S6 sync mode and S7 no-keyword phrasing); N-side 21/21 did NOT route to it. The design-word traps held: N6 (landing เท่ ๆ ว้าว ๆ) went to frontend-design (2 judges) / impeccable (1) — never the org installer. The 3 secondary misses are other skills' boundaries, not this one's: N5 (เพิ่มกราฟ dashboard) → brainstorming twice instead of none — defensible, superpowers mandates brainstorming before feature work; N1 (database schema) → none once instead of ugt-nextjs-database-setup. No description change needed; optimizer loop terminated at iteration 0."
   },
   "queries": {
     "S1": {
