@@ -2,7 +2,7 @@
 
 <!-- source: extracted from gov-boi-smart components/ui/button.tsx (base-mira) — installed by ugt-nextjs-design-setup -->
 
-เพิ่ม variant 4 ตัวลงใน `components/ui/button.tsx` (radix-mira) ของโปรเจกต์ —
+เพิ่ม variant 4 ตัวลงใน `components/ui/button.tsx` (base-mira) ของโปรเจกต์ —
 แก้เฉพาะ object `variants.variant` ภายใน `cva(...)` ไม่ต้องแตะส่วนอื่นของไฟล์
 
 สีถูกแปลงจาก token ของโปรเจกต์ต้นทาง (`--success`) มาเป็น token ขององค์กรแล้ว:
@@ -30,7 +30,7 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
 
 หมายเหตุ:
 
-- `success` ใช้ `text-white` ตามแบบแผนเดียวกับ variant `destructive` ของ shadcn (radix-mira)
+- `success` ใช้ `text-white` ตามแบบแผนเดียวกับ variant `destructive` ของ shadcn (base-mira)
   — ไม่ใช้ `text-status-emerald-foreground` เพราะ token นั้นเป็นสีตัวอักษรสำหรับพื้นจาง (badge/tint)
   ไม่ใช่สำหรับพื้น solid
 - ตัวต้นทางมี `focus-visible:ring` เฉพาะสีบน variant `destructive` — ถ้า button.tsx ปลายทาง
@@ -43,7 +43,7 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
 
 trigger ของ popover ที่ทำหน้าที่แทนช่องกรอก (datepicker/combobox) — ผิวต้องเหมือน
 `Input`/`SelectTrigger` ไม่ใช่ปุ่ม (ที่มา: ugt-hrms `components/ui/button.tsx`;
-registry radix-mira ปัจจุบันไม่มี variant นี้แล้ว จึงต้องเพิ่มเองเสมอ):
+registry base-mira ปัจจุบันไม่มี variant นี้แล้ว จึงต้องเพิ่มเองเสมอ):
 
 ```ts
 field:

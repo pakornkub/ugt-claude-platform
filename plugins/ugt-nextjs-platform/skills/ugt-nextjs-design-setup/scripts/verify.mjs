@@ -39,11 +39,11 @@ check('docs/design-questions.md exists', () =>
 );
 
 // ── shadcn config ──────────────────────────────────────────────────────────
-check("components.json style is 'radix-mira' + lucide", () => {
+check("components.json style is 'base-mira' + lucide", () => {
   if (!has('components.json')) return { ok: false, msg: 'No components.json — shadcn not initialized' };
   const cj = JSON.parse(read('components.json'));
   const problems = [];
-  if (cj.style !== 'radix-mira') problems.push(`style is '${cj.style}' (org standard: radix-mira)`);
+  if (cj.style !== 'base-mira') problems.push(`style is '${cj.style}' (org standard: base-mira — มติ 2026-08-04 supersedes radix-mira)`);
   if (cj.iconLibrary && cj.iconLibrary !== 'lucide') problems.push(`iconLibrary is '${cj.iconLibrary}'`);
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });

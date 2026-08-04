@@ -318,7 +318,12 @@ icon lib · กฎ a11y — 2 โปรเจคพิสูจน์แล้�
    gov-boi เป็นค่าที่ prototype บังคับ ไม่ใช่ทางเลือกองค์กร (เคสนั้นเดินผ่าน
    คำถาม interview ข้อ 1)
 2. ~~**DataTable ฐานไหน**~~ — **เคาะแล้ว 2026-08-04: ฐาน HRMS + option เต็มชุดจาก gov-boi** (global search · filter รายคอลัมน์ Popover · sort · pagination 2 โหมด · dnd สลับคอลัมน์ · ซ่อน/แสดงคอลัมน์ · จำ preference · คืนค่าเริ่มต้น/clear filter) — งาน merge จริง ไม่ใช่ copy
-3. ~~**shadcn style preset**~~ — **เคาะแล้ว 2026-08-04: `radix-mira` (Radix UI)**
+3. ~~**shadcn style preset**~~ — ⚠️ **มติกลับ 2026-08-04 (รอบสอง): `base-mira` (Base UI)**
+   — user เคาะเองตอนสร้าง org preset (`b1ZzrZbs0`) ว่าตั้งใจเลือก Base UI ·
+   kit ports กลับเป็น `render` prop, verify.mjs เช็ค base-mira, HRMS
+   (radix-mira) ยังเป็น reference ของ DataTable แต่ทุกครั้งที่ sync ต้อง
+   port `asChild` → `render` · มติเดิมด้านล่างเก็บไว้เป็นประวัติ:
+   ~~เคาะแล้ว 2026-08-04: `radix-mira` (Radix UI)~~
    — UI kit ที่ยกมาจาก HRMS สร้างบนตัวนี้ทั้งหมด + ecosystem block ของ shadcn
    เป็นฝั่ง Radix · หมายเหตุ: `base-mira` ของ gov-boi คือ Base UI (API `render`
    ไม่ใช่ `asChild`) → assets ที่ยกจาก gov-boi (IconAction,

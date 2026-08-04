@@ -174,7 +174,7 @@
   }
   html {
     @apply font-sans;
-    /* base 16px — never overridden; density comes from radix-mira (h-7 controls, text-xs tables) */
+    /* base 16px — never overridden; density comes from base-mira (h-7 controls, text-xs tables) */
   }
 }
 

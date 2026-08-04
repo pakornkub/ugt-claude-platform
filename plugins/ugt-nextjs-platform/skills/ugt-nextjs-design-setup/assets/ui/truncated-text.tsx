@@ -25,11 +25,13 @@ export function TruncatedText({ children, tooltip, ...props }: Readonly<Truncate
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span ref={ref} onPointerEnter={checkTruncation} onFocus={checkTruncation} {...props}>
-          {' '}
-          {children}
-        </span>
+      <TooltipTrigger
+        render={
+          <span ref={ref} onPointerEnter={checkTruncation} onFocus={checkTruncation} {...props} />
+        }
+      >
+        {' '}
+        {children}
       </TooltipTrigger>
       {isTruncated && <TooltipContent>{tooltip ?? children}</TooltipContent>}
     </Tooltip>

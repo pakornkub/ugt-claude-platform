@@ -59,7 +59,7 @@ Read these before drafting; the draft agreement states what the code
 
 | อ่าน | หาอะไร | ไปตอบคำถาม |
 | --- | --- | --- |
-| `components.json` | style (`radix-mira`? Base UI `base-*`?), baseColor, icon lib | preset conflict → Deviations |
+| `components.json` | style (`base-mira` = ตรงมาตรฐาน · `radix-*` = conflict), baseColor, icon lib | preset conflict → Deviations |
 | `app/globals.css` | palette จริง (`--primary`, status tokens มีไหม), radius, font vars | ข้อ 1–2 · token gaps |
 | `app/layout.tsx` | ฟ้อนต์จริง (`next/font`), `lang` | font conflict |
 | `app/**/layout.tsx` + `components/` | shell จริง (sidebar? topbar?), nav pattern | ข้อ 5 |

@@ -1,5 +1,29 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.9.0 (2026-08-04)
+
+`ugt-nextjs-design-setup`: **standard base flips to `base-mira` (Base UI)**,
+superseding the radix-mira มติ of the same day — the org preset
+(`b1ZzrZbs0`) was deliberately authored on Base UI and the user confirmed
+that intent, so the standard follows the preset rather than the other way
+around. Minor bump: the shipped kit's component API changed.
+
+- Init commands drop `-b radix` (and the docs now warn *against* adding it).
+  Fallback becomes `--preset mira`. verify.mjs expects `style: "base-mira"`.
+- Kit ported Radix → Base UI: `asChild` → `render` prop at 7 sites
+  (combobox, data-table ×2, date-picker, truncated-text, theme-toggle) ·
+  `icon-action.tsx` + `confirm-action-dialog.tsx` restored to their
+  gov-boi-smart **Base UI originals** (the Radix-era `preventDefault`
+  workaround on AlertDialogAction is gone — Base UI doesn't auto-close).
+  Remaining kit files audited clean of Radix-only API. `grep asChild|@radix-ui`
+  over assets/: 0.
+- Provenance flips: gov-boi-smart (base-mira) is now the base-aligned
+  reference; **ugt-hrms stays the DataTable reference but every sync now
+  ports `asChild` → `render`** (recorded in conventions.md §Kit status).
+- Scan checklist: `base-mira` = compliant, `radix-*` = recorded deviation.
+- Historical trail kept in `docs/design-skill-draft.md` (superseded มติ
+  struck through, not erased).
+
 ## 2.8.2 (2026-08-04)
 
 `ugt-nextjs-design-setup`: the org now has its own **canonical shadcn

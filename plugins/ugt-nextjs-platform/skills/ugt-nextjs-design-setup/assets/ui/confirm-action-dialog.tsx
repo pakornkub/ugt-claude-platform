@@ -1,6 +1,6 @@
 'use client';
 
-// source: gov-boi-smart, ported Base UI → Radix — installed by ugt-nextjs-design-setup (org UI kit)
+// source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
 // สำเร็จ → toast แล้วปิดตัวเอง · error/throw → toast แล้ว "ค้างไว้" ให้ผู้ใช้อ่านเหตุผล
 // (ข้อความอย่าง "ลบไม่ได้ — ยังมีข้อมูลผูกอยู่ ..." ยาวเกินกว่าจะอ่านทันใน toast ที่หายเอง)
@@ -66,15 +66,7 @@ export function ConfirmActionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>ยกเลิก</AlertDialogCancel>
-          {/* Radix: AlertDialogAction ปิด dialog เองทันทีที่คลิก — ต้อง preventDefault
-              ไม่งั้นเคส error จะปิดไปก่อนที่ผู้ใช้จะได้อ่านเหตุผล (ปิดเองเฉพาะเคสสำเร็จ) */}
-          <AlertDialogAction
-            disabled={pending}
-            onClick={(e) => {
-              e.preventDefault();
-              void confirm();
-            }}
-          >
+          <AlertDialogAction disabled={pending} onClick={() => void confirm()}>
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,8 +1,9 @@
 # Component conventions — the deep rules behind DESIGN.md §4–6
 
 DESIGN.md carries the agreement; this file carries the how + the edge cases.
-Provenance: HRMS = `ugt-hrms` (Radix, radix-mira) · BOI = `gov-boi-smart`
-(ported from Base UI).
+Provenance: HRMS = `ugt-hrms` (radix-mira — kit files from there are ported
+`asChild` → Base UI `render` on sync) · BOI = `gov-boi-smart` (base-mira —
+Base UI native, same base as the org standard since มติ 2026-08-04).
 
 ## ถูก/ผิด — the five violations that cover 90% of review comments
 
@@ -108,7 +109,9 @@ table→card · row selection + bulk bar · built-in Empty state.
 > filter UI is auto-suppressed on tables that pass `serverPagination` without
 > `serverQuery` (partial-page guard). Prefs persist only when the `id` prop
 > is given. Future improvements happen in ugt-hrms first, then sync back —
-> one direction only.
+> one direction only. **Sync cost since มติ base-mira**: ugt-hrms is
+> radix-mira, so every sync ports `asChild` → Base UI `render` (grep
+> `asChild` must be 0 in the shipped asset).
 
 ## Feedback
 
@@ -140,8 +143,8 @@ table→card · row selection + bulk bar · built-in Empty state.
 | `ui/data-table.tsx` | HRMS | see Kit status above |
 | `ui/form-dialog.tsx` | HRMS | compound + height variants |
 | `ui/status-badge.tsx` | HRMS | exports `TONE_STYLES` |
-| `ui/icon-action.tsx` | BOI → ported to Radix (`asChild`) | label required |
-| `ui/confirm-action-dialog.tsx` | BOI → ported to Radix | destructive confirm |
+| `ui/icon-action.tsx` | BOI (Base UI native, `render` prop) | label required |
+| `ui/confirm-action-dialog.tsx` | BOI (Base UI native) | destructive confirm |
 | `ui/date-picker.tsx` / `ui/date-range-picker.tsx` | HRMS | |
 | `ui/combobox.tsx` | HRMS | generic (employee-combobox ไม่เอา — HR-specific) |
 | `ui/page-shell.tsx` · `ui/detail-dialog-shell.tsx` · `ui/detail-row.tsx` · `ui/detail-section.tsx` | HRMS | |

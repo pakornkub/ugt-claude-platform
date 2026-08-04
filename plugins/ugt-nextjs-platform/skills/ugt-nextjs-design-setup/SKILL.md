@@ -31,7 +31,7 @@ a harness rule so the agreement outlives this session.
 
 The normative source is **`contracts/design.md` in the ugt-core plugin**
 (iron rules + org defaults). This skill is its Next.js rendering: shadcn/ui
-(style `radix-mira`), Tailwind v4 tokens, lucide icons. Where this file and
+(style `base-mira`, Base UI), Tailwind v4 tokens, lucide icons. Where this file and
 the contract disagree, the contract wins — fix this file.
 
 What lands in the project:
@@ -43,7 +43,7 @@ What lands in the project:
 | Motion inventory (only if project opts into custom motion) | `docs/MOTION.md` — from `assets/MOTION.template.md` |
 | Color/radius/status tokens (light+dark) | `app/globals.css` — from `assets/globals.tokens.css` |
 | Fonts (Inter + Noto Sans Thai + Geist Mono via `next/font`) | `app/layout.tsx` |
-| shadcn config (style `radix-mira`, neutral, lucide) | `components.json` |
+| shadcn config (style `base-mira`, neutral, lucide) | `components.json` |
 | Org UI kit | `components/ui/*` + `lib/format.ts` — from `assets/ui/` and `assets/lib/` |
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules-ugt-nextjs-design.md` |
@@ -71,7 +71,7 @@ What lands in the project:
 
 Org defaults (interview only asks "เปลี่ยนไหม"): primary indigo
 `oklch(0.488 0.243 264.4)` · neutral hue ~258 · semantic-6 `--status-*` set ·
-Inter + Noto Sans Thai · density `radix-mira` (controls h-7, tables text-xs)
+Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables text-xs)
 · radius tiers control 6 / card 12 / overlay 14 px.
 
 ## 3. Workflow
@@ -102,30 +102,30 @@ each with a recorded decision — never silently reformat the project.
    ugt-core contract version in the header; seed the decision log (ส่วน 10)
    with today's มติ. Create `docs/design-questions.md` (empty skeleton).
 2. shadcn init if none yet — **the org preset (canonical, มติ 2026-08-04;
-   verified 2026-08-04: produces `radix-mira` + `lucide` + `rtl:false` +
+   verified: produces `base-mira` + `lucide` + `rtl:false` +
    menu default/solid/subtle + neutral)**:
 
    ```bash
    # โปรเจคใหม่ล้วน — scaffolds the Next app too (no separate create-next-app):
-   printf '<project-name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 -b radix --template next --pointer --yes
+   printf '<project-name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 --template next --pointer --yes
    # โปรเจคเดิมที่มี Next.js แล้ว:
-   npx shadcn@latest init --preset b1ZzrZbs0 -b radix --pointer --yes
+   npx shadcn@latest init --preset b1ZzrZbs0 --pointer --yes
    ```
 
-   (a custom preset code from the shadcn configurator: mira family,
-   single-repo, no RTL, pointer on buttons. **`-b radix` is mandatory** —
-   the preset was authored on the Base UI side; without it you get
-   `base-mira` and the whole Radix kit breaks. The `printf` pipe answers
-   `--template next`'s project-name prompt, which `--yes` does not cover.
-   Fallback if the code ever stops resolving:
-   `npx shadcn@latest init --preset mira -b radix` — there is NO
-   `--style radix-mira` flag.)
-   **After init, verify `components.json`** — expected: `style` in the
-   radix-mira family · `iconLibrary: "lucide"` (mira presets default to
+   (a custom preset code from the shadcn configurator: mira family on
+   **Base UI** — a deliberate มติ 2026-08-04 superseding the earlier
+   radix-mira choice — single-repo, no RTL, pointer on buttons. **Do NOT
+   pass `-b radix`**: it would flip the style to `radix-mira` and the kit
+   is Base UI now. The `printf` pipe answers `--template next`'s
+   project-name prompt, which `--yes` does not cover. Fallback if the code
+   ever stops resolving: `npx shadcn@latest init --preset mira` — there is
+   NO `--style base-mira` flag.)
+   **After init, verify `components.json`** — expected: `style:
+   "base-mira"` · `iconLibrary: "lucide"` (mira presets can default to
    `hugeicons` — fix and uninstall any `@hugeicons/*` deps) · `rtl: false` ·
-   `menuColor: "default"`. If the org preset writes a different `style`
-   string than `radix-mira`, update `scripts/verify.mjs`'s expectation in
-   the same change — never leave the two disagreeing.
+   `menuColor: "default"`. If the org preset ever writes a different
+   `style` string than `base-mira`, update `scripts/verify.mjs`'s
+   expectation in the same change — never leave the two disagreeing.
    Windows note: very deep project paths break the CLI's ESM loader with a
    misleading `ERR_PACKAGE_IMPORT_NOT_DEFINED` (chalk) — run from a short
    path; never from a `subst` drive (realpath guard misfires).
@@ -144,7 +144,7 @@ each with a recorded decision — never silently reformat the project.
    ```
 
    Body wraps: `ThemeProvider` (from `assets/components/theme-provider.tsx`,
-   when dark mode = มี) → **`TooltipProvider` (required — radix-mira's
+   when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 4. Install the base component set — prefer the **shadcn MCP** (`ToolSearch`
@@ -154,14 +154,14 @@ each with a recorded decision — never silently reformat the project.
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea
    avatar input-group`
-   (**`field`, not `form`** — radix-mira's `form.json` is an empty stub; the
+   (**`field`, not `form`** — the mira styles' `form.json` is an empty stub; the
    registry moved form composition to the `field` primitive. It still pairs
    with zod + react-hook-form.)
    Then the kit's npm deps — **pin majors, the kit is version-coupled**:
    `npm i @tanstack/react-table@^8 date-fns@^4 react-hook-form zod
    lucide-react` (v9 of tanstack renames the v8 API the kit uses; `add`
    doesn't always install lucide-react itself) · `next-themes` when dark
-   mode = มี · `@base-ui/react` (combobox primitive in the radix-mira
+   mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
    registry uses it) · `next-intl` only when ภาษา = th+en.
 5. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,

@@ -298,17 +298,19 @@ function DataTableFilterPopover({
         if (next) setDraft(value); // เปิดใหม่ = เริ่มจากค่าที่กรองอยู่จริง ไม่ใช่ draft ค้าง
       }}
     >
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={`กรอง ${label}`}
-          className={cn(
-            'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
-            active && 'text-primary opacity-100'
-          )}
-        >
-          <Filter className="size-3" strokeWidth={2} aria-hidden />
-        </button>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={`กรอง ${label}`}
+            className={cn(
+              'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
+              active && 'text-primary opacity-100'
+            )}
+          />
+        }
+      >
+        <Filter className="size-3" strokeWidth={2} aria-hidden />
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-56 flex-col gap-2 p-3">
         <Input
@@ -363,10 +365,8 @@ function DataTableColumnSettings({
   const [overKey, setOverKey] = React.useState<string | null>(null);
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="icon" aria-label="ตั้งค่าคอลัมน์">
-          <Settings2 strokeWidth={2} />
-        </Button>
+      <PopoverTrigger render={<Button variant="outline" size="icon" aria-label="ตั้งค่าคอลัมน์" />}>
+        <Settings2 strokeWidth={2} />
       </PopoverTrigger>
       <PopoverContent align="end" className="flex w-60 flex-col gap-1 p-2">
         <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">คอลัมน์</p>

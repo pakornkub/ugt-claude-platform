@@ -68,21 +68,23 @@ export function DatePicker({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="field"
-          className={cn(
-            'w-36 justify-start text-left font-normal',
-            !value && 'text-muted-foreground',
-            className
-          )}
-        >
-          <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
-          {value
-            ? format(value, dateFormat, { locale: dateFnsLocale })
-            : (placeholder ?? 'เลือกวันที่')}
-          {triggerSuffix}
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="field"
+            className={cn(
+              'w-36 justify-start text-left font-normal',
+              !value && 'text-muted-foreground',
+              className
+            )}
+          />
+        }
+      >
+        <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
+        {value
+          ? format(value, dateFormat, { locale: dateFnsLocale })
+          : (placeholder ?? 'เลือกวันที่')}
+        {triggerSuffix}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
