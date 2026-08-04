@@ -1,200 +1,129 @@
 # UGT Claude Platform
 
-**Plugin marketplace ขององค์กร** สำหรับ Claude Code — เปลี่ยนโปรเจค Next.js ที่มีอยู่
-(รวมถึงโปรเจคที่ user สร้างเองด้วย AI) ให้ deploy ได้จริงตามมาตรฐานองค์กร
-พร้อมชั้น harness ที่ทำให้มาตรฐานคงอยู่ข้าม session — สกัด pattern มาจากโปรเจคจริง
-ที่ผ่านการใช้งาน production แล้ว
+**ชุดเครื่องมือสำหรับ Claude Code ขององค์กร** — ติดตั้งครั้งเดียว แล้วทุกโปรเจค
+Next.js ที่ทีมสร้าง (รวมถึงโปรเจคที่สร้างด้วย AI) จะ**ทำตามมาตรฐานบริษัทเองอัตโนมัติ**:
+ต่อฐานข้อมูลถูกวิธี มีระบบ login มีดีไซน์เดียวกันทั้งองค์กร มีระบบทดสอบ
+และ deploy ขึ้น server จริงได้ — โดยความรู้ทั้งหมดสกัดมาจากโปรเจคที่ใช้งานจริงแล้ว
 
-**Stack ที่รองรับ**: TypeScript / React / Next.js (App Router) · Prisma → SQL Server ·
-Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** โปรเจค stack อื่นใช้ไม่ได้
+**ใช้ได้กับ**: TypeScript / React / Next.js (App Router) · SQL Server ·
+Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** stack อื่นยังไม่รองรับ
 
-## มีอะไรใน marketplace
+## มีอะไรในชุดนี้
 
-| Plugin | เวอร์ชันล่าสุด | คืออะไร |
+| Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-core` | 1.5.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง รวม `design.md`) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
-| `ugt-nextjs-platform` | 2.7.0 | skills 8 ตัวของ stack Next.js + harness assets + shadcn MCP (depend บน `ugt-core`) |
-| `ugt-nextjs-standard` | 1.3.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `frontend-design` (คุณภาพงาน UI) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
+| `ugt-nextjs-standard` | 1.3.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่างอัตโนมัติ |
+| `ugt-nextjs-platform` | 2.9.1 | ตัวช่วย 8 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-core` | 1.5.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) — มาเองไม่ต้องติดตั้ง |
 
-เวอร์ชันจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดต่อรุ่นอยู่ใน
+รุ่นจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดแต่ละรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
 
-### Skills ใน `ugt-nextjs-platform`
+### ตัวช่วยทั้งหมด (เรียกผ่าน `/ugt` จะเห็นรายการ)
 
-| Skill | ทำอะไร | เรียกเมื่อไหร่ |
+| ตัวช่วย | ทำอะไรให้ | เมื่อไหร่ |
 | --- | --- | --- |
-| `ugt-nextjs-setup` | ตัวแม่ — interview ครั้งเดียว → ติดตั้ง module ตามลำดับ → ติดตั้ง harness | คำขอกว้าง ๆ ("ทำให้ deploy ได้") |
-| `ugt-nextjs-database-setup` | SQL Server ผ่าน Prisma + naming convention + audit columns | งาน DB ทุกชนิด รวมแก้ schema |
-| `ugt-nextjs-quality-setup` | Vitest (JUnit+lcov) + ESLint + Prettier + pre-commit | ก่อนทำ CI เสมอ |
-| `ugt-nextjs-design-setup` | ข้อตกลง design → `docs/DESIGN.md` + shadcn tokens/ฟ้อนต์ไทย/shell + org UI kit + สคริปต์ตรวจ WCAG | ทำข้อตกลง design / "UI แต่ละหน้าไม่เหมือนกัน" / sync หลัง update plugin — **รันก่อน auth เสมอ** |
-| `ugt-nextjs-auth-setup` | Login SSO/LDAP/Local + RBAC + audit log + admin bootstrap | งาน auth/permission ทุกชนิด |
-| `ugt-nextjs-cicd-setup` | Jenkins 10 stages + SonarQube Gate + OWASP + Docker deploy + `/api/health` | งาน CI/CD + วินิจฉัย pipeline |
-| `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก | **โหลดเองอัตโนมัติ**เมื่อแตะไฟล์ `.ts`/`.tsx` |
-| `ugt-nextjs-pitfalls` | กับดักจากบั๊ก production จริง — วันที่เลื่อน, cache ไม่ refresh, basePath 404 | **โหลดเองอัตโนมัติ**เมื่อแตะ `app/` `components/` `lib/` |
-| `ugt-checkpoint` *(มาจาก `ugt-core`)* | บันทึก state ของทีมลง `.claude/state/` | จบงานทุกครั้ง / ส่งต่อ session |
-| `ugt-mode` *(มาจาก `ugt-core`)* | สลับชุด model ต่อประเภทงานสำหรับ subagent (`easy`/`default`/`god`) | `/ugt-mode <preset>` หรือ "โหมดประหยัด" / "โหมด god" |
-| `ugt-requirements` *(มาจาก `ugt-core`)* | อ่าน `docs/requirements/` → เอกสาร brief ภาษาไทยแยกไฟล์ต่อ feature + open questions ที่ต้องถาม stakeholder ก่อนสร้าง | เริ่มโปรเจคจากโฟลเดอร์ requirement / "อ่าน requirement แล้วสรุปแยก feature" |
+| `ugt-nextjs-setup` | **ตัวแม่** — ถามครั้งเดียว แล้วติดตั้งทุกอย่างตามลำดับที่ถูกต้อง | พิมพ์ "ทำให้ deploy ได้" ก็เริ่มเอง |
+| `ugt-nextjs-database-setup` | ต่อ SQL Server + ตั้งชื่อตาราง/คอลัมน์ตามมาตรฐาน | งานฐานข้อมูลทุกชนิด |
+| `ugt-nextjs-quality-setup` | ระบบทดสอบ + ตรวจโค้ดอัตโนมัติก่อน commit | ก่อนทำ CI เสมอ |
+| `ugt-nextjs-design-setup` | **ข้อตกลงดีไซน์** — ถามไม่กี่ข้อ ได้ธีม สี ฟ้อนต์ไทย เมนู และชุด component สำเร็จรูปเหมือนกันทั้งองค์กร | "ทำข้อตกลง design" / "UI แต่ละหน้าไม่เหมือนกัน" — **รันก่อนทำ login เสมอ** |
+| `ugt-nextjs-auth-setup` | ระบบ login (SSO บริษัท / AD / รหัสผ่าน) + จัดการสิทธิ์ + หน้า admin | งาน login และสิทธิ์ทุกชนิด |
+| `ugt-nextjs-cicd-setup` | ต่อ Jenkins ให้ตรวจ-ทดสอบ-deploy อัตโนมัติเมื่อ push | งาน CI/CD + แก้ pipeline แดง |
+| `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่านเกณฑ์คุณภาพตั้งแต่ครั้งแรก | **ทำงานเองเมื่อแตะไฟล์โค้ด** |
+| `ugt-nextjs-pitfalls` | กับดักที่เคยพังจริงบน production (วันที่เลื่อน, cache, 404) | **ทำงานเองเมื่อแตะไฟล์ที่เสี่ยง** |
+| `ugt-checkpoint` | จดความคืบหน้าของทีมไว้ให้คนต่อไปอ่านต่อได้ | จบงานทุกครั้ง |
+| `ugt-mode` | เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน | `/ugt-mode god` / "โหมดประหยัด" |
+| `ugt-requirements` | อ่านโฟลเดอร์ requirement แล้วสรุปเป็นเอกสารภาษาไทยแยกตาม feature | เริ่มโปรเจคจากกอง requirement |
 
-## วิธีติดตั้ง — 3 โหมด
+## ติดตั้ง (ครั้งเดียวต่อเครื่อง)
 
-| โหมด | ทำอย่างไร | ได้อะไร | update ได้ไหม |
-| --- | --- | --- | --- |
-| **C. Marketplace (ทีมพัฒนา — แนะนำ)** | `/plugin marketplace add pakornkub/ugt-claude-platform` แล้ว `/plugin install ugt-nextjs-standard@ugt` แล้ว `/reload-plugins` | ครบทุกอย่าง (core+platform+superpowers+skill-creator ไหลมาอัตโนมัติ) | ✅ ดูหัวข้อ "การอัปเดต" |
-| **B. Copy plugin ลงโปรเจคที่ส่งมอบ** | copy **ทั้งสองโฟลเดอร์**: `plugins/ugt-core` และ `plugins/ugt-nextjs-platform` ไปวางใน `<โปรเจค>/.claude/skills/` (โหลดเป็น plugin อัตโนมัติเพราะมี `.claude-plugin/plugin.json` — ต้องกดยอมรับ workspace trust ครั้งแรก) | skills + hooks ครบ ไม่ต้องแตะ marketplace | ❌ copy ใหม่เอง |
-| **A. Copy skill เดี่ยว** | copy `plugins/ugt-nextjs-platform/skills/<ชื่อ>` ไปวางใน `.claude/skills/` | เฉพาะ skill นั้น (ไม่มี hook) | ❌ |
+> รีโปนี้เป็น private — ต้องมีสิทธิ์อ่าน + login GitHub ในเครื่อง (`gh auth login`)
 
-> **รีโปนี้เป็น private** — โหมด C ต้องมีสิทธิ์อ่านรีโป + login GitHub ไว้ในเครื่อง
-> (`gh auth login`) · ถ้าใช้ HTTPS ตั้ง `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` ·
-> แนะนำตั้ง `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1` กัน plugin หาย
-> ชั่วคราวตอน background pull ไม่ผ่าน
+เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรันทีละบรรทัด:
 
-โปรเจคที่ผ่าน `/ugt-nextjs-setup` แล้วจะมี `.claude/settings.json` ที่ประกาศ marketplace ไว้ —
-คนที่ clone repo นั้นจะถูกชวนติดตั้ง plugin อัตโนมัติ ไม่ต้องทำอะไรเพิ่ม
+```
+/plugin marketplace add pakornkub/ugt-claude-platform
+/plugin install ugt-nextjs-standard@ugt
+/reload-plugins
+```
 
-## ขั้นตอนติดตั้ง (ทำครั้งเดียวต่อเครื่อง)
+ตอน install เลือก scope **project** ถ้าอยากให้เพื่อนร่วมทีมที่ clone โปรเจคได้ด้วย ·
+เลือก **user** ถ้าอยากใช้เองทุกโปรเจค · เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็นรายการตัวช่วย
 
-1. มีสิทธิ์อ่านรีโปนี้ + login GitHub ในเครื่อง: `gh auth login`
-2. เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรันทีละบรรทัด:
+<details>
+<summary>ทางเลือกอื่น: copy ไฟล์ตรง ๆ (ไม่ต้องแตะ marketplace แต่ update เองทุกครั้ง)</summary>
 
-   ```
-   /plugin marketplace add pakornkub/ugt-claude-platform
-   /plugin install ugt-nextjs-standard@ugt
-   /reload-plugins
-   ```
+- **copy ทั้ง plugin**: เอาโฟลเดอร์ `plugins/ugt-core` และ `plugins/ugt-nextjs-platform`
+  ไปวางใน `<โปรเจค>/.claude/skills/` (ต้องกดยอมรับ workspace trust ครั้งแรก)
+- **copy ตัวช่วยเดี่ยว**: เอา `plugins/ugt-nextjs-platform/skills/<ชื่อ>` ไปวางใน `.claude/skills/`
 
-   (ตอน install เลือก scope **project** ถ้าอยากให้คนที่ clone โปรเจคนั้นได้ตามด้วย ·
-   เลือก **user** ถ้าอยากใช้เองทุกโปรเจคบนเครื่อง)
-3. เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็น autocomplete รายการ skill · `/plugin`
-   ต้องเห็น core + platform + standard ไม่มี error
+</details>
 
-## ตัวอย่างการใช้งาน — 2 use case หลัก
+## วิธีใช้ — 3 สถานการณ์หลัก
 
-### Use case 1: มีโปรเจค Next.js อยู่แล้ว มาเติมมาตรฐาน (retrofit)
+### 1. มีโปรเจคอยู่แล้ว อยากให้เข้ามาตรฐาน
 
-สถานการณ์: โปรเจคที่ทำกับ AI จนรันในเครื่องได้ แต่ยังไม่มี login / database จริง / CI —
-จะส่งให้ทีมใช้จริงแล้ว
+พิมพ์ประโยคเดียว:
 
-1. เปิด Claude Code ที่โปรเจคนั้น แล้วพิมพ์ประโยคเดียว:
+```
+ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย
+```
 
-   ```
-   ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย
-   ```
+Claude จะ**ตรวจของเดิมก่อนเสมอ** (มีอะไรอยู่แล้วจะถาม ไม่ทับเงียบ ๆ) → ถามคำถามชุดเดียว
+(ติดตั้งอะไรบ้าง, ชื่อโปรเจค, login แบบไหน ฯลฯ) → ไล่ติดตั้งตามลำดับ
+**Database → Quality → Design → Auth → CI** → รันสคริปต์ตรวจจนเขียวทุกตัว →
+สรุปสิ่งที่ต้องไปขอ admin (เช่น Keycloak, Jenkins) พร้อม checklist ทดสอบ
 
-   (skill trigger เองจากประโยคกว้าง ๆ แบบนี้ — วัดแล้ว 60/60 · หรือเรียกตรง `/ugt-nextjs-setup`)
-2. Claude **ตรวจของเดิมก่อนเสมอ** — ถ้ามี Prisma/jest/Jenkinsfile อยู่แล้วจะรายงานสิ่งที่เจอ
-   และถามก่อน ไม่ทับเงียบ ๆ
-3. ตอบ **interview ชุดเดียว** เช่น: ติดตั้งครบทั้งสี่ module · login = SSO + LDAP ·
-   ชื่อโปรเจค `expense-portal` · basePath `/expense-portal` · ports 3000/3001 ·
-   DB server + ชื่อ database · มี Sentry ไหม
-4. รอ Claude ไล่ติดตั้ง **Database → Quality → Auth → CI → harness** แล้วรัน verify script
-   ของทุก module จนเขียว
-5. ทำตามสรุปปิดงาน: เติมค่าจริงใน `.env.local` · เอารายการไปขอ admin
-   (Keycloak client + redirect URI, Jenkins credentials, SonarQube projects) ·
-   push `develop` แล้วดู pipeline วิ่งครบ 10 stages
-6. Smoke test ตาม checklist ที่ได้: `npm run build` ผ่าน · login ทุก method ·
-   `/admin/setup` กดครั้งเดียวได้ Administrator
+### 2. โปรเจคใหม่ มีแต่โฟลเดอร์ requirement
 
-### Use case 2: โปรเจคเพิ่งสร้าง มีแค่โฟลเดอร์ requirement
+1. **อ่าน requirement ก่อน อย่าเพิ่งสร้าง** — พิมพ์ "อ่าน requirement แล้วทำ brief
+   แยกเป็น feature" → ได้เอกสารสรุปภาษาไทย + รายการคำถามที่ต้องถาม stakeholder
+   ก่อนเขียนโค้ดผิดทิศ
+2. ติดตั้งมาตรฐานด้วย `/ugt-nextjs-setup` (ตอบคำถามโดยใช้ข้อมูลจาก brief)
+   — ตัวช่วยดีไซน์จะสร้างโปรเจค Next.js ให้เองด้วยถ้ายังไม่มี
+3. วนสร้างทีละ feature: "สร้างหน้า X ตาม requirement ใน docs/Y" —
+   ระบบคุมคุณภาพประกบเองอัตโนมัติ
+4. จบวัน: `/ugt-checkpoint` แล้ว commit — พรุ่งนี้ (หรือเพื่อน) เปิดมาอ่านต่อได้ทันที
 
-สถานการณ์: โฟลเดอร์ว่าง ๆ ที่มีแต่ `docs/` (requirement, mockup, business rules) —
-ยังไม่มีโค้ดสักบรรทัด
+### 3. อยากจัดดีไซน์อย่างเดียว
 
-1. **อ่าน requirement ก่อน อย่าเพิ่งสร้างอะไร** — เรียก `/ugt-requirements`
-   (หรือพิมพ์ "อ่าน requirement แล้วทำ brief แยกเป็น feature") → ได้
-   `docs/requirements-brief/` เป็นเอกสารสรุปภาษาไทย แยกไฟล์ต่อ feature
-   พร้อม **Open Questions** ที่เอกสารไม่บอกแต่จำเป็นต่อการสร้าง —
-   เอารายการนี้ไปถาม stakeholder ก่อนเขียนโค้ดผิดทิศ · commit brief เข้า repo
+```
+ทำข้อตกลง design ให้โปรเจคนี้หน่อย
+```
 
-   > ยังไม่ได้ update plugin? paste prompt เดิมแทนได้:
-   > "อ่านเอกสารทั้งหมดใน docs/ แล้วสรุป: ระบบทำอะไร มี module/ผู้ใช้กี่แบบ
-   > ต้องมีตารางอะไรบ้าง และอะไรที่เอกสารยังไม่บอกแต่จำเป็นต่อการสร้าง"
-2. **Scaffold Next.js เปล่า**:
+Claude ถามไม่กี่ข้อ (สีหลักของแบรนด์? มีโหมดมืดไหม? เมนูข้างหรือบน?) — ตอบ
+"ตามมาตรฐานทั้งหมด" ก็ได้ — แล้วได้:
 
-   ```
-   สร้างโปรเจค Next.js ใหม่ในโฟลเดอร์นี้: TypeScript, App Router, Tailwind
-   ```
+- **`docs/DESIGN.md`** — ข้อตกลงดีไซน์ของโปรเจค เขียนทุกการตัดสินใจพร้อมวันที่
+- ธีมสี + ฟ้อนต์ไทย + โครงเมนู ตามมาตรฐานองค์กร (ผ่านการตรวจ contrast สำหรับ
+  ผู้มีปัญหาการมองเห็นแล้วทุกคู่สี)
+- ชุด component สำเร็จรูป: ตารางข้อมูลครบเครื่อง (ค้นหา กรอง เรียง จำการตั้งค่า),
+  ฟอร์ม, ป้ายสถานะ, ปุ่มยืนยันลบ ฯลฯ — หน้าตาเดียวกันทุกโปรเจค
+- กฎที่ทำให้ Claude **อ่านข้อตกลงเองทุกครั้ง**ก่อนแตะงาน UI — session หน้า
+  ก็ยังรักษาดีไซน์เดิม
 
-   หรือทำเองโดยไม่ผ่าน AI:
+โปรเจคเดิมที่มี UI แล้ว: Claude จะสแกนของจริงก่อน แล้วชวนตกลงว่าจุดไหน
+ปรับตาม จุดไหนคงไว้ (บันทึกไว้เป็นลายลักษณ์อักษร ไม่มีการไล่แก้ทั้งแอปเงียบ ๆ)
 
-   ```bash
-   npx create-next-app@latest . --typescript --app --tailwind --eslint --src-dir --import-alias "@/*" --yes
-   ```
+## หลังติดตั้งแล้ว ชีวิตประจำวันเป็นยังไง
 
-   (ใช้ `--src-dir` เพราะ skills ในชุดนี้คาดหวังโครงสร้าง `src/`)
-3. **ติดตั้งมาตรฐานก่อนเขียน feature แรก** — `/ugt-nextjs-setup` (ตอบ interview โดยใช้
-   ข้อมูลจากข้อ 1 เช่นเปิด login method ตามประเภทผู้ใช้ใน requirement) —
-   เหตุที่ต้องมาก่อน feature: Quality Gate วัดโค้ดใหม่ตั้งแต่บรรทัดแรก และตาราง domain
-   ที่กำลังจะออกแบบจะถูกกฎ naming/audit columns คุมตั้งแต่ต้น
-4. **วนสร้าง feature จาก docs**:
+ส่วนใหญ่**ไม่ต้องเรียกอะไรเลย** — ระบบทำงานเองตามเหตุการณ์:
 
-   ```
-   สร้างหน้า <feature แรกตามความสำคัญ> ตาม requirement ใน docs/<ไฟล์>
-   ```
-
-   superpowers รับช่วง (brainstorming → plan → TDD) โดยมี harness ประกบอัตโนมัติ
-   ตามตาราง "งานประจำวัน" ข้างล่าง
-5. จบ session: `/ugt-checkpoint` แล้ว commit — คนต่อไป (หรือตัวเองพรุ่งนี้) เปิดมาอ่านต่อได้ทันที
-
-### งานพัฒนาประจำวัน (harness ทำงานเอง ไม่ต้องเรียกอะไร)
-
-| เหตุการณ์ | สิ่งที่เกิดเอง |
+| เมื่อคุณ... | สิ่งที่เกิดเอง |
 | --- | --- |
-| งานอ่านอย่างเดียว (ตอบคำถามเรื่องโค้ด/เอกสาร/config — ไม่แก้ไฟล์) | ตอบตรง ๆ **ไม่เข้า pipeline ไม่ brainstorming** — กฎ "1% chance → must invoke" ของ superpowers ไม่ใช้กับงานอ่าน |
-| เริ่มจากโฟลเดอร์ requirement → ต้องการ brief เป็นไฟล์ | `/ugt-requirements` — แล้วค่อยส่งทีละ feature เข้า pipeline ของ superpowers |
-| งานเล็ก (typo, แก้ doc, เปลี่ยนค่า config, one-line fix ที่รู้ตำแหน่ง) | ทำตรง ๆ **ข้าม pipeline ของ superpowers** — ไม่เปลือง token กับ brainstorming/plan (กฎ auto-load ยังทำงานปกติ) |
-| สร้าง feature / แก้บั๊ก | pipeline ของ superpowers รับไป (brainstorming → plan → TDD → review) โดยเลือก model ของ subagent ตามตาราง `/ugt-mode` |
-| แตะไฟล์ `.ts`/`.tsx` | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` โหลดเอง |
-| แตะ `prisma/` / ไฟล์ auth / Jenkinsfile | rules ที่เกี่ยวโหลดเองจาก `.claude/rules/` |
-| จบงานทุกครั้ง | เรียก `/ugt-checkpoint` แล้ว commit |
-| โปรเจคอยู่บน Next.js 16.3+ | `next dev` เติมบล็อก `nextjs-agent-rules` + `AGENTS.md` เอง — **ปล่อยไว้และ commit ไปด้วย** (อยู่ร่วมกับบล็อก ugt ได้โดยออกแบบ) |
+| ถามคำถาม / อ่านโค้ด | ตอบตรง ๆ ไม่มีพิธีรีตอง |
+| แก้งานเล็ก (typo, ค่า config) | ทำตรง ๆ ไม่เสียเวลา |
+| สร้าง feature / แก้บั๊ก | เข้ากระบวนการเต็ม: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review |
+| แตะไฟล์โค้ด / ไฟล์ UI / ไฟล์ฐานข้อมูล | กฎที่เกี่ยวโหลดเอง (มาตรฐานโค้ด, ข้อตกลงดีไซน์, กับดัก production) |
+| จบงาน | `/ugt-checkpoint` แล้ว commit |
 
-ต้องการติดตั้งทีละส่วนก็เรียก skill ลูกตรง ๆ ได้ (`/ugt-nextjs-database-setup` ฯลฯ)
+**เลือกความแรงของ AI ตามงาน**: `/ugt-mode god` (งานสำคัญ อัดเต็มที่) ·
+`/ugt-mode easy` (งานทั่วไป ประหยัด) · `/ugt-mode auto` (ให้เลือกเองตามความยาก
+รายงาน) — โหมดถูก commit กับ repo ทั้งทีมได้โหมดเดียวกัน
 
-### เลือกชุด model ต่อประเภทงาน — `/ugt-mode`
+## การอัปเดต
 
-โหมดถูกเก็บใน `.claude/state/mode.md` (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
-และใช้กับ**งานที่ส่งไป subagent เท่านั้น** — model หลักของ session ยังเปลี่ยนด้วย
-`/model` ตามปกติ
-
-| ประเภทงาน | `easy` | `default` | `god` |
-| --- | --- | --- | --- |
-| Plan / วิเคราะห์ requirement | opus | fable | fable |
-| เขียนโค้ด (feature) | sonnet | sonnet | opus |
-| Review โค้ด | opus | fable | fable |
-| หาสาเหตุบั๊ก (ยังไม่รู้ root cause) | opus | fable | fable |
-| แก้บั๊ก (รู้ root cause แล้ว) | sonnet | sonnet | opus |
-| รันเทส / verify script (งาน mechanical) | haiku | haiku | haiku |
-| Doc / งานเบา | haiku | haiku | haiku |
-
-ตัวอย่างการใช้:
-
-```
-/ugt-mode god          ← งานสำคัญ อัดคุณภาพเต็มที่ (โค้ด+แก้บั๊กใช้ opus)
-/ugt-mode easy         ← งานทั่วไป ประหยัด token
-/ugt-mode              ← ดูว่าโหมดปัจจุบันคืออะไร
-โหมดประหยัดหน่อย งานนี้ไม่รีบ   ← ประโยคธรรมดาก็ trigger ได้ (= easy)
-```
-
-หลักที่ทุก preset ยึด: planner/reviewer ไม่อ่อนกว่า coder เสมอ ·
-แยก "หาสาเหตุ" (แพง ใช้ model แรง) จาก "แก้ตาม plan" (ถูกกว่า) ·
-งาน mechanical ใช้ haiku ทุกโหมด
-
-### สิ่งที่ `/ugt-nextjs-setup` ติดตั้งลงโปรเจค (ชั้น harness)
-
-```
-CLAUDE.md                      ← บล็อกกฎองค์กรใน marker <!-- ugt:start/end --> (skill เป็นเจ้าของ)
-.claude/rules/ugt-nextjs-*.md  ← กฎผูก path — runtime โหลดเองเมื่อแตะไฟล์ที่เกี่ยว
-.claude/state/checkpoint.md    ← ความจำของทีม (commit) — อัปเดตด้วย /ugt-checkpoint
-.claude/state/project-notes.md ← Error Patterns · Deviations · Open Questions
-.claude/state/mode.md          ← ชุด model ต่อประเภทงานของ subagent — สลับด้วย /ugt-mode
-.claude/settings.json          ← marketplace + plugin + permissions
-.claude/logs/                  ← audit log จาก hooks (gitignore)
-```
-
-## การอัปเดต (สำหรับทีม — โหมด C)
-
-auto-update **ปิดโดย default** สำหรับ marketplace ที่ไม่ใช่ของ Anthropic — เมื่อมีประกาศรุ่นใหม่
-ให้รันในโปรเจคไหนก็ได้:
+เมื่อมีประกาศรุ่นใหม่ รันในโปรเจคไหนก็ได้:
 
 ```
 /plugin marketplace update ugt
@@ -202,49 +131,48 @@ auto-update **ปิดโดย default** สำหรับ marketplace ที
 /reload-plugins
 ```
 
-- dependency ทั้งสาย (core / platform / superpowers / skill-creator) ตามมาเอง
-- อัปเดตแล้ว **ไม่ต้องแก้อะไรในโปรเจค** — ไฟล์ harness ที่ติดตั้งไว้ใช้ต่อได้เสมอ
-  (ถ้ารุ่นใหม่เปลี่ยน rules/CLAUDE-block จะมีบอกใน CHANGELOG ว่าให้รัน `/ugt-nextjs-setup`
-  ซ้ำเพื่อ refresh บล็อกของ skill — เนื้อหาของทีมไม่ถูกแตะ)
-- อยากรู้ว่ารุ่นที่ใช้อยู่คืออะไร: `/plugin` แล้วดูเวอร์ชันในรายการ
+อัปเดตแล้ว**ไม่ต้องแก้อะไรในโปรเจค** — ถ้ารุ่นไหนต้องทำอะไรเพิ่มจะเขียนไว้ใน
+CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่: `/plugin`
 
-## ความรู้ใหม่ไปไว้ที่ไหน (คู่มือ triage — สำคัญที่สุดในไฟล์นี้)
+## เจอความรู้ใหม่ เอาไปไว้ที่ไหน (สำคัญที่สุดในไฟล์นี้)
 
 | ความรู้ที่เจอ | ไปไว้ที่ | ห้ามทำ |
 | --- | --- | --- |
-| จริงเฉพาะโปรเจคนั้น (business rule, ตารางแปลก) | `.claude/state/project-notes.md` ของโปรเจค หรือ `.claude/rules/<project>-*.md` | — |
-| จริงกับทุกโปรเจคบน stack นี้ (gotcha ของ Prisma/Keycloak/Jenkins) | **เปิด PR เข้ารีโปนี้** → bump version → ทีมอื่นอัปเดตตามหัวข้อข้างบน | ❌ แก้ไฟล์ skill ที่ติดตั้งมา — มันอยู่ใน plugin cache ที่ถูกลบตอน update และไม่มีใครได้ด้วย |
-| ความชอบส่วนตัว | ปล่อยให้ auto memory ของ Claude จัดการ | ❌ ยัดลงไฟล์ที่ commit |
+| จริงเฉพาะโปรเจคนั้น (business rule) | `.claude/state/project-notes.md` ของโปรเจค | — |
+| จริงกับทุกโปรเจค (กับดักของ Prisma/Keycloak/Jenkins/shadcn) | **เปิด PR เข้ารีโปนี้** — ทีมอื่นจะได้ด้วยตอนอัปเดต | ❌ แก้ไฟล์ตัวช่วยที่ติดตั้งมา (หายตอน update และไม่มีใครได้) |
+| ความชอบส่วนตัว | ปล่อยให้ memory ของ Claude จัดการเอง | ❌ ยัดลงไฟล์ที่ commit |
 
-**ห้ามสร้าง `.claude/skills/ugt-<ชื่อเดิม>/` ทับ skill ของ platform** — จะได้ความรู้สองชุด
-ที่ขัดกันโดยไม่มีใครรู้ว่าใช้อันไหนอยู่ ถ้าต้อง extend ให้ตั้งชื่อใหม่ (สร้างด้วย
-`skill-creator` ที่มากับ bundle ได้เลย)
+**ห้ามสร้างตัวช่วยชื่อ `ugt-*` ซ้ำของเดิม** — จะได้ความรู้สองชุดที่ขัดกันเอง
+ถ้าอยากต่อยอดให้ตั้งชื่อใหม่
 
-## การออกรุ่น (สำหรับทีม platform)
+## สำหรับทีมดูแล platform
 
 1. รับ PR → merge เข้า `main`
-2. bump `version` ใน `.claude-plugin/plugin.json` ของ **plugin ที่เปลี่ยน**
-   (`ugt-core` / `ugt-nextjs-platform` / `ugt-nextjs-standard` — เส้นเวอร์ชันแยกกัน)
-   + เพิ่มหัวข้อใน `CHANGELOG.md` ของตัวนั้น
-3. `claude plugin validate ./plugins/<ชื่อ> --strict` (และ validate `.` สำหรับ marketplace)
-4. tag ตามแบบ `<plugin>--v<version>` แล้ว push main พร้อม tag —
-   **ถ้ารุ่นนั้นเพิ่ม dependency ใหม่ ให้ push tag ของ dependency ก่อนตัวที่ depend**
-5. ประกาศให้ทีมรันคำสั่งอัปเดต (หัวข้อ "การอัปเดต")
+2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
+3. `claude plugin validate ./plugins/<ชื่อ> --strict`
+4. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
+   push tag ของ dependency ก่อน)
+5. ประกาศให้ทีมรันคำสั่งอัปเดต
 
-กติกาเนื้อหา: ทุก skill ต้อง self-contained (ห้ามอ้างไฟล์ข้าม plugin/skill,
-verify script ยึด `process.cwd()`), เนื้อหาที่โหลดเข้า context เป็นภาษาอังกฤษ
-(เว้น trigger phrase), และมาตรฐานกลางแก้ที่ `plugins/ugt-core/contracts/` ก่อนเสมอ
-แล้วค่อยตามไปแก้ใน skill ของ stack
+กติกา: ทุกตัวช่วยต้องพึ่งตัวเองได้ (ห้ามอ้างไฟล์ข้าม plugin) · เนื้อหาที่โหลดเข้า
+context เป็นภาษาอังกฤษ (เว้นประโยค trigger) · มาตรฐานกลางแก้ที่
+`plugins/ugt-core/contracts/` ก่อนเสมอ แล้วค่อยตามแก้ในตัวช่วยของ stack
 
-## หลักฐานคุณภาพ
+## หลักฐานว่าใช้ได้จริง
 
-ทุก skill มี `scripts/verify.mjs` (แปลง checklist เป็นคำสั่งเดียว — ทดสอบกับโปรเจค
-production จริงและ negative case แล้ว และเคยจับบั๊กจริงในโปรเจคต้นทางได้หลายรอบ)
-และ `evals/` — ผลวัดที่ผ่านมา: setup/auth/cicd eval **with-skill 34/34 (100%)
-vs without-skill 18/34 (53%)** · pitfalls **9/9 vs 6/9** · ugt-mode **9/9 +
-trigger boundary 60/60** (20 query × 3 judges รวม keyword traps) · trigger
-boundary ชุดอื่น **60/60** (วัดซ้ำหลัง rename และของ pitfalls/clean-code แยกชุด)
+ทุกตัวช่วยมีสคริปต์ตรวจ (`verify.mjs`) และชุดทดสอบ (`evals/`) — ผลวัดล่าสุด:
 
-Hard boundary ระดับองค์กร (บังคับที่ client ไม่ใช่ที่ instruction) → ส่ง
-`plugins/ugt-core/contracts/org-managed-settings.md` ให้ทีม IT ·
-ข้อเสนอรองรับ stack อื่น (Python ฯลฯ) → `docs/multi-stack-proposal.md`
+- setup/auth/cicd: มีตัวช่วย **34/34 (100%)** vs ไม่มี **18/34 (53%)**
+- design-setup: จับ trigger ถูก **42/42** · ทดสอบจริงบนโปรเจคเปล่า **14/14**
+  vs ไม่มีตัวช่วย 2/14 — และรอบสองผ่านเต็มแบบไม่ต้องแก้อะไรหน้างานเลย
+- pitfalls **9/9 vs 6/9** · ugt-mode **9/9 + trigger 69/69**
+
+มาตรฐานดีไซน์สกัดจากโปรเจค production จริง 2 ตัว และตารางข้อมูลชุดเต็มผ่านการ
+พัฒนา+ทดสอบในโปรเจคจริง (62 เทสต์) ก่อนเข้ามาเป็นของกลาง
+
+---
+
+เอกสารเชิงลึก: มาตรฐานกลาง → `plugins/ugt-core/contracts/` · ข้อเสนอรองรับ
+stack อื่น → `docs/multi-stack-proposal.md` · ที่มาของมาตรฐานดีไซน์ →
+`docs/design-skill-draft.md` · ให้ทีม IT ตั้ง hard boundary →
+`plugins/ugt-core/contracts/org-managed-settings.md`
