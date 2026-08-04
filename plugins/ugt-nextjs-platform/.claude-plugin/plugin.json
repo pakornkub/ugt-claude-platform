@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ugt-nextjs-platform",
   "displayName": "UGT Platform",
-  "version": "2.6.0",
-  "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)",
+  "version": "2.7.0",
+  "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, design agreement + shadcn tokens/UI kit, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)",
   "author": {
     "name": "UGT DX Team"
   },

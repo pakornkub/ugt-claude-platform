@@ -1,0 +1,37 @@
+# Layout shells — interview answer → shadcn block
+
+Never hand-compose a shell. Start from the shadcn block, then apply the org
+rules below. Browse blocks through the shadcn MCP (preferred — live
+registry) or `npx shadcn@latest add <block>`.
+
+## Shell mapping
+
+| คำตอบข้อ 5 | ฐาน | หมายเหตุ |
+| --- | --- | --- |
+| Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) |
+| Topbar | no dedicated block — compose from `navigation-menu` + the org rules; the reference implementation is gov-boi-smart's header (blue navbar) | User menu = `DropdownMenu` มุมขวาสุด |
+| Sidebar + Topbar | `sidebar-07` + a slim header (`site-header` pattern จาก HRMS) | Header ใส่ breadcrumb + actions ของหน้า |
+| Landing page (ข้อ 6 = มี) | pick a marketing block/template from the registry at implement time | Landing ใช้ token ชุดเดียวกัน — ห้ามธีมแยก |
+
+Login/setup pages come themed from `ugt-nextjs-auth-setup` — this skill runs
+first so those pages inherit the tokens; do not build login UI here.
+
+## Org shell rules (apply to whichever shell)
+
+- **Menu items**: icon (lucide) + label เสมอ · group into sections when > ~7
+  items · max depth 2 — deeper = split into in-page tabs · order: งานหลัก →
+  รายงาน → ตั้งค่า/admin ล่างสุด
+- **Permission-hidden, not disabled** — hide items the user lacks `*:read`
+  for; the server guard is the real boundary (contract `identity.md`)
+- **Nav highlight**: current item = the **longest** href among
+  `pathname === href || pathname.startsWith(href + '/')` — the `+ '/'` stops
+  `/` matching everything, the longest-match stops `/cut` and `/cut-history`
+  both lighting up (bug both projects hit)
+- **Overflow**: menu wider than the bar → horizontal scroll, **never wrap**
+  (the right-side group dropping to a second line was a real production fix)
+- **Page skeleton** (every page, no exceptions): page title
+  (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน
+  + content in a card · breadcrumb above the title only when depth > 2
+- **Mobile**: sidebar collapses to the block's built-in sheet/drawer ·
+  content transforms are systematic (table→card via DataTable, dialog→bottom
+  sheet via the primitive) — never per-page improvisation

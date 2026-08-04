@@ -307,3 +307,17 @@ token/override system and a component-kit half that only works if the org adopts
 shared components (`form-dialog`, `status-badge`, `data-table`, the `field` button variant)
 as an org UI kit shipped with the plugin. That adoption question — assets vs. documentation —
 is the design plugin's first decision, and a reason to keep it separate from app-patterns.
+
+---
+
+## Addendum 2026-08-04 — gap ที่พบระหว่างร่าง design skill (สำหรับคนทำ Bucket 1)
+
+การสกัดรอบนี้ (ดู `docs/design-skill-draft.md`) พบว่า audit ฉบับนี้ยังไม่ได้เก็บ
+convention เรื่อง **form/state libraries** เลย ทั้งที่ 2 โปรเจคใช้จริง:
+
+| Lib | สถานะใน 2 โปรเจค | คำถามที่ Bucket 1 ต้องตอบ |
+| --- | --- | --- |
+| react-hook-form + zod (ฟอร์ม) | converge ทั้งคู่ (ผ่าน shadcn `ui/form`) | ฝั่ง UI ถูกเก็บใน design skill แล้ว — Bucket 1 เก็บฝั่ง schema/resolver pattern |
+| zod ที่ Server Action / DTO boundary | converge ทั้งคู่ | pattern การ validate ที่ boundary + literal-union DTO (มีบางส่วนใน Bucket 1 แล้ว) |
+| @tanstack/react-query | converge ทั้งคู่ | เมื่อไหร่ใช้ react-query vs server component fetch · key convention · invalidation |
+| zustand | เฉพาะ gov-boi (HRMS ไม่ใช้) | ยังไม่ converge — อย่าเพิ่งตั้งเป็นมาตรฐาน บันทึกไว้เฉย ๆ |

@@ -12,8 +12,8 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 | Plugin | เวอร์ชันล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-core` | 1.3.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
-| `ugt-nextjs-platform` | 2.3.0 | skills 7 ตัวของ stack Next.js + harness assets (depend บน `ugt-core`) |
+| `ugt-core` | 1.5.0 | ฐานกลางทุก stack — `ugt-checkpoint`, `ugt-mode`, `ugt-requirements`, audit hooks, `contracts/` (มาตรฐานต้นทางให้ทุก stack อ้าง รวม `design.md`) — **ไม่ต้องติดตั้งเอง** ไหลมากับ platform อัตโนมัติ |
+| `ugt-nextjs-platform` | 2.7.0 | skills 8 ตัวของ stack Next.js + harness assets + shadcn MCP (depend บน `ugt-core`) |
 | `ugt-nextjs-standard` | 1.3.0 | bundle แนะนำ — ติดตั้งตัวเดียวได้ `ugt-nextjs-platform` + `superpowers` (pipeline การพัฒนา: brainstorming → plan → TDD → review) + `frontend-design` (คุณภาพงาน UI) + `skill-creator` (สร้าง skill ของโปรเจคตามมาตรฐานเดียวกัน) |
 
 เวอร์ชันจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดต่อรุ่นอยู่ใน
@@ -26,6 +26,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-setup` | ตัวแม่ — interview ครั้งเดียว → ติดตั้ง module ตามลำดับ → ติดตั้ง harness | คำขอกว้าง ๆ ("ทำให้ deploy ได้") |
 | `ugt-nextjs-database-setup` | SQL Server ผ่าน Prisma + naming convention + audit columns | งาน DB ทุกชนิด รวมแก้ schema |
 | `ugt-nextjs-quality-setup` | Vitest (JUnit+lcov) + ESLint + Prettier + pre-commit | ก่อนทำ CI เสมอ |
+| `ugt-nextjs-design-setup` | ข้อตกลง design → `docs/DESIGN.md` + shadcn tokens/ฟ้อนต์ไทย/shell + org UI kit + สคริปต์ตรวจ WCAG | ทำข้อตกลง design / "UI แต่ละหน้าไม่เหมือนกัน" / sync หลัง update plugin — **รันก่อน auth เสมอ** |
 | `ugt-nextjs-auth-setup` | Login SSO/LDAP/Local + RBAC + audit log + admin bootstrap | งาน auth/permission ทุกชนิด |
 | `ugt-nextjs-cicd-setup` | Jenkins 10 stages + SonarQube Gate + OWASP + Docker deploy + `/api/health` | งาน CI/CD + วินิจฉัย pipeline |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่าน Quality Gate ตั้งแต่สแกนแรก | **โหลดเองอัตโนมัติ**เมื่อแตะไฟล์ `.ts`/`.tsx` |

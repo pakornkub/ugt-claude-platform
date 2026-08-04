@@ -10,11 +10,13 @@ description: >
   อะไรเลย", "ต้องเตรียมอะไรบ้างก่อนขึ้น server", "ทำตามมาตรฐานบริษัทให้ด้วย" —
   because that is exactly the case where they don't yet know which pieces they
   need, and this skill's job is to find out. It interviews once, routes to
-  ugt-nextjs-database-setup → ugt-nextjs-quality-setup → ugt-nextjs-auth-setup → ugt-nextjs-cicd-setup in
+  ugt-nextjs-database-setup → ugt-nextjs-quality-setup → ugt-nextjs-design-setup →
+  ugt-nextjs-auth-setup → ugt-nextjs-cicd-setup in
   dependency order, then installs the harness files (CLAUDE.md block,
   .claude/rules, .claude/state) so the standards outlive the session.
   Do NOT use when the request names exactly one area: "ต่อ database", "ทำ CI",
-  "ใส่ login SSO", "ตั้ง vitest" go straight to that single skill.
+  "ใส่ login SSO", "ตั้ง vitest", "ทำข้อตกลง design" go straight to that single
+  skill.
 ---
 
 # UGT Setup — org-standard installer (parent skill)
@@ -29,6 +31,7 @@ child skills in the correct order → summarize + smoke test.
 | --- | --- |
 | `ugt-nextjs-database-setup` | SQL Server via Prisma + naming conventions |
 | `ugt-nextjs-quality-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
+| `ugt-nextjs-design-setup` | Design agreement (`docs/DESIGN.md`) + shadcn tokens/fonts/shell + org UI kit |
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
@@ -55,7 +58,7 @@ Ask all of this in a single message (use AskUserQuestion if available):
 
 **Module selection:**
 
-1. What to install? Database / Quality (test+lint) / Auth / CI (multi-select — default: all four)
+1. What to install? Database / Quality (test+lint) / Design / Auth / CI (multi-select — default: all five)
 2. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
 
 **Shared identity (used by every module — ask once, don't let child skills re-ask):**
@@ -69,16 +72,20 @@ Ask all of this in a single message (use AskUserQuestion if available):
 **Module-specific questions** — **open the Interview section in the SKILL.md of
 every selected child skill and fold its questions into this same batch**
 (example topics, not the full list: DB: server, database name, existing or new,
-stored procedures needed · Auth: Keycloak client exists yet, AD details, first
-admin · CI: Sentry?, deploy target).
+stored procedures needed · Design: prototype/brand to match?, primary color,
+shell sidebar/topbar, dark mode, ภาษา UI · Auth: Keycloak client exists yet,
+AD details, first admin · CI: Sentry?, deploy target).
 
 ### 3. Install in order (never reorder)
 
 ```
-Database → Quality → Auth → CI
+Database → Quality → Design → Auth → CI
 ```
 
 - **Auth must come after Database** — Better Auth stores user/session/account in Prisma.
+- **Design must come before Auth** — auth generates themed pages (login,
+  `/admin/*`); running design later means re-theming them (the retheme-twice
+  lesson from gov-boi-smart).
 - **Quality must come before CI** — the pipeline calls `lint`/`format:check`/
   `test:coverage` by exact name; without them it goes red at the third stage on
   the very first push.
@@ -86,7 +93,8 @@ Database → Quality → Auth → CI
   stage) and the build must pass first.
 - Skip unselected modules; the relative order of the rest is unchanged.
 - For each module: invoke the child skill (`ugt-nextjs-database-setup` /
-  `ugt-nextjs-quality-setup` / `ugt-nextjs-auth-setup` / `ugt-nextjs-cicd-setup`) and follow its
+  `ugt-nextjs-quality-setup` / `ugt-nextjs-design-setup` / `ugt-nextjs-auth-setup` /
+  `ugt-nextjs-cicd-setup`) and follow its
   SKILL.md — pass down the interview answers already collected, never re-ask
   the user.
 

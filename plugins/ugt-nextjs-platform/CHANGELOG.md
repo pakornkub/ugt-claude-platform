@@ -1,6 +1,35 @@
 # Changelog — ugt-nextjs-platform
 
-## 2.6.0 (2026-08-03)
+## 2.7.0 (2026-08-04)
+
+New skill: **`ugt-nextjs-design-setup`** — the design agreement installer,
+rendering ugt-core's new `contracts/design.md` (1.5.0) for Next.js. Extracted
+from `ugt-hrms` (the reference implementation) and `gov-boi-smart` (whose git
+history — two full rethemes — is the reason the skill runs *before* UI
+exists). Full evidence trail: `docs/design-skill-draft.md` in this repo.
+
+- Interview (defaults on every question, "ตามมาตรฐานทั้งหมด" fast path) →
+  generated `docs/DESIGN.md` with a dated decision log; existing projects get
+  scan → draft agreement → recorded Deviations (migrate/grandfather) instead
+  of a silent reformat.
+- Installs: shadcn `radix-mira` config, org tokens (indigo primary,
+  semantic-6 `--status-*` set, WCAG-AA-verified — `scripts/check-contrast.mjs`
+  re-verifies on every color change), Inter + Noto Sans Thai, app shell from
+  shadcn blocks, the org UI kit (DataTable, FormDialog, StatusBadge,
+  IconAction, ConfirmActionDialog, date pickers, combobox, detail-*,
+  query-state, merged `lib/format.ts`), and the `.claude/rules/
+  ugt-nextjs-design.md` harness rule so the agreement outlives the session.
+- "sync ข้อตกลง design" mode: after a plugin update, diff the project's
+  DESIGN.md against the contract and record มติ — never overwrite.
+- Plugin now declares the **shadcn MCP server** (`.mcp.json`) so component/
+  block installs browse the live registry.
+- `ugt-nextjs-setup` (parent): install order is now Database → Quality →
+  **Design** → Auth → CI — design must precede auth because auth generates
+  themed pages.
+- Known gap, deliberate: the shipped `ui/data-table.tsx` is the HRMS build;
+  the full-option merge (URL-state server mode + per-column popover filter +
+  dnd + localStorage prefs) is being built and tested inside ugt-hrms first
+  (มติ 2026-08-04) and will replace the asset when it lands.
 
 Real-deployment feedback: `ugt-nextjs-auth-setup` shipped the RBAC data model
 and the permission-check plumbing, but never the pages to actually manage it.

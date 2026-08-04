@@ -1,0 +1,66 @@
+{
+  "purpose": "Trigger-boundary set for ugt-nextjs-design-setup. S* queries must route to this skill; N* queries must NOT (expected target noted). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke/read first.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers + frontend-design distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "Baseline not yet run — run after the skill ships (same 3-judge protocol as ugt-mode's set)."
+  },
+  "queries": {
+    "S1": {
+      "prompt": "ทำข้อตกลง design ให้โปรเจคนี้หน่อย",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S2": {
+      "prompt": "ตั้ง design system ของบริษัทให้โปรเจคใหม่ตัวนี้",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S3": {
+      "prompt": "UI แต่ละหน้าสีกับฟ้อนต์ไม่เหมือนกันเลย ช่วยจัดให้เป็นมาตรฐานเดียวกันหน่อย",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S4": {
+      "prompt": "ทำ DESIGN.md ให้โปรเจคหน่อย เอาแบบมาตรฐานบริษัท",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S5": {
+      "prompt": "อยากได้ sidebar กับธีมตามมาตรฐานบริษัท โปรเจคนี้ยังไม่มีอะไรเลย",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S6": {
+      "prompt": "sync ข้อตกลง design หน่อย เพิ่ง update plugin มา",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "S7": {
+      "prompt": "กำหนดหน่อยว่าทั้งแอปจะใช้ font อะไร วันที่ format ไหน ปุ่มหน้าตายังไง จะได้ไม่มั่ว",
+      "expected": "ugt-nextjs-design-setup"
+    },
+    "N1": {
+      "prompt": "ออกแบบ database schema ให้ระบบลางาน",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N2": {
+      "prompt": "ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัท",
+      "expected": "ugt-nextjs-setup"
+    },
+    "N3": {
+      "prompt": "ใส่ระบบ login SSO ให้หน่อย",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N4": {
+      "prompt": "โค้ดไม่ผ่าน Quality Gate ช่วยแก้ violation หน่อย",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N5": {
+      "prompt": "เพิ่มกราฟสรุปยอดขายในหน้า dashboard",
+      "expected": "none (feature work — the design harness rule loads by paths, not this setup skill)"
+    },
+    "N6": {
+      "prompt": "หน้า landing ของ product ใหม่ อยากได้ดีไซน์เท่ ๆ ว้าว ๆ ช่วย design ให้หน่อย",
+      "expected": "frontend-design/impeccable (aesthetic exploration, not the org agreement installer) — near-miss trap: คำว่า design"
+    },
+    "N7": {
+      "prompt": "ปุ่ม submit กดแล้วไม่ทำงาน ช่วย debug หน่อย",
+      "expected": "diagnosing-bugs / systematic-debugging"
+    }
+  }
+}

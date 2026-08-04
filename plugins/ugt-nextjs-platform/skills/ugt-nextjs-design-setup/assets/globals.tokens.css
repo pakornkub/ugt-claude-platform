@@ -1,0 +1,201 @@
+/* ugt-nextjs-design-setup — org token set (source: ugt-hrms, WCAG-AA verified)
+   Merge into app/globals.css: replace the @theme/:root/.dark token blocks,
+   keep any project-specific @layer content.
+   Placeholders — substitute from the interview, then run check-contrast.mjs:
+     {{PRIMARY}}       default: oklch(0.488 0.243 264.4)   (org indigo, light)
+     {{PRIMARY_DARK}}  default: oklch(0.55 0.21 264.4)     (must be LIGHTER than light-mode primary)
+   Rule of the palette: neutrals stay hue ~258 chroma 0.004–0.02 — never add
+   a chroma-0 gray. Editing ANY color = re-run check-contrast.mjs. */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), var(--font-noto-sans-thai), sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-status-amber: var(--status-amber);
+  --color-status-amber-foreground: var(--status-amber-foreground);
+  --color-status-emerald: var(--status-emerald);
+  --color-status-emerald-foreground: var(--status-emerald-foreground);
+  --color-status-red: var(--status-red);
+  --color-status-red-foreground: var(--status-red-foreground);
+  --color-status-coral: var(--status-coral);
+  --color-status-coral-foreground: var(--status-coral-foreground);
+  --color-status-sky: var(--status-sky);
+  --color-status-sky-foreground: var(--status-sky-foreground);
+  --color-status-gray: var(--status-gray);
+  --color-status-gray-foreground: var(--status-gray-foreground);
+  /* Radius tiers (DESIGN.md §1): control 6px · card 12px · overlay 14px —
+     never override per callsite */
+  --radius-sm: 0.25rem; /* 4px — chip, kbd */
+  --radius-md: 0.375rem; /* 6px — control: input / select / button */
+  --radius-lg: var(--radius); /* 12px — card */
+  --radius-xl: 0.875rem; /* 14px — dialog / floating overlay */
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
+}
+
+:root {
+  --background: oklch(0.977 0.004 258);
+  --foreground: oklch(0.16 0.01 258);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0.01 258);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0.01 258);
+  --primary: {{PRIMARY}};
+  --primary-foreground: oklch(0.985 0.008 255);
+  --secondary: oklch(0.955 0.006 258);
+  --secondary-foreground: oklch(0.23 0.012 258);
+  --muted: oklch(0.955 0.006 258);
+  --muted-foreground: oklch(0.49 0.018 258);
+  --accent: oklch(0.94 0.01 258);
+  --accent-foreground: oklch(0.2 0.012 258);
+  --destructive: oklch(0.52 0.22 27.3);
+  --border: oklch(0.905 0.008 258);
+  --input: oklch(0.905 0.008 258);
+  --ring: {{PRIMARY}};
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.965 0.006 258);
+  --sidebar-foreground: oklch(0.16 0.01 258);
+  --sidebar-primary: {{PRIMARY}};
+  --sidebar-primary-foreground: oklch(0.985 0.008 255);
+  --sidebar-accent: oklch(0.94 0.01 258);
+  --sidebar-accent-foreground: oklch(0.2 0.012 258);
+  --sidebar-border: oklch(0.905 0.008 258);
+  --sidebar-ring: {{PRIMARY}};
+  --status-amber: oklch(0.666 0.179 58.3);
+  --status-amber-foreground: oklch(0.473 0.137 46.2);
+  --status-emerald: oklch(0.596 0.145 163.2);
+  --status-emerald-foreground: oklch(0.432 0.095 166.9);
+  --status-red: oklch(0.577 0.245 27.3);
+  --status-red-foreground: oklch(0.444 0.177 26.9);
+  --status-coral: oklch(0.68 0.18 35);
+  --status-coral-foreground: oklch(0.5 0.15 33);
+  --status-sky: oklch(0.588 0.158 242);
+  --status-sky-foreground: oklch(0.443 0.11 240.8);
+  --status-gray: oklch(0.554 0.041 257.4);
+  --status-gray-foreground: oklch(0.372 0.044 257.3);
+}
+
+.dark {
+  --background: oklch(0.185 0.012 258);
+  --foreground: oklch(0.975 0.005 258);
+  --card: oklch(0.26 0.015 258);
+  --card-foreground: oklch(0.975 0.005 258);
+  --popover: oklch(0.32 0.016 258);
+  --popover-foreground: oklch(0.975 0.005 258);
+  --primary: {{PRIMARY_DARK}};
+  --primary-foreground: oklch(0.985 0.008 255);
+  --secondary: oklch(0.31 0.015 258);
+  --secondary-foreground: oklch(0.975 0.005 258);
+  --muted: oklch(0.3 0.015 258);
+  --muted-foreground: oklch(0.74 0.02 258);
+  --accent: oklch(0.33 0.018 258);
+  --accent-foreground: oklch(0.975 0.005 258);
+  --destructive: oklch(0.704 0.191 22.2);
+  /* dark border ≥ 16% white or it vanishes on real monitors (contract rule) */
+  --border: oklch(1 0 0 / 22%);
+  --input: oklch(1 0 0 / 28%);
+  --ring: oklch(0.62 0.17 264.4);
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --sidebar: oklch(0.215 0.013 258);
+  --sidebar-foreground: oklch(0.975 0.005 258);
+  --sidebar-primary: {{PRIMARY_DARK}};
+  --sidebar-primary-foreground: oklch(0.985 0.008 255);
+  --sidebar-accent: oklch(0.3 0.015 258);
+  --sidebar-accent-foreground: oklch(0.975 0.005 258);
+  --sidebar-border: oklch(1 0 0 / 22%);
+  --sidebar-ring: oklch(0.62 0.17 264.4);
+  --status-amber: oklch(0.769 0.188 70.1);
+  --status-amber-foreground: oklch(0.879 0.169 91.6);
+  --status-emerald: oklch(0.696 0.17 162.5);
+  --status-emerald-foreground: oklch(0.845 0.143 165);
+  --status-red: oklch(0.704 0.191 22.2);
+  --status-red-foreground: oklch(0.808 0.114 19.6);
+  --status-coral: oklch(0.74 0.16 35);
+  --status-coral-foreground: oklch(0.84 0.11 35);
+  --status-sky: oklch(0.685 0.169 237.3);
+  --status-sky-foreground: oklch(0.828 0.111 230.3);
+  --status-gray: oklch(0.704 0.04 256.8);
+  --status-gray-foreground: oklch(0.869 0.022 252.9);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    /* base 16px — never overridden; density comes from radix-mira (h-7 controls, text-xs tables) */
+  }
+}
+
+/* Sonner rich-colors toast overrides — align toasts with the token system.
+   Light mode only; dark inherits Sonner defaults deliberately. */
+[data-sonner-toast][data-rich-colors='true'][data-type='success'] {
+  --success-bg: oklch(0.96 0.05 145);
+  --success-text: oklch(0.3 0.12 145);
+  --success-border: oklch(0.8 0.14 145);
+}
+[data-sonner-toast][data-rich-colors='true'][data-type='error'] {
+  --error-bg: oklch(0.97 0.03 27);
+  --error-text: oklch(0.38 0.18 27);
+  --error-border: oklch(0.8 0.15 27);
+}
+[data-sonner-toast][data-rich-colors='true'][data-type='warning'] {
+  --warning-bg: oklch(0.97 0.04 85);
+  --warning-text: oklch(0.4 0.12 85);
+  --warning-border: oklch(0.8 0.14 85);
+}
+[data-sonner-toast][data-rich-colors='true'][data-type='info'] {
+  --info-bg: oklch(0.96 0.04 240);
+  --info-text: oklch(0.36 0.1 240);
+  --info-border: oklch(0.74 0.12 240);
+}
