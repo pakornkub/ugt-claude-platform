@@ -248,6 +248,16 @@
   }
 
   /* ============ ugt-mode preset switcher ============ */
+  /* subsection ภายใน section ใหญ่ — เว้นให้หายใจ + เส้นคั่นบอกว่าเริ่มเรื่องใหม่ */
+  .subsec{margin-top:64px;padding-top:40px;border-top:1px solid var(--line)}
+  .subsec .sub-kicker{
+    display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.05em;
+    color:var(--accent-text);background:var(--accent-soft);
+    padding:4px 12px;border-radius:999px;margin-bottom:14px;
+  }
+  .subsec h3.sub-title{font-size:clamp(1.15rem,2.2vw,1.4rem);margin-bottom:10px}
+  .subsec p.sub-lead{color:var(--ink-soft);max-width:720px;margin-bottom:28px}
+  .subsec .grid{margin-top:0}
   .mode-head{margin-top:34px}
   .mode-chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 14px}
   .mode-chip{
@@ -441,8 +451,11 @@
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
     </div>
-    <h3 class="mode-head reveal">ของแถม: plugin official ที่พ่วงมาให้อัตโนมัติ</h3>
-    <p class="reveal">bundle เดียวกันติดตั้ง plugin จากทีม Anthropic/ชุมชนที่องค์กรคัดแล้วมาให้ด้วย — ทำงานร่วมกับตัวช่วย ugt โดยอัตโนมัติ:</p>
+    <div class="subsec">
+    <span class="sub-kicker reveal">พ่วงมากับ bundle</span>
+    <h3 class="sub-title reveal">ของแถม: plugin official ที่ติดตั้งมาให้อัตโนมัติ</h3>
+    <p class="sub-lead reveal">ติด <strong>ugt-nextjs-standard</strong> ตัวเดียว จะได้ plugin จากทีม Anthropic/ชุมชน
+      ที่องค์กรคัดไว้แล้วอีก 3 ตัว — ทำงานร่วมกับตัวช่วย ugt เองโดยไม่ต้องตั้งค่าอะไรเพิ่ม</p>
     <div class="grid cols-3">
       <article class="card reveal">
         <h3>superpowers</h3>
@@ -459,6 +472,7 @@
         <p>สร้าง "ตัวช่วย" เฉพาะของโปรเจคคุณเองได้ ด้วยมาตรฐานเดียวกับชุดนี้ —
         พร้อมระบบทดสอบว่าตัวช่วยทำงานจริง</p>
       </article>
+    </div>
     </div>
     <p class="foot-note reveal">
       รุ่นจริงล่าสุดดูจาก git tags (รูปแบบ <span class="inline-code">&lt;plugin&gt;--v&lt;version&gt;</span>) ·
@@ -605,9 +619,12 @@
         </tbody>
       </table>
     </div>
-    <h3 class="mode-head reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-mode</span></h3>
-    <p class="reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
-      ใช้กับ<strong>งานที่ส่งไปตัวช่วยย่อยเท่านั้น</strong> — model หลักของ session ยังเปลี่ยนด้วย <span class="inline-code">/model</span> ตามปกติ</p>
+    <div class="subsec">
+    <span class="sub-kicker reveal">ปรับได้ตามความสำคัญของงาน</span>
+    <h3 class="sub-title reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-mode</span></h3>
+    <p class="sub-lead reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
+      ใช้กับ<strong>งานที่ส่งไปตัวช่วยย่อยเท่านั้น</strong> — model หลักของ session ยังเปลี่ยนด้วย <span class="inline-code">/model</span> ตามปกติ
+      · กดปุ่มด้านล่างเพื่อเทียบแต่ละโหมด</p>
     <div class="mode-chips reveal" role="tablist" aria-label="เลือก preset">
       <button class="mode-chip" data-col="1" role="tab">easy</button>
       <button class="mode-chip active" data-col="2" role="tab" aria-selected="true">default</button>
@@ -657,6 +674,7 @@
         highlight(2);
       })();
     </script>
+    </div>
   </div>
 </section>
 
