@@ -136,7 +136,8 @@
   /* dark border ≥ 16% white or it vanishes on real monitors (contract rule) */
   --border: oklch(1 0 0 / 22%);
   --input: oklch(1 0 0 / 28%);
-  --ring: oklch(0.62 0.17 264.4);
+  /* ring ตาม primary เสมอ — ห้าม hardcode สี (บทเรียน eval: brand เขียวแต่ ring indigo) */
+  --ring: {{PRIMARY_DARK}};
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -149,7 +150,7 @@
   --sidebar-accent: oklch(0.3 0.015 258);
   --sidebar-accent-foreground: oklch(0.975 0.005 258);
   --sidebar-border: oklch(1 0 0 / 22%);
-  --sidebar-ring: oklch(0.62 0.17 264.4);
+  --sidebar-ring: {{PRIMARY_DARK}};
   --status-amber: oklch(0.769 0.188 70.1);
   --status-amber-foreground: oklch(0.879 0.169 91.6);
   --status-emerald: oklch(0.696 0.17 162.5);

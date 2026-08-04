@@ -71,7 +71,7 @@
   เท่ากัน ไม่ bump บนมือถือ
 - เลือก control: ≤5 = RadioGroup · 6–15 = Select · >15/ค้นหา = Combobox ·
   วันที่ = `ui/date-picker` เสมอ (ยกเว้น filter ปี/เดือน = Select)
-- Form: label บนช่อง · required = `*` แดง · error ใต้ช่องผ่าน `ui/form`
+- Form: label บนช่อง · required = `*` แดง · error ใต้ช่องผ่าน `ui/field`
   (zod + react-hook-form) · validate ตอน submit แล้ว re-validate ต่อ field
 - Dialog ladder: ฟอร์ม ≤6 ช่อง = `FormDialog` (compound + height
   `fluid`/`auto`/`fill`) · ยาว = หน้าแยก · panel ค้าง = `Sheet` ·
@@ -81,7 +81,8 @@
   **ปุ่มเดียว**ต่อ dialog · ห้ามซ้อน dialog (ยกเว้น AlertDialog ยืนยัน 1 ชั้น)
   · ฟอร์ม dirty ปิดต้องถามก่อน
 - Variant เพิ่มที่อนุญาต: Button `success`, `soft-primary`,
-  `soft-destructive`, `soft-success` — เพิ่มอื่นต้องเป็นมติส่วน 10
+  `soft-destructive`, `soft-success`, `field` (trigger ของ
+  datepicker/combobox — ผิวเหมือน Input) — เพิ่มอื่นต้องเป็นมติส่วน 10
 - Row actions: ≤3 = `IconAction` · >3 = `DropdownMenu` + `MoreHorizontal`
 - **Icon mapping**: เพิ่ม `Plus` · แก้ไข `Pencil` · ลบ `Trash2` · กู้คืน
   `RotateCcw` · ดู `Eye` · Import `Upload` · Export `Download` · ค้นหา
@@ -121,7 +122,7 @@
   data state ผ่าน `ui/query-state` — ไม่เขียน if-loading เอง
 - Empty: `ui/empty` ทุกกรณี (ตารางว่าง/ไม่มีสิทธิ์/404) — icon + ข้อความ +
   CTA ถ้ามีทางไปต่อ
-- Error ระดับหน้า: banner บนสุดของการ์ด · ระดับ field: ใต้ช่องผ่าน `ui/form`
+- Error ระดับหน้า: banner บนสุดของการ์ด · ระดับ field: ใต้ช่องผ่าน `ui/field`
 
 ## 7. Motion
 

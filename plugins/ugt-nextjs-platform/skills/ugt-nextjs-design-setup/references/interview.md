@@ -26,7 +26,17 @@ toast semantics · motion rules · icon library · accessibility floor.
 from the prototype/brand FIRST (before any UI work — the retheme lesson),
 map them onto the same token names, run check-contrast, and record the
 source in DESIGN.md §1. ข้อ 2 with a brand color → substitute `{{PRIMARY}}`
-(+ a lighter dark-mode variant) and run check-contrast.
+(+ a lighter dark-mode variant as `{{PRIMARY_DARK}}` — it also feeds the
+dark `--ring`/`--sidebar-ring`) and run check-contrast.
+
+**Brand-color AA trap (predictable — handle, don't discover):** for a
+mid-lightness brand color (many greens/oranges), "dark primary must be
+lighter than light" + the template's near-white `--primary-foreground`
+cannot BOTH pass AA — a lighter fill pushes white text below 4.5:1. The
+sanctioned fix: flip the **dark** `--primary-foreground` to a dark tone of
+the brand hue (e.g. `oklch(0.16 0.035 <hue>)`), keep light mode as-is,
+record it as a มติ. check-contrast.mjs is the arbiter — never ship a
+failing pair, never silently darken the dark primary below the light one.
 
 ## ชุด 2 — Layout
 

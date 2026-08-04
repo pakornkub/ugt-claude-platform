@@ -1,5 +1,42 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.8.1 (2026-08-04)
+
+`ugt-nextjs-design-setup` hardening from the first behavioral eval run
+(2 evals × with/without-skill on real scaffolds; with-skill passed 14/14
+assertions + verify + contrast + build in both — but only by improvising
+past 12 frictions, all now fixed; baselines scored 2/14, confirming the
+skill carries org knowledge, not general competence):
+
+- SKILL.md: the real init invocation (`npx shadcn@latest init --preset mira
+  -b radix` — "style radix-mira" is not a CLI flag) + force `iconLibrary`
+  to lucide and strip `@hugeicons/*` (the mira preset's default) + Windows
+  MAX_PATH/`subst` hazards note.
+- **`form` → `field`**: radix-mira's `form.json` is an empty stub — install
+  list, template, rules, and conventions now all say `ui/field`
+  (still zod + react-hook-form).
+- npm deps pinned (`@tanstack/react-table@^8` — v9 renames the kit's API —
+  `date-fns@^4`) + `react-hook-form zod lucide-react` added explicitly.
+- `button-variants.md` now ships the **`field` variant** (kit date-picker
+  needs it; today's registry button dropped it — was a build breaker) and
+  the template sanctions it.
+- `globals.tokens.css`: dark `--ring`/`--sidebar-ring` now derive from
+  `{{PRIMARY_DARK}}` instead of hardcoded indigo.
+- interview.md documents the **brand-color AA trap** (mid-lightness brand +
+  "dark primary lighter" + near-white foreground can't all pass AA) with the
+  sanctioned fix: flip dark `--primary-foreground` to a dark brand tone, as
+  a มติ.
+- Exact `app/layout.tsx` next/font snippet now in SKILL.md (the old text
+  pointed at a template section that had no snippet) + **root
+  `TooltipProvider` requirement** (radix-mira Tooltip doesn't self-wrap;
+  sidebar tooltips crash prerender without it).
+- New asset `components/theme-provider.tsx` (next-themes wrapper — was
+  improvised in both eval runs).
+- `lib/format.ts`: locale now defaults to `'th'` (ไทยล้วน projects no longer
+  pass it on every call).
+- conventions.md: added ถูก/ผิด code-example pairs for the five most common
+  violations (StatusBadge, DataTable, formatter, size default, IconAction).
+
 ## 2.8.0 (2026-08-04)
 
 `ugt-nextjs-design-setup`: the **full-option DataTable** lands, closing

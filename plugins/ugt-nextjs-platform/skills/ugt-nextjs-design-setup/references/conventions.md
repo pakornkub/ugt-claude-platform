@@ -4,6 +4,35 @@ DESIGN.md carries the agreement; this file carries the how + the edge cases.
 Provenance: HRMS = `ugt-hrms` (Radix, radix-mira) · BOI = `gov-boi-smart`
 (ported from Base UI).
 
+## ถูก/ผิด — the five violations that cover 90% of review comments
+
+```tsx
+// ❌ สีสถานะ inline — สีอย่างเดียว ไม่มี icon, ค่าหลุด token
+<span className="rounded bg-green-100 px-2 text-green-700">อนุมัติแล้ว</span>
+// ✅ StatusBadge: tone + icon บังคับ, สีมาจาก --status-* ที่ผ่าน WCAG แล้ว
+<StatusBadge tone="success" icon={CheckCircle2}>อนุมัติแล้ว</StatusBadge>
+
+// ❌ ตาราง hand-rolled — sort/filter/mobile/empty ต้องเขียนเองหมดและไม่เหมือนใคร
+<table><thead>…</thead><tbody>{rows.map(…)}</tbody></table>
+// ✅ DataTable กลาง — ได้ครบชุดและหน้าตาเดียวกันทุกหน้า
+<DataTable id="projects" columns={columns} data={rows} />
+
+// ❌ format วันที่ inline — server เป็น UTC วันเลื่อน, พ.ศ./ค.ศ. สุ่มตาม locale
+{new Date(row.startDate).toLocaleDateString('th-TH')}
+// ✅ formatter กลาง — DD/MM/YYYY ค.ศ. เสมอ, กัน timezone เลื่อนวันแล้ว
+{formatDate(row.startDate)}
+
+// ❌ ปรับขนาด/สีปุ่มเอง — density หลุดมาตรฐาน mira
+<Button className="h-9 bg-blue-600 text-base">บันทึก</Button>
+// ✅ variant/size ตามระบบ — ปุ่มหลักคือ default อยู่แล้ว
+<Button type="submit">บันทึก</Button>
+
+// ❌ ปุ่ม icon ล้วนเปล่า ๆ — screen reader อ่านไม่ออก, ไม่มี tooltip
+<Button size="icon" onClick={onEdit}><Pencil /></Button>
+// ✅ IconAction — label บังคับ กลายเป็นทั้ง aria-label และ tooltip
+<IconAction label="แก้ไข" variant="soft-primary" onClick={onEdit}><Pencil /></IconAction>
+```
+
 ## Control selection ladder
 
 | ตัวเลือก | ใช้ |
@@ -91,7 +120,7 @@ table→card · row selection + bulk bar · built-in Empty state.
 - Empty: `ui/empty` everywhere (empty table / no permission / 404) — icon +
   message + CTA when actionable.
 - Page-level error: banner at the top of the content card · field-level:
-  under the field via `ui/form` (zod + react-hook-form; label above field,
+  under the field via `ui/field` (zod + react-hook-form; label above field,
   required = red `*`, validate on submit then re-validate per field).
 
 ## Tabs · Tooltip · Chart · Rich text
@@ -118,6 +147,7 @@ table→card · row selection + bulk bar · built-in Empty state.
 | `ui/page-shell.tsx` · `ui/detail-dialog-shell.tsx` · `ui/detail-row.tsx` · `ui/detail-section.tsx` | HRMS | |
 | `ui/query-state.tsx` · `ui/truncated-text.tsx` | HRMS | query-state needs `ui/callout` |
 | `ui/callout.tsx` | HRMS | page-level banner; tones reuse `TONE_STYLES` |
+| `components/theme-provider.tsx` | standard next-themes wrapper | ship with theme-toggle when dark mode = มี; wraps app in layout.tsx |
 | `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |
 | `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |

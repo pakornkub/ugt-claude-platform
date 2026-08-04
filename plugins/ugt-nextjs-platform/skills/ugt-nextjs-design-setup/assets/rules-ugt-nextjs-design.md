@@ -26,7 +26,7 @@ beautification skill. The short version that catches 90% of violations:
   labels/counts → `Badge`, colorless.
 - Icon-only buttons → `IconAction` (label mandatory). Destructive actions →
   `ConfirmActionDialog`, text button.
-- Forms → `ui/form` (zod + react-hook-form), short forms in `FormDialog`,
+- Forms → `ui/field` (zod + react-hook-form), short forms in `FormDialog`,
   long forms on a page. One primary button per dialog; dirty forms confirm
   before closing.
 - New colors or token edits → run the design skill's `check-contrast.mjs`

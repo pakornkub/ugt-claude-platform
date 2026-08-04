@@ -50,7 +50,7 @@ function toWallClockDate(value: string | Date): Date | null {
 }
 
 /** วันที่ wall-clock → `DD/MM/YYYY` (ค.ศ. เสมอ). คืน '' เมื่อว่าง/ไม่ valid. */
-export function formatDate(value: string | Date | null | undefined, locale: AppLocale): string {
+export function formatDate(value: string | Date | null | undefined, locale: AppLocale = 'th'): string {
   if (!value) return '';
   const d = toWallClockDate(value);
   if (!d) return '';
@@ -58,7 +58,7 @@ export function formatDate(value: string | Date | null | undefined, locale: AppL
 }
 
 /** instant → `DD/MM/YYYY HH:MM` เวลาท้องถิ่น (ค.ศ. เสมอ). คืน '' เมื่อว่าง/ไม่ valid. */
-export function formatDateTime(value: string | Date | null | undefined, locale: AppLocale): string {
+export function formatDateTime(value: string | Date | null | undefined, locale: AppLocale = 'th'): string {
   if (!value) return '';
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
@@ -137,7 +137,7 @@ const MONTH_NAMES_CACHE = new Map<AppLocale, readonly string[]>();
  * แหล่งเดียวของชื่อเดือนทั้งแอป: เลิก hardcode array ไทย ซึ่งทำให้ EN เห็นเดือนไทย.
  * ใช้ปี 2024 เป็นวันอ้างอิงเฉยๆ — ผลลัพธ์ไม่ขึ้นกับปี.
  */
-export function getMonthNames(locale: AppLocale): readonly string[] {
+export function getMonthNames(locale: AppLocale = 'th'): readonly string[] {
   let names = MONTH_NAMES_CACHE.get(locale);
   if (!names) {
     const formatter = new Intl.DateTimeFormat(INTL_LOCALES[locale], {

@@ -101,31 +101,59 @@ each with a recorded decision — never silently reformat the project.
 1. `docs/DESIGN.md` from the template — fill every `{{...}}`, including the
    ugt-core contract version in the header; seed the decision log (ส่วน 10)
    with today's มติ. Create `docs/design-questions.md` (empty skeleton).
-2. `npx shadcn@latest init` if no shadcn yet (style **radix-mira**, base
-   color neutral) · merge `assets/globals.tokens.css` into `app/globals.css`
-   (replace the `:root`/`.dark` token blocks; keep any project-specific
-   `@layer` content) · substitute `{{PRIMARY}}` etc. from interview answers.
-3. Fonts in `app/layout.tsx`: Inter + Noto Sans Thai + Geist Mono via
-   `next/font`, wired to `--font-sans` / `--font-mono` (see the template's
-   Typography section for the exact snippet).
+2. shadcn init if none yet — the working invocation (eval-verified; there is
+   NO `--style radix-mira` flag):
+   `npx shadcn@latest init --preset mira -b radix` → produces
+   `"style": "radix-mira"`. **Then fix two things the preset gets wrong**:
+   set `components.json` `iconLibrary` to `"lucide"` (mira defaults to
+   `hugeicons`) and uninstall any `@hugeicons/*` deps it added.
+   Windows note: very deep project paths break the CLI's ESM loader with a
+   misleading `ERR_PACKAGE_IMPORT_NOT_DEFINED` (chalk) — run from a short
+   path; never from a `subst` drive (realpath guard misfires).
+   Merge `assets/globals.tokens.css` into `app/globals.css` (replace the
+   `:root`/`.dark` token blocks; keep any project-specific `@layer` content)
+   · substitute `{{PRIMARY}}`/`{{PRIMARY_DARK}}` from interview answers
+   (dark ring tokens derive from `{{PRIMARY_DARK}}` automatically).
+3. Fonts + providers in `app/layout.tsx` — the exact wiring:
+
+   ```tsx
+   import { Geist_Mono, Inter, Noto_Sans_Thai } from 'next/font/google';
+   const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+   const notoSansThai = Noto_Sans_Thai({ subsets: ['thai'], variable: '--font-noto-sans-thai' });
+   const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
+   // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
+   ```
+
+   Body wraps: `ThemeProvider` (from `assets/components/theme-provider.tsx`,
+   when dark mode = มี) → **`TooltipProvider` (required — radix-mira's
+   Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
+   without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 4. Install the base component set — prefer the **shadcn MCP** (`ToolSearch`
    for `shadcn` tools; the plugin declares the server) to browse/add, fall
    back to `npx shadcn@latest add`:
-   `button input label select checkbox radio-group form dialog alert-dialog
+   `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea
    avatar input-group`
-   Then the kit's npm deps: `npm i @tanstack/react-table date-fns` ·
-   `next-themes` when dark mode = มี · `@base-ui/react` (combobox primitive
-   in the radix-mira registry uses it) · `next-intl` only when ภาษา = th+en.
+   (**`field`, not `form`** — radix-mira's `form.json` is an empty stub; the
+   registry moved form composition to the `field` primitive. It still pairs
+   with zod + react-hook-form.)
+   Then the kit's npm deps — **pin majors, the kit is version-coupled**:
+   `npm i @tanstack/react-table@^8 date-fns@^4 react-hook-form zod
+   lucide-react` (v9 of tanstack renames the v8 API the kit uses; `add`
+   doesn't always install lucide-react itself) · `next-themes` when dark
+   mode = มี · `@base-ui/react` (combobox primitive in the radix-mira
+   registry uses it) · `next-intl` only when ภาษา = th+en.
 5. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
-   th+en only; `theme-toggle`/`language-switcher` from `assets/components/`
-   per the interview answers — list + provenance in
-   `references/conventions.md` §Kit). Apply `assets/ui/button-variants.md`
-   to the installed `components/ui/button.tsx` (the sanctioned `success` /
-   `soft-*` variants). Never overwrite an existing same-name file silently —
-   diff and ask.
+   th+en only; `theme-provider`/`theme-toggle` (dark mode = มี) and
+   `language-switcher` (th+en) from `assets/components/` — list + provenance
+   in `references/conventions.md` §Kit). Apply `assets/ui/button-variants.md`
+   to the installed `components/ui/button.tsx` — the sanctioned `success` /
+   `soft-*` variants **and the `field` variant (mandatory: the kit's
+   date-picker uses it and today's registry button doesn't ship it — build
+   breaks without it)**. Never overwrite an existing same-name file
+   silently — diff and ask.
 6. App shell per the interview answer — build from the shadcn block named in
    `references/layout-shells.md`, never hand-composed.
 7. Run `node <skill-dir>/scripts/check-contrast.mjs` (cwd = project root) —

@@ -38,3 +38,14 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
   `focus-visible:ring-status-emerald/20 dark:focus-visible:ring-status-emerald/40`
 - variant `soft-*` ออกแบบมาใช้คู่กับ `size="icon"` ใน `<IconAction>` (ดู `ui/icon-action.tsx`)
   — พื้นโปร่งใส ตัวอักษร/ไอคอนมีสี แล้วค่อยขึ้นพื้นจาง (10%) ตอน hover
+
+## variant `field` (จำเป็น — `ui/date-picker` ใช้)
+
+trigger ของ popover ที่ทำหน้าที่แทนช่องกรอก (datepicker/combobox) — ผิวต้องเหมือน
+`Input`/`SelectTrigger` ไม่ใช่ปุ่ม (ที่มา: ugt-hrms `components/ui/button.tsx`;
+registry radix-mira ปัจจุบันไม่มี variant นี้แล้ว จึงต้องเพิ่มเองเสมอ):
+
+```ts
+field:
+  'border-input bg-input/20 hover:bg-input/50 hover:text-foreground aria-expanded:border-ring aria-expanded:ring-2 aria-expanded:ring-ring/30 disabled:border-transparent disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 dark:bg-input/30 dark:hover:bg-input/50 dark:disabled:bg-muted',
+```
