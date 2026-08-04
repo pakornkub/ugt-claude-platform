@@ -1,6 +1,31 @@
 # Changelog — ugt-core
 
-## 1.4.0 (2026-08-03)
+## 1.5.0 (2026-08-04)
+
+New contract: **`contracts/design.md`** — the org UI design standard,
+stack-agnostic, extracted from two production projects (`ugt-hrms`,
+`gov-boi-smart`; evidence trail in the marketplace repo's
+`docs/design-skill-draft.md`):
+
+- **Iron rules (7)** — component-library-first escalation order, one icon
+  set (never emoji), library-default sizes, central table component with the
+  server-mode rule (server-paginated data must sort/filter server-side),
+  central formatter only, accessibility floor (dual-cue status, labeled icon
+  buttons, WCAG AA re-verified on change), and `DESIGN.md` as the design
+  source of truth.
+- **Org defaults** — primary indigo `oklch(0.488 0.243 264.4)`, cool-tint
+  neutrals (hue ~258), the semantic-6 status token set, Inter + Noto Sans
+  Thai, Thai typography rules (no uppercase eyebrows), `DD/MM/YYYY` Gregorian
+  on screen / ISO in exported files, wall-clock-vs-instant timezone contract,
+  shell/menu/mobile layout rules, the four motion rules, toast semantics.
+- **Governance** — dated decision log (มติ) in every generated `DESIGN.md`,
+  pending-decisions doc pattern, scan → draft → deviations flow for existing
+  projects.
+
+Rendered for Next.js by `ugt-nextjs-platform`'s new `ugt-nextjs-design-setup`
+(that skill is the primary restatement to keep in sync). Generated `DESIGN.md`
+files record the ugt-core version they were generated against, so the skill's
+"sync" mode can diff a project after this contract changes.
 
 `ugt-mode` gains the **`auto` preset** and Agent Teams coverage:
 
