@@ -51,6 +51,8 @@
 location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set_header Host $host; }
 ```
 
+`{{PORT_DEV}}` ด้านบนเป็นแค่ค่า default ที่เสนอไป (`3000`/`3001`) — ถ้า port จริงที่จัดสรรให้ต่างไป ใช้ค่าจริงแทน และแจ้งกลับตามหัวข้อ "ค่าที่ต้องส่งกลับ" ท้ายเอกสาร
+
 ---
 
 ## 2. SonarQube
@@ -102,6 +104,8 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 
 | ค่า | มาจากไหน | กรอกตรงนี้ |
 | --- | --- | --- |
+| **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `3000` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
+| **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `3001` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
 | `KEYCLOAK_ISSUER` | `https://<keycloak-host>/realms/<realm>` (ตรวจว่าเปิด `<issuer>/.well-known/openid-configuration` ได้) | |
 | `KEYCLOAK_CLIENT_SECRET` | Keycloak → client `{{PROJECT_NAME}}` → Credentials | **ส่งช่องทางปลอดภัย อย่ากรอกในไฟล์นี้** |
 | ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
@@ -113,6 +117,7 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 - [ ] redirect URI ตรงทุกตัวอักษรรวม path
 - [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
 - [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
+- [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `3000`/`3001`
 
 ---
 
