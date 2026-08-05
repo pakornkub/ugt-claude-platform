@@ -46,6 +46,7 @@ What lands in the project:
 | shadcn config (style `base-mira`, neutral, lucide) | `components.json` |
 | Org UI kit | `components/ui/*` + `lib/format.ts` — from `assets/ui/` and `assets/lib/` |
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
+| Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules-ugt-nextjs-design.md` |
 
 ## 2. Org standards (summary — full text in ugt-core `contracts/design.md`)
@@ -192,6 +193,11 @@ each with a recorded decision — never silently reformat the project.
    date-picker uses it and today's registry button doesn't ship it — build
    breaks without it)**. Never overwrite an existing same-name file
    silently — diff and ask.
+   Also copy `assets/brand/` → `public/brand/` (company logos as tintable
+   SVGs — `fill="currentColor"`, so CSS `color` sets the brand blue or
+   white-on-dark): `ube-logo-short.svg` for the shell header (sidebar/topbar),
+   `ube-logo-long.svg` (with tagline) for login/landing. Usage rule lands in
+   DESIGN.md §3.
 7. Run `node <skill-dir>/scripts/check-contrast.mjs` (cwd = project root) —
    every ✘ pair must be fixed before closing.
 8. Install the harness rule: copy `assets/rules-ugt-nextjs-design.md` →

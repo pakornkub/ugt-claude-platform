@@ -60,6 +60,9 @@
   งานหลัก→รายงาน→ตั้งค่า/admin · **ซ่อนตามสิทธิ์ ไม่ disable** (guard ฝั่ง
   server คือเส้นกั้นจริง)
 - User menu (avatar+ชื่อ+logout): sidebar = ล่างสุด · topbar = dropdown ขวาสุด
+- **Logo บริษัท** (`public/brand/` — SVG ย้อมสีผ่าน CSS `color`):
+  header ของ shell = `ube-logo-short.svg` · หน้า login/landing =
+  `ube-logo-long.svg` (มี tagline) — ห้าม embed logo เป็นรูปอื่น/สีเพี้ยน
 - Nav highlight: longest-prefix ด้วย `${href}/` · เมนูล้น = scroll แนวนอน
   ห้าม wrap
 - โครงทุกหน้า: page title + actions ขวาบน + เนื้อหาในการ์ด — pattern เดียว

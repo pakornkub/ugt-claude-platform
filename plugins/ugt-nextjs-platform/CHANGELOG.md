@@ -1,5 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
+## 2.9.3 (2026-08-05)
+
+`ugt-nextjs-design-setup`: **company logo assets** join the kit —
+`assets/brand/ube-logo-short.svg` (shell header) and `ube-logo-long.svg`
+(with tagline — login/landing), both converted to `fill="currentColor"` so
+CSS `color` tints them (brand blue, white-on-dark, any theme). The install
+step copies them to the project's `public/brand/`, and DESIGN.md §3 gains
+the usage rule (short = header, long = login/landing, ห้าม embed
+logo รูปอื่น/สีเพี้ยน). Also fixes a leftover `radix-mira` mention in
+conventions.md's kit inventory (missed in the 2.9.0 sweep).
+
 ## 2.9.2 (2026-08-05)
 
 **Admin handoff becomes a standard FILE, not a chat message.** The external
