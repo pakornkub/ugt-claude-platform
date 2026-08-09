@@ -43,9 +43,17 @@
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
   translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
 - **มุมโค้ง = ใช้ของ preset `base-mira` ทั้งชุด ไม่ตั้งทับ** (มติ 2026-08-09):
-  `--radius: 0.45rem` (7.2px) แล้ว shadcn คำนวณระดับที่เหลือจากตัวนี้ด้วยการคูณ
-  (`sm ×0.6` = 4.3px chip/kbd · `md ×0.8` = 5.8px control · `lg ×1` = 7.2px
-  การ์ด · `xl ×1.4` = 10.1px dialog/popover)
+  `--radius: 0.45rem` (7.2px) แล้ว shadcn คำนวณระดับที่เหลือจากตัวนี้ด้วยการคูณ:
+
+  | tier | px | ใช้กับอะไรจริง |
+  | --- | --- | --- |
+  | `sm` ×0.6 | 4.3 | **องค์ประกอบย่อยใน control** — ปุ่ม `size="xs"`/`icon-xs` · จุดที่รับ focus ring แต่ไม่ใช่ปุ่มเต็มตัว (ปุ่ม ✕ ของ chip, จุดจับลากคอลัมน์, ปุ่ม sort ในหัวตาราง) · tooltip · เมนูใน sidebar |
+  | `md` ×0.8 | 5.8 | **control หลัก** — input / select / button |
+  | `lg` ×1 | 7.2 | **การ์ด** |
+  | `xl` ×1.4 | 10.1 | **overlay** — dialog / popover / dropdown |
+
+  > **Badge / StatusBadge / chip ไม่ได้อยู่ในสเกลนี้** — ใช้ `rounded-full`
+  > (แคปซูล) เสมอ · อย่าสับสนกับ `sm` ที่บางเอกสารเคยเรียกผิดว่า "chip"
   - **ปรับความโค้งทั้งแอปได้ที่ `--radius` ตัวเดียว** — ทุกระดับขยับตามเอง ·
     การเปลี่ยนค่านี้เป็น**มติ** เพราะกระทบทุกหน้า
   - บทบาทที่ใช้จริงมี 4 ระดับ: chip → control → card → overlay ·
@@ -73,7 +81,18 @@
 - เมนู: icon+label เสมอ · จัดกลุ่มเมื่อเกิน ~7 · ลึกสุด 2 ชั้น · ลำดับ
   งานหลัก→รายงาน→ตั้งค่า/admin · **ซ่อนตามสิทธิ์ ไม่ disable** (guard ฝั่ง
   server คือเส้นกั้นจริง)
-- User menu (avatar+ชื่อ+logout): sidebar = ล่างสุด · topbar = dropdown ขวาสุด
+- **User menu = `NavUser` เสมอ** (มาจาก `ugt-nextjs-auth-setup`): sidebar =
+  ล่างสุด · topbar = dropdown ขวาสุด · ปุ่มแสดง avatar + ชื่อ + อีเมล +
+  `MoreVertical` · เมนูมี 2 รายการตายตัว — **บัญชีผู้ใช้** (เปิดการ์ดโปรไฟล์)
+  และ **ออกจากระบบ** (มี spinner ระหว่างรอ · SSO ใช้ backchannel logout)
+- **การ์ดโปรไฟล์** (เปิดจาก NavUser): banner ไล่สี → avatar ซ้อนขึ้นมา → ชื่อ →
+  `Badge` ชื่อ role → รายการข้อมูลแบบ label–ค่า · แถวมาตรฐานคือ **อีเมล** กับ
+  **วิธี Login ล่าสุด** (sso/ldap/local) · ข้อมูลเฉพาะโปรเจค (รหัสพนักงาน
+  ตำแหน่ง แผนก) ใส่ผ่าน prop `extraRows` · **read-only ห้ามแก้ไขในนี้**
+  > **มติ 2026-08-09 — ข้อยกเว้นที่บันทึกไว้**: การ์ดโปรไฟล์ใช้เส้นคั่นรายแถว
+  > (`divide-y`) ได้ ทั้งที่ §4 ห้าม detail dialog ทั่วไปทำ — เพราะเป็นรายการ
+  > สั้นชุดเดียว การแบ่ง section จะกลายเป็นหัวข้อที่ตั้งขึ้นมาลอย ๆ ·
+  > ข้อยกเว้นนี้ใช้ได้เฉพาะการ์ดโปรไฟล์ ที่อื่นยังใช้ `DetailDialogShell` ตามเดิม
 - **Logo บริษัท** (`public/brand/` — SVG ย้อมสีผ่าน CSS `color`):
   header ของ shell = `ube-logo-short.svg` · หน้า login/landing =
   `ube-logo-long.svg` (มี tagline) — ห้าม embed logo เป็นรูปอื่น/สีเพี้ยน
@@ -134,8 +153,23 @@
   `RotateCcw` · ดู `Eye` · Import `Upload` · Export `Download` · ค้นหา
   `Search` · กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2`
   · ปิด `X` — งานเดียวกันห้ามคนละไอคอน
-- **Badge**: `StatusBadge` = สถานะเท่านั้น · `Badge` ธรรมดา = label/จำนวน —
-  ห้ามสีสถานะ inline · mapping สถานะ→tone ประกาศที่เดียวต่อ domain
+- **Badge — มี component แค่ 2 ตัว `Badge` กับ `StatusBadge` (ซึ่งสร้างจาก
+  `Badge variant="outline"`) ส่วน "chip" คือวิธีใช้ Badge แบบหนึ่ง ไม่ใช่ของใหม่**:
+
+  | กรณี | ใช้ |
+  | --- | --- |
+  | สถานะ (รอ/อนุมัติ/ปฏิเสธ/ยกเลิก) | `StatusBadge` — tone + **ไอคอนบังคับ** |
+  | ป้ายกำกับ/ตัวระบุ (ชื่อ role, ประเภท, template) | `Badge variant="outline"` ข้อความล้วน **ห้ามสีสถานะ** |
+  | ตัวเลขนับ | `Badge` + `tabular-nums` |
+  | chip ตัวกรองที่กดปิดได้ | `Badge variant="secondary"` + ปุ่ม ✕ |
+  | ป้ายสีที่ต้องไม่มีไอคอน (เช่น IN/OUT ใน log ดิบ) | `Badge variant="outline"` + `TONE_STYLES` — ห้ามประกาศสีใหม่ |
+
+  mapping สถานะ→tone ประกาศที่เดียวต่อ domain · ทุกตัวเป็น `rounded-full`
+- **ตัวเลขนับท้ายเมนู sidebar** (มติ 2026-08-09): ใช้ได้เฉพาะเมนูที่มี
+  **งานรอผู้ใช้คนนั้นทำ** (คิวอนุมัติ ฯลฯ) ไม่ใช่จำนวนข้อมูลทั่วไป ·
+  `<Badge className="ml-auto h-5 min-w-5 rounded-full px-1 text-xs tabular-nums">` ·
+  **เป็น 0 ให้ซ่อน ไม่แสดงเลข 0** · เกิน 99 แสดง `99+` · ตัวเลขต้องมาจาก
+  query ที่ scope ตามสิทธิ์ผู้ใช้แล้ว ไม่ใช่ยอดรวมทั้งระบบ
 - Tabs: มุมมองย่อยในหน้าเดียว · tab หลักของหน้า = `?tab=` ใน URL · เกิน ~5
   = แตกหน้า
 - Tooltip: delay 0 · ห้ามซ่อนข้อมูลจำเป็นไว้ใน tooltip อย่างเดียว

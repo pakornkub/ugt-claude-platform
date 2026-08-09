@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.2.0 (2026-08-09)
+
+**Every app now ships the same identity block.** Ported from `ugt-hrms`
+`components/nav-user.tsx`, generalized — the HR-only parts (employee photo
+lookup, Thai full name, emp-code / position / cost-centre rows) are gone and
+come back through a single `extraRows` prop.
+
+- New asset `ugt-nextjs-auth-setup/assets/components/nav-user.tsx`: sidebar
+  footer button (avatar + name + email + `MoreVertical`) → dropdown with
+  exactly two items, **บัญชีผู้ใช้** and **ออกจากระบบ** (spinner while
+  pending; SSO routes to the backchannel logout, other methods to the plain
+  one) → a read-only profile card.
+- DESIGN.md §3 fixes the placement and both menu items, so "who am I / sign
+  out" sits in the same spot in every app; §3 also describes the profile card
+  (banner → avatar → name → role `Badge` → label–value rows, with **email**
+  and **last login method** as the two rows every app has).
+- **มติ 2026-08-09 — recorded exception**: the profile card may use per-row
+  dividers (`divide-y`), which §4 forbids for detail dialogs generally. A
+  profile is one short list; splitting it into sections would invent headings
+  that carry no meaning. The exception is scoped to this card only.
+
+**Badge, stated properly.** There are two components — `Badge` and
+`StatusBadge` (itself `Badge variant="outline"`) — and "chip" is a *usage*, not
+a third thing. DESIGN.md §4 now tables the five cases: status → StatusBadge ·
+label/identifier → `Badge outline` · count → `Badge` + `tabular-nums` ·
+removable filter chip → `Badge secondary` + ✕ · icon-free coloured label →
+`Badge outline` + `TONE_STYLES`. All five are `rounded-full`.
+
+**Sidebar count badges** are new to the agreement (มติ 2026-08-09): only for
+menus holding **work waiting on that user**, `h-5 min-w-5 rounded-full px-1
+text-xs tabular-nums`, **hidden at 0** (never a literal "0"), `99+` above 99,
+and the number must come from a query already scoped to the user's
+permissions — not a system-wide total.
+
+**Radius `sm` was mislabelled.** The token comment and DESIGN called it
+"chip 4px"; chips and badges are `rounded-full` and never touch it. Verified
+against the registry: `sm` is for sub-elements *inside* controls — `size="xs"`
+buttons, focus-ring targets that are not full buttons (a chip's ✕, the column
+drag handle, the header sort button), tooltips, and sidebar menu items.
+Corrected in `globals.tokens.css`, DESIGN.md §1 and the preview.
+
+`docs/design-preview.html` grows two specimens: the five badge cases, and
+NavUser + the profile card; the shell mock now shows count badges and the
+NavUser footer.
+
 ## 4.1.0 (2026-08-09)
 
 **Overflow — content must never disappear without a trace.** Reported from a

@@ -209,6 +209,16 @@
   .ui .bars{display:flex;align-items:flex-end;gap:8px;height:70px}
   .ui .bars i{flex:1;border-radius:var(--r-chip) var(--r-chip) 0 0;display:block}
   .fmt{font-family:var(--mono);font-size:12px}
+  .ui .countbadge{margin-left:auto;height:20px;min-width:20px;padding:0 4px;border-radius:999px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;
+    font-variant-numeric:tabular-nums;background:var(--primary);color:var(--primary-foreground)}
+  .ui .navuser{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--r-ctl)}
+  .ui .ava{width:30px;height:30px;border-radius:var(--r-ctl);display:inline-flex;align-items:center;
+    justify-content:center;font-size:12px;font-weight:500;background:var(--accent-c);flex:none}
+  .ui .tr{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ui .lbadge{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;
+    font-size:11px;font-weight:500;border:1px solid var(--border-c);color:var(--foreground)}
+  .ui .lbadge.sec{background:var(--secondary);border-color:transparent}
   /* label + เครื่องหมาย required ต้องอยู่บรรทัดเดียวกันเสมอ — ไม่ตกลงไปแถวใหม่ */
   .ui .fld{display:grid;gap:5px}
   .ui .lbl{display:flex;align-items:center;gap:4px;font-size:12.5px;line-height:1.4}
@@ -353,13 +363,15 @@
 
         <div class="cmp-title">มุมโค้ง — ใช้ของ preset base-mira ทั้งชุด ปรับได้ที่ <code>--radius</code> ตัวเดียว</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;align-items:center" class="muted">
-          <span style="border:1px solid var(--border-c);border-radius:var(--r-chip);padding:4px 10px">chip 4.3px</span>
+          <span style="border:1px solid var(--border-c);border-radius:var(--r-chip);padding:4px 10px">sm 4.3px — ของย่อยใน control</span>
           <span class="field">control 5.8px</span>
           <span class="card" style="padding:6px 12px">card 7.2px</span>
           <span style="border:1px solid var(--border-c);border-radius:var(--r-overlay);padding:6px 12px">overlay 10.1px</span>
         </div>
         <p class="muted" style="font-size:11.5px"><code>--radius: 0.45rem</code> → ทุกระดับคำนวณจากตัวนี้
-          (×0.6 · ×0.8 · ×1 · ×1.4) · ห้ามใช้ <code>rounded-2xl</code> ขึ้นไป แม้ preset จะนิยามไว้</p>
+          (×0.6 · ×0.8 · ×1 · ×1.4) · <code>sm</code> ใช้กับปุ่ม <code>xs</code>, จุดรับ focus เล็ก ๆ,
+          tooltip, เมนู sidebar — <strong>ไม่ใช่ของ Badge/chip ซึ่งเป็น <code>rounded-full</code></strong>
+          · ห้ามใช้ <code>rounded-2xl</code> ขึ้นไป แม้ preset จะนิยามไว้</p>
       </div>
     </div>
   </div>
@@ -436,10 +448,22 @@
             <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>บันทึก OT</div>
             <div class="navgroup">รายงาน</div>
             <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-chart"/></svg>สรุปรายเดือน</div>
+            <div class="navgroup">รายการอนุมัติ</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-check"/></svg>อนุมัติใบลา
+              <span class="countbadge">5</span></div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>อนุมัติ OT
+              <span class="countbadge">12</span></div>
             <div class="navgroup">ตั้งค่า</div>
             <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-user"/></svg>ผู้ใช้และสิทธิ์</div>
             <div style="margin-top:auto;border-top:1px solid var(--border-c);padding-top:8px">
-              <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-logout"/></svg>สมชาย ใจดี</div>
+              <div class="navuser">
+                <span class="ava">สจ</span>
+                <span style="display:grid;min-width:0;line-height:1.3">
+                  <span style="font-size:13px;font-weight:500" class="tr">สมชาย ใจดี</span>
+                  <span style="font-size:11px" class="muted tr">somchai@ube.co.th</span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-left:auto;opacity:.6"><use href="#i-more"/></svg>
+              </div>
             </div>
           </aside>
           <div class="main">
@@ -884,6 +908,77 @@
         </div>
       </div>
     </div>
+
+    <h3>การ์ดโปรไฟล์ — เปิดจากเมนูผู้ใช้ท้าย sidebar</h3>
+    <p class="lead">ทุกแอปที่มี login ได้ block นี้เหมือนกัน (มาจาก <code>ugt-nextjs-auth-setup</code>) —
+      ผู้ใช้จึงหา "ฉันคือใคร / ออกจากระบบ" ที่เดิมเสมอ · แถวมาตรฐานมี 2 อัน คือ
+      <strong>อีเมล</strong> กับ <strong>วิธี Login ล่าสุด</strong> ส่วนข้อมูลเฉพาะโปรเจค
+      (รหัสพนักงาน ตำแหน่ง แผนก) ใส่เพิ่มผ่าน prop · <strong>อ่านอย่างเดียว ไม่มีการแก้ไข</strong></p>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>NavUser (เมนู) · การ์ดโปรไฟล์</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));display:grid;align-items:start">
+        <div>
+          <div class="cmp-title">เมนูที่เปิดจากปุ่มผู้ใช้</div>
+          <div class="menu" style="width:210px;margin-top:8px">
+            <div style="gap:8px;padding:6px 8px">
+              <span class="ava">สจ</span>
+              <span style="display:grid;min-width:0;line-height:1.3">
+                <span style="font-size:12.5px;font-weight:500" class="tr">สมชาย ใจดี</span>
+                <span style="font-size:11px" class="muted tr">somchai@ube.co.th</span>
+              </span>
+            </div>
+            <div style="height:1px;background:var(--border-c);margin:3px 0"></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-user"/></svg>บัญชีผู้ใช้</div>
+            <div style="height:1px;background:var(--border-c);margin:3px 0"></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-logout"/></svg>ออกจากระบบ</div>
+          </div>
+          <p class="muted" style="font-size:11.5px;margin-top:8px">2 รายการตายตัว — SSO ใช้ backchannel
+            logout · ระหว่างรอมี spinner</p>
+        </div>
+        <div>
+          <div class="cmp-title">การ์ดโปรไฟล์</div>
+          <div class="dlg" style="max-width:270px;margin-top:8px">
+            <div style="height:56px;background:linear-gradient(135deg,
+              color-mix(in oklab,var(--primary) 20%,transparent),
+              color-mix(in oklab,var(--primary) 5%,transparent),transparent)"></div>
+            <div style="margin-top:-28px;display:flex;flex-direction:column;align-items:center;padding:0 16px">
+              <span class="ava" style="width:56px;height:56px;border-radius:999px;font-size:18px;
+                box-shadow:0 0 0 4px var(--popover)">สจ</span>
+              <p style="margin-top:8px;font-size:14px;font-weight:600">สมชาย ใจดี</p>
+              <span class="lbadge sec" style="margin-top:6px">ผู้อนุมัติระดับต้น</span>
+            </div>
+            <div style="padding:14px 16px 18px">
+              <div style="border:1px solid var(--border-c);border-radius:var(--r-card);background:var(--card)">
+                <div class="drow" style="padding:7px 12px;border-bottom:1px solid var(--border-c)">
+                  <span class="muted" style="display:flex;align-items:center;gap:7px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-info"/></svg>อีเมล</span>
+                  <span style="font-weight:500">somchai@ube.co.th</span>
+                </div>
+                <div class="drow" style="padding:7px 12px;border-bottom:1px solid var(--border-c)">
+                  <span class="muted" style="display:flex;align-items:center;gap:7px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-user"/></svg>รหัสพนักงาน</span>
+                  <span style="font-weight:500">91226</span>
+                </div>
+                <div class="drow" style="padding:7px 12px">
+                  <span class="muted" style="display:flex;align-items:center;gap:7px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-check"/></svg>วิธี Login ล่าสุด</span>
+                  <span style="font-weight:500">SSO (Keycloak)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="muted" style="font-size:11.5px;margin-top:8px"><strong>มติ 2026-08-09</strong>:
+            การ์ดนี้เป็น<strong>ข้อยกเว้นข้อเดียว</strong>ที่ใช้เส้นคั่นรายแถวได้ ทั้งที่ detail dialog
+            ทั่วไปห้าม — เพราะเป็นรายการสั้นชุดเดียว การแบ่ง section จะกลายเป็นหัวข้อลอย ๆ</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -894,6 +989,64 @@
     <p class="lead">ไม่ต้องเขียน if-loading เองทุกหน้า — สถานะข้อมูลผ่าน <code>ui/query-state</code> ·
       Skeleton สำหรับโครง · spinner ในปุ่ม (พร้อม disabled) สำหรับ action ·
       Empty ใช้ <code>ui/empty</code> ทุกกรณี ทั้งตารางว่าง ไม่มีสิทธิ์ และ 404</p>
+    <h3>ป้าย (Badge) — มี component 2 ตัว ใช้ 5 กรณี</h3>
+    <p class="lead"><code>StatusBadge</code> สร้างจาก <code>Badge variant="outline"</code> อีกที
+      ส่วนคำว่า "chip" คือ<strong>วิธีใช้ Badge แบบหนึ่ง ไม่ใช่ component ใหม่</strong> ·
+      หลักแยกที่จำง่าย: <strong>มีไอคอน + บอกสถานะ = StatusBadge · ที่เหลือทั้งหมด = Badge</strong></p>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>5 กรณีของป้าย</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <div class="cmp-title">1 · สถานะ → StatusBadge (tone + ไอคอนบังคับ)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="sb sb-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-check"/></svg>อนุมัติแล้ว</span>
+          <span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>รออนุมัติ</span>
+          <span class="sb sb-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-xcircle"/></svg>ไม่อนุมัติ</span>
+          <span class="sb sb-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-rotate"/></svg>ขอยกเลิก</span>
+          <span class="sb sb-sky"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-info"/></svg>ระบบสร้าง</span>
+          <span class="sb sb-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-minus"/></svg>ฉบับร่าง</span>
+        </div>
+
+        <div class="cmp-title">2 · ป้ายกำกับ/ตัวระบุ → Badge outline (ข้อความล้วน ห้ามสีสถานะ)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="lbadge">ผู้อนุมัติระดับต้น</span>
+          <span class="lbadge">ระบบ</span>
+          <span class="lbadge">ลาพักร้อน</span>
+        </div>
+
+        <div class="cmp-title">3 · ตัวเลขนับ → Badge + tabular-nums</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span class="countbadge" style="margin-left:0">5</span>
+          <span class="countbadge" style="margin-left:0">12</span>
+          <span class="countbadge" style="margin-left:0">99+</span>
+          <span class="muted" style="font-size:11.5px">เป็น 0 ให้ซ่อน ไม่แสดงเลข 0 · เกิน 99 แสดง 99+</span>
+        </div>
+
+        <div class="cmp-title">4 · chip ตัวกรองที่กดปิดได้ → Badge secondary + ปุ่ม ✕</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="chip">สถานะ: รออนุมัติ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><use href="#i-x"/></svg></span>
+          <span class="chip">หน่วยงาน: บัญชี<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><use href="#i-x"/></svg></span>
+        </div>
+
+        <div class="cmp-title">5 · ป้ายสีที่ต้องไม่มีไอคอน → Badge outline + TONE_STYLES</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="lbadge" style="border-color:color-mix(in oklab,var(--status-emerald) 40%,transparent);
+            background:color-mix(in oklab,var(--status-emerald) 10%,transparent);color:var(--status-emerald-fg)">IN</span>
+          <span class="lbadge" style="border-color:color-mix(in oklab,var(--status-gray) 40%,transparent);
+            background:color-mix(in oklab,var(--status-gray) 10%,transparent);color:var(--status-gray-fg)">OUT</span>
+          <span class="muted" style="font-size:11.5px">ใช้ token ชุดเดียวกับ StatusBadge ห้ามประกาศสีใหม่</span>
+        </div>
+        <p class="muted" style="font-size:11.5px">ทั้ง 5 กรณีเป็น <code>rounded-full</code> —
+          ไม่อยู่ในสเกล radius 4 ระดับ</p>
+      </div>
+    </div>
+
+    <h3>สถานะของข้อมูล</h3>
     <div class="specimen">
       <div class="specimen-bar">
         <span>Loading · Empty · Error · Toast</span>

@@ -65,6 +65,9 @@
      `base-mira` ตามที่ shadcn ให้มา:
        :root  --radius: 0.45rem (7.2px)
        @theme --radius-sm/md/lg/xl/2xl/3xl/4xl = calc(--radius × 0.6/0.8/1/1.4/1.8/2.2/2.6)
+     บทบาทที่ใช้จริง: sm 4.3 = ของย่อยใน control (ปุ่ม xs, จุด focus เล็ก ๆ,
+     tooltip, เมนู sidebar) · md 5.8 = control หลัก · lg 7.2 = การ์ด ·
+     xl 10.1 = overlay · Badge/chip ใช้ rounded-full ไม่อยู่ในสเกลนี้
      ตอน merge ไฟล์นี้เข้า app/globals.css ต้อง **คงบรรทัด --radius ของ preset
      ใน :root และ scale ใน @theme ไว้** — ถ้าลบทิ้งตาม pattern "แทนที่บล็อก
      :root" จะไม่มีใครนิยาม --radius แล้วการ์ด/ปุ่มจะกลายเป็นมุมเหลี่ยมทั้งแอป

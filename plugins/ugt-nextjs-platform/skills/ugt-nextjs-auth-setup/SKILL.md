@@ -125,6 +125,7 @@ exceptions:
 | `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see §5.3 |
 | `assets/env.example` | merge into `.env.example` + `.env.local` | drop vars for unselected methods |
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
+| `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 
 The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
@@ -168,7 +169,15 @@ of which login methods were chosen.
    is still present — see `references/auth-flows.md`)
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
-4. First deployment: log in → visit `/admin/setup` → one click → Administrator
+4. **Identity block in the shell** — render `<NavUser>` in the sidebar footer
+   (or the topbar's right-hand dropdown), fed from the session: `name`,
+   `email`, `roleName` from the user's role, `authType` from `user.authType`.
+   Project-specific profile rows (employee code, position, department) go in
+   through `extraRows` — the component ships only the two rows every app has
+   (email · last login method). DESIGN.md §3 fixes the placement and the two
+   menu items, so users find "who am I / sign out" in the same spot in every
+   app.
+5. First deployment: log in → visit `/admin/setup` → one click → Administrator
    role → redirects to `/admin/users`, which now really exists
 5. `app/(admin)/layout.tsx` calls `syncPermissionsIfNeeded()` on every request
    into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
