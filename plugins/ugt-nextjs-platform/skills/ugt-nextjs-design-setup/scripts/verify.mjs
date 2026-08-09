@@ -27,7 +27,7 @@ function check(name, fn) {
 check('docs/DESIGN.md exists with no leftover placeholders', () => {
   if (!has('docs', 'DESIGN.md')) return { ok: false, msg: 'No docs/DESIGN.md — the agreement was never written' };
   const md = read('docs', 'DESIGN.md');
-  const left = md.match(/\{\{[A-Z_]+\}\}/g);
+  const left = md.match(/__[A-Z][A-Z0-9_]*__/g);
   if (left) return { ok: false, msg: `Unsubstituted: ${[...new Set(left)].join(' ')}` };
   if (!/ugt-core/.test(md)) return { ok: false, msg: 'Header does not record the ugt-core contract version (sync mode needs it)' };
   if (!/##\s*10\.\s*มติ/.test(md)) return { ok: false, msg: 'No มติ (decision log) section' };
@@ -53,7 +53,7 @@ check('globals.css carries the org token set', () => {
   if (!has('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
   const css = read('app', 'globals.css');
   const problems = [];
-  if (/\{\{PRIMARY(_DARK)?\}\}/.test(css)) problems.push('{{PRIMARY}} placeholder not substituted');
+  if (/__PRIMARY(_DARK)?__/.test(css)) problems.push('__PRIMARY__ placeholder not substituted');
   for (const t of ['amber', 'emerald', 'red', 'coral', 'sky', 'gray']) {
     if (!css.includes(`--status-${t}:`)) problems.push(`--status-${t} missing`);
   }

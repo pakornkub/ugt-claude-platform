@@ -1,7 +1,7 @@
-# {{PROJECT_NAME}} — Design Agreement
+# __PROJECT_NAME__ — Design Agreement
 
-> Gen โดย ugt-nextjs-design-setup เมื่อ {{DATE}} ·
-> อิงมาตรฐานกลาง `ugt-core/contracts/design.md` (ugt-core **{{STD_VERSION}}**)
+> Gen โดย ugt-nextjs-design-setup เมื่อ __DATE__ ·
+> อิงมาตรฐานกลาง `ugt-core/contracts/design.md` (ugt-core **__STD_VERSION__**)
 > Token จริงอยู่ที่ `app/globals.css` — ไฟล์นี้คือข้อตกลง "ใช้อย่างไร"
 > เปลี่ยนข้อตกลง = แก้ไฟล์นี้ + เพิ่มแถวใน "มติ" (ส่วน 10) พร้อมวันที่และเหตุผล
 > Plugin อัปเดตมาตรฐานกลาง = สั่ง "sync ข้อตกลง design" — diff ให้ดูแล้ว
@@ -28,11 +28,11 @@
 
 ## 1. Visual identity
 
-- **แหล่งอ้างอิง**: {{REFERENCE}}
-- **primary**: {{PRIMARY}} — ใช้กับ **interactive เท่านั้น** (ปุ่มหลัก, ลิงก์,
+- **แหล่งอ้างอิง**: __REFERENCE__
+- **primary**: __PRIMARY__ — ใช้กับ **interactive เท่านั้น** (ปุ่มหลัก, ลิงก์,
   focus ring, สถานะเลือก) · dark mode สว่างกว่า light เสมอ
 - **base**: neutral tint เย็น hue ~258 chroma 0.004–0.02 — ห้ามเทา chroma 0
-- **dark mode**: {{DARK_MODE}} · กฎ dark: border ≥ ขาว 16% · elevation จาก
+- **dark mode**: __DARK_MODE__ · กฎ dark: border ≥ ขาว 16% · elevation จาก
   lightness (background < card < popover)
 - **สีสถานะ 6 ตัว** (`--status-*` + `-foreground` — ค่ากลางองค์กร):
   amber=รอ/เตือน · emerald=สำเร็จ · red=ปฏิเสธ/ลบ · coral=ขอยกเลิก ·
@@ -55,7 +55,7 @@
 
 ## 3. Layout & app shell
 
-- **Shell**: {{SHELL}} (จาก shadcn block — ดู layout-shells.md ของ skill)
+- **Shell**: __SHELL__ (จาก shadcn block — ดู layout-shells.md ของ skill)
 - เมนู: icon+label เสมอ · จัดกลุ่มเมื่อเกิน ~7 · ลึกสุด 2 ชั้น · ลำดับ
   งานหลัก→รายงาน→ตั้งค่า/admin · **ซ่อนตามสิทธิ์ ไม่ disable** (guard ฝั่ง
   server คือเส้นกั้นจริง)
@@ -68,7 +68,7 @@
 - โครงทุกหน้า: page title + actions ขวาบน + เนื้อหาในการ์ด — pattern เดียว
   ทุกหน้า · breadcrumb เมื่อลึกเกิน 2 ชั้น วางเหนือ title
 - Mobile เป็นระบบ: ตาราง→การ์ด (DataTable จัดให้) · dialog→bottom-sheet
-- Landing page: {{LANDING}}
+- Landing page: __LANDING__
 
 ## 4. Components
 
@@ -111,12 +111,12 @@
 
 ## 5. Format การแสดงผล (ทุกตัวผ่าน `lib/format.ts`)
 
-- จอ: `DD/MM/YYYY` **{{ERA}}** · มีเวลา = เติม `HH:MM` · wall-clock date
+- จอ: `DD/MM/YYYY` **__ERA__** · มีเวลา = เติม `HH:MM` · wall-clock date
   อ่าน UTC parts (กันเลื่อนวัน) · instant จริงแสดงเวลาไทย Asia/Bangkok
 - **ไฟล์ export (Excel/CSV): ISO `yyyy-MM-dd` เสมอ** — คนละมาตรฐานกับจอ
   โดยตั้งใจ (DD/MM ทำ Excel สลับวัน-เดือนตาม locale ผู้รับ)
 - ตัวเลข: comma คั่นหลักพัน · ทศนิยมตามที่ DB ให้ ไม่ปัดเอง · ค่าว่าง = `-`
-- **ภาษา UI**: {{LANG}}
+- **ภาษา UI**: __LANG__
 - ศัพท์บังคับ: `requirements/glossary.md` (ถ้ามี)
 
 ## 6. Feedback & states
@@ -148,10 +148,10 @@
 
 | จุดที่ขัดข้อตกลง | ตัดสินใจ | หมายเหตุ |
 | --- | --- | --- |
-| {{DEVIATIONS}} | | |
+| __DEVIATIONS__ | | |
 
 ## 10. มติ (decision log)
 
 | วันที่ | มติ | เหตุผล |
 | --- | --- | --- |
-| {{DATE}} | ติดตั้งข้อตกลงฉบับแรก — {{ANSWERS_SUMMARY}} | ตาม interview ({{ANSWERED_BY}}) |
+| __DATE__ | ติดตั้งข้อตกลงฉบับแรก — __ANSWERS_SUMMARY__ | ตาม interview (__ANSWERED_BY__) |

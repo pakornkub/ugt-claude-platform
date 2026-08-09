@@ -2,8 +2,8 @@
    Merge into app/globals.css: replace the @theme/:root/.dark token blocks,
    keep any project-specific @layer content.
    Placeholders — substitute from the interview, then run check-contrast.mjs:
-     {{PRIMARY}}       default: oklch(0.488 0.243 264.4)   (org indigo, light)
-     {{PRIMARY_DARK}}  default: oklch(0.55 0.21 264.4)     (must be LIGHTER than light-mode primary)
+     __PRIMARY__       default: oklch(0.488 0.243 264.4)   (org indigo, light)
+     __PRIMARY_DARK__  default: oklch(0.55 0.21 264.4)     (must be LIGHTER than light-mode primary)
    Rule of the palette: neutrals stay hue ~258 chroma 0.004–0.02 — never add
    a chroma-0 gray. Editing ANY color = re-run check-contrast.mjs. */
 
@@ -79,7 +79,7 @@
   --card-foreground: oklch(0.16 0.01 258);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.01 258);
-  --primary: {{PRIMARY}};
+  --primary: __PRIMARY__;
   --primary-foreground: oklch(0.985 0.008 255);
   --secondary: oklch(0.955 0.006 258);
   --secondary-foreground: oklch(0.23 0.012 258);
@@ -90,7 +90,7 @@
   --destructive: oklch(0.52 0.22 27.3);
   --border: oklch(0.905 0.008 258);
   --input: oklch(0.905 0.008 258);
-  --ring: {{PRIMARY}};
+  --ring: __PRIMARY__;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -99,12 +99,12 @@
   --radius: 0.75rem;
   --sidebar: oklch(0.965 0.006 258);
   --sidebar-foreground: oklch(0.16 0.01 258);
-  --sidebar-primary: {{PRIMARY}};
+  --sidebar-primary: __PRIMARY__;
   --sidebar-primary-foreground: oklch(0.985 0.008 255);
   --sidebar-accent: oklch(0.94 0.01 258);
   --sidebar-accent-foreground: oklch(0.2 0.012 258);
   --sidebar-border: oklch(0.905 0.008 258);
-  --sidebar-ring: {{PRIMARY}};
+  --sidebar-ring: __PRIMARY__;
   --status-amber: oklch(0.666 0.179 58.3);
   --status-amber-foreground: oklch(0.473 0.137 46.2);
   --status-emerald: oklch(0.596 0.145 163.2);
@@ -126,7 +126,7 @@
   --card-foreground: oklch(0.975 0.005 258);
   --popover: oklch(0.32 0.016 258);
   --popover-foreground: oklch(0.975 0.005 258);
-  --primary: {{PRIMARY_DARK}};
+  --primary: __PRIMARY_DARK__;
   --primary-foreground: oklch(0.985 0.008 255);
   --secondary: oklch(0.31 0.015 258);
   --secondary-foreground: oklch(0.975 0.005 258);
@@ -139,7 +139,7 @@
   --border: oklch(1 0 0 / 22%);
   --input: oklch(1 0 0 / 28%);
   /* ring ตาม primary เสมอ — ห้าม hardcode สี (บทเรียน eval: brand เขียวแต่ ring indigo) */
-  --ring: {{PRIMARY_DARK}};
+  --ring: __PRIMARY_DARK__;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -147,12 +147,12 @@
   --chart-5: oklch(0.424 0.199 265.638);
   --sidebar: oklch(0.215 0.013 258);
   --sidebar-foreground: oklch(0.975 0.005 258);
-  --sidebar-primary: {{PRIMARY_DARK}};
+  --sidebar-primary: __PRIMARY_DARK__;
   --sidebar-primary-foreground: oklch(0.985 0.008 255);
   --sidebar-accent: oklch(0.3 0.015 258);
   --sidebar-accent-foreground: oklch(0.975 0.005 258);
   --sidebar-border: oklch(1 0 0 / 22%);
-  --sidebar-ring: {{PRIMARY_DARK}};
+  --sidebar-ring: __PRIMARY_DARK__;
   --status-amber: oklch(0.769 0.188 70.1);
   --status-amber-foreground: oklch(0.879 0.169 91.6);
   --status-emerald: oklch(0.696 0.17 162.5);

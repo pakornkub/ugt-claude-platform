@@ -38,7 +38,7 @@ the cookie and every page redirects to `/login` in a loop.
 Two independent prefixes combine into the session cookie name:
 
 1. **App cookie prefix** — derived from `NEXT_PUBLIC_BASE_PATH`
-   (`/<base-path>` → `<base-path>`; fallback `better-auth`). Set via
+   (`/__BASE_PATH__` → `__BASE_PATH__`; fallback `better-auth`). Set via
    `advanced.cookiePrefix` in `betterAuth({})`. **Why:** when two apps share one
    domain (e.g. `portal.example.com/app-a` and `portal.example.com/app-b`), both
    would otherwise create `better-auth.session_token` at `path=/`. The browser
@@ -221,7 +221,7 @@ never `auth.api.getSession()` (needs DB, not Edge-safe).
 | Build crashes with `SKIP_ENV_VALIDATION=1` | `keycloak()` helper runs `.replace()` on undefined issuer | Conditional plugin registration guard |
 | `Unknown argument 'id'` from Better Auth rate limit | `rateLimit` model used `key` as `@id` | `id String @id` + nullable `key` (see schema template) |
 | SSO shows "Invalid OAuth configuration" | Node can't verify internal CA cert on Keycloak host | Trust the CA in the runtime (`NODE_EXTRA_CA_CERTS`); last resort `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container |
-| authClient hits `…/<base-path>/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
+| authClient hits `…/__BASE_PATH__/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
 | `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
 | SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins |
 | SSO fails `account_not_linked` despite `trustedProviders` | Local user has `emailVerified: false` (created by sync/upsert) | `accountLinking.requireLocalEmailVerified: false` |

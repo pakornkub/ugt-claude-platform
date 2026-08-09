@@ -1,0 +1,46 @@
+// ─── Naming Convention ───────────────────────────────────────────────────────
+// All table names MUST use PascalCase plural and be set via @@map().
+// MS SQL Server standard: PascalCase, plural, no reserved words.
+//   ✅  @@map("Users")          ✅  @@map("RolePermissions")
+//   ❌  @@map("user")           ❌  @@map("rolePermission")
+// Column names in the DB are PascalCase via @map(); Prisma fields and
+// relation names stay camelCase (Prisma convention).
+// Tables populated by external jobs (read-only to the app) use a distinct
+// prefix, e.g. @@map("__EXT___WeeklySummary") — the app never writes to them.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js" // MUST be prisma-client-js — "prisma-client" has no MSSQL driver adapter
+}
+
+datasource db {
+  provider = "sqlserver" // NO url here — the url lives only in prisma.config.ts
+}
+
+// ─── Example model — shows every org convention ──────────────────────────────
+// Replace with your real domain models; keep the same shape:
+//   camelCase model + @@map("PascalCasePlural")
+//   camelCase fields + @map("PascalCase")
+//   full audit column set: Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted
+//   reserved-word columns renamed with a suffix/prefix + inline comment
+
+model item {
+  id        Int      @id @default(autoincrement()) @map("Id")
+  code      String   @unique                       @map("Code")      @db.NVarChar(50)
+  nameTh    String                                 @map("NameTh")    @db.NVarChar(200) // Thai text → NVarChar always
+  nameEn    String                                 @map("NameEn")    @db.NVarChar(200)
+  itemKey   String                                 @map("ItemKey")   // KEY is T-SQL reserved → ItemKey
+  groupName String                                 @map("GroupName") // GROUP is T-SQL reserved → GroupName
+  sortOrder Int      @default(0)                   @map("SortOrder") // ORDER is T-SQL reserved → SortOrder
+  notes     String?  @db.NVarChar(Max)             @map("Notes")     // long text / JSON blob → NVarChar(Max)
+
+  // Standard audit columns — required on every app-owned master/transaction table
+  isActive  Boolean  @default(true)                @map("IsActive")
+  isDeleted Boolean  @default(false)               @map("IsDeleted") // soft delete — never hard delete audited data
+  createdBy String                                 @map("CreatedBy")
+  createdAt DateTime @default(now())               @map("CreatedAt")
+  updatedBy String?                                @map("UpdatedBy")
+  updatedAt DateTime @updatedAt                    @map("UpdatedAt")
+
+  @@map("Items")
+}

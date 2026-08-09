@@ -64,7 +64,7 @@
     },
     "N4": {
       "prompt": "ตั้ง vitest กับ eslint ให้โปรเจกต์ที",
-      "expected": "ugt-nextjs-quality-setup"
+      "expected": "ugt-nextjs-test-lint-setup"
     },
     "N5": {
       "prompt": "pipeline แดงที่ stage Quality Gate",
@@ -80,7 +80,7 @@
     },
     "N8": {
       "prompt": "จบงานวันนี้แล้ว บันทึก checkpoint ไว้ให้ด้วย",
-      "expected": "ugt-checkpoint"
+      "expected": "ugt-handoff"
     },
     "N9": {
       "prompt": "อยากเพิ่ม login ด้วย AD ของบริษัท",

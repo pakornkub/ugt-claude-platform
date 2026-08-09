@@ -1,7 +1,7 @@
 # Audit Logging — ActivityLogs (org contract item 4)
 
 The `ActivityLogs` table is **append-only**: who did what, when. Every project
-must have it. The schema ships in `assets/schema-auth.prisma` — this file
+must have it. The schema ships in `assets/prisma/schema-auth.prisma` — this file
 covers the write, read, and retention rules.
 
 ## Quick Rules
@@ -21,7 +21,7 @@ covers the write, read, and retention rules.
 - **Export routes are the one exception**: log **before** streaming starts,
   because a stream can't be interrupted once begun
 
-## Schema (already in `assets/schema-auth.prisma`)
+## Schema (already in `assets/prisma/schema-auth.prisma`)
 
 ```prisma
 model activityLog {
@@ -61,8 +61,8 @@ export const AUDIT_ACTIONS = {
 } as const;
 ```
 
-The first four are **org-mandated** (contract item 4) — `assets/lib-auth.ts`
-and `assets/lib-actions-auth.ts` already write them. Add the rest per the
+The first four are **org-mandated** (contract item 4) — `assets/lib/auth.ts`
+and `assets/lib/actions/auth.ts` already write them. Add the rest per the
 project's domain.
 
 ```ts

@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-nextjs-cicd-setup",
-  "notes": "Runs on a Next.js scaffold that already has the lint/format:check/test:coverage/build scripts (the output of ugt-nextjs-quality-setup). Eval 2 uses a scaffold without prisma but with @sentry/nextjs. Most assertions are machine-checkable via scripts/verify.mjs. Prompts stay in Thai: they simulate real user input.",
+  "notes": "Runs on a Next.js scaffold that already has the lint/format:check/test:coverage/build scripts (the output of ugt-nextjs-test-lint-setup). Eval 2 uses a scaffold without prisma but with @sentry/nextjs. Most assertions are machine-checkable via scripts/verify.mjs. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,

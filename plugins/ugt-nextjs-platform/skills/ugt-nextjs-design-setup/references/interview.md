@@ -25,8 +25,8 @@ toast semantics · motion rules · icon library · accessibility floor.
 ข้อ 1 ตอบ "มี" → the reference **overrides the org palette**: extract tokens
 from the prototype/brand FIRST (before any UI work — the retheme lesson),
 map them onto the same token names, run check-contrast, and record the
-source in DESIGN.md §1. ข้อ 2 with a brand color → substitute `{{PRIMARY}}`
-(+ a lighter dark-mode variant as `{{PRIMARY_DARK}}` — it also feeds the
+source in DESIGN.md §1. ข้อ 2 with a brand color → substitute `__PRIMARY__`
+(+ a lighter dark-mode variant as `__PRIMARY_DARK__` — it also feeds the
 dark `--ring`/`--sidebar-ring`) and run check-contrast.
 
 **Brand-color AA trap (predictable — handle, don't discover):** for a

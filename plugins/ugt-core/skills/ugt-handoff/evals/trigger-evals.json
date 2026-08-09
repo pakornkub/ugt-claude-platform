@@ -1,0 +1,24 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-handoff (renamed from ugt-checkpoint in v2.0.0). S* queries must route to ugt-handoff; N* queries must NOT. Legacy wording ('checkpoint') must still route here — the description carries the old name.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "pending — run as part of the v3.0 release gate (P4)"
+  },
+  "queries": {
+    "S1": { "prompt": "จบงานวันนี้แล้ว บันทึก state ไว้ให้ทีมด้วย", "expected": "ugt-handoff" },
+    "S2": { "prompt": "บันทึกไว้ก่อน เดี๋ยวพรุ่งนี้มาทำต่อ", "expected": "ugt-handoff" },
+    "S3": { "prompt": "จบงานแล้ว บันทึก checkpoint ไว้ให้คนต่อไปหน่อย", "expected": "ugt-handoff" },
+    "S4": { "prompt": "handoff งานให้เพื่อนร่วมทีมที่จะมาทำต่อพรุ่งนี้", "expected": "ugt-handoff" },
+    "S5": { "prompt": "เพิ่งแก้บั๊ก prisma generate พังหลัง migrate เสร็จ จดไว้หน่อยกัน session หน้าเจอซ้ำ", "expected": "ugt-handoff" },
+    "S6": { "prompt": "feature บันทึก OT เสร็จแล้ว อัปเดตสถานะใน board ด้วย", "expected": "ugt-handoff" },
+    "S7": { "prompt": "ไฟล์ handoff ใน .claude/state ดูเก่ากว่าโค้ดจริงมาก ช่วยอัปเดตให้ตรง", "expected": "ugt-handoff" },
+    "S8": { "prompt": "save state ก่อนปิดเครื่อง", "expected": "ugt-handoff" },
+    "N1": { "prompt": "ติดตั้งมาตรฐานบริษัทให้โปรเจคนี้หน่อย ยังไม่มีอะไรเลย", "expected": "ugt-nextjs-full-setup" },
+    "N2": { "prompt": "บันทึกมติ design ว่าปุ่มหลักใช้สีน้ำเงิน", "expected": "ugt-nextjs-design-setup (มติ design → DESIGN.md)" },
+    "N3": { "prompt": "จำไว้หน่อยว่าผมชอบให้ตอบสั้น ๆ", "expected": "(no skill — personal preference goes to auto memory)" },
+    "N4": { "prompt": "commit โค้ดที่แก้เสร็จแล้วให้หน่อย", "expected": "(no skill — plain git commit)" },
+    "N5": { "prompt": "อ่าน requirement ในโฟลเดอร์ docs แล้วสรุปเป็น brief ให้หน่อย", "expected": "ugt-requirements" },
+    "N6": { "prompt": "เปลี่ยนเป็นโหมดประหยัด token ให้หน่อย", "expected": "ugt-model-mode" }
+  }
+}

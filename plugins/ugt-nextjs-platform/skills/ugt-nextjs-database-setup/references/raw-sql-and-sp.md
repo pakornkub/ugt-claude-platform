@@ -22,7 +22,7 @@ export async function getRecordByCode(code: string): Promise<Row | null> {
     SELECT TOP 1
       CAST(u.Code     AS VARCHAR(50))    AS Code,
       CAST(u.NameThai AS NVARCHAR(100))  AS NameThai
-    FROM <linked-server>.<db>.dbo.<view> AS u
+    FROM __LINKED_SERVER__.<db>.dbo.<view> AS u
     WHERE u.Code = ${code}
   `;
   return rows[0] ?? null;
@@ -38,7 +38,7 @@ export async function getRecordByCode(code: string): Promise<Row | null> {
 
 For projects reading master data from another DB over a linked server:
 
-- Use the full 4-part name: `<linked-server>.<db>.dbo.<view>`
+- Use the full 4-part name: `__LINKED_SERVER__.<db>.dbo.<view>`
 - **Strictly SELECT-only** — never INSERT/UPDATE/DELETE across a linked server
 - **`CAST(...)` every selected column** — type metadata across a linked server
   is unreliable (Thai columns → `NVARCHAR(n)`, codes → `VARCHAR(n)`, dates →
@@ -54,7 +54,7 @@ For projects reading master data from another DB over a linked server:
 const term = `%${query.trim()}%`;   // wildcards on the JS side — the term itself stays a parameter
 const rows = await prisma.$queryRaw<Row[]>`
   SELECT TOP 50 ...
-  FROM <linked-server>.<db>.dbo.<view> AS u
+  FROM __LINKED_SERVER__.<db>.dbo.<view> AS u
   WHERE u.LoginName LIKE ${term} OR u.NameThai LIKE ${term}
   ORDER BY u.NameEng
 `;
@@ -69,14 +69,14 @@ const offset = (page - 1) * pageSize;
 const [rows, countResult] = await Promise.all([
   prisma.$queryRaw<Row[]>`
     SELECT ...
-    FROM <linked-server>.<db>.dbo.<view> AS u
+    FROM __LINKED_SERVER__.<db>.dbo.<view> AS u
     WHERE u.OrgCode = ${orgCode}
     ORDER BY u.NameEng
     OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY
   `,
   prisma.$queryRaw<[{ total: number }]>`
     SELECT COUNT(*) AS total
-    FROM <linked-server>.<db>.dbo.<view> AS u
+    FROM __LINKED_SERVER__.<db>.dbo.<view> AS u
     WHERE u.OrgCode = ${orgCode}
   `,
 ]);
@@ -107,7 +107,7 @@ session guard → permission check → validate input (Zod) → `EXEC` → audit
 ## 4. requestTimeout for long-running SPs
 
 The `mssql` default timeout is 15 seconds — heavy recalculation/dump SPs get
-cut off. Set it in the adapter config (see `assets/lib-prisma.ts`):
+cut off. Set it in the adapter config (see `assets/lib/prisma.ts`):
 
 ```ts
 return {

@@ -6,7 +6,7 @@ file is what a PR changes first when the standard itself changes.
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-database-setup` (primary), `ugt-nextjs-setup` (summary), and
+> `ugt-nextjs-database-setup` (primary), `ugt-nextjs-full-setup` (summary), and
 > `ugt-nextjs-pitfalls` (gotchas). Bump the platform's `plugin.json` version
 > and CHANGELOG when you do.
 
@@ -32,8 +32,8 @@ not `[brackets]`: `key`→`SettingKey`, `value`→`SettingValue`, `group`→`Gro
 
 - PK is always named `Id`
 - Delete data that needs history via **`IsDeleted = 1`** (soft delete), never hard delete
-- Lookup/join tables may trim the set, but exemptions are recorded in the
-  project's Deviations notes
+- Lookup/join tables may trim the set, but exemptions are recorded as
+  `⚠ deviation` lines in the project's `docs/project-context/architecture.md`
 - Append-only log tables (e.g. audit logs) are exempt by nature
 
 ## Read-only and override rules

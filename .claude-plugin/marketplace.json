@@ -11,7 +11,7 @@
     {
       "name": "ugt-core",
       "source": "./plugins/ugt-core",
-      "description": "Stack-agnostic foundation: ugt-checkpoint team-state skill, audit-trail hooks, and the normative org contracts (database, delivery, identity, harness). Installed automatically as a dependency of stack platforms."
+      "description": "Stack-agnostic foundation: ugt-handoff work-state skill, ugt-context knowledge-base bootstrap (docs/project-context/), audit-trail hooks, and the normative org contracts (database, cicd, auth, design, harness). Installed automatically as a dependency of stack platforms."
     },
     {
       "name": "ugt-nextjs-platform",

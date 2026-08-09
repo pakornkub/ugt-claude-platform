@@ -10,7 +10,7 @@
       "assertions": [
         "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0",
         "No [METHOD: marker remains in any file",
-        "No <project-name> remains anywhere, including inside components/login-form.tsx",
+        "No __PROJECT_NAME__ remains anywhere, including inside components/login-form.tsx",
         "components/login-form.tsx has no local email/password section and no orphaned imports from it",
         "lib/actions/auth.ts has no localLoginAction",
         "lib/ldap.ts exists and package.json has ldapts, not ldapjs",

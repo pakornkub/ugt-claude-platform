@@ -1,5 +1,11 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
+> **หมายเหตุ (2026-08-09)**: เอกสารนี้เป็นบันทึก ณ v2.x — เก็บไว้เป็นประวัติการตัดสินใจ ไม่แก้ย้อนหลัง
+> ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` · `ugt-mode`→`ugt-model-mode` ·
+> `ugt-nextjs-setup`→`ugt-nextjs-full-setup` · `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
+> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ดู CHANGELOG ของแต่ละ plugin
+
+
 Status: **draft for review** · Date: 2026-07-29 · Scope: feasibility + design only —
 no existing plugin is modified by this document.
 

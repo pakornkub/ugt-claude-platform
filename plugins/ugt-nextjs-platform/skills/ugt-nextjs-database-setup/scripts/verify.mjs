@@ -114,7 +114,7 @@ check('No process.env outside the allowlist', () => {
 // Tables installed by ugt-nextjs-auth-setup map to **singular** names — the exception
 // to the PascalCase-plural rule (Better Auth core uses singular by its own
 // convention, and the RBAC tables sit next to them in the same file, so the
-// whole set shares the form — see ugt-nextjs-auth-setup's assets/schema-auth.prisma)
+// whole set shares the form — see ugt-nextjs-auth-setup's assets/prisma/schema-auth.prisma)
 const BETTER_AUTH_MODELS = new Set([
   'user',
   'session',
@@ -224,7 +224,7 @@ check('.env.example exists and leaks no real values', () => {
   if (!has('.env.example')) return { ok: false, msg: 'No .env.example' };
   const body = read('.env.example');
   // A value with no trace of a placeholder is suspect
-  const PLACEHOLDER = /<|CHANGE[_-]?ME|YOUR[_-]|REPLACE|TODO|xxx|\*\*\*|placeholder|example\.com/i;
+  const PLACEHOLDER = /<|__[A-Z][A-Z0-9_]*__|CHANGE[_-]?ME|YOUR[_-]|REPLACE|TODO|xxx|\*\*\*|placeholder|example\.com/i;
   const leaked = body
     .split('\n')
     .filter((l) => !l.trim().startsWith('#'))

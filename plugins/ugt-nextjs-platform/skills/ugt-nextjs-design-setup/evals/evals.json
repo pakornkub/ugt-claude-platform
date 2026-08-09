@@ -10,7 +10,7 @@
       "assertions": [
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0",
         "node scripts/check-contrast.mjs exits 0",
-        "docs/DESIGN.md contains no {{PLACEHOLDER}} and has a มติ row dated today",
+        "docs/DESIGN.md contains no __PLACEHOLDER__ and has a มติ row dated today",
         "docs/DESIGN.md header records the ugt-core contract version",
         "components.json style is base-mira",
         "app/globals.css has --status-coral (the semantic-6 set, not a generic success/warning pair)",
@@ -23,7 +23,7 @@
       "id": 2,
       "name": "fresh-project-brand-color",
       "prompt": "โปรเจคใหม่ชื่อ fleet-tracker ทำข้อตกลง design ให้ แต่บริษัทลูกค้ามีสี brand เป็นเขียว #1a7f4b ต้องใช้สีนี้เป็นหลัก ที่เหลือตามมาตรฐาน",
-      "expected_output": "Substitutes the brand green as {{PRIMARY}} (with a lighter dark-mode variant) instead of the org indigo · records the custom color as a มติ with the reason (client brand) · runs check-contrast against the new primary and fixes/reports any failing pair before closing",
+      "expected_output": "Substitutes the brand green as __PRIMARY__ (with a lighter dark-mode variant) instead of the org indigo · records the custom color as a มติ with the reason (client brand) · runs check-contrast against the new primary and fixes/reports any failing pair before closing",
       "assertions": [
         "app/globals.css --primary derives from #1a7f4b (as given or converted to oklch), not the org indigo",
         "The dark-mode --primary is lighter than the light-mode --primary",

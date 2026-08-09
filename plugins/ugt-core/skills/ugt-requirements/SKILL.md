@@ -63,16 +63,20 @@ Output goes to `docs/requirements-brief/` (committed). All content in
 | --- | --- |
 | ระบบทำอะไร | 2–5 sentences, the system's purpose in plain language |
 | ผู้ใช้ / role | Every user type the documents mention, with what each can do |
-| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on → **สถานะ** (initial `☐ todo`; afterwards maintained by `/ugt-checkpoint` — this table is the team's feature-progress board) |
+| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on — **no status column**; live status is the board's job (`docs/project-context/board.md`) |
 | ตารางข้อมูล (candidate) | Union of tables/entities implied across features — candidates, not a schema |
 | Cross-cutting | Concerns spanning features: auth, audit, notifications, integrations |
 | Open Questions (ระดับระบบ) | System-wide gaps and conflicts, each phrased as a question a stakeholder can answer |
 | Sources | Every source file: read (with a 1-line description) or `unread` (with reason) |
 
-Status values for the feature table: `☐ todo` · `🔨 in progress` ·
-`⏳ blocked — <what it waits on>` · `✅ done`. This skill only ever writes the
-initial `☐ todo`; updating statuses later is `/ugt-checkpoint`'s job, so the
-board has one writer and cannot drift from the checkpoint.
+**Feature board**: this skill also writes one row per feature into
+`docs/project-context/board.md` — a table
+`| Feature | Brief | Priority | Depends on | สถานะ |` — creating the file if
+missing (the folder normally exists via `ugt-context`). Every row starts
+`☐ todo`; updating statuses later is `/ugt-handoff`'s job, and only the
+สถานะ column — one writer per column, so the board cannot drift from the
+handoff file. Status values: `☐ todo` · `🔨 in progress` ·
+`⏳ blocked — <what it waits on>` · `✅ done`.
 
 ### `<NN>-<kebab-feature>.md` — one per feature
 
@@ -97,16 +101,30 @@ an unmarked guess is worse than a gap, because nobody knows to question it.
   stakeholders *before* starting that feature — that is the whole point of
   extracting them early.
 - Questions still unresolved when the session ends: point the user to
-  `/ugt-checkpoint`, which records them under Open Questions in
-  `.claude/state/project-notes.md`. This skill **never writes
-  `.claude/state/` itself** — those files have one owner each.
+  `/ugt-handoff`, which records them under Open Questions in
+  `.claude/state/handoff.md`. This skill **never writes `.claude/state/`
+  itself** — that file has one owner.
 
-## Re-runs
+## Re-runs and requirement changes
 
 If `docs/requirements-brief/` already exists, report what is there and ask
-before touching anything: regenerate everything, or add only new features?
-Never overwrite silently — the brief is in git so the user can diff either
-way, but the choice is theirs.
+before touching anything. Never overwrite silently — the brief is in git so
+the user can diff either way, but the choice is theirs.
+
+A requirement change is NOT always a new feature — route by the affected
+feature's status on `docs/project-context/board.md`:
+
+| เคส | ทำ |
+| --- | --- |
+| ของใหม่ ไม่กระทบ feature เดิม | brief ใหม่ (`NN-*.md`) + แถวใหม่บน board `☐ todo` |
+| กระทบ feature ที่ยัง `☐ todo` | แก้ brief เดิมตรง ๆ — ยังไม่ได้ build อะไร |
+| กระทบ feature ที่ `🔨 in progress` | แก้ brief เดิม + ให้ผู้ใช้บันทึกว่า scope เปลี่ยนกลางทางผ่าน `/ugt-handoff` |
+| กระทบ feature ที่ `✅ done` | **ห้ามแก้ brief เดิม** (มันคือประวัติ) — เขียน brief ใหม่เป็น change (`NN-<feature>-revision.md`, อ้าง `business-rules.md` สำหรับพฤติกรรมปัจจุบันแทนการลอกความเข้าใจระบบมาใหม่) + แถวใหม่บน board · ห้ามดึงแถวเดิมกลับจาก ✅ |
+
+Cross-cutting: if the new requirement contradicts a recorded decision
+(`docs/project-context/decisions.md`, or `DESIGN.md` §10 for design) —
+surface the conflict with the decision's date and reason; never silently
+build against a standing decision.
 
 ## Handoff
 
@@ -123,7 +141,7 @@ Close out with, in this order:
 
    which enters the normal superpowers pipeline (brainstorming → plan → TDD →
    review). One feature per session keeps context clean.
-4. Remind: commit the brief, then `/ugt-checkpoint`.
+4. Remind: commit the brief, then `/ugt-handoff`.
 
 ## Quick Rules
 
@@ -147,3 +165,4 @@ Before closing out, confirm:
 - [ ] Every conflict found while reading appears as an Open Question
 - [ ] No unmarked assumptions — check the brief for claims no source backs
 - [ ] Feature dependency references match the overview table
+- [ ] `docs/project-context/board.md` has one `☐ todo` row per feature file

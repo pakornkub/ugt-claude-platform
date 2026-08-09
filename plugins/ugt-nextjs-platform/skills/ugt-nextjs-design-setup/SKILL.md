@@ -47,7 +47,7 @@ What lands in the project:
 | Org UI kit | `components/ui/*` + `lib/format.ts` — from `assets/ui/` and `assets/lib/` |
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
-| Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules-ugt-nextjs-design.md` |
+| Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules/ugt-nextjs-design.md` |
 
 ## 2. Org standards (summary — full text in ugt-core `contracts/design.md`)
 
@@ -99,7 +99,7 @@ each with a recorded decision — never silently reformat the project.
 
 ### Step 3 — Generate and install
 
-1. `docs/DESIGN.md` from the template — fill every `{{...}}`, including the
+1. `docs/DESIGN.md` from the template — fill every `__...__`, including the
    ugt-core contract version in the header; seed the decision log (ส่วน 10)
    with today's มติ. Create `docs/design-questions.md` (empty skeleton).
 2. shadcn init if none yet — **the org preset (canonical, มติ 2026-08-04;
@@ -142,8 +142,8 @@ each with a recorded decision — never silently reformat the project.
    `:root`/`.dark` token blocks; keep any project/preset `@layer` rules —
    e.g. the preset's button `cursor: pointer` — and keep preset `@theme`
    vars: re-point `--font-heading` at the font-sans variables)
-   · substitute `{{PRIMARY}}`/`{{PRIMARY_DARK}}` from interview answers
-   (dark ring tokens derive from `{{PRIMARY_DARK}}` automatically).
+   · substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers
+   (dark ring tokens derive from `__PRIMARY_DARK__` automatically).
 3. Fonts + providers in `app/layout.tsx` — the exact wiring:
 
    ```tsx
@@ -200,7 +200,7 @@ each with a recorded decision — never silently reformat the project.
    DESIGN.md §3.
 7. Run `node <skill-dir>/scripts/check-contrast.mjs` (cwd = project root) —
    every ✘ pair must be fixed before closing.
-8. Install the harness rule: copy `assets/rules-ugt-nextjs-design.md` →
+8. Install the harness rule: copy `assets/rules/ugt-nextjs-design.md` →
    `.claude/rules/ugt-nextjs-design.md` (whole-file overwritable on update).
 
 ### Step 4 — Close out

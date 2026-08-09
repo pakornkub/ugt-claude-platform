@@ -100,6 +100,6 @@ sonar.dependencyCheck.severity.low=0.0
 ## G. Coverage property
 
 `sonar.javascript.lcov.reportPaths=coverage/lcov.info` — this file comes from
-`npm run test:coverage`, whose `lcov` reporter `ugt-nextjs-quality-setup` already
+`npm run test:coverage`, whose `lcov` reporter `ugt-nextjs-test-lint-setup` already
 configures. If the path holds no real file, Sonar reports `new_coverage` as 0%
 and the Quality Gate blocks every build with no error pointing at the cause.

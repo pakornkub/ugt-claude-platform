@@ -1,0 +1,15 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-context. S* must route here (first-time knowledge-base creation); N* must NOT (ongoing updates → ugt-handoff, requirement docs → ugt-requirements, install → full-setup).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": { "date": null, "note": "pending — run as part of the v3.0 release gate (P4)" },
+  "queries": {
+    "S1": { "prompt": "สร้าง project context ให้โปรเจคนี้หน่อย", "expected": "ugt-context" },
+    "S2": { "prompt": "อยากมีสารบัญโปรเจค ให้ AI ไม่ต้องไปสำรวจโค้ดใหม่ทุก session", "expected": "ugt-context" },
+    "S3": { "prompt": "โปรเจคเก่ามีโค้ดเยอะแล้ว ช่วย scan ทำ architecture กับ api index ให้ที", "expected": "ugt-context" },
+    "S4": { "prompt": "โปรเจคนี้ยังไม่มี docs/project-context เลย ทำให้หน่อย", "expected": "ugt-context" },
+    "N1": { "prompt": "จบงานแล้ว อัปเดต context กับ board ให้ด้วย", "expected": "ugt-handoff (ongoing updates, not bootstrap)" },
+    "N2": { "prompt": "อ่าน requirement ในโฟลเดอร์แล้วสรุปเป็น brief", "expected": "ugt-requirements" },
+    "N3": { "prompt": "เตรียมโปรเจคให้ deploy ได้ตามมาตรฐานบริษัท", "expected": "ugt-nextjs-full-setup" },
+    "N4": { "prompt": "ตอนนี้ระบบมี feature อะไรเสร็จแล้วบ้าง", "expected": "(no skill — read docs/project-context/board.md directly)" }
+  }
+}

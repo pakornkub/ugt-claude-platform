@@ -11,7 +11,7 @@ description: >
   never reaching `healthy`, `COPY .next/standalone` failing, client-side env vars
   empty in the browser bundle, or a Groovy parse error after removing an optional
   block.
-  Run ugt-nextjs-quality-setup first — this pipeline calls `lint`, `format:check` and
+  Run ugt-nextjs-test-lint-setup first — this pipeline calls `lint`, `format:check` and
   `test:coverage` by exact name and goes red on the third stage without them.
   Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth setup
   (→ ugt-nextjs-database-setup / ugt-nextjs-auth-setup).
@@ -128,6 +128,7 @@ assets/docker-compose.yml         → docker-compose.yml
 assets/docker-compose.dev.yml     → docker-compose.dev.yml
 assets/owasp-suppressions.xml     → owasp-suppressions.xml
 assets/api-health-route.ts        → app/api/health/route.ts
+assets/rules/ugt-nextjs-ci.md     → .claude/rules/ugt-nextjs-ci.md   (whole-file overwritable on plugin update)
 ```
 
 > **`/api/health` is not optional** — the Dockerfile `HEALTHCHECK` and both
@@ -214,7 +215,7 @@ not a style nit.
 - SonarQube: projects ×2 (prod/dev), Global Analysis Token, Quality Gate per
   §2.3, webhook back to Jenkins → **`references/sonarqube-setup.md`**
 - **Render `assets/admin-handoff.template.md` → write it to the project as
-  `docs/admin-handoff.md`** with every `{{...}}` substituted (project name,
+  `docs/admin-handoff.md`** with every `__...__` substituted (project name,
   ports, basePaths, credential IDs, URLs) and every section for an unselected
   system deleted (no Sentry → no Sentry row; no SSO → no Keycloak section;
   not the first project on the server → no server-level appendix). This is

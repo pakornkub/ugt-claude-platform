@@ -33,7 +33,7 @@ Database-level standards every project shares:
 | Named object | Convention | Example |
 | --- | --- | --- |
 | Table (app-owned) | **PascalCase plural**, no prefix | `Items`, `LeaveRequests`, `AppSettings` |
-| Read-only table (external system dumps) | group prefix `<EXT>_` | `<EXT>_WeeklySummary` |
+| Read-only table (external system dumps) | group prefix `__EXT___` | `__EXT___WeeklySummary` |
 | Column | **PascalCase** | `Id`, `CreatedAt`, `EmpCode` |
 | Stored procedure | `usp_*` (PascalCase after) | `usp_RecalculateWeeklySummary` |
 | Function (scalar/TVF) | `fn*` | `fnGetScheduleActual` |
@@ -44,7 +44,7 @@ Database-level standards every project shares:
 `Id`, `CreatedAt`, `UpdatedAt`, `CreatedBy`, `UpdatedBy`, `IsActive`, `IsDeleted`
 (soft delete — never hard-delete data that needs history)
 
-**Read-only rule**: tables prefixed `<EXT>_` and views/tables on a linked
+**Read-only rule**: tables prefixed `__EXT___` and views/tables on a linked
 server are SELECT-only, always — no INSERT/UPDATE/DELETE from the app; to
 adjust values, create an app-side override table and overlay at read time.
 
@@ -72,10 +72,11 @@ npm install --save-dev prisma tsx dotenv
 | Asset | Destination |
 | --- | --- |
 | `assets/prisma.config.ts` | `prisma.config.ts` |
-| `assets/schema-skeleton.prisma` | `prisma/schema.prisma` |
-| `assets/lib-prisma.ts` | `lib/prisma.ts` |
-| `assets/lib-env.ts` | `lib/env.ts` |
+| `assets/prisma/schema-skeleton.prisma` | `prisma/schema.prisma` |
+| `assets/lib/prisma.ts` | `lib/prisma.ts` |
+| `assets/lib/env.ts` | `lib/env.ts` |
 | `assets/env.example` | `.env.example` (+ copy to `.env.local` and fill real values) |
+| `assets/rules/ugt-nextjs-database.md` | `.claude/rules/ugt-nextjs-database.md` (whole-file overwritable on plugin update) |
 
 **Keep the env files distinct**: `.env.example` = generic placeholders only
 (committable) · `.env.local` = real values (never committed) — the values from
@@ -85,19 +86,19 @@ the placeholder table below go into `.env.local` only.
 
 | Placeholder | Meaning |
 | --- | --- |
-| `<db-host>` | SQL Server hostname/IP |
-| `<db-port>` | port (usually `1433`) |
-| `<db-name>` | database name |
-| `<db-user>` | SQL login |
-| `<db-password>` | password (`.env.local` only — never committed) |
-| `<project-name>` | project name (used in comments/app name) |
-| `<EXT>` | prefix of read-only tables populated externally (if any) |
-| `<linked-server>` | linked-server name (only for projects reading across servers) |
+| `__DB_HOST__` | SQL Server hostname/IP |
+| `__DB_PORT__` | port (usually `1433`) |
+| `__DB_NAME__` | database name |
+| `__DB_USER__` | SQL login |
+| `__DB_PASSWORD__` | password (`.env.local` only — never committed) |
+| `__PROJECT_NAME__` | project name (used in comments/app name) |
+| `__EXT__` | prefix of read-only tables populated externally (if any) |
+| `__LINKED_SERVER__` | linked-server name (only for projects reading across servers) |
 
 > If the project has **no** external read-only tables / linked server →
-> **delete the related comment lines** from the copied files (e.g. the `<EXT>_`
-> comment at the top of `schema.prisma`) — never leave `<EXT>` /
-> `<linked-server>` placeholders dangling.
+> **delete the related comment lines** from the copied files (e.g. the `__EXT___`
+> comment at the top of `schema.prisma`) — never leave `__EXT__` /
+> `__LINKED_SERVER__` placeholders dangling.
 
 ### 3. Critical rules (break these and generate/build fails)
 
