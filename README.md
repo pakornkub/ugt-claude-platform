@@ -175,16 +175,22 @@ CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่
    ถ้าใช่ ตัดสินตามชนิดเอกสาร — `Living` = แก้ให้ตรงแล้วอัปเดต `Last-reviewed` ·
    บันทึกการตัดสินใจ (`Accepted`/`Done`) = **ห้ามแก้เนื้อหา** ให้เปลี่ยนเป็น `Superseded`
    พร้อมชี้ `Superseded-by` ไปที่ของใหม่แทน (แก้ย้อนหลังทำให้บันทึกประวัติเพี้ยน)
-4. รันสคริปต์ตรวจ — ต้องเขียวทั้งคู่:
+4. **ถ้า release นี้แตะ UI kit** (`components/ui/*`, token, หรือกติกาใน DESIGN template)
+   → เปิด [`docs/design-preview.html`](docs/design-preview.html) เทียบกับของจริงว่ายังตรงไหม
+   หน้านี้คือสิ่งที่คนเห็น**ก่อน**ตัดสินใจติดตั้ง — preview ที่ล้าสมัยคือคำสัญญาที่ plugin ทำไม่ได้
+   จุดที่เคยหลุดมาแล้ว: หัวตาราง (จับลาก/sort/filter), ชุดปุ่ม pagination,
+   เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
+5. รันสคริปต์ตรวจ — ต้องเขียวทั้งสามตัว:
    ```bash
-   node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs
+   node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs
    ```
-   ตัวแรกเช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวหลังเช็คว่า
-   เอกสารทุกไฟล์ใน `docs/` ประกาศสถานะตัวเองครบ (Living / Accepted / Superseded / Done)
-5. `claude plugin validate ./plugins/<ชื่อ> --strict`
-6. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
+   ตัวที่ 1 เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวที่ 2 เช็คว่า
+   เอกสารทุกไฟล์ใน `docs/` ประกาศสถานะตัวเองครบ · ตัวที่ 3 เช็คว่าสีใน design-preview
+   ยังตรงกับ token ที่ติดตั้งจริง (โครงหน้ายังต้องดูด้วยตาตามข้อ 4 — markup เทียบด้วยเครื่องไม่ได้)
+6. `claude plugin validate ./plugins/<ชื่อ> --strict`
+7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
    push tag ของ dependency ก่อน)
-7. ประกาศให้ทีมรันคำสั่งอัปเดต
+8. ประกาศให้ทีมรันคำสั่งอัปเดต
 
 **กติกาเอกสารใน `docs/`** — ทุกไฟล์ `.md` ต้องมีบล็อกนี้ใต้หัวข้อ H1:
 
