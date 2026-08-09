@@ -57,5 +57,6 @@ name.
   `process.cwd()` and fail (never pass) when expected files are missing
 - Contract text from this directory is deliberately duplicated into stack
   skills, rendered in stack terms — these files are the canonical diff target;
-  a repo-level drift check greps stack skills for the contract's threshold
-  values
+  `scripts/check-contract-drift.mjs` (repo root) greps stack skills for the
+  contract's threshold values — run it before every release, and update its
+  check table whenever a contract value or copy location changes
