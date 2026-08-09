@@ -363,15 +363,25 @@
 
         <div class="cmp-title">มุมโค้ง — ใช้ของ preset base-mira ทั้งชุด ปรับได้ที่ <code>--radius</code> ตัวเดียว</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;align-items:center" class="muted">
-          <span style="border:1px solid var(--border-c);border-radius:var(--r-chip);padding:4px 10px">sm 4.3px — ของย่อยใน control</span>
-          <span class="field">control 5.8px</span>
-          <span class="card" style="padding:6px 12px">card 7.2px</span>
-          <span style="border:1px solid var(--border-c);border-radius:var(--r-overlay);padding:6px 12px">overlay 10.1px</span>
+          <span style="border:1px solid var(--border-c);border-radius:var(--r-chip);padding:6px 12px">sm 4.3px</span>
+          <span style="border:1px solid var(--border-c);border-radius:var(--r-ctl);padding:6px 12px">md 5.8px</span>
+          <span style="border:1px solid var(--border-c);border-radius:var(--r-card);padding:6px 12px">lg 7.2px</span>
+          <span style="border:1px solid var(--border-c);border-radius:var(--r-overlay);padding:6px 12px">xl 10.1px</span>
         </div>
-        <p class="muted" style="font-size:11.5px"><code>--radius: 0.45rem</code> → ทุกระดับคำนวณจากตัวนี้
-          (×0.6 · ×0.8 · ×1 · ×1.4) · <code>sm</code> ใช้กับปุ่ม <code>xs</code>, จุดรับ focus เล็ก ๆ,
-          tooltip, เมนู sidebar — <strong>ไม่ใช่ของ Badge/chip ซึ่งเป็น <code>rounded-full</code></strong>
-          · ห้ามใช้ <code>rounded-2xl</code> ขึ้นไป แม้ preset จะนิยามไว้</p>
+        <table class="doc" style="margin-top:4px">
+          <thead><tr><th>tier</th><th>ใช้กับ</th></tr></thead>
+          <tbody>
+            <tr><td><code>sm</code></td><td>ของย่อย<strong>ที่อยู่ในตัว control</strong> — ปุ่ม <code>xs</code>, จุดรับ focus ที่ไม่ใช่ปุ่มเต็มตัว (ปุ่ม ✕ ของ chip, จุดจับลากคอลัมน์, ปุ่ม sort), tooltip, เมนู sidebar</td></tr>
+            <tr><td><code>md</code></td><td>control หลัก — input / select / button</td></tr>
+            <tr><td><code>lg</code></td><td>การ์ด</td></tr>
+            <tr><td><code>xl</code></td><td>overlay — dialog / popover / dropdown</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="font-size:11.5px"><code>--radius: 0.45rem</code> → ทุก tier คำนวณจากตัวนี้
+          (×0.6 · ×0.8 · ×1 · ×1.4) · <strong>Badge / chip ไม่อยู่ในสเกลนี้</strong> ใช้
+          <code>rounded-full</code> เสมอ · <strong>ห้ามใช้ <code>rounded-2xl</code> ขึ้นไป</strong> —
+          preset นิยาม 2xl/3xl/4xl มาให้ด้วย เขียนแล้ว<strong>ใช้ได้ ไม่มี error</strong> แต่หลุดจาก
+          4 บทบาทที่ตกลงกัน จึงต้องให้ <code>verify.mjs</code> เป็นคนจับ ไม่ใช่ CSS</p>
       </div>
     </div>
   </div>
