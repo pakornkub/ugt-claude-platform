@@ -1,0 +1,21 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-mail-setup. S* must route here (sending mail from the app, SMTP setup, template editing, documented mail symptoms); N* must NOT — the sharpest boundary is Jenkins build-result email, which belongs to cicd-setup.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "queries": {
+    "S1": { "prompt": "อยากให้ระบบส่งอีเมลแจ้งหัวหน้าตอนมีคำขอเข้ามา", "expected": "ugt-nextjs-mail-setup" },
+    "S2": { "prompt": "ตั้ง SMTP ให้โปรเจคหน่อย ใช้ relay ของบริษัท", "expected": "ugt-nextjs-mail-setup" },
+    "S3": { "prompt": "อยากให้ admin แก้ข้อความในอีเมลได้เองโดยไม่ต้อง deploy ใหม่", "expected": "ugt-nextjs-mail-setup" },
+    "S4": { "prompt": "ทดสอบ flow อนุมัติแล้วเมลวิ่งไปหาคนจริง อยากให้เข้าเฉพาะตัวเองตอนเทส", "expected": "ugt-nextjs-mail-setup" },
+    "S5": { "prompt": "ส่งเมลแล้วไม่มีใครได้รับเลย ไม่ขึ้น error ด้วย", "expected": "ugt-nextjs-mail-setup" },
+    "S6": { "prompt": "relay ตีกลับบอกว่าไม่มีสิทธิ์ส่งจากอีเมลนี้", "expected": "ugt-nextjs-mail-setup" },
+    "S7": { "prompt": "ลิงก์ในอีเมลกดแล้ว 404 ทั้งที่ในแอปเข้าได้", "expected": "ugt-nextjs-mail-setup" },
+    "S8": { "prompt": "กดอนุมัติแล้ว error เพราะส่งเมลไม่ผ่าน แต่อยากให้อนุมัติสำเร็จอยู่ดี", "expected": "ugt-nextjs-mail-setup" },
+    "N1": { "prompt": "อยากให้ Jenkins ส่งเมลแจ้งผล build ให้ทีม", "expected": "ugt-nextjs-cicd-setup (emailext + NOTIFY_EMAIL)" },
+    "N2": { "prompt": "เพิ่ม permission ใหม่ให้ role หัวหน้า", "expected": "ugt-nextjs-auth-setup" },
+    "N3": { "prompt": "ทำตาราง AppSettings ตามมาตรฐานตั้งชื่อของบริษัท", "expected": "ugt-nextjs-database-setup" },
+    "N4": { "prompt": "อยากให้ toast ตอนบันทึกสำเร็จหน้าตาเป็นมาตรฐาน", "expected": "ugt-nextjs-design-setup" },
+    "N5": { "prompt": "เขียน test ให้ฟังก์ชันส่งเมลที่ทำเสร็จแล้ว", "expected": "(normal dev work / superpowers:test-driven-development)" },
+    "N6": { "prompt": "กด save แล้วรายการไม่ refresh ต้อง reload เอง", "expected": "ugt-nextjs-pitfalls" }
+  }
+}

@@ -29,6 +29,12 @@ export const PERMISSIONS = {
   // Audit logs
   AUDIT_LOGS_READ: 'audit-logs:read',
 
+  // Testing aid — grant to developers/testers ONLY. Holders receive workflow
+  // email themselves instead of the real recipients (see ugt-nextjs-mail-setup).
+  // On a normal account this silently hides notifications from the people who
+  // should get them.
+  DEV_MODE: 'dev-mode:enable',
+
   // EXTENSION POINT: add project-domain permissions here (resource:action)
 } as const;
 

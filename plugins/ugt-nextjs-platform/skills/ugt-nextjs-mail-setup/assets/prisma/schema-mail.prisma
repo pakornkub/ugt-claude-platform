@@ -1,0 +1,21 @@
+// Paste into prisma/schema.prisma — required by ugt-nextjs-mail-setup.
+//
+// Key/value store for settings an admin edits at runtime. Mail templates live
+// here under `mailTemplate:<key>`; reuse the table for other admin-editable
+// settings instead of adding a table per setting.
+//
+// Deliberately NOT the full audit-column set (contract: database.md allows
+// lookup/settings tables to trim it) — but the two "who touched it last"
+// columns stay, because an admin editing a template that goes to real
+// recipients must be traceable.
+
+model appSetting {
+  id        String   @id @default(cuid())            @map("Id")
+  key       String   @unique @db.NVarChar(200)       @map("SettingKey")   // `key` is a T-SQL reserved word
+  value     String   @db.NVarChar(Max)               @map("SettingValue")
+  createdAt DateTime @default(now())                 @map("CreatedAt")
+  updatedAt DateTime @updatedAt                      @map("UpdatedAt")
+  updatedBy String?  @db.NVarChar(200)               @map("UpdatedBy")
+
+  @@map("AppSettings")
+}

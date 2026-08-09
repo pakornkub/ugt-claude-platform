@@ -33,6 +33,7 @@ child skills in the correct order → summarize + smoke test.
 | `ugt-nextjs-test-lint-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
 | `ugt-nextjs-design-setup` | Design agreement (`docs/DESIGN.md`) + shadcn tokens/fonts/shell + org UI kit |
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
+| `ugt-nextjs-mail-setup` | Workflow email over the org SMTP relay + admin-editable templates + dev mode (optional — only if the project sends mail) |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
 `ugt-nextjs-clean-code` and `ugt-nextjs-pitfalls` are not part of the install
@@ -58,8 +59,11 @@ Ask all of this in a single message (use AskUserQuestion if available):
 
 **Module selection:**
 
-1. What to install? Database / Quality (test+lint) / Design / Auth / CI (multi-select — default: all five)
+1. What to install? Database / Quality (test+lint) / Design / Auth / **Mail** / CI
+   (multi-select — default: all except Mail, which is opt-in)
 2. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
+3. [If Mail selected] SMTP host/port, sender address, support contact for the
+   email footer — see `ugt-nextjs-mail-setup`'s Interview
 
 **Shared identity (used by every module — ask once, don't let child skills re-ask):**
 
@@ -79,10 +83,13 @@ AD details, first admin · CI: Sentry?, deploy target).
 ### 3. Install in order (never reorder)
 
 ```
-Database → Quality → Design → Auth → CI
+Database → Quality → Design → Auth → [Mail] → CI
 ```
 
 - **Auth must come after Database** — Better Auth stores user/session/account in Prisma.
+- **Mail comes after Auth** — it needs the actor (session email) and adds the
+  `dev-mode:enable` permission to the auth permission list. It is optional:
+  install it only when the project sends email.
 - **Design must come before Auth** — auth generates themed pages (login,
   `/admin/*`); running design later means re-theming them (the retheme-twice
   lesson from gov-boi-smart).

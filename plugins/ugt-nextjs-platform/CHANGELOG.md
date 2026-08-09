@@ -1,5 +1,44 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.4.0 (2026-08-09)
+
+**New skill `ugt-nextjs-mail-setup`** — the first of the runtime-feature gaps
+identified in the platform review. Extracted from `ugt-hrms`, where this exact
+code sends every approval email in production.
+
+What it installs: `nodemailer` over the org SMTP relay · admin-editable
+templates (subject + body stored as one `AppSettings` row per key, in-code
+defaults so mail works before anyone edits anything) · fixed email chrome
+(card, header, greeting, status banner, CTA, "do not reply" footer) assembled
+in code so an admin can change wording but never the layout or the disclaimer ·
+`AppSettings` model · the `.claude/rules` file · `references/templates-and-tokens.md`.
+
+Three production lessons carried over as enforced rules:
+
+- **Dev mode is mandatory.** A user holding `dev-mode:enable` receives workflow
+  mail themselves — CC dropped, `[DEV] ` on the subject, a banner naming the
+  real recipients — so an approval flow can be tested end to end without
+  notifying anyone. `verify.mjs` fails on any `sendTemplatedMail` call without
+  an `actor`, because omitting it turns dev mode off silently.
+- **Missing `SMTP_HOST` throws.** Without the guard nodemailer falls back to
+  `localhost:25` and mail disappears with no error — checked by the script.
+- **Every token is HTML-escaped.** `htmlVariables` is the single bypass, for
+  server-built HTML only; the script fails when a user-typed token name
+  (`reason`, `comment`, `note`, …) appears in that list.
+
+Wiring: install order becomes `Database → Quality → Design → Auth → [Mail] → CI`
+(Mail is opt-in and must follow Auth — it needs the session actor and adds
+`dev-mode:enable` to `ugt-nextjs-auth-setup`'s permission list, which now ships
+that key with a warning to grant it to testers only).
+
+Not in scope, stated so it is not assumed: **file upload**. The review named it
+alongside email, but `ugt-hrms` has no upload path at all — no `formData()`
+handler, no volume, no storage dependency, only CSV/XLSX *exports*. There is
+nothing to extract, and writing one would mean inventing answers to three org
+decisions (where files live given `docker-compose` mounts no volume, size/type
+limits and whether virus scanning is required, and whether downloads must be
+permission-checked). Those go to the team before any code.
+
 ## 4.3.0 (2026-08-09)
 
 **One scrollbar style for the whole org.** 4.1.0 said "delete `no-scrollbar`",

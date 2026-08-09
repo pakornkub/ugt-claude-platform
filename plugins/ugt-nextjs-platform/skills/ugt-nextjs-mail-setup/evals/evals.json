@@ -1,0 +1,63 @@
+{
+  "skill_name": "ugt-nextjs-mail-setup",
+  "notes": "Evals run on a project that already has database + auth installed (AppSettings needs Prisma; dev mode needs the permission list and a session actor). Machine-checkable assertions use scripts/verify.mjs as the grader. Prompts stay in Thai — they simulate real user input.",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "evals": [
+    {
+      "id": 1,
+      "name": "fresh-install",
+      "prompt": "โปรเจคนี้ต้องส่งอีเมลแจ้งเตือนตอนมีคำขออนุมัติ ตั้งระบบเมลให้หน่อย",
+      "expected_output": "Asks the interview batch (SMTP host/port/auth, sender, support contact, header colour, which workflows) in ONE message · copies the three lib files + AppSettings model + rule file · adds the SMTP vars to lib/env.ts as optional · adds DEV_MODE to lib/permissions.ts · runs migrate + generate · closes with the dev-mode-vs-normal-user smoke test",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-nextjs-mail-setup exits 0",
+        "lib/env.ts declares SMTP_HOST/PORT/SECURE/FROM and all are optional (build must pass with no relay)",
+        "lib/permissions.ts contains 'dev-mode:enable'",
+        "prisma/schema.prisma has a model mapping to AppSettings",
+        "No __*__ placeholder remains in the copied files",
+        "The closing summary tells the user to ask the admin team for the SMTP values"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "adds-a-template-completely",
+      "prompt": "เพิ่มเมลแจ้งเตือนตอนคำขอถูกยกเลิก",
+      "setup": "Project already set up by this skill.",
+      "expected_output": "Adds the key to MAIL_TEMPLATE_KEYS, a definition to MAIL_TEMPLATE_DEFINITIONS (label/heading/variables, banner or CTA as appropriate) AND a default to DEFAULT_MAIL_TEMPLATES — all three, in one change",
+      "assertions": [
+        "All three structures contain the new key",
+        "verify.mjs's 'Every key has a definition and a default' check passes",
+        "The new template's variables list includes appName and recipientName (the chrome needs both)"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "refuses-to-unescape-user-input",
+      "prompt": "เหตุผลการปฏิเสธที่ผู้ใช้พิมพ์มามีขึ้นบรรทัดใหม่ อยากให้แสดงเป็น <br> ในอีเมล ใส่ rejectReason ลง htmlVariables ให้หน่อย",
+      "setup": "Project already set up by this skill.",
+      "expected_output": "Declines to put a user-controlled token in htmlVariables and explains it is the one bypass around escaping; offers a safe alternative (convert newlines server-side into an escaped-then-joined HTML fragment under a different token, or use CSS white-space) rather than doing what was asked",
+      "assertions": [
+        "rejectReason is NOT added to htmlVariables",
+        "The refusal names the injection risk concretely, not as a vague warning",
+        "A concrete safe alternative is offered",
+        "verify.mjs's htmlVariables check still passes"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "mail-failure-must-not-roll-back",
+      "prompt": "เขียน server action อนุมัติคำขอ แล้วส่งเมลแจ้งผู้ขอด้วย",
+      "setup": "Project already set up by this skill and auth-setup.",
+      "expected_output": "Writes the guard order (session → permission → action → audit log), commits the approval FIRST, then sends inside try/catch with the failure logged — never inside the transaction and never awaited in a way that fails the action",
+      "assertions": [
+        "sendTemplatedMail is called after the transaction, not inside it",
+        "The call is wrapped in try/catch and the error is logged",
+        "The call passes `actor` with email and hasDevMode",
+        "Links passed in vars are absolute URLs built from env, not relative paths"
+      ],
+      "files": []
+    }
+  ]
+}
