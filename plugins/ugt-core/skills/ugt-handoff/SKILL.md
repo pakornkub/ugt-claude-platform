@@ -1,22 +1,24 @@
 ---
-name: ugt-checkpoint
+name: ugt-handoff
 description: >
-  Save or read the project's handoff state — `.claude/state/checkpoint.md`
+  Save or read the project's handoff state — `.claude/state/handoff.md`
   (what's done / in progress / next, plus decisions taken) and
   `.claude/state/project-notes.md` (Error Patterns, Deviations, Open Questions).
   Use at the END of any work chunk before the session ends, when the user says
   "บันทึกไว้", "จบงานแล้ว", "save state", "handoff", "checkpoint", or when a bug
   was just diagnosed and the fix is worth recording so the next session doesn't
-  rediscover it. Also use when starting work and the checkpoint looks stale or
-  contradicts what's actually in the code.
+  rediscover it. Also use when starting work and the handoff file looks stale
+  or contradicts what's actually in the code. Run it at the end of EVERY work
+  chunk, even when the same person continues tomorrow — the next session is
+  the receiver either way. (เดิมชื่อ ugt-checkpoint)
   These two files are committed, so they are the TEAM's memory — separate from
   Claude's own auto memory, which is machine-local and not shared.
-  Don't use it to install anything (→ ugt-nextjs-setup) or to record a gotcha that is
+  Don't use it to install anything (→ ugt-nextjs-full-setup) or to record a gotcha that is
   true for every project on this stack — that belongs in a PR to the platform
   repo, not in one project's notes.
 ---
 
-# UGT Checkpoint — record state for the next session and for teammates
+# UGT Handoff — record state for the next session and for teammates
 
 ## Why these files exist when Claude already has auto memory
 
@@ -27,22 +29,22 @@ live in files committed to the repo.
 
 | Location | Contents | Visible to |
 | --- | --- | --- |
-| `.claude/state/checkpoint.md` | Current work state + decisions already taken | Everyone who clones the repo |
+| `.claude/state/handoff.md` | Current work state + decisions already taken | Everyone who clones the repo |
 | `.claude/state/project-notes.md` | Error Patterns · Deviations · Open Questions | Everyone who clones the repo |
 | auto memory | Personal preferences/habits of that machine's user | That person, that machine |
 
 **On conflict, the committed files win** — auto memory may be stale or someone
 else's.
 
-## Writing the checkpoint (end of a work chunk)
+## Writing the handoff (end of a work chunk)
 
-1. Read the existing `.claude/state/checkpoint.md` first — **update it, never
+1. Read the existing `.claude/state/handoff.md` first — **update it, never
    rewrite it from scratch.** Decision history has value.
 2. Bring it up to date with reality, using this structure (keep every section;
    add or remove none):
 
 ```markdown
-# Checkpoint
+# Handoff
 
 Last updated: YYYY-MM-DD
 
@@ -63,8 +65,8 @@ Last updated: YYYY-MM-DD
    update the สถานะ column of its feature table to match what just happened
    (`☐ todo` · `🔨 in progress` · `⏳ blocked — <what it waits on>` ·
    `✅ done`). This skill is the board's **only** writer after generation, so
-   it cannot drift from the checkpoint — the board answers "which features
-   are done" at a glance; the checkpoint stays the narrative of what happened
+   it cannot drift from the handoff file — the board answers "which features
+   are done" at a glance; the handoff stays the narrative of what happened
    and why. Touch nothing else in that file.
 4. Write things that are **traceable** — file names, function names, PR numbers;
    not "fixed the user page".
@@ -111,9 +113,9 @@ e.g. `.claude/skills/<project>-payroll-rules/`.
 
 ## Verification
 
-- [ ] `.claude/state/checkpoint.md` has all 4 sections and "Last updated" is today
+- [ ] `.claude/state/handoff.md` has all 4 sections and "Last updated" is today
 - [ ] `.claude/state/project-notes.md` has the 3 fixed sections
 - [ ] Every added entry is dated · every Decision has its reason
-- [ ] If `docs/requirements-brief/00-overview.md` exists, its สถานะ column agrees with the checkpoint's In progress/Done
+- [ ] If `docs/requirements-brief/00-overview.md` exists, its สถานะ column agrees with the handoff's In progress/Done
 - [ ] No secrets / `.env` values in these files (they are committed)
-- [ ] `CLAUDE.md` still imports `@.claude/state/checkpoint.md` (or the next session won't see it)
+- [ ] `CLAUDE.md` still imports `@.claude/state/handoff.md` (or the next session won't see it)

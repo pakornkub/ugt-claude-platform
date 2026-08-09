@@ -1,6 +1,6 @@
 # Model Mode
 
-<!-- Owned by /ugt-mode — switch with `/ugt-mode easy|default|god|auto`, never edit by hand. -->
+<!-- Owned by /ugt-model-mode — switch with `/ugt-model-mode easy|default|god|auto`, never edit by hand. -->
 
 Current mode: **default**
 

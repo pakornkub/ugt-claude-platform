@@ -1,20 +1,20 @@
 {
-  "skill_name": "ugt-checkpoint",
-  "notes": "Runs on a fixture where both .claude/state/ files already exist (the output of ugt-nextjs-setup step 4) with some prior content, to test 'update, don't overwrite'. Prompts stay in Thai: they simulate real user input.",
+  "skill_name": "ugt-handoff",
+  "notes": "Runs on a fixture where both .claude/state/ files already exist (the output of ugt-nextjs-full-setup step 4) with some prior content, to test 'update, don't overwrite'. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
       "name": "update-not-overwrite",
       "prompt": "วันนี้ทำเสร็จแล้ว บันทึกไว้ให้ด้วย วันนี้แก้หน้า approve ลาให้กดอนุมัติหลายรายการพร้อมกันได้ ตัดสินใจใช้ transaction เดียวต่อการกดหนึ่งครั้งเพราะไม่อยากให้อนุมัติได้ครึ่ง ๆ ส่วนที่ยังไม่เสร็จคือ email แจ้งเตือน",
-      "expected_output": "Updates checkpoint.md keeping the existing entries, adds new entries under the right sections, records the Decision with its reason and rejected alternative, dates everything, leaves project-notes.md untouched since there is no error pattern",
+      "expected_output": "Updates handoff.md keeping the existing entries, adds new entries under the right sections, records the Decision with its reason and rejected alternative, dates everything, leaves project-notes.md untouched since there is no error pattern",
       "assertions": [
-        "Pre-existing entries in checkpoint.md are all preserved, none deleted",
+        "Pre-existing entries in handoff.md are all preserved, none deleted",
         "Today's finished work is added under 'Done' with a date",
         "The email notification lands under 'Next', not under 'Done'",
         "The transaction decision is recorded with its reason",
         "The 'Last updated' field is changed to today's date",
-        "All 4 checkpoint.md sections remain and no new section is added",
-        "node scripts/verify.mjs of ugt-nextjs-setup exits 0 (state structure still valid)",
+        "All 4 handoff.md sections remain and no new section is added",
+        "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0 (state structure still valid)",
         "If the fixture has docs/requirements-brief/00-overview.md, the สถานะ column is updated to reflect the finished work (and nothing else in that file changes)"
       ],
       "files": []

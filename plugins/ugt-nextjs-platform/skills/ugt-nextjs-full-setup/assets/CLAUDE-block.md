@@ -1,4 +1,4 @@
-<!-- ugt:start — this block is owned by `ugt-nextjs-setup` and may be rewritten wholesale on /plugin update.
+<!-- ugt:start — this block is owned by `ugt-nextjs-full-setup` and may be rewritten wholesale on /plugin update.
      Put project-specific content OUTSIDE the markers or it will be lost on update.
      (HTML comments are stripped before entering context, so they cost no tokens.) -->
 
@@ -36,23 +36,23 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 ## Team state (committed to the repo)
 
-@.claude/state/checkpoint.md
+@.claude/state/handoff.md
 
 @.claude/state/project-notes.md
 
 - **Treat these two files as the latest truth** — if they conflict with auto
   memory, these files win (auto memory is machine-local, not shared with the team)
-- **Call `/ugt-checkpoint` at the end of every work chunk** to update them, then commit
+- **Call `/ugt-handoff` at the end of every work chunk** to update them, then commit
 - Hit an error that cost real time → record it under Error Patterns in
   `project-notes.md` immediately, while the details are fresh
 - Keep both files short (~100 lines each) — they load into context every session
 
 ## Model mode (subagent routing)
 
-@.claude/state/mode.md
+@.claude/state/model-mode.md
 
 - Follow that table when dispatching subagents or spawning teammates · switch
-  preset with `/ugt-mode easy|default|god|auto` · main session model stays the
+  preset with `/ugt-model-mode easy|default|god|auto` · main session model stays the
   user's `/model`
 
 ## Which skill, when
@@ -65,7 +65,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
 | Build a feature / fix a bug | Normal superpowers pipeline (brainstorming → plan → TDD → review) |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
-| Finish work / hand off the session | `/ugt-checkpoint` |
+| Finish work / hand off the session | `/ugt-handoff` |
 
 ## Where new knowledge goes
 

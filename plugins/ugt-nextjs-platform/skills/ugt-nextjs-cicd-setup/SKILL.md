@@ -11,7 +11,7 @@ description: >
   never reaching `healthy`, `COPY .next/standalone` failing, client-side env vars
   empty in the browser bundle, or a Groovy parse error after removing an optional
   block.
-  Run ugt-nextjs-quality-setup first — this pipeline calls `lint`, `format:check` and
+  Run ugt-nextjs-test-lint-setup first — this pipeline calls `lint`, `format:check` and
   `test:coverage` by exact name and goes red on the third stage without them.
   Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth setup
   (→ ugt-nextjs-database-setup / ugt-nextjs-auth-setup).

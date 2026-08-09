@@ -1,5 +1,5 @@
 ---
-name: ugt-nextjs-setup
+name: ugt-nextjs-full-setup
 description: >
   The entry point for turning an existing Next.js project into one that can
   actually be deployed on the org's infrastructure. Use this whenever someone
@@ -10,16 +10,16 @@ description: >
   อะไรเลย", "ต้องเตรียมอะไรบ้างก่อนขึ้น server", "ทำตามมาตรฐานบริษัทให้ด้วย" —
   because that is exactly the case where they don't yet know which pieces they
   need, and this skill's job is to find out. It interviews once, routes to
-  ugt-nextjs-database-setup → ugt-nextjs-quality-setup → ugt-nextjs-design-setup →
+  ugt-nextjs-database-setup → ugt-nextjs-test-lint-setup → ugt-nextjs-design-setup →
   ugt-nextjs-auth-setup → ugt-nextjs-cicd-setup in
   dependency order, then installs the harness files (CLAUDE.md block,
   .claude/rules, .claude/state) so the standards outlive the session.
   Do NOT use when the request names exactly one area: "ต่อ database", "ทำ CI",
   "ใส่ login SSO", "ตั้ง vitest", "ทำข้อตกลง design" go straight to that single
-  skill.
+  skill. (เดิมชื่อ ugt-nextjs-setup)
 ---
 
-# UGT Setup — org-standard installer (parent skill)
+# UGT Full Setup — org-standard installer (parent skill)
 
 ## Overview
 
@@ -30,7 +30,7 @@ child skills in the correct order → summarize + smoke test.
 | Child skill | Installs |
 | --- | --- |
 | `ugt-nextjs-database-setup` | SQL Server via Prisma + naming conventions |
-| `ugt-nextjs-quality-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
+| `ugt-nextjs-test-lint-setup` | Vitest (JUnit + lcov) + ESLint + Prettier + pre-commit |
 | `ugt-nextjs-design-setup` | Design agreement (`docs/DESIGN.md`) + shadcn tokens/fonts/shell + org UI kit |
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
@@ -93,7 +93,7 @@ Database → Quality → Design → Auth → CI
   stage) and the build must pass first.
 - Skip unselected modules; the relative order of the rest is unchanged.
 - For each module: invoke the child skill (`ugt-nextjs-database-setup` /
-  `ugt-nextjs-quality-setup` / `ugt-nextjs-design-setup` / `ugt-nextjs-auth-setup` /
+  `ugt-nextjs-test-lint-setup` / `ugt-nextjs-design-setup` / `ugt-nextjs-auth-setup` /
   `ugt-nextjs-cicd-setup`) and follow its
   SKILL.md — pass down the interview answers already collected, never re-ask
   the user.
@@ -112,9 +112,9 @@ where noted.
 | `assets/rules-ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole file |
 | `assets/rules-ugt-nextjs-ci.md` | `.claude/rules/ugt-nextjs-ci.md` | whole file |
 | `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
-| `assets/state-checkpoint.md` | `.claude/state/checkpoint.md` | **create once, never overwrite** |
+| `assets/state-handoff.md` | `.claude/state/handoff.md` | **create once, never overwrite** |
 | `assets/state-project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
-| `assets/state-mode.md` | `.claude/state/mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-mode` |
+| `assets/state-model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
 
 How:
 
@@ -142,8 +142,8 @@ How:
    if the file already exists, merge — do not overwrite.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
-   installed modules in `checkpoint.md` · `mode.md` ships with the `default`
-   preset — changing it is `/ugt-mode`'s job, not this skill's.
+   installed modules in `handoff.md` · `model-mode.md` ships with the `default`
+   preset — changing it is `/ugt-model-mode`'s job, not this skill's.
 5. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
    **`.claude/state/` must be committed** — never ignore `.claude/` wholesale.
 6. If the org has no machine-level hard boundary yet → point the user at the
@@ -155,7 +155,7 @@ How:
 ### 5. Close out
 
 1. **Run `node <skill-dir>/scripts/verify.mjs` for every installed module**
-   (cwd = project root), **including `ugt-nextjs-setup`'s own `scripts/verify.mjs`
+   (cwd = project root), **including `ugt-nextjs-full-setup`'s own `scripts/verify.mjs`
    which checks the harness layer.** Fix every ✘ before closing — never report
    done with an exit code 1 outstanding. Then walk the remaining checklist
    items in each skill that a machine can't verify.

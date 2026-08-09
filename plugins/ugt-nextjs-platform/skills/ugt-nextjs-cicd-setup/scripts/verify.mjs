@@ -235,7 +235,7 @@ check('npm scripts the pipeline calls are present', () => {
   if (!pkg) return { ok: false, msg: 'No package.json' };
   const missing = ['lint', 'format:check', 'test:coverage', 'build'].filter((s) => !pkg.scripts?.[s]);
   return missing.length
-    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-quality-setup first` }
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-test-lint-setup first` }
     : { ok: true };
 });
 

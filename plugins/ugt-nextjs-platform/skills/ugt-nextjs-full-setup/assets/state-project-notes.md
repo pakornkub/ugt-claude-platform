@@ -1,6 +1,6 @@
 # Project Notes
 
-<!-- These 3 sections are fixed — never add or remove sections. Updated via /ugt-checkpoint.
+<!-- These 3 sections are fixed — never add or remove sections. Updated via /ugt-handoff.
      This file is committed with the repo: never put secrets or .env values here. -->
 
 ## Error Patterns

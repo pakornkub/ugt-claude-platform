@@ -1,23 +1,23 @@
 ---
-name: ugt-mode
+name: ugt-model-mode
 description: >
   Read or switch the project's model mode — the committed preset
-  (`.claude/state/mode.md`) that decides which Claude model
+  (`.claude/state/model-mode.md`) that decides which Claude model
   (fable/opus/sonnet/haiku) each task type gets when work is dispatched to a
-  subagent or an Agent Teams teammate. Use when the user says "/ugt-mode",
+  subagent or an Agent Teams teammate. Use when the user says "/ugt-model-mode",
   "เปลี่ยนโหมด", "โหมดประหยัด", "ประหยัด token", "โหมด god",
   "อัดคุณภาพเต็มที่", "โหมด auto", "เลือกความแรงตามงาน", asks which mode is
   active, or complains the setup spends too many (or too few) tokens for the
   job.
   Do NOT use to change the main session model — that is `/model`, which only
-  the user can run.
+  the user can run. (เดิมชื่อ ugt-mode)
 ---
 
-# UGT Mode — per-task-type model routing for subagents
+# UGT Model Mode — per-task-type model routing for subagents
 
 ## Overview
 
-One committed file, `.claude/state/mode.md`, tells every session which model to
+One committed file, `.claude/state/model-mode.md`, tells every session which model to
 pass when dispatching work — a subagent (superpowers pipeline or direct Agent
 call) or an Agent Teams teammate at spawn; the decision point is the same
 either way. Three fixed presets trade cost against quality; a fourth, `auto`,
@@ -69,20 +69,20 @@ LLM, not a rule engine.
 | Docs / light edits | haiku |
 
 The judgment happens **at dispatch time, in the session**. `auto` never
-rewrites `mode.md` per task and never switches presets by itself — switching
+rewrites `model-mode.md` per task and never switches presets by itself — switching
 presets is always a human command. All three design invariants above still
 bind the judgment.
 
 ## Switching mode
 
-On "/ugt-mode <preset>" (or an equivalent phrase — "โหมดประหยัด" = `easy`,
+On "/ugt-model-mode <preset>" (or an equivalent phrase — "โหมดประหยัด" = `easy`,
 "โหมด god"/"อัดคุณภาพ" = `god`, "เลือกความแรงตามงาน"/"โหมด auto" = `auto`):
 
-1. Rewrite `.claude/state/mode.md` **wholesale** — for `easy`/`default`/`god`
+1. Rewrite `.claude/state/model-mode.md` **wholesale** — for `easy`/`default`/`god`
    use the fixed template below, substituting the Model column from the chosen
    preset's column; for `auto` use the auto template below it verbatim. This
    file is skill-owned — wholesale rewrite is correct here (unlike
-   checkpoint.md).
+   handoff.md).
 2. Confirm to the user: the new mode, and that it applies from the next
    subagent dispatch (no restart needed — the file is re-read via the
    CLAUDE.md `@` import each session, and current-session dispatches should
@@ -94,7 +94,7 @@ Fixed template (`<mode>` = preset name, model column from the table above):
 ```markdown
 # Model Mode
 
-<!-- Owned by /ugt-mode — switch with `/ugt-mode easy|default|god|auto`, never edit by hand. -->
+<!-- Owned by /ugt-model-mode — switch with `/ugt-model-mode easy|default|god|auto`, never edit by hand. -->
 
 Current mode: **<mode>**
 
@@ -115,12 +115,12 @@ Agent tool, or Agent Teams), pass `model:` by task type:
 - Task type not listed → omit `model:` (the subagent inherits the session model).
 ```
 
-Auto template (used verbatim for `/ugt-mode auto`):
+Auto template (used verbatim for `/ugt-model-mode auto`):
 
 ```markdown
 # Model Mode
 
-<!-- Owned by /ugt-mode — switch with `/ugt-mode easy|default|god|auto`, never edit by hand. -->
+<!-- Owned by /ugt-model-mode — switch with `/ugt-model-mode easy|default|god|auto`, never edit by hand. -->
 
 Current mode: **auto**
 
@@ -146,24 +146,24 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 
 ## Reading mode
 
-"โหมดตอนนี้คืออะไร" / "/ugt-mode" with no argument → read
-`.claude/state/mode.md` and report the `Current mode:` line plus its table.
+"โหมดตอนนี้คืออะไร" / "/ugt-model-mode" with no argument → read
+`.claude/state/model-mode.md` and report the `Current mode:` line plus its table.
 File missing → say no mode is set (dispatches inherit the session model) and
-offer `/ugt-mode default` to create it.
+offer `/ugt-model-mode default` to create it.
 
 ## Quick Rules
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| Rewrite `mode.md` wholesale from the template | Hand-edit single rows (drifts from every preset) |
+| Rewrite `model-mode.md` wholesale from the template | Hand-edit single rows (drifts from every preset) |
 | Point the user to `/model` for the main session | Claim the mode changed the main-loop model |
 | Keep haiku on mechanical rows in every preset | "Upgrade" verify-script runs to an expensive model |
-| Let `auto` judge in-session at dispatch time | Rewrite `mode.md` per task or auto-switch presets |
-| Leave `checkpoint.md` / `project-notes.md` alone | Record the switch as a checkpoint Decision (it's config, not history) |
+| Let `auto` judge in-session at dispatch time | Rewrite `model-mode.md` per task or auto-switch presets |
+| Leave `handoff.md` / `project-notes.md` alone | Record the switch as a handoff Decision (it's config, not history) |
 
 ## Verification
 
-- [ ] `.claude/state/mode.md` has a `Current mode: **easy|default|god|auto**` line
+- [ ] `.claude/state/model-mode.md` has a `Current mode: **easy|default|god|auto**` line
 - [ ] Fixed preset: the table's non-mechanical rows match that preset's column
       exactly · `auto`: the table matches the auto template's rules verbatim
 - [ ] The two mechanical rows still say `haiku`

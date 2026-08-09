@@ -1,5 +1,5 @@
 {
-  "skill_name": "ugt-nextjs-setup",
+  "skill_name": "ugt-nextjs-full-setup",
   "notes": "Evals 1-2 run on a bare Next.js scaffold; eval 3 on an Express scaffold (not Next.js). Part of this skill's output lives in the transcript (child-skill invocation order), not in files — the grader must read the transcript, not only the produced files. Prompts are intentionally kept in Thai: they simulate what org users actually type.",
   "evals": [
     {
@@ -13,7 +13,7 @@
         "Child-skill-specific questions are folded into the same batch instead of re-asked later",
         "Installs in order Database → Quality → Auth → CI",
         "Also installs the harness: ugt:start/ugt:end block in CLAUDE.md, .claude/rules/, .claude/state/, .claude/settings.json",
-        "node scripts/verify.mjs of ugt-nextjs-setup exits 0",
+        "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0",
         "Runs verify.mjs for every installed module and reports the results",
         "Closing summary lists env vars needing real values and items to request from admins",
         "Attaches a smoke-test checklist matching what was actually installed"
@@ -24,7 +24,7 @@
       "id": 2,
       "name": "single-area-should-not-orchestrate",
       "prompt": "ต่อ database sql server ให้โปรเจคนี้ด้วยครับ ที่เหลือยังไม่ต้อง",
-      "expected_output": "Does not open the parent skill's full interview and does not install auth/quality/CI — hands off to ugt-nextjs-database-setup directly (or, if ugt-nextjs-setup was already invoked, does only the database part)",
+      "expected_output": "Does not open the parent skill's full interview and does not install auth/quality/CI — hands off to ugt-nextjs-database-setup directly (or, if ugt-nextjs-full-setup was already invoked, does only the database part)",
       "assertions": [
         "Installs no auth, vitest/eslint, or CI files",
         "Asks no questions about Keycloak, LDAP, Jenkins, or Sentry",

@@ -1,5 +1,5 @@
 ---
-name: ugt-nextjs-quality-setup
+name: ugt-nextjs-test-lint-setup
 description: >
   Use when a Next.js/TypeScript project needs its test and code-quality tooling
   set up so the org CI pipeline can pass — Vitest (with JUnit output + lcov
@@ -13,9 +13,10 @@ description: >
   npm scripts by exact name and goes red immediately if any is absent.
   Don't use for writing the tests themselves (that's normal dev work) or for
   Jenkins/SonarQube server config (→ ugt-nextjs-cicd-setup).
+  (เดิมชื่อ ugt-nextjs-quality-setup)
 ---
 
-# UGT Quality Setup — Vitest / ESLint / Prettier so the pipeline can pass
+# UGT Test-Lint Setup — Vitest / ESLint / Prettier so the pipeline can pass
 
 ## Overview
 

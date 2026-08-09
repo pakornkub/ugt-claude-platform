@@ -1,4 +1,4 @@
-# Org-level Hard Boundary — a document for the IT team (NOT installed by `/ugt-nextjs-setup`)
+# Org-level Hard Boundary — a document for the IT team (NOT installed by `/ugt-nextjs-full-setup`)
 
 > **Read first**: this is the list of things to request from IT / machine
 > administrators — the skill cannot install it, because it requires writing a
@@ -8,7 +8,7 @@
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-setup` and `ugt-nextjs-auth-setup` reference this boundary.
+> `ugt-nextjs-full-setup` and `ugt-nextjs-auth-setup` reference this boundary.
 > Bump the platform's `plugin.json` version and CHANGELOG when you do.
 
 ## Why it must be the managed level

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runnable check for the harness layer that ugt-nextjs-setup installs (CLAUDE.md / rules / state / settings)
+// Runnable check for the harness layer that ugt-nextjs-full-setup installs (CLAUDE.md / rules / state / settings)
 //
 //   node <path-to-skill>/scripts/verify.mjs
 //
@@ -47,9 +47,9 @@ check('CLAUDE.md within 200 lines', () => {
 
 check('CLAUDE.md imports team state', () => {
   if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
-  return /@\.claude\/state\/checkpoint\.md/.test(claudeMd)
+  return /@\.claude\/state\/handoff\.md/.test(claudeMd)
     ? { ok: true }
-    : { ok: false, msg: 'No `@.claude/state/checkpoint.md` import — next session will not see team state' };
+    : { ok: false, msg: 'No `@.claude/state/handoff.md` import — next session will not see team state' };
 });
 
 check('No <...> placeholders left in CLAUDE.md', () => {
@@ -92,15 +92,15 @@ check('Rules exist for every installed module', () => {
 
 // ── .claude/state ──────────────────────────────────────────────────────────
 check('Both team-state files exist', () => {
-  const missing = ['checkpoint.md', 'project-notes.md'].filter((f) => !has('.claude/state', f));
+  const missing = ['handoff.md', 'project-notes.md'].filter((f) => !has('.claude/state', f));
   return missing.length
     ? { ok: false, msg: `Missing .claude/state/${missing.join(', ')}` }
     : { ok: true };
 });
 
-check('checkpoint.md has all sections and was actually updated', () => {
-  if (!has('.claude/state/checkpoint.md')) return { ok: false, msg: 'No checkpoint.md' };
-  const body = read('.claude/state/checkpoint.md');
+check('handoff.md has all sections and was actually updated', () => {
+  if (!has('.claude/state/handoff.md')) return { ok: false, msg: 'No handoff.md' };
+  const body = read('.claude/state/handoff.md');
   const needed = ['## In progress', '## Done', '## Next', '## Decisions'];
   const missing = needed.filter((h) => !body.includes(h));
   if (missing.length) return { ok: false, msg: `Missing sections: ${missing.join(', ')}` };
@@ -109,13 +109,13 @@ check('checkpoint.md has all sections and was actually updated', () => {
     : { ok: true };
 });
 
-check('mode.md declares a valid model mode', () => {
-  if (!has('.claude/state/mode.md')) {
-    return { ok: 'warn', msg: 'No .claude/state/mode.md — subagent dispatches inherit the session model; run /ugt-mode default to create it' };
+check('model-mode.md declares a valid model mode', () => {
+  if (!has('.claude/state/model-mode.md')) {
+    return { ok: 'warn', msg: 'No .claude/state/model-mode.md — subagent dispatches inherit the session model; run /ugt-model-mode default to create it' };
   }
-  return /Current mode:\s*\*\*(easy|default|god|auto)\*\*/.test(read('.claude/state/mode.md'))
+  return /Current mode:\s*\*\*(easy|default|god|auto)\*\*/.test(read('.claude/state/model-mode.md'))
     ? { ok: true }
-    : { ok: false, msg: 'mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-mode' };
+    : { ok: false, msg: 'model-mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-model-mode' };
 });
 
 check('project-notes.md has the 3 fixed sections', () => {
@@ -129,7 +129,7 @@ check('project-notes.md has the 3 fixed sections', () => {
 check('No secrets leaked into state files', () => {
   const suspicious = /(password|secret|client_secret|api[_-]?key|bearer)\s*[=:]\s*\S{8,}/i;
   const bad = [];
-  for (const f of ['checkpoint.md', 'project-notes.md']) {
+  for (const f of ['handoff.md', 'project-notes.md']) {
     if (!has('.claude/state', f)) continue;
     if (suspicious.test(read('.claude/state', f))) bad.push(f);
   }
@@ -172,7 +172,7 @@ check('.gitignore: logs ignored, state committed', () => {
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;
 let warned = 0;
-console.log('\nugt-nextjs-setup — verify (harness layer)\n');
+console.log('\nugt-nextjs-full-setup — verify (harness layer)\n');
 for (const r of results) {
   const state = r.ok === true ? 'true' : r.ok === 'warn' ? 'warn' : 'false';
   if (state === 'false') failed++;

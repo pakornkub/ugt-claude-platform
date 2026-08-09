@@ -45,7 +45,7 @@
     },
     "N2": {
       "prompt": "ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัท",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "N3": {
       "prompt": "ใส่ระบบ login SSO ให้หน่อย",

@@ -24,16 +24,16 @@ const CHECKS = [
   {
     name: 'Quality Gate: new_coverage >= 60%',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/new_coverage/, /≥\s*60%/],
+      [`${CORE}/contracts/cicd.md`]: [/new_coverage/, /≥\s*60%/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
-      [`${NEXT}/ugt-nextjs-quality-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
+      [`${NEXT}/ugt-nextjs-test-lint-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
     },
   },
   {
     name: 'Quality Gate: new_violations = 0',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/new_violations/, /=\s*0/],
+      [`${CORE}/contracts/cicd.md`]: [/new_violations/, /=\s*0/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_violations/, /=\s*0/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_violations/, /=\s*0/],
     },
@@ -41,7 +41,7 @@ const CHECKS = [
   {
     name: 'Quality Gate: new_duplicated_lines_density <= 3%',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
+      [`${CORE}/contracts/cicd.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
     },
@@ -49,7 +49,7 @@ const CHECKS = [
   {
     name: 'Quality Gate: new_security_hotspots_reviewed = 100%',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/new_security_hotspots_reviewed/, /100%/],
+      [`${CORE}/contracts/cicd.md`]: [/new_security_hotspots_reviewed/, /100%/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_security_hotspots_reviewed/, /100%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_security_hotspots_reviewed/, /100%/],
     },
@@ -57,39 +57,39 @@ const CHECKS = [
   {
     name: 'Dependency scan: fail CRITICAL >= 1, unstable HIGH >= 1',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
+      [`${CORE}/contracts/cicd.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
     },
   },
   {
     name: 'Pipeline: 10 stages',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/all 10, in order/],
+      [`${CORE}/contracts/cicd.md`]: [/all 10, in order/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/all 10, in order|10-stage/],
     },
   },
   {
     name: 'Credential naming: env-<project> / env-<project>-dev',
     files: {
-      [`${CORE}/contracts/delivery.md`]: [/env-<project>/, /env-<project>-dev/],
+      [`${CORE}/contracts/cicd.md`]: [/env-<project>/, /env-<project>-dev/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/env-<project>/, /env-<project>-dev/],
     },
   },
   {
     name: 'Session policy: 8h lifetime, refresh at 30m remaining',
     files: {
-      [`${CORE}/contracts/identity.md`]: [/8 hours/, /30 minutes/],
+      [`${CORE}/contracts/auth.md`]: [/8 hours/, /30 minutes/],
       [`${NEXT}/ugt-nextjs-auth-setup/SKILL.md`]: [/8[\s-]?h(?:our)?/, /30[\s-]?m(?:in)?/],
     },
   },
   {
     name: 'Guard order: session -> permission -> action -> audit log',
     files: {
-      [`${CORE}/contracts/identity.md`]: [
+      [`${CORE}/contracts/auth.md`]: [
         /1\.\s*session[\s\S]*2\.\s*permission[\s\S]*3\.\s*action[\s\S]*4\.\s*audit log/,
       ],
       [`${NEXT}/ugt-nextjs-auth-setup/SKILL.md`]: [/session\s*→\s*permission\s*→\s*action\s*→\s*audit log/],
-      [`${NEXT}/ugt-nextjs-setup/assets/CLAUDE-block.md`]: [/session\s*→\s*permission\s*→\s*action\s*→\s*audit log/],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/session\s*→\s*permission\s*→\s*action\s*→\s*audit log/],
     },
   },
   {
@@ -101,7 +101,7 @@ const CHECKS = [
       [`${NEXT}/ugt-nextjs-database-setup/SKILL.md`]: [
         /CreatedAt/, /UpdatedAt/, /CreatedBy/, /UpdatedBy/, /IsActive/, /IsDeleted/,
       ],
-      [`${NEXT}/ugt-nextjs-setup/assets/CLAUDE-block.md`]: [
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
         /CreatedAt/, /UpdatedAt/, /CreatedBy/, /UpdatedBy/, /IsActive/, /IsDeleted/,
       ],
     },
@@ -111,7 +111,7 @@ const CHECKS = [
     files: {
       [`${CORE}/contracts/database.md`]: [/IsDeleted = 1/i, /never hard delete/i],
       [`${NEXT}/ugt-nextjs-database-setup/SKILL.md`]: [/IsDeleted = 1/i],
-      [`${NEXT}/ugt-nextjs-setup/assets/CLAUDE-block.md`]: [/IsDeleted = 1/i],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/IsDeleted = 1/i],
     },
   },
 ];

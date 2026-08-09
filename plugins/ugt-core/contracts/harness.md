@@ -6,9 +6,9 @@ stack; this mechanism is shared.
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-setup` (installs the harness: CLAUDE-block, state assets,
-> verify.mjs) and `ugt-core`'s own `ugt-mode`/`ugt-checkpoint` skills (own the
-> `mode.md`/`checkpoint.md` rows). Bump the relevant plugin's `plugin.json`
+> `ugt-nextjs-full-setup` (installs the harness: CLAUDE-block, state assets,
+> verify.mjs) and `ugt-core`'s own `ugt-model-mode`/`ugt-handoff` skills (own the
+> `model-mode.md`/`handoff.md` rows). Bump the relevant plugin's `plugin.json`
 > version and CHANGELOG when you do.
 
 ## Files and ownership
@@ -18,22 +18,22 @@ stack; this mechanism is shared.
 | `CLAUDE.md` — block between `<!-- ugt:start -->` … `<!-- ugt:end -->` | the stack platform | replaced wholesale on plugin update; **project content lives outside the markers and is never touched** |
 | `.claude/rules/ugt-<stack>-*.md` | the stack platform | replaced wholesale; carry `paths:` frontmatter so the runtime loads them only when matching files are touched |
 | `.claude/rules/<project>-*.md` | the project | never touched by the platform |
-| `.claude/state/checkpoint.md`, `.claude/state/project-notes.md` | the team | **created once, never overwritten** — updated via `/ugt-checkpoint` |
-| `.claude/state/mode.md` | the team | **created once** with the `default` preset — rewritten only via `/ugt-mode` |
+| `.claude/state/handoff.md`, `.claude/state/project-notes.md` | the team | **created once, never overwritten** — updated via `/ugt-handoff` |
+| `.claude/state/model-mode.md` | the team | **created once** with the `default` preset — rewritten only via `/ugt-model-mode` |
 | `.claude/settings.json` | shared | key-merge only (`extraKnownMarketplaces`, `enabledPlugins`, `permissions`); never rewritten |
 | `.claude/logs/` | audit hooks | gitignored; `.claude/state/` is committed — never ignore `.claude/` wholesale |
 
 ## Rules
 
 - `CLAUDE.md` stays under ~200 lines; the block imports team state via
-  `@.claude/state/checkpoint.md` so it loads every session; path-bound content
+  `@.claude/state/handoff.md` so it loads every session; path-bound content
   goes to rules files, not the block
-- State files: `checkpoint.md` has fixed sections (In progress / Done / Next /
+- State files: `handoff.md` has fixed sections (In progress / Done / Next /
   Decisions-with-reasons); `project-notes.md` has exactly three (Error
   Patterns / Deviations / Open Questions); entries are dated; decisions carry
   the rejected alternative; no secrets (the files are committed)
 - Committed state outranks Claude's machine-local auto memory on conflict
-- `mode.md` routes **dispatched-work** model choice per task type — subagents
+- `model-mode.md` routes **dispatched-work** model choice per task type — subagents
   and Agent Teams teammates alike (presets: `easy`/`default`/`god`, plus
   `auto` which judges per task at dispatch time); the main-loop model is the
   user's `/model` and is never switched by a skill

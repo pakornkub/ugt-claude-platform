@@ -2,7 +2,7 @@
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-design-setup` (primary) and `ugt-nextjs-setup` (summary). Bump
+> `ugt-nextjs-design-setup` (primary) and `ugt-nextjs-full-setup` (summary). Bump
 > ugt-core's `plugin.json` version and CHANGELOG when you do. Generated
 > project `DESIGN.md` files record the ugt-core version they were generated
 > against; the design skill's "sync" mode diffs a project against this file.
@@ -95,7 +95,7 @@
 - Shell is a per-project choice (sidebar / topbar) made once in `DESIGN.md`;
   either way: menu items are icon + label; group when > ~7 items; max depth
   2; permission-hidden (not disabled — server guard is the boundary, per
-  `identity.md`); overflow scrolls horizontally, never wraps.
+  `auth.md`); overflow scrolls horizontally, never wraps.
 - One page pattern per app: title + actions + content card — no per-page
   invention. Mobile adaptation is systematic (table→card, dialog→bottom
   sheet), not per-page.

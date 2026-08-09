@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runnable version of the ugt-nextjs-quality-setup Verification Checklist
+// Runnable version of the ugt-nextjs-test-lint-setup Verification Checklist
 //
 //   node <path-to-skill>/scripts/verify.mjs
 //
@@ -39,7 +39,7 @@ const REQUIRED = [
 check('Config files present', () => {
   const missing = REQUIRED.filter((f) => !has(f));
   return missing.length
-    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-quality-setup first` }
+    ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-test-lint-setup first` }
     : { ok: true };
 });
 
@@ -163,7 +163,7 @@ check('Test/coverage artifacts gitignored', () => {
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;
 let warned = 0;
-console.log('\nugt-nextjs-quality-setup — verify\n');
+console.log('\nugt-nextjs-test-lint-setup — verify\n');
 for (const r of results) {
   const state = r.ok === true ? 'true' : r.ok === 'warn' ? 'warn' : 'false';
   if (state === 'false') failed++;

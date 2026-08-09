@@ -1,10 +1,10 @@
-# Checkpoint
+# Handoff
 
 Last updated: <YYYY-MM-DD>
 
 <!-- This file is committed with the repo = the TEAM's memory (Claude's auto memory
      lives on one machine only). CLAUDE.md imports this file into context every
-     session — update it with /ugt-checkpoint at the end of each work chunk.
+     session — update it with /ugt-handoff at the end of each work chunk.
      Never put secrets or .env values here. -->
 
 ## In progress
@@ -13,13 +13,13 @@ Last updated: <YYYY-MM-DD>
 
 ## Done (newest first)
 
-- <YYYY-MM-DD> Installed org standards via `/ugt-nextjs-setup` — <list installed modules>
+- <YYYY-MM-DD> Installed org standards via `/ugt-nextjs-full-setup` — <list installed modules>
 
 ## Next
 
 - Fill in real values in `.env.local`
-- Request from admins: <Keycloak client / Jenkins credentials / SonarQube project, per the ugt-nextjs-setup summary>
-- Run the smoke tests from the `/ugt-nextjs-setup` checklist
+- Request from admins: <Keycloak client / Jenkins credentials / SonarQube project, per the ugt-nextjs-full-setup summary>
+- Run the smoke tests from the `/ugt-nextjs-full-setup` checklist
 
 ## Decisions taken (do not revisit without talking to the team)
 

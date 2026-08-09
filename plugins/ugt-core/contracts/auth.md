@@ -2,7 +2,7 @@
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-auth-setup` (primary) and `ugt-nextjs-setup` (summary). Bump the
+> `ugt-nextjs-auth-setup` (primary) and `ugt-nextjs-full-setup` (summary). Bump the
 > platform's `plugin.json` version and CHANGELOG when you do.
 
 ## Keycloak

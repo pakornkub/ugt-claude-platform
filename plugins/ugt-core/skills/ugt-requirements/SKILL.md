@@ -63,7 +63,7 @@ Output goes to `docs/requirements-brief/` (committed). All content in
 | --- | --- |
 | ระบบทำอะไร | 2–5 sentences, the system's purpose in plain language |
 | ผู้ใช้ / role | Every user type the documents mention, with what each can do |
-| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on → **สถานะ** (initial `☐ todo`; afterwards maintained by `/ugt-checkpoint` — this table is the team's feature-progress board) |
+| รายการ feature | Table: feature name → brief file → priority (if stated) → depends on → **สถานะ** (initial `☐ todo`; afterwards maintained by `/ugt-handoff` — this table is the team's feature-progress board) |
 | ตารางข้อมูล (candidate) | Union of tables/entities implied across features — candidates, not a schema |
 | Cross-cutting | Concerns spanning features: auth, audit, notifications, integrations |
 | Open Questions (ระดับระบบ) | System-wide gaps and conflicts, each phrased as a question a stakeholder can answer |
@@ -71,8 +71,8 @@ Output goes to `docs/requirements-brief/` (committed). All content in
 
 Status values for the feature table: `☐ todo` · `🔨 in progress` ·
 `⏳ blocked — <what it waits on>` · `✅ done`. This skill only ever writes the
-initial `☐ todo`; updating statuses later is `/ugt-checkpoint`'s job, so the
-board has one writer and cannot drift from the checkpoint.
+initial `☐ todo`; updating statuses later is `/ugt-handoff`'s job, so the
+board has one writer and cannot drift from the handoff file.
 
 ### `<NN>-<kebab-feature>.md` — one per feature
 
@@ -97,7 +97,7 @@ an unmarked guess is worse than a gap, because nobody knows to question it.
   stakeholders *before* starting that feature — that is the whole point of
   extracting them early.
 - Questions still unresolved when the session ends: point the user to
-  `/ugt-checkpoint`, which records them under Open Questions in
+  `/ugt-handoff`, which records them under Open Questions in
   `.claude/state/project-notes.md`. This skill **never writes
   `.claude/state/` itself** — those files have one owner each.
 
@@ -123,7 +123,7 @@ Close out with, in this order:
 
    which enters the normal superpowers pipeline (brainstorming → plan → TDD →
    review). One feature per session keeps context clean.
-4. Remind: commit the brief, then `/ugt-checkpoint`.
+4. Remind: commit the brief, then `/ugt-handoff`.
 
 ## Quick Rules
 

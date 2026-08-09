@@ -64,11 +64,11 @@
     },
     "N4": {
       "prompt": "pipeline ล้มที่ stage Unit Tests บอกว่าไม่มี junit.xml",
-      "expected": "ugt-nextjs-quality-setup"
+      "expected": "ugt-nextjs-test-lint-setup"
     },
     "N5": {
       "prompt": "ตั้ง eslint กับ prettier กับ pre-commit hook ให้โปรเจกต์",
-      "expected": "ugt-nextjs-quality-setup"
+      "expected": "ugt-nextjs-test-lint-setup"
     },
     "N6": {
       "prompt": "กดบันทึกแล้วกลับมาหน้า list รายการใหม่ไม่ขึ้น ต้อง refresh เอง",

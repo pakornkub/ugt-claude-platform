@@ -1,5 +1,5 @@
 {
-  "purpose": "Trigger-boundary regression set for ugt-nextjs-setup. S* queries must route to ugt-nextjs-setup; N* queries must NOT (their expected child target is informational). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke first.",
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-full-setup. S* queries must route to ugt-nextjs-full-setup; N* queries must NOT (their expected child target is informational). Rerun by giving a fresh model the plugin skill listing plus each query independently and asking which skill it would invoke first.",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
   "baseline_result": {
     "date": "2026-07-27",
@@ -12,43 +12,43 @@
   "queries": {
     "S1": {
       "prompt": "ทำให้โปรเจคนี้ deploy ได้หน่อยครับ",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S2": {
       "prompt": "โปรเจคนี้ผมสร้างกับ ai ใช้ในเครื่องได้แล้ว แต่จะเอาให้ทีมใช้จริงต้องทำไงต่อ",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S3": {
       "prompt": "ช่วย setup ตามมาตรฐานบริษัทให้ทีครับ",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S4": {
       "prompt": "อยากได้ทั้ง login ทั้ง database ทั้ง ci เลย จัดให้หน่อย",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S5": {
       "prompt": "โปรเจคยังไม่มีอะไรเลย ไม่มี login ไม่มี db ต้องเริ่มจากไหน",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S6": {
       "prompt": "เตรียมโปรเจคขึ้น production ให้หน่อย",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S7": {
       "prompt": "app นี้ยังใช้งานจริงไม่ได้ ช่วยทำให้ใช้ได้ที",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S8": {
       "prompt": "ก่อนส่งมอบให้ user ต้องติดตั้งอะไรบ้าง ทำให้เลยได้ไหม",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S9": {
       "prompt": "ขอ setup โปรเจคใหม่ตาม standard ทีม มี auth กับ db ด้วย",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "S10": {
       "prompt": "โปรเจค demo ตัวนี้อยากยกระดับเป็นระบบจริง ช่วยดูให้หน่อยว่าขาดอะไรแล้วติดตั้งให้เลย",
-      "expected": "ugt-nextjs-setup"
+      "expected": "ugt-nextjs-full-setup"
     },
     "N1": {
       "prompt": "ต่อ database sql server ให้หน่อย ที่เหลือยังไม่เอา",
@@ -64,7 +64,7 @@
     },
     "N4": {
       "prompt": "ตั้ง vitest กับ eslint ให้หน่อย",
-      "expected": "ugt-nextjs-quality-setup"
+      "expected": "ugt-nextjs-test-lint-setup"
     },
     "N5": {
       "prompt": "sonar ไม่ผ่าน ช่วยแก้ violation ที",
@@ -80,11 +80,11 @@
     },
     "N8": {
       "prompt": "จบงานวันนี้แล้ว บันทึก checkpoint ไว้ให้ด้วย",
-      "expected": "ugt-checkpoint"
+      "expected": "ugt-handoff"
     },
     "N9": {
       "prompt": "เขียนหน้า dashboard สรุปยอดให้หน่อย",
-      "expected": "(anything except ugt-nextjs-setup)"
+      "expected": "(anything except ugt-nextjs-full-setup)"
     },
     "N10": {
       "prompt": "deploy รอบล่าสุดพังตรง Quality Gate ค้าง",

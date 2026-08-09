@@ -35,7 +35,7 @@ first so those pages inherit the tokens; do not build login UI here.
   items · max depth 2 — deeper = split into in-page tabs · order: งานหลัก →
   รายงาน → ตั้งค่า/admin ล่างสุด
 - **Permission-hidden, not disabled** — hide items the user lacks `*:read`
-  for; the server guard is the real boundary (contract `identity.md`)
+  for; the server guard is the real boundary (contract `auth.md`)
 - **Nav highlight**: current item = the **longest** href among
   `pathname === href || pathname.startsWith(href + '/')` — the `+ '/'` stops
   `/` matching everything, the longest-match stops `/cut` and `/cut-history`
