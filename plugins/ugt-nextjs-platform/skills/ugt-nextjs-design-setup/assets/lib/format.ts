@@ -165,6 +165,26 @@ export function formatNumber(value: string | number | null | undefined): string 
   return `${m[1]}${m[2].replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${m[3] ?? ''}`;
 }
 
+// ─── ขนาดไฟล์ ────────────────────────────────────────────────────────────────
+
+// ฐาน 1024 พร้อมหน่วย KB/MB/GB แบบที่ผู้ใช้ทั่วไปคาด (ไม่ใช่ KiB/MiB)
+// ต่ำกว่า 1 KB แสดงเป็นไบต์เต็ม ๆ · ที่เหลือทศนิยม 1 ตำแหน่งก็พอสำหรับการอ่าน
+const FILE_SIZE_UNITS = ['KB', 'MB', 'GB', 'TB'] as const;
+
+export function formatFileSize(bytes: number | null | undefined): string {
+  if (bytes === null || bytes === undefined || Number.isNaN(bytes)) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < FILE_SIZE_UNITS.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  // ตัดทศนิยม .0 ทิ้ง — "2 MB" อ่านง่ายกว่า "2.0 MB"
+  const shown = value >= 100 ? Math.round(value) : Number(value.toFixed(1));
+  return `${shown} ${FILE_SIZE_UNITS[unitIndex]}`;
+}
+
 // ─── วันนี้ (เวลาไทย) ─────────────────────────────────────────────────────────
 
 // วันที่ "วันนี้" ตามเวลาไทยเป็น 'YYYY-MM-DD' — ต้องคิดที่ timezone ไทยเสมอ ไม่ใช่ของเครื่อง

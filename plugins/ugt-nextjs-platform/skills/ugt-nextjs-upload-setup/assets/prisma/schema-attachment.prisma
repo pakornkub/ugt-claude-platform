@@ -1,0 +1,40 @@
+// Paste into prisma/schema.prisma — required by ugt-nextjs-upload-setup.
+//
+// The row is the source of truth: the file on the volume is opaque bytes named
+// after `storageKey`, and nothing reads the filesystem to decide what exists or
+// who may see it. Deleting is a soft delete (contract: database.md) — the bytes
+// are removed by the retention job, not by the user's click, so an accidental
+// delete stays recoverable for as long as the project's retention allows.
+
+model attachment {
+  id           String   @id @default(cuid())               @map("Id")
+
+  /** Which record this file belongs to — e.g. "LeaveRequest" + its id. The
+   *  download guard uses this pair to decide whether the caller may read it. */
+  entityType   String   @db.NVarChar(100)                  @map("EntityType")
+  entityId     String   @db.NVarChar(100)                  @map("EntityId")
+
+  /** Generated path on the volume ("2026/08/<uuid>") — never user input. */
+  storageKey   String   @unique @db.NVarChar(300)          @map("StorageKey")
+  /** Original filename, for display and the download header only. */
+  fileName     String   @db.NVarChar(255)                  @map("FileName")
+  /** Client-declared type. Advisory only — never trusted for how we serve it. */
+  contentType  String   @db.NVarChar(150)                  @map("ContentType")
+  fileSize     Int                                         @map("FileSize")
+  checksum     String   @db.NVarChar(64)                   @map("Checksum")
+
+  /** "clean" | "infected" | "error" — only "clean" rows are ever served. */
+  scanStatus   String   @default("clean") @db.NVarChar(20) @map("ScanStatus")
+  scanSignature String? @db.NVarChar(200)                  @map("ScanSignature")
+  scannedAt    DateTime?                                   @map("ScannedAt")
+
+  createdAt    DateTime @default(now())                    @map("CreatedAt")
+  updatedAt    DateTime @updatedAt                         @map("UpdatedAt")
+  createdBy    String?  @db.NVarChar(200)                  @map("CreatedBy")
+  updatedBy    String?  @db.NVarChar(200)                  @map("UpdatedBy")
+  isActive     Boolean  @default(true)                     @map("IsActive")
+  isDeleted    Boolean  @default(false)                    @map("IsDeleted")
+
+  @@index([entityType, entityId])
+  @@map("Attachments")
+}

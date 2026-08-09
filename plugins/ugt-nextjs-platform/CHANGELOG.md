@@ -1,5 +1,53 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.5.0 (2026-08-09)
+
+**New skill `ugt-nextjs-upload-setup`** — file attachments, the second runtime
+gap. 4.4.0 recorded that this needed three org decisions before any code could
+be written; they were made on 2026-08-09:
+
+| Decision | Answer |
+| --- | --- |
+| Where files live | **Docker volume** |
+| Which types | **All types, virus-scanned** |
+| Downloads | **Permission-checked every request** |
+
+Unlike every other skill here, **nothing was extracted** — `ugt-hrms` has no
+upload path at all, so this is built from the decisions rather than from a
+running implementation, and the SKILL says so.
+
+What it installs: `lib/storage.ts` (volume paths derived from a generated
+`yyyy/mm/<uuid>`, never from the filename, with a containment check) ·
+`lib/virus-scan.ts` (clamd INSTREAM spoken directly over TCP — ~40 lines, no
+npm client on the upload path) · an upload Route Handler · a guarded download
+route · `lib/attachment-access.ts` (deny-all skeleton the project must
+implement) · the `Attachments` model · a `FileUpload` component · the
+Dockerfile/compose changes · `.claude/rules`.
+
+The rules that carry the risk:
+
+- **Scan before the volume, fail closed.** Bytes are scanned in memory;
+  anything but a definite *clean* refuses the upload (503 when the scanner is
+  down). A scanner that waves files through when it is broken is worse than
+  none, because everyone believes files are checked. `verify.mjs` fails when
+  `writeStoredFile` runs before `scanBuffer`.
+- **Always `octet-stream` + `attachment` + `nosniff`.** "All types allowed"
+  makes this non-negotiable: a virus-free `.svg` or `.html` served inline is
+  stored XSS on the app's own domain.
+- **Missing and forbidden both answer 404** — a 403 confirms the id exists.
+- **Upload is a Route Handler, not a Server Action** — `bodySizeLimit` caps
+  Server Actions at 1 MB and fails opaquely above it.
+- The storage volume **is not covered by the database backup** and
+  `docker compose down -v` deletes it; both go into `docs/admin-handoff.md`.
+
+Also: `lib/format.ts` gains **`formatFileSize`** (1024-based, KB/MB/GB, `.0`
+trimmed) — file sizes are numbers shown to users, so they belong in the central
+formatter rather than being formatted inline. `ugt-nextjs-auth-setup` now ships
+`files:create` / `files:read` alongside `dev-mode:enable`.
+
+Install order is now `Database → Quality → Design → Auth → [Mail] → [Upload] →
+CI`; Upload is opt-in and must precede CI, whose compose files it modifies.
+
 ## 4.4.0 (2026-08-09)
 
 **New skill `ugt-nextjs-mail-setup`** — the first of the runtime-feature gaps

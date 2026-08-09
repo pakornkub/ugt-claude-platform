@@ -1,0 +1,20 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-upload-setup. S* must route here (storing files users attach, virus scanning, guarded downloads, the documented storage symptoms); N* must NOT — the sharpest boundary is generated downloads (Excel/CSV exports), which need no storage at all.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "queries": {
+    "S1": { "prompt": "อยากให้ผู้ใช้แนบไฟล์เอกสารกับคำขอได้", "expected": "ugt-nextjs-upload-setup" },
+    "S2": { "prompt": "ทำระบบอัปโหลดไฟล์ ต้องสแกนไวรัสก่อนเก็บด้วย", "expected": "ugt-nextjs-upload-setup" },
+    "S3": { "prompt": "ไฟล์ที่อัปโหลดไว้หายหมดหลัง deploy รอบใหม่", "expected": "ugt-nextjs-upload-setup" },
+    "S4": { "prompt": "อัปโหลดไฟล์เกิน 1 MB แล้ว error แปลก ๆ ไม่บอกอะไรเลย", "expected": "ugt-nextjs-upload-setup" },
+    "S5": { "prompt": "ใครก็ตามที่รู้ URL ของไฟล์ก็โหลดได้ ทั้งที่ยังไม่ login", "expected": "ugt-nextjs-upload-setup" },
+    "S6": { "prompt": "ต้องเก็บไฟล์แนบไว้ที่ไหนถึงจะไม่หายและคนอื่นเข้าไม่ได้", "expected": "ugt-nextjs-upload-setup" },
+    "S7": { "prompt": "มีคนอัปโหลดไฟล์ svg ที่มี script ฝังอยู่ กังวลเรื่องความปลอดภัย", "expected": "ugt-nextjs-upload-setup" },
+    "N1": { "prompt": "ทำปุ่ม export รายงานเป็น Excel", "expected": "(normal dev work — generated download, no storage)" },
+    "N2": { "prompt": "ต่อ SQL Server ให้โปรเจค ยังไม่มี prisma", "expected": "ugt-nextjs-database-setup" },
+    "N3": { "prompt": "อยากส่งอีเมลแนบไฟล์ไปกับการแจ้งเตือน", "expected": "ugt-nextjs-mail-setup" },
+    "N4": { "prompt": "เพิ่ม permission ใหม่ให้ role", "expected": "ugt-nextjs-auth-setup" },
+    "N5": { "prompt": "container ไม่ขึ้น healthy หลัง deploy", "expected": "ugt-nextjs-cicd-setup" },
+    "N6": { "prompt": "ปุ่มแนบไฟล์สีไม่ตรงธีมบริษัท", "expected": "ugt-nextjs-design-setup" }
+  }
+}

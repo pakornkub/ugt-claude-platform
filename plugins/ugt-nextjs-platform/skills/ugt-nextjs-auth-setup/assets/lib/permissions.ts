@@ -35,6 +35,12 @@ export const PERMISSIONS = {
   // should get them.
   DEV_MODE: 'dev-mode:enable',
 
+  // File attachments (ugt-nextjs-upload-setup). `files:read` only grants
+  // "may download files at all" — WHICH files a user may see is decided
+  // per record in lib/attachment-access.ts.
+  FILES_CREATE: 'files:create',
+  FILES_READ: 'files:read',
+
   // EXTENSION POINT: add project-domain permissions here (resource:action)
 } as const;
 

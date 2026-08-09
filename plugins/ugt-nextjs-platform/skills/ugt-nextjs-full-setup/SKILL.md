@@ -34,6 +34,7 @@ child skills in the correct order → summarize + smoke test.
 | `ugt-nextjs-design-setup` | Design agreement (`docs/DESIGN.md`) + shadcn tokens/fonts/shell + org UI kit |
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-nextjs-mail-setup` | Workflow email over the org SMTP relay + admin-editable templates + dev mode (optional — only if the project sends mail) |
+| `ugt-nextjs-upload-setup` | File attachments on a Docker volume + ClamAV scanning + guarded download route (optional — only if users attach files) |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
 `ugt-nextjs-clean-code` and `ugt-nextjs-pitfalls` are not part of the install
@@ -83,7 +84,7 @@ AD details, first admin · CI: Sentry?, deploy target).
 ### 3. Install in order (never reorder)
 
 ```
-Database → Quality → Design → Auth → [Mail] → CI
+Database → Quality → Design → Auth → [Mail] → [Upload] → CI
 ```
 
 - **Auth must come after Database** — Better Auth stores user/session/account in Prisma.
@@ -96,6 +97,9 @@ Database → Quality → Design → Auth → [Mail] → CI
 - **Quality must come before CI** — the pipeline calls `lint`/`format:check`/
   `test:coverage` by exact name; without them it goes red at the third stage on
   the very first push.
+- **Upload comes after Auth and before CI** — it needs the permissions and
+  audit log from Auth, and it adds a volume plus a `clamav` service that CI's
+  compose files must already contain. Optional: only when users attach files.
 - **CI comes last** — the pipeline needs to know whether a DB exists (migrate
   stage) and the build must pass first.
 - Skip unselected modules; the relative order of the rest is unchanged.

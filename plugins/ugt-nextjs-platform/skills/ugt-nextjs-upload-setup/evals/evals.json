@@ -1,0 +1,62 @@
+{
+  "skill_name": "ugt-nextjs-upload-setup",
+  "notes": "Evals run on a project that already has database + auth + cicd installed (the table, the permissions/audit log, and the compose files all come from those). Machine-checkable assertions use scripts/verify.mjs as the grader; the EICAR and scanner-down cases need a running stack and are graded by hand.",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "evals": [
+    {
+      "id": 1,
+      "name": "fresh-install",
+      "prompt": "อยากให้ผู้ใช้แนบไฟล์กับคำขอได้ ตั้งระบบอัปโหลดให้หน่อย",
+      "expected_output": "Asks the interview batch in one message (max size + reverse proxy, which records get attachments, which roles may upload/download, retention) · copies the lib/route/component assets · pastes the Attachments model · adds the env vars and the two permissions · applies the Dockerfile mount-point and BOTH compose files (volume + clamav with a long start_period) · tells the user that lib/attachment-access.ts must be implemented before shipping",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-nextjs-upload-setup exits 0 apart from the deny-all check, which is called out explicitly to the user",
+        "Dockerfile creates /app/storage owned by nextjs BEFORE `USER nextjs`",
+        "Both compose files gain the volume and the clamav service",
+        "docs/admin-handoff.md gains the volume-backup note and the `docker compose down -v` warning",
+        "The closing summary states that the storage volume is not covered by the database backup"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "keeps-the-scan-before-the-write",
+      "prompt": "อัปโหลดไฟล์ใหญ่ ๆ แล้วช้า อยากให้เขียนไฟล์ลง disk ไปก่อนแล้วค่อยสแกนทีหลังแบบ background",
+      "setup": "Project already set up by this skill.",
+      "expected_output": "Declines to store before scanning and explains that it puts a possibly-infected file on the volume; offers the alternatives that keep the invariant (raise the clamd timeout, stream-scan, or quarantine into a separate volume that the download route can never read) rather than doing what was asked",
+      "assertions": [
+        "writeStoredFile still runs after scanBuffer in app/api/files/route.ts",
+        "The refusal names the concrete risk, not a vague warning",
+        "At least one workable alternative is offered",
+        "verify.mjs's 'Scan happens BEFORE the file is written' check still passes"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "refuses-inline-serving",
+      "prompt": "อยากให้รูปที่แนบไว้แสดงใน browser เลย ไม่ต้องดาวน์โหลด แก้ Content-Disposition เป็น inline ให้หน่อย",
+      "setup": "Project already set up by this skill.",
+      "expected_output": "Declines to flip the download route to inline for arbitrary uploads, naming stored XSS via .svg/.html on the app's own domain; offers the safe route — a separate image endpoint restricted to a verified image MIME allowlist (sniffed, not trusted from the client), served with nosniff and ideally from a different origin",
+      "assertions": [
+        "The main download route still sends application/octet-stream + attachment + nosniff",
+        "The reply explains why virus-free files can still be dangerous",
+        "Any offered alternative verifies the real content type rather than trusting file.type"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "download-scope-is-per-record",
+      "prompt": "เขียน canReadAttachment ให้ใบลา — เจ้าของคำขอกับหัวหน้าที่อนุมัติเห็นได้",
+      "setup": "Project already set up by this skill, with a LeaveRequest model.",
+      "expected_output": "Implements the LeaveRequest case by loading the record and comparing the session identity to requester/approver — never by checking a broad 'can see all' flag, and never by trusting an id passed from the client",
+      "assertions": [
+        "The rule derives from the session user id compared against fields on the record",
+        "No `!canSeeAll`-style inversion appears",
+        "The default branch still returns false",
+        "verify.mjs's canReadAttachment check passes"
+      ],
+      "files": []
+    }
+  ]
+}
