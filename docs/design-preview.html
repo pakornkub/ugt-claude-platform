@@ -155,7 +155,7 @@
   .ui .hcell .grip{width:11px;height:11px;opacity:.35;cursor:grab}
   .ui .hcell .mark{width:11px;height:11px;opacity:.45}
   .ui .hcell .mark.on{opacity:1;color:var(--primary)}
-  .swatch{border:1px solid var(--border-c);border-radius:10px;overflow:hidden;background:var(--card)}
+  .swatch{border:1px solid var(--border-c);border-radius:var(--r-card);overflow:hidden;background:var(--card)}
   .swatch .chipbox{height:48px}
   .swatch .meta{padding:7px 10px;font-size:12px;line-height:1.5}
   .swatch .meta b{display:block;font-weight:600}
@@ -193,21 +193,21 @@
   .ui .radio i{width:14px;height:14px;border-radius:999px;border:1px solid var(--input-c);display:inline-block;position:relative}
   .ui .radio.on i{border-color:var(--primary)}
   .ui .radio.on i::after{content:'';position:absolute;inset:3px;border-radius:999px;background:var(--primary)}
-  .ui .cbox i{width:14px;height:14px;border-radius:3px;border:1px solid var(--input-c);display:inline-block}
+  .ui .cbox i{width:14px;height:14px;border-radius:var(--r-chip);border:1px solid var(--input-c);display:inline-block}
   .ui .cbox.on i{background:var(--primary);border-color:var(--primary)}
-  .ui .toast{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:8px;
+  .ui .toast{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:var(--r-overlay);
     border:1px solid;font-size:12.5px;line-height:1.5}
   .ui .toast svg{width:14px;height:14px;flex:none;margin-top:2px}
-  .ui .skel{background:var(--muted);border-radius:6px;height:10px}
-  .ui .mcard{border:1px solid var(--border-c);border-radius:10px;padding:10px 12px;display:grid;gap:5px;font-size:12px}
-  .ui .menu{border:1px solid var(--border-c);border-radius:8px;background:var(--popover);padding:4px;
+  .ui .skel{background:var(--muted);border-radius:var(--r-ctl);height:10px}
+  .ui .mcard{border:1px solid var(--border-c);border-radius:var(--r-card);padding:10px 12px;display:grid;gap:5px;font-size:12px}
+  .ui .menu{border:1px solid var(--border-c);border-radius:var(--r-overlay);background:var(--popover);padding:4px;
     display:grid;gap:1px;width:150px;font-size:12.5px}
-  .ui .menu div{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px}
+  .ui .menu div{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:var(--r-ctl)}
   .ui .menu svg{width:13px;height:13px;opacity:.75}
   .ui .tip{background:var(--foreground);color:var(--background);font-size:11.5px;
-    padding:3px 8px;border-radius:6px;display:inline-block}
+    padding:3px 8px;border-radius:var(--r-ctl);display:inline-block}
   .ui .bars{display:flex;align-items:flex-end;gap:8px;height:70px}
-  .ui .bars i{flex:1;border-radius:4px 4px 0 0;display:block}
+  .ui .bars i{flex:1;border-radius:var(--r-chip) var(--r-chip) 0 0;display:block}
   .fmt{font-family:var(--mono);font-size:12px}
   /* label + เครื่องหมาย required ต้องอยู่บรรทัดเดียวกันเสมอ — ไม่ตกลงไปแถวใหม่ */
   .ui .fld{display:grid;gap:5px}
@@ -615,6 +615,13 @@
         </tbody>
       </table>
     </div>
+    <p class="note"><strong>ข้อมูลต้องไม่หายเงียบ ๆ</strong> (มติ 2026-08-09 จากบั๊กจริง):
+      ตารางกว้างเกินกรอบ<strong>เลื่อนแนวนอนได้เสมอ</strong> จะตัดทิ้งต้องส่ง
+      <code>scrollX={false}</code> พร้อมคอมเมนต์เหตุผล · แนวตั้งเลื่อนตามหน้าโดยหัวตาราง
+      ค้างไว้ (ห้ามใส่ <code>max-h</code> จนเกิด scroll ซ้อน) · เมนู sidebar ยาวเกินจอ
+      ต้องเลื่อนได้<strong>และเห็น scrollbar</strong> — ต้องลบ <code>no-scrollbar</code>
+      ที่ block ของ shadcn ติดมา เพราะมันซ่อน scrollbar ทำให้ไม่มีอะไรบอกว่ายังมีเมนูอีก
+      · <code>verify.mjs</code> ตรวจทั้งสองข้อ</p>
     <p class="note"><strong>ห้าม sort ฝั่ง client บนข้อมูลที่เห็นไม่ครบ</strong> — เรียงหน้าเดียว
       ของชุดที่ paginate ฝั่ง server ให้ผลลัพธ์ผิดโดยไม่มี error ตัว DataTable จึง
       <strong>ซ่อน filter รายคอลัมน์ให้อัตโนมัติ</strong>เมื่อได้ <code>serverPagination</code>
@@ -913,7 +920,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>สร้างใบลา</button>
         </div>
         <div class="card" style="padding:14px;display:grid;gap:9px;align-content:start">
-          <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;border-radius:8px;
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;border-radius:var(--r-ctl);
                background:color-mix(in oklab,var(--destructive) 10%,transparent);
                border:1px solid color-mix(in oklab,var(--destructive) 35%,transparent)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--destructive);flex:none;margin-top:1px"><use href="#i-alert"/></svg>

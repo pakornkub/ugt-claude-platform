@@ -1,5 +1,37 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.1.0 (2026-08-09)
+
+**Overflow — content must never disappear without a trace.** Reported from a
+real project ("ข้อมูลใน DataTable หาย ไม่มี scroll") and confirmed in the code.
+
+- `DataTable`: **`scrollX` now defaults to `true`.** It was `false`, and the
+  wrapper applies `overflow-x-clip` in that case — so any table wider than its
+  container had its trailing columns cut off with no scrollbar and no other
+  hint. Passing `scrollX={false}` is still allowed but is now the opt-in, and
+  `verify.mjs` fails unless a comment next to it explains why clipping is safe
+  there. (The Y axis was already fine: the table has no `max-h` and the header
+  is `sticky`, so it rides the page scroll.)
+- **Sidebar**: the `sidebar-*` block ships `SidebarContent` with shadcn's
+  `no-scrollbar` utility — verified to be `scrollbar-width: none` plus a
+  hidden webkit scrollbar. A long menu scrolls but nothing tells the user
+  more exists below. The block cleanup in `references/layout-shells.md` now
+  requires removing it, and `verify.mjs` fails while it is present.
+- DESIGN.md §3 gains an overflow table covering all four surfaces (table X,
+  table Y, sidebar, topbar) with the shared principle stated once.
+
+**Filter chips are `Badge` now.** The chips above the table were a hand-rolled
+pill (`rounded-full border bg-muted px-2 py-0.5 text-xs`) — same idea as
+`Badge` but a different height and font size, so filter chips did not match
+badges elsewhere. They now render `<Badge variant="secondary">`, which is also
+what `StatusBadge` builds on (`Badge variant="outline"` + tone + required
+icon), so all three pill shapes finally come from one component.
+
+`docs/design-preview.html`: every hard-coded `border-radius` inside the
+specimen scope now uses the radius variables — the page was violating the
+"ห้าม override ราย callsite" rule it teaches, and after the 4.0.0 switch to
+mira's radii those literals no longer matched anything.
+
 ## 4.0.0 (2026-08-09)
 
 **BREAKING — radius is now the preset's, not the org's** (มติ 2026-08-09).

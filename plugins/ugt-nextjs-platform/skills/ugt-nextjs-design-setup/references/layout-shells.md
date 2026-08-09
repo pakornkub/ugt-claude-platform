@@ -40,7 +40,14 @@ first so those pages inherit the tokens; do not build login UI here.
   `pathname === href || pathname.startsWith(href + '/')` — the `+ '/'` stops
   `/` matching everything, the longest-match stops `/cut` and `/cut-history`
   both lighting up (bug both projects hit)
-- **Overflow**: menu wider than the bar → horizontal scroll, **never wrap**
+- **Overflow (topbar)**: menu wider than the bar → horizontal scroll, **never wrap**
+- **Overflow (sidebar)**: a menu taller than the viewport must scroll **with a
+  visible scrollbar**. The `sidebar-*` block ships `SidebarContent` with
+  `no-scrollbar` — a shadcn utility that is literally
+  `scrollbar-width: none` plus a hidden webkit scrollbar. It still scrolls, but
+  nothing tells the user more menu exists below, which is the same silent-loss
+  failure as a clipped table. **Delete `no-scrollbar` from `SidebarContent`
+  during the block cleanup** (`scripts/verify.mjs` checks for it).
   (the right-side group dropping to a second line was a real production fix)
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน

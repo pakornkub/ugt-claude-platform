@@ -153,6 +153,28 @@ check('--radius survived the token merge', () => {
     : { ok: 'warn', msg: 'no `--radius-lg` in globals.css — the preset @theme radius scale may have been overwritten' };
 });
 
+check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () => {
+  const problems = [];
+  for (const file of sourceTsx()) {
+    const body = readFileSync(file, 'utf8');
+    const rel = relative(ROOT, file).split('\\').join('/');
+    // scrollX={false} clips columns away — allowed, but the reason must be written down
+    for (const m of body.matchAll(/scrollX=\{false\}/g)) {
+      const upto = body.slice(0, m.index);
+      const line = upto.split('\n').length;
+      const near = body.slice(Math.max(0, m.index - 400), m.index);
+      if (!/\/\/|\/\*|\{\/\*/.test(near)) {
+        problems.push(`${rel}:${line} scrollX={false} with no comment saying why clipping is safe here`);
+      }
+    }
+    // the sidebar block ships `no-scrollbar`, which hides the only hint that more menu exists
+    if (/SidebarContent/.test(body) && /no-scrollbar/.test(body)) {
+      problems.push(`${rel}: SidebarContent still has \`no-scrollbar\` — remove it so a long menu shows its scrollbar`);
+    }
+  }
+  return problems.length ? { ok: false, msg: problems.slice(0, 5).join(' · ') } : { ok: true };
+});
+
 check('Only the four agreed radius roles are used', () => {
   // The preset defines 2xl/3xl/4xl too, but the agreement uses four roles:
   // chip (sm) · control (md) · card (lg) · overlay (xl).

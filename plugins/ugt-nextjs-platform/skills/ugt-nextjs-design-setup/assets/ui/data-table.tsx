@@ -43,6 +43,7 @@ import { cn } from '@/lib/utils';
 import { ROWS_PER_PAGE_OPTIONS } from '@/lib/pagination';
 import { withTableQuery, type TableFields, type TableQuery } from '@/lib/table-query';
 import { moveKey, normalizeOrder, useTablePrefs } from '@/lib/table-prefs';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -607,9 +608,11 @@ interface DataTableProps<TData> {
   emptyTitle?: string;
   emptyDescription?: string;
   /**
-   * Let the table scroll sideways instead of clipping. Off by default (narrow
-   * CRUD tables look better clipped); turn it on for wide monitoring tables,
-   * whose later columns are otherwise unreachable between `sm` and `lg`.
+   * Sideways scrolling. **On by default (มติ 2026-08-09)** — a table wider
+   * than its container must stay reachable. Passing `false` CLIPS the overflow:
+   * the columns past the edge are gone with no scrollbar and no other hint, so
+   * only turn it off when the table genuinely cannot overflow, and say why in
+   * a comment (`verify.mjs` requires the comment).
    */
   scrollX?: boolean;
   /** Optional per-row className, derived from the row's original data (e.g. to
@@ -655,7 +658,7 @@ export function DataTable<TData>({
   searchable,
   emptyTitle,
   emptyDescription,
-  scrollX = false,
+  scrollX = true,
   rowClassName,
   onRowClick,
   toolbarExtra,
@@ -900,10 +903,9 @@ export function DataTable<TData>({
           {activeColumnFilters.map(([key, value]) => {
             const label = labelByKey.get(key) ?? key;
             return (
-              <span
-                key={key}
-                className="inline-flex items-center gap-1 rounded-full border bg-muted px-2 py-0.5 text-xs"
-              >
+              // ป้ายตัวกรอง = `Badge` ตามข้อตกลง (ป้ายที่ไม่ใช่สถานะ) — ห้ามเขียน
+              // ทรง pill เองอีกชุด ไม่งั้นสูง/ขนาดตัวอักษรไม่ตรงกับ Badge ที่อื่น
+              <Badge key={key} variant="secondary" className="gap-1">
                 <span className="text-muted-foreground">{label}:</span>
                 {value}
                 <button
@@ -914,7 +916,7 @@ export function DataTable<TData>({
                 >
                   <X className="size-3" strokeWidth={2} aria-hidden />
                 </button>
-              </span>
+              </Badge>
             );
           })}
           <Button variant="ghost" size="sm" onClick={clearAllColumnFilters}>
@@ -926,7 +928,8 @@ export function DataTable<TData>({
       <div
         className={cn(
           'hidden overflow-clip rounded-lg border sm:block',
-          // default: no sideways scroll · scrollX: let the inner container scroll
+          // default: the inner container scrolls sideways · scrollX={false}
+          // CLIPS — columns past the edge become unreachable, so it is opt-in
           !scrollX && '[&_[data-slot=table-container]]:overflow-x-clip'
         )}
       >
