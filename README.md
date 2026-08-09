@@ -8,6 +8,10 @@ Next.js ที่ทีมสร้าง (รวมถึงโปรเจค�
 **ใช้ได้กับ**: TypeScript / React / Next.js (App Router) · SQL Server ·
 Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** stack อื่นยังไม่รองรับ
 
+> 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [`docs/design-preview.html`](docs/design-preview.html)
+> (เปิดด้วย browser ได้เลย ไม่ต้องติดตั้งอะไร) — สี ปุ่ม ตาราง ฟอร์ม สถานะ light/dark
+> ทุกอย่างเรนเดอร์จากไฟล์ token จริงที่ plugin ติดตั้ง
+
 ## มีอะไรในชุดนี้
 
 | Plugin | รุ่นล่าสุด | คืออะไร |

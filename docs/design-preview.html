@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGT Design Preview — หน้าตาที่ได้หลังติดตั้ง plugin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== page chrome (เข้าชุดกับ README.html) ===== */
+  :root{
+    --bg:#ffffff; --bg-soft:#f8f9fc; --ink:#1e2436; --ink-soft:#4b5268;
+    --ink-faint:#6d7590; --line:#e5e8f0; --accent:#4f46e5; --accent-deep:#4338ca;
+    --accent-soft:#e0e7ff; --ok:#047857; --bad:#b91c1c; --ok-soft:#ecfdf5; --bad-soft:#fef2f2;
+    --font:'Inter','Noto Sans Thai','Segoe UI',system-ui,sans-serif;
+    --mono:'Cascadia Code',Consolas,'Courier New',monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  section{padding:56px 0;border-top:1px solid var(--line)}
+  h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.25;letter-spacing:-.02em}
+  h2{font-size:clamp(1.35rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.3}
+  h3{font-size:1.02rem;letter-spacing:-.005em}
+  .kicker{display:inline-block;font-size:.76rem;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--accent-deep);background:var(--accent-soft);
+    padding:4px 10px;border-radius:999px;margin-bottom:12px}
+  .lead{color:var(--ink-soft);max-width:74ch;margin-top:8px}
+  .note{color:var(--ink-faint);font-size:.9rem;max-width:78ch;margin-top:10px}
+  code{font-family:var(--mono);font-size:.86em;background:#f1f3f9;padding:2px 6px;border-radius:5px}
+  .hero{padding:64px 0 48px;background:linear-gradient(180deg,#f7f8fd,#fff)}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .badge{font-size:.82rem;color:var(--ink-soft);background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:5px 12px}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .specimen{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 8px 30px -18px rgba(30,36,54,.35)}
+  .specimen-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 14px;background:#f6f7fb;border-bottom:1px solid var(--line);font-size:.82rem;color:var(--ink-faint)}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+  .toggle button{font:inherit;font-size:.8rem;padding:5px 14px;border:0;background:transparent;
+    color:var(--ink-soft);cursor:pointer}
+  .toggle button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .cmp{display:grid;gap:12px;padding:20px}
+  .cmp-title{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+  table.doc{width:100%;border-collapse:collapse;margin-top:16px;font-size:.93rem}
+  table.doc th,table.doc td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.doc th{color:var(--ink-faint);font-weight:600;font-size:.82rem}
+  .dd{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:18px}
+  .dd .box{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .dd .box.no{border-color:#fecaca;background:var(--bad-soft)}
+  .dd .box.yes{border-color:#a7f3d0;background:var(--ok-soft)}
+  .dd .tag{font-weight:600;font-size:.85rem;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .dd .box.no .tag{color:var(--bad)} .dd .box.yes .tag{color:var(--ok)}
+  footer{padding:44px 0 64px;background:var(--bg-soft);border-top:1px solid var(--line);color:var(--ink-soft)}
+  a{color:var(--accent-deep)}
+
+  /* ===== ของจริง: token ที่ plugin ติดตั้ง (globals.tokens.css) ===== */
+  .ui{
+    --primary:oklch(0.488 0.243 264.4); --primary-foreground:oklch(0.985 0.008 255);
+    --background:oklch(0.977 0.004 258); --foreground:oklch(0.16 0.01 258);
+    --card:oklch(1 0 0); --card-foreground:oklch(0.16 0.01 258);
+    --popover:oklch(1 0 0);
+    --secondary:oklch(0.955 0.006 258); --secondary-foreground:oklch(0.23 0.012 258);
+    --muted:oklch(0.955 0.006 258); --muted-foreground:oklch(0.49 0.018 258);
+    --accent-c:oklch(0.94 0.01 258); --destructive:oklch(0.52 0.22 27.3);
+    --border-c:oklch(0.905 0.008 258); --input-c:oklch(0.905 0.008 258);
+    --sidebar:oklch(0.965 0.006 258); --sidebar-accent:oklch(0.94 0.01 258);
+    --status-amber:oklch(0.666 0.179 58.3); --status-amber-fg:oklch(0.473 0.137 46.2);
+    --status-emerald:oklch(0.596 0.145 163.2); --status-emerald-fg:oklch(0.432 0.095 166.9);
+    --status-red:oklch(0.577 0.245 27.3); --status-red-fg:oklch(0.444 0.177 26.9);
+    --status-coral:oklch(0.68 0.18 35); --status-coral-fg:oklch(0.5 0.15 33);
+    --status-sky:oklch(0.588 0.158 242); --status-sky-fg:oklch(0.443 0.11 240.8);
+    --status-gray:oklch(0.554 0.041 257.4); --status-gray-fg:oklch(0.372 0.044 257.3);
+    --r-ctl:6px; --r-card:12px; --r-overlay:14px;
+    background:var(--background); color:var(--foreground);
+  }
+  .ui.dark{
+    --primary:oklch(0.55 0.21 264.4);
+    --background:oklch(0.185 0.012 258); --foreground:oklch(0.975 0.005 258);
+    --card:oklch(0.26 0.015 258); --card-foreground:oklch(0.975 0.005 258);
+    --popover:oklch(0.32 0.016 258);
+    --secondary:oklch(0.31 0.015 258); --secondary-foreground:oklch(0.975 0.005 258);
+    --muted:oklch(0.3 0.015 258); --muted-foreground:oklch(0.74 0.02 258);
+    --accent-c:oklch(0.33 0.018 258); --destructive:oklch(0.704 0.191 22.2);
+    --border-c:oklch(1 0 0 / 22%); --input-c:oklch(1 0 0 / 28%);
+    --sidebar:oklch(0.215 0.013 258); --sidebar-accent:oklch(0.3 0.015 258);
+    --status-amber:oklch(0.769 0.188 70.1); --status-amber-fg:oklch(0.879 0.169 91.6);
+    --status-emerald:oklch(0.696 0.17 162.5); --status-emerald-fg:oklch(0.845 0.143 165);
+    --status-red:oklch(0.704 0.191 22.2); --status-red-fg:oklch(0.808 0.114 19.6);
+    --status-coral:oklch(0.74 0.16 35); --status-coral-fg:oklch(0.84 0.11 35);
+    --status-sky:oklch(0.685 0.169 237.3); --status-sky-fg:oklch(0.828 0.111 230.3);
+    --status-gray:oklch(0.704 0.04 256.8); --status-gray-fg:oklch(0.869 0.022 252.9);
+  }
+  /* density: ตระกูล mira — control สูง 28px, ตาราง 12px */
+  .ui .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:28px;
+    padding:0 12px;border-radius:var(--r-ctl);font:inherit;font-size:13px;font-weight:500;
+    border:1px solid transparent;cursor:pointer;white-space:nowrap}
+  .ui .btn svg{width:14px;height:14px}
+  .ui .btn-primary{background:var(--primary);color:var(--primary-foreground)}
+  .ui .btn-outline{background:transparent;color:var(--foreground);border-color:var(--border-c)}
+  .ui .btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+  .ui .btn-ghost{background:transparent;color:var(--foreground)}
+  .ui .btn-destructive{background:var(--destructive);color:#fff}
+  .ui .btn-success{background:var(--status-emerald);color:#fff}
+  .ui .btn-soft-primary{background:color-mix(in oklab,var(--primary) 12%,transparent);color:var(--primary)}
+  .ui .btn-soft-destructive{background:color-mix(in oklab,var(--destructive) 12%,transparent);color:var(--destructive)}
+  .ui .btn-soft-success{background:color-mix(in oklab,var(--status-emerald) 14%,transparent);color:var(--status-emerald-fg)}
+  .ui .btn-icon{width:28px;height:28px;padding:0}
+  .ui .field{height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 10px;font-size:13px;
+    border:1px solid var(--input-c);border-radius:var(--r-ctl);background:var(--card);color:var(--foreground)}
+  .ui .field.muted{color:var(--muted-foreground)}
+  .ui .card{background:var(--card);color:var(--card-foreground);border:1px solid var(--border-c);
+    border-radius:var(--r-card)}
+  .ui .sb{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;
+    padding:2px 8px;border-radius:999px;border:1px solid}
+  .ui .sb svg{width:12px;height:12px}
+  .ui .sb-emerald{border-color:color-mix(in oklab,var(--status-emerald) 40%,transparent);
+    background:color-mix(in oklab,var(--status-emerald) 10%,transparent);color:var(--status-emerald-fg)}
+  .ui .sb-amber{border-color:color-mix(in oklab,var(--status-amber) 40%,transparent);
+    background:color-mix(in oklab,var(--status-amber) 10%,transparent);color:var(--status-amber-fg)}
+  .ui .sb-red{border-color:color-mix(in oklab,var(--status-red) 40%,transparent);
+    background:color-mix(in oklab,var(--status-red) 10%,transparent);color:var(--status-red-fg)}
+  .ui .sb-coral{border-color:color-mix(in oklab,var(--status-coral) 40%,transparent);
+    background:color-mix(in oklab,var(--status-coral) 10%,transparent);color:var(--status-coral-fg)}
+  .ui .sb-sky{border-color:color-mix(in oklab,var(--status-sky) 40%,transparent);
+    background:color-mix(in oklab,var(--status-sky) 10%,transparent);color:var(--status-sky-fg)}
+  .ui .sb-gray{border-color:color-mix(in oklab,var(--status-gray) 40%,transparent);
+    background:color-mix(in oklab,var(--status-gray) 10%,transparent);color:var(--status-gray-fg)}
+  .ui table.dt{width:100%;border-collapse:collapse;font-size:12px}
+  .ui table.dt th{text-align:left;font-weight:500;color:var(--muted-foreground);
+    padding:8px 12px;border-bottom:1px solid var(--border-c);white-space:nowrap}
+  .ui table.dt td{padding:8px 12px;border-bottom:1px solid var(--border-c)}
+  .ui table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .ui table.dt tr:last-child td{border-bottom:0}
+  .ui .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 8px;
+    border-radius:999px;background:var(--secondary);color:var(--secondary-foreground)}
+  .ui .muted{color:var(--muted-foreground)}
+  .ui .skel{background:var(--muted);border-radius:6px;height:10px}
+  .swatch{border:1px solid var(--border-c);border-radius:10px;overflow:hidden;background:var(--card)}
+  .swatch .chipbox{height:52px}
+  .swatch .meta{padding:8px 10px;font-size:12px;line-height:1.5}
+  .swatch .meta b{display:block;font-weight:600}
+  .swatch .meta span{color:var(--muted-foreground);font-family:var(--mono);font-size:10.5px}
+  .shell{display:grid;grid-template-columns:212px 1fr;min-height:430px}
+  @media(max-width:720px){.shell{grid-template-columns:1fr}.shell .side{display:none}}
+  .shell .side{background:var(--sidebar);border-right:1px solid var(--border-c);padding:14px 10px}
+  .shell .nav{display:flex;align-items:center;gap:9px;font-size:13px;padding:7px 10px;
+    border-radius:var(--r-ctl);color:var(--foreground)}
+  .shell .nav svg{width:15px;height:15px;opacity:.8}
+  .shell .nav.on{background:var(--sidebar-accent);font-weight:500}
+  .shell .main{padding:20px;display:flex;flex-direction:column;gap:18px}
+  .pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .pagehead h4{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .filterbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .dlg{border:1px solid var(--border-c);border-radius:var(--r-overlay);background:var(--popover);
+    padding:16px;display:grid;gap:12px;max-width:390px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="kicker">Design preview</span>
+    <h1>ติดตั้ง plugin แล้วหน้าตาแอปจะออกมาแบบนี้</h1>
+    <p class="lead">ทุกสี ทุกระยะ ทุกขนาดในหน้านี้<strong>ดึงมาจากไฟล์ token จริง</strong>ที่
+      <code>ugt-nextjs-design-setup</code> ติดตั้งลงโปรเจค (<code>globals.tokens.css</code>) —
+      ไม่ใช่ภาพ mockup ที่วาดขึ้นใหม่ สิ่งที่คุณเห็นคือสิ่งที่ทีมจะได้ตั้งแต่หน้าแรก</p>
+    <div class="badges">
+      <span class="badge">shadcn/ui · style base-mira (Base UI)</span>
+      <span class="badge">Inter + Noto Sans Thai</span>
+      <span class="badge">lucide icons เท่านั้น</span>
+      <span class="badge">Light + Dark ทุกโทเคน</span>
+      <span class="badge">ผ่าน WCAG AA ทุกคู่สี</span>
+    </div>
+    <p class="note">หน้านี้เป็นตัวอย่างเชิงภาพเพื่อการตัดสินใจ — ของจริงคือ React component ที่ติดตั้งลงโปรเจค
+      (<code>components/ui/*</code>) ข้อตกลงฉบับเต็มของแต่ละโปรเจคอยู่ใน <code>docs/DESIGN.md</code></p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">1 · สี</span>
+    <h2>ชุดสีเดียวทั้งองค์กร</h2>
+    <p class="lead">สีหลักเปลี่ยนได้ตอนติดตั้ง (เช่นใช้สีแบรนด์ลูกค้า) แต่<strong>ชุดสีสถานะ 6 ตัวคงที่</strong> —
+      งานเดียวกันจะได้สีเดียวกันทุกโปรเจค และทุกคู่สีถูกตรวจ contrast อัตโนมัติทุกครั้งที่มีการแก้สี</p>
+
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>โทเคนจริงจาก globals.tokens.css</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <div class="cmp-title">Primary + พื้นผิว</div>
+        <div class="grid g3">
+          <div class="swatch"><div class="chipbox" style="background:var(--primary)"></div>
+            <div class="meta"><b>primary</b><span>ปุ่มหลัก · ลิงก์ · focus ring</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--background)"></div>
+            <div class="meta"><b>background</b><span>พื้นหน้า</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--card)"></div>
+            <div class="meta"><b>card</b><span>การ์ดเนื้อหา</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--muted)"></div>
+            <div class="meta"><b>muted</b><span>พื้นรอง · skeleton</span></div></div>
+        </div>
+        <div class="cmp-title" style="margin-top:8px">สถานะ 6 ตัว (คงที่ทุกโปรเจค)</div>
+        <div class="grid g3">
+          <div class="swatch"><div class="chipbox" style="background:var(--status-emerald)"></div>
+            <div class="meta"><b>emerald</b><span>อนุมัติ / สำเร็จ</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--status-amber)"></div>
+            <div class="meta"><b>amber</b><span>รอดำเนินการ</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--status-red)"></div>
+            <div class="meta"><b>red</b><span>ไม่อนุมัติ / ผิดพลาด</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--status-coral)"></div>
+            <div class="meta"><b>coral</b><span>ขอยกเลิก / กึ่งกลาง</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--status-sky)"></div>
+            <div class="meta"><b>sky</b><span>ข้อมูล / ระบบสร้าง</span></div></div>
+          <div class="swatch"><div class="chipbox" style="background:var(--status-gray)"></div>
+            <div class="meta"><b>gray</b><span>ยกเลิก / ฉบับร่าง</span></div></div>
+        </div>
+        <p class="muted" style="font-size:12.5px">sky ≠ primary — sky บอก “ข้อมูล” ส่วน primary บอก “กดได้”
+          ห้ามสลับกัน</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">2 · หน้าจริง</span>
+    <h2>หน้าแบบที่ทีมจะสร้างทุกวัน</h2>
+    <p class="lead">โครงนี้<strong>เหมือนกันทุกหน้าทั้งแอป</strong>: ชื่อหน้าซ้ายบน · ปุ่มหลักขวาบน ·
+      เนื้อหาในการ์ด · แถบ filter อยู่หัวการ์ดชิดซ้าย เรียงจากกว้างไปแคบ — กติกานี้ถูกพินไว้ในข้อตกลง
+      เพื่อไม่ให้หน้าที่ทำทีหลังวาง filter คนละที่</p>
+
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>App shell + หน้ารายการ + DataTable</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="ui" data-ui>
+        <div class="shell">
+          <aside class="side">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 14px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8"/></svg>
+              <b style="font-size:14px;letter-spacing:-.01em">Leave Portal</b>
+            </div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>ภาพรวม</div>
+            <div class="nav on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>ใบลา</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>บันทึก OT</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>รายงาน</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>ผู้ใช้และสิทธิ์</div>
+          </aside>
+
+          <div class="main">
+            <div class="pagehead">
+              <div>
+                <h4>ใบลา</h4>
+                <div class="muted" style="font-size:13px">รายการคำขอลาทั้งหมดของหน่วยงาน</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+                <button class="btn btn-primary" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>สร้างใบลา</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;
+                   align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div class="filterbar">
+                  <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>01/08/2026 – 31/08/2026</span>
+                  <span class="field">ทุกหน่วยงาน</span>
+                  <span class="field">ทุกสถานะ</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>ค้นหา…</span>
+                  <button class="btn btn-icon btn-ghost" type="button" aria-label="เลือกคอลัมน์">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg></button>
+                </div>
+              </div>
+              <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border-c)">
+                <span class="chip">สถานะ: รออนุมัติ
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <span class="chip">หน่วยงาน: บัญชี
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <span class="muted" style="font-size:11px;align-self:center">ล้างทั้งหมด</span>
+              </div>
+              <table class="dt">
+                <thead><tr><th>รหัส</th><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th>
+                  <th class="num">จำนวนวัน</th><th>สถานะ</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>LV-0241</td><td>สมชาย ใจดี</td><td>ลาพักร้อน</td><td>12/08/2026 – 14/08/2026</td>
+                    <td class="num">3</td>
+                    <td><span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>รออนุมัติ</span></td>
+                    <td style="text-align:right;white-space:nowrap">
+                      <button class="btn btn-icon btn-soft-primary" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                      <button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                    </td></tr>
+                  <tr><td>LV-0240</td><td>วิภา สุขใจ</td><td>ลากิจ</td><td>08/08/2026</td>
+                    <td class="num">1</td>
+                    <td><span class="sb sb-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.8 10A10 10 0 1 1 17 3.3"/><path d="m9 11 3 3L22 4"/></svg>อนุมัติแล้ว</span></td>
+                    <td></td></tr>
+                  <tr><td>LV-0239</td><td>ธนา พูลผล</td><td>ลาป่วย</td><td>05/08/2026 – 06/08/2026</td>
+                    <td class="num">2</td>
+                    <td><span class="sb sb-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>ไม่อนุมัติ</span></td>
+                    <td></td></tr>
+                  <tr><td>LV-0238</td><td>ปรียา วงศ์ทอง</td><td>ลาพักร้อน</td><td>01/08/2026 – 02/08/2026</td>
+                    <td class="num">2</td>
+                    <td><span class="sb sb-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>ขอยกเลิก</span></td>
+                    <td></td></tr>
+                </tbody>
+              </table>
+              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
+                   gap:10px;border-top:1px solid var(--border-c);font-size:12px" class="muted">
+                <span>แสดง 1–4 จาก 128 รายการ</span>
+                <span style="display:flex;align-items:center;gap:6px">
+                  <span class="field" style="height:24px;font-size:12px">10 / หน้า</span>
+                  <button class="btn btn-outline" style="height:24px" type="button">ก่อนหน้า</button>
+                  <button class="btn btn-outline" style="height:24px" type="button">ถัดไป</button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">ตารางนี้คือ component กลางตัวเดียวที่ทุกหน้าต้องใช้ — มาพร้อมค้นหา กรองรายคอลัมน์ เรียง
+      แบ่งหน้า สลับ/ซ่อนคอลัมน์ และจำการตั้งค่าของผู้ใช้ไว้ ไม่ต้องเขียนใหม่ทุกหน้า และ<strong>ห้ามเขียนตารางเอง</strong></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">3 · ปุ่มและไอคอน</span>
+    <h2>งานเดียวกัน ปุ่มเดียวกัน ไอคอนเดียวกัน</h2>
+    <p class="lead">ขนาดปุ่มมาตรฐานคือ <code>default</code> ทั้งแอป (สูง 28px ตามความหนาแน่นของตระกูล mira) ·
+      variant ที่ใช้ได้มีรายการปิด · ไอคอนผูกตายกับความหมาย เพิ่ม = <code>Plus</code> ลบ = <code>Trash2</code>
+      เสมอ ทุกหน้า</p>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>Buttons · IconAction · Status</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <div class="cmp-title">Variant ที่อนุญาต</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <button class="btn btn-primary" type="button">บันทึก</button>
+          <button class="btn btn-secondary" type="button">รอง</button>
+          <button class="btn btn-outline" type="button">ยกเลิก</button>
+          <button class="btn btn-ghost" type="button">Ghost</button>
+          <button class="btn btn-success" type="button">อนุมัติ</button>
+          <button class="btn btn-destructive" type="button">ลบถาวร</button>
+          <button class="btn btn-soft-primary" type="button">soft-primary</button>
+          <button class="btn btn-soft-success" type="button">soft-success</button>
+          <button class="btn btn-soft-destructive" type="button">soft-destructive</button>
+        </div>
+        <div class="cmp-title" style="margin-top:8px">ปุ่มไอคอนในแถวตาราง (มี aria-label + tooltip เสมอ)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <button class="btn btn-icon btn-soft-primary" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="btn btn-icon btn-soft-success" type="button" aria-label="กู้คืน"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+          <button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          <button class="btn btn-icon btn-ghost" type="button" aria-label="เมนูเพิ่มเติม"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+        </div>
+        <div class="cmp-title" style="margin-top:8px">ป้ายสถานะ — สี + ไอคอนเสมอ (ไม่พึ่งสีอย่างเดียว)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="sb sb-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.8 10A10 10 0 1 1 17 3.3"/><path d="m9 11 3 3L22 4"/></svg>อนุมัติแล้ว</span>
+          <span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>รออนุมัติ</span>
+          <span class="sb sb-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>ไม่อนุมัติ</span>
+          <span class="sb sb-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>ขอยกเลิก</span>
+          <span class="sb sb-sky"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>ระบบสร้าง</span>
+          <span class="sb sb-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>ฉบับร่าง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">4 · ฟอร์มและกล่องโต้ตอบ</span>
+    <h2>เลือก control ตามจำนวนตัวเลือก ไม่ใช่ตามใจคนเขียน</h2>
+    <div class="grid g2" style="margin-top:6px">
+      <table class="doc">
+        <thead><tr><th>จำนวนตัวเลือก</th><th>ใช้</th></tr></thead>
+        <tbody>
+          <tr><td>≤ 5</td><td>RadioGroup</td></tr>
+          <tr><td>6–15</td><td>Select</td></tr>
+          <tr><td>&gt; 15 หรือต้องค้นหา</td><td>Combobox</td></tr>
+          <tr><td>วันที่ / ช่วงวันที่</td><td>DatePicker · DateRangePicker</td></tr>
+        </tbody>
+      </table>
+      <table class="doc">
+        <thead><tr><th>งาน</th><th>ภาชนะ</th></tr></thead>
+        <tbody>
+          <tr><td>ฟอร์มสั้น ≤ 6 ช่อง</td><td>FormDialog</td></tr>
+          <tr><td>ฟอร์มยาว / หลายขั้น</td><td>หน้าแยก</td></tr>
+          <tr><td>ดูรายละเอียดอย่างเดียว</td><td>DetailDialog</td></tr>
+          <tr><td>ยืนยันลบ</td><td>ConfirmActionDialog</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>FormDialog · ConfirmActionDialog</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));display:grid">
+        <div class="dlg">
+          <b style="font-size:15px">สร้างใบลา</b>
+          <div style="display:grid;gap:9px">
+            <label style="display:grid;gap:4px;font-size:12.5px">ประเภทการลา <span style="color:var(--destructive)">*</span>
+              <span class="field" style="justify-content:space-between">เลือกประเภท
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="m6 9 6 6 6-6"/></svg></span></label>
+            <label style="display:grid;gap:4px;font-size:12.5px">ช่วงวันที่ <span style="color:var(--destructive)">*</span>
+              <span class="field muted">เลือกช่วงวันที่</span></label>
+            <label style="display:grid;gap:4px;font-size:12.5px">เหตุผล
+              <span class="field muted" style="height:52px;align-items:flex-start;padding-top:6px">พิมพ์เหตุผล…</span></label>
+          </div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding-top:2px">
+            <button class="btn btn-outline" type="button">ยกเลิก</button>
+            <button class="btn btn-primary" type="button">บันทึก</button>
+          </div>
+        </div>
+        <div class="dlg" style="align-content:start">
+          <b style="font-size:15px">ลบใบลา LV-0241?</b>
+          <p class="muted" style="font-size:12.5px;line-height:1.6">รายการนี้จะถูกทำเครื่องหมายว่าลบแล้ว
+            ประวัติยังอยู่ในระบบและกู้คืนได้ภายหลัง</p>
+          <div style="display:flex;justify-content:space-between;gap:8px">
+            <button class="btn btn-outline" type="button">ยกเลิก</button>
+            <button class="btn btn-destructive" type="button">ลบรายการ</button>
+          </div>
+          <p class="muted" style="font-size:11.5px">ปุ่มยืนยันมีข้อความเสมอ · primary ปุ่มเดียวต่อกล่อง ·
+            ยกเลิกอยู่ซ้าย ยืนยันอยู่ขวาสุด</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">5 · สถานะของข้อมูล</span>
+    <h2>ว่าง กำลังโหลด ผิดพลาด — มีหน้าตามาตรฐานให้แล้ว</h2>
+    <p class="lead">ไม่ต้องเขียน if-loading เองทุกหน้า ทุกสถานะมี component กลางรออยู่ ผลคือผู้ใช้เจอ
+      หน้าตาเดียวกันไม่ว่าจะอยู่ส่วนไหนของระบบ</p>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>Loading · Empty · Error</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));display:grid">
+        <div class="card" style="padding:14px;display:grid;gap:9px">
+          <div class="skel" style="width:38%"></div>
+          <div class="skel" style="width:86%"></div>
+          <div class="skel" style="width:72%"></div>
+          <div class="skel" style="width:80%"></div>
+          <span class="muted" style="font-size:11.5px">Skeleton — โครงเดิม ไม่กระตุก</span>
+        </div>
+        <div class="card" style="padding:20px 14px;display:grid;gap:8px;justify-items:center;text-align:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:26px;height:26px;color:var(--muted-foreground)"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          <b style="font-size:13.5px">ยังไม่มีใบลาในช่วงนี้</b>
+          <span class="muted" style="font-size:12px">ลองขยายช่วงวันที่ หรือสร้างรายการใหม่</span>
+          <button class="btn btn-primary" type="button" style="margin-top:4px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>สร้างใบลา</button>
+        </div>
+        <div class="card" style="padding:14px;display:grid;gap:8px;align-content:start">
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;border-radius:8px;
+               background:color-mix(in oklab,var(--destructive) 10%,transparent);
+               border:1px solid color-mix(in oklab,var(--destructive) 35%,transparent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--destructive);flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            <span style="font-size:12.5px;line-height:1.55">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</span>
+          </div>
+          <span class="muted" style="font-size:11.5px">Error ระดับหน้าอยู่บนสุดของการ์ด ·
+            ระดับช่องอยู่ใต้ช่องนั้น</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">6 · กฎที่กันของเพี้ยน</span>
+    <h2>สิ่งที่ระบบไม่ยอมให้ทำ</h2>
+    <p class="lead">ห้าข้อนี้คือ 90% ของคอมเมนต์ตอน review งาน UI — หลังติดตั้ง กฎพวกนี้จะถูกโหลดให้ AI อ่านเอง
+      ทุกครั้งที่แตะไฟล์หน้าจอ และบางข้อมีสคริปต์ตรวจซ้ำให้ด้วย</p>
+    <div class="dd">
+      <div class="box no"><div class="tag">✕ เขียนตารางเอง</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">แต่ละหน้าได้ค้นหา/เรียง/แบ่งหน้าไม่เหมือนกัน
+          และไม่มีใครจำการตั้งค่าของผู้ใช้ได้</div></div>
+      <div class="box yes"><div class="tag">✓ ใช้ DataTable กลาง</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">ได้ชุดความสามารถครบเท่ากันทุกหน้า และต้องส่ง
+          <code>id</code> เสมอ ไม่งั้นสคริปต์ตรวจจะฟ้อง</div></div>
+
+      <div class="box no"><div class="tag">✕ ใส่สีสถานะเอง</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">สีหลุดจากชุดกลาง คนตาบอดสีแยกไม่ออก
+          เพราะมีแต่สีไม่มีไอคอน</div></div>
+      <div class="box yes"><div class="tag">✓ ใช้ StatusBadge</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">บังคับสี + ไอคอนคู่กัน สีมาจากโทเคนที่ผ่าน
+          contrast แล้ว</div></div>
+
+      <div class="box no"><div class="tag">✕ format วันที่ตรงหน้าจอ</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">server เป็น UTC แล้ววันเลื่อน · พ.ศ./ค.ศ. สลับกันตาม
+          เครื่องผู้ใช้</div></div>
+      <div class="box yes"><div class="tag">✓ ผ่าน lib/format.ts ที่เดียว</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">จอเป็น DD/MM/YYYY เสมอ · ไฟล์ export เป็น ISO
+          กัน Excel สลับวัน-เดือน</div></div>
+
+      <div class="box no"><div class="tag">✕ ปรับขนาด/สีปุ่มเอง</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">ความหนาแน่นหลุดมาตรฐาน แต่ละหน้าปุ่มคนละขนาด</div></div>
+      <div class="box yes"><div class="tag">✓ ใช้ variant + size มาตรฐาน</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">เพิ่ม variant ใหม่ได้ แต่ต้องบันทึกเป็นมติในข้อตกลง</div></div>
+
+      <div class="box no"><div class="tag">✕ ปุ่มไอคอนล้วนเปล่า ๆ</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">screen reader อ่านไม่ออก และไม่มี tooltip
+          ผู้ใช้เดาเอง</div></div>
+      <div class="box yes"><div class="tag">✓ ใช้ IconAction</div>
+        <div style="font-size:.92rem;color:var(--ink-soft)">บังคับใส่ label ซึ่งกลายเป็นทั้ง aria-label
+          และ tooltip</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <h3 style="margin-bottom:8px">แล้วสิ่งเหล่านี้ถูกรักษาไว้ยังไง</h3>
+    <p style="max-width:80ch">ตอนติดตั้ง ระบบจะถามไม่กี่ข้อ (สีแบรนด์? โหมดมืด? เมนูข้างหรือบน?) แล้วเขียน
+      ข้อตกลงทั้งหมดลง <code>docs/DESIGN.md</code> ของโปรเจค พร้อมกฎที่ทำให้ AI
+      <strong>อ่านข้อตกลงเองทุกครั้ง</strong>ก่อนแตะไฟล์หน้าจอ — หน้าที่ทำเดือนหน้าจึงยังหน้าตาเหมือนหน้าแรก
+      และมีสคริปต์ตรวจซ้ำอีกชั้นสำหรับข้อที่ตรวจด้วยเครื่องได้ (คู่สี contrast, ตารางที่ลืมใส่ id)</p>
+    <p style="margin-top:14px"><a href="../README.html">← กลับไปหน้าภาพรวมของชุดเครื่องมือ</a></p>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.toggle').forEach(function (group) {
+    group.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-theme]');
+      if (!btn) return;
+      var dark = btn.dataset.theme === 'dark';
+      var panel = group.closest('.specimen').querySelector('[data-ui]');
+      panel.classList.toggle('dark', dark);
+      group.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+    });
+  });
+</script>
+</body>
+</html>
