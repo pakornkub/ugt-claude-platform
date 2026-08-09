@@ -42,11 +42,18 @@
   เขียวทึบ · ในตารางใช้ variant `soft-*`
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
   translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
-- **มุมโค้ง 3 ระดับ** (ค่ากลางองค์กร ไม่ใช่ค่า derive ของ shadcn — ตั้งทับใน
-  `globals.tokens.css` เพื่อให้เข้ากับ density ตระกูล mira): control 6px
-  (`--radius-md`: input/select/button) · card 12px (`--radius-lg` = `--radius`)
-  · overlay 14px (`--radius-xl`: dialog/popover) · chip/kbd 4px
-  (`--radius-sm`) — **ห้าม override ราย callsite** ใช้ตัวแปรเสมอ
+- **มุมโค้ง 4 ระดับ เท่านั้น** (ค่ากลางองค์กร ตั้งทับใน `globals.tokens.css`):
+  chip/kbd 4px (`--radius-sm`) · control 6px (`--radius-md`: input/select/
+  button) · card 12px (`--radius-lg` = `--radius`) · overlay 14px
+  (`--radius-xl`: dialog/popover) — **ห้าม override ราย callsite** ใช้ตัวแปรเสมอ
+  · **ห้ามใช้ `rounded-2xl`/`3xl`/`4xl`** เพราะอยู่นอกลำดับที่ตกลงกัน
+  (`verify.mjs` ตรวจให้)
+  > shadcn คำนวณสเกลจาก `--radius` ด้วยการคูณ (sm ×0.6 · md ×0.8 · xl ×1.4)
+  > ค่ามาตรฐาน 0.625rem → 6/8/10/14px · ของเรา**ตั้งมือทุกระดับ ไม่ derive**
+  > เพราะ density ตระกูล mira ทำให้ control สูง 28px ถ้าใช้ค่าที่ derive มา
+  > (md ≈ 9.6px) สัดส่วนโค้งต่อความสูงจะเป็น 34% แทนที่จะเป็น 21%
+  > **ผลที่ต้องรู้: แก้ `--radius` ไม่ได้ทำให้ทุกระดับขยับตาม** — มันขยับแค่
+  > `lg`/การ์ด · จะเปลี่ยนระดับไหนให้แก้บรรทัดนั้นตรง ๆ
 
 ## 2. Typography
 

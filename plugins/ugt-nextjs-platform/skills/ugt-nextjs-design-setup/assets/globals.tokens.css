@@ -61,15 +61,22 @@
   --color-status-sky-foreground: var(--status-sky-foreground);
   --color-status-gray: var(--status-gray);
   --color-status-gray-foreground: var(--status-gray-foreground);
-  /* Radius tiers (DESIGN.md §1): control 6px · card 12px · overlay 14px —
-     never override per callsite */
+  /* Radius tiers (DESIGN.md §1): chip 4 · control 6 · card 12 · overlay 14 —
+     never override per callsite.
+     shadcn DERIVES its scale from --radius by multiplication
+     (sm ×0.6 · md ×0.8 · lg ×1 · xl ×1.4 · 2xl ×1.8 · 3xl ×2.2 · 4xl ×2.6),
+     stock --radius = 0.625rem → 6/8/10/14px. Ours are HAND-SET, not derived:
+     mira density puts controls at 28px, so a derived md (9.6px at our
+     --radius) would read as 34% radius-to-height where 6px reads as 21%.
+     Consequence to know: **changing --radius here does NOT rescale the
+     tiers** — it only moves `lg`/card. Change a tier by editing its line.
+     Only four tiers exist by design; 2xl/3xl/4xl are intentionally not
+     declared. Tailwind still ships its own defaults for those utilities, so
+     the guard against `rounded-2xl` is scripts/verify.mjs, not this file. */
   --radius-sm: 0.25rem; /* 4px — chip, kbd */
   --radius-md: 0.375rem; /* 6px — control: input / select / button */
   --radius-lg: var(--radius); /* 12px — card */
   --radius-xl: 0.875rem; /* 14px — dialog / floating overlay */
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.25rem;
-  --radius-4xl: 1.5rem;
 }
 
 :root {

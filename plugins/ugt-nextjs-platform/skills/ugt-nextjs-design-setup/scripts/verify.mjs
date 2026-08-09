@@ -139,6 +139,27 @@ check('Every <DataTable> passes a unique id (column prefs persist)', () => {
     : { ok: 'warn', msg: 'No <DataTable> in the project yet — nothing to check' };
 });
 
+check('Radius stays within the four agreed tiers', () => {
+  // The token file declares sm/md/lg/xl only. Removing 2xl/3xl/4xl does NOT
+  // make those utilities fail — Tailwind still ships its own defaults — so the
+  // agreement is enforced here instead.
+  const offenders = [];
+  for (const file of sourceTsx()) {
+    const body = readFileSync(file, 'utf8');
+    const rel = relative(ROOT, file).split('\\').join('/');
+    const hits = [...new Set([...body.matchAll(/\brounded-(2xl|3xl|4xl)\b/g)].map((m) => m[0]))];
+    if (hits.length) offenders.push(`${rel}: ${hits.join(', ')}`);
+  }
+  if (offenders.length) {
+    return { ok: false, msg: `outside the agreed tiers (chip/control/card/overlay): ${offenders.slice(0, 5).join(' · ')}` };
+  }
+  const css = has('app', 'globals.css') ? read('app', 'globals.css') : '';
+  const declared = [...new Set([...css.matchAll(/--radius-(2xl|3xl|4xl)\s*:/g)].map((m) => m[1]))];
+  return declared.length
+    ? { ok: false, msg: `globals.css re-declares --radius-${declared.join(', --radius-')} — the agreement has four tiers only` }
+    : { ok: true };
+});
+
 check('Page-level filters use the control ladder, not bare Inputs', () => {
   // A filter row rendered with raw <Input> is the "dropdown here, textbox there"
   // drift; free-text search belongs to the DataTable toolbar, not a page filter.

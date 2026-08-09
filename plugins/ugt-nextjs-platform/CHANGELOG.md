@@ -1,6 +1,42 @@
 # Changelog — ugt-nextjs-platform
 
+## 3.4.0 (2026-08-09)
+
+**Correction to 3.3.0 — the radius comparison in that entry was wrong.**
+3.3.0 said shadcn derives `sm/md/xl` from `--radius` as `−4/−2/+4px`. It does
+not: shadcn derives them by **multiplication** — `sm ×0.6 · md ×0.8 · lg ×1 ·
+xl ×1.4 · 2xl ×1.8 · 3xl ×2.2 · 4xl ×2.6` — with stock `--radius: 0.625rem`
+giving 6 / 8 / 10 / 14px ([shadcn theming docs](https://ui.shadcn.com/docs/theming)).
+The conclusion still holds and is now stated with the right numbers: our tiers
+are **hand-set, not derived**, because mira puts controls at 28px, where a
+derived `md` (9.6px at our `--radius`) reads as 34% radius-to-height instead
+of 21%.
+
+Two consequences that were never written down and are now in DESIGN.md §1:
+
+- **Changing `--radius` does NOT rescale the tiers** here — it only moves
+  `lg`/card, because the other three are literal values. Change a tier by
+  editing its own line.
+- **Only four tiers exist**: chip 4 · control 6 · card 12 · overlay 14.
+  `--radius-2xl/3xl/4xl` are removed from `globals.tokens.css` — but removing
+  them does **not** disable `rounded-2xl`, since Tailwind still ships its own
+  defaults for those utilities. The real guard is a new `verify.mjs` check
+  that fails on `rounded-2xl|3xl|4xl` in source and on any re-declaration of
+  those variables in `globals.css` (tested on both failure modes plus the
+  passing case).
+
+Not verifiable from here, stated so nobody assumes: **whether the `base-mira`
+preset ships its own radius values.** Styles clearly can carry radius —
+public docs describe Lyra as zero-radius and Maia as larger-cornered — but
+mira's exact numbers are not published, and our install replaces the whole
+token block anyway, so the four tiers above are what a project actually gets
+regardless of what the preset had.
+
 ## 3.3.0 (2026-08-09)
+
+> **แก้ไขแล้วใน 3.4.0**: สูตร derive ของ shadcn ที่อ้างในหัวข้อนี้ (`−4/−2/+4`)
+> ผิด — ที่ถูกคือคูณ (`×0.6 / ×0.8 / ×1.4`) ดูรายละเอียดใน 3.4.0
+
 
 Two rules the agreement never stated, found by reviewing the preview page —
 both are layout bugs that repeat on every form/detail screen until pinned:
