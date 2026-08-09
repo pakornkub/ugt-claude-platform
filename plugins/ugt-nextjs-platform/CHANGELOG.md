@@ -1,5 +1,31 @@
 # Changelog — ugt-nextjs-platform
 
+## 3.2.0 (2026-08-09)
+
+**Fix — icon buttons in `DataTable` were two different sizes.** The four
+pagination buttons hardcoded `size-8` / `h-8 w-8` (32px) while the toolbar's
+column-settings button used the mira density default (28px) — visibly uneven
+inside one table. All five now use `size="icon"` with no size override, and
+the code carries a comment saying why an override must not come back.
+
+Pinned so it cannot drift again (มติ 2026-08-09, ugt-core 2.2.0 carries the
+stack-agnostic wording):
+
+- DESIGN.md §4: pagination is rows-per-page + "หน้า X จาก Y" + four icon
+  buttons, **no numbered page list**; icon buttons in a table are
+  `size="icon"` only.
+- `references/conventions.md`: new **Header cell anatomy** (drag handle →
+  sortable label with direction indicator → per-column filter popover, with
+  the auto-suppression rule when `serverPagination` has no `serverQuery`) and
+  **Toolbar** / **Pagination** paragraphs.
+
+`docs/design-preview.html` (repo-level) corrected to match the real
+component — it had been showing a plain header row, text prev/next buttons,
+and dialogs without the header/footer rules. Now shows the real header
+affordances, the real pagination cluster, `FormDialog`'s bordered
+header/scrollable body/bordered footer + built-in close ✕, and
+`ConfirmActionDialog` deliberately without either.
+
 ## 3.1.0 (2026-08-09)
 
 **Cross-feature consistency** — closing the gap between "the agreement was

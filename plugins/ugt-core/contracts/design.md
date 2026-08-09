@@ -111,6 +111,15 @@
   user column preferences persist identically on every screen, standard
   features stay on unless the page's own situation makes one meaningless,
   and page size follows the org set. Same situation → same configuration.
+- **Pagination control set is fixed**: rows-per-page selector · a
+  "page X of Y" indicator · first/previous/next/last icon buttons (first and
+  last may hide on small screens). **No numbered page list** — it costs width
+  and misreports on empty data. Changing this is an org-level decision, not a
+  per-project one.
+- **Icon buttons inside a data table share one size** — the density default,
+  never a per-callsite override. A hardcoded size on one row (pagination) and
+  the default on another (toolbar) is a visible inconsistency inside a single
+  table; it happened once and is now called out here.
 
 ### Motion
 

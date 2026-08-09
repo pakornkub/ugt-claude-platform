@@ -1060,9 +1060,13 @@ export function DataTable<TData>({
               {`หน้า ${table.getState().pagination.pageIndex + 1} จาก ${Math.max(1, table.getPageCount())}`}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
+              {/* ขนาดปุ่มไอคอน = `size="icon"` ตาม density กลาง (มติ 2026-08-09)
+                  — ห้าม hardcode size-8/h-8 ทับ ไม่งั้นแถว pagination จะสูงไม่เท่า
+                  ปุ่มตั้งค่าคอลัมน์ใน toolbar ของตารางเดียวกัน */}
               <Button
                 variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
+                className="hidden lg:flex"
+                size="icon"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
@@ -1071,7 +1075,6 @@ export function DataTable<TData>({
               </Button>
               <Button
                 variant="outline"
-                className="size-8"
                 size="icon"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -1081,7 +1084,6 @@ export function DataTable<TData>({
               </Button>
               <Button
                 variant="outline"
-                className="size-8"
                 size="icon"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -1091,7 +1093,7 @@ export function DataTable<TData>({
               </Button>
               <Button
                 variant="outline"
-                className="hidden size-8 lg:flex"
+                className="hidden lg:flex"
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}

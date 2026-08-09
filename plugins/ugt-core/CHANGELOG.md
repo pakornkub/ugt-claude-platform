@@ -1,5 +1,19 @@
 # Changelog — ugt-core
 
+## 2.2.0 (2026-08-09)
+
+`contracts/design.md` §Layout pins two more things that a design review kept
+having to re-litigate per page:
+
+- **Pagination control set is fixed** — rows-per-page · "page X of Y" ·
+  first/prev/next/last icon buttons (first/last may hide on small screens) ·
+  **no numbered page list** (costs width, misreports on empty data). Changing
+  it is an org decision, not a per-project one.
+- **Icon buttons inside a data table share one size** — the density default,
+  never a per-callsite override. Written down because it already slipped: one
+  row hardcoded a larger size while the toolbar kept the default, inside the
+  same table.
+
 ## 2.1.0 (2026-08-09)
 
 `contracts/design.md` §Layout gains two rules aimed at the failure the

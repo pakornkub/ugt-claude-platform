@@ -136,6 +136,11 @@
   .ui table.dt td{padding:8px 12px;border-bottom:1px solid var(--border-c)}
   .ui table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
   .ui table.dt tr:last-child td{border-bottom:0}
+  .ui .hcell{display:inline-flex;align-items:center;gap:4px}
+  .ui .hcell .grip{width:11px;height:11px;opacity:.35;cursor:grab}
+  .ui .hcell .sortmark{width:11px;height:11px;opacity:.45}
+  .ui .hcell .filtermark{width:11px;height:11px;opacity:.45}
+  .ui .hcell .sortmark.on,.ui .hcell .filtermark.on{opacity:1;color:var(--primary)}
   .ui .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 8px;
     border-radius:999px;background:var(--secondary);color:var(--secondary-foreground)}
   .ui .muted{color:var(--muted-foreground)}
@@ -156,8 +161,17 @@
   .pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .pagehead h4{font-size:19px;font-weight:600;letter-spacing:-.01em}
   .filterbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  /* dialog จริงบังคับ header มี border-b · body scroll · footer มี border-t · ปุ่มปิดมุมขวาบน */
   .dlg{border:1px solid var(--border-c);border-radius:var(--r-overlay);background:var(--popover);
-    padding:16px;display:grid;gap:12px;max-width:390px}
+    max-width:390px;overflow:hidden;position:relative}
+  .dlg .dlg-head{border-bottom:1px solid var(--border-c);padding:12px 16px;font-size:15px;font-weight:600}
+  .dlg .dlg-body{padding:16px;display:grid;gap:10px}
+  .dlg .dlg-foot{border-top:1px solid var(--border-c);padding:12px 16px;display:flex;
+    justify-content:space-between;gap:8px}
+  .dlg .dlg-x{position:absolute;top:10px;right:12px;opacity:.55;cursor:pointer;
+    background:transparent;border:0;color:inherit;padding:2px;line-height:0}
+  .dlg .dlg-x svg{width:14px;height:14px}
+  .dlg.plain{padding:16px;display:grid;gap:12px}
 </style>
 </head>
 <body>
@@ -296,8 +310,14 @@
                 <span class="muted" style="font-size:11px;align-self:center">ล้างทั้งหมด</span>
               </div>
               <table class="dt">
-                <thead><tr><th>รหัส</th><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th>
-                  <th class="num">จำนวนวัน</th><th>สถานะ</th><th></th></tr></thead>
+                <thead><tr>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg>รหัส<svg class="sortmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></span></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg>พนักงาน<svg class="sortmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg><svg class="filtermark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></span></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg>ประเภท<svg class="filtermark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></span></th>
+                  <th><span class="hcell">ช่วงวันที่<svg class="sortmark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 9 5-5 5 5"/></svg></span></th>
+                  <th class="num">จำนวนวัน</th>
+                  <th><span class="hcell">สถานะ<svg class="filtermark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></span></th>
+                  <th></th></tr></thead>
                 <tbody>
                   <tr><td>LV-0241</td><td>สมชาย ใจดี</td><td>ลาพักร้อน</td><td>12/08/2026 – 14/08/2026</td>
                     <td class="num">3</td>
@@ -322,11 +342,18 @@
               </table>
               <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
                    gap:10px;border-top:1px solid var(--border-c);font-size:12px" class="muted">
-                <span>แสดง 1–4 จาก 128 รายการ</span>
-                <span style="display:flex;align-items:center;gap:6px">
-                  <span class="field" style="height:24px;font-size:12px">10 / หน้า</span>
-                  <button class="btn btn-outline" style="height:24px" type="button">ก่อนหน้า</button>
-                  <button class="btn btn-outline" style="height:24px" type="button">ถัดไป</button>
+                <span>1–4 จาก 128</span>
+                <span style="display:flex;align-items:center;gap:14px">
+                  <span style="display:flex;align-items:center;gap:6px">แถวต่อหน้า
+                    <span class="field" style="font-size:12px">10
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg></span></span>
+                  <span style="font-weight:500;color:var(--foreground)">หน้า 1 จาก 13</span>
+                  <span style="display:flex;align-items:center;gap:6px">
+                    <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าแรก" disabled style="opacity:.5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></svg></button>
+                    <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าก่อน" disabled style="opacity:.5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าถัดไป"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                    <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าสุดท้าย"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 17 5-5-5-5"/><path d="m6 17 5-5-5-5"/></svg></button>
+                  </span>
                 </span>
               </div>
             </div>
@@ -334,8 +361,12 @@
         </div>
       </div>
     </div>
-    <p class="note">ตารางนี้คือ component กลางตัวเดียวที่ทุกหน้าต้องใช้ — มาพร้อมค้นหา กรองรายคอลัมน์ เรียง
-      แบ่งหน้า สลับ/ซ่อนคอลัมน์ และจำการตั้งค่าของผู้ใช้ไว้ ไม่ต้องเขียนใหม่ทุกหน้า และ<strong>ห้ามเขียนตารางเอง</strong></p>
+    <p class="note">ตารางนี้คือ component กลางตัวเดียวที่ทุกหน้าต้องใช้ — ไม่ต้องเขียนใหม่ทุกหน้า และ
+      <strong>ห้ามเขียนตารางเอง</strong> · ในหัวคอลัมน์: จุดจับลาก → ชื่อคอลัมน์ที่กด sort ได้ →
+      ไอคอนกรองที่เปิด popover เฉพาะคอลัมน์นั้น (สีเข้ม = กำลังใช้งานอยู่) ·
+      ปุ่มขวาสุดของ toolbar เปิด popover จัดการคอลัมน์ (ลากสลับลำดับ + ติ๊กซ่อน/แสดง + คืนค่าเริ่มต้น)
+      จำการตั้งค่าไว้ต่อผู้ใช้ · ท้ายตารางเป็นแถวต่อหน้า + "หน้า X จาก Y" + ปุ่มไอคอน 4 ตัว
+      <strong>ไม่มีรายการเลขหน้า</strong> (มติ 2026-08-09)</p>
   </div>
 </section>
 
@@ -406,10 +437,12 @@
       <table class="doc">
         <thead><tr><th>งาน</th><th>ภาชนะ</th></tr></thead>
         <tbody>
-          <tr><td>ฟอร์มสั้น ≤ 6 ช่อง</td><td>FormDialog</td></tr>
-          <tr><td>ฟอร์มยาว / หลายขั้น</td><td>หน้าแยก</td></tr>
-          <tr><td>ดูรายละเอียดอย่างเดียว</td><td>DetailDialog</td></tr>
-          <tr><td>ยืนยันลบ</td><td>ConfirmActionDialog</td></tr>
+          <tr><td>ฟอร์มสั้น ≤ 6 ช่อง</td><td><code>FormDialog</code> (modal)</td></tr>
+          <tr><td>ฟอร์มยาว / หลายขั้น</td><td><strong>หน้าแยก</strong> — ไม่ใช่ dialog</td></tr>
+          <tr><td>panel เปิดค้างดูคู่เนื้อหา (filter ชุดใหญ่, preview)</td><td><code>Sheet</code> (เลื่อนจากขอบจอ)</td></tr>
+          <tr><td>ดูรายละเอียด read-only</td><td><code>DetailDialogShell</code></td></tr>
+          <tr><td>ยืนยัน destructive</td><td><code>ConfirmActionDialog</code> (AlertDialog)</td></tr>
+          <tr><td>มือถือ</td><td>Dialog กลายเป็น bottom sheet <strong>เอง</strong> — ไม่มี Drawer แยกให้เลือก</td></tr>
         </tbody>
       </table>
     </div>
@@ -423,32 +456,42 @@
         </span>
       </div>
       <div class="cmp ui" data-ui style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));display:grid">
-        <div class="dlg">
-          <b style="font-size:15px">สร้างใบลา</b>
-          <div style="display:grid;gap:9px">
-            <label style="display:grid;gap:4px;font-size:12.5px">ประเภทการลา <span style="color:var(--destructive)">*</span>
-              <span class="field" style="justify-content:space-between">เลือกประเภท
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="m6 9 6 6 6-6"/></svg></span></label>
-            <label style="display:grid;gap:4px;font-size:12.5px">ช่วงวันที่ <span style="color:var(--destructive)">*</span>
-              <span class="field muted">เลือกช่วงวันที่</span></label>
-            <label style="display:grid;gap:4px;font-size:12.5px">เหตุผล
-              <span class="field muted" style="height:52px;align-items:flex-start;padding-top:6px">พิมพ์เหตุผล…</span></label>
+        <div>
+          <div class="dlg">
+            <button class="dlg-x" type="button" aria-label="ปิด">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            <div class="dlg-head">สร้างใบลา</div>
+            <div class="dlg-body">
+              <label style="display:grid;gap:4px;font-size:12.5px">ประเภทการลา <span style="color:var(--destructive)">*</span>
+                <span class="field" style="justify-content:space-between">เลือกประเภท
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="m6 9 6 6 6-6"/></svg></span></label>
+              <label style="display:grid;gap:4px;font-size:12.5px">ช่วงวันที่ <span style="color:var(--destructive)">*</span>
+                <span class="field muted">เลือกช่วงวันที่</span></label>
+              <label style="display:grid;gap:4px;font-size:12.5px">เหตุผล
+                <span class="field muted" style="height:52px;align-items:flex-start;padding-top:6px">พิมพ์เหตุผล…</span></label>
+            </div>
+            <div class="dlg-foot">
+              <button class="btn btn-outline" type="button">ยกเลิก</button>
+              <button class="btn btn-primary" type="button">บันทึก</button>
+            </div>
           </div>
-          <div style="display:flex;justify-content:space-between;gap:8px;padding-top:2px">
-            <button class="btn btn-outline" type="button">ยกเลิก</button>
-            <button class="btn btn-primary" type="button">บันทึก</button>
-          </div>
+          <p class="muted" style="font-size:11.5px;margin-top:8px">FormDialog — header มีเส้นคั่นล่าง ·
+            body เลื่อนได้ · footer มีเส้นคั่นบน · ปุ่มปิด ✕ มุมขวาบนมาให้เอง ·
+            ฟอร์มที่แก้ค้างไว้จะไม่ปิดเงียบตอนกด Esc</p>
         </div>
-        <div class="dlg" style="align-content:start">
-          <b style="font-size:15px">ลบใบลา LV-0241?</b>
-          <p class="muted" style="font-size:12.5px;line-height:1.6">รายการนี้จะถูกทำเครื่องหมายว่าลบแล้ว
-            ประวัติยังอยู่ในระบบและกู้คืนได้ภายหลัง</p>
-          <div style="display:flex;justify-content:space-between;gap:8px">
-            <button class="btn btn-outline" type="button">ยกเลิก</button>
-            <button class="btn btn-destructive" type="button">ลบรายการ</button>
+        <div>
+          <div class="dlg plain">
+            <b style="font-size:15px">ลบใบลา LV-0241?</b>
+            <p class="muted" style="font-size:12.5px;line-height:1.6">รายการนี้จะถูกทำเครื่องหมายว่าลบแล้ว
+              ประวัติยังอยู่ในระบบและกู้คืนได้ภายหลัง</p>
+            <div style="display:flex;justify-content:space-between;gap:8px">
+              <button class="btn btn-outline" type="button">ยกเลิก</button>
+              <button class="btn btn-destructive" type="button">ลบรายการ</button>
+            </div>
           </div>
-          <p class="muted" style="font-size:11.5px">ปุ่มยืนยันมีข้อความเสมอ · primary ปุ่มเดียวต่อกล่อง ·
-            ยกเลิกอยู่ซ้าย ยืนยันอยู่ขวาสุด</p>
+          <p class="muted" style="font-size:11.5px;margin-top:8px">ConfirmActionDialog — <strong>ไม่มีเส้นคั่น
+            และไม่มีปุ่มปิด ✕ โดยตั้งใจ</strong> เพราะต้องบังคับให้เลือกอย่างใดอย่างหนึ่ง ปิดเงียบไม่ได้ ·
+            ปุ่มยืนยันมีข้อความเสมอ · primary ปุ่มเดียวต่อกล่อง · ยกเลิกซ้าย ยืนยันขวาสุด</p>
         </div>
       </div>
     </div>

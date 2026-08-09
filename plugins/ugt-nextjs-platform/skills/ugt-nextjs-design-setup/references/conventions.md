@@ -120,6 +120,24 @@ options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
 table→card · row selection + bulk bar · built-in Empty state.
 
+**Header cell anatomy** (left → right inside one cell, only what is enabled):
+drag handle (`GripVertical`, dimmed) → column label as a sort button with a
+direction indicator → per-column filter icon opening a Popover. Per-column
+filter UI is **auto-suppressed** when a table passes `serverPagination`
+without `serverQuery` — client-filtering one page of a server-paginated set
+returns confident nonsense, so the component refuses rather than trusting the
+caller.
+
+**Toolbar** (right side): search input, then the column-settings icon button
+opening a Popover with drag-to-reorder + show/hide checkboxes + reset. Prefs
+persist per table `id`.
+
+**Pagination**: rows-per-page Select → `หน้า X จาก Y` → four icon buttons
+(first · prev · next · last; first/last are `lg`-only). **No numbered page
+list** — มติ 2026-08-09. All icon buttons use `size="icon"`; hardcoding
+`size-8`/`h-8` is forbidden (it made the pagination row 32px while the
+toolbar button stayed 28px in the same table — fixed 2026-08-09).
+
 **Consistency obligations** (this is where page-to-page drift actually
 happens — same component, different config):
 
