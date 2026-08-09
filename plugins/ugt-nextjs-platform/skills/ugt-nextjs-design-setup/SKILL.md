@@ -144,7 +144,14 @@ each with a recorded decision — never silently reformat the project.
    Merge `assets/globals.tokens.css` into `app/globals.css` (replace the
    `:root`/`.dark` token blocks; keep any project/preset `@layer` rules —
    e.g. the preset's button `cursor: pointer` — and keep preset `@theme`
-   vars: re-point `--font-heading` at the font-sans variables)
+   vars: re-point `--font-heading` at the font-sans variables).
+   **Radius is the preset's, not ours (มติ 2026-08-09)** — when replacing the
+   `:root` block you MUST carry over the preset's `--radius` line
+   (`base-mira` ships `0.45rem`), and leave its `@theme` radius scale
+   (`--radius-sm/md/lg/xl/2xl/3xl/4xl` as `calc()` of `--radius`) untouched.
+   Our token file deliberately declares no radius; dropping the preset's line
+   too leaves `--radius` undefined and every card/button goes square.
+   `scripts/verify.mjs` fails if it is missing.
    · substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers
    (dark ring tokens derive from `__PRIMARY_DARK__` automatically).
 3. Fonts + providers in `app/layout.tsx` — the exact wiring:

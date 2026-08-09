@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-standard
 
+## 2.1.0 (2026-08-09)
+
+- Dependency floor moves to `ugt-nextjs-platform` 4.0.0 (radius now comes from
+  the `base-mira` preset instead of org-pinned values). Projects already
+  installed keep their current corners until they re-run the design step —
+  nothing breaks on update; see the platform's 4.0.0 entry for what changes
+  and why.
+
 ## 2.0.0 (2026-08-09)
 
 - Records the new dependency floor after the v3.0 naming + knowledge-architecture

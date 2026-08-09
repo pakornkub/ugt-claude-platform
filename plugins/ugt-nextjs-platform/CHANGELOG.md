@@ -1,5 +1,47 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.0.0 (2026-08-09)
+
+**BREAKING — radius is now the preset's, not the org's** (มติ 2026-08-09).
+`globals.tokens.css` no longer declares any radius; projects use what
+`base-mira` ships.
+
+The values were finally measured by running the org preset for real
+(`shadcn init --preset b1ZzrZbs0`) instead of guessing — mira sets
+`--radius: 0.45rem` (7.2px) and derives the rest by multiplication:
+
+| role | mira (new) | org hand-set (old) |
+| --- | --- | --- |
+| chip `sm` (×0.6) | 4.32px | 4px |
+| control `md` (×0.8) | 5.76px | 6px |
+| card `lg` (×1) | 7.20px | 12px |
+| overlay `xl` (×1.4) | 10.08px | 14px |
+
+Small tiers were already all but identical — the real change is **cards and
+dialogs get noticeably squarer** (12→7.2, 14→10.1). What the switch buys: one
+knob (`--radius`) rescales everything, which the old setup could not do (its
+four literals moved independently, and changing `--radius` only affected the
+card tier — a trap documented in 3.4.0 and now gone).
+
+Because the install replaces the `:root` block, three other places had to
+change or projects would end up with **no** `--radius` at all and square
+corners everywhere:
+
+- `SKILL.md` merge step: explicitly carry over the preset's `--radius` line
+  and leave its `@theme` radius scale untouched.
+- `verify.mjs`: new check **`--radius survived the token merge`** (fails when
+  the line was lost, warns when the `@theme` scale is gone), and the old
+  "globals.css must not declare `--radius-2xl`" check is **removed** — the
+  preset legitimately declares 2xl/3xl/4xl, so that check would have failed
+  every project. The usage rule stays: source may only use the four agreed
+  roles, `rounded-2xl` and up still fail.
+- DESIGN.md §1 rewritten: radius comes from the preset, one knob adjusts it,
+  changing it is a มติ.
+
+All three checks were exercised against the real `globals.css` mira generated:
+passes as-shipped, fails when `--radius` is stripped, fails on `rounded-3xl`.
+`docs/design-preview.html` now renders the mira radii.
+
 ## 3.4.0 (2026-08-09)
 
 **Correction to 3.3.0 — the radius comparison in that entry was wrong.**
