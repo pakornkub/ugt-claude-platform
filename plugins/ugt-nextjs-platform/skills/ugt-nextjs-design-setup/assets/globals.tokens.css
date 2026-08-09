@@ -168,6 +168,31 @@
   --status-gray-foreground: oklch(0.869 0.022 252.9);
 }
 
+/* พื้นผิวที่เลื่อนได้ต้องเห็น scrollbar เสมอ แต่ไม่ให้หนาแบบของ OS
+   (มติ 2026-08-09 — ที่มา: ugt-hrms เขียน arbitrary variant ชุดนี้ซ้ำต่อจุด
+   ยกมาเป็น utility กลางเพื่อไม่ต้องก๊อป)
+   ใช้กับ: SidebarContent · ตัวหุ้มตารางที่เลื่อนแนวนอน · body ของ dialog ที่ยาว
+   ห้ามใช้ `no-scrollbar` ของ shadcn กับพื้นผิวที่ผู้ใช้ต้องรู้ว่ายังมีของต่อ */
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--muted-foreground) 40%, transparent);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

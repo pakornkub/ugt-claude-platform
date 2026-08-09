@@ -1,5 +1,43 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.3.0 (2026-08-09)
+
+**One scrollbar style for the whole org.** 4.1.0 said "delete `no-scrollbar`",
+which leaves the OS scrollbar — chunky on Windows, invisible-until-hover on
+macOS, different on every machine. `globals.tokens.css` now ships
+`@utility scroll-thin` (6px, `--border` thumb, brightens on hover, Firefox +
+WebKit), lifted from `ugt-hrms` where the same arbitrary-variant string was
+pasted per call site.
+
+- `SidebarContent`: swap `no-scrollbar` → `scroll-thin` (block-cleanup step in
+  `references/layout-shells.md`, with the exact line to paste).
+- `DataTable`: the sideways scroll container gets `scroll-thin` too, so the
+  scrollbar that 4.1.0 turned on looks deliberate.
+- `verify.mjs`: fails when `no-scrollbar` survives or when `globals.css` has
+  no `@utility scroll-thin`; warns when `SidebarContent` carries neither.
+  All four paths tested.
+
+### Syncing a project that installed the kit before 4.3.0
+
+The kit is copied into projects, so an update does not reach them. Nothing
+here is urgent, but a project on an older copy is missing these — re-copy the
+file, or apply the one-liner:
+
+| What | Where | How |
+| --- | --- | --- |
+| Sideways scroll on wide tables (**the "data disappears" fix**) | `components/ui/data-table.tsx` | `scrollX` default `false` → `true`; add `scroll-thin` to the container |
+| Filter chips as `Badge` | same file | the hand-rolled pill → `<Badge variant="secondary">` |
+| Visible sidebar scrollbar | `components/ui/sidebar.tsx` | `no-scrollbar` → `scroll-thin` |
+| `scroll-thin` itself | `app/globals.css` | copy the `@utility` block from `assets/globals.tokens.css` |
+| Identity block | `components/nav-user.tsx` | new file from `ugt-nextjs-auth-setup` (projects with their own version: keep it, but check the two menu items and the two standard profile rows match) |
+| Radius from the preset | `app/globals.css` | drop the org `--radius*` declarations, keep the preset's (see 4.0.0) |
+
+`ugt-hrms` — the source of most of this kit — currently has the **old**
+`scrollX = false` and the hand-rolled chip, so the table-clipping bug reported
+from there is still live in that project until it syncs. Its sidebar already
+matches (it removed `no-scrollbar` in `cf8cd53`, which is where the
+`scroll-thin` style came from).
+
 ## 4.2.0 (2026-08-09)
 
 **Every app now ships the same identity block.** Ported from `ugt-hrms`

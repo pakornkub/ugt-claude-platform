@@ -46,8 +46,16 @@ first so those pages inherit the tokens; do not build login UI here.
   `no-scrollbar` — a shadcn utility that is literally
   `scrollbar-width: none` plus a hidden webkit scrollbar. It still scrolls, but
   nothing tells the user more menu exists below, which is the same silent-loss
-  failure as a clipped table. **Delete `no-scrollbar` from `SidebarContent`
-  during the block cleanup** (`scripts/verify.mjs` checks for it).
+  failure as a clipped table. During the block cleanup: **replace
+  `no-scrollbar` with `scroll-thin`** — the org utility shipped in
+  `globals.tokens.css` (6px track, `--border` thumb that brightens on hover,
+  Firefox + WebKit). `scripts/verify.mjs` fails on `no-scrollbar` and warns
+  when `scroll-thin` is absent.
+
+  ```tsx
+  // components/ui/sidebar.tsx — SidebarContent
+  'scroll-thin flex min-h-0 flex-1 flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
+  ```
   (the right-side group dropping to a second line was a real production fix)
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน

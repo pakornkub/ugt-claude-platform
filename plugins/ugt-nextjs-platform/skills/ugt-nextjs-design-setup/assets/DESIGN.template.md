@@ -104,7 +104,7 @@
   | --- | --- |
   | ตาราง แกน X | เลื่อนได้เสมอ (`scrollX` default = จริง) · จะ clip ต้องส่ง `scrollX={false}` **พร้อมคอมเมนต์เหตุผล** |
   | ตาราง แกน Y | เลื่อนตามหน้า + หัวตาราง `sticky` — ห้ามใส่ `max-h` ให้ตารางจนเกิด scroll ซ้อน |
-  | Sidebar แนวตั้ง | เมนูยาวเกินจอต้องเลื่อนได้ **และเห็น scrollbar** — ลบ `no-scrollbar` ออกจาก `SidebarContent` ของ block |
+  | Sidebar แนวตั้ง | เมนูยาวเกินจอต้องเลื่อนได้ **และเห็น scrollbar** — เปลี่ยน `no-scrollbar` ของ block เป็น `scroll-thin` |
   | Topbar แนวนอน | scroll แนวนอน ห้าม wrap |
 
   > `no-scrollbar` ของ shadcn คือ `scrollbar-width: none` + ซ่อน webkit

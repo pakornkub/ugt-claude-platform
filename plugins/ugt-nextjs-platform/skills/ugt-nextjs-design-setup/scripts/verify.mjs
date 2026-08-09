@@ -169,10 +169,27 @@ check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () 
     }
     // the sidebar block ships `no-scrollbar`, which hides the only hint that more menu exists
     if (/SidebarContent/.test(body) && /no-scrollbar/.test(body)) {
-      problems.push(`${rel}: SidebarContent still has \`no-scrollbar\` — remove it so a long menu shows its scrollbar`);
+      problems.push(`${rel}: SidebarContent still has \`no-scrollbar\` — swap it for \`scroll-thin\` so a long menu shows its scrollbar`);
     }
   }
-  return problems.length ? { ok: false, msg: problems.slice(0, 5).join(' · ') } : { ok: true };
+  if (problems.length) return { ok: false, msg: problems.slice(0, 5).join(' · ') };
+
+  // soft check: the sidebar should carry the org scrollbar style, not the OS default
+  const sidebar = sourceTsx().find((f) => /[\\/]sidebar\.tsx$/.test(f));
+  if (sidebar) {
+    const body = readFileSync(sidebar, 'utf8');
+    if (/SidebarContent/.test(body) && !/scroll-thin/.test(body)) {
+      return { ok: 'warn', msg: 'SidebarContent has no `scroll-thin` — the menu will use the OS scrollbar, which differs per machine' };
+    }
+  }
+  return { ok: true };
+});
+
+check('scroll-thin utility is installed', () => {
+  if (!has('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
+  return /@utility\s+scroll-thin/.test(read('app', 'globals.css'))
+    ? { ok: true }
+    : { ok: false, msg: 'globals.css has no `@utility scroll-thin` — scrollable surfaces (sidebar, wide tables) fall back to the OS scrollbar; copy it from assets/globals.tokens.css' };
 });
 
 check('Only the four agreed radius roles are used', () => {

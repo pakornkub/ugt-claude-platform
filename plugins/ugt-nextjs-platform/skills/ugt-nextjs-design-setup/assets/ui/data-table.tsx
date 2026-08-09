@@ -930,7 +930,9 @@ export function DataTable<TData>({
           'hidden overflow-clip rounded-lg border sm:block',
           // default: the inner container scrolls sideways · scrollX={false}
           // CLIPS — columns past the edge become unreachable, so it is opt-in
-          !scrollX && '[&_[data-slot=table-container]]:overflow-x-clip'
+          !scrollX && '[&_[data-slot=table-container]]:overflow-x-clip',
+          // the sideways scrollbar uses the org's thin style, not the OS default
+          scrollX && '[&_[data-slot=table-container]]:scroll-thin'
         )}
       >
         <Table className={cn(fixedLayout && 'table-fixed')}>
