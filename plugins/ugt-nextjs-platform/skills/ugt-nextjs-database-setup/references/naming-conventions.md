@@ -23,10 +23,10 @@ model rolePermission {
 ### Read-only tables populated by external systems
 
 Tables that a **SQL Server Agent Job / ETL / external SP** INSERTs into (the
-app only reads) take a group prefix such as `<EXT>_` (pick one short prefix per
+app only reads) take a group prefix such as `__EXT___` (pick one short prefix per
 project and keep it fixed):
 
-- `<EXT>_WeeklySummary`, `<EXT>_AccessDetail` → SELECT-only from the app side
+- `__EXT___WeeklySummary`, `__EXT___AccessDetail` → SELECT-only from the app side
 - App-owned tables (the app may write) → **no prefix** — `HolidayLists`, `AppSettings`
 - The prefix is an ownership signal: see the prefix = never write; to adjust a
   value, create an app-side override table

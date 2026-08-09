@@ -77,7 +77,7 @@ The org-wide contract:
 Ask all of these **in a single message** before doing anything:
 
 1. **Which login methods?** SSO / LDAP / Local (default: SSO only)
-2. **Deployed under a basePath / shared domain?** If yes → what basePath (e.g. `/<base-path>`)
+2. **Deployed under a basePath / shared domain?** If yes → what basePath (e.g. `/__BASE_PATH__`)
 3. **[If SSO] Does a Keycloak client exist yet?**
    - exists → request `KEYCLOAK_ISSUER` / `CLIENT_ID` / `CLIENT_SECRET`
    - not yet → follow `references/keycloak-client.md` (the redirect URI must
@@ -114,44 +114,30 @@ Then mount `<Toaster richColors />` (from sonner) in the root layout
 
 ### 5.2 Copy assets → project locations
 
-| Asset | Destination | When |
-| --- | --- | --- |
-| `assets/lib-auth.ts` | `lib/auth.ts` | always |
-| `assets/lib-auth-client.ts` | `lib/auth-client.ts` | always |
-| `assets/lib-actions-auth.ts` | `lib/actions/auth.ts` | always (delete actions for unselected methods) |
-| `assets/lib-ldap.ts` | `lib/ldap.ts` | LDAP only |
-| `assets/route.ts` | `app/api/auth/[...all]/route.ts` | always |
-| `assets/proxy.ts` | `proxy.ts` (root) | always — Next.js 16 uses `proxy.ts`, not `middleware.ts` |
-| `assets/login-form.tsx` | `components/login-form.tsx` | always (delete sections for unselected methods) |
-| `assets/lib-permissions.ts` | `lib/permissions.ts` | always |
-| `assets/lib-permissions-sync.ts` | `lib/permissions-sync.ts` | always |
-| `assets/lib-get-user-permissions.ts` | `lib/get-user-permissions.ts` | always |
-| `assets/admin-setup/layout.tsx` | `app/(admin-setup)/layout.tsx` | always |
-| `assets/admin-setup/page.tsx` | `app/(admin-setup)/admin/setup/page.tsx` | always |
-| `assets/admin-setup/admin-setup-form.tsx` | `components/admin-setup-form.tsx` | always |
-| `assets/admin-setup/admin-setup-action.ts` | `lib/actions/admin-setup.ts` | always |
-| `assets/admin/layout.tsx` | `app/(admin)/layout.tsx` | always |
-| `assets/admin/admin-nav.tsx` | `components/admin-nav.tsx` | always |
-| `assets/admin/users-page.tsx` | `app/(admin)/admin/users/page.tsx` | always |
-| `assets/admin/users-actions.ts` | `lib/actions/admin-users.ts` | always |
-| `assets/admin/user-role-select.tsx` | `components/user-role-select.tsx` | always |
-| `assets/admin/roles-page.tsx` | `app/(admin)/admin/roles/page.tsx` | always |
-| `assets/admin/roles-actions.ts` | `lib/actions/admin-roles.ts` | always |
-| `assets/admin/role-form.tsx` | `components/role-form.tsx` | always |
-| `assets/admin/roles-manager.tsx` | `components/roles-manager.tsx` | always |
-| `assets/admin/audit-logs-page.tsx` | `app/(admin)/admin/audit-logs/page.tsx` | always |
-| `assets/env.example` | merge into `.env.example` + `.env.local` | always (drop vars for unselected methods) |
+Assets mirror their destinations — **copy the `assets/` tree straight onto the
+project root** (`assets/lib/auth.ts` → `lib/auth.ts`, `assets/app/(admin)/…` →
+`app/(admin)/…`, `assets/components/…` → `components/…`, `assets/proxy.ts` →
+`proxy.ts`; Next.js 16 uses `proxy.ts`, not `middleware.ts`), then handle the
+exceptions:
 
-The login-method assets (`lib-auth.ts`, `lib-auth-client.ts`,
-`lib-actions-auth.ts`, `login-form.tsx`, `env.example`) carry
+| Asset | Destination | Note |
+| --- | --- | --- |
+| `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see §5.3 |
+| `assets/env.example` | merge into `.env.example` + `.env.local` | drop vars for unselected methods |
+| `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
+| `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
+
+The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
+`lib/actions/auth.ts`, `components/login-form.tsx`, `env.example`) carry
 `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section (imports included)
 belonging to methods that were not selected. The RBAC/admin assets
-(`admin-setup/*`, `admin/*`) are method-agnostic — copy them as-is regardless
+(`app/(admin-setup)/**`, `app/(admin)/**`, the admin components, and
+`lib/actions/admin-*.ts`) are method-agnostic — copy them as-is regardless
 of which login methods were chosen.
 
 ### 5.3 Schema + migrate
 
-1. Paste `assets/schema-auth.prisma` into `prisma/schema.prisma`
+1. Paste `assets/prisma/schema-auth.prisma` into `prisma/schema.prisma`
    (adjust `@db.NVarChar(Max)` if not MSSQL)
    > **Naming-rule exception**: Better Auth core tables (`User`, `Session`,
    > `Account`, `Verification`, `RateLimit`) map to **singular** names per the
@@ -193,14 +179,14 @@ of which login methods were chosen.
 
 | Placeholder | Meaning | Example |
 | --- | --- | --- |
-| `<project-name>` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (~line 181, flagged with a ⚠️ PLACEHOLDER comment); don't miss it** | `expense-portal` |
-| `<base-path>` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
-| `<keycloak-host>` | the org's central Keycloak host | — |
-| `<realm>` | the org's central realm | — |
-| `<ldap-host>` | AD server hostname | — |
-| `<ad-base-dn>` | full AD base DN (one `DC=` per label) | `DC=example,DC=com` |
-| `<company-domain>` | org email/UPN domain | `company.co.th` |
-| `<app-host>` | the host the app actually deploys to | — |
+| `__PROJECT_NAME__` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (~line 181, flagged with a ⚠️ PLACEHOLDER comment); don't miss it** | `expense-portal` |
+| `__BASE_PATH__` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
+| `__KEYCLOAK_HOST__` | the org's central Keycloak host | — |
+| `__REALM__` | the org's central realm | — |
+| `__LDAP_HOST__` | AD server hostname | — |
+| `__AD_BASE_DN__` | full AD base DN (one `DC=` per label) | `DC=example,DC=com` |
+| `__COMPANY_DOMAIN__` | org email/UPN domain | `company.co.th` |
+| `__APP_HOST__` | the host the app actually deploys to | — |
 
 ## 7. Quick Rules — DO / DON'T
 
@@ -259,5 +245,5 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       from the steps above
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
-- [ ] With a basePath: the cookie name in DevTools starts with `<base-path>.` (or `__Secure-<base-path>.` on https)
+- [ ] With a basePath: the cookie name in DevTools starts with `__BASE_PATH__.` (or `__Secure-__BASE_PATH__.` on https)
 - [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)

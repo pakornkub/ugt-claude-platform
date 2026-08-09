@@ -108,16 +108,16 @@ check('Bootstrap redirects into a page that actually exists', () => {
 
 // ── 2. Leftover placeholders (including the one hidden mid-file) ───────────
 const PLACEHOLDERS = [
-  '<project-name>',
-  '<base-path>',
-  '<keycloak-host>',
-  '<realm>',
-  '<ldap-host>',
-  '<ad-base-dn>',
-  '<company-domain>',
-  '<app-host>',
+  '__PROJECT_NAME__',
+  '__BASE_PATH__',
+  '__KEYCLOAK_HOST__',
+  '__REALM__',
+  '__LDAP_HOST__',
+  '__AD_BASE_DN__',
+  '__COMPANY_DOMAIN__',
+  '__APP_HOST__',
 ];
-check('No <...> placeholders left', () => {
+check('No __*__ placeholders left', () => {
   const found = [];
   for (const file of sourceFiles()) {
     const body = readFileSync(file, 'utf8');

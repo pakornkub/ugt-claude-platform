@@ -1,0 +1,22 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-test-lint-setup (renamed from ugt-nextjs-quality-setup in v3.0.0). S* queries must route here; N* must NOT (writing tests = normal dev work, pipeline/server config → cicd-setup, code violations → clean-code).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "pending — run as part of the v3.0 release gate (P4)"
+  },
+  "queries": {
+    "S1": { "prompt": "ตั้ง test ให้โปรเจคหน่อย ยังไม่มี test เลย", "expected": "ugt-nextjs-test-lint-setup" },
+    "S2": { "prompt": "ใส่ vitest กับ eslint prettier ตามมาตรฐานบริษัท", "expected": "ugt-nextjs-test-lint-setup" },
+    "S3": { "prompt": "pipeline แดงที่ stage lint บอกว่าไม่มี script ชื่อ format:check", "expected": "ugt-nextjs-test-lint-setup" },
+    "S4": { "prompt": "coverage ไม่ขึ้นใน sonar ทั้งที่รัน test ผ่าน", "expected": "ugt-nextjs-test-lint-setup" },
+    "S5": { "prompt": "Jenkins หา test-results/junit.xml ไม่เจอ", "expected": "ugt-nextjs-test-lint-setup" },
+    "S6": { "prompt": "อยากให้ format โค้ดอัตโนมัติก่อน commit ทุกครั้ง", "expected": "ugt-nextjs-test-lint-setup" },
+    "S7": { "prompt": "เทสรันไม่ได้เพราะมันเรียกหา .env จริง ทำให้รันบน CI ได้ที", "expected": "ugt-nextjs-test-lint-setup" },
+    "N1": { "prompt": "เขียน unit test ให้ฟังก์ชัน calculateOvertime ที่เพิ่งทำเสร็จ", "expected": "(normal dev work / superpowers:test-driven-development)" },
+    "N2": { "prompt": "ตั้ง Jenkins pipeline ให้โปรเจคนี้", "expected": "ugt-nextjs-cicd-setup" },
+    "N3": { "prompt": "Quality Gate แดงเพราะ violation ใหม่ 3 ตัว ช่วยแก้โค้ดที", "expected": "ugt-nextjs-clean-code" },
+    "N4": { "prompt": "กด save แล้วหน้า list ไม่ refresh ต้อง reload เอง", "expected": "ugt-nextjs-pitfalls" },
+    "N5": { "prompt": "SonarQube server ต้องตั้ง webhook ยังไงให้ Jenkins รู้ผล", "expected": "ugt-nextjs-cicd-setup" }
+  }
+}

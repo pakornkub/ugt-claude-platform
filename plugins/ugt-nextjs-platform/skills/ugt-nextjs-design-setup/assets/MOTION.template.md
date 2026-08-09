@@ -1,4 +1,4 @@
-# {{PROJECT_NAME}} — Motion Inventory
+# __PROJECT_NAME__ — Motion Inventory
 
 > รายการจุด motion ที่**เพิ่มเอง**นอกเหนือจากที่ shadcn/tw-animate ให้มา
 > (dialog/dropdown/skeleton มี motion ในตัวแล้ว — ไม่ต้องจดที่นี่)

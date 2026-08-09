@@ -108,21 +108,22 @@ where noted.
 | Asset | Destination | Overwritable? |
 | --- | --- | --- |
 | `assets/CLAUDE-block.md` | inserted into root `CLAUDE.md` | **only between `<!-- ugt:start -->` … `<!-- ugt:end -->`** |
-| `assets/rules-ugt-nextjs-database.md` | `.claude/rules/ugt-nextjs-database.md` | whole file |
-| `assets/rules-ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole file |
-| `assets/rules-ugt-nextjs-ci.md` | `.claude/rules/ugt-nextjs-ci.md` | whole file |
 | `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
-| `assets/state-handoff.md` | `.claude/state/handoff.md` | **create once, never overwrite** |
-| `assets/state-project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
-| `assets/state-model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
+| `assets/state/handoff.md` | `.claude/state/handoff.md` | **create once, never overwrite** |
+| `assets/state/project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
+| `assets/state/model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
+
+`.claude/rules/ugt-nextjs-*.md` files are NOT installed from here — each child
+skill ships its own rule in its `assets/rules/` and installs it as part of its
+own steps (so installing a single skill directly also gets its rule).
 
 How:
 
 1. **`CLAUDE.md`** — no file → create it from the block · file exists → look for
    the `<!-- ugt:start -->` marker: found → replace only the span between the
    markers · not found → **append** the block. Never touch a single line of the
-   project's own content. Substitute `<project-name>` / `<base-path-prod>` /
-   `<base-path-dev>` from the interview answers.
+   project's own content. Substitute `__PROJECT_NAME__` / `__BASE_PATH_PROD__` /
+   `__BASE_PATH_DEV__` from the interview answers.
    > **Size check**: if the combined file exceeds ~200 lines, move project
    > content that is path-bound into `.claude/rules/<project>-*.md` instead of
    > letting CLAUDE.md bloat (longer files get followed less).
@@ -132,10 +133,12 @@ How:
    > ours. Leave that block alone, commit it (deleting it just recreates an
    > uncommitted change), and never place the ugt block inside it. Opt-out, if
    > a project ever needs it: `agentRules: false` in next.config.
-2. **`.claude/rules/`** — copy only the files for modules actually installed
-   (no auth module → no `ugt-nextjs-auth.md`). These files carry `paths` frontmatter,
-   so the runtime loads them by itself when Claude touches matching files —
-   there is no need to write "if you edit X, read Y" into CLAUDE.md.
+2. **`.claude/rules/`** — verify each installed module's child skill wrote its
+   rule file (`ugt-nextjs-database.md` / `ugt-nextjs-auth.md` /
+   `ugt-nextjs-ci.md` / `ugt-nextjs-design.md`). These files carry `paths`
+   frontmatter, so the runtime loads them by itself when Claude touches
+   matching files — there is no need to write "if you edit X, read Y" into
+   CLAUDE.md.
 3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`,
    `enabledPlugins`, `permissions` (the marketplace repo is already set to
    `pakornkub/ugt-claude-platform`) ·
@@ -165,7 +168,7 @@ How:
    written `docs/admin-handoff.md` (from its
    `assets/admin-handoff.template.md` — plain-Thai steps + exact names +
    fill-in return section covering Jenkins + SonarQube + Keycloak); confirm
-   it exists, has no `{{...}}` left, and tell the user to forward that file
+   it exists, has no `__...__` left, and tell the user to forward that file
    to the admin/DevOps team and wait for the returned values to fill
    `.env.local`. If CI was NOT installed but Auth was, render the same
    template with only the Keycloak section into `docs/admin-handoff.md`

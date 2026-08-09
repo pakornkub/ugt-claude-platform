@@ -177,8 +177,8 @@ export function LoginForm({
 }: Readonly<{ className?: string; sessionExpired?: boolean }>) {
   // Direct process.env read is intentional here (same reason as lib/auth-client.ts):
   // t3-env createEnv() returns '' for NEXT_PUBLIC_* in the Turbopack client bundle.
-  // ⚠️ PLACEHOLDER: replace '<project-name>' in the fallback below with the real app name (see SKILL.md §7)
-  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? '<project-name>';
+  // ⚠️ PLACEHOLDER: replace '__PROJECT_NAME__' in the fallback below with the real app name (see SKILL.md §7)
+  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? '__PROJECT_NAME__';
 
   useEffect(() => {
     if (sessionExpired) {

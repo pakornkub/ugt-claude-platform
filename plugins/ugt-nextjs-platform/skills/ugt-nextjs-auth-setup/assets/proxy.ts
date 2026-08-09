@@ -45,7 +45,7 @@ function buildCsp(nonce: string): string {
 
 export function proxy(request: NextRequest) {
   // Next.js 16 + Turbopack includes basePath in request.nextUrl.pathname
-  // (e.g. "/<base-path>/login", not "/login"). Strip it so the route checks below
+  // (e.g. "/__BASE_PATH__/login", not "/login"). Strip it so the route checks below
   // are basePath-agnostic. The guard makes this a no-op when the prefix is
   // already absent, so it stays correct regardless of that behaviour.
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';

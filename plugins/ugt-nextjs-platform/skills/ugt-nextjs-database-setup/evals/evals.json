@@ -16,8 +16,8 @@
         "Every model has PascalCase-plural @@map and every field has @map",
         "Every app-owned model carries all 7 audit columns",
         ".env.example holds no real password (placeholders only) and .gitignore covers .env.local",
-        "No <db-host> <db-port> <db-name> placeholders left in .env.local",
-        "No leftover comments referencing <EXT>_ or <linked-server>, since this project uses neither"
+        "No __DB_HOST__ __DB_PORT__ __DB_NAME__ placeholders left in .env.local",
+        "No leftover comments referencing __EXT___ or __LINKED_SERVER__, since this project uses neither"
       ],
       "files": []
     },

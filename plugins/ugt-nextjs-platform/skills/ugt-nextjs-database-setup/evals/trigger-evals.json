@@ -1,0 +1,24 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-database-setup. S* queries must route here; N* queries must NOT (auth tables → auth-setup, CI → cicd-setup, sonar → clean-code, runtime bugs → pitfalls).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "pending — run as part of the v3.0 release gate (P4)"
+  },
+  "queries": {
+    "S1": { "prompt": "ต่อ database ให้โปรเจคนี้หน่อย ใช้ SQL Server ของบริษัท", "expected": "ugt-nextjs-database-setup" },
+    "S2": { "prompt": "ตั้ง prisma ให้หน่อย โปรเจคยังไม่มี DB เลย", "expected": "ugt-nextjs-database-setup" },
+    "S3": { "prompt": "ช่วยออกแบบตาราง leave request ตามมาตรฐานบริษัท", "expected": "ugt-nextjs-database-setup" },
+    "S4": { "prompt": "จะเพิ่มคอลัมน์ชื่อ order ในตาราง Items ได้ไหม", "expected": "ugt-nextjs-database-setup" },
+    "S5": { "prompt": "ต้องเรียก stored procedure usp_RecalculateWeeklySummary จากแอปยังไงให้ปลอดภัย", "expected": "ugt-nextjs-database-setup" },
+    "S6": { "prompt": "อยากอ่านข้อมูลข้าม linked server จาก HR ระบบเก่า", "expected": "ugt-nextjs-database-setup" },
+    "S7": { "prompt": "rename คอลัมน์ใน prisma แล้วกลัวข้อมูลหาย ทำยังไงดี", "expected": "ugt-nextjs-database-setup" },
+    "S8": { "prompt": "npx prisma generate พังบอก url อยู่ผิดที่", "expected": "ugt-nextjs-database-setup" },
+    "N1": { "prompt": "ใส่ระบบ login พร้อมตาราง user role permission", "expected": "ugt-nextjs-auth-setup" },
+    "N2": { "prompt": "ทำ CI ให้ migrate อัตโนมัติตอน deploy", "expected": "ugt-nextjs-cicd-setup" },
+    "N3": { "prompt": "sonar ฟ้อง violation ในไฟล์ service ที่ query ข้อมูล", "expected": "ugt-nextjs-clean-code" },
+    "N4": { "prompt": "วันที่ในตารางแสดงเลื่อนไป 1 วันเฉพาะตอนกลางคืน", "expected": "ugt-nextjs-pitfalls" },
+    "N5": { "prompt": "ตั้ง vitest ให้ project หน่อย", "expected": "ugt-nextjs-test-lint-setup" },
+    "N6": { "prompt": "ออกแบบ data model ของ business domain ก่อนเริ่มเขียนโค้ด อยากคุยเรื่อง ubiquitous language", "expected": "mattpocock-skills:domain-modeling (conceptual modeling, not org DB standards)" }
+  }
+}

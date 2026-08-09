@@ -7,7 +7,7 @@
 Next.js (App Router) · TypeScript · React · Prisma → SQL Server ·
 Better Auth (SSO Keycloak / AD-LDAP / Local) · Vitest · Jenkins + SonarQube + Docker
 
-Project `<project-name>` · basePath prod `<base-path-prod>` · dev `<base-path-dev>`
+Project `__PROJECT_NAME__` · basePath prod `__BASE_PATH_PROD__` · dev `__BASE_PATH_DEV__`
 
 ## Commands
 

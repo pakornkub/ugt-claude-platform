@@ -52,9 +52,9 @@ check('CLAUDE.md imports team state', () => {
     : { ok: false, msg: 'No `@.claude/state/handoff.md` import — next session will not see team state' };
 });
 
-check('No <...> placeholders left in CLAUDE.md', () => {
+check('No __*__ placeholders left in CLAUDE.md', () => {
   if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
-  const hits = [...new Set([...claudeMd.matchAll(/<(project-name|base-path-prod|base-path-dev|org)>/g)].map((m) => m[0]))];
+  const hits = [...new Set([...claudeMd.matchAll(/__(PROJECT_NAME|BASE_PATH_PROD|BASE_PATH_DEV)__/g)].map((m) => m[0]))];
   return hits.length ? { ok: false, msg: `Unsubstituted: ${hits.join(', ')}` } : { ok: true };
 });
 
@@ -153,7 +153,7 @@ check('.claude/settings.json declares marketplace + plugin', () => {
   if (!s.extraKnownMarketplaces) problems.push('no extraKnownMarketplaces');
   if (!s.enabledPlugins) problems.push('no enabledPlugins');
   const raw = JSON.stringify(s);
-  if (raw.includes('<org>')) problems.push('<org> not replaced with the real GitHub org');
+  if (/__[A-Z][A-Z0-9_]*__/.test(raw)) problems.push('unsubstituted __*__ placeholder in settings.json');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 

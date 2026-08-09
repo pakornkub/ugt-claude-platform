@@ -1,7 +1,7 @@
-# คำขอตั้งค่าระบบ — {{PROJECT_DISPLAY_NAME}} (`{{PROJECT_NAME}}`)
+# คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)
 
-> **เอกสารส่งต่อทีม Admin / DevOps** · สร้างอัตโนมัติเมื่อ {{DATE}}
-> ผู้ขอ: {{REQUESTER}} · โปรเจค: {{REPO_URL}}
+> **เอกสารส่งต่อทีม Admin / DevOps** · สร้างอัตโนมัติเมื่อ __DATE__
+> ผู้ขอ: __REQUESTER__ · โปรเจค: __REPO_URL__
 > ทำเสร็จแล้วกรุณา**กรอกหัวข้อสุดท้าย "ค่าที่ต้องส่งกลับ" แล้วส่งไฟล์นี้คืน**ทีมพัฒนา
 >
 > ชื่อทุกตัวในเอกสารนี้ถูก generate ให้ตรงกับค่าที่ตั้งไว้ในโปรเจคแล้ว —
@@ -11,7 +11,7 @@
 
 | # | ระบบ | งาน | ใช้เวลาโดยประมาณ |
 | --- | --- | --- | --- |
-| 1 | Jenkins | สร้าง credentials {{N_CREDS}} ตัว + pipeline job + webhook | ~15 นาที |
+| 1 | Jenkins | สร้าง credentials __N_CREDS__ ตัว + pipeline job + webhook | ~15 นาที |
 | 2 | SonarQube | สร้าง 2 projects + ผูก Quality Gate + webhook | ~10 นาที |
 | 3 | Keycloak | สร้าง client 1 ตัว (SSO) | ~10 นาที |
 
@@ -28,19 +28,19 @@
 
 | ชื่อ credential (ID) | ชนิด | ใส่อะไร |
 | --- | --- | --- |
-| `env-{{PROJECT_NAME}}` | **Secret file** | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาแนบให้ / นัดส่งช่องทางปลอดภัย) |
-| `env-{{PROJECT_NAME}}-dev` | **Secret file** | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod (คนละ DATABASE_URL คนละ secret) |
-| `sentry-dsn-{{PROJECT_NAME}}` | **Secret text** | Sentry DSN <!-- ลบแถวนี้ถ้าโปรเจคไม่ใช้ Sentry --> |
+| `env-__PROJECT_NAME__` | **Secret file** | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาแนบให้ / นัดส่งช่องทางปลอดภัย) |
+| `env-__PROJECT_NAME__-dev` | **Secret file** | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod (คนละ DATABASE_URL คนละ secret) |
+| `sentry-dsn-__PROJECT_NAME__` | **Secret text** | Sentry DSN <!-- ลบแถวนี้ถ้าโปรเจคไม่ใช้ Sentry --> |
 
 ### 1.2 สร้าง Pipeline job
 
-1. New Item → ชื่อ `{{PROJECT_NAME}}` → เลือก **Multibranch Pipeline**
-2. Branch Sources → GitHub → repo `{{REPO_URL}}` → discover branches `main` และ `develop`
+1. New Item → ชื่อ `__PROJECT_NAME__` → เลือก **Multibranch Pipeline**
+2. Branch Sources → GitHub → repo `__REPO_URL__` → discover branches `main` และ `develop`
 3. **สำคัญ**: ปิด "Lightweight checkout" (ถ้าเปิดไว้ stage แรกจะพัง)
 
 ### 1.3 ตั้ง Webhook ที่ GitHub repo
 
-- Settings → Webhooks → Add: URL `http://{{JENKINS_HOST}}:8080/github-webhook/` · event: **push เท่านั้น**
+- Settings → Webhooks → Add: URL `http://__JENKINS_HOST__:8080/github-webhook/` · event: **push เท่านั้น**
 
 <!-- ถ้าโปรเจคใช้ basePath: -->
 ### 1.4 Reverse proxy (dev)
@@ -48,10 +48,10 @@
 เพิ่ม location block ใน nginx ของเครื่อง dev:
 
 ```nginx
-location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set_header Host $host; }
+location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; proxy_set_header Host $host; }
 ```
 
-`{{PORT_DEV}}` ด้านบนเป็นแค่ค่า default ที่เสนอไป (`3000`/`3001`) — ถ้า port จริงที่จัดสรรให้ต่างไป ใช้ค่าจริงแทน และแจ้งกลับตามหัวข้อ "ค่าที่ต้องส่งกลับ" ท้ายเอกสาร
+`__PORT_DEV__` ด้านบนเป็นแค่ค่า default ที่เสนอไป (`3000`/`3001`) — ถ้า port จริงที่จัดสรรให้ต่างไป ใช้ค่าจริงแทน และแจ้งกลับตามหัวข้อ "ค่าที่ต้องส่งกลับ" ท้ายเอกสาร
 
 ---
 
@@ -61,8 +61,8 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 
 | Project Key | Display name |
 | --- | --- |
-| `{{PROJECT_NAME}}` | {{PROJECT_DISPLAY_NAME}} |
-| `{{PROJECT_NAME}}-dev` | {{PROJECT_DISPLAY_NAME}} (Dev) |
+| `__PROJECT_NAME__` | __PROJECT_DISPLAY_NAME__ |
+| `__PROJECT_NAME__-dev` | __PROJECT_DISPLAY_NAME__ (Dev) |
 
 ### 2.2 ผูก Quality Gate
 
@@ -70,7 +70,7 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 
 ### 2.3 Webhook กลับไป Jenkins (Administration → Configuration → Webhooks)
 
-- URL: `http://{{JENKINS_HOST}}:8080/sonarqube-webhook/`
+- URL: `http://__JENKINS_HOST__:8080/sonarqube-webhook/`
 - **ถ้าไม่ตั้งข้อนี้ pipeline จะค้างตลอดไป** ที่ขั้นรอผล Quality Gate
 
 ---
@@ -82,7 +82,7 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 | การตั้งค่า | ค่า |
 | --- | --- |
 | Client type | OpenID Connect |
-| Client ID | `{{PROJECT_NAME}}` |
+| Client ID | `__PROJECT_NAME__` |
 | Client authentication | **On** (confidential) |
 | Standard flow (Authorization Code) | **On** |
 | Direct access grants / Implicit / Service accounts | **Off ทั้งหมด** |
@@ -92,8 +92,8 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 **Valid redirect URIs — ลงทะเบียนให้ตรงทุกตัวอักษร:**
 
 ```
-{{APP_URL_DEV}}/api/auth/oauth2/callback/keycloak
-{{APP_URL_PROD}}/api/auth/oauth2/callback/keycloak
+__APP_URL_DEV__/api/auth/oauth2/callback/keycloak
+__APP_URL_PROD__/api/auth/oauth2/callback/keycloak
 ```
 
 (ไม่ต้องตั้ง post-logout redirect — ระบบ logout ผ่านหลังบ้าน)
@@ -107,7 +107,7 @@ location {{BASE_PATH_DEV}} { proxy_pass http://127.0.0.1:{{PORT_DEV}}; proxy_set
 | **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `3000` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
 | **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `3001` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
 | `KEYCLOAK_ISSUER` | `https://<keycloak-host>/realms/<realm>` (ตรวจว่าเปิด `<issuer>/.well-known/openid-configuration` ได้) | |
-| `KEYCLOAK_CLIENT_SECRET` | Keycloak → client `{{PROJECT_NAME}}` → Credentials | **ส่งช่องทางปลอดภัย อย่ากรอกในไฟล์นี้** |
+| `KEYCLOAK_CLIENT_SECRET` | Keycloak → client `__PROJECT_NAME__` → Credentials | **ส่งช่องทางปลอดภัย อย่ากรอกในไฟล์นี้** |
 | ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
 | ยืนยัน SonarQube projects + webhook แล้ว | ลิงก์ project | |
 

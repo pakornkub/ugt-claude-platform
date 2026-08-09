@@ -1,0 +1,24 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-auth-setup. S* queries must route here (login methods, RBAC/permissions, documented auth symptoms); N* must NOT (DB plumbing → database-setup, page theming → design-setup, CI → cicd-setup).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "pending — run as part of the v3.0 release gate (P4)"
+  },
+  "queries": {
+    "S1": { "prompt": "ใส่ระบบ login ให้โปรเจคนี้ ใช้ SSO ของบริษัท", "expected": "ugt-nextjs-auth-setup" },
+    "S2": { "prompt": "อยากให้ user login ด้วย AD account ของบริษัทได้", "expected": "ugt-nextjs-auth-setup" },
+    "S3": { "prompt": "deploy แล้วเจอ ERR_TOO_MANY_REDIRECTS ทั้งที่ local ปกติ", "expected": "ugt-nextjs-auth-setup" },
+    "S4": { "prompt": "เพิ่ม role หัวหน้าแผนก ให้เห็นเมนูอนุมัติได้อย่างเดียว", "expected": "ugt-nextjs-auth-setup" },
+    "S5": { "prompt": "guard หน้า /admin ไม่ให้คนไม่มีสิทธิ์เข้า", "expected": "ugt-nextjs-auth-setup" },
+    "S6": { "prompt": "logout บน https แล้ว cookie ไม่หาย กลับมา login ใหม่ก็เข้าเลย", "expected": "ugt-nextjs-auth-setup" },
+    "S7": { "prompt": "console ขึ้น Unexpected token '<' ตอนโหลดหน้าแรกหลัง deploy", "expected": "ugt-nextjs-auth-setup" },
+    "S8": { "prompt": "Keycloak บอก invalid redirect_uri ตอนกด login", "expected": "ugt-nextjs-auth-setup" },
+    "S9": { "prompt": "ใครแก้ข้อมูลอะไรในระบบต้องเก็บ log ไว้ตรวจย้อนหลังได้", "expected": "ugt-nextjs-auth-setup" },
+    "N1": { "prompt": "ต่อ SQL Server ให้โปรเจค ยังไม่มี prisma เลย", "expected": "ugt-nextjs-database-setup" },
+    "N2": { "prompt": "หน้า login สีเพี้ยนไม่ตรงธีมบริษัท ปรับให้หน่อย", "expected": "ugt-nextjs-design-setup" },
+    "N3": { "prompt": "ทำ pipeline ให้ deploy อัตโนมัติตอน push main", "expected": "ugt-nextjs-cicd-setup" },
+    "N4": { "prompt": "เขียน test ให้ flow login ที่ทำเสร็จแล้ว", "expected": "(normal dev work / superpowers:test-driven-development)" },
+    "N5": { "prompt": "ticking แถวในตาราง user แล้วมันเลือกแถวอื่น", "expected": "ugt-nextjs-pitfalls" }
+  }
+}

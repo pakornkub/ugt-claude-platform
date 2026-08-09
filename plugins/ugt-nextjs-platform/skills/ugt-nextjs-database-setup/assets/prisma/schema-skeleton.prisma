@@ -6,7 +6,7 @@
 // Column names in the DB are PascalCase via @map(); Prisma fields and
 // relation names stay camelCase (Prisma convention).
 // Tables populated by external jobs (read-only to the app) use a distinct
-// prefix, e.g. @@map("<EXT>_WeeklySummary") — the app never writes to them.
+// prefix, e.g. @@map("__EXT___WeeklySummary") — the app never writes to them.
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
