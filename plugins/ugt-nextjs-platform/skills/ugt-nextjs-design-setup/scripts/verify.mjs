@@ -5,14 +5,32 @@
 //
 // Anchors at process.cwd() as the project root — a file that should exist but
 // can't be found is a FAIL, never a pass.
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
 const results = [];
 const p = (...s) => join(ROOT, ...s);
 const has = (...s) => existsSync(p(...s));
 const read = (...s) => readFileSync(p(...s), 'utf8');
+
+/** All .tsx under the app's own source dirs (skips build output and deps) */
+function sourceTsx() {
+  const skip = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', '.claude']);
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (skip.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (entry.endsWith('.tsx')) out.push(full);
+    }
+  };
+  for (const d of ['app', 'components', 'features', 'src']) {
+    if (has(d)) walk(p(d));
+  }
+  return out;
+}
 
 function check(name, fn) {
   try {
@@ -81,6 +99,64 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
 check('lib/format.ts installed (the only formatter)', () =>
   has('lib', 'format.ts') ? { ok: true } : { ok: false, msg: 'Central formatter missing' }
 );
+
+// ── cross-page consistency ────────────────────────────────────────────────
+// Same component used on every page, but per-page config is where drift shows
+// up: a table without `id` silently forgets column prefs that every other
+// table remembers, and duplicate ids make two tables share one set of prefs.
+check('Every <DataTable> passes a unique id (column prefs persist)', () => {
+  const files = sourceTsx().filter((f) => !/[\\/]components[\\/]ui[\\/]data-table\.tsx$/.test(f));
+  const missing = [];
+  const ids = new Map();
+  for (const file of files) {
+    const body = readFileSync(file, 'utf8');
+    const rel = relative(ROOT, file).split('\\').join('/');
+    // each JSX opening tag for DataTable, up to the end of its attribute list
+    for (const m of body.matchAll(/<DataTable\b([\s\S]*?)(?:\/>|>)/g)) {
+      const attrs = m[1];
+      const idMatch = attrs.match(/\bid\s*=\s*(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\})/);
+      const line = body.slice(0, m.index).split('\n').length;
+      if (!idMatch) {
+        missing.push(`${rel}:${line}`);
+        continue;
+      }
+      const id = idMatch[1] ?? idMatch[2] ?? idMatch[3];
+      if (!id) {
+        missing.push(`${rel}:${line} (empty id)`);
+        continue;
+      }
+      if (ids.has(id)) ids.set(id, [...ids.get(id), `${rel}:${line}`]);
+      else ids.set(id, [`${rel}:${line}`]);
+    }
+  }
+  const dupes = [...ids.entries()].filter(([, where]) => where.length > 1);
+  const problems = [];
+  if (missing.length) problems.push(`no id: ${missing.slice(0, 5).join(' · ')}${missing.length > 5 ? ` …+${missing.length - 5}` : ''}`);
+  for (const [id, where] of dupes) problems.push(`id "${id}" reused: ${where.join(' · ')}`);
+  if (problems.length) return { ok: false, msg: problems.join(' | ') };
+  return ids.size
+    ? { ok: true, msg: `${ids.size} table(s), all with a unique id` }
+    : { ok: 'warn', msg: 'No <DataTable> in the project yet — nothing to check' };
+});
+
+check('Page-level filters use the control ladder, not bare Inputs', () => {
+  // A filter row rendered with raw <Input> is the "dropdown here, textbox there"
+  // drift; free-text search belongs to the DataTable toolbar, not a page filter.
+  const suspects = [];
+  for (const file of sourceTsx()) {
+    const body = readFileSync(file, 'utf8');
+    const rel = relative(ROOT, file).split('\\').join('/');
+    for (const m of body.matchAll(/<Input\b([\s\S]*?)(?:\/>|>)/g)) {
+      const attrs = m[1];
+      if (/(?:placeholder|name|id|aria-label)\s*=\s*[^>]*?(?:ค้นหา|กรอง|filter|search)/i.test(attrs)) {
+        suspects.push(`${rel}:${body.slice(0, m.index).split('\n').length}`);
+      }
+    }
+  }
+  return suspects.length
+    ? { ok: 'warn', msg: `Input used as search/filter — should be DataTable's toolbar search or a Select/Combobox: ${suspects.slice(0, 5).join(' · ')}` }
+    : { ok: true };
+});
 
 // ── harness ───────────────────────────────────────────────────────────────
 check('.claude/rules/ugt-nextjs-design.md installed', () => {

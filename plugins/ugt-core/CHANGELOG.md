@@ -1,5 +1,26 @@
 # Changelog — ugt-core
 
+## 2.1.0 (2026-08-09)
+
+`contracts/design.md` §Layout gains two rules aimed at the failure the
+agreement exists to prevent — **feature 2 not matching feature 1**:
+
+- **Page-level filters have one fixed home**: inside the card holding the data
+  they filter, leading edge, widest scope → narrowest (period → org unit →
+  status). Actions stay with the title; a filter row never hosts an action
+  button; free-text search stays the table primitive's own and is never
+  duplicated beside it. Added because "filter ซ้ายบ้างขวาบ้าง" across screens
+  was the most visible consistency failure reported from a real project, and
+  the contract previously pinned the page pattern but not this row.
+- **Per-page config of a shared primitive is part of the agreement**: a
+  data-table instance always carries a stable unique id (so column prefs
+  persist identically everywhere), standard features stay on unless the
+  page's own situation makes one meaningless, page size follows the org set.
+  Same situation → same configuration.
+
+Rendered for Next.js in `ugt-nextjs-platform` 3.1.0, which also makes the
+id rule machine-checkable.
+
 ## 2.0.0 (2026-08-09)
 
 **BREAKING — the naming + knowledge-architecture release.** Everything renamed

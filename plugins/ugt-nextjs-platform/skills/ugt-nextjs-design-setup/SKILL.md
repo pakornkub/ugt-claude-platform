@@ -60,6 +60,9 @@ What lands in the project:
    rows, `sm` in dense toolbars) are listed in DESIGN.md, nowhere else.
 4. **DataTable only** for tabular data; server-paginated data must sort and
    filter server-side through URL state — never client-sort a partial page.
+   Every instance passes a **unique `id`** (prefs persist), and page-level
+   filters live in the table's card, left-aligned, widest→narrowest —
+   per-page config is part of the agreement, not a free choice.
 5. **`lib/format.ts` only** for dates and numbers — `DD/MM/YYYY` Gregorian
    (ค.ศ.) on screen, ISO `yyyy-MM-dd` in exported files, wall-clock dates
    read as UTC parts, instants shown in Asia/Bangkok.
@@ -210,6 +213,8 @@ each with a recorded decision — never silently reformat the project.
 2. Summarize: every file added/changed, the answers recorded in DESIGN.md,
    and any deviations grandfathered.
 3. Smoke checklist:
+   - [ ] every `<DataTable>` has a unique `id` · page filters sit in the
+     table's card, left-aligned (verify.mjs checks both)
    - [ ] `npm run build` passes
    - [ ] a page using Button/Input/Table renders with the new tokens (both
      light and dark if dark mode was selected)

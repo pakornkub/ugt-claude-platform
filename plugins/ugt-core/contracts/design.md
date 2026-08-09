@@ -99,6 +99,18 @@
 - One page pattern per app: title + actions + content card — no per-page
   invention. Mobile adaptation is systematic (table→card, dialog→bottom
   sheet), not per-page.
+- **Page-level filters have one fixed home**: inside the same card as the
+  data they filter, leading edge, ordered widest scope → narrowest (period →
+  org unit → status). Page actions stay with the title; a filter row never
+  hosts an action button, and free-text search belongs to the table
+  primitive's own toolbar — never duplicated beside it. *(Added after
+  page-to-page drift — left on one screen, right on the next — was reported
+  as the most visible consistency failure in a real project.)*
+- **Per-page config of a shared primitive is part of the agreement, not a
+  free choice**: a data-table instance always carries a stable unique id so
+  user column preferences persist identically on every screen, standard
+  features stay on unless the page's own situation makes one meaningless,
+  and page size follows the org set. Same situation → same configuration.
 
 ### Motion
 

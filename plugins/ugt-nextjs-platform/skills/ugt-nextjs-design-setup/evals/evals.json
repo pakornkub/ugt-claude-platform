@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-nextjs-design-setup",
-  "notes": "Evals 1-2 run on a bare create-next-app scaffold (App Router, no shadcn). Eval 3 needs a scaffold pre-seeded with components.json style 'radix-mira' (a non-standard base — the deviation under test), a components/ui/button.tsx, and a page containing a hardcoded hex color and a raw <table>. Eval 4 runs on a project already set up by this skill but with an older ugt-core version recorded in docs/DESIGN.md. Machine-checkable assertions use scripts/verify.mjs and scripts/check-contrast.mjs as graders. Prompts stay in Thai: they simulate real user input.",
+  "notes": "Evals 1-2 run on a bare create-next-app scaffold (App Router, no shadcn). Eval 3 needs a scaffold pre-seeded with components.json style 'radix-mira' (a non-standard base — the deviation under test), a components/ui/button.tsx, and a page containing a hardcoded hex color and a raw <table>. Eval 4 runs on a project already set up by this skill but with an older ugt-core version recorded in docs/DESIGN.md. Evals 6-7 are DIFFERENT IN KIND from 1-5: 1-5 grade the install moment, 6-7 grade what the agreement is actually for — that the SECOND feature built weeks later still matches the first. They run on a project already set up by this skill with one finished list page, and the agent is given a normal feature request with no design instructions at all. Machine-checkable assertions use scripts/verify.mjs and scripts/check-contrast.mjs as graders. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
@@ -68,6 +68,43 @@
       "assertions": [
         "The stated install order places design-setup before ugt-nextjs-auth-setup",
         "The login page generated afterwards uses the org tokens (no re-theming pass needed)",
+        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "second-feature-matches-the-first",
+      "prompt": "ทำหน้ารายการใบลาให้หน่อย มีตารางแสดงรายการ กรองตามช่วงวันที่กับสถานะได้ แล้วมีปุ่มสร้างใบลาใหม่",
+      "setup": "Project already set up by this skill (DESIGN.md, tokens, kit, harness rule installed). It already contains ONE finished list page — app/(app)/ot/page.tsx — built to the agreement: PageShell/PageHeader/PageTitle + PageActions top-right, a card holding a left-aligned period+status filter row, and <DataTable id=\"ot-requests\"> with the standard feature set. The prompt says nothing about design on purpose: the whole point is whether the harness rule pulls DESIGN.md in by itself.",
+      "expected_output": "Reads docs/DESIGN.md (via .claude/rules/ugt-nextjs-design.md, unprompted) BEFORE writing UI, then produces a leave page structurally identical to the OT page: same page scaffold, same filter-bar placement and order, same table component and config — differing only in domain content (columns, labels, endpoints)",
+      "assertions": [
+        "docs/DESIGN.md was read before any UI file was written (the harness rule fired without being asked)",
+        "The page uses PageShell/PageHeader/PageTitle/PageActions — title left, the 'สร้างใบลา' action top-right, NOT inside the filter row",
+        "The filter row sits in the same card as the table, left-aligned, ordered period → status — the same order as the OT page",
+        "Date range uses ui/date-range-picker and status uses Select per the control ladder — no bare <Input> as a filter, no duplicated free-text search next to the table's own",
+        "<DataTable> is used (no hand-rolled <table>) and passes a unique id (e.g. leave-requests), not a copy of ot-requests",
+        "The table's standard feature set is left on; anything switched off is justified by the page's situation, matching how the OT page decided",
+        "Status is rendered with StatusBadge (tone + icon), not an inline-colored span",
+        "Icons follow the fixed mapping (สร้าง = Plus) and buttons keep size default",
+        "Dates render through lib/format.ts, not new Date().toLocaleDateString",
+        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 — including the DataTable-id check",
+        "No token, variant, or size was invented for this page; nothing new was added to DESIGN.md §10 (this feature needed no new precedent)"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "second-feature-needs-a-new-pattern",
+      "prompt": "หน้าอนุมัติใบลา อยากให้แยกเป็น tab รออนุมัติ / อนุมัติแล้ว / ไม่อนุมัติ แล้วแต่ละ tab มีตารางของตัวเอง",
+      "setup": "Same project as eval 6. The agreement has no rule yet for splitting an approval page by status tabs — this is a genuinely new page pattern, and DESIGN.md §8 says a choice that becomes a precedent for later pages must be recorded.",
+      "expected_output": "Builds the page inside the existing agreement (tab state in the URL per §4, one DataTable per tab each with its own id, filter bar and page scaffold unchanged) AND records the new precedent — a dated มติ in DESIGN.md §10 plus the rule written into the relevant section, not left only in the log",
+      "assertions": [
+        "Tab state is in the URL (?tab=) per the agreement, not local component state only",
+        "Each tab's table has its own unique DataTable id — not one id shared across tabs",
+        "docs/DESIGN.md §10 gains a dated มติ recording 'approval pages split by status tabs' with a reason",
+        "The rule is also written into the section it belongs to (§3 or §4), so the next page follows it without reading the log",
+        "The page scaffold and filter-bar placement still match eval 6's page — the new pattern did not become an excuse to redesign the rest",
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0"
       ],
       "files": []

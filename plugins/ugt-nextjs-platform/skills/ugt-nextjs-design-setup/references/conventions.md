@@ -84,6 +84,24 @@ via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
 ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/Import=เขียวทึบ; in table rows
 use the `soft-*` button variants so colors don't shout on every row.
 
+## Page-level filter bar (outside the table)
+
+Filters that scope the whole page — period, org unit, status — are NOT the
+table's per-column filters. Fixed placement so page N+1 never moves them:
+
+- Lives in the **same card header as the table** — never floating above the
+  card, never in its own card.
+- **Left-aligned**, ordered **wide → narrow**: period → org unit/scope →
+  status. Page actions stay top-right in `PageActions`; never mix an action
+  button into the filter row.
+- Control per the ladder above (≤5 RadioGroup · 6–15 Select · >15 Combobox ·
+  date range = `ui/date-range-picker`). **A bare `Input` is never a filter** —
+  free-text search is the DataTable's own toolbar search; do not duplicate it
+  here.
+- A filter that changes *which rows exist* must be part of the query key and
+  re-fetch server-side (see `ugt-nextjs-pitfalls` → data-fetching) — the
+  placement rule and the fetching rule are separate obligations.
+
 ## DataTable
 
 Central component, two modes; the mode is decided **per table at build time**
@@ -101,6 +119,19 @@ chips with per-chip ✕ and clear-all) · sort · pagination (default 10,
 options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
 table→card · row selection + bulk bar · built-in Empty state.
+
+**Consistency obligations** (this is where page-to-page drift actually
+happens — same component, different config):
+
+- **`id` is mandatory on every table**, a stable app-unique slug. Prefs
+  persist only when it is present, so a table without one silently "forgets"
+  what every other table remembers. `scripts/verify.mjs` fails on a
+  `<DataTable>` with no `id`.
+- Turning a feature off needs a reason that would hold on any similar page
+  ("3 columns, hiding them is meaningless"), not "this page's author didn't
+  wire it". Same situation → same config.
+- Page size stays at the standard 10 / 10-20-50 set; a different set is a
+  มติ in DESIGN.md §10, not a per-page choice.
 
 > **Kit status**: the shipped `ui/data-table.tsx` IS the full option set —
 > built and tested inside ugt-hrms (per มติ 2026-08-04; ugt-hrms PR #166,

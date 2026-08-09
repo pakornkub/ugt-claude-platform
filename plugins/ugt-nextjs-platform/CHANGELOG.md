@@ -1,5 +1,39 @@
 # Changelog — ugt-nextjs-platform
 
+## 3.1.0 (2026-08-09)
+
+**Cross-feature consistency** — closing the gap between "the agreement was
+installed" and "page 2 still looks like page 1" (ugt-core 2.1.0 carries the
+stack-agnostic rules).
+
+`ugt-nextjs-design-setup`:
+
+- DESIGN.md §3 pins the **page-level filter bar**: inside the table's card,
+  left-aligned, ordered period → org unit → status; page actions stay in
+  `PageActions` top-right; control per the existing ladder and **never a bare
+  `Input` as a filter** (free-text search is the DataTable toolbar's, not
+  duplicated beside it).
+- DESIGN.md §4: **every `<DataTable>` must pass a unique `id`** — column prefs
+  persist only with one, so a table that forgets it silently behaves
+  differently from every other table in the app. Turning a standard feature
+  off now needs a reason that holds on any similar page.
+- DESIGN.md §8: when a per-page UX choice becomes a **precedent** for later
+  pages it is a มติ (§10) *and* gets written into the section it belongs to —
+  the test is "must the next similar page do this too?". Plus the explicit
+  reminder that design มติ live here, never in `project-context/decisions.md`.
+- `scripts/verify.mjs` gains two real checks: a **fail** on any `<DataTable>`
+  without an `id` or with a duplicated `id` (reported file:line), and a
+  **warning** on an `<Input>` used as a search/filter control.
+- `references/conventions.md`: new "Page-level filter bar" section and the
+  DataTable "consistency obligations" block.
+- `evals/evals.json` adds **evals 6 and 7 — a different kind of eval**: 1–5
+  grade the install moment, 6–7 grade the agreement's actual purpose by asking
+  for a *second* feature on a project that already has one, with no design
+  instructions in the prompt, and checking the result against the first page
+  (scaffold, filter placement, table config, StatusBadge, formatter) — plus
+  the case where the second feature genuinely needs a new pattern and must
+  record it as a precedent.
+
 ## 3.0.0 (2026-08-09)
 
 **BREAKING — the naming + knowledge-architecture release** (pairs with
