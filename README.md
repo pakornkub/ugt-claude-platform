@@ -171,12 +171,31 @@ CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่
 
 1. รับ PR → merge เข้า `main`
 2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
-3. `node scripts/check-contract-drift.mjs` — ต้องเขียวทุกข้อ (มาตรฐานกลางถูกก๊อป
-   ไปอยู่ในตัวช่วยหลายตัวโดยตั้งใจ สคริปต์นี้เช็คว่าทุกสำเนายังตรงกัน)
-4. `claude plugin validate ./plugins/<ชื่อ> --strict`
-5. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
+3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
+   ถ้าใช่ ตัดสินตามชนิดเอกสาร — `Living` = แก้ให้ตรงแล้วอัปเดต `Last-reviewed` ·
+   บันทึกการตัดสินใจ (`Accepted`/`Done`) = **ห้ามแก้เนื้อหา** ให้เปลี่ยนเป็น `Superseded`
+   พร้อมชี้ `Superseded-by` ไปที่ของใหม่แทน (แก้ย้อนหลังทำให้บันทึกประวัติเพี้ยน)
+4. รันสคริปต์ตรวจ — ต้องเขียวทั้งคู่:
+   ```bash
+   node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs
+   ```
+   ตัวแรกเช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวหลังเช็คว่า
+   เอกสารทุกไฟล์ใน `docs/` ประกาศสถานะตัวเองครบ (Living / Accepted / Superseded / Done)
+5. `claude plugin validate ./plugins/<ชื่อ> --strict`
+6. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
    push tag ของ dependency ก่อน)
-6. ประกาศให้ทีมรันคำสั่งอัปเดต
+7. ประกาศให้ทีมรันคำสั่งอัปเดต
+
+**กติกาเอกสารใน `docs/`** — ทุกไฟล์ `.md` ต้องมีบล็อกนี้ใต้หัวข้อ H1:
+
+```markdown
+> **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
+> **Last-reviewed:** 2026-08-09 — <ยืนยันอะไรไว้>
+```
+
+`Living` = ต้องคงความจริงไว้ (ต้องมี `Last-reviewed`) · `Accepted` = บันทึกการตัดสินใจที่ยังมีผล ·
+`Superseded` = ถูกแทนที่แล้ว (ต้องมี `Superseded-by` ชี้ path จริง) · `Done` = งานจบแล้ว เก็บเป็นประวัติ
+· **เอกสารไม่มี version ของตัวเอง** — แกน version มีแกนเดียวคือ tag ของ plugin ส่วนประวัติการแก้อยู่ใน git
 
 กติกา: ทุกตัวช่วยต้องพึ่งตัวเองได้ (ห้ามอ้างไฟล์ข้าม plugin) · เนื้อหาที่โหลดเข้า
 context เป็นภาษาอังกฤษ (เว้นประโยค trigger) · มาตรฐานกลางแก้ที่

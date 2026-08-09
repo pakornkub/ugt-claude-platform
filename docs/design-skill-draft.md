@@ -1,5 +1,8 @@
 # ร่าง — `ugt-nextjs-design-setup` (design agreement skill)
 
+> **Status:** Superseded · **Date:** 2026-08-03 · **Applies-to:** ugt-nextjs-platform 2.x
+> **Superseded-by:** `plugins/ugt-core/contracts/design.md` (มติ 2026-08-04 — base-mira แทน radix-mira)
+
 > ## ⛔ อย่าใช้ไฟล์นี้เป็นมาตรฐาน — เนื้อหาถูก supersede ไปแล้ว
 >
 > เอกสารนี้คือ **ร่างตอนออกแบบ skill (2026-08-03)** เก็บไว้เพื่อตอบว่า "ทำไมตอนนั้น

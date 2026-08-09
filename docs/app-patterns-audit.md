@@ -1,5 +1,8 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
+> **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-nextjs-platform 3.x
+> **Last-reviewed:** 2026-08-09 — ส่วน curation เป็นบันทึกที่ไม่แก้ย้อนหลัง · ส่วน Addendum คือ backlog ที่ต้องคงความจริงไว้
+
 > **สถานะ (2026-08-09): บันทึกการตัดสินใจ + backlog ที่ยังเปิดอยู่ — ไม่ใช่มาตรฐาน**
 >
 > ข้อสรุปส่วนใหญ่ถูกสกัดไปเป็น `ugt-nextjs-pitfalls` แล้ว สิ่งที่เหลือค่าในไฟล์นี้คือ

@@ -1,5 +1,8 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
+> **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
+> **Last-reviewed:** 2026-08-09 — ยังไม่มี plugin ตามข้อเสนอ (Python / React SPA)
+
 > **สถานะ (2026-08-09): ข้อเสนอที่ยังไม่ได้ทำ — ไม่ใช่บันทึกย้อนหลัง**
 >
 > ส่วนที่ทำไปแล้วคือการแยก `ugt-core` ออกมา (มีจริงแล้ว) ส่วน `ugt-python-platform`
@@ -13,8 +16,9 @@
 > `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ไม่แก้ย้อนหลัง
 
 
-Status: **draft for review** · Date: 2026-07-29 · Scope: feasibility + design only —
-no existing plugin is modified by this document.
+Scope: feasibility + design only — no existing plugin is modified by this document.
+(สถานะปัจจุบันของเอกสารอยู่ในบล็อกหัวไฟล์ — บรรทัด Status เดิมถูกยุบเข้าไปที่นั่นแล้ว
+เพื่อไม่ให้มีสองที่ที่บอกสถานะไม่ตรงกัน)
 
 This proposal covers three questions:
 
