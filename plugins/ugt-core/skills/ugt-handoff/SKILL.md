@@ -1,47 +1,42 @@
 ---
 name: ugt-handoff
 description: >
-  Save or read the project's handoff state — `.claude/state/handoff.md`
-  (what's done / in progress / next, plus decisions taken) and
-  `.claude/state/project-notes.md` (Error Patterns, Deviations, Open Questions).
-  Use at the END of any work chunk before the session ends, when the user says
-  "บันทึกไว้", "จบงานแล้ว", "save state", "handoff", "checkpoint", or when a bug
-  was just diagnosed and the fix is worth recording so the next session doesn't
-  rediscover it. Also use when starting work and the handoff file looks stale
-  or contradicts what's actually in the code. Run it at the end of EVERY work
-  chunk, even when the same person continues tomorrow — the next session is
-  the receiver either way. (เดิมชื่อ ugt-checkpoint)
-  These two files are committed, so they are the TEAM's memory — separate from
-  Claude's own auto memory, which is machine-local and not shared.
-  Don't use it to install anything (→ ugt-nextjs-full-setup) or to record a gotcha that is
-  true for every project on this stack — that belongs in a PR to the platform
-  repo, not in one project's notes.
+  Close out a work chunk by writing every result into its correct home:
+  work state → `.claude/state/handoff.md` (what's in progress / next / open
+  questions / recent done), feature status → `docs/project-context/board.md`,
+  changed knowledge → the affected `docs/project-context/` files
+  (architecture / business-rules / api / troubleshooting), and decisions →
+  `docs/project-context/decisions.md` (append-only). Use at the END of any
+  work chunk before the session ends — even when the same person continues
+  tomorrow — when the user says "บันทึกไว้", "จบงานแล้ว", "save state",
+  "handoff", "checkpoint", when a feature just finished (board + as-built
+  rules must update), or when a bug was just diagnosed and the fix is worth
+  recording so the next session doesn't rediscover it. Also use when starting
+  work and the handoff file looks stale or contradicts the code.
+  These files are committed, so they are the TEAM's memory — separate from
+  Claude's machine-local auto memory. Don't use it to install anything
+  (→ ugt-<stack>-full-setup), to bootstrap `docs/project-context/` the first
+  time (→ ugt-context), or to record a stack-wide gotcha — that belongs in a
+  PR to the platform repo. (เดิมชื่อ ugt-checkpoint)
 ---
 
-# UGT Handoff — record state for the next session and for teammates
+# UGT Handoff — close the chunk, file every result where it belongs
 
-## Why these files exist when Claude already has auto memory
+## The two homes
 
-Auto memory (`~/.claude/projects/<repo>/memory/`) belongs to **one person's
-machine** — the docs state it plainly: *"Auto memory is machine-local... Files
-are not shared across machines"*. Anything the team must know together has to
-live in files committed to the repo.
-
-| Location | Contents | Visible to |
+| Home | Nature | Loaded |
 | --- | --- | --- |
-| `.claude/state/handoff.md` | Current work state + decisions already taken | Everyone who clones the repo |
-| `.claude/state/project-notes.md` | Error Patterns · Deviations · Open Questions | Everyone who clones the repo |
-| auto memory | Personal preferences/habits of that machine's user | That person, that machine |
+| `.claude/state/handoff.md` | **ของสด** — work state, changes weekly, deleted when resolved | every session (CLAUDE.md import) — keep ~60 lines |
+| `docs/project-context/` | **ความรู้** — what the system is, grows with the project | on demand (only `00-index.md` is always loaded) |
 
-**On conflict, the committed files win** — auto memory may be stale or someone
-else's.
+Auto memory (`~/.claude/projects/...`) is one person's machine. Anything the
+team must share lives in these committed files — **on conflict, committed
+files win**.
 
-## Writing the handoff (end of a work chunk)
+## Step 1 — update the handoff file (every run)
 
-1. Read the existing `.claude/state/handoff.md` first — **update it, never
-   rewrite it from scratch.** Decision history has value.
-2. Bring it up to date with reality, using this structure (keep every section;
-   add or remove none):
+Read the existing `.claude/state/handoff.md` and bring it up to date. Fixed
+sections — keep all four, add none:
 
 ```markdown
 # Handoff
@@ -51,71 +46,67 @@ Last updated: YYYY-MM-DD
 ## In progress
 - <work genuinely mid-flight, with the files touched halfway — or "Nothing in progress">
 
-## Done (newest first)
-- YYYY-MM-DD <what finished + the main files involved>
-
 ## Next
-- <known upcoming work, in the order it should happen>
+- <upcoming work in order — including non-feature work: waiting on admin values, pending upgrades>
 
-## Decisions taken (do not revisit without talking to the team)
-- YYYY-MM-DD <what was decided> — **because** <reason> · rejected alternative: <what was not chosen>
+## Open Questions
+- <question blocking work + who owes the answer — delete the row once answered>
+
+## Done (newest first — keep only ~10; older history lives in git and board.md)
+- YYYY-MM-DD <what finished + the main files involved>
 ```
 
-3. **Feature board**: if `docs/requirements-brief/00-overview.md` exists,
-   update the สถานะ column of its feature table to match what just happened
-   (`☐ todo` · `🔨 in progress` · `⏳ blocked — <what it waits on>` ·
-   `✅ done`). This skill is the board's **only** writer after generation, so
-   it cannot drift from the handoff file — the board answers "which features
-   are done" at a glance; the handoff stays the narrative of what happened
-   and why. Touch nothing else in that file.
-4. Write things that are **traceable** — file names, function names, PR numbers;
-   not "fixed the user page".
-5. Every `Decision` entry needs **the reason + the rejected alternative** —
-   otherwise someone re-litigates it in three months without knowing it was
-   already weighed.
-6. Skip anything git already records (diffs, commit names) — record only what
-   cannot be read from the code.
+Entries are **traceable** (file names, function names, PR numbers — not
+"fixed the user page") and dated. No secrets — the file is committed.
 
-## Writing project-notes (on hitting an error or an oddity)
+## Step 2 — fan out this chunk's results (only the rows that apply)
 
-`.claude/state/project-notes.md` has **3 fixed sections**, never more:
-
-| Section | Contents | Good example |
+| What happened this chunk | Write to | How |
 | --- | --- | --- |
-| **Error Patterns** | Symptom → cause → fix, for problems that already cost time | "`prisma generate` reports P1012 after adding a field → forgot to migrate first → run `migrate dev`, then `generate`" |
-| **Deviations** | Places this project **intentionally** differs from the `ugt-*` standards, with the reason | "Table `LegacyEmp` has no audit columns because it is a view dumped from the legacy system" |
-| **Open Questions** | Unanswered questions blocking work + who owes the answer | "Is the prod basePath `/hr` or `/hrms` — waiting on IT" |
+| A feature's status changed | `docs/project-context/board.md` | update **only** the สถานะ column (`☐` `🔨` `⏳ — <รออะไร>` `✅`). This skill is the board's only writer after row creation |
+| A feature reached `✅ done` | `docs/project-context/business-rules.md` | summarize the **as-built** rules (including what changed from the brief along the way) under its domain, each rule pointing at `path:function`. The feature's brief in `docs/requirements-brief/` is now frozen history |
+| Structure changed (new module, table, flow) | `docs/project-context/architecture.md` | update the affected section — pointers, not prose; deviations get `⚠ deviation:` + reason + date |
+| Endpoint added/changed/removed | `docs/project-context/api.md` | keep the table current |
+| A decision was taken | `docs/project-context/decisions.md` | **append**: `- YYYY-MM-DD <what> — **because** <reason> · rejected: <alternative>`. Never edit old entries — reversing = new entry referencing the old. **Design decisions go to `docs/DESIGN.md` §10 instead**, never here |
+| A bug that cost real time was diagnosed | `docs/project-context/troubleshooting.md` | `- **<อาการ>** → <สาเหตุ> → <วิธีแก้> (date)` — write while details are fresh |
+| `00-index.md` rows no longer match reality | `docs/project-context/00-index.md` | fix the index |
 
-## Where new knowledge goes — the 3-way triage
+Then **commit the whole set together** — handoff + context in one commit is
+the atomic unit of "what this chunk did and what it taught us".
 
-Before writing anything into `project-notes.md`, ask who the knowledge is true for:
+## Where new knowledge goes — the 4-way triage
 
 | Knowledge | Goes to | Never do |
 | --- | --- | --- |
-| True only for this project | `project-notes.md` (or `.claude/rules/<project>-*.md` if it's a path-bound rule) | — |
-| True for every project on this stack (Prisma/Keycloak/Jenkins gotcha) | **Open a PR against `ugt-claude-platform`**, then bump the version | Edit installed skill files — they live in the plugin cache, whose path changes on every update and gets deleted |
-| A personal preference of the current user | Leave it to auto memory | Force it into committed files everyone else must carry |
+| Work state (ค้างไหน คิวอะไร คำถามอะไร) | `handoff.md` | Let it rot in chat history |
+| True only for this project | the matching `docs/project-context/` file, or `.claude/rules/<project>-*.md` if path-bound | — |
+| True for every project on this stack | **PR against the platform repo** (a proven `troubleshooting.md` entry graduates into the stack's pitfalls skill — then delete it here), bump the version | Edit installed skill files (plugin cache is disposable) |
+| Personal preference of the current user | auto memory | Force it into committed files |
 
-**Never create `.claude/skills/ugt-<same-name>/` shadowing a platform skill** —
-it works mechanically, but produces two diverging sets of knowledge with nobody
-knowing which one is active. To extend, create a skill under a **new** name,
-e.g. `.claude/skills/<project>-payroll-rules/`.
+**Never create `.claude/skills/ugt-<same-name>/`** shadowing a platform skill —
+extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 
 ## Quick Rules
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| Read the existing file, then update | Rewrite the whole file (decision history lost) |
-| Decisions carry reason + rejected alternative | A bare "decided to use X" |
+| Update the existing handoff file | Rewrite it from scratch |
+| Done section capped ~10 — prune as you add | Let the always-loaded file grow unbounded |
+| Decisions append-only, with reason + rejected alternative | Editing/deleting old decisions, or a bare "decided X" |
+| Design decision → `DESIGN.md` §10 · everything else → `decisions.md` | A third home, or the same decision in two homes |
+| Board: touch only the สถานะ column | Rewrite board rows (they belong to /ugt-requirements) |
+| Feature done → as-built summary into business-rules.md | Leave the knowledge only in the frozen brief |
 | Reference real file/function names | Vague "improved the user page" |
 | Stack-wide gotcha → PR to the platform | Keep it in one project and let others rediscover it |
-| Date every entry | Undated entries (in a year nobody knows what still holds) |
+| Commit handoff + context changes together | Commit state but leave knowledge dirty |
 
 ## Verification
 
-- [ ] `.claude/state/handoff.md` has all 4 sections and "Last updated" is today
-- [ ] `.claude/state/project-notes.md` has the 3 fixed sections
-- [ ] Every added entry is dated · every Decision has its reason
-- [ ] If `docs/requirements-brief/00-overview.md` exists, its สถานะ column agrees with the handoff's In progress/Done
-- [ ] No secrets / `.env` values in these files (they are committed)
-- [ ] `CLAUDE.md` still imports `@.claude/state/handoff.md` (or the next session won't see it)
+- [ ] `handoff.md` has exactly the 4 sections, "Last updated" is today, Done ≤ ~10 rows
+- [ ] `docs/project-context/board.md` สถานะ agrees with handoff's In progress/Done
+- [ ] Every decision taken this chunk is in `decisions.md` (or DESIGN.md §10 if design) with reason + rejected alternative
+- [ ] Feature(s) that reached done this chunk have their rules in `business-rules.md`
+- [ ] Every added entry is dated · every pointer names a real file
+- [ ] No secrets / `.env` values in any of these files (they are committed)
+- [ ] `CLAUDE.md` still imports `@.claude/state/handoff.md` and `@docs/project-context/00-index.md`
+- [ ] One commit covers the whole set

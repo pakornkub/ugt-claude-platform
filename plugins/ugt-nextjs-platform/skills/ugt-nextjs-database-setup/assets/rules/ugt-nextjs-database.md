@@ -45,7 +45,7 @@ App-owned master/transaction tables must carry the full set:
 
 - Delete data that needs history via **`IsDeleted = 1`**, never hard delete
 - Lookup/join tables may be exempt, but record the exemption in
-  `.claude/state/project-notes.md` → Deviations
+  `docs/project-context/architecture.md` → บรรทัด `⚠ deviation:` ตรงหัวข้อที่เกี่ยว
 
 ## Migration
 

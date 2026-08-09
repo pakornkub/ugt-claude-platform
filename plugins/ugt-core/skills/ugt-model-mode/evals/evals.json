@@ -11,7 +11,7 @@
         "model-mode.md 'Current mode:' line becomes **god**",
         "Write-code and fix-a-bug rows become opus; plan/review/diagnose rows become fable",
         "Run-tests/verify and docs rows remain haiku",
-        "handoff.md and project-notes.md are not modified",
+        "handoff.md and docs/project-context/ are not modified",
         "Does not claim the main session model changed and does not attempt to run /model"
       ],
       "files": []
@@ -39,7 +39,7 @@
         "Non-mechanical rows contain the auto rules (not fixed single models)",
         "Run-tests/verify and docs rows remain haiku",
         "Explains judgment happens at dispatch time and model-mode.md is never rewritten per task",
-        "handoff.md and project-notes.md are not modified"
+        "handoff.md and docs/project-context/ are not modified"
       ],
       "files": []
     }

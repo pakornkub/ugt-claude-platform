@@ -32,8 +32,8 @@ not `[brackets]`: `key`→`SettingKey`, `value`→`SettingValue`, `group`→`Gro
 
 - PK is always named `Id`
 - Delete data that needs history via **`IsDeleted = 1`** (soft delete), never hard delete
-- Lookup/join tables may trim the set, but exemptions are recorded in the
-  project's Deviations notes
+- Lookup/join tables may trim the set, but exemptions are recorded as
+  `⚠ deviation` lines in the project's `docs/project-context/architecture.md`
 - Append-only log tables (e.g. audit logs) are exempt by nature
 
 ## Read-only and override rules

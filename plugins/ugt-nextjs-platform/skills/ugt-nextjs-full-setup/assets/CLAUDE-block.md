@@ -34,18 +34,21 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 - New TS/TSX code must pass the SonarQube Quality Gate on the first scan (`new_violations = 0`)
   — `ugt-nextjs-clean-code` loads itself when you touch `.ts`/`.tsx` files; follow it
 
-## Team state (committed to the repo)
+## Team state + project knowledge (committed to the repo)
 
 @.claude/state/handoff.md
 
-@.claude/state/project-notes.md
+@docs/project-context/00-index.md
 
-- **Treat these two files as the latest truth** — if they conflict with auto
-  memory, these files win (auto memory is machine-local, not shared with the team)
-- **Call `/ugt-handoff` at the end of every work chunk** to update them, then commit
-- Hit an error that cost real time → record it under Error Patterns in
-  `project-notes.md` immediately, while the details are fresh
-- Keep both files short (~100 lines each) — they load into context every session
+- **Treat committed files as the latest truth** — on conflict with auto memory,
+  they win (auto memory is machine-local, not shared with the team)
+- **Call `/ugt-handoff` at the end of every work chunk** — it updates the
+  handoff file + feature board + affected `docs/project-context/` files; commit
+  the whole set together
+- ก่อนเสนอเปลี่ยนแนวทาง/lib/โครงสร้าง → เช็ค `docs/project-context/decisions.md`
+  ก่อนว่าเคยเคาะไปแล้วหรือยัง — ถ้าขัดมติเดิม ให้ยกขึ้นมาคุย ไม่ทำเงียบ ๆ
+- เจอ error แปลก → เปิด `docs/project-context/troubleshooting.md` ก่อนเริ่ม debug
+- Keep `handoff.md` short (~60 lines) — it loads into context every session
 
 ## Model mode (subagent routing)
 
@@ -61,19 +64,24 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | --- | --- |
 | Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (the superpowers "1% chance → must invoke" rule does not apply to read-only work) |
 | Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to the superpowers pipeline |
+| First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
 | Small task: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
-| Build a feature / fix a bug | Normal superpowers pipeline (brainstorming → plan → TDD → review) |
+| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้วจึงเข้า superpowers pipeline (brainstorming → plan → TDD → review) — ไม่ต้องสำรวจโค้ดจากศูนย์ |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |
 
-## Where new knowledge goes
+## Where new knowledge goes (4 ทาง)
 
-- True only for this project → `.claude/state/project-notes.md` or `.claude/rules/<project>-*.md`
-- True for every project on this stack → **open a PR against the `ugt-claude-platform`
-  repo** — never edit installed skill files (they live in the plugin cache and
-  are deleted on update)
-- Never create `.claude/skills/ugt-<same-name>/` shadowing a platform skill — to
-  extend, create a skill under a new name
+- Work state (ค้างไหน คิวอะไร คำถามค้าง) → `.claude/state/handoff.md`
+- True only for this project → the matching `docs/project-context/` file
+  (มติ → `decisions.md` · error ที่เคยเจอ → `troubleshooting.md` · กติกา as-built
+  → `business-rules.md` · โครงสร้าง → `architecture.md`) or
+  `.claude/rules/<project>-*.md` if path-bound · มติ design → `docs/DESIGN.md` §10
+- True for every project on this stack → **open a PR against the
+  `ugt-claude-platform` repo** — never edit installed skill files (plugin cache,
+  deleted on update)
+- Personal preference → auto memory · never create `.claude/skills/ugt-<same-name>/`
+  shadowing a platform skill — extend under a new name
 
 <!-- ugt:end -->

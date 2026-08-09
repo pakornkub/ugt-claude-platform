@@ -110,8 +110,8 @@ where noted.
 | `assets/CLAUDE-block.md` | inserted into root `CLAUDE.md` | **only between `<!-- ugt:start -->` … `<!-- ugt:end -->`** |
 | `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
 | `assets/state/handoff.md` | `.claude/state/handoff.md` | **create once, never overwrite** |
-| `assets/state/project-notes.md` | `.claude/state/project-notes.md` | **create once, never overwrite** |
 | `assets/state/model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
+| (via `ugt-context` skill) | `docs/project-context/` (7 files) | **create once** — afterwards owned by `/ugt-handoff` |
 
 `.claude/rules/ugt-nextjs-*.md` files are NOT installed from here — each child
 skill ships its own rule in its `assets/rules/` and installs it as part of its
@@ -147,9 +147,15 @@ How:
    present, do not touch (it is the team's memory) · fill in the date and the
    installed modules in `handoff.md` · `model-mode.md` ships with the `default`
    preset — changing it is `/ugt-model-mode`'s job, not this skill's.
-5. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
-   **`.claude/state/` must be committed** — never ignore `.claude/` wholesale.
-6. If the org has no machine-level hard boundary yet → point the user at the
+   If legacy v2.x files exist (`checkpoint.md` / `mode.md` /
+   `project-notes.md`) → stop and migrate first per the v3.0.0 CHANGELOG.
+5. **`docs/project-context/`** — invoke the **`ugt-context`** skill (ugt-core):
+   fresh project → skeleton files; existing codebase → its scan path (draft →
+   user review → write). Skip only if the folder already exists.
+6. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
+   **`.claude/state/` and `docs/project-context/` must be committed** — never
+   ignore `.claude/` wholesale.
+7. If the org has no machine-level hard boundary yet → point the user at the
    IT deployment guide `contracts/org-managed-settings.md` in the **ugt-core**
    plugin (canonical copy:
    https://github.com/pakornkub/ugt-claude-platform/blob/main/plugins/ugt-core/contracts/org-managed-settings.md)

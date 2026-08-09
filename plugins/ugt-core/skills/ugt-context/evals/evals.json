@@ -1,0 +1,36 @@
+{
+  "purpose": "Behavior evals for ugt-context — bootstrap-only, single-shot, ownership handed to /ugt-handoff.",
+  "baseline_result": { "date": null, "note": "pending — run as part of the v3.0 release gate (P4)" },
+  "scenarios": [
+    {
+      "name": "fresh-project-skeletons",
+      "setup": "Empty Next.js scaffold, no docs/project-context/",
+      "prompt": "สร้าง project context ให้โปรเจคนี้",
+      "expected_output": "Copies all 7 templates to docs/project-context/ unchanged, invents nothing (no architecture entries for code that doesn't exist), reminds the user the folder is committed and /ugt-handoff maintains it from now on",
+      "graded_on": [
+        "All 7 files created",
+        "No fabricated content in architecture/business-rules/api",
+        "Ownership handoff to /ugt-handoff stated"
+      ]
+    },
+    {
+      "name": "existing-codebase-scan",
+      "setup": "Project with app/ routes, lib/actions/, prisma schema, no docs/project-context/",
+      "prompt": "โปรเจคนี้มีโค้ดอยู่แล้ว อยากให้ AI ไม่ต้องอ่านโค้ดใหม่ทุกรอบ ทำ context ให้หน่อย",
+      "expected_output": "Scans layout/schema/routes, drafts architecture.md + api.md + business-rules.md as pointers into real files, marks every inference (assumption), leaves decisions/troubleshooting/board as skeletons, presents drafts for user review BEFORE writing",
+      "graded_on": [
+        "Draft shown for review before any file is written",
+        "Every entry points at a real path",
+        "Inferences marked (assumption)",
+        "decisions.md / troubleshooting.md / board.md stay skeletons"
+      ]
+    },
+    {
+      "name": "folder-already-exists",
+      "setup": "docs/project-context/ exists with real content",
+      "prompt": "รัน ugt-context ให้หน่อย",
+      "expected_output": "Reports what exists and stops — does not regenerate or overwrite; points ongoing updates to /ugt-handoff",
+      "graded_on": ["No file overwritten", "Stops after reporting"]
+    }
+  ]
+}

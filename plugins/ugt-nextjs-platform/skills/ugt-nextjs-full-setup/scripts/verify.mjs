@@ -91,17 +91,17 @@ check('Rules exist for every installed module', () => {
 });
 
 // ── .claude/state ──────────────────────────────────────────────────────────
-check('Both team-state files exist', () => {
-  const missing = ['handoff.md', 'project-notes.md'].filter((f) => !has('.claude/state', f));
-  return missing.length
-    ? { ok: false, msg: `Missing .claude/state/${missing.join(', ')}` }
+check('No legacy v2.x state files (must be migrated)', () => {
+  const legacy = ['checkpoint.md', 'mode.md', 'project-notes.md'].filter((f) => has('.claude/state', f));
+  return legacy.length
+    ? { ok: false, msg: `Found .claude/state/${legacy.join(', ')} — v2.x layout; migrate per the ugt-nextjs-platform v3.0.0 CHANGELOG (contents move to handoff.md / model-mode.md / docs/project-context/)` }
     : { ok: true };
 });
 
-check('handoff.md has all sections and was actually updated', () => {
-  if (!has('.claude/state/handoff.md')) return { ok: false, msg: 'No handoff.md' };
+check('handoff.md exists with all sections and was actually updated', () => {
+  if (!has('.claude/state/handoff.md')) return { ok: false, msg: 'No .claude/state/handoff.md' };
   const body = read('.claude/state/handoff.md');
-  const needed = ['## In progress', '## Done', '## Next', '## Decisions'];
+  const needed = ['## In progress', '## Next', '## Open Questions', '## Done'];
   const missing = needed.filter((h) => !body.includes(h));
   if (missing.length) return { ok: false, msg: `Missing sections: ${missing.join(', ')}` };
   return /<YYYY-MM-DD>/.test(body)
@@ -118,20 +118,32 @@ check('model-mode.md declares a valid model mode', () => {
     : { ok: false, msg: 'model-mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-model-mode' };
 });
 
-check('project-notes.md has the 3 fixed sections', () => {
-  if (!has('.claude/state/project-notes.md')) return { ok: false, msg: 'No project-notes.md' };
-  const body = read('.claude/state/project-notes.md');
-  const needed = ['## Error Patterns', '## Deviations', '## Open Questions'];
-  const missing = needed.filter((h) => !body.includes(h));
-  return missing.length ? { ok: false, msg: `Missing sections: ${missing.join(', ')}` } : { ok: true };
+check('docs/project-context/ knowledge base exists', () => {
+  const FILES = ['00-index.md', 'board.md', 'architecture.md', 'business-rules.md', 'api.md', 'decisions.md', 'troubleshooting.md'];
+  if (!has('docs/project-context')) {
+    return { ok: false, msg: 'No docs/project-context/ — run ugt-context to bootstrap the knowledge base' };
+  }
+  const missing = FILES.filter((f) => !has('docs/project-context', f));
+  return missing.length
+    ? { ok: false, msg: `docs/project-context/ missing: ${missing.join(', ')}` }
+    : { ok: true };
 });
 
-check('No secrets leaked into state files', () => {
+check('CLAUDE.md imports the knowledge index', () => {
+  if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
+  return /@docs\/project-context\/00-index\.md/.test(claudeMd)
+    ? { ok: true }
+    : { ok: false, msg: 'No `@docs/project-context/00-index.md` import — sessions will not see the knowledge index' };
+});
+
+check('No secrets leaked into committed state/knowledge files', () => {
   const suspicious = /(password|secret|client_secret|api[_-]?key|bearer)\s*[=:]\s*\S{8,}/i;
   const bad = [];
-  for (const f of ['handoff.md', 'project-notes.md']) {
-    if (!has('.claude/state', f)) continue;
-    if (suspicious.test(read('.claude/state', f))) bad.push(f);
+  if (has('.claude/state', 'handoff.md') && suspicious.test(read('.claude/state', 'handoff.md'))) bad.push('handoff.md');
+  if (has('docs/project-context')) {
+    for (const f of readdirSync(p('docs/project-context')).filter((f) => f.endsWith('.md'))) {
+      if (suspicious.test(read('docs/project-context', f))) bad.push(`project-context/${f}`);
+    }
   }
   return bad.length
     ? { ok: false, msg: `${bad.join(', ')} may contain a secret — these files are committed` }

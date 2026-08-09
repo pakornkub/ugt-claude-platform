@@ -159,7 +159,7 @@ offer `/ugt-model-mode default` to create it.
 | Point the user to `/model` for the main session | Claim the mode changed the main-loop model |
 | Keep haiku on mechanical rows in every preset | "Upgrade" verify-script runs to an expensive model |
 | Let `auto` judge in-session at dispatch time | Rewrite `model-mode.md` per task or auto-switch presets |
-| Leave `handoff.md` / `project-notes.md` alone | Record the switch as a handoff Decision (it's config, not history) |
+| Leave `handoff.md` / `docs/project-context/` alone | Record the switch in `decisions.md` (it's config, not history) |
 
 ## Verification
 
