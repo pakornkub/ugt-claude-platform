@@ -196,7 +196,23 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 
 ---
 
-เอกสารเชิงลึก: มาตรฐานกลาง → `plugins/ugt-core/contracts/` · ข้อเสนอรองรับ
-stack อื่น → `docs/multi-stack-proposal.md` · ที่มาของมาตรฐานดีไซน์ →
-`docs/design-skill-draft.md` · ให้ทีม IT ตั้ง hard boundary →
-`plugins/ugt-core/contracts/org-managed-settings.md`
+## เอกสารเชิงลึก
+
+**มาตรฐานปัจจุบัน** (อ้างอิงได้ ใช้ทำงานจริง):
+
+- มาตรฐานกลางขององค์กร → `plugins/ugt-core/contracts/`
+- ตัวอย่างหน้าตา UI ที่ได้ → [`docs/design-preview.html`](docs/design-preview.html)
+- ให้ทีม IT ตั้ง hard boundary → `plugins/ugt-core/contracts/org-managed-settings.md`
+- ขั้นตอนออกรุ่น → หัวข้อ "สำหรับทีมดูแล platform" ด้านบน
+
+**บันทึกย้อนหลัง + งานค้าง** (เก็บไว้ตอบว่า "ทำไมตอนนั้นถึงเลือกแบบนี้" —
+⚠️ **ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม**):
+
+- [`docs/multi-stack-proposal.md`](docs/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
+  (Python / React SPA) · **ยังไม่ได้ทำ** ยังไม่มี plugin ตามข้อเสนอนี้
+- [`docs/app-patterns-audit.md`](docs/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
+  `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · ท้ายไฟล์มี backlog ที่ยังเปิดอยู่
+- [`docs/design-skill-draft.md`](docs/design-skill-draft.md) — ร่างตอนออกแบบ design skill
+  (2026-08-03) · **เนื้อหาถูก supersede แล้ว** (เช่นยังพูดถึง `radix-mira` ทั้งที่มติ
+  2026-08-04 เปลี่ยนเป็น `base-mira`) — มาตรฐานดีไซน์ปัจจุบันอยู่ที่
+  `plugins/ugt-core/contracts/design.md`

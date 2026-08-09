@@ -1,9 +1,22 @@
 # ร่าง — `ugt-nextjs-design-setup` (design agreement skill)
 
-> **หมายเหตุ (2026-08-09)**: เอกสารนี้เป็นบันทึก ณ v2.x — เก็บไว้เป็นประวัติการตัดสินใจ ไม่แก้ย้อนหลัง
-> ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` · `ugt-mode`→`ugt-model-mode` ·
-> `ugt-nextjs-setup`→`ugt-nextjs-full-setup` · `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
-> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ดู CHANGELOG ของแต่ละ plugin
+> ## ⛔ อย่าใช้ไฟล์นี้เป็นมาตรฐาน — เนื้อหาถูก supersede ไปแล้ว
+>
+> เอกสารนี้คือ **ร่างตอนออกแบบ skill (2026-08-03)** เก็บไว้เพื่อตอบว่า "ทำไมตอนนั้น
+> ถึงเลือกแบบนี้ / ทำไมถึงปัดตัวเลือกอื่นทิ้ง" เท่านั้น — **ไม่ใช่มาตรฐานปัจจุบัน**
+> และหลายจุดขัดกับของจริงไปแล้ว ตัวอย่างที่ทำให้เข้าใจผิดได้ทันที:
+> ร่างนี้ยังพูดถึง `radix-mira` (Radix UI) แต่**มติ 2026-08-04 เปลี่ยนเป็น `base-mira`
+> (Base UI) ไปแล้ว** — ทำตามร่างนี้จะได้ preset ผิด
+>
+> **มาตรฐานปัจจุบันอยู่ที่**: `plugins/ugt-core/contracts/design.md` (ข้อกำหนดกลาง) ·
+> `plugins/ugt-nextjs-platform/skills/ugt-nextjs-design-setup/` (การนำไปใช้จริง) ·
+> `docs/design-preview.html` (ดูหน้าตาที่ได้)
+>
+> ชื่อ skill/ไฟล์บางตัวก็เปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` ·
+> `ugt-mode`→`ugt-model-mode` · `ugt-nextjs-setup`→`ugt-nextjs-full-setup` ·
+> `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
+> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`)
+> — ไม่แก้ย้อนหลังในไฟล์นี้ เพราะจะทำให้บันทึกประวัติเพี้ยน
 
 
 > สถานะ: **ร่างเพื่อ review** (2026-08-03) — ยังไม่ใช่ skill จริง

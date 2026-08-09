@@ -1,9 +1,18 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
-> **หมายเหตุ (2026-08-09)**: เอกสารนี้เป็นบันทึก ณ v2.x — เก็บไว้เป็นประวัติการตัดสินใจ ไม่แก้ย้อนหลัง
-> ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` · `ugt-mode`→`ugt-model-mode` ·
-> `ugt-nextjs-setup`→`ugt-nextjs-full-setup` · `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
-> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ดู CHANGELOG ของแต่ละ plugin
+> **สถานะ (2026-08-09): บันทึกการตัดสินใจ + backlog ที่ยังเปิดอยู่ — ไม่ใช่มาตรฐาน**
+>
+> ข้อสรุปส่วนใหญ่ถูกสกัดไปเป็น `ugt-nextjs-pitfalls` แล้ว สิ่งที่เหลือค่าในไฟล์นี้คือ
+> **เหตุผลที่ตัดแต่ละข้อทิ้ง** (คนที่จะเสนอเพิ่มเนื้อหาเข้า pitfalls ควรอ่านก่อน
+> จะได้ไม่เสนอของที่เคยพิจารณาแล้ว) และ **งานที่ยังค้างจริง** — ดู
+> "Addendum 2026-08-04" ท้ายไฟล์: convention เรื่อง RHF+zod schema/resolver,
+> เกณฑ์ว่าเมื่อไหร่ใช้ React Query vs RSC fetch, และ zustand ที่ยังไม่ converge
+> ยังไม่ถูกเก็บเข้า skill ใด
+>
+> ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` ·
+> `ugt-mode`→`ugt-model-mode` · `ugt-nextjs-setup`→`ugt-nextjs-full-setup` ·
+> `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
+> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ไม่แก้ย้อนหลัง
 
 
 **Date:** 2026-07-29 (curation pass added same day)
