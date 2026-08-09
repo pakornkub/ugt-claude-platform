@@ -14,10 +14,13 @@ description: >
   recording so the next session doesn't rediscover it. Also use when starting
   work and the handoff file looks stale or contradicts the code.
   These files are committed, so they are the TEAM's memory — separate from
-  Claude's machine-local auto memory. Don't use it to install anything
-  (→ ugt-<stack>-full-setup), to bootstrap `docs/project-context/` the first
-  time (→ ugt-context), or to record a stack-wide gotcha — that belongs in a
-  PR to the platform repo. (เดิมชื่อ ugt-checkpoint)
+  Claude's machine-local auto memory. Don't use it to record a DESIGN decision
+  (color, font, layout, component choice — "บันทึกมติ design"): those live in
+  `docs/DESIGN.md` §10 and belong to the stack's design skill, not here.
+  Don't use it to install anything (→ ugt-<stack>-full-setup), to bootstrap
+  `docs/project-context/` the first time (→ ugt-context), or to record a
+  stack-wide gotcha — that belongs in a PR to the platform repo.
+  (เดิมชื่อ ugt-checkpoint)
 ---
 
 # UGT Handoff — close the chunk, file every result where it belongs

@@ -2,22 +2,66 @@
   "purpose": "Trigger-boundary regression set for ugt-nextjs-cicd-setup. S* queries must route here (pipeline install + documented pipeline symptoms); N* must NOT (code that passes the gate → clean-code, test tooling → test-lint-setup, auth symptoms in production → auth-setup).",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
   "baseline_result": {
-    "date": null,
-    "note": "pending — run as part of the v3.0 release gate (P4)"
+    "date": "2026-08-09",
+    "judges": 3,
+    "judgments": 39,
+    "primary_accuracy": "39/39 (100.0%)",
+    "secondary_accuracy": "14/15",
+    "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
+    "note": "S-side 24/24 including every pipeline-failure symptom. N-side 15/15: writing gate-passing code went to clean-code, vitest/junit setup to test-lint-setup, the prod-only login loop to auth-setup, and the prod-only 404 to pitfalls — the four neighbours this skill is most often confused with."
   },
   "queries": {
-    "S1": { "prompt": "ทำ CI/CD ให้โปรเจคนี้หน่อย ยัง deploy มือทุกครั้งเลย", "expected": "ugt-nextjs-cicd-setup" },
-    "S2": { "prompt": "ตั้ง Jenkins กับ SonarQube ตามมาตรฐานบริษัท", "expected": "ugt-nextjs-cicd-setup" },
-    "S3": { "prompt": "pipeline ค้างที่ Quality Gate ไม่ยอมจบสักที รอเป็นชั่วโมง", "expected": "ugt-nextjs-cicd-setup" },
-    "S4": { "prompt": "stage OWASP Dependency Check timeout ทุกรอบ", "expected": "ugt-nextjs-cicd-setup" },
-    "S5": { "prompt": "deploy แล้ว container ไม่เคยขึ้น healthy จน stage fail", "expected": "ugt-nextjs-cicd-setup" },
-    "S6": { "prompt": "docker build พังตรง COPY .next/standalone", "expected": "ugt-nextjs-cicd-setup" },
-    "S7": { "prompt": "ตัวแปร NEXT_PUBLIC ว่างเปล่าใน browser ทั้งที่ตั้งใน compose แล้ว", "expected": "ugt-nextjs-cicd-setup" },
-    "S8": { "prompt": "Jenkinsfile พัง Groovy parse error หลังลบ block ของ Sentry ออก", "expected": "ugt-nextjs-cicd-setup" },
-    "N1": { "prompt": "เขียนโค้ด component ใหม่ยังไงไม่ให้ sonar ฟ้อง", "expected": "ugt-nextjs-clean-code" },
-    "N2": { "prompt": "ตั้ง vitest ให้ output junit กับ coverage", "expected": "ugt-nextjs-test-lint-setup" },
-    "N3": { "prompt": "login วนลูปเฉพาะบน production หลัง deploy ขึ้น shared domain", "expected": "ugt-nextjs-auth-setup" },
-    "N4": { "prompt": "fetch ข้อมูลได้ปกติใน dev แต่ 404 บน production", "expected": "ugt-nextjs-pitfalls" },
-    "N5": { "prompt": "อยากได้มาตรฐานทุกอย่างครบทั้ง DB login test CI", "expected": "ugt-nextjs-full-setup" }
+    "S1": {
+      "prompt": "ทำ CI/CD ให้โปรเจคนี้หน่อย ยัง deploy มือทุกครั้งเลย",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S2": {
+      "prompt": "ตั้ง Jenkins กับ SonarQube ตามมาตรฐานบริษัท",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S3": {
+      "prompt": "pipeline ค้างที่ Quality Gate ไม่ยอมจบสักที รอเป็นชั่วโมง",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S4": {
+      "prompt": "stage OWASP Dependency Check timeout ทุกรอบ",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S5": {
+      "prompt": "deploy แล้ว container ไม่เคยขึ้น healthy จน stage fail",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S6": {
+      "prompt": "docker build พังตรง COPY .next/standalone",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S7": {
+      "prompt": "ตัวแปร NEXT_PUBLIC ว่างเปล่าใน browser ทั้งที่ตั้งใน compose แล้ว",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "S8": {
+      "prompt": "Jenkinsfile พัง Groovy parse error หลังลบ block ของ Sentry ออก",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N1": {
+      "prompt": "เขียนโค้ด component ใหม่ยังไงไม่ให้ sonar ฟ้อง",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N2": {
+      "prompt": "ตั้ง vitest ให้ output junit กับ coverage",
+      "expected": "ugt-nextjs-test-lint-setup"
+    },
+    "N3": {
+      "prompt": "login วนลูปเฉพาะบน production หลัง deploy ขึ้น shared domain",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N4": {
+      "prompt": "fetch ข้อมูลได้ปกติใน dev แต่ 404 บน production",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N5": {
+      "prompt": "อยากได้มาตรฐานทุกอย่างครบทั้ง DB login test CI",
+      "expected": "ugt-nextjs-full-setup"
+    }
   }
 }

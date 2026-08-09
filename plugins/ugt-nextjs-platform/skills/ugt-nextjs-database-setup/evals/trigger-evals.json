@@ -2,23 +2,70 @@
   "purpose": "Trigger-boundary regression set for ugt-nextjs-database-setup. S* queries must route here; N* queries must NOT (auth tables → auth-setup, CI → cicd-setup, sonar → clean-code, runtime bugs → pitfalls).",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
   "baseline_result": {
-    "date": null,
-    "note": "pending — run as part of the v3.0 release gate (P4)"
+    "date": "2026-08-09",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "42/42 (100.0%)",
+    "secondary_accuracy": "17/18",
+    "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
+    "note": "S-side 24/24 including the symptom-only queries (reserved-word column, data-preserving rename, `url` in the wrong place). N-side 18/18: auth tables went to auth-setup, the sonar query to clean-code, the date-shift symptom to pitfalls. One secondary variance: the conceptual 'ubiquitous language' query (N6) split between domain-modeling and (no skill) — both acceptable, neither is this skill."
   },
   "queries": {
-    "S1": { "prompt": "ต่อ database ให้โปรเจคนี้หน่อย ใช้ SQL Server ของบริษัท", "expected": "ugt-nextjs-database-setup" },
-    "S2": { "prompt": "ตั้ง prisma ให้หน่อย โปรเจคยังไม่มี DB เลย", "expected": "ugt-nextjs-database-setup" },
-    "S3": { "prompt": "ช่วยออกแบบตาราง leave request ตามมาตรฐานบริษัท", "expected": "ugt-nextjs-database-setup" },
-    "S4": { "prompt": "จะเพิ่มคอลัมน์ชื่อ order ในตาราง Items ได้ไหม", "expected": "ugt-nextjs-database-setup" },
-    "S5": { "prompt": "ต้องเรียก stored procedure usp_RecalculateWeeklySummary จากแอปยังไงให้ปลอดภัย", "expected": "ugt-nextjs-database-setup" },
-    "S6": { "prompt": "อยากอ่านข้อมูลข้าม linked server จาก HR ระบบเก่า", "expected": "ugt-nextjs-database-setup" },
-    "S7": { "prompt": "rename คอลัมน์ใน prisma แล้วกลัวข้อมูลหาย ทำยังไงดี", "expected": "ugt-nextjs-database-setup" },
-    "S8": { "prompt": "npx prisma generate พังบอก url อยู่ผิดที่", "expected": "ugt-nextjs-database-setup" },
-    "N1": { "prompt": "ใส่ระบบ login พร้อมตาราง user role permission", "expected": "ugt-nextjs-auth-setup" },
-    "N2": { "prompt": "ทำ CI ให้ migrate อัตโนมัติตอน deploy", "expected": "ugt-nextjs-cicd-setup" },
-    "N3": { "prompt": "sonar ฟ้อง violation ในไฟล์ service ที่ query ข้อมูล", "expected": "ugt-nextjs-clean-code" },
-    "N4": { "prompt": "วันที่ในตารางแสดงเลื่อนไป 1 วันเฉพาะตอนกลางคืน", "expected": "ugt-nextjs-pitfalls" },
-    "N5": { "prompt": "ตั้ง vitest ให้ project หน่อย", "expected": "ugt-nextjs-test-lint-setup" },
-    "N6": { "prompt": "ออกแบบ data model ของ business domain ก่อนเริ่มเขียนโค้ด อยากคุยเรื่อง ubiquitous language", "expected": "mattpocock-skills:domain-modeling (conceptual modeling, not org DB standards)" }
+    "S1": {
+      "prompt": "ต่อ database ให้โปรเจคนี้หน่อย ใช้ SQL Server ของบริษัท",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S2": {
+      "prompt": "ตั้ง prisma ให้หน่อย โปรเจคยังไม่มี DB เลย",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S3": {
+      "prompt": "ช่วยออกแบบตาราง leave request ตามมาตรฐานบริษัท",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S4": {
+      "prompt": "จะเพิ่มคอลัมน์ชื่อ order ในตาราง Items ได้ไหม",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S5": {
+      "prompt": "ต้องเรียก stored procedure usp_RecalculateWeeklySummary จากแอปยังไงให้ปลอดภัย",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S6": {
+      "prompt": "อยากอ่านข้อมูลข้าม linked server จาก HR ระบบเก่า",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S7": {
+      "prompt": "rename คอลัมน์ใน prisma แล้วกลัวข้อมูลหาย ทำยังไงดี",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S8": {
+      "prompt": "npx prisma generate พังบอก url อยู่ผิดที่",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "N1": {
+      "prompt": "ใส่ระบบ login พร้อมตาราง user role permission",
+      "expected": "ugt-nextjs-auth-setup"
+    },
+    "N2": {
+      "prompt": "ทำ CI ให้ migrate อัตโนมัติตอน deploy",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N3": {
+      "prompt": "sonar ฟ้อง violation ในไฟล์ service ที่ query ข้อมูล",
+      "expected": "ugt-nextjs-clean-code"
+    },
+    "N4": {
+      "prompt": "วันที่ในตารางแสดงเลื่อนไป 1 วันเฉพาะตอนกลางคืน",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "N5": {
+      "prompt": "ตั้ง vitest ให้ project หน่อย",
+      "expected": "ugt-nextjs-test-lint-setup"
+    },
+    "N6": {
+      "prompt": "ออกแบบ data model ของ business domain ก่อนเริ่มเขียนโค้ด อยากคุยเรื่อง ubiquitous language",
+      "expected": "mattpocock-skills:domain-modeling (conceptual modeling, not org DB standards)"
+    }
   }
 }

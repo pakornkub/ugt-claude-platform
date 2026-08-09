@@ -2,8 +2,20 @@
   "purpose": "Trigger-boundary regression set for ugt-handoff (renamed from ugt-checkpoint in v2.0.0). S* queries must route to ugt-handoff; N* queries must NOT. Legacy wording ('checkpoint') must still route here — the description carries the old name.",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
   "baseline_result": {
-    "date": null,
-    "note": "pending — run as part of the v3.0 release gate (P4)"
+    "date": "2026-08-09",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "39/42 (92.9%) at iteration 0 → 100% after the fix below",
+    "secondary_accuracy": "15/18",
+    "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
+    "note": "S-side 24/24, including the legacy 'บันทึก checkpoint' phrasing (S3) — the old name in the description does its job. The three primary misses were ALL the same query, N2 ('บันทึกมติ design ว่าปุ่มหลักใช้สีน้ำเงิน'), missed by all 3 judges — a unanimous miss is a description hole, not noise: the description advertised 'decisions → decisions.md' with no design carve-out, so every judge grabbed it."
+  },
+  "iteration_1": {
+    "date": "2026-08-09",
+    "change": "Added an explicit exclusion to the description: a DESIGN decision (color/font/layout/component, 'บันทึกมติ design') belongs to docs/DESIGN.md §10 and the stack design skill, not here.",
+    "retest": "3 judges × 8 queries (N2 + the S queries most at risk of over-correcting + 2 new decision queries) = 24/24 (100%)",
+    "result_detail": "N2 and the new X2 (font decision) both routed to ugt-nextjs-design-setup 3/3, while X1 (a non-design decision — React Query vs RSC) still routed to ugt-handoff 3/3. The fix separated the two decision kinds without weakening the skill's own S-side, which held 3/3 on every retested query.",
+    "watch": "The risk this exclusion introduces is the opposite error — a plain 'บันทึกมติ' with no design content drifting to design-setup. X1 covers exactly that and is now part of the permanent set."
   },
   "queries": {
     "S1": { "prompt": "จบงานวันนี้แล้ว บันทึก state ไว้ให้ทีมด้วย", "expected": "ugt-handoff" },
@@ -14,8 +26,10 @@
     "S6": { "prompt": "feature บันทึก OT เสร็จแล้ว อัปเดตสถานะใน board ด้วย", "expected": "ugt-handoff" },
     "S7": { "prompt": "ไฟล์ handoff ใน .claude/state ดูเก่ากว่าโค้ดจริงมาก ช่วยอัปเดตให้ตรง", "expected": "ugt-handoff" },
     "S8": { "prompt": "save state ก่อนปิดเครื่อง", "expected": "ugt-handoff" },
+    "X1": { "prompt": "เคาะกันแล้วว่าจะใช้ React Query แทน RSC ล้วน บันทึกมติไว้หน่อย", "expected": "ugt-handoff", "added": "iteration_1 — guards against over-correcting the design carve-out" },
     "N1": { "prompt": "ติดตั้งมาตรฐานบริษัทให้โปรเจคนี้หน่อย ยังไม่มีอะไรเลย", "expected": "ugt-nextjs-full-setup" },
     "N2": { "prompt": "บันทึกมติ design ว่าปุ่มหลักใช้สีน้ำเงิน", "expected": "ugt-nextjs-design-setup (มติ design → DESIGN.md)" },
+    "X2": { "prompt": "บันทึกมติว่าเปลี่ยนฟอนต์หัวข้อเป็น Inter", "expected": "ugt-nextjs-design-setup", "added": "iteration_1 — a design decision that never says the word 'design'" },
     "N3": { "prompt": "จำไว้หน่อยว่าผมชอบให้ตอบสั้น ๆ", "expected": "(no skill — personal preference goes to auto memory)" },
     "N4": { "prompt": "commit โค้ดที่แก้เสร็จแล้วให้หน่อย", "expected": "(no skill — plain git commit)" },
     "N5": { "prompt": "อ่าน requirement ในโฟลเดอร์ docs แล้วสรุปเป็น brief ให้หน่อย", "expected": "ugt-requirements" },
