@@ -42,6 +42,11 @@
   เขียวทึบ · ในตารางใช้ variant `soft-*`
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
   translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
+- **มุมโค้ง 3 ระดับ** (ค่ากลางองค์กร ไม่ใช่ค่า derive ของ shadcn — ตั้งทับใน
+  `globals.tokens.css` เพื่อให้เข้ากับ density ตระกูล mira): control 6px
+  (`--radius-md`: input/select/button) · card 12px (`--radius-lg` = `--radius`)
+  · overlay 14px (`--radius-xl`: dialog/popover) · chip/kbd 4px
+  (`--radius-sm`) — **ห้าม override ราย callsite** ใช้ตัวแปรเสมอ
 
 ## 2. Typography
 
@@ -88,6 +93,11 @@
   วันที่ = `ui/date-picker` เสมอ (ยกเว้น filter ปี/เดือน = Select)
 - Form: label บนช่อง · required = `*` แดง · error ใต้ช่องผ่าน `ui/field`
   (zod + react-hook-form) · validate ตอน submit แล้ว re-validate ต่อ field
+  > **`*` ต้องอยู่บรรทัดเดียวกับข้อความ label เสมอ** — ตัว label เป็น flex row
+  > ไม่ใช่ grid item แยก ไม่งั้น `*` ตกลงบรรทัดใหม่ กลายเป็นดาวลอยเหนือช่อง
+- **แถวคู่ label–ค่า** (detail dialog, สรุป, การ์ดข้อมูล): flex `justify-between`
+  + `align-items:center` + ระยะระหว่างคอลัมน์ ≥16px + ความสูงแถวขั้นต่ำ ~24px
+  — ค่าที่เป็น `StatusBadge` จะได้ไม่ชนข้อความฝั่งซ้าย (badge สูงกว่าข้อความธรรมดา)
 - Dialog ladder: ฟอร์ม ≤6 ช่อง = `FormDialog` (compound + height
   `fluid`/`auto`/`fill`) · ยาว = หน้าแยก · panel ค้าง = `Sheet` ·
   read-only = `detail-dialog-shell` · destructive = `ConfirmActionDialog`

@@ -1,5 +1,31 @@
 # Changelog — ugt-nextjs-platform
 
+## 3.3.0 (2026-08-09)
+
+Two rules the agreement never stated, found by reviewing the preview page —
+both are layout bugs that repeat on every form/detail screen until pinned:
+
+- **`*` (required) must sit on the same line as its label.** Written because
+  a label built as a grid container pushes the `*` onto its own row, leaving
+  a red star floating above the field. DESIGN.md §4 now says the label line
+  is a flex row, not a separate grid item.
+- **label–value rows** (detail dialogs, summaries, data cards) are flex
+  `justify-between` + `align-items:center`, column gap ≥16px, row height
+  ≥~24px — a `StatusBadge` is taller than plain text and collides with the
+  left-hand label without it.
+
+Also documented, because the token file cited a section that did not exist:
+**DESIGN.md §1 now carries the radius tiers** — control 6px (`--radius-md`) ·
+card 12px (`--radius-lg` = `--radius`) · overlay 14px (`--radius-xl`) ·
+chip 4px (`--radius-sm`), stated as **org values that deliberately replace
+shadcn's derived scale** (shadcn derives sm/md/xl from `--radius` as −4/−2/+4;
+the org pins tighter control corners to match mira density). Never override
+per callsite.
+
+`docs/design-preview.html` fixed for both layout rules and verified in a
+browser: all three required labels keep `*` inline (18px single-line labels),
+all four label–value rows are vertically centred with ≥110px column gap.
+
 ## 3.2.0 (2026-08-09)
 
 **Fix — icon buttons in `DataTable` were two different sizes.** The four
