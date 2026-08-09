@@ -1,5 +1,18 @@
 # Changelog — ugt-nextjs-standard
 
+## 2.0.0 (2026-08-09)
+
+- Records the new dependency floor after the v3.0 naming + knowledge-architecture
+  release: `ugt-nextjs-platform` 3.0.0 (which depends on `ugt-core` 2.0.0).
+  No dependency-list change in this manifest — but the bundle now delivers the
+  renamed skills (`ugt-nextjs-full-setup`, `ugt-nextjs-test-lint-setup`,
+  `ugt-handoff`, `ugt-model-mode`) plus the new `ugt-context` /
+  `docs/project-context/` knowledge base. Existing projects: follow the
+  migration steps in ugt-nextjs-platform 3.0.0's CHANGELOG.
+- The 1.3.0 note about `domain-modeling` writing to `project-notes.md` now
+  reads against `docs/project-context/` (project-notes was dissolved in 3.0.0)
+  — the rejection stands for the same one-home-per-knowledge reason.
+
 ## 1.3.0 (2026-08-03)
 
 - Add `frontend-design@claude-plugins-official` (Anthropic) as a fourth

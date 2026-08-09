@@ -1,5 +1,11 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
+> **หมายเหตุ (2026-08-09)**: เอกสารนี้เป็นบันทึก ณ v2.x — เก็บไว้เป็นประวัติการตัดสินใจ ไม่แก้ย้อนหลัง
+> ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` · `ugt-mode`→`ugt-model-mode` ·
+> `ugt-nextjs-setup`→`ugt-nextjs-full-setup` · `ugt-nextjs-quality-setup`→`ugt-nextjs-test-lint-setup` ·
+> `.claude/state/project-notes.md` ยุบเข้า `docs/project-context/`) — ดู CHANGELOG ของแต่ละ plugin
+
+
 **Date:** 2026-07-29 (curation pass added same day)
 **Purpose:** decide whether the knowledge still living only in `ugt-hrms` justifies a new
 feature-development skill in `plugins/ugt-nextjs-platform`. Report only — no skill was

@@ -1,5 +1,50 @@
 # Changelog — ugt-core
 
+## 2.0.0 (2026-08-09)
+
+**BREAKING — the naming + knowledge-architecture release.** Everything renamed
+here keeps its old trigger words in the new skill's description, so old habits
+still route correctly; only names and file layouts changed. Project-side
+migration steps live in **ugt-nextjs-platform 3.0.0's CHANGELOG** (the
+stack-facing entry) — this entry records the platform-side changes.
+
+Renames (ชื่อสื่อหน้าที่จริง):
+
+- `ugt-checkpoint` → **`ugt-handoff`** · project file `checkpoint.md` →
+  `handoff.md`
+- `ugt-mode` → **`ugt-model-mode`** · project file `mode.md` → `model-mode.md`
+- contracts: `identity.md` → **`auth.md`** · `delivery.md` → **`cicd.md`**
+  (one vocabulary per domain, matching the stack skills)
+
+New knowledge architecture — two homes with a one-sentence rule each:
+
+- `.claude/state/` = **ของสด** (always-loaded, short): `handoff.md` becomes a
+  pure handoff file with new fixed sections **In progress / Next / Open
+  Questions / Done (capped ~10)**.
+- `docs/project-context/` = **ความรู้** (on-demand, grows): 7 files —
+  `00-index.md` (the only always-loaded one) · `board.md` (feature board,
+  moved out of requirements-brief) · `architecture.md` · `business-rules.md`
+  (as-built) · `api.md` · `decisions.md` (append-only; every decision has
+  exactly one home: design → `DESIGN.md` §10, everything else → here) ·
+  `troubleshooting.md` (graduates to the stack pitfalls skill via PR when
+  proven stack-wide).
+- `project-notes.md` is **dissolved**: Open Questions → `handoff.md` ·
+  Deviations → `⚠ deviation` lines in `architecture.md` · Error Patterns →
+  `troubleshooting.md`.
+
+New skill **`ugt-context`** — bootstraps `docs/project-context/` once:
+skeletons on fresh projects, scan → draft → user review on existing codebases
+(pointers into code, never mirrors; inferences marked `(assumption)`).
+Ownership then passes to `/ugt-handoff`, which fans out every chunk's results:
+handoff file + board status column + affected context files + appended
+decisions, committed as one set. `ugt-requirements` gains the
+requirement-change routing table (4 cases by board status; briefs freeze once
+their feature is done) and now writes board rows to the new location.
+
+`contracts/harness.md` rewritten to the new ownership table + 4-way knowledge
+triage, and now names the drift check (`scripts/check-contract-drift.mjs`,
+repo root) that verifies contract values against every stack-skill copy.
+
 ## 1.5.0 (2026-08-04)
 
 New contract: **`contracts/design.md`** — the org UI design standard,

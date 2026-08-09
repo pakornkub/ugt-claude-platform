@@ -245,7 +245,7 @@
     .files code{min-width:0}
   }
 
-  /* ============ ugt-mode preset switcher ============ */
+  /* ============ ugt-model-mode preset switcher ============ */
   /* subsection ภายใน section ใหญ่ — เว้นให้หายใจ + เส้นคั่นบอกว่าเริ่มเรื่องใหม่ */
   .subsec{margin-top:64px;padding-top:40px;border-top:1px solid var(--line)}
   .subsec .sub-kicker{
@@ -404,7 +404,7 @@
     </p>
     <div class="chips h-anim d3">
       <span class="chip"><span class="dot" aria-hidden="true"></span>ติดตั้งครั้งเดียวต่อเครื่อง</span>
-      <span class="chip"><span class="dot violet" aria-hidden="true"></span>ตัวช่วย 11 ตัว ครอบ 8 เรื่องหลัก</span>
+      <span class="chip"><span class="dot violet" aria-hidden="true"></span>ตัวช่วย 12 ตัว ครอบ 8 เรื่องหลัก</span>
       <span class="chip"><span class="dot green" aria-hidden="true"></span>ผลทดสอบ setup/auth/cicd 100%</span>
     </div>
     <div class="codebox h-anim d4">
@@ -433,18 +433,18 @@
     <div class="grid cols-3">
       <article class="card plugin-card featured reveal">
         <span class="badge">แนะนำ — ติดตัวนี้</span>
-        <span class="ver">v1.3.0</span>
+        <span class="ver">v2.0.0</span>
         <h3>ugt-nextjs-standard</h3>
         <p>ตัวที่ควรติดตั้ง — ติดตัวเดียวได้ครบทุกอย่างข้างล่างอัตโนมัติ
         <strong>พร้อม plugin official อีก 3 ตัว</strong> (ดูกรอบล่าง) ไม่ต้องเลือกทีละชิ้น</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.9.2</span>
+        <span class="ver">v3.0.0</span>
         <h3>ugt-nextjs-platform</h3>
         <p>ตัวช่วย 8 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login CI/CD และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v1.5.0</span>
+        <span class="ver">v2.0.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -484,12 +484,12 @@
 <!-- ================= SKILLS ================= -->
 <section id="skills" aria-labelledby="skills-title">
   <div class="wrap">
-    <span class="kicker reveal">11 ตัวช่วย</span>
+    <span class="kicker reveal">12 ตัวช่วย</span>
     <h2 id="skills-title" class="reveal">ตัวช่วยทั้งหมด</h2>
     <p class="lead reveal">พิมพ์ <span class="inline-code">/ugt</span> จะเห็นรายการทั้งหมด — สองตัวสุดท้ายในกลุ่มเขียว<strong>ทำงานเองอัตโนมัติ</strong> ไม่ต้องเรียก</p>
     <div class="skills-grid">
       <article class="skill reveal">
-        <div class="top"><span class="emoji" aria-hidden="true">🚀</span><h3>ugt-nextjs-setup</h3></div>
+        <div class="top"><span class="emoji" aria-hidden="true">🚀</span><h3>ugt-nextjs-full-setup</h3></div>
         <p>ตัวแม่ — ถามครั้งเดียว แล้วติดตั้งทุกอย่างตามลำดับที่ถูกต้อง พิมพ์ "ทำให้ deploy ได้" ก็เริ่มเอง</p>
         <span class="tag main">ตัวแม่</span>
       </article>
@@ -498,7 +498,7 @@
         <p>ต่อ SQL Server + ตั้งชื่อตาราง/คอลัมน์ตามมาตรฐาน — ใช้กับงานฐานข้อมูลทุกชนิด</p>
       </article>
       <article class="skill reveal">
-        <div class="top"><span class="emoji" aria-hidden="true">✅</span><h3>ugt-nextjs-quality-setup</h3></div>
+        <div class="top"><span class="emoji" aria-hidden="true">✅</span><h3>ugt-nextjs-test-lint-setup</h3></div>
         <p>ระบบทดสอบ + ตรวจโค้ดอัตโนมัติก่อน commit — ต้องมีก่อนทำ CI เสมอ</p>
       </article>
       <article class="skill reveal">
@@ -515,12 +515,16 @@
         <p>ต่อ Jenkins ให้ตรวจ-ทดสอบ-deploy อัตโนมัติเมื่อ push — รวมงานแก้ pipeline แดง</p>
       </article>
       <article class="skill reveal">
-        <div class="top"><span class="emoji" aria-hidden="true">📝</span><h3>ugt-checkpoint</h3></div>
-        <p>จดความคืบหน้าของทีมไว้ให้คนต่อไปอ่านต่อได้ — ใช้ตอนจบงานทุกครั้ง</p>
+        <div class="top"><span class="emoji" aria-hidden="true">📝</span><h3>ugt-handoff</h3></div>
+        <p>ปิดงานหนึ่งรอบ — จดว่าค้างตรงไหน แล้วอัปเดตความรู้ของโปรเจคให้ตรงปัจจุบัน ใช้ตอนจบงานทุกครั้ง</p>
       </article>
       <article class="skill reveal">
-        <div class="top"><span class="emoji" aria-hidden="true">⚡</span><h3>ugt-mode</h3></div>
-        <p>เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน — <span class="inline-code">/ugt-mode god</span> หรือ "โหมดประหยัด"</p>
+        <div class="top"><span class="emoji" aria-hidden="true">🗺️</span><h3>ugt-context</h3></div>
+        <p>สร้างสารบัญความรู้ของโปรเจค (<span class="inline-code">docs/project-context/</span>) ครั้งแรก — โปรเจคเดิมมันสแกนโค้ดให้แล้วให้เราตรวจก่อนบันทึก</p>
+      </article>
+      <article class="skill reveal">
+        <div class="top"><span class="emoji" aria-hidden="true">⚡</span><h3>ugt-model-mode</h3></div>
+        <p>เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน — <span class="inline-code">/ugt-model-mode god</span> หรือ "โหมดประหยัด"</p>
       </article>
       <article class="skill reveal">
         <div class="top"><span class="emoji" aria-hidden="true">📋</span><h3>ugt-requirements</h3></div>
@@ -567,11 +571,11 @@
         <ol>
           <li><strong>อ่านก่อน อย่าเพิ่งสร้าง</strong> — ประโยคข้างบนจะได้เอกสารสรุปภาษาไทย
           + รายการคำถามที่ต้องถาม stakeholder ก่อนเขียนโค้ดผิดทิศ</li>
-          <li>ติดตั้งมาตรฐานด้วย <span class="inline-code">/ugt-nextjs-setup</span>
+          <li>ติดตั้งมาตรฐานด้วย <span class="inline-code">/ugt-nextjs-full-setup</span>
           (ตอบคำถามโดยใช้ข้อมูลจาก brief) — ตัวช่วยดีไซน์จะสร้างโปรเจค Next.js ให้เองถ้ายังไม่มี</li>
           <li>วนสร้างทีละ feature: "สร้างหน้า X ตาม requirement ใน docs/Y" —
           ระบบคุมคุณภาพประกบเองอัตโนมัติ</li>
-          <li>จบวัน: <span class="inline-code">/ugt-checkpoint</span> แล้ว commit —
+          <li>จบวัน: <span class="inline-code">/ugt-handoff</span> แล้ว commit —
           พรุ่งนี้ (หรือเพื่อน) เปิดมาอ่านต่อได้ทันที</li>
         </ol>
       </article>
@@ -611,16 +615,47 @@
         <tbody>
           <tr><td><strong>ถามคำถาม / อ่านโค้ด</strong></td><td>ตอบตรง ๆ ไม่มีพิธีรีตอง</td></tr>
           <tr><td><strong>แก้งานเล็ก</strong> (typo, ค่า config)</td><td>ทำตรง ๆ ไม่เสียเวลา</td></tr>
-          <tr><td><strong>สร้าง feature / แก้บั๊ก</strong></td><td>เข้ากระบวนการเต็ม: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review</td></tr>
+          <tr><td><strong>สร้าง feature / แก้บั๊ก</strong></td><td><strong>อ่านความรู้ของโปรเจคก่อน</strong> (ระบบเป็นยังไง กติกาอะไรอยู่) แล้วเข้ากระบวนการเต็ม: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review</td></tr>
           <tr><td><strong>แตะไฟล์โค้ด / ไฟล์ UI / ไฟล์ฐานข้อมูล</strong></td><td>กฎที่เกี่ยวโหลดเอง (มาตรฐานโค้ด, ข้อตกลงดีไซน์, กับดัก production)</td></tr>
-          <tr><td><strong>จบงาน</strong></td><td><span class="cmd">/ugt-checkpoint</span> แล้ว commit</td></tr>
+          <tr><td><strong>จบงาน</strong></td><td><span class="cmd">/ugt-handoff</span> แล้ว commit</td></tr>
         </tbody>
       </table>
     </div>
     <div class="subsec">
+    <span class="sub-kicker reveal">โปรเจคจำเองได้</span>
+    <h3 class="sub-title reveal">ความจำของทีม — ไม่ต้องเล่าใหม่ทุกครั้ง</h3>
+    <p class="sub-lead reveal">สองที่เก็บที่ commit ไปกับ repo (ทุกคนในทีมได้เหมือนกัน) แยกกันชัดเจนว่าอะไร<strong>ของสด</strong> อะไร<strong>ความรู้</strong></p>
+    <div class="table-scroll reveal">
+      <table>
+        <caption>ตารางที่เก็บความจำของทีมและช่วงเวลาที่โหลดเข้าใช้งาน</caption>
+        <thead>
+          <tr><th scope="col">ที่เก็บ</th><th scope="col">เก็บอะไร</th><th scope="col">โหลดเมื่อไหร่</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cmd">.claude/state/handoff.md</span></td>
+            <td><strong>ของสด</strong> — งานค้างตรงไหน คิวถัดไป คำถามที่ยังรอคำตอบ</td>
+            <td>ทุก session (สั้นเสมอ)</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">docs/project-context/</span></td>
+            <td><strong>ความรู้</strong> — ระบบทำงานยังไง กติกา business ตามที่ทำจริง รายการ API สถานะ feature มติที่เคาะไปแล้ว บั๊กที่เคยเจอ</td>
+            <td>เปิดเฉพาะไฟล์ที่เกี่ยวกับงานตรงหน้า</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note reveal">
+      ทั้งหมดอัปเดตผ่าน <span class="inline-code">/ugt-handoff</span> ที่เดียว — จบงานหนึ่งรอบ มันจดว่าค้างตรงไหน อัปเดตสถานะ feature
+      เขียนความรู้ที่เปลี่ยนเข้าไฟล์ที่ถูก และต่อท้ายมติที่เคาะรอบนี้ให้เอง ผลคือ session หน้า (หรือเพื่อนร่วมทีม)
+      <strong>ไม่ต้องไล่อ่านโค้ดใหม่</strong> และไม่รื้อเรื่องที่เคยตัดสินใจไปแล้วซ้ำ ๆ ·
+      โปรเจคที่มีโค้ดอยู่แล้วสร้างครั้งแรกด้วย <span class="inline-code">/ugt-context</span> (สแกนให้แล้วให้เราตรวจก่อนบันทึก)
+    </p>
+    </div>
+    <div class="subsec">
     <span class="sub-kicker reveal">ปรับได้ตามความสำคัญของงาน</span>
-    <h3 class="sub-title reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-mode</span></h3>
-    <p class="sub-lead reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
+    <h3 class="sub-title reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-model-mode</span></h3>
+    <p class="sub-lead reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/model-mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
       ใช้กับ<strong>งานที่ส่งไปตัวช่วยย่อยเท่านั้น</strong> — model หลักของ session ยังเปลี่ยนด้วย <span class="inline-code">/model</span> ตามปกติ
       · กดปุ่มด้านล่างเพื่อเทียบแต่ละโหมด</p>
     <div class="mode-chips reveal" role="tablist" aria-label="เลือก preset">
@@ -644,9 +679,9 @@
       </table>
     </div>
     <p class="foot-note reveal">
-      <span class="inline-code">/ugt-mode god</span> งานสำคัญ อัดเต็มที่ ·
-      <span class="inline-code">/ugt-mode easy</span> งานทั่วไป ประหยัด ·
-      <span class="inline-code">/ugt-mode auto</span> ให้เลือกความแรงเองเป็นรายงานตามความยาก ·
+      <span class="inline-code">/ugt-model-mode god</span> งานสำคัญ อัดเต็มที่ ·
+      <span class="inline-code">/ugt-model-mode easy</span> งานทั่วไป ประหยัด ·
+      <span class="inline-code">/ugt-model-mode auto</span> ให้เลือกความแรงเองเป็นรายงานตามความยาก ·
       พิมพ์ประโยคธรรมดา "โหมดประหยัดหน่อย งานนี้ไม่รีบ" ก็ได้ —
       หลักที่ทุกโหมดยึด: คนตรวจไม่อ่อนกว่าคนเขียน · แยก "หาสาเหตุ" (ใช้ตัวแรง) จาก "แก้ตามแผน" (ตัวถูกกว่า) · งาน mechanical ใช้ haiku เสมอ
     </p>
@@ -680,17 +715,24 @@
 <section id="installed" aria-labelledby="installed-title">
   <div class="wrap">
     <span class="kicker reveal">โปร่งใส ตรวจได้</span>
-    <h2 id="installed-title" class="reveal">สิ่งที่ <span class="inline-code">/ugt-nextjs-setup</span> ติดตั้งลงโปรเจค</h2>
+    <h2 id="installed-title" class="reveal">สิ่งที่ <span class="inline-code">/ugt-nextjs-full-setup</span> ติดตั้งลงโปรเจค</h2>
     <p class="lead reveal">ไฟล์ทุกตัวเปิดอ่านได้ commit กับ repo — ไม่มีอะไรซ่อน</p>
     <div class="files reveal">
       <div class="group">ชั้นความรู้ (harness — ทำให้มาตรฐานอยู่ข้าม session)</div>
       <div class="row"><code>CLAUDE.md</code><span>บล็อกกฎองค์กรใน marker <span class="inline-code">&lt;!-- ugt:start/end --&gt;</span> — แก้เฉพาะในบล็อก เนื้อหาทีมไม่ถูกแตะ</span></div>
       <div class="row"><code>.claude/rules/ugt-nextjs-*.md</code><span>กฎผูก path — โหลดเองเมื่อแตะไฟล์ที่เกี่ยว (โค้ด / ฐานข้อมูล / auth / CI / ดีไซน์)</span></div>
-      <div class="row"><code>.claude/state/checkpoint.md</code><span>ความจำของทีม (commit) — อัปเดตด้วย <span class="inline-code">/ugt-checkpoint</span></span></div>
-      <div class="row"><code>.claude/state/project-notes.md</code><span>Error Patterns · Deviations · Open Questions ของโปรเจค</span></div>
-      <div class="row"><code>.claude/state/mode.md</code><span>ชุดความแรง AI ต่อประเภทงาน — สลับด้วย <span class="inline-code">/ugt-mode</span></span></div>
+      <div class="row"><code>.claude/state/handoff.md</code><span>ของสด — งานค้างตรงไหน คิวถัดไป คำถามที่รอคำตอบ (โหลดทุก session) — อัปเดตด้วย <span class="inline-code">/ugt-handoff</span></span></div>
+      <div class="row"><code>.claude/state/model-mode.md</code><span>ชุดความแรง AI ต่อประเภทงาน — สลับด้วย <span class="inline-code">/ugt-model-mode</span></span></div>
       <div class="row"><code>.claude/settings.json</code><span>marketplace + plugin + permissions</span></div>
       <div class="row"><code>.claude/logs/</code><span>audit log อัตโนมัติ (gitignore — ไม่ commit)</span></div>
+      <div class="group">ความรู้ของโปรเจค (<span class="inline-code">docs/project-context/</span> — เปิดเฉพาะไฟล์ที่เกี่ยวกับงานตรงหน้า)</div>
+      <div class="row"><code>00-index.md</code><span>สารบัญ — ไฟล์เดียวในโฟลเดอร์นี้ที่โหลดทุก session</span></div>
+      <div class="row"><code>architecture.md</code><span>ระบบประกอบด้วยอะไร อยู่ไฟล์ไหน ข้อมูลไหลยังไง + จุดที่จงใจต่างจากมาตรฐาน</span></div>
+      <div class="row"><code>business-rules.md</code><span>กติกา business ตามที่ระบบทำจริงตอนนี้ (ชี้เข้าโค้ด)</span></div>
+      <div class="row"><code>api.md</code><span>ตาราง endpoint ทั้งหมด</span></div>
+      <div class="row"><code>board.md</code><span>สถานะ feature ทั้งโปรเจค (todo / กำลังทำ / ติดอะไร / เสร็จ)</span></div>
+      <div class="row"><code>decisions.md</code><span>มติที่เคาะไปแล้ว พร้อมเหตุผลและทางเลือกที่ปัดตก — เขียนต่อท้ายเท่านั้น</span></div>
+      <div class="row"><code>troubleshooting.md</code><span>บั๊กที่เคยกินเวลาในโปรเจคนี้: อาการ → สาเหตุ → วิธีแก้</span></div>
       <div class="group">เอกสารที่ module สร้างให้</div>
       <div class="row"><code>docs/DESIGN.md</code><span>ข้อตกลงดีไซน์ของโปรเจค — ทุกการตัดสินใจพร้อมวันที่ (จากตัวช่วยดีไซน์)</span></div>
       <div class="row"><code>docs/admin-handoff.md</code><span>เอกสารส่งต่อทีม admin/DevOps — ขั้นตอน + ชื่อที่ต้องตั้งเป๊ะ ๆ + ช่องกรอกค่าตอบกลับ</span></div>
@@ -717,9 +759,14 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>จริงเฉพาะโปรเจคนั้น</strong> (business rule)</td>
-              <td><span class="cmd">.claude/state/project-notes.md</span> ของโปรเจค</td>
+              <td><strong>งานค้าง / คิวถัดไป / คำถามที่รอคำตอบ</strong></td>
+              <td><span class="cmd">.claude/state/handoff.md</span> — ผ่าน <span class="cmd">/ugt-handoff</span></td>
               <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>จริงเฉพาะโปรเจคนั้น</strong> (business rule, โครงสร้าง, มติ, บั๊กที่เคยเจอ)</td>
+              <td>ไฟล์ที่ตรงเรื่องใน <span class="cmd">docs/project-context/</span> — มติดีไซน์ไป <span class="cmd">docs/DESIGN.md</span></td>
+              <td><span class="no">❌ เก็บเรื่องเดียวกันสองที่</span> — แล้วมันจะขัดกันเอง</td>
             </tr>
             <tr>
               <td><strong>จริงกับทุกโปรเจค</strong> (กับดักของ Prisma / Keycloak / Jenkins / shadcn)</td>
@@ -771,7 +818,7 @@
       </article>
     </div>
     <p class="evidence-note reveal">
-      เพิ่มเติม: pitfalls <strong>9/9</strong> (ไม่มีตัวช่วย 6/9) · ugt-mode <strong>9/9</strong> + trigger <strong>69/69</strong> ·
+      เพิ่มเติม: pitfalls <strong>9/9</strong> (ไม่มีตัวช่วย 6/9) · ugt-model-mode <strong>9/9</strong> + trigger <strong>69/69</strong> ·
       มาตรฐานดีไซน์สกัดจากโปรเจค production จริง 2 ตัว
     </p>
   </div>

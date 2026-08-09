@@ -193,6 +193,6 @@ for (const r of results) {
 }
 console.log(
   `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
-    "Also run each installed module's own verify.mjs (database / quality / auth / cicd)\n"
+    "Also run each installed module's own verify.mjs (database / test-lint / design / auth / cicd)\n"
 );
 process.exit(failed > 0 ? 1 : 0);

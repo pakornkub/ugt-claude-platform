@@ -1,5 +1,74 @@
 # Changelog — ugt-nextjs-platform
 
+## 3.0.0 (2026-08-09)
+
+**BREAKING — the naming + knowledge-architecture release** (pairs with
+ugt-core 2.0.0). Renamed skills keep their old trigger words in the new
+descriptions, so "บันทึก checkpoint" or "/ugt-nextjs-setup"-era habits still
+route correctly.
+
+Renames:
+
+- `ugt-nextjs-setup` → **`ugt-nextjs-full-setup`** (the orchestrator no longer
+  reads as a sibling of the `*-setup` children)
+- `ugt-nextjs-quality-setup` → **`ugt-nextjs-test-lint-setup`** (no more
+  collision with "Quality Gate", which belongs to clean-code/cicd)
+- displayName → "UGT Next.js Platform"
+
+Assets are now one convention everywhere:
+
+- **Placeholders**: one system — `__X__` — in every asset (was 3 systems:
+  `<x>`, `__X__`, `{{X}}`). Angle/mustache notation survives only as prose
+  notation in docs. Verify scripts updated to match.
+- **Mirror layout**: every asset sits at its destination path
+  (`assets/lib/auth.ts` → `lib/auth.ts`, `assets/app/(admin)/…` →
+  `app/(admin)/…`) — the auth copy table collapsed from 26 rows to a
+  copy-the-tree rule + 4 exceptions.
+- **Rules travel with their owner**: `.claude/rules/ugt-nextjs-{database,
+  auth,ci,design}.md` are installed by their own child skill from
+  `assets/rules/` — installing a single skill now also installs its rule.
+- Every skill now ships both `evals.json` and `trigger-evals.json`
+  (5 new trigger sets; baselines run at the release gate).
+
+Knowledge architecture (see ugt-core 2.0.0 for the design):
+`assets/state/` now ships `handoff.md` (new sections) + `model-mode.md` only;
+`project-notes.md` is gone; the harness step invokes `ugt-context` to
+bootstrap `docs/project-context/`; CLAUDE-block imports
+`@docs/project-context/00-index.md`, tells sessions to read the relevant
+context **before** entering the superpowers pipeline, to check `decisions.md`
+before proposing direction changes, and to open `troubleshooting.md` before
+debugging a strange error; the knowledge triage is now 4-way.
+
+### Migration — existing v2.x projects (AI-executable; run after `/plugin update`)
+
+1. `git mv .claude/state/checkpoint.md .claude/state/handoff.md` and
+   `git mv .claude/state/mode.md .claude/state/model-mode.md`.
+2. Create `docs/project-context/` by running **`ugt-context`** (existing
+   codebase → scan path). Then move history into it:
+   - `handoff.md` §Decisions entries → append to
+     `docs/project-context/decisions.md` (keep dates/reasons verbatim), then
+     delete the section; retitle sections to **In progress / Next / Open
+     Questions / Done** and trim Done to ~10 rows.
+   - `project-notes.md`: Error Patterns → `troubleshooting.md` · Deviations →
+     `⚠ deviation` lines in `architecture.md` at the relevant section · Open
+     Questions → `handoff.md` §Open Questions. Then delete
+     `project-notes.md`.
+   - If `docs/requirements-brief/00-overview.md` has a สถานะ column: move the
+     feature rows + statuses to `docs/project-context/board.md` and drop the
+     column from the overview.
+3. Re-run `ugt-nextjs-full-setup`'s harness step (step 4–5 only) to refresh
+   the CLAUDE.md block (new imports + rules) — project content outside the
+   markers is untouched.
+4. Verify: `node <plugin>/skills/ugt-nextjs-full-setup/scripts/verify.mjs`
+   from the project root — it fails loudly on any leftover v2.x file.
+
+Release gate (run before tagging): a scratch project on the v2.x layout
+(checkpoint + project-notes + mode + old CLAUDE block + a brief with a สถานะ
+column) fails verify with 5 actionable errors naming the migration; executing
+steps 1–3 above verbatim lands it on **14/14 green**, with team content
+outside the `ugt:start/end` markers untouched. A fresh harness install is
+14/14 green as well.
+
 ## 2.9.3 (2026-08-05)
 
 `ugt-nextjs-design-setup`: **company logo assets** join the kit —
