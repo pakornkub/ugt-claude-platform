@@ -1,5 +1,40 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.7.1 (2026-08-10)
+
+4.7.0 shipped the recovery half of local login and I described the password
+policy as shared with "admin-create" — **which did not exist**. Checking that
+claim turned up two holes that had been there since local login was first
+offered:
+
+- **No local account could be created at all.** `/admin/users` only listed
+  users and assigned roles; `/admin/setup` promotes an already-logged-in user;
+  there is no sign-up page. `USERS_CREATE` and `USERS_RESET_PASSWORD` were
+  sitting in `ALL_PERMISSIONS` with nothing implementing them. A local-only
+  project could not get its first person in.
+- **Sign-up was open to the internet.** `emailAndPassword.enabled: true`
+  publishes `POST /api/auth/sign-up/email`, and nothing blocked it — anyone who
+  could reach the app could mint themselves an account.
+
+Closed:
+
+- `createLocalUserAction` + `sendUserPasswordResetAction` in
+  `lib/actions/admin-users.ts`, both on the org guard order, both audited
+  (`users.create`, `users.password-reset-sent`), neither putting a password in
+  `detail`. `components/admin-user-actions.tsx` puts them on `/admin/users`.
+- `proxy.ts` 404s `/api/auth/sign-up`. Deliberately **not** `disableSignUp:
+  true` — that flag also blocks the server-side `auth.api.signUpEmail()` the
+  admin action runs on (verified in 1.5.4: the check sits inside the handler
+  with no server-side bypass). Server Actions never pass through the proxy, so
+  blocking the HTTP route closes the door without closing the admin's path.
+- `scripts/create-first-user.ts` for the chicken-and-egg a local-only project
+  hits: accounts come from `/admin/users`, which needs a login nobody has yet.
+  It refuses to run once any user exists.
+- The admin **sends a reset link** and cannot type someone's new password — an
+  audit log stops meaning anything once two people know one credential.
+- `verify.mjs` fails on a missing sign-up block, a missing
+  `createLocalUserAction`, and a missing bootstrap script.
+
 ## 4.7.0 (2026-08-10)
 
 **Local login is finally complete.** Until now a project could hand someone a

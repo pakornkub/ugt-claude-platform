@@ -239,6 +239,24 @@ check('Password reset wired correctly', () => {
   if (has('proxy.ts') && !/reset-password/.test(read('proxy.ts'))) {
     problems.push('/reset-password is not public in proxy.ts — the mailed link bounces to /login');
   }
+  // emailAndPassword.enabled opens POST /api/auth/sign-up/email to the world.
+  if (has('proxy.ts') && !/api\/auth\/sign-up/.test(read('proxy.ts'))) {
+    problems.push('proxy.ts does not block /api/auth/sign-up — anyone can self-register on this app');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('Local accounts have a way to exist', () => {
+  if (!has('lib/actions/password.ts')) {
+    return { ok: true, msg: 'no local login — accounts come from SSO/LDAP on first bind' };
+  }
+  const problems = [];
+  if (!has('lib/actions/admin-users.ts') || !/createLocalUserAction/.test(read('lib/actions/admin-users.ts'))) {
+    problems.push('no createLocalUserAction — with sign-up blocked, nobody can ever get a local account');
+  }
+  if (!has('scripts/create-first-user.ts')) {
+    problems.push('scripts/create-first-user.ts missing — a local-only project cannot bootstrap its first login');
+  }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 

@@ -8,6 +8,8 @@ import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { UserRoleSelect } from '@/components/user-role-select';
+// [METHOD: LOCAL] — ลบ import + คอลัมน์/ปุ่มด้านล่างเมื่อไม่ได้เปิด local login
+import { CreateUserDialog, SendPasswordResetButton } from '@/components/admin-user-actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
@@ -18,6 +20,9 @@ export default async function AdminUsersPage() {
   const perms = await getUserPermissions(session.user.id);
   if (!perms.includes(PERMISSIONS.USERS_READ)) redirect('/');
   const canUpdate = perms.includes(PERMISSIONS.USERS_UPDATE);
+  // [METHOD: LOCAL] — ปุ่มถูก "ซ่อน" ไม่ใช่ disable ตามกฎ; ด่านจริงคือ guard ในแอ็กชัน
+  const canCreate = perms.includes(PERMISSIONS.USERS_CREATE);
+  const canResetPassword = perms.includes(PERMISSIONS.USERS_RESET_PASSWORD);
 
   const [users, roles] = await Promise.all([
     prisma.user.findMany({
@@ -30,7 +35,10 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">ผู้ใช้งาน</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">ผู้ใช้งาน</h1>
+        {canCreate && <CreateUserDialog roles={roles} />}
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -38,6 +46,7 @@ export default async function AdminUsersPage() {
             <TableHead>อีเมล</TableHead>
             <TableHead>วิธีเข้าสู่ระบบ</TableHead>
             <TableHead>บทบาท</TableHead>
+            {canResetPassword && <TableHead>รหัสผ่าน</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -56,6 +65,12 @@ export default async function AdminUsersPage() {
                   disabled={!canUpdate || user.id === session.user.id}
                 />
               </TableCell>
+              {canResetPassword && (
+                <TableCell>
+                  {/* บัญชี SSO/LDAP ตั้งรหัสผ่านที่ directory — ปุ่มนี้ทำอะไรให้ไม่ได้ */}
+                  {user.authType === 'local' && <SendPasswordResetButton userId={user.id} />}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

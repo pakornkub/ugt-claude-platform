@@ -53,6 +53,15 @@ http has no `__Secure-` prefix).
 
 ## Passwords (local accounts)
 
+- **No sign-up page, ever.** `emailAndPassword.enabled` publishes
+  `POST /api/auth/sign-up/email`, so `proxy.ts` 404s that path. Do not "fix"
+  it with `disableSignUp: true` — that also blocks the server-side
+  `auth.api.signUpEmail()` behind `createLocalUserAction`. Accounts are created
+  from `/admin/users` (guard + audit) or, for the very first one,
+  `scripts/create-first-user.ts`.
+- An admin **sends a reset link**; an admin never types someone's new password.
+  Once two people know a credential, the audit log can no longer say who acted.
+
 - Rules for length/complexity live **only** in `lib/password-policy.ts` — reset,
   change and admin-create all import it. A second regex somewhere else means the
   loosest form quietly becomes the system's real policy.

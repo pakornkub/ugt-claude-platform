@@ -146,6 +146,8 @@ exceptions:
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
+| `assets/components/admin-user-actions.tsx` | `components/…` | Local only — **the only way a local account is ever created**; there is no sign-up page and there will not be one |
+| `assets/scripts/create-first-user.ts` | `scripts/…` | Local only, run once — see §5.5 |
 | `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
 
 The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
@@ -205,6 +207,18 @@ of which login methods were chosen.
    app.
 5. First deployment: log in → visit `/admin/setup` → one click → Administrator
    role → redirects to `/admin/users`, which now really exists
+   **[Local-only projects have a chicken-and-egg here]**: a local account can
+   only be made from `/admin/users`, which needs a login, and nobody has one
+   yet. SSO/LDAP never hit this — their accounts appear on the first successful
+   bind. So for local-only, run once:
+
+   ```bash
+   npx tsx scripts/create-first-user.ts "ชื่อผู้ดูแล" admin@__COMPANY_DOMAIN__ '<initial password>'
+   ```
+
+   then log in with it and continue with `/admin/setup`. The script refuses to
+   run once any user exists — everyone after the first is created through
+   `/admin/users`, where the permission guard and the audit log apply.
 5. `app/(admin)/layout.tsx` calls `syncPermissionsIfNeeded()` on every request
    into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
    it reaches the database the next time anyone opens an admin page, no
@@ -240,6 +254,9 @@ of which login methods were chosen.
 | One `lib/password-policy.ts` for reset · change · admin-create | A different regex per form (the loosest one becomes the real rule) |
 | `revokeSessionsOnPasswordReset: true` + `revokeOtherSessions` on change | Leave old sessions alive after a reset — the intruder simply stays |
 | Require the current password to change one | Trust the session alone (a borrowed unlocked laptop = account taken) |
+| Block `/api/auth/sign-up` in `proxy.ts` | Leave it reachable — `emailAndPassword.enabled` opens public self-registration on an internal app |
+| Create local accounts only from `/admin/users` (guard + audit) | Add a sign-up page, or set `disableSignUp: true` (it also kills the server-side `signUpEmail` the admin action needs) |
+| Admin **sends a reset link** | Admin types a new password for someone — then the audit log can no longer say who acted |
 | `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
@@ -280,6 +297,10 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       refused; a password that breaks the policy is refused with the same message
       the reset page gives; after success this browser stays logged in
 - [ ] The change-password item does **not** appear for an SSO/LDAP account
+- [ ] [Local] `POST /api/auth/sign-up/email` from curl → **404**, and creating a
+      user from `/admin/users` still works (the block is the HTTP route only)
+- [ ] [Local] The new user can log in with the initial password, and the
+      audit log has a `users.create` row with **no password in `detail`**
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away
