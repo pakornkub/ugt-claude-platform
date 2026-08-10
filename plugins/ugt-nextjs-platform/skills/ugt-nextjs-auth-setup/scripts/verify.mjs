@@ -295,6 +295,51 @@ check('Directory enrichment is wired and fails soft', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+// ── 4d. Data scope + approval chain (only when installed) ──────────────────
+check('Data scope is enforced where an owner id is accepted', () => {
+  if (!has('lib', 'scope.ts')) return { ok: true, msg: 'no row-level scope in this project' };
+  const problems = [];
+
+  // scopeWhere must never widen to "everything" for an unlinked account.
+  const scopeSrc = read('lib', 'scope.ts');
+  if (!/in:\s*allowed|in:\s*\[/.test(scopeSrc)) {
+    problems.push('scopeWhere does not constrain with an `in:` list — an unlinked account may be seeing every row');
+  }
+  if (!has('lib', 'scope.test.ts')) {
+    problems.push('lib/scope.test.ts missing — the subtree walk and the unlinked-account case are exactly what silently regress');
+  }
+
+  // The real failure: a route takes empCode from the client and never checks it.
+  const suspects = [];
+  for (const file of sourceFiles()) {
+    const rel = relative(ROOT, file).split('\\').join('/');
+    if (!/^app\/(api|\()|^lib\/actions\//.test(rel)) continue;
+    if (rel.startsWith('lib/scope')) continue;
+    const body = stripComments(readFileSync(file, 'utf8'));
+    const takesOwnerId = /searchParams[^\n]*empCode|params[^\n]*empCode|body[^\n]*empCode|empCode:\s*z\./.test(body);
+    if (!takesOwnerId) continue;
+    if (!/isEmpCodeAllowed|scopeWhere|resolveDataScope/.test(body)) suspects.push(rel);
+  }
+  if (suspects.length) {
+    problems.push(
+      `accepts an empCode from the client without a scope check (edit ?empCode= and you read someone else's rows): ${suspects.slice(0, 5).join(' · ')}`
+    );
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('Approval-chain lookups fail loud', () => {
+  if (!has('lib', 'approval-chain.ts')) return { ok: true, msg: 'no approval workflow in this project' };
+  const body = read('lib', 'approval-chain.ts');
+  // A swallowed error here saves a request with no approver and tells the user "submitted".
+  return /getApprovalChain[\s\S]*?catch[\s\S]{0,400}?throw/.test(body)
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: 'getApprovalChain swallows its error instead of rethrowing — a failed lookup becomes "no approver" and the request sits unrouted',
+      };
+});
+
 check('Keycloak plugin guarded by env', () => {
   if (!has('lib/auth.ts')) return { ok: false, msg: 'No lib/auth.ts' };
   const body = read('lib/auth.ts');

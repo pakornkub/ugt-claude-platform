@@ -10,12 +10,17 @@ employee's rows by editing a query param.
 Pattern for a "view own unless privileged" route:
 
 1. Load permissions for the session user.
-2. Has the view-all permission → use the client-supplied identifier.
+2. Has the read-all permission → use the client-supplied identifier.
 3. Otherwise → **ignore/override** it with the session user's own linked
    identifier; if the account has no linked identifier, return `403` with an
    explicit code.
 4. Reuse the central `PERMISSIONS.*` constants — never hardcode permission
    strings.
+
+Projects installed by `ugt-nextjs-auth-setup` get this as `lib/scope.ts`
+(`resolveDataScope` → `isEmpCodeAllowed` for one record, `scopeWhere` for a
+list). Use it rather than re-deriving the rule per route — the incident above
+happened because two sibling routes derived it separately and one was missed.
 
 Before shipping a new scoped route, diff it against an existing enforced one —
 the bug shipped because one sibling route had the check and the new one didn't.
@@ -24,7 +29,7 @@ the bug shipped because one sibling route had the check and the new one didn't.
 
 `isSelf` must mean `session.identifier === record.identifier` — **never**
 `!canViewAll`. Deriving "own record" from the absence of a wider read
-permission strips self-service capabilities from privileged users (a view-all
+permission strips self-service capabilities from privileged users (a read-all
 user lost the edit buttons on their *own* record). A wider read scope must
 never remove a capability. The UI flag is convenience; the server action's
 own-record guard is the boundary.

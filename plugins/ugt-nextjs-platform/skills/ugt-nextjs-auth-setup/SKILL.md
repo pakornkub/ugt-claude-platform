@@ -54,6 +54,9 @@ project. Deep detail lives in `references/`:
 - `references/directory-enrichment.md` — filling employee code / department /
   position / supervisor from the org's employee view over a linked server,
   because SSO and LDAP only answer "who are you"
+- `references/data-scope.md` — "may they?" vs "**whose data?**": the row-level
+  scope layer, and the approval-chain view (**read before writing any route
+  that accepts an empCode from the client**)
 
 ## 2. Org Standards
 
@@ -76,6 +79,10 @@ The org-wide contract:
 5. **RBAC shape**: `user (1)──(0..1) role (1)──(M:N) permission` — permission
    keys are `resource:action`, roles with `isSystem: true` cannot be deleted,
    every mutation guarded in the order **session → permission → action → audit log**
+5b. **Permission is not scope.** A permission says *may they*; scope says *whose
+   data*. Any route/action accepting a record-owner id from the client resolves
+   `lib/scope.ts` and checks it — read-all → own → team, unlinked accounts see
+   nothing, and out-of-scope answers **404** (`references/data-scope.md`)
 6. **Cookie-prefix rule**: when multiple apps deploy under one domain (shared
    domain + basePath), the session cookie name must be unique per app — derive
    the prefix from the basePath, or cookies collide → `ERR_TOO_MANY_REDIRECTS`
@@ -121,6 +128,11 @@ Ask all of these **in a single message** before doing anything:
    → `references/directory-enrichment.md`. Answering "no" means deleting
    `lib/directory.ts`, its three call sites and the directory columns in the
    schema; say that out loud so it is a decision, not an omission.
+   Two follow-ups, both defaulting to yes for org apps:
+   - **"เห็นเฉพาะของตัวเองกับทีม" หรือทุกคนเห็นหมด?** → installs `lib/scope.ts`
+     and adds a `<resource>:read-all` key per scoped resource
+   - **มี workflow อนุมัติไหม?** → installs `lib/approval-chain.ts` and needs the
+     **approval-chain view**, which is a different object from the employee one
 7. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
    - yes → password reset by email is installed (forgot dialog + `/reset-password`)
    - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, so the only
@@ -166,6 +178,8 @@ exceptions:
 | `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 | `assets/lib/directory.ts` | `lib/directory.ts` | only when a central employee view exists — substitute the four-part view name + column map; skipping it means deleting the directory columns from the schema too (§3 Q6) |
+| `assets/lib/scope.ts` + `assets/lib/scope.test.ts` | `lib/…` | row-level data scope (read-all → own → team). Needs `lib/directory.ts` for the management chain |
+| `assets/lib/approval-chain.ts` | `lib/approval-chain.ts` | only when the app has an approval workflow — substitute `__HR_AUTHORIZE_VIEW__` (a **different** view from the employee one) |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
 | `assets/components/admin-user-actions.tsx` | `components/…` | LDAP/Local — the "เพิ่มผู้ใช้" dialog on `/admin/users` (local account with an initial password · AD account pre-registered) + admin set-password; **there is no sign-up page and there will not be one** |
@@ -259,6 +273,7 @@ of which login methods were chosen.
 | `__COMPANY_DOMAIN__` | org email/UPN domain | `company.co.th` |
 | `__APP_HOST__` | the host the app actually deploys to | — |
 | `__LINKED_SERVER__` · `__HR_DB__` · `__HR_EMPLOYEE_VIEW__` | the four-part name of the org employee view in `lib/directory.ts` (same `__LINKED_SERVER__` as ugt-nextjs-database-setup) | `thsrv01` · `HRPortal` · `vwEmployee` |
+| `__HR_AUTHORIZE_VIEW__` | the approval-chain view in `lib/approval-chain.ts` — **a different object** from the employee view | `HR_AuthorizeEmployee_ms` |
 
 ## 7. Quick Rules — DO / DON'T
 
@@ -284,6 +299,11 @@ of which login methods were chosen.
 | Refresh the directory fields on **every** login, from one shared helper | Fill them once at first login (people move team), or write SSO and LDAP separately (the two drift apart unnoticed) |
 | Directory lookups return `null` on failure | Let a linked-server outage throw — everyone's login dies with it |
 | `Prisma.raw` only for the view name + column list, both constants | Anything user-supplied inside `Prisma.raw` |
+| Resolve scope, then `isEmpCodeAllowed` / `scopeWhere` from the **same** scope object | Filter the list one way and check the detail page another (the gap is invisible on screen) |
+| 404 for a record outside scope | 403 — it confirms the id exists |
+| `isSelf` = `session.empCode === record.empCode` | `!viewAll` — a read-all user then loses the buttons on their **own** record |
+| Approval-chain lookups rethrow | Return `[]` on error — the request saves with nobody to approve it and just sits there |
+| Separate "no chain configured" (`[]`) from "lookup failed" (throw) in the message | One message — it sends people to HR when a linked server is merely down |
 | `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
@@ -339,6 +359,14 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       the app row follows
 - [ ] [Directory] Point the view name at something unreachable → login still
       works, the fields just stay as they were (this is the check that matters)
+- [ ] [Scope] As a user **without** `:read-all`, edit `?empCode=` to a colleague's
+      → 404, and the list shows only your own + your team's rows
+- [ ] [Scope] `npm test` passes `lib/scope.test.ts` (cycles, unlinked account,
+      empty-list-means-no-rows)
+- [ ] [Approval] Point `__HR_AUTHORIZE_VIEW__` at something unreachable →
+      submitting a request **fails visibly**; it must never save with no approver
+- [ ] [Approval] An employee with no chain configured gets "ติดต่อฝ่ายบุคคล",
+      not the same message as a system error
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away

@@ -27,7 +27,7 @@ Models live in `assets/prisma/schema-auth.prisma`. Key points:
 | --- | --- | --- |
 | Page/layout guard (view access) | `resource:read` | `users:read`, `roles:read` |
 | Create / Update / Delete | `resource:create` etc. | `users:create` |
-| Data visibility scope (all vs. own records) | `resource:read-all` / `resource:view-all` | `reports:view-all` |
+| Data visibility scope (all vs. own records) | `resource:read-all` | `reports:read-all` |
 | Acting on behalf of others | `resource:manage-all` | `requests:manage-all` |
 | Custom action | `resource:custom-verb` | `users:reset-password` |
 

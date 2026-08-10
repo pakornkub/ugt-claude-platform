@@ -116,6 +116,38 @@ export async function searchDirectory(query: string): Promise<DirectoryPerson[]>
   }
 }
 
+/** เส้นสายบังคับบัญชาหนึ่งเส้น: พนักงาน → หัวหน้าโดยตรง */
+export interface DirectoryEdge {
+  empCode: string;
+  superEmpCode: string | null;
+}
+
+/**
+ * ดึงคู่ (พนักงาน, หัวหน้า) ทั้ง view ครั้งเดียวเพื่อเอาไปไล่สายใน JS
+ *
+ * **จงใจไม่ใช้ recursive CTE** ถึงจะเขียนสั้นกว่ามาก — CTE แบบวนซ้ำข้าม linked
+ * server ทำให้ SQL Server ดึงข้อมูลข้ามเครือข่ายรอบใหม่ทุกชั้นความลึก
+ * ดึงทีเดียวแล้ว BFS ในหน่วยความจำเร็วกว่าและคาดเดาได้กว่า (กฎเดียวกับที่
+ * ugt-nextjs-database-setup → references/raw-sql-and-sp.md เขียนไว้)
+ *
+ * ponytail: อ่านทั้ง view ทุกครั้งที่เรียก พอสำหรับองค์กรหลักพันคน
+ * ถ้าโตกว่านั้นค่อยแคชผลไว้ต่อ request
+ */
+export async function getDirectoryEdges(): Promise<DirectoryEdge[]> {
+  try {
+    return await prisma.$queryRaw<DirectoryEdge[]>`
+      SELECT
+        CAST(u.EmpCode      AS VARCHAR(50)) AS empCode,
+        CAST(u.SuperEmpCode AS VARCHAR(50)) AS superEmpCode
+      FROM ${VIEW} AS u
+      WHERE u.EmpCode IS NOT NULL
+    `;
+  } catch (error) {
+    console.error('[directory] edge list failed:', error); // NOSONAR typescript:S106 — server-side error log only
+    return [];
+  }
+}
+
 /**
  * ฟิลด์ที่เอาไปเขียนทับบนแถว user — เรียกจากทั้ง LDAP login และ SSO session hook
  * เพื่อให้ทั้งสองทางได้ข้อมูลชุดเดียวกัน ถ้าแยกกันเขียน ผู้ใช้ SSO กับผู้ใช้ AD

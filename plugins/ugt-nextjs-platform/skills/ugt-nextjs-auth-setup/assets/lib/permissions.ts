@@ -6,7 +6,9 @@
  *   - resource:update  → can edit
  *   - resource:delete  → can delete
  *   - resource:action  → other domain-specific actions (e.g. users:reset-password)
- *   - resource:view-all → data scope (see all records vs. only own records)
+ *   - resource:read-all → data scope (see all records vs. only own + team)
+ *                        — pairs with lib/scope.ts; absence is the safe default
+ *   - resource:manage-all → act on behalf of others (never overload read-all)
  * Seed these into the `permission` table on first admin setup.
  *
  * This skeleton ships the 3 baseline admin domains every project needs.

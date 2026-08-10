@@ -1,5 +1,52 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.9.0 (2026-08-10)
+
+**Permission answers "may they"; nothing answered "whose data".** 4.8.0 put
+`empCode` / `orgCode` / `superEmpCode` on the user row and stopped there — the
+raw material for row-level scope with no layer that enforced it. That gap is the
+most common hole in internal apps: a user passes every guard, edits `?empCode=`
+to a colleague's, and reads their rows. The skill's own
+`ugt-nextjs-pitfalls/references/hardening.md` already described the incident;
+there was just nothing to reach for.
+
+- `lib/scope.ts` (from `ugt-hrms/lib/services/employee-monitor-scope.ts` +
+  the subtree walk in `hr-lookup.ts`): `resolveDataScope` →
+  `isEmpCodeAllowed` for one record, `scopeWhere` for a list, both from the
+  **same** scope object — a list filtered one way and a detail page checked
+  another leaves a gap nothing on screen reveals.
+  - An account with no linked `empCode` sees nothing; `scopeWhere` yields
+    `{ in: [] }`, which is zero rows rather than all of them.
+  - Out of scope answers **404** — 403 confirms the id exists.
+  - `collectSubtreeEmpCodes` is pure and ships with `lib/scope.test.ts`
+    covering the cases that regress in silence: multi-level teams, a cycle
+    (real HR data has them, from keying errors), a null supervisor, and the
+    unlinked account.
+- `lib/approval-chain.ts` (from `workflow-resolver.ts` + `hr-lookup.ts`) reads
+  the org **approval-chain view** — one row per step (`EmpCode` + `Seq`). It is
+  a different object from the employee view, and `superEmpCode` there is only
+  the denormalized direct supervisor: fine for team scope, wrong for routing an
+  approval.
+- **The two linked-server modules fail in opposite directions, deliberately.**
+  `directory.ts` swallows and returns `null` — it runs during login, and an HR
+  outage must not become "nobody can log in". `approval-chain.ts` rethrows —
+  returning `[]` would save a request with no approver, tell the user
+  "submitted", and leave it sitting until someone chases it weeks later.
+  Callers must also separate `[]` (no chain configured → contact HR) from a
+  thrown error (system down → retry); one message sends people to HR over a
+  network blip.
+- `verify.mjs` now flags a route or action that accepts an `empCode` from the
+  client without resolving scope, a `scopeWhere` that does not constrain, a
+  missing `scope.test.ts`, and an approval-chain lookup that swallows its error.
+- Fixed a pre-existing inconsistency while here: the scope permission was
+  documented as `resource:view-all` in `permissions.ts` and `hardening.md` but
+  `resource:read-all` in `rbac.md`. Standardized on **`read-all`**, which is
+  what the production code actually uses.
+
+Not extracted, and the reference says so: HRMS's per-menu workflow config,
+approval-chain snapshots taken at submit time, and its bulk `/admin/users/sync`
+page. Those encode one organization's workflow rules, not an org-wide standard.
+
 ## 4.8.0 (2026-08-10)
 
 **Identity now comes from the employee directory, not just the IdP.** SSO and

@@ -11,6 +11,8 @@ paths:
   - "components/login-form.tsx"
   - "lib/password-policy.ts"
   - "lib/directory.ts"
+  - "lib/scope.ts"
+  - "lib/approval-chain.ts"
 ---
 
 <!-- Owned by ugt-nextjs-auth-setup — may be overwritten wholesale on /plugin update. -->
@@ -82,6 +84,40 @@ http has no `__Secure-` prefix).
   the user was trying to lock out is still logged in.
 - Changing a password always requires the current one.
 - `/reset-password` stays public in `proxy.ts`.
+
+## Data scope — permission says "may they", scope says "whose data"
+
+Any route, page or Server Action that accepts a **record-owner id from the
+client** (`?empCode=`, a body field, a hidden input) must resolve scope and
+check it. A permission check alone lets an authenticated user read a colleague's
+rows by editing a query param.
+
+```ts
+const scope = await resolveDataScope(session.user.id, PERMISSIONS.X_READ_ALL);
+if (!isEmpCodeAllowed(scope, empCode)) return notFound();      // one record
+const rows = await prisma.x.findMany({ where: scopeWhere(scope) }); // a list
+```
+
+- Both must come from the **same** scope object; a list filtered one way and a
+  detail page checked another leaves a gap nothing on screen reveals.
+- Out of scope → **404**, never 403 (403 confirms the id exists).
+- `isSelf` means `session.empCode === record.empCode` — never `!viewAll`, which
+  strips a read-all user of the buttons on their own record.
+- An account with no linked `empCode` sees nothing. `scopeWhere` returns
+  `{ in: [] }` — zero rows, not all rows.
+
+## Approval chain
+
+`lib/approval-chain.ts` reads the org **approval-chain view** (one row per step,
+`EmpCode` + `Seq`). That is not the same thing as `superEmpCode` on the employee
+view, which is only the denormalized direct supervisor — use that one for team
+scope, never for routing an approval.
+
+**It rethrows on failure, on purpose.** Returning `[]` when the query fails
+means the request saves with nobody to approve it: the user is told "submitted",
+and it sits there until someone chases it weeks later. Failing at the click is
+far cheaper. Callers must also distinguish `[]` (no chain configured → tell them
+to contact HR) from a thrown error (system down → tell them to retry).
 
 ## Directory fields (employee code, department, position, supervisor)
 

@@ -69,6 +69,12 @@ login (SSO หรือ LDAP)
 `addDirectoryUserAction` ก็ตัดไปด้วย (มันดึงชื่อ/อีเมลจาก directory) — ผู้ใช้ AD
 ยังเกิดเองตอน bind สำเร็จครั้งแรกตามปกติ แค่กำหนด role ล่วงหน้าไม่ได้
 
+## ต่อจากนี้
+
+ฟิลด์ที่เติมมาไม่ได้มีไว้แค่โชว์ — `empCode` กับ `superEmpCode` เป็นวัตถุดิบของชั้น
+scope (`lib/scope.ts`) และสายอนุมัติ (`lib/approval-chain.ts`)
+→ `references/data-scope.md`
+
 ## ที่จงใจไม่สกัดมาจาก HRMS
 
 `ugt-hrms` มีหน้า `/admin/users/sync` ที่ดึงพนักงานทั้งหน่วยงานมาสร้างทีเดียว
