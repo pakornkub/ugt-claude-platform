@@ -210,6 +210,38 @@ check('Logout avoids cookieStore.delete()', () => {
     : { ok: true };
 });
 
+// ── 4b. Password reset (Local only — silent when the files aren't installed) ─
+check('Password reset wired correctly', () => {
+  if (!has('lib/actions/password.ts')) {
+    return { ok: true, msg: 'no local password flows installed — nothing to check' };
+  }
+  const problems = [];
+  const authTs = has('lib/auth.ts') ? read('lib/auth.ts') : '';
+  const actions = read('lib/actions/password.ts');
+
+  // The 1.5.x rename: the old name compiles (any-typed api) and fails at runtime.
+  if (/auth\.api\.forgetPassword/.test(stripComments(actions))) {
+    problems.push('auth.api.forgetPassword no longer exists in better-auth 1.5.x — use requestPasswordReset');
+  }
+  if (!/sendResetPassword/.test(authTs)) {
+    problems.push('lib/auth.ts has no sendResetPassword — Better Auth answers RESET_PASSWORD_DISABLED and the form is dead');
+  }
+  // The basePath trap: mailing Better Auth's own `url` 404s in production only.
+  if (/sendResetPassword/.test(authTs) && !/NEXT_PUBLIC_BASE_PATH[^\n]*reset-password|reset-password[^\n]*token/.test(authTs)) {
+    problems.push('the reset link is not built from token + NEXT_PUBLIC_BASE_PATH — Better Auth\'s url omits the basePath and 404s in prod');
+  }
+  if (!/revokeSessionsOnPasswordReset\s*:\s*true/.test(authTs)) {
+    problems.push('revokeSessionsOnPasswordReset is not true — a reset leaves the intruder\'s session alive');
+  }
+  if (!has('lib/password-policy.ts')) {
+    problems.push('lib/password-policy.ts missing — each form will grow its own rules and the loosest one wins');
+  }
+  if (has('proxy.ts') && !/reset-password/.test(read('proxy.ts'))) {
+    problems.push('/reset-password is not public in proxy.ts — the mailed link bounces to /login');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 check('Keycloak plugin guarded by env', () => {
   if (!has('lib/auth.ts')) return { ok: false, msg: 'No lib/auth.ts' };
   const body = read('lib/auth.ts');

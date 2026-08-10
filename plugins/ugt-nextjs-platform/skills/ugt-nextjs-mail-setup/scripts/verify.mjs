@@ -129,7 +129,10 @@ check('htmlVariables holds no obviously user-typed token', () => {
 check('Every key has a definition and a default', () => {
   if (!has('lib/types/mail-templates.ts')) return { ok: false, msg: 'No lib/types/mail-templates.ts' };
   const body = read('lib/types/mail-templates.ts');
-  const keys = [...(body.match(/MAIL_TEMPLATE_KEYS\s*=\s*\[([\s\S]*?)\]/)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  // anchor the end on `] as const`, not the first `]` — a comment inside the
+  // array (e.g. a "[METHOD: …]" marker) would otherwise close the match early
+  // and every key after it would vanish from this check without a word
+  const keys = [...(body.match(/MAIL_TEMPLATE_KEYS\s*=\s*\[([\s\S]*?)\]\s*as const/)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]);
   if (!keys.length) return { ok: false, msg: 'MAIL_TEMPLATE_KEYS is empty or unreadable' };
   // anchor on the export statements — both names also appear in the header
   // comment, and slicing from the comment gives an empty range

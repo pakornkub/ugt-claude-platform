@@ -6,7 +6,10 @@ import { getSessionCookie } from 'better-auth/cookies';
 
 // Paths that only unauthenticated users should access.
 // Authenticated users visiting these will be sent to the dashboard.
-const AUTH_ONLY_PATHS = ['/login'];
+// [METHOD: LOCAL] '/reset-password' MUST be listed — someone who cannot log in
+// also cannot reach a protected page, so leaving it out makes the reset link in
+// the email bounce straight back to /login. Remove it only when local login is off.
+const AUTH_ONLY_PATHS = ['/login', '/reset-password'];
 
 /**
  * Generate a cryptographically-random base64 nonce suitable for CSP.

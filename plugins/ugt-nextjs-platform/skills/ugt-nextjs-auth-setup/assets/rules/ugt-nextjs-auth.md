@@ -9,6 +9,7 @@ paths:
   - "proxy.ts"
   - "app/api/auth/**"
   - "components/login-form.tsx"
+  - "lib/password-policy.ts"
 ---
 
 <!-- Owned by ugt-nextjs-auth-setup — may be overwritten wholesale on /plugin update. -->
@@ -49,6 +50,25 @@ http has no `__Secure-` prefix).
 - auth-client: pass no `baseURL`; pass the path via the `basePath` option and
   read `process.env.NEXT_PUBLIC_BASE_PATH` directly (reading through
   `createEnv()` yields undefined in the client bundle)
+
+## Passwords (local accounts)
+
+- Rules for length/complexity live **only** in `lib/password-policy.ts` — reset,
+  change and admin-create all import it. A second regex somewhere else means the
+  loosest form quietly becomes the system's real policy.
+- `auth.api.requestPasswordReset(...)` in better-auth 1.5.x — `forgetPassword`
+  is gone (it compiles, then fails at runtime).
+- Build the mailed link from `token` + `NEXT_PUBLIC_BASE_PATH` yourself. Better
+  Auth's own `url` omits the basePath, so it 404s in production only.
+- "ลืมรหัสผ่าน" answers **the same message for every email**, real or not —
+  anything else lets anyone test who has an account here.
+- Reset is refused for `authType !== 'local'`: SSO/LDAP passwords belong to the
+  directory, and a second local password beside it defeats the point.
+- Reset and change both revoke the user's other sessions
+  (`revokeSessionsOnPasswordReset`, `revokeOtherSessions`) — otherwise whoever
+  the user was trying to lock out is still logged in.
+- Changing a password always requires the current one.
+- `/reset-password` stays public in `proxy.ts`.
 
 ## proxy.ts
 

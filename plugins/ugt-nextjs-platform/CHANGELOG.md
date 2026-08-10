@@ -1,5 +1,52 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.7.0 (2026-08-10)
+
+**Local login is finally complete.** Until now a project could hand someone a
+local account and had no way to let them recover it — the only path was an
+admin editing the database. `ugt-nextjs-mail-setup` (4.4.0) removed the blocker.
+
+- `lib/password-policy.ts` — **one** schema for length and complexity, imported
+  by reset, change and admin-create. `lib/auth.ts` previously said complexity
+  "belongs in Zod schemas on the create-user / reset-password forms", which is
+  how three forms end up with three different rules and the loosest one becomes
+  the real policy.
+- `lib/actions/password.ts` — forgot / reset / change, each rate-limited and
+  audited (`password.reset.requested` · `password.reset` ·
+  `password.reset.refused` · `password.change` · `password.change.failed`).
+- `lib/auth.ts` gains `sendResetPassword`, `resetPasswordTokenExpiresIn` (1h),
+  `revokeSessionsOnPasswordReset` and `onPasswordReset`; `proxy.ts` makes
+  `/reset-password` public; NavUser grows a **เปลี่ยนรหัสผ่าน** item that is
+  hidden unless `authType === 'local'`; the login form grows "ลืมรหัสผ่าน?".
+- `auth.password-reset` joins the mail templates, so the wording is admin-editable
+  while the link button stays fixed chrome nobody can delete by accident.
+
+Four decisions that are security, not preference, and are written down as such:
+
+1. **The reset link is built from `token` + `NEXT_PUBLIC_BASE_PATH` by hand.**
+   Better Auth's own `url` omits the Next.js basePath — the same trap already
+   documented for the Keycloak `redirectURI` — so mailing it 404s, and only in
+   production, where the basePath exists.
+2. **Every email gets the same answer**, real or not. Anything else turns the
+   form into a way to test who has an account.
+3. **SSO/LDAP accounts are refused a reset.** Their password lives in the
+   directory; a second app-local password beside it defeats the directory.
+4. **Reset and change both revoke the user's other sessions.** People reset
+   because they think someone else is in the account; leaving that session alive
+   makes the reset theatre.
+
+API note, verified against the better-auth **1.5.4** in `ugt-hrms/node_modules`
+rather than from memory: `auth.api.forgetPassword` **no longer exists** — it is
+`requestPasswordReset` now. The old name still type-checks and fails at runtime,
+so `verify.mjs` fails on it explicitly.
+
+Also fixed while adding the template: `mail-setup`'s "every key has a definition
+and a default" check read the key list with a regex that stopped at the first
+`]`. A `[METHOD: …]` comment inside the array would have closed the match early
+and every key after it would have gone **unchecked in silence**. The regex now
+anchors on `] as const`, and the array carries a comment saying why brackets
+must stay out of it.
+
 ## 4.6.0 (2026-08-10)
 
 **Excel/CSV export joins the UI kit** — extracted from `ugt-hrms`, where the

@@ -3,6 +3,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
+import { sendTemplatedMail } from '@/lib/email'; // [METHOD: LOCAL] — needs ugt-nextjs-mail-setup; remove with sendResetPassword
 
 // Derive a unique cookie prefix from NEXT_PUBLIC_BASE_PATH (e.g. '/__BASE_PATH__' → '__BASE_PATH__').
 // This prevents cross-app cookie collisions when multiple apps share the same domain
@@ -29,9 +30,52 @@ export const auth = betterAuth({
   // Rule: set enabled: false when Local login is not selected in the interview.
   emailAndPassword: {
     enabled: true, // ← set to false when Local login is not selected
-    minPasswordLength: 8,
-    // Complexity rules (uppercase, lowercase, digit, special) belong in Zod schemas
-    // on the create-user / reset-password forms, not here.
+    minPasswordLength: 8, // MUST match PASSWORD_MIN_LENGTH in lib/password-policy.ts
+    // Complexity rules (uppercase, lowercase, digit, special) live in
+    // lib/password-policy.ts — one schema shared by reset / change / admin-create.
+
+    // [METHOD: LOCAL] Password reset. Delete this whole block when local login
+    // is off; delete only `sendResetPassword` when ugt-nextjs-mail-setup was not
+    // installed (Better Auth then refuses the request with RESET_PASSWORD_DISABLED,
+    // which is the honest behaviour — a reset link nobody can receive is worse
+    // than no reset at all).
+    resetPasswordTokenExpiresIn: 60 * 60, // 1 hour — org standard
+    // A reset usually means "I think someone else is in my account". Leaving
+    // that someone's session alive would make the reset pointless.
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, token }) => {
+      // Build the link ourselves from `token` instead of using Better Auth's
+      // `url`: its callback URL is computed WITHOUT the Next.js basePath (same
+      // trap as the Keycloak redirectURI below), so the mailed link would 404
+      // on any app deployed under a base path.
+      const resetUrl = `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH}/reset-password?token=${token}`;
+      await sendTemplatedMail({
+        templateKey: 'auth.password-reset',
+        to: user.email,
+        // No session here — the request comes from a logged-out visitor, so the
+        // dev-mode redirect cannot apply.
+        actor: { hasDevMode: false, email: null },
+        vars: {
+          appName: env.NEXT_PUBLIC_APP_NAME ?? '',
+          recipientName: user.name,
+          resetUrl,
+          expiresInMinutes: '60',
+        },
+      });
+    },
+    // Fires after a successful reset — the only place that still knows which
+    // user the (already consumed) token belonged to.
+    onPasswordReset: async ({ user }) => {
+      await prisma.activityLog
+        .create({
+          data: {
+            userId: user.id,
+            action: 'password.reset',
+            detail: JSON.stringify({ authType: 'local' }),
+          },
+        })
+        .catch(() => {});
+    },
   },
   rateLimit: {
     storage: 'database', // requires the rateLimit model (see schema-auth.prisma)
@@ -39,6 +83,9 @@ export const auth = betterAuth({
       // [METHOD: LOCAL] — stricter window for email sign-in: 5 attempts per 60 seconds.
       // Remove this rule when Local login is not selected (emailAndPassword.enabled: false).
       '/api/auth/sign-in/email': { window: 60, max: 5 },
+      // [METHOD: LOCAL] — each success sends a real email; 3 per 15 minutes.
+      // The Server Action limits by IP too, but this also covers direct API calls.
+      '/api/auth/request-password-reset': { window: 15 * 60, max: 3 },
     },
   },
   session: {

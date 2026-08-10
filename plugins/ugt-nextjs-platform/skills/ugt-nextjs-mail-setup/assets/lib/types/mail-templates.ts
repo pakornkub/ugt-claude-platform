@@ -20,6 +20,11 @@ export const MAIL_TEMPLATE_KEYS = [
   'request.submitted',
   'request.approved',
   'request.rejected',
+  // ใช้โดย sendResetPassword ใน lib/auth.ts — ลบได้เมื่อไม่ได้เปิด local login
+  // (บัญชี SSO/LDAP ตั้งรหัสผ่านที่ directory ไม่ใช่ที่นี่)
+  // อย่าใส่วงเล็บเหลี่ยมในคอมเมนต์ในอาร์เรย์นี้ — verify.mjs อ่านคีย์ด้วย regex
+  // ที่หยุดที่ ] ตัวแรก คีย์ที่อยู่ถัดจากนั้นจะหายไปจากการตรวจเงียบ ๆ
+  'auth.password-reset',
 ] as const;
 
 export type MailTemplateKey = (typeof MAIL_TEMPLATE_KEYS)[number];
@@ -118,6 +123,17 @@ export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
     previewSample: { status: 'ไม่อนุมัติ', rejectReason: 'ข้อมูลไม่ครบถ้วน' },
     banner: { token: 'status', tone: 'danger' },
     cta: { label: 'เปิดดูรายละเอียด →', urlToken: 'detailUrl' },
+  },
+  {
+    key: 'auth.password-reset',
+    menu: 'บัญชีผู้ใช้',
+    label: 'ลิงก์ตั้งรหัสผ่านใหม่',
+    description:
+      'ส่งเมื่อผู้ใช้กด "ลืมรหัสผ่าน" · ลิงก์ใช้ได้ครั้งเดียวและหมดอายุตาม resetPasswordTokenExpiresIn ใน lib/auth.ts',
+    heading: 'ตั้งรหัสผ่านใหม่',
+    variables: ['appName', 'recipientName', 'resetUrl', 'expiresInMinutes'],
+    previewSample: { resetUrl: '__APP_URL_PROD__/reset-password?token=…', expiresInMinutes: '60' },
+    cta: { label: 'ตั้งรหัสผ่านใหม่ →', urlToken: 'resetUrl' },
   },
   // EXTENSION POINT: add this project's templates here, then add the matching
   // key to MAIL_TEMPLATE_KEYS and a default to DEFAULT_MAIL_TEMPLATES.
@@ -239,6 +255,17 @@ export const DEFAULT_MAIL_TEMPLATES: Record<MailTemplateKey, MailTemplate> = {
       '<p>คำขอของคุณได้รับการพิจารณาแล้ว</p>',
       '<p><strong>รายการ:</strong> {{itemName}}</p>',
       '<p><strong>เหตุผล:</strong> {{rejectReason}}</p>',
+    ].join(''),
+  },
+
+  // [METHOD: LOCAL] ข้อความรอบลิงก์แก้ได้ แต่ปุ่มลิงก์เป็น chrome ที่ composeEmail
+  // ประกอบให้ — แอดมินลบลิงก์ทิ้งโดยไม่ตั้งใจไม่ได้
+  'auth.password-reset': {
+    subject: '[{{appName}}] ตั้งรหัสผ่านใหม่',
+    html: [
+      '<p>เราได้รับคำขอตั้งรหัสผ่านใหม่สำหรับบัญชีนี้ กดปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>',
+      '<p>ลิงก์นี้ใช้ได้ครั้งเดียวและจะหมดอายุใน {{expiresInMinutes}} นาที</p>',
+      '<p>หากคุณไม่ได้เป็นผู้ขอ ไม่ต้องดำเนินการใด ๆ รหัสผ่านเดิมยังใช้ได้ตามปกติ</p>',
     ].join(''),
   },
 };

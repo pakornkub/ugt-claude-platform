@@ -32,6 +32,8 @@ import {
 } from '@/components/ui/sidebar';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { logoutAction, ssoLogoutAction } from '@/lib/actions/auth';
+// [METHOD: LOCAL] — ลบ import + เมนู "เปลี่ยนรหัสผ่าน" ด้านล่างเมื่อไม่ได้เปิด local login
+import { ChangePasswordDialog } from '@/components/change-password-dialog';
 
 /** One label→value line in the profile card. */
 export type ProfileRow = {
@@ -97,6 +99,7 @@ export function NavUser({
 }: Readonly<NavUserProps>) {
   const { isMobile } = useSidebar();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false); // [METHOD: LOCAL]
   const [isPending, startTransition] = useTransition();
   const initials = getInitials(name);
   // SSO needs the backchannel logout; the other methods just drop the session
@@ -154,6 +157,19 @@ export function NavUser({
                   <UserCircle2 strokeWidth={2} aria-hidden />
                   บัญชีผู้ใช้
                 </DropdownMenuItem>
+                {/* [METHOD: LOCAL] เฉพาะบัญชีที่รหัสผ่านอยู่ในระบบนี้ — บัญชี
+                    SSO/LDAP เปลี่ยนที่ directory ขององค์กร */}
+                {authType === 'local' && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setPasswordOpen(true);
+                    }}
+                  >
+                    <KeyRound strokeWidth={2} aria-hidden />
+                    เปลี่ยนรหัสผ่าน
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -220,6 +236,9 @@ export function NavUser({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* [METHOD: LOCAL] */}
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </>
   );
 }

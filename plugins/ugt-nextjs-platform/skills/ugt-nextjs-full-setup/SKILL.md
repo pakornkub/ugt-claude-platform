@@ -102,6 +102,13 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
 - **Mail comes after Auth** — it needs the actor (session email) and adds the
   `dev-mode:enable` permission to the auth permission list. It is optional:
   install it only when the project sends email.
+  **[Local login + Mail] one step back afterwards**: "ลืมรหัสผ่าน" lives in
+  auth but sends through mail, so it cannot be wired while mail does not exist
+  yet. Once mail-setup finishes, return to auth-setup §5.5 and install the
+  reset pieces (`sendResetPassword` in `lib/auth.ts`, the forgot dialog, the
+  `/reset-password` page). Skipping this leaves local accounts with **no
+  recovery path except an admin** — say so out loud rather than leaving it
+  silently undone.
 - **Design must come before Auth** — auth generates themed pages (login,
   `/admin/*`); running design later means re-theming them (the retheme-twice
   lesson from gov-boi-smart).

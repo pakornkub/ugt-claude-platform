@@ -121,7 +121,16 @@ plus its `ALL_PERMISSIONS` entry (group: `ระบบ`, label: "โหมดท
 Grant it to testers/developers only — it silently redirects mail away from real
 recipients, which is exactly what you do not want on a normal account.
 
-### 4.5 Migrate + send a test
+### 4.5 [Local login only] Hand the password-reset template back to auth
+
+`auth.password-reset` ships in `MAIL_TEMPLATE_KEYS` because the reset email is
+an ordinary editable template. It is **used from `lib/auth.ts`**
+(`sendResetPassword`), not from here — so when the project has local login, go
+back to `ugt-nextjs-auth-setup` §5.5 and install the reset pieces now that
+`lib/email.ts` exists. Projects with no local login should delete the key, its
+definition and its default together.
+
+### 4.6 Migrate + send a test
 
 ```bash
 npx prisma migrate dev --name add-app-settings && npx prisma generate

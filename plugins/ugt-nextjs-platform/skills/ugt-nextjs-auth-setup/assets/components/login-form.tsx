@@ -20,6 +20,8 @@ import { authClient } from '@/lib/auth-client'; // [METHOD: SSO]
 // [METHOD: LDAP|LOCAL] — delete this import when neither form method is enabled;
 // with a single form method, keep only that method's action.
 import { ldapLoginAction, localLoginAction } from '@/lib/actions/auth';
+// [METHOD: LOCAL] — ต้องมี ugt-nextjs-mail-setup ด้วย; ลบพร้อมลิงก์ "ลืมรหัสผ่าน?"
+import { ForgotPasswordDialog } from '@/components/forgot-password-dialog';
 
 // ─── [METHOD: SSO] SSO (Keycloak) ────────────────────────────────────────────
 
@@ -124,6 +126,7 @@ function LocalSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [forgotOpen, setForgotOpen] = useState(false); // ต้องมี ugt-nextjs-mail-setup
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -151,7 +154,18 @@ function LocalSection() {
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="local-password">รหัสผ่าน</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="local-password">รหัสผ่าน</Label>
+          {/* ต้องมี ugt-nextjs-mail-setup — ลบลิงก์นี้พร้อม ForgotPasswordDialog
+              เมื่อโปรเจคไม่มีระบบส่งอีเมล */}
+          <button
+            type="button"
+            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+            onClick={() => setForgotOpen(true)}
+          >
+            ลืมรหัสผ่าน?
+          </button>
+        </div>
         <Input
           id="local-password"
           type="password"
@@ -165,6 +179,7 @@ function LocalSection() {
         {isLoading && <Loader2 className="size-4 animate-spin" />}
         เข้าสู่ระบบ
       </Button>
+      <ForgotPasswordDialog open={forgotOpen} onOpenChange={setForgotOpen} />
     </form>
   );
 }

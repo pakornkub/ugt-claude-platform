@@ -10,11 +10,15 @@ description: >
   anything touching permissions ("ใครเห็นเมนูนี้ได้", "เพิ่ม role",
   "guard หน้านี้", "หน้าจัดการ user/role") since every privileged Server
   Action must follow session → permission → action → audit log.
+  Covers the whole local-account lifecycle too — "ลืมรหัสผ่าน", "รีเซ็ตรหัสผ่าน",
+  "เปลี่ยนรหัสผ่านเอง", "ตั้งกฎความยาวรหัสผ่าน" — password-reset links by email,
+  the reset page, self-service change-password, and the one shared password
+  policy (the reset link needs ugt-nextjs-mail-setup installed).
   Reach for it immediately on these symptoms, which all have documented causes
   here: `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain, login
   working locally but looping in production, logout that doesn't stick on https,
-  static assets returning `Unexpected token '<'`, or Keycloak rejecting the
-  redirect URI.
+  static assets returning `Unexpected token '<'`, Keycloak rejecting the
+  redirect URI, or a mailed reset link that 404s under a basePath.
   Requires the database set up first (→ ugt-nextjs-database-setup). Not for CI
   (→ ugt-nextjs-cicd-setup).
 ---
@@ -31,7 +35,7 @@ methods**:
 | --- | --- | --- |
 | **SSO** | Keycloak (OIDC + PKCE) via Better Auth `genericOAuth` | ✅ on |
 | **LDAP** | direct AD bind via `ldapts` + self-created session (HMAC-signed) | optional |
-| **Local** | Better Auth email/password (`signInEmail`) | optional |
+| **Local** | Better Auth email/password (`signInEmail`) + reset/change password | optional |
 
 Every method lands in **the same Better Auth + Prisma session**, with RBAC
 (role → permission), a first-admin bootstrap page (`/admin/setup`), and the
@@ -59,7 +63,9 @@ The org-wide contract:
 3. **Session: 8-hour lifetime, refresh when 30 minutes remain**
    (`expiresIn: 8h`, `updateAge: 30m`)
 4. **Audit log every time**: `login.success` / `login.failed` / `logout` /
-   `logout.sso` into the ActivityLogs table (non-blocking — must never throw and
+   `logout.sso` — plus, for local accounts, `password.reset.requested` /
+   `password.reset` / `password.reset.refused` / `password.change` /
+   `password.change.failed` — into the ActivityLogs table (non-blocking — must never throw and
    break login), and every privileged mutation writes an audit log after success
    — full rules (action naming, forbidden payloads, retention) in
    `references/audit-logging.md`
@@ -71,6 +77,10 @@ The org-wide contract:
    the prefix from the basePath, or cookies collide → `ERR_TOO_MANY_REDIRECTS`
 7. **SSO logout = delete the local session + backchannel logout to Keycloak**
    (POST with the refresh_token) — the browser is never redirected through Keycloak
+8. **[Local] One password policy, one file** (`lib/password-policy.ts`) shared by
+   reset · change · admin-create; a reset link is **single-use, 1 hour**, sent
+   only to `authType === 'local'` accounts, and answers identically whether or
+   not the email exists; every password change revokes the user's other sessions
 
 ## 3. Interview — ask the installer first (one batch)
 
@@ -90,6 +100,13 @@ Ask all of these **in a single message** before doing anything:
      update its Keycloak section instead of overwriting the file.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
 5. **Who is the first admin?** (first person to log in visits `/admin/setup` and becomes Administrator with one click)
+6. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
+   - yes → password reset by email is installed (forgot dialog + `/reset-password`)
+   - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, and that
+     the only recovery path is an admin resetting the password by hand. Offer to
+     run mail-setup first. Never install the button without the mail behind it —
+     Better Auth answers `RESET_PASSWORD_DISABLED` and the user gets a dead form.
+   - Self-service **change password** works either way (no email involved).
 
 ## 4. Prerequisite
 
@@ -127,6 +144,9 @@ exceptions:
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
 | `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
+| `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
+| `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
+| `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
 
 The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
 `lib/actions/auth.ts`, `components/login-form.tsx`, `env.example`) carry
@@ -163,6 +183,12 @@ of which login methods were chosen.
 
 1. Create `app/(auth)/login/page.tsx` rendering
    `<LoginForm sessionExpired={reason === 'session_expired'} />`
+   [Local + mail] also create `app/(auth)/reset-password/page.tsx` rendering
+   `<ResetPasswordForm token={(await searchParams).token ?? ''} />`. **This route
+   must stay public** — `proxy.ts` already lists it in `AUTH_ONLY_PATHS`
+   (remove that entry only when local login is off); a user who cannot log in
+   also cannot reach a protected page.
+   No page is needed for "forgot" — it is a dialog on the login form.
 2. Protected group layout (`app/(app)/layout.tsx`):
    `auth.api.getSession({ headers: await headers() })` → no session →
    `redirect('/login')` (distinguish `?reason=session_expired` when the cookie
@@ -207,6 +233,13 @@ of which login methods were chosen.
 | Guard Keycloak plugin registration with `env.KEYCLOAK_* &&` | Call `keycloak()` bare (build crashes under `SKIP_ENV_VALIDATION=1`) |
 | `redirectURI` = `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/oauth2/callback/keycloak` | Let Better Auth guess the redirect URI (no basePath) |
 | `auth.api.signInEmail(...)` | `auth.api.signIn.email(...)` (that path doesn't exist) |
+| `auth.api.requestPasswordReset(...)` (1.5.x) | `auth.api.forgetPassword(...)` — removed |
+| Build the reset link from `token` + `NEXT_PUBLIC_BASE_PATH` yourself | Mail the `url` Better Auth passes in (no basePath → 404 in prod only) |
+| Answer "ถ้าอีเมลนี้มีอยู่…" for every input | Say "ไม่พบอีเมลนี้" — that is a user-enumeration oracle |
+| Refuse reset for `authType !== 'local'` | Let an SSO/LDAP user set an app-local password beside the directory one |
+| One `lib/password-policy.ts` for reset · change · admin-create | A different regex per form (the loosest one becomes the real rule) |
+| `revokeSessionsOnPasswordReset: true` + `revokeOtherSessions` on change | Leave old sessions alive after a reset — the intruder simply stays |
+| Require the current password to change one | Trust the session alone (a borrowed unlocked laptop = account taken) |
 | `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
@@ -238,6 +271,15 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
 - [ ] Logout clears the cookie + the DB session + returns to `/login` (test on https too if possible)
 - [ ] [SSO] after logout, clicking login again → must see the Keycloak page again (backchannel logout works)
 - [ ] Visiting `/login` while logged in → bounces to the dashboard; a protected page without login → bounces to `/login`; API routes without a session → 401 JSON
+- [ ] [Local + mail] "ลืมรหัสผ่าน?" with a **real** email and with a made-up one →
+      **the same message both times**, and the email arrives for the real one
+- [ ] The mailed link opens the reset page **on the deployed basePath**, not a 404
+- [ ] Using the same link twice → the second time says expired/already used
+- [ ] After a reset, a session open on another browser is logged out
+- [ ] [Local] Change password from the profile menu: wrong current password is
+      refused; a password that breaks the policy is refused with the same message
+      the reset page gives; after success this browser stays logged in
+- [ ] The change-password item does **not** appear for an SSO/LDAP account
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away
