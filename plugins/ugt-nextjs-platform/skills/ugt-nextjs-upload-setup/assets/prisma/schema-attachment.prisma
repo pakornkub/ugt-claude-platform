@@ -10,7 +10,14 @@ model attachment {
   id           String   @id @default(cuid())               @map("Id")
 
   /** Which record this file belongs to — e.g. "LeaveRequest" + its id. The
-   *  download guard uses this pair to decide whether the caller may read it. */
+   *  download guard uses this pair to decide whether the caller may read it.
+   *
+   *  POLYMORPHIC BY DEFAULT, AND THAT IS A CHOICE — not the only shape. It
+   *  suits many owning types, but the database cannot enforce it: delete the
+   *  owning row and these become orphans no FK will catch, so the retention
+   *  job has to sweep them. A project with one or two owning types is usually
+   *  better served by a real foreign key.
+   *  Pick deliberately → references/attachment-linking.md */
   entityType   String   @db.NVarChar(100)                  @map("EntityType")
   entityId     String   @db.NVarChar(100)                  @map("EntityId")
 

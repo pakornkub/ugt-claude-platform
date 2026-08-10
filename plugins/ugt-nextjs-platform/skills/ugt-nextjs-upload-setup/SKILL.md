@@ -62,8 +62,13 @@ as a starting point that the first real project will sharpen.
 1. **Max file size** (default 25 MB) — and does a reverse proxy sit in front?
    Its body limit must be raised to match, or large uploads die before the app
    sees them.
-2. **Which records get attachments** — drives `entityType` values and the
-   `canReadAttachment` rules.
+2. **Which records get attachments**, and **how the attachment links to them** —
+   the file's path is always a column in `Attachments`, but the *relationship*
+   is business logic, not a default. Polymorphic `entityType`+`entityId` (what
+   the skeleton ships) · a real FK per owning type · a single column on the
+   business table. Trade-offs and how to choose →
+   `references/attachment-linking.md`. Record the choice in
+   `docs/project-context/decisions.md`.
 3. **Who may upload / download** — two permissions are added
    (`files:create`, `files:read`); decide which roles get them.
 4. **Retention** — how long a soft-deleted attachment's bytes are kept before
@@ -153,3 +158,6 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] `canReadAttachment` no longer returns `false` for every case
 - [ ] `docs/admin-handoff.md` mentions the volume backup and the
       `docker compose down -v` warning
+- [ ] The attachment→record linking pattern is recorded in
+      `docs/project-context/decisions.md` (polymorphic / FK / single column),
+      not left as "whatever the skeleton did"

@@ -1,5 +1,28 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.5.1 (2026-08-09)
+
+Two gaps in 4.4.0/4.5.0, both found by review rather than by a check:
+
+- **The installer never asked about Upload.** Mail was in the module question;
+  Upload only ever appeared in the child-skill table and the install order, so
+  a run of `ugt-nextjs-full-setup` would have skipped it silently. Both are now
+  asked as their own yes/no, phrased by what the app does ("ต้องส่งอีเมลแจ้งเตือนไหม",
+  "ผู้ใช้ต้องแนบไฟล์ไหม") rather than by module name, and both default to **no** —
+  each drags in real infrastructure (an SMTP relay to request; a volume plus a
+  ~2 GB ClamAV container needing its own backup), so neither should arrive
+  uninvited.
+- **How an attachment links to its record was presented as a default when it is
+  a business decision.** The path itself is always a column, and that stays
+  fixed — but the polymorphic `entityType`+`entityId` shape the skeleton ships
+  is one of three, and the schema said so nowhere. New
+  `references/attachment-linking.md` lays out polymorphic vs a real FK per
+  owning type vs a single column on the business table, with the trade-off that
+  actually bites: polymorphic has **no FK protecting it**, so deleting an owning
+  record leaves orphan rows that only the retention sweep will catch. The
+  interview now asks, the schema comment says it is a choice, and the checklist
+  requires the answer in `docs/project-context/decisions.md`.
+
 ## 4.5.0 (2026-08-09)
 
 **New skill `ugt-nextjs-upload-setup`** — file attachments, the second runtime

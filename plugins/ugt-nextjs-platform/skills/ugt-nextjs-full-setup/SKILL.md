@@ -60,11 +60,22 @@ Ask all of this in a single message (use AskUserQuestion if available):
 
 **Module selection:**
 
-1. What to install? Database / Quality (test+lint) / Design / Auth / **Mail** / CI
-   (multi-select — default: all except Mail, which is opt-in)
-2. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
-3. [If Mail selected] SMTP host/port, sender address, support contact for the
+1. What to install? Database / Quality (test+lint) / Design / Auth / CI —
+   **default: all five**
+2. Does the project need either of the optional feature modules? Ask both as a
+   yes/no, phrased in terms of what the app does, not the module name:
+   - **Mail** — "ระบบนี้ต้องส่งอีเมลแจ้งเตือนไหม (เช่น แจ้งผู้อนุมัติ / แจ้งผลกลับผู้ขอ)"
+   - **Upload** — "ผู้ใช้ต้องแนบไฟล์ไหม (เช่น เอกสารประกอบ ใบเสร็จ รูป)"
+   Both default to **no**: each adds real infrastructure (an SMTP relay to
+   request from the admin team; a Docker volume plus a ~2 GB ClamAV container
+   that must be backed up separately), so neither should arrive uninvited.
+3. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
+4. [If Mail selected] SMTP host/port, sender address, support contact for the
    email footer — see `ugt-nextjs-mail-setup`'s Interview
+5. [If Upload selected] Max file size + is there a reverse proxy in front,
+   which records get attachments, **how attachments link to those records**
+   (see that skill's Interview — it is a business-logic decision, not a
+   default), and retention for deleted files
 
 **Shared identity (used by every module — ask once, don't let child skills re-ask):**
 
