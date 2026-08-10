@@ -1,5 +1,42 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.8.0 (2026-08-10)
+
+**Identity now comes from the employee directory, not just the IdP.** SSO and
+LDAP answer exactly one question — "who are you" — and the skill stopped there,
+leaving three `EXTENSION POINT: enrich the user from your own directory` comments
+and no mechanism. Every feature needing an employee code, department, position
+or supervisor would have gone and queried the HR view itself, each mapping the
+columns its own way.
+
+- `lib/directory.ts`, generalized from `ugt-hrms/lib/hr-lookup.ts` (the
+  HR-domain half — shift rules, leave quota, approval chains, subordinate BFS —
+  stayed behind; that is feature code, not identity):
+  `getDirectoryPerson` · `getDirectoryPersonByEmpCode` · `searchDirectory` ·
+  `directoryUserFields`.
+- Wired at all three points that create or refresh a user, from the **same**
+  helper: `ldapLoginAction`, the SSO `session.create.after` hook, and
+  `addDirectoryUserAction`. Separate implementations would leave SSO users and
+  AD users with different columns filled, and nothing would surface it until a
+  page needed the missing one. SSO must enrich in the hook — Better Auth drops
+  custom fields returned from `mapProfileToUser`.
+- The `user` model gains `empCode` · `fullNameThai` · `position` · `department`
+  · `orgCode` · `superEmpCode`, documented as a **cache, not the source**, and
+  refreshed on every login rather than once at signup — people change teams.
+- **Every lookup returns `null` instead of throwing.** A dead HR server must
+  degrade to "the Thai name is stale", never to "nobody can log in".
+- `Prisma.raw` for the view name and column list, which are identifiers rather
+  than values — interpolating them normally makes them bound parameters and the
+  SQL fails. Nothing user-supplied ever goes near it. The SQL rules themselves
+  (SELECT-only, CAST every column, no recursive CTEs) are not restated here;
+  they live in `ugt-nextjs-database-setup` → `references/raw-sql-and-sp.md`.
+- `addDirectoryUserAction` no longer asks the admin to type a name and email —
+  it resolves them from the directory. Typed values would be overwritten at the
+  person's first login anyway, so they could only ever be right by luck.
+- Interview gains "is there a central employee database?" so answering *no* is a
+  recorded decision rather than a silent omission, and `verify.mjs` checks the
+  lookup fails soft, uses `Prisma.raw`, and is actually called from a login path.
+
 ## 4.7.1 (2026-08-10)
 
 **User administration was missing entirely**, in both directions. 4.7.0

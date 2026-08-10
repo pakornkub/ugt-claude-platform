@@ -22,6 +22,7 @@ import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
+import { directoryUserFields, getDirectoryPerson } from '@/lib/directory'; // [METHOD: LDAP]
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -212,15 +213,11 @@ const addDirectoryUserSchema = z.object({
     .min(1)
     .max(100)
     .regex(/^[a-zA-Z0-9_.@-]+$/, 'ชื่อผู้ใช้ AD ไม่ถูกต้อง'),
-  name: z.string().min(1, 'กรุณากรอกชื่อ').max(255),
-  email: z.email('อีเมลไม่ถูกต้อง').max(255),
   roleId: z.string().nullable(),
 });
 
 export async function addDirectoryUserAction(values: {
   ldapUsername: string;
-  name: string;
-  email: string;
   roleId: string | null;
 }): Promise<ActionResult> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -233,7 +230,20 @@ export async function addDirectoryUserAction(values: {
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
   }
-  const { ldapUsername, name, email, roleId } = parsed.data;
+  const { ldapUsername, roleId } = parsed.data;
+
+  // ชื่อ/อีเมล/รหัสพนักงานมาจากฐานพนักงานกลาง ไม่ให้แอดมินพิมพ์เอง — พิมพ์เองแล้ว
+  // ตอน login จริงข้อมูลจาก directory จะทับทันที ค่าที่พิมพ์ไว้จึงเป็นได้แค่ค่าที่
+  // ดูถูกจนถึงวันที่เขา login ครั้งแรก
+  const person = await getDirectoryPerson(ldapUsername);
+  if (!person) {
+    return {
+      success: false,
+      error: 'ไม่พบชื่อผู้ใช้นี้ในฐานพนักงาน (ตรวจการสะกด หรือฐานพนักงานอาจเชื่อมต่อไม่ได้)',
+    };
+  }
+  const email = person.email;
+  if (!email) return { success: false, error: 'พนักงานรายนี้ไม่มีอีเมลในฐานพนักงาน' };
 
   // ชนได้สองทาง: LDAP upsert จับที่ ldapUsername ส่วน Keycloak accountLinking จับที่ email
   const [byEmail, byLogin] = await Promise.all([
@@ -242,17 +252,16 @@ export async function addDirectoryUserAction(values: {
   ]);
   if (byEmail || byLogin) return { success: false, error: 'มีผู้ใช้รายนี้อยู่แล้ว' };
 
-  // EXTENSION POINT: โปรเจคที่มีฐานข้อมูลพนักงาน ให้ดึงชื่อ/อีเมล/รหัสพนักงาน
-  // จากที่นั่นด้วย ldapUsername แทนการให้แอดมินพิมพ์เอง แล้วเติมฟิลด์ลงใน create นี้
   const user = await prisma.user.create({
     data: {
       id: generateId(24),
       ldapUsername,
-      name,
+      name: person.nameEn ?? person.nameTh ?? ldapUsername,
       email,
       emailVerified: false, // ยังไม่เคย bind — ยืนยันอีเมลตอนนี้ไม่ได้
       authType: 'ldap',
       roleId,
+      ...directoryUserFields(person),
     },
   });
 
@@ -261,7 +270,13 @@ export async function addDirectoryUserAction(values: {
       data: {
         userId: session.user.id,
         action: 'users.create',
-        detail: JSON.stringify({ targetId: user.id, ldapUsername, email, roleId, authType: 'ldap' }),
+        detail: JSON.stringify({
+          targetId: user.id,
+          ldapUsername,
+          empCode: person.empCode,
+          roleId,
+          authType: 'ldap',
+        }),
       },
     })
     .catch(() => {});

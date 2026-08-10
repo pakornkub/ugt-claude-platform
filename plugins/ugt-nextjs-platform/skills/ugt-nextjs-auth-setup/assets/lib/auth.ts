@@ -4,6 +4,9 @@ import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] �
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { sendTemplatedMail } from '@/lib/email'; // [METHOD: LOCAL] — needs ugt-nextjs-mail-setup; remove with sendResetPassword
+// [METHOD: SSO] — remove with the enrichment in the session hook below when the
+// project has no central employee directory to read from
+import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
 
 // Derive a unique cookie prefix from NEXT_PUBLIC_BASE_PATH (e.g. '/__BASE_PATH__' → '__BASE_PATH__').
 // This prevents cross-app cookie collisions when multiple apps share the same domain
@@ -170,9 +173,13 @@ export const auth = betterAuth({
 
             const loginName = userData?.ldapUsername ?? userData?.email?.split('@')[0] ?? null;
 
-            // EXTENSION POINT: this hook runs on every SSO session creation — the reliable
-            // place to sync custom user fields (employee code, department, job title, …)
-            // from your directory / HR source into the user row.
+            // This hook runs on every SSO session creation — the reliable place to
+            // refresh the directory fields (Better Auth does NOT persist custom
+            // fields returned from mapProfileToUser). The LDAP path does the same
+            // thing in ldapLoginAction, from the same helper, so an SSO user and an
+            // AD user end up with the same columns filled.
+            const person = loginName ? await getDirectoryPerson(loginName) : null;
+
             await prisma.user
               .update({
                 where: { id: session.userId },
@@ -180,6 +187,7 @@ export const auth = betterAuth({
                   authType: 'sso',
                   // Set ldapUsername if not already stored (SSO-first users)
                   ...(loginName && !userData?.ldapUsername ? { ldapUsername: loginName } : {}),
+                  ...directoryUserFields(person),
                 },
               })
               .catch(() => {});

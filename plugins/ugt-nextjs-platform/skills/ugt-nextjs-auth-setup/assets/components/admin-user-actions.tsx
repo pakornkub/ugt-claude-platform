@@ -64,7 +64,8 @@ export function CreateUserDialog({ roles }: Readonly<{ roles: Role[] }>) {
     const result =
       authType === 'local'
         ? await createLocalUserAction({ name, email, password, roleId: role })
-        : await addDirectoryUserAction({ ldapUsername, name, email, roleId: role });
+        : // ชื่อกับอีเมลของบัญชี AD มาจากฐานพนักงาน ไม่ได้พิมพ์ในฟอร์มนี้
+          await addDirectoryUserAction({ ldapUsername, roleId: role });
     setIsLoading(false);
     if (!result.success) {
       setError(result.error);
@@ -141,47 +142,51 @@ export function CreateUserDialog({ roles }: Readonly<{ roles: Role[] }>) {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  ต้องตรงกับที่เขาพิมพ์ตอน login เป๊ะ ๆ — พิมพ์ผิดจะได้ผู้ใช้ซ้ำสองรายการ
+                  ต้องตรงกับที่เขาพิมพ์ตอน login เป๊ะ ๆ — พิมพ์ผิดจะได้ผู้ใช้ซ้ำสองรายการ ·
+                  ชื่อ อีเมล และรหัสพนักงานดึงจากฐานพนักงานให้เอง
                 </p>
               </div>
             )}
 
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-name">ชื่อ</Label>
-              <Input
-                id="new-user-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-email">อีเมล</Label>
-              <Input
-                id="new-user-email"
-                type="email"
-                autoComplete="off"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* [METHOD: LOCAL] */}
+            {/* [METHOD: LOCAL] ชื่อ/อีเมลกรอกเองเฉพาะบัญชี local — บัญชี AD ดึงจาก
+                ฐานพนักงาน เพราะค่าที่พิมพ์เองจะโดนทับตอนเขา login ครั้งแรกอยู่ดี */}
             {authType === 'local' && (
-              <div className="grid gap-2">
-                <Label htmlFor="new-user-password">รหัสผ่านตั้งต้น</Label>
-                <Input
-                  id="new-user-password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
-              </div>
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="new-user-name">ชื่อ</Label>
+                  <Input
+                    id="new-user-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="new-user-email">อีเมล</Label>
+                  <Input
+                    id="new-user-email"
+                    type="email"
+                    autoComplete="off"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="new-user-password">รหัสผ่านตั้งต้น</Label>
+                  <Input
+                    id="new-user-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
+                </div>
+              </>
             )}
 
             <div className="grid gap-2">

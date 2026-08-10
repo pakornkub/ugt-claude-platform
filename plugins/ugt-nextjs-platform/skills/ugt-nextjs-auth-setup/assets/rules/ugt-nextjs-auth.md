@@ -10,6 +10,7 @@ paths:
   - "app/api/auth/**"
   - "components/login-form.tsx"
   - "lib/password-policy.ts"
+  - "lib/directory.ts"
 ---
 
 <!-- Owned by ugt-nextjs-auth-setup — may be overwritten wholesale on /plugin update. -->
@@ -81,6 +82,23 @@ http has no `__Secure-` prefix).
   the user was trying to lock out is still logged in.
 - Changing a password always requires the current one.
 - `/reset-password` stays public in `proxy.ts`.
+
+## Directory fields (employee code, department, position, supervisor)
+
+SSO and LDAP answer only "who are you". Everything else comes from the org
+employee view over a linked server — `lib/directory.ts`.
+
+- The `user` row is a **cache, not the source**. Never let the app edit those
+  columns; the next login overwrites them anyway.
+- Refresh on **every** login, from the one shared helper, on both paths
+  (`ldapLoginAction` and the SSO `session.create.after` hook). Filling them once
+  at signup leaves the data frozen at someone's first day.
+- SSO must enrich in the session hook — Better Auth drops custom fields returned
+  from `mapProfileToUser`.
+- Lookups return `null` on failure and never throw: an HR-server outage must not
+  become "nobody can log in".
+- SELECT only. `Prisma.raw` is for the view name and column list (constants)
+  — never for anything a user supplied.
 
 ## proxy.ts
 

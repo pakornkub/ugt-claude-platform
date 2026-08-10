@@ -51,6 +51,9 @@ project. Deep detail lives in `references/`:
 - `references/rbac.md` — data model, guard pattern, bootstrap, adding permissions later
 - `references/audit-logging.md` — action naming, write pattern, payload rules (PDPA), retention, viewer API
 - `references/keycloak-client.md` — requesting/creating a Keycloak client for a new project
+- `references/directory-enrichment.md` — filling employee code / department /
+  position / supervisor from the org's employee view over a linked server,
+  because SSO and LDAP only answer "who are you"
 
 ## 2. Org Standards
 
@@ -82,7 +85,12 @@ The org-wide contract:
    reset · change · admin-create; a reset link is **single-use, 1 hour**, sent
    only to `authType === 'local'` accounts, and answers identically whether or
    not the email exists; every password change revokes the user's other sessions
-9. **No self-registration.** SSO and LDAP accounts appear on their first
+9. **Identity is enriched from the org employee view, not from the IdP.** SSO
+   and LDAP give username + email + display name; employee code, department,
+   position and supervisor come from the central view over a linked server,
+   refreshed on every login by one shared helper — read-only, and never
+   allowed to break login (`references/directory-enrichment.md`)
+10. **No self-registration.** SSO and LDAP accounts appear on their first
    successful login; local accounts are created by someone holding
    `users:create` on `/admin/users`, and `disableSignUp: true` closes the
    endpoint Better Auth would otherwise publish. An LDAP account may also be
@@ -106,7 +114,14 @@ Ask all of these **in a single message** before doing anything:
      update its Keycloak section instead of overwriting the file.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
 5. **Who is the first admin?** (first person to log in visits `/admin/setup` and becomes Administrator with one click)
-6. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
+6. **Is there a central employee database to read over a linked server?**
+   (default: yes for org apps) — SSO/LDAP give only username + email + display
+   name. If the app needs employee code, department, position or supervisor,
+   ask for the **four-part view name** and which columns carry those fields.
+   → `references/directory-enrichment.md`. Answering "no" means deleting
+   `lib/directory.ts`, its three call sites and the directory columns in the
+   schema; say that out loud so it is a decision, not an omission.
+7. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
    - yes → password reset by email is installed (forgot dialog + `/reset-password`)
    - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, so the only
      recovery is an admin using "ตั้งรหัสผ่าน" on `/admin/users`. Offer to run
@@ -150,6 +165,7 @@ exceptions:
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
 | `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
+| `assets/lib/directory.ts` | `lib/directory.ts` | only when a central employee view exists — substitute the four-part view name + column map; skipping it means deleting the directory columns from the schema too (§3 Q6) |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
 | `assets/components/admin-user-actions.tsx` | `components/…` | LDAP/Local — the "เพิ่มผู้ใช้" dialog on `/admin/users` (local account with an initial password · AD account pre-registered) + admin set-password; **there is no sign-up page and there will not be one** |
@@ -242,6 +258,7 @@ of which login methods were chosen.
 | `__AD_BASE_DN__` | full AD base DN (one `DC=` per label) | `DC=example,DC=com` |
 | `__COMPANY_DOMAIN__` | org email/UPN domain | `company.co.th` |
 | `__APP_HOST__` | the host the app actually deploys to | — |
+| `__LINKED_SERVER__` · `__HR_DB__` · `__HR_EMPLOYEE_VIEW__` | the four-part name of the org employee view in `lib/directory.ts` (same `__LINKED_SERVER__` as ugt-nextjs-database-setup) | `thsrv01` · `HRPortal` · `vwEmployee` |
 
 ## 7. Quick Rules — DO / DON'T
 
@@ -264,6 +281,9 @@ of which login methods were chosen.
 | Create accounts from `/admin/users` (guard + audit) | Add a sign-up page |
 | Write the user + `credential` account rows with `hashPassword` (`better-auth/crypto`) | `auth.api.signUpEmail` in an admin action — `disableSignUp` blocks it too, and it mints a session for the new user |
 | Pre-register an AD user by the **exact** `ldapUsername` they log in with | A guessed spelling — the login upsert matches on that key, so a typo yields a second user and the role sits on the unused row |
+| Refresh the directory fields on **every** login, from one shared helper | Fill them once at first login (people move team), or write SSO and LDAP separately (the two drift apart unnoticed) |
+| Directory lookups return `null` on failure | Let a linked-server outage throw — everyone's login dies with it |
+| `Prisma.raw` only for the view name + column list, both constants | Anything user-supplied inside `Prisma.raw` |
 | `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
@@ -313,6 +333,12 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       the new password works; the button is absent on SSO/LDAP rows
 - [ ] [LDAP] Pre-register an AD user with a role, then have them log in for the
       first time → they land on the **same** row with that role, not a second one
+- [ ] [Directory] Log in and check the `User` row: employee code, department,
+      position, supervisor are filled — and by **both** SSO and LDAP, not one
+- [ ] [Directory] Change someone's department in the HR view, log in again →
+      the app row follows
+- [ ] [Directory] Point the view name at something unreachable → login still
+      works, the fields just stay as they were (this is the check that matters)
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away

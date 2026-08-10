@@ -7,6 +7,9 @@ import { generateId } from 'better-auth'; // [METHOD: LDAP] — used only by lda
 import { auth } from '@/lib/auth'; // [METHOD: LOCAL] — used only by localLoginAction
 import { prisma } from '@/lib/prisma';
 import { ldapBind } from '@/lib/ldap'; // [METHOD: LDAP] — remove if LDAP not enabled
+// [METHOD: LDAP] — remove with the enrichment below when the project has no
+// central employee directory to read from
+import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
 import { env } from '@/lib/env';
 
 // ─── Schemas ── [METHOD: LDAP|LOCAL] ─────────────────────────────────────────
@@ -139,16 +142,20 @@ export async function ldapLoginAction(values: {
     return { error: 'Invalid username or password' };
   }
 
-  // 2. Upsert user in DB
-  // EXTENSION POINT: enrich the user from your own directory / HR source here
-  // (e.g. look up employee master data by username and add custom fields to
-  // both the update and create blocks).
+  // 2. Upsert user in DB, enriched from the central employee directory.
+  // AD ให้แค่ displayName กับอีเมล — รหัสพนักงาน หน่วยงาน ตำแหน่ง หัวหน้า
+  // อยู่ในฐานพนักงานกลาง เติมทุกครั้งที่ login สำเนาในตารางจะได้ไม่ค้างเก่า
+  // (คืน null เมื่อ linked server ล่ม — login ต้องไม่พังตามไปด้วย)
+  const person = await getDirectoryPerson(username);
+  const directoryFields = directoryUserFields(person);
+
   const user = await prisma.user.upsert({
     where: { ldapUsername: username },
     update: {
       authType: 'ldap', // always update — reflects last login method
       name: ldapUser.displayName,
       email: ldapUser.email,
+      ...directoryFields,
     },
     create: {
       ldapUsername: username,
@@ -156,6 +163,7 @@ export async function ldapLoginAction(values: {
       name: ldapUser.displayName,
       email: ldapUser.email,
       emailVerified: true,
+      ...directoryFields,
     },
   });
 

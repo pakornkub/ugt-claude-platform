@@ -28,9 +28,24 @@ model user {
   // upsert key and to link SSO logins back to the directory identity.
   ldapUsername String?  @unique                              @map("LdapUsername")
 
-  // EXTENSION POINT: add org/HR custom fields here (e.g. employee code,
-  // department, job title) and sync them in lib/auth.ts databaseHooks +
-  // lib/actions/auth.ts ldapLoginAction.
+  // ─── Directory fields (จากฐานพนักงานกลางผ่าน linked server) ──────────────
+  // SSO/LDAP ให้แค่ username + อีเมล + ชื่อที่แสดง ซึ่งไม่พอสำหรับแอปในองค์กร
+  // ฟิลด์ชุดนี้ถูกเติมทุกครั้งที่ login โดย lib/directory.ts (ดู references/
+  // directory-enrichment.md) — **สำเนาไว้อ่านเร็ว ไม่ใช่ต้นฉบับ**: ต้นฉบับคือ
+  // view ฝั่ง HR ห้ามให้แอปแก้ค่าเหล่านี้เอง
+  //
+  // ตัดฟิลด์ที่โปรเจคไม่ใช้ทิ้ง และเพิ่มที่ต้องใช้ — คอลัมน์ที่ไม่มีใครอ่าน
+  // คือคอลัมน์ที่ไม่มีใครรู้ว่าค่ามันถูกหรือผิด
+  empCode      String?  @db.NVarChar(50)                       @map("EmpCode")
+  fullNameThai String?  @db.NVarChar(200)                      @map("FullNameThai")
+  position     String?  @db.NVarChar(200)                      @map("Position")
+  department   String?  @db.NVarChar(200)                      @map("Department")
+  /// รหัสหน่วยงาน — ฐานของ scope "เห็นเฉพาะหน่วยงานตัวเอง"
+  orgCode      String?  @db.NVarChar(20)                       @map("OrgCode")
+  /// รหัสพนักงานของหัวหน้า — ฐานของสายอนุมัติ
+  superEmpCode String?  @db.NVarChar(50)                       @map("SuperEmpCode")
+
+  @@index([empCode])
 
   sessions session[]
   accounts account[]

@@ -268,6 +268,33 @@ check('Local accounts: no self-signup, but a way in', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+// ── 4c. Directory enrichment (only when lib/directory.ts was installed) ─────
+check('Directory enrichment is wired and fails soft', () => {
+  if (!has('lib', 'directory.ts')) {
+    return { ok: true, msg: 'no central employee view in this project' };
+  }
+  const problems = [];
+  const dir = read('lib', 'directory.ts');
+
+  // A lookup that throws during login turns an HR-server outage into a total outage.
+  if (!/catch\s*\(/.test(dir)) {
+    problems.push('lib/directory.ts never catches — a linked-server outage would take every login down with it');
+  }
+  // Identifiers must go through Prisma.raw; values must NOT.
+  if (!/Prisma\.raw/.test(dir)) {
+    problems.push("lib/directory.ts has no Prisma.raw — a view name interpolated as a value becomes a bound parameter and the SQL fails");
+  }
+  // Both login paths must refresh from the same helper, or SSO and LDAP users
+  // end up with different columns filled and nobody notices until a page needs one.
+  const wired = ['lib/auth.ts', 'lib/actions/auth.ts'].filter(
+    (f) => has(f) && /getDirectoryPerson|directoryUserFields/.test(read(f))
+  );
+  if (wired.length === 0) {
+    problems.push('lib/directory.ts is installed but never called from a login path — the columns stay empty forever');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 check('Keycloak plugin guarded by env', () => {
   if (!has('lib/auth.ts')) return { ok: false, msg: 'No lib/auth.ts' };
   const body = read('lib/auth.ts');
