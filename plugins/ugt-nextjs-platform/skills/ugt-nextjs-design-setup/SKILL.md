@@ -183,7 +183,10 @@ each with a recorded decision — never silently reformat the project.
    lucide-react` (v9 of tanstack renames the v8 API the kit uses; `add`
    doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
-   registry uses it) · `next-intl` only when ภาษา = th+en.
+   registry uses it) · `next-intl` only when ภาษา = th+en · `exceljs` only when
+   the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
+   skip both files otherwise; route shape and traps in
+   `references/conventions.md` §Export).
 5. **App shell FIRST, then variants**: install the shadcn block named in
    `references/layout-shells.md` (never hand-composed) **before** touching
    `button.tsx` — `add <block>` prompts per existing file (even with
@@ -244,7 +247,7 @@ contain project มติ that deliberately deviate.
   highlight rule + overflow rule
 - `references/conventions.md` — component-usage rules in depth (Dialog
   ladder, Badge vs StatusBadge, icon mapping, TONE_STYLES exception,
-  DataTable modes) + the kit inventory with provenance
+  DataTable modes, Excel/CSV export) + the kit inventory with provenance
 
 ## 5. Quick Rules
 

@@ -1,5 +1,49 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.6.0 (2026-08-10)
+
+**Excel/CSV export joins the UI kit** — extracted from `ugt-hrms`, where the
+same ~120 lines were written twice (`access-monitor/export`,
+`employee-monitor/export`) and drifted apart. Deliberately **not a new skill**:
+export is ordinary feature work with no infrastructure, and
+`ugt-nextjs-upload-setup`'s trigger evals confirm judges already route
+"ปุ่ม export Excel" away from it 3/3 — a skill would have blurred a boundary
+that works.
+
+- `lib/export.ts` — one `ExportColumn[]` spec drives **both** formats, so CSV
+  and Excel cannot disagree. HRMS proved why that matters: `employee-monitor`
+  shipped a CSV with **15 headers and 13 values per row**, misaligned all the
+  way down, because the header string and the row array were maintained
+  separately. That class of bug is now unrepresentable.
+- Three things the hand-written routes got wrong, fixed once:
+  **no UTF-8 BOM** (Thai opens as garbage in Excel on Windows), **no formula
+  guard** (a cell starting with `=`/`+`/`-`/`@` is executable — `=cmd|…` is a
+  real attack against whoever opens the file), and **no row cap** on
+  `employee-monitor` while `access-monitor` capped at 10,000. `exceljs` is now
+  a dynamic import, so a CSV request no longer loads an xlsx parser.
+- `ui/export-menu.tsx` — the dropdown, reshaped to the toolbar's icon-button
+  form so it matches the column-settings button it sits beside; the filename
+  now comes from the server's `Content-Disposition` instead of being guessed a
+  second time on the client.
+- `references/conventions.md` §Export — the route order (**session →
+  permission → scope → zod → capped query → audit → build**) and the DO/DON'T
+  table. The export bypasses pagination, which makes the scope check the only
+  thing between a user and every row in the table.
+- `assets/lib/export.test.ts` travels with the code — 4 assertions covering
+  BOM, formula guard, negative numbers staying numeric, and column alignment.
+- `scripts/verify.mjs` gains a check that fails on a hand-rolled export
+  (`exceljs` or `text/csv` outside `lib/export.ts`); it stays silent in
+  projects that export nothing.
+- `docs/design-preview.html`: Export was drawn as a text button in the page
+  header, which matched neither the kit nor HRMS. Moved into the table toolbar
+  as an icon button — the preview drifting from reality is the same defect
+  class this release is about.
+
+Trigger-eval baselines run for the two 4.4/4.5 skills (3 judges, 27 queries
+interleaved, randomized per judge): **mail 24/24 primary · upload 21/21 ·
+negatives 36/36**, every negative landing on its expected owner unanimously.
+No description changes needed.
+
 ## 4.5.1 (2026-08-09)
 
 Two gaps in 4.4.0/4.5.0, both found by review rather than by a check:

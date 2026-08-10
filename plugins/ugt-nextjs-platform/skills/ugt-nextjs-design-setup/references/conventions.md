@@ -186,6 +186,46 @@ happens — same component, different config):
   chart lib, no hardcoded colors.
 - Rich text: tiptap via a central `ui/tiptap-editor` — no other editor lib.
 
+## Export (Excel/CSV)
+
+`ui/export-menu` in the table's `toolbarExtra` → POSTs to a **Route Handler**
+(never a Server Action — 1 MB body cap) → `lib/export.ts` turns rows into the
+file. One `ExportColumn[]` spec feeds both formats, so CSV and Excel can never
+drift apart.
+
+```ts
+const COLUMNS: ExportColumn<LeaveRow>[] = [
+  { header: 'รหัสพนักงาน', width: 12, value: (r) => r.empCode },
+  { header: 'วันที่',      width: 14, value: (r) => formatExportDate(r.date) },
+  { header: 'จำนวนวัน',    width: 10, value: (r) => r.days },        // number → Excel คำนวณต่อได้
+];
+return toExportResponse(format, COLUMNS, rows, {
+  filename: `leave-requests-${bangkokToday(new Date())}`,
+  sheetName: 'Leave Requests',
+});
+```
+
+Route order, every time: **session → permission → scope → validate body (zod)
+→ query capped at `EXPORT_MAX_ROWS` → audit row → build**. The export bypasses
+the table's pagination, so the scope check is the only thing standing between a
+user and every row in the table — it is not optional, and it must re-derive
+scope server-side rather than trust anything in the body.
+
+| DO ✅ | DON'T ❌ |
+| --- | --- |
+| One `ExportColumn[]` for both formats | Separate header string + row array (HRMS shipped a 15-vs-13 mismatch this way) |
+| `formatExportDate` → ISO `yyyy-MM-dd` | `DD/MM/YYYY` in a file — Excel re-reads it by locale and silently swaps day/month |
+| Numbers stay numbers | `String(n)` — the column becomes text and SUM stops working |
+| `take: EXPORT_MAX_ROWS` in the query | Fetch everything and cap afterwards |
+| Audit row before the file is built | Export with no trace of who took what |
+| Send the table's current filters in `buildBody` | Export the unfiltered set from a filtered screen |
+| Filename from `Content-Disposition` | A second filename guessed on the client |
+
+`lib/export.ts` handles the three things everyone forgets: a UTF-8 **BOM** (no
+BOM = Thai is garbage in Excel on Windows), a `'` in front of `= + - @` (a cell
+starting with `=` is a **formula**, and that is remote code in a spreadsheet),
+and CRLF per RFC 4180.
+
 ## Kit inventory (assets/ui/ + assets/lib/)
 
 | File | From | Note |
@@ -200,11 +240,13 @@ happens — same component, different config):
 | `ui/page-shell.tsx` · `ui/detail-dialog-shell.tsx` · `ui/detail-row.tsx` · `ui/detail-section.tsx` | HRMS | |
 | `ui/query-state.tsx` · `ui/truncated-text.tsx` | HRMS | query-state needs `ui/callout` |
 | `ui/callout.tsx` | HRMS | page-level banner; tones reuse `TONE_STYLES` |
+| `ui/export-menu.tsx` | HRMS | ปุ่ม Excel/CSV สำหรับ `toolbarExtra`; ship only when a page exports (needs `dropdown-menu` + `sonner`) |
 | `components/theme-provider.tsx` | standard next-themes wrapper | **fallback only** — the org preset scaffold ships its own (superset: hotkey + disableTransitionOnChange); keep the registry's file when present |
 | `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |
 | `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |
 | `lib/table-query.ts` · `lib/table-prefs.ts` · `lib/pagination.ts` | BOI | URL-state + column prefs + page params for server-mode tables (`table-query` imports `firstParam` from `pagination`) |
 | `lib/actions-locale.ts` → `lib/actions/locale.ts` | HRMS | th+en only; Server Action guarded by `lib/auth` (auth-setup) |
+| `lib/export.ts` | merge: HRMS's two hand-written export routes, collapsed into one column spec (+ BOM, formula guard, row cap) | server-only (`exceljs`); pairs with `ui/export-menu` |
 | `ui/button-variants.md` | BOI → recipes on the base-mira button, colors mapped to org tokens | the sanctioned `components/ui/button.tsx` edit |
 | `brand/ube-logo-short.svg` · `brand/ube-logo-long.svg` | company asset | → `public/brand/` · `fill="currentColor"` (tint via CSS) · short = shell header, long (tagline) = login/landing |

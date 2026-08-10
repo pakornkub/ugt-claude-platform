@@ -22,6 +22,10 @@ beautification skill. The short version that catches 90% of violations:
   (URL state) — client-sorting a partial page silently lies.
 - Dates/numbers → `lib/format.ts` only. Screen `DD/MM/YYYY`; exported files
   ISO `yyyy-MM-dd` — different on purpose.
+- Excel/CSV export → `lib/export.ts` + `ui/export-menu` from a **Route
+  Handler**, one `ExportColumn[]` for both formats. Hand-rolling CSV loses
+  the BOM (ไทยเพี้ยนใน Excel) and the `=`-formula guard. The export skips
+  pagination, so it re-checks permission and scope server-side.
 - Status UI → `StatusBadge` (tone + icon, both required). Plain
   labels/counts → `Badge`, colorless.
 - Icon-only buttons → `IconAction` (label mandatory). Destructive actions →

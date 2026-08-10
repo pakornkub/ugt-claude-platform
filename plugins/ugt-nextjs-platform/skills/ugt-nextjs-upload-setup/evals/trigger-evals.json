@@ -1,7 +1,15 @@
 {
   "purpose": "Trigger-boundary regression set for ugt-nextjs-upload-setup. S* must route here (storing files users attach, virus scanning, guarded downloads, the documented storage symptoms); N* must NOT — the sharpest boundary is generated downloads (Excel/CSV exports), which need no storage at all.",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
-  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "baseline_result": {
+    "date": "2026-08-10",
+    "judges": 3,
+    "judgments": 39,
+    "primary_accuracy": "21/21 (100%)",
+    "secondary_accuracy": "18/18",
+    "method_note": "Text-isolated: judges read a compiled listing (14 real skills + 9 distractors: superpowers, frontend-design, skill-creator, mattpocock), all 27 mail+upload queries interleaved in a per-judge randomized order, expected answers never shown.",
+    "note": "S-side 21/21 → ugt-nextjs-upload-setup; the symptom phrasings carried it even when the word อัปโหลด is absent (S3 files vanishing after deploy, S5 unauthenticated URL access, S7 svg with embedded script). N-side 18/18 stayed away and each landed on its expected owner unanimously. The load-bearing boundary held: N1 (ปุ่ม export Excel) → (no skill) 3/3, never upload-setup — the \"not for generated downloads\" clause in the description is doing its job. N3 (email with an attachment) → mail-setup 3/3. No description change needed."
+  },
   "queries": {
     "S1": { "prompt": "อยากให้ผู้ใช้แนบไฟล์เอกสารกับคำขอได้", "expected": "ugt-nextjs-upload-setup" },
     "S2": { "prompt": "ทำระบบอัปโหลดไฟล์ ต้องสแกนไวรัสก่อนเก็บด้วย", "expected": "ugt-nextjs-upload-setup" },

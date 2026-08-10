@@ -1,7 +1,15 @@
 {
   "purpose": "Trigger-boundary regression set for ugt-nextjs-mail-setup. S* must route here (sending mail from the app, SMTP setup, template editing, documented mail symptoms); N* must NOT — the sharpest boundary is Jenkins build-result email, which belongs to cicd-setup.",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
-  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "baseline_result": {
+    "date": "2026-08-10",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "24/24 (100%)",
+    "secondary_accuracy": "17/18",
+    "method_note": "Text-isolated: judges read a compiled listing (14 real skills + 9 distractors: superpowers, frontend-design, skill-creator, mattpocock), all 27 mail+upload queries interleaved in a per-judge randomized order, expected answers never shown.",
+    "note": "S-side 24/24 → ugt-nextjs-mail-setup, including the three symptom phrasings that never say \"อีเมล\" as a task (S5 silent non-delivery, S6 relay rejection, S7 dead link). N-side 18/18 stayed away, and every one landed on its expected owner unanimously — N1 (Jenkins build mail) → cicd-setup 3/3, the sharpest boundary in the set. Sole secondary variance: N5 (test a finished mail function) → (no skill) 3/3 where the note suggested TDD; that is judge conservatism about a distractor, not a boundary defect. No description change needed."
+  },
   "queries": {
     "S1": { "prompt": "อยากให้ระบบส่งอีเมลแจ้งหัวหน้าตอนมีคำขอเข้ามา", "expected": "ugt-nextjs-mail-setup" },
     "S2": { "prompt": "ตั้ง SMTP ให้โปรเจคหน่อย ใช้ relay ของบริษัท", "expected": "ugt-nextjs-mail-setup" },

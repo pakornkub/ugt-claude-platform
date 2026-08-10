@@ -226,6 +226,44 @@ check('Page-level filters use the control ladder, not bare Inputs', () => {
     : { ok: true };
 });
 
+// ── export ────────────────────────────────────────────────────────────────
+// Only fires once the project actually exports something. Hand-rolled CSV is
+// the failure mode: it loses the BOM (Thai turns to garbage in Excel) and the
+// `=`-formula guard, and its header list drifts from its row list — HRMS
+// shipped a 15-header/13-value route exactly that way.
+check('Excel/CSV export goes through lib/export.ts', () => {
+  const skip = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', '.claude']);
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (skip.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (/\.tsx?$/.test(entry)) files.push(full);
+    }
+  };
+  for (const d of ['app', 'components', 'features', 'lib', 'src']) if (has(d)) walk(p(d));
+
+  const offenders = [];
+  let exports = false;
+  for (const file of files) {
+    const rel = relative(ROOT, file).split('\\').join('/');
+    if (rel === 'lib/export.ts') continue;
+    const body = readFileSync(file, 'utf8');
+    const rolled = /from\s+['"]exceljs['"]/.test(body) || /['"]text\/csv/.test(body);
+    if (rolled) offenders.push(rel);
+    if (rolled || /from\s+['"]@\/lib\/export['"]/.test(body)) exports = true;
+  }
+
+  if (!exports) return { ok: true, msg: 'no export route in this project — nothing to check' };
+  if (!has('lib', 'export.ts')) {
+    return { ok: false, msg: `Project exports files but lib/export.ts was never installed: ${offenders.join(' · ')}` };
+  }
+  return offenders.length
+    ? { ok: false, msg: `Hand-rolled export (missing BOM + formula guard + row cap): ${offenders.join(' · ')}` }
+    : { ok: true };
+});
+
 // ── harness ───────────────────────────────────────────────────────────────
 check('.claude/rules/ugt-nextjs-design.md installed', () => {
   if (!has('.claude', 'rules', 'ugt-nextjs-design.md')) {
