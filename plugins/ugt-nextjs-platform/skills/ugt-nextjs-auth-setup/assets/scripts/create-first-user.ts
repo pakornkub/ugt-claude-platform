@@ -4,13 +4,14 @@
 //
 // แก้ปัญหาไก่กับไข่ของโปรเจคที่มีแต่ local login: บัญชี local สร้างได้จาก
 // /admin/users เท่านั้น แต่หน้านั้นต้อง login ก่อน และยังไม่มีใครให้ login
-// (SSO/LDAP ไม่เจอปัญหานี้ — บัญชีเกิดเองตอน bind สำเร็จครั้งแรก)
+// (โปรเจคที่มี SSO/LDAP ไม่เจอปัญหานี้ — บัญชีเกิดเองตอน login สำเร็จครั้งแรก)
 //
 // รันครั้งเดียวตอนติดตั้ง แล้วเอาบัญชีนี้ไปกด /admin/setup เพื่อรับสิทธิ์
 // Administrator จากนั้นสร้างคนอื่นผ่านหน้าเว็บได้ตามปกติ
 // **อย่าใส่รหัสผ่านจริงลงใน shell history ที่แชร์กัน และให้เจ้าตัวเปลี่ยนทันที**
 
-import { auth } from '../lib/auth';
+import { generateId } from 'better-auth';
+import { hashPassword } from 'better-auth/crypto';
 import { prisma } from '../lib/prisma';
 import { passwordSchema } from '../lib/password-policy';
 
@@ -36,8 +37,18 @@ if (existing > 0) {
   process.exit(1);
 }
 
-const created = await auth.api.signUpEmail({ body: { name, email, password } });
-await prisma.user.update({ where: { id: created.user.id }, data: { authType: 'local' } });
+// เขียนแถวเดียวกับที่ createLocalUserAction เขียน (signUpEmail ใช้ไม่ได้ —
+// lib/auth.ts ตั้ง disableSignUp: true ไว้)
+const userId = generateId(24);
+const hashed = await hashPassword(password);
+await prisma.$transaction([
+  prisma.user.create({
+    data: { id: userId, name, email, emailVerified: true, authType: 'local', roleId: null },
+  }),
+  prisma.account.create({
+    data: { id: generateId(24), accountId: email, providerId: 'credential', userId, password: hashed },
+  }),
+]);
 
 console.log(`สร้างบัญชี ${email} แล้ว — เข้าสู่ระบบ แล้วไปที่ /admin/setup เพื่อรับสิทธิ์ Administrator`);
 await prisma.$disconnect();

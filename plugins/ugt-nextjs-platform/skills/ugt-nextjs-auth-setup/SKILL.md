@@ -63,9 +63,10 @@ The org-wide contract:
 3. **Session: 8-hour lifetime, refresh when 30 minutes remain**
    (`expiresIn: 8h`, `updateAge: 30m`)
 4. **Audit log every time**: `login.success` / `login.failed` / `logout` /
-   `logout.sso` — plus, for local accounts, `password.reset.requested` /
-   `password.reset` / `password.reset.refused` / `password.change` /
-   `password.change.failed` — into the ActivityLogs table (non-blocking — must never throw and
+   `logout.sso` / `users.create` / `users.role-assign` — plus, for local
+   accounts, `password.reset.requested` / `password.reset` /
+   `password.reset.refused` / `password.change` / `password.change.failed` /
+   `users.password-set` — into the ActivityLogs table (non-blocking — must never throw and
    break login), and every privileged mutation writes an audit log after success
    — full rules (action naming, forbidden payloads, retention) in
    `references/audit-logging.md`
@@ -81,6 +82,11 @@ The org-wide contract:
    reset · change · admin-create; a reset link is **single-use, 1 hour**, sent
    only to `authType === 'local'` accounts, and answers identically whether or
    not the email exists; every password change revokes the user's other sessions
+9. **No self-registration.** SSO and LDAP accounts appear on their first
+   successful login; local accounts are created by someone holding
+   `users:create` on `/admin/users`, and `disableSignUp: true` closes the
+   endpoint Better Auth would otherwise publish. An LDAP account may also be
+   pre-registered there when the role has to be in place before day one
 
 ## 3. Interview — ask the installer first (one batch)
 
@@ -102,11 +108,11 @@ Ask all of these **in a single message** before doing anything:
 5. **Who is the first admin?** (first person to log in visits `/admin/setup` and becomes Administrator with one click)
 6. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
    - yes → password reset by email is installed (forgot dialog + `/reset-password`)
-   - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, and that
-     the only recovery path is an admin resetting the password by hand. Offer to
-     run mail-setup first. Never install the button without the mail behind it —
+   - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, so the only
+     recovery is an admin using "ตั้งรหัสผ่าน" on `/admin/users`. Offer to run
+     mail-setup first. Never install the button without the mail behind it —
      Better Auth answers `RESET_PASSWORD_DISABLED` and the user gets a dead form.
-   - Self-service **change password** works either way (no email involved).
+   - Self-service **change password** and admin **set password** work either way.
 
 ## 4. Prerequisite
 
@@ -146,7 +152,7 @@ exceptions:
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
-| `assets/components/admin-user-actions.tsx` | `components/…` | Local only — **the only way a local account is ever created**; there is no sign-up page and there will not be one |
+| `assets/components/admin-user-actions.tsx` | `components/…` | LDAP/Local — the "เพิ่มผู้ใช้" dialog on `/admin/users` (local account with an initial password · AD account pre-registered) + admin set-password; **there is no sign-up page and there will not be one** |
 | `assets/scripts/create-first-user.ts` | `scripts/…` | Local only, run once — see §5.5 |
 | `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
 
@@ -254,9 +260,10 @@ of which login methods were chosen.
 | One `lib/password-policy.ts` for reset · change · admin-create | A different regex per form (the loosest one becomes the real rule) |
 | `revokeSessionsOnPasswordReset: true` + `revokeOtherSessions` on change | Leave old sessions alive after a reset — the intruder simply stays |
 | Require the current password to change one | Trust the session alone (a borrowed unlocked laptop = account taken) |
-| Block `/api/auth/sign-up` in `proxy.ts` | Leave it reachable — `emailAndPassword.enabled` opens public self-registration on an internal app |
-| Create local accounts only from `/admin/users` (guard + audit) | Add a sign-up page, or set `disableSignUp: true` (it also kills the server-side `signUpEmail` the admin action needs) |
-| Admin **sends a reset link** | Admin types a new password for someone — then the audit log can no longer say who acted |
+| `emailAndPassword.disableSignUp: true` | Leave it off — `enabled: true` publishes `POST /api/auth/sign-up/email` and anyone who can reach the app can self-register |
+| Create accounts from `/admin/users` (guard + audit) | Add a sign-up page |
+| Write the user + `credential` account rows with `hashPassword` (`better-auth/crypto`) | `auth.api.signUpEmail` in an admin action — `disableSignUp` blocks it too, and it mints a session for the new user |
+| Pre-register an AD user by the **exact** `ldapUsername` they log in with | A guessed spelling — the login upsert matches on that key, so a typo yields a second user and the role sits on the unused row |
 | `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
 | LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
 | LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
@@ -297,10 +304,15 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       refused; a password that breaks the policy is refused with the same message
       the reset page gives; after success this browser stays logged in
 - [ ] The change-password item does **not** appear for an SSO/LDAP account
-- [ ] [Local] `POST /api/auth/sign-up/email` from curl → **404**, and creating a
-      user from `/admin/users` still works (the block is the HTTP route only)
-- [ ] [Local] The new user can log in with the initial password, and the
-      audit log has a `users.create` row with **no password in `detail`**
+- [ ] [Local] `POST /api/auth/sign-up/email` from curl → refused
+      (`EMAIL_PASSWORD_SIGN_UP_DISABLED`), while "เพิ่มผู้ใช้" on `/admin/users`
+      still works
+- [ ] [Local] The new user can log in with the initial password, and the audit
+      log has a `users.create` row with **no password in `detail`**
+- [ ] [Local] Admin "ตั้งรหัสผ่าน" on a row → that user's open sessions die and
+      the new password works; the button is absent on SSO/LDAP rows
+- [ ] [LDAP] Pre-register an AD user with a role, then have them log in for the
+      first time → they land on the **same** row with that role, not a second one
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away

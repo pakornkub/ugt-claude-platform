@@ -62,16 +62,6 @@ export function proxy(request: NextRequest) {
   const nonce = generateNonce();
 
   // Always pass through Next.js internals, static assets, and the public auth API.
-  // [METHOD: LOCAL] Better Auth exposes POST /api/auth/sign-up/email publicly
-  // whenever emailAndPassword.enabled is true — that is open self-registration
-  // on an internal app. Block the HTTP route here rather than setting
-  // `disableSignUp: true`, which would also disable the server-side
-  // `auth.api.signUpEmail()` that createLocalUserAction needs. Server Actions
-  // never travel through the proxy, so admin-created accounts still work.
-  if (pathname.startsWith('/api/auth/sign-up')) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
-
   if (
     pathname.startsWith('/_next/') ||
     pathname === '/favicon.ico' ||

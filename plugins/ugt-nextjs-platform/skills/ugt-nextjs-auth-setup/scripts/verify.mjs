@@ -239,20 +239,28 @@ check('Password reset wired correctly', () => {
   if (has('proxy.ts') && !/reset-password/.test(read('proxy.ts'))) {
     problems.push('/reset-password is not public in proxy.ts — the mailed link bounces to /login');
   }
-  // emailAndPassword.enabled opens POST /api/auth/sign-up/email to the world.
-  if (has('proxy.ts') && !/api\/auth\/sign-up/.test(read('proxy.ts'))) {
-    problems.push('proxy.ts does not block /api/auth/sign-up — anyone can self-register on this app');
-  }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('Local accounts have a way to exist', () => {
+check('Local accounts: no self-signup, but a way in', () => {
   if (!has('lib/actions/password.ts')) {
-    return { ok: true, msg: 'no local login — accounts come from SSO/LDAP on first bind' };
+    return { ok: true, msg: 'no local login — accounts come from SSO/LDAP on first login' };
   }
   const problems = [];
-  if (!has('lib/actions/admin-users.ts') || !/createLocalUserAction/.test(read('lib/actions/admin-users.ts'))) {
-    problems.push('no createLocalUserAction — with sign-up blocked, nobody can ever get a local account');
+  const authTs = has('lib/auth.ts') ? read('lib/auth.ts') : '';
+  const adminUsers = has('lib/actions/admin-users.ts') ? read('lib/actions/admin-users.ts') : '';
+
+  // emailAndPassword.enabled publishes POST /api/auth/sign-up/email to the world.
+  if (!/disableSignUp\s*:\s*true/.test(authTs)) {
+    problems.push('emailAndPassword.disableSignUp is not true — anyone who can reach the app can self-register');
+  }
+  if (!/createLocalUserAction/.test(adminUsers)) {
+    problems.push('no createLocalUserAction — with sign-up closed, nobody can ever get a local account');
+  }
+  // signUpEmail is what disableSignUp switches off; an admin action calling it
+  // fails the moment the flag above is set, and only in the one flow nobody tests.
+  if (/auth\.api\.signUpEmail/.test(stripComments(adminUsers))) {
+    problems.push('admin-users.ts calls auth.api.signUpEmail — disableSignUp blocks it too; write the user + credential rows with hashPassword instead');
   }
   if (!has('scripts/create-first-user.ts')) {
     problems.push('scripts/create-first-user.ts missing — a local-only project cannot bootstrap its first login');

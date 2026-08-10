@@ -8,8 +8,9 @@ import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { UserRoleSelect } from '@/components/user-role-select';
-// [METHOD: LOCAL] — ลบ import + คอลัมน์/ปุ่มด้านล่างเมื่อไม่ได้เปิด local login
-import { CreateUserDialog, SendPasswordResetButton } from '@/components/admin-user-actions';
+// [METHOD: LDAP|LOCAL] — ลบ import + ปุ่ม/คอลัมน์ด้านล่างเมื่อใช้ SSO อย่างเดียว
+// (บัญชี SSO เกิดเองตอน login ครั้งแรก ไม่มีใครต้องเพิ่ม)
+import { CreateUserDialog, SetPasswordDialog } from '@/components/admin-user-actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
@@ -20,7 +21,7 @@ export default async function AdminUsersPage() {
   const perms = await getUserPermissions(session.user.id);
   if (!perms.includes(PERMISSIONS.USERS_READ)) redirect('/');
   const canUpdate = perms.includes(PERMISSIONS.USERS_UPDATE);
-  // [METHOD: LOCAL] — ปุ่มถูก "ซ่อน" ไม่ใช่ disable ตามกฎ; ด่านจริงคือ guard ในแอ็กชัน
+  // [METHOD: LDAP|LOCAL] — ปุ่มถูก "ซ่อน" ไม่ใช่ disable ตามกฎ; ด่านจริงคือ guard ในแอ็กชัน
   const canCreate = perms.includes(PERMISSIONS.USERS_CREATE);
   const canResetPassword = perms.includes(PERMISSIONS.USERS_RESET_PASSWORD);
 
@@ -68,7 +69,9 @@ export default async function AdminUsersPage() {
               {canResetPassword && (
                 <TableCell>
                   {/* บัญชี SSO/LDAP ตั้งรหัสผ่านที่ directory — ปุ่มนี้ทำอะไรให้ไม่ได้ */}
-                  {user.authType === 'local' && <SendPasswordResetButton userId={user.id} />}
+                  {user.authType === 'local' && (
+                    <SetPasswordDialog userId={user.id} userName={user.name} />
+                  )}
                 </TableCell>
               )}
             </TableRow>

@@ -2,38 +2,51 @@
 
 ## 4.7.1 (2026-08-10)
 
-4.7.0 shipped the recovery half of local login and I described the password
-policy as shared with "admin-create" — **which did not exist**. Checking that
-claim turned up two holes that had been there since local login was first
-offered:
+**User administration was missing entirely**, in both directions. 4.7.0
+described the password policy as shared with "admin-create"; checking that claim
+found no such thing, and pulling the thread found two holes that had been there
+since local login was first offered:
 
-- **No local account could be created at all.** `/admin/users` only listed
+- **No account could be created by hand at all.** `/admin/users` only listed
   users and assigned roles; `/admin/setup` promotes an already-logged-in user;
-  there is no sign-up page. `USERS_CREATE` and `USERS_RESET_PASSWORD` were
-  sitting in `ALL_PERMISSIONS` with nothing implementing them. A local-only
-  project could not get its first person in.
-- **Sign-up was open to the internet.** `emailAndPassword.enabled: true`
-  publishes `POST /api/auth/sign-up/email`, and nothing blocked it — anyone who
-  could reach the app could mint themselves an account.
+  there is no sign-up page. `USERS_CREATE` and `USERS_RESET_PASSWORD` sat in
+  `ALL_PERMISSIONS` with nothing implementing them. A local-only project could
+  not get its first person in.
+- **Sign-up was open to anyone who could reach the app.**
+  `emailAndPassword.enabled: true` publishes `POST /api/auth/sign-up/email` and
+  nothing closed it.
 
-Closed:
+`ugt-hrms` had already solved both — the skill just never extracted it. It is
+extracted now, generalized:
 
-- `createLocalUserAction` + `sendUserPasswordResetAction` in
-  `lib/actions/admin-users.ts`, both on the org guard order, both audited
-  (`users.create`, `users.password-reset-sent`), neither putting a password in
-  `detail`. `components/admin-user-actions.tsx` puts them on `/admin/users`.
-- `proxy.ts` 404s `/api/auth/sign-up`. Deliberately **not** `disableSignUp:
-  true` — that flag also blocks the server-side `auth.api.signUpEmail()` the
-  admin action runs on (verified in 1.5.4: the check sits inside the handler
-  with no server-side bypass). Server Actions never pass through the proxy, so
-  blocking the HTTP route closes the door without closing the admin's path.
+- `createLocalUserAction` · `setUserPasswordAction` · `addDirectoryUserAction`
+  in `lib/actions/admin-users.ts`, all on the org guard order, all audited
+  (`users.create`, `users.password-set`), none putting a password in `detail`.
+  `components/admin-user-actions.tsx` puts them on `/admin/users` as one
+  "เพิ่มผู้ใช้" dialog that switches between a local account (with an initial
+  password) and an AD account.
+- **AD accounts can be pre-registered.** They already appear on the first
+  successful bind, but a role often has to be in place before day one. The
+  `ldapUsername` must match exactly what the person types at login — that is
+  the key the login upsert matches on, so a typo produces a second user and the
+  role sits on the row nobody uses.
+- `emailAndPassword.disableSignUp: true`. This also blocks the server-side
+  `auth.api.signUpEmail()` (verified in 1.5.4 — the check is inside the handler,
+  no server bypass), which is why the admin action writes the `user` +
+  `credential` rows itself with `hashPassword` from `better-auth/crypto`, the
+  way HRMS does. That avoids a second problem in passing: `signUpEmail` mints a
+  session for the account being created.
+- An admin **sets a password directly** rather than mailing a link, because
+  `ugt-nextjs-mail-setup` is optional and a project without it would otherwise
+  have no recovery path at all. Every session of that user is revoked, and the
+  cost — two people knowing one credential for a while — is stated in the rule
+  file rather than left implicit.
 - `scripts/create-first-user.ts` for the chicken-and-egg a local-only project
   hits: accounts come from `/admin/users`, which needs a login nobody has yet.
   It refuses to run once any user exists.
-- The admin **sends a reset link** and cannot type someone's new password — an
-  audit log stops meaning anything once two people know one credential.
-- `verify.mjs` fails on a missing sign-up block, a missing
-  `createLocalUserAction`, and a missing bootstrap script.
+- `verify.mjs` fails on a missing `disableSignUp`, a missing
+  `createLocalUserAction`, an admin action still calling `signUpEmail`, and a
+  missing bootstrap script.
 
 ## 4.7.0 (2026-08-10)
 

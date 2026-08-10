@@ -30,6 +30,12 @@ export const auth = betterAuth({
   // Rule: set enabled: false when Local login is not selected in the interview.
   emailAndPassword: {
     enabled: true, // ← set to false when Local login is not selected
+    // `enabled: true` also publishes POST /api/auth/sign-up/email — open
+    // self-registration on an internal app. Accounts are created by an admin on
+    // /admin/users, so close it. `createLocalUserAction` writes the user +
+    // credential rows itself (with `hashPassword` from better-auth/crypto), so
+    // nothing on our side depends on the sign-up endpoint.
+    disableSignUp: true,
     minPasswordLength: 8, // MUST match PASSWORD_MIN_LENGTH in lib/password-policy.ts
     // Complexity rules (uppercase, lowercase, digit, special) live in
     // lib/password-policy.ts — one schema shared by reset / change / admin-create.
