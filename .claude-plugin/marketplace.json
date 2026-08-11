@@ -27,6 +27,11 @@
       "name": "ugt-python-platform",
       "source": "./plugins/ugt-python-platform",
       "description": "Org standards for Python projects (deploy-only for now): Jenkins + SonarQube + OWASP + Docker deploy for FastAPI / Flask / Django / batch jobs, with minimal lint/test tooling so the org Quality Gate passes"
+    },
+    {
+      "name": "ugt-php-platform",
+      "source": "./plugins/ugt-php-platform",
+      "description": "Org standards for PHP projects (deploy-only for now): Jenkins + SonarQube + OWASP + Docker deploy for Laravel / CodeIgniter / plain PHP / WordPress, with minimal lint/test tooling so the org Quality Gate passes"
     }
   ]
 }
