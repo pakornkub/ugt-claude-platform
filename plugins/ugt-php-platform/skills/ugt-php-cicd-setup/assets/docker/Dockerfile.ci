@@ -1,0 +1,4 @@
+# CI-only image — ใช้ใน Jenkins stage Install/Quality/Tests เท่านั้น ห้าม deploy
+FROM php:8.3-cli
+RUN pecl install pcov && docker-php-ext-enable pcov
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

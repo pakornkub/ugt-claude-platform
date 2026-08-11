@@ -1,0 +1,55 @@
+# Dev compose — deployed by Jenkins on the `develop` branch.
+# Same shape as docker-compose.yml but with dev image/container names and dev
+# host port.
+#
+# Placeholders: __PROJECT_NAME__, __PORT_DEV__
+services:
+  app:
+    build:
+      context: .
+    image: __PROJECT_NAME__-dev:latest
+    pull_policy: never
+    container_name: __PROJECT_NAME__-dev
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT:-__PORT_DEV__}:80'
+    # [VOLUME] persistent data — uncomment + rename per interview; path must be
+    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # volumes:
+    #   - /srv/appdata/__PROJECT_NAME__-dev/<name>:/var/www/html/<name>
+    # [WP] WordPress: wp-content เป็น volume บังคับ — ห้ามลบบล็อกนี้เมื่อใช้ shape WP
+    # volumes:
+    #   - /srv/appdata/__PROJECT_NAME__-dev/wp-content:/var/www/html/wp-content
+    networks:
+      - proxy-network
+    environment:
+      # Dev .env MUST differ from prod in at least:
+      #   DATABASE_URL  → separate dev DB (never point dev at prod data)
+      #   auth secret   → never share secrets between environments
+      DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # Add the project's runtime secrets below (same keys as prod compose):
+      # AUTH_SECRET: ${AUTH_SECRET}
+      # SENTRY_DSN: ${SENTRY_DSN:-}
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1:80/api/health\") !== false ? 0 : 1);' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  proxy-network:
+    external: true

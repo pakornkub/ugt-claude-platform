@@ -1,0 +1,7 @@
+# Org-standard WordPress Dockerfile — wp-content เป็น volume บังคับ (ดู compose)
+FROM wordpress:php8.3-apache
+# วาง org health endpoint ลง webroot ของ image (นอก wp-content — รอด volume mount)
+COPY api/health/index.php /var/www/html/api/health/index.php
+RUN chown -R www-data:www-data /var/www/html/api
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD php -r 'exit(@file_get_contents("http://127.0.0.1:80/api/health") !== false ? 0 : 1);' || exit 1

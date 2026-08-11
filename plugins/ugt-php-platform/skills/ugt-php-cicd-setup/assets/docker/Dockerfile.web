@@ -1,0 +1,27 @@
+# Org-standard PHP web Dockerfile — Laravel / CodeIgniter / plain PHP (apache)
+FROM php:8.3-apache
+WORKDIR /var/www/html
+
+# [DB] เปิด extension ตาม DB ของโปรเจค — เลือกบรรทัดเดียว ลบที่เหลือ:
+# RUN docker-php-ext-install pdo_mysql
+# RUN pecl install sqlsrv pdo_sqlsrv && docker-php-ext-enable sqlsrv pdo_sqlsrv   # SQL Server (ต้องมี msodbcsql — ดู references/docker-deploy.md)
+
+RUN a2enmod rewrite
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY composer.json composer.lock* ./
+# legacy ที่ composer มีแต่ dev tooling: --no-dev จะไม่ติดตั้งอะไร — ถูกต้องแล้ว
+RUN composer install --no-dev --no-interaction --no-progress || true
+
+COPY . .
+RUN chown -R www-data:www-data /var/www/html
+
+# [LARAVEL] DocumentRoot ชี้ public/ — ลบ 2 บรรทัดนี้ถ้าไม่ใช่ Laravel/CI4
+# RUN sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+# RUN sed -ri 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf
+
+EXPOSE 80
+
+# apache image ไม่มี curl/wget เสมอไป — ใช้ php ยิง 127.0.0.1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD php -r 'exit(@file_get_contents("http://127.0.0.1:80/api/health") !== false ? 0 : 1);' || exit 1
