@@ -23,7 +23,7 @@
         "The Jenkinsfile Deploy stage [VOLUME] block's mkdir -p line includes the uploads subdirectory (not just the <project> root) ahead of the chown -R call",
         "Both compose healthchecks target http://127.0.0.1:80/api/health or equivalent and carry pull_policy: never",
         "waitForQualityGate carries abortPipeline: true",
-        "Every path in sonar.sources/sonar.tests exists in the project and sonar.php.coverage.reportPaths=coverage/cobertura.xml"
+        "Every path in sonar.sources/sonar.tests exists in the project and sonar.php.coverage.reportPaths=clover.xml and sonar.php.tests.reportPath=test-results/junit.xml"
       ],
       "files": []
     }
