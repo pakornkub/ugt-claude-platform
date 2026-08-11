@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.mypy]
+ignore_missing_imports = true
+exclude = ["\\.venv"]
+
+[tool.pytest.ini_options]
+addopts = "--junitxml=test-results/junit.xml --cov=. --cov-report=xml --cov-report=html:coverage"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["tests/*", ".venv/*"]
