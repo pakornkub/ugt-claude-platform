@@ -89,11 +89,13 @@ use the `soft-*` button variants so colors don't shout on every row.
 Filters that scope the whole page — period, org unit, status — are NOT the
 table's per-column filters. Fixed placement so page N+1 never moves them:
 
-- Lives in the **same card header as the table** — never floating above the
-  card, never in its own card.
-- **Left-aligned**, ordered **wide → narrow**: period → org unit/scope →
-  status. Page actions stay top-right in `PageActions`; never mix an action
-  button into the filter row.
+- **In the DataTable toolbar row, via the `toolbarFilters` slot** — right
+  after the search box, ordered **wide → narrow**: period → org unit/scope →
+  status (มติ 2026-08-11; the earlier separate filter row above the toolbar
+  left the search row half empty and made the eye scan three strips for one
+  job). On narrow screens the row wraps naturally.
+- Page actions stay top-right in `PageActions`; never mix an action button
+  into the toolbar's filter zone.
 - Control per the ladder above (≤5 RadioGroup · 6–15 Select · >15 Combobox ·
   date range = `ui/date-range-picker`). **A bare `Input` is never a filter** —
   free-text search is the DataTable's own toolbar search; do not duplicate it
@@ -101,11 +103,11 @@ table's per-column filters. Fixed placement so page N+1 never moves them:
 - A filter that changes *which rows exist* must be part of the query key and
   re-fetch server-side (see `ugt-nextjs-pitfalls` → data-fetching) — the
   placement rule and the fetching rule are separate obligations.
-- **One divider only** between the whole control block (filter row → DataTable
-  toolbar → active-filter chips) and the table itself; the **last** control row
-  present carries it. Inside the control block, spacing separates the rows —
-  no hairlines between filters and search, or between search and chips: they
-  are one card header, and slicing it into strips reads as three components.
+- **One divider only** between the control block (toolbar row → active-filter
+  chips) and the table itself; the **last** control row present carries it.
+  Inside the control block, spacing separates the rows — no hairline between
+  the toolbar and the chips: they are one card header, and slicing it into
+  strips reads as separate components.
 
 ## DataTable
 
@@ -133,14 +135,13 @@ without `serverQuery` — client-filtering one page of a server-paginated set
 returns confident nonsense, so the component refuses rather than trusting the
 caller.
 
-**Toolbar** — fixed placement, matching the component (`data-table.tsx`):
-**search input leftmost**, a flex spacer, then `toolbarExtra` (export menu and
-friends) and the column-settings icon button hugging the **right** edge. The
-column-settings Popover has drag-to-reorder + show/hide checkboxes + reset;
-prefs persist per table `id`. When a page also has page-level filters, those
-form their **own row above** this toolbar (left-aligned, wide → narrow — see
-§Page-level filter bar); they never share the toolbar row, so search never
-migrates to the right side.
+**Toolbar** — one row, fixed order, matching the component (`data-table.tsx`):
+**search input leftmost** → `toolbarFilters` (page-level filters, wide →
+narrow) → flex spacer → `toolbarExtra` (export menu and friends) and the
+column-settings icon button hugging the **right** edge. The column-settings
+Popover has drag-to-reorder + show/hide checkboxes + reset; prefs persist per
+table `id`. Search never migrates to the right side, and filters never get
+their own row above the toolbar (มติ 2026-08-11).
 
 **Pagination**: rows-per-page Select → `หน้า X จาก Y` → four icon buttons
 (first · prev · next · last; first/last are `lg`-only). **No numbered page

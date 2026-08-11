@@ -627,6 +627,14 @@ interface DataTableProps<TData> {
   onRowClick?: (row: TData) => void;
   /** Extra controls rendered in the toolbar row, before the column toggle. */
   toolbarExtra?: React.ReactNode;
+  /**
+   * Page-level filters (period → org unit → status, กว้าง→แคบ) rendered in the
+   * toolbar row RIGHT AFTER the search box (มติ 2026-08-11 — one toolbar row,
+   * no separate filter row above; the old two-row layout left the search row
+   * half empty). Filters that change which rows exist must still be part of
+   * the server query — placement here is layout only.
+   */
+  toolbarFilters?: React.ReactNode;
 }
 
 /**
@@ -662,6 +670,7 @@ export function DataTable<TData>({
   rowClassName,
   onRowClick,
   toolbarExtra,
+  toolbarFilters,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
   const router = useRouter();
@@ -861,9 +870,10 @@ export function DataTable<TData>({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* toolbar มีปุ่มตั้งค่าคอลัมน์เสมอ (มติ full option set) — ช่องค้นหา/
-          toolbarExtra ยังคงตำแหน่งเดิม: ค้นหาซ้าย ปุ่มอื่นชิดขวา */}
-      <div className="flex items-center gap-2">
+      {/* toolbar แถวเดียว (มติ 2026-08-11): ค้นหาซ้ายสุด → filter ระดับหน้า
+          (toolbarFilters, กว้าง→แคบ) → ช่องว่าง → toolbarExtra + ปุ่มตั้งค่าคอลัมน์
+          ชิดขวา · จอแคบ wrap ลงบรรทัดใหม่เอง */}
+      <div className="flex flex-wrap items-center gap-2">
         {(filterColumn || globalSearch) && (
           <div className="relative">
             <Search
@@ -886,6 +896,8 @@ export function DataTable<TData>({
             />
           </div>
         )}
+
+        {toolbarFilters}
 
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">{toolbarExtra}</div>
 

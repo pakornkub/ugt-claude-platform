@@ -61,8 +61,9 @@ What lands in the project:
 4. **DataTable only** for tabular data; server-paginated data must sort and
    filter server-side through URL state — never client-sort a partial page.
    Every instance passes a **unique `id`** (prefs persist), and page-level
-   filters live in the table's card, left-aligned, widest→narrowest —
-   per-page config is part of the agreement, not a free choice.
+   filters live in the toolbar row via `toolbarFilters` — right after the
+   search box, widest→narrowest (มติ 2026-08-11) — per-page config is part
+   of the agreement, not a free choice.
 5. **`lib/format.ts` only** for dates and numbers — `DD/MM/YYYY` Gregorian
    (ค.ศ.) on screen, ISO `yyyy-MM-dd` in exported files, wall-clock dates
    read as UTC parts, instants shown in Asia/Bangkok.

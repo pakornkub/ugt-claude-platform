@@ -554,13 +554,11 @@
             </div>
 
             <div class="card">
-              <div class="filterbar" style="padding:12px 14px 0">
+              <div style="padding:12px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
                 <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-cal"/></svg>01/08/2026 – 31/08/2026</span>
                 <span class="field">ทุกหน่วยงาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
-                <span class="field">ทุกสถานะ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
-              </div>
-              <div style="padding:10px 14px 12px;display:flex;align-items:center;gap:8px">
-                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
+                <span class="field" style="border-color:var(--primary);color:var(--primary)">สถานะ: รออนุมัติ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
                 <span style="flex:1"></span>
                 <button class="btn btn-icon btn-outline" type="button" aria-label="ดาวน์โหลด">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-download"/></svg></button>
@@ -624,13 +622,14 @@
         </div>
       </div>
     </div>
-    <p class="note"><strong>ผังหัวการ์ดตายตัวสองแถว</strong>: แถวบน = filter ระดับหน้า
-      (ช่วงเวลา → หน่วยงาน → สถานะ เรียงกว้าง→แคบ ชิดซ้าย — ห้ามใช้ Input เปล่าเป็น filter) ·
-      แถวล่างเป็นของ DataTable เอง: <strong>ช่องค้นหาซ้ายสุดเสมอ</strong> ปุ่มอื่น
-      (ดาวน์โหลด/ตั้งค่าคอลัมน์) ชิดขวา — หน้าที่ไม่มี filter ระดับหน้าจะเหลือแค่แถวล่าง
-      (ดูหน้า admin ในส่วน 13) · <strong>เส้นคั่นมีเส้นเดียว</strong>: ระหว่างแถบควบคุม
-      ทั้งก้อนกับตัวตาราง (แถวควบคุมสุดท้ายเป็นคนถือเส้น) — ภายในแถบควบคุมใช้ระยะห่างแบ่ง
-      ไม่ใช้เส้น เพราะ filter/ค้นหา/chip เป็นหัวการ์ดก้อนเดียวกัน · ในหัวคอลัมน์: จุดจับลาก → ชื่อคอลัมน์ที่กด sort ได้
+    <p class="note"><strong>toolbar แถวเดียว ลำดับตายตัว (มติ 2026-08-11)</strong>:
+      <strong>ค้นหาซ้ายสุด</strong> → filter ระดับหน้า (ช่วงเวลา → หน่วยงาน → สถานะ
+      เรียงกว้าง→แคบ ผ่าน slot <code>toolbarFilters</code> — ห้ามใช้ Input เปล่าเป็น filter
+      และ filter ที่กำลังใช้งานเน้นเส้นขอบสี primary) → ช่องว่าง → ปุ่มเครื่องมือ
+      (ดาวน์โหลด/ตั้งค่าคอลัมน์) ชิดขวา · จอแคบ wrap ลงบรรทัดใหม่เอง ·
+      หน้าที่ไม่มี filter ระดับหน้าก็ผังเดียวกัน แค่ไม่มีก้อนกลาง (ดูหน้า admin ส่วน 13) ·
+      <strong>เส้นคั่นมีเส้นเดียว</strong>: ระหว่างแถบควบคุมกับตัวตาราง
+      (แถวควบคุมสุดท้ายเป็นคนถือเส้น — มี chip เส้นอยู่ใต้ chip ไม่มีก็ใต้ toolbar) · ในหัวคอลัมน์: จุดจับลาก → ชื่อคอลัมน์ที่กด sort ได้
       (ลูกศรบอกทิศ) → ไอคอนกรองเปิด popover เฉพาะคอลัมน์นั้น (สีเข้ม = กำลังใช้งาน) ·
       ปุ่มตั้งค่าคอลัมน์จำการตั้งค่าต่อผู้ใช้เมื่อตารางส่ง <code>id</code> ·
       ปุ่มดาวน์โหลดส่งออก<strong>ตาม filter ที่เห็นอยู่</strong> ไม่ใช่ทั้งตาราง ·

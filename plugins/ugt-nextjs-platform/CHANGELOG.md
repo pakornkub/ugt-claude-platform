@@ -1,5 +1,37 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.11.0 (2026-08-11)
+
+**One toolbar row** (มติ 2026-08-11). The maintainer flagged the three-strip
+card header — filter row, then a half-empty search row, then chips — as
+reading wrong, and it did: three scans for one job. The layout follows the
+canonical shadcn DataTable toolbar now:
+
+```
+[search] [period] [org] [status]   …   [export] [columns]
+[active-filter chips]                       ← only when filtering
+─────────────────────────────────────────── ← the one divider
+table …
+```
+
+- `data-table.tsx` gains a **`toolbarFilters` slot**, rendered right after the
+  search box; page-level filters go there (wide → narrow) instead of a
+  separate row above. The toolbar row wraps on narrow screens. Placement is
+  layout only — a filter that changes which rows exist must still ride the
+  server query (that rule is unchanged).
+- Chips row survives on purpose: it is the one place per-column filters (from
+  the header popovers) become visible and individually clearable — the
+  "values shown in the controls, no chips" variant was considered and
+  rejected for exactly that reason.
+- The divider rule from earlier today simplifies to: the last control row
+  present carries the single divider (chips when filtering, the toolbar
+  otherwise).
+- `conventions.md` §Page-level filter bar + §DataTable Toolbar rewritten;
+  design SKILL §2.4 updated; preview specimen 4 redrawn (active filter shown
+  with a primary border so "filtering is on" is visible even before the chips
+  row). The org contract needed no change — it pins "same card, leading edge,
+  wide → narrow", which this still satisfies.
+
 ## 4.10.0 (2026-08-11)
 
 Two changes from the maintainer reviewing the admin pages against HRMS, plus a
