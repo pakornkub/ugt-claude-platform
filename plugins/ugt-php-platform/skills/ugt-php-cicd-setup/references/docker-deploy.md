@@ -52,6 +52,43 @@ core ทับ แต่ image เองไม่มี state ของ uploads 
 เสมอ ไม่ใช่ optional ตาม interview** เพราะไม่มี WordPress project ไหนที่ไม่
 เขียนอะไรลง wp-content เลย
 
+### แล้วโค้ดของโปรเจคขึ้น container ทางไหน
+
+คำถามที่ตามมาทันทีจากสองย่อหน้าบน: ถ้า image = base + ไฟล์ health เท่านั้น และ
+`wp-content` เป็น bind mount เปล่า ๆ ที่ไม่มีอะไรเติมให้ — โค้ดของโปรเจคไปอยู่
+ที่นั่นได้ยังไง ชุดนี้รองรับ 2 ทาง (SKILL.md §5.3 บล็อก `[WP]` สั่งให้บอกผู้ใช้
+ตั้งแต่ตอน setup ว่าโปรเจคนี้ใช้ทางไหน):
+
+1. **ทางหลัก — `wp-content` คือข้อมูล runtime ไม่ใช่ artifact ของ pipeline**
+   theme/plugin/media ติดตั้งผ่าน **wp-admin ครั้งแรกหลัง deploy** แล้วอยู่ยาว
+   ใน `/srv/appdata/<project>/wp-content` ข้าม deploy ถัดไปเอง — pipeline
+   เปลี่ยนเฉพาะสิ่งที่มากับ image (core + health) ไม่เคยแตะ `wp-content` เลย
+   นี่คือเหตุผลที่ volume นี้บังคับ และคือสาเหตุที่ deploy รอบสองไม่ทำให้ของหาย
+2. **repo ที่ track theme/plugin ที่เขียนเอง** — โค้ดชุดนั้นต้องถูก copy ฝั่ง
+   **โฮสต์** ลง bind mount ก่อน `up -d` (ทำได้เพราะเป็น bind mount ไม่ใช่ named
+   volume — path เดียวกันมองเห็นได้ทั้งจาก Jenkins และจาก container):
+
+   ```groovy
+   // [WP] วางหลังบล็อก [VOLUME] (path + chown ต้องมาก่อน) และก่อน docker-compose up
+   sh "cp -r wp-content/. /srv/appdata/${containerName}/wp-content/"
+   ```
+
+   - `cp -r <dir>/.` (จุดต่อท้าย) คัดลอก *เนื้อใน* ไม่ใช่ตัวโฟลเดอร์ — ลืมจุด
+     แล้วจะได้ `wp-content/wp-content` ซ้อนกันหนึ่งชั้น
+   - ทับไฟล์ชื่อซ้ำแต่ **ไม่ลบ** ของที่ติดตั้งผ่าน wp-admin ไว้; อยากได้ mirror
+     เป๊ะ ๆ ต้อง `rsync --delete` ซึ่ง **ห้ามเป็นค่า default** เพราะจะลบ
+     `uploads/` ของผู้ใช้ทิ้งทุกรอบ deploy
+   - **ยังไม่ผ่าน pilot** — ownership หลัง `cp` (jenkins vs `www-data`) ยังไม่
+     เคยพิสูจน์กับโปรเจคจริง; `chown -R` ของบล็อก `[VOLUME]` รัน**ครั้งแรก
+     ครั้งเดียว** (มี `if [ ! -d ... ]` ครอบ) จึงไม่ครอบไฟล์ที่ `cp` เข้ามาใน
+     รอบถัดไป — โปรเจคแรกที่ใช้ทางนี้ต้องเช็ค permission จริงแล้วส่ง feedback
+     กลับมาที่ plugin
+
+ผลพลอยได้: ข้อนี้กำหนดว่า **SonarQube สแกนอะไร** — สิ่งที่ scanner เห็นคือโค้ด
+ใน repo (theme/plugin ที่เขียนเอง) เท่านั้น ไม่ใช่ WordPress core ซึ่งไม่เคยอยู่
+ใน repo อยู่แล้ว และถูก `sonar.exclusions` (`**/wp-admin/**`, `**/wp-includes/**`)
+กันไว้ซ้ำอีกชั้นเผื่อโปรเจคที่เผลอ commit core เข้ามา
+
 ### Core upgrade ผ่าน image ใหม่ ไม่ auto-update ในคอนเทนเนอร์
 
 WordPress core version ผูกกับ base image tag (`wordpress:php8.3-apache`

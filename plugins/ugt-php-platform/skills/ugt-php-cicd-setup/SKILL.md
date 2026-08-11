@@ -192,10 +192,10 @@ handoff). รายละเอียดกลไก chown → `references/docke
 | หาอะไร | หายังไง | ใช้ตอบข้อไหน |
 | --- | --- | --- |
 | Shape | ไล่**ตามลำดับนี้** หยุดที่ข้อแรกที่ตรง: มี `artisan` ที่ root → **laravel** · มี `wp-config.php` (หรือ `wp-config-sample.php`) + `wp-content/` → **wordpress** · มี `system/` คู่กับ `app/` (CI4) หรือ `application/` (CI3) → **codeigniter** · มี `composer.json` และ/หรือ `public/index.php` แต่ไม่เข้า 3 ข้อบน → **legacy** | ข้อ 4 (shape) |
-| `__ENTRY_FILE__` candidate | Laravel / CI4 → `public/index.php` · CI3 / legacy → `index.php` ที่ root · WordPress → `index.php` ที่ root — เลือกไฟล์ที่ **มีจริงและถูก commit ใน repo** เพราะ `SmokeTest.php` ใช้ `assertFileExists` กับ path นี้ตรง ๆ | §5.2 |
+| `__ENTRY_FILE__` candidate | Laravel / CI4 → `public/index.php` · CI3 / legacy → `index.php` ที่ root · **WordPress → `api/health/index.php`** (ไม่ใช่ `index.php` — repo ของ WP ไม่ได้ commit core ไว้) — เลือกไฟล์ที่ **มีจริงและถูก commit ใน repo** เสมอ เพราะ `SmokeTest.php` ใช้ `assertFileExists` กับ path นี้ตรง ๆ (ไม่มีไฟล์ = สเตจ Unit Tests แดง) | §5.2 |
 | DocumentRoot | มีโฟลเดอร์ `public/` ที่เป็น webroot จริงไหม (Laravel, CI4) → ต้อง uncomment บล็อก `[LARAVEL]` sed ใน `Dockerfile.web` | §5.3 |
 | Route/ไฟล์ `/api/health` เดิม | grep `api/health` ใน `**/*.php` + `routes/*.php` (Laravel) + `app/Config/Routes.php` (CI4) และเช็คว่ามีไฟล์ `api/health/index.php` อยู่แล้วไหม | §5.1 (มีแล้ว → ไม่ copy ทับ แค่ตรวจว่าไม่ต้อง login และไม่คืน version) |
-| composer manifest | มี `composer.json` ไหม (ถ้าไม่มีต้อง `composer init` ก่อน — สเตจ Install และ `Dockerfile.web` อ้างไฟล์นี้ตรง ๆ); มี `composer.lock` แล้วหรือยัง; มี dev tooling ตัวไหนติดอยู่ก่อนแล้ว | ข้อ 1 + §5.4 |
+| composer manifest | มี `composer.json` ไหม (ถ้าไม่มีต้อง `composer init` ก่อน — สเตจ Install รัน `composer install` **ทุก shape** ไม่มีข้อยกเว้น); มี `composer.lock` แล้วหรือยัง; มี dev tooling ตัวไหนติดอยู่ก่อนแล้ว. **WordPress แทบไม่เคยมี `composer.json`** → เตรียมใจว่าต้องเดินเส้นเดียวกับ legacy | ข้อ 1 + §5.4 |
 | Config lint/test เดิม | `phpstan.neon` / `phpstan.neon.dist`, `.php-cs-fixer.php` / `.php-cs-fixer.dist.php` / `.php_cs` (ตัวเก่า), `phpunit.xml` / `phpunit.xml.dist` | §5.1 (merge ไม่ทับ) |
 | Migration tool | Laravel: `database/migrations/` + `artisan` → `php artisan migrate` · CI4: `app/Database/Migrations/` + `spark` → `php spark migrate` · legacy/WordPress: ไม่มี migration มาตรฐาน | ข้อ 5 |
 | Test เดิม | มี `tests/` + ไฟล์ `*Test.php` อยู่แล้วไหม · มี `tests/SmokeTest.php` ชื่อชนอยู่แล้วไหม | §5.1 (`tests/SmokeTest.php` ใส่**เสมอ** — เป็นไฟล์แยกไม่ชนของเดิม; ชนชื่อพอดี → ไม่ทับ อ่านของเดิมแล้วเติม assert `__ENTRY_FILE__` เข้าไปถ้ายังไม่มี) |
@@ -254,8 +254,8 @@ handoff). รายละเอียดกลไก chown → `references/docke
 | `assets/tooling/.php-cs-fixer.php` | `.php-cs-fixer.php` (root) | เสมอ |
 | `assets/tooling/phpunit.xml` | `phpunit.xml` (root) | เสมอ |
 | `assets/tooling/SmokeTest.php` | `tests/SmokeTest.php` | **เสมอ** — โปรเจคที่มี test อยู่แล้วก็ใส่ (ไฟล์แยก ไม่ชนของเดิม) · มีไฟล์ชื่อนี้อยู่แล้ว = ไม่ทับ ให้เติม test เข้าไปในไฟล์เดิมแทน |
-| `assets/tooling/composer-require-dev.md` | **ไม่ copy** — เป็นคำสั่งให้รัน (§5.4) | เสมอ |
-| `assets/rules/ugt-php-ci.md` | `.claude/rules/ugt-php-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) |
+| `assets/tooling/composer-require-dev.md` | **ไม่ copy** — เป็นคำสั่งให้รัน (§5.4) | เสมอ (ทุก shape รวม WordPress) |
+| `assets/rules/ugt-php-ci.md` | `.claude/rules/ugt-php-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) — **ไฟล์นี้มี `__PROJECT_NAME__` อยู่ 2 จุด** (ชื่อ CI image) ต้องแทนค่าเหมือนไฟล์อื่น ไม่ใช่ copy ดิบ ๆ |
 
 นอกจากตารางนี้ ต้อง **สร้าง `.dockerignore`** ที่ root ถ้ายังไม่มี (หรือเติม
 บรรทัดที่ขาด) อย่างน้อย 4 บรรทัด:
@@ -283,7 +283,7 @@ Docker Build ใช้เป็น build context และ `Dockerfile.web` ใ�
 
 | Placeholder | ความหมาย | อยู่ในไฟล์ | ตัวอย่าง |
 | --- | --- | --- | --- |
-| `__PROJECT_NAME__` | kebab-case id — image/container/sonar key/credential suffix + tag ของ CI image (`<project>-ci`) | `Jenkinsfile`, `sonar-project.properties`, `docker-compose.yml`, `docker-compose.dev.yml`, `admin-handoff.template.md`, `tooling/composer-require-dev.md` (เฉพาะเคส legacy `composer init`) | `hr-portal` |
+| `__PROJECT_NAME__` | kebab-case id — image/container/sonar key/credential suffix + tag ของ CI image (`<project>-ci`) | `Jenkinsfile`, `sonar-project.properties`, `docker-compose.yml`, `docker-compose.dev.yml`, **`rules/ugt-php-ci.md`** (ชื่อ CI image 2 จุด — ไฟล์นี้ถูก copy ทุกโปรเจค ลืมแทนแล้ว rule จะบอกชื่อ image ผิดให้ session ถัดไป), `admin-handoff.template.md`, `tooling/composer-require-dev.md` (เคสที่ต้อง `composer init` — legacy/WordPress) | `hr-portal` |
 | `__PROJECT_DISPLAY_NAME__` | ชื่อที่คนอ่าน (sonar `projectName`, หัวเอกสาร handoff) | `Jenkinsfile`, `sonar-project.properties`, `admin-handoff.template.md` | `HR Portal` |
 | `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 80 เสมอ — apache) | `docker-compose.yml` | `8080` |
 | `__PORT_DEV__` | host port ของ dev | `docker-compose.dev.yml` | `8081` |
@@ -295,8 +295,17 @@ Docker Build ใช้เป็น build context และ `Dockerfile.web` ใ�
 Laravel      public/index.php
 CodeIgniter  public/index.php   (CI4)   ·   index.php   (CI3)
 legacy       index.php          (หรือ public/index.php ถ้าใช้ public/ เป็น webroot)
-WordPress    index.php
+WordPress    api/health/index.php
 ```
+
+> **WordPress ใช้ `api/health/index.php` ไม่ใช่ `index.php`** — repo ของโปรเจค
+> WordPress ไม่ได้ commit core ไว้ (core มากับ base image `wordpress:*` และ
+> `Dockerfile.wordpress` ไม่มี `COPY . .`) ดังนั้น `index.php` ที่ root **ไม่มี
+> อยู่ใน repo** ที่ CI checkout มา — `assertFileExists` จะ fail แล้วสเตจ Unit
+> Tests แดงตั้งแต่ build แรก. `api/health/index.php` เป็นไฟล์ที่ **การันตีว่า
+> commit อยู่จริง** เพราะ `Dockerfile.wordpress` `COPY` มันจาก build context
+> (ไม่มีไฟล์นี้ = image build ไม่ผ่านตั้งแต่แรกอยู่แล้ว) จึงเป็น smoke check ที่
+> ตรงกับความจริงของ shape นี้ที่สุด
 
 placeholder อีก 5 ตัวอยู่ใน `admin-handoff.template.md` **เท่านั้น** เติมตอน
 render เอกสารส่ง admin (§5.7):
@@ -343,6 +352,40 @@ render เอกสารส่ง admin (§5.7):
   นี้ **ไม่มี `COPY . .`** — วางที่อื่นแล้วจะไม่มีอะไรเข้า image เลย) · บล็อก
   `[WP]` ในทั้ง 2 compose **ห้ามลบ** · เพิ่ม `define('WP_AUTO_UPDATE_CORE', false);`
   ใน `wp-config.php` (เหตุผล → `references/docker-deploy.md` §B)
+
+  **โค้ดของโปรเจค WordPress ขึ้น container ทางไหน — ต้องบอกผู้ใช้ให้ชัดตั้งแต่
+  ตอน setup** เพราะ `Dockerfile.wordpress` = base image + ไฟล์ health เท่านั้น
+  ไม่มีอะไรจาก repo เข้า image อีกเลย และ `wp-content` เป็น bind mount ที่**ไม่มี
+  อะไรเติมให้อัตโนมัติ**:
+
+  1. **โมเดลหลัก (default) — `wp-content` เป็นข้อมูล runtime** อยู่ที่
+     `/srv/appdata/<project>/wp-content` บนโฮสต์ ไม่ใช่ของที่ pipeline ส่งขึ้นไป:
+     theme/plugin/media ติดตั้งผ่าน **wp-admin ครั้งแรกหลัง deploy** แล้วอยู่ยาว
+     ข้าม deploy ถัดไปเอง (นี่คือเหตุผลที่ volume นี้บังคับ) — deploy รอบถัดไป
+     เปลี่ยนแค่ core/health ที่มากับ image ไม่แตะ `wp-content`
+  2. **ถ้า repo track theme/plugin ที่เขียนเอง** (มี `wp-content/themes/<custom>`
+     หรือ `wp-content/plugins/<custom>` อยู่ใน git) โค้ดชุดนั้น**ยังไม่มีทางขึ้น
+     ไปเอง** — ต้องเติมขั้น copy ฝั่งโฮสต์ลง bind mount **ก่อน** `compose up`
+     ในสเตจ Deploy (ทำได้เพราะเป็น bind mount ไม่ใช่ named volume):
+
+     ```groovy
+     // [WP] เฉพาะโปรเจคที่ track theme/plugin ของตัวเองใน repo —
+     // ⚠️ ยังไม่ผ่าน pilot: ต้องพิสูจน์ ownership/permission กับโปรเจคจริงก่อนใช้ยาว
+     sh "cp -r wp-content/. /srv/appdata/${containerName}/wp-content/"
+     ```
+
+     วางไว้**หลัง**บล็อก `[VOLUME]` (path + chown ต้องมีก่อน) และ **ก่อน**
+     `docker-compose ... up -d`. `cp -r <dir>/.` (มีจุดต่อท้าย) = คัดลอก
+     *เนื้อใน* ไม่ใช่ตัวโฟลเดอร์ — ไม่งั้นจะได้ `wp-content/wp-content`.
+     ข้อนี้ทับไฟล์ชื่อซ้ำแต่**ไม่ลบ**ของที่ผู้ใช้ติดตั้งผ่าน wp-admin ไว้ ถ้า
+     ต้องการ mirror เป๊ะ ๆ ค่อยพิจารณา `rsync --delete` เป็นกรณีไป (เสี่ยงลบ
+     uploads — ห้ามใส่เป็นค่า default)
+  3. **ข้อนี้กำหนดว่า Sonar สแกนอะไรด้วย** — สิ่งที่ scanner เห็นคือโค้ดใน repo
+     (theme/plugin ที่เขียนเอง) ไม่ใช่ WordPress core ซึ่งไม่เคยอยู่ใน repo อยู่
+     แล้ว และถูก `sonar.exclusions` กัน `wp-admin`/`wp-includes` ไว้ซ้ำอีกชั้น —
+     ถ้าโปรเจคไม่มีโค้ดของตัวเองใน repo เลย ให้บอกผู้ใช้ตรง ๆ ว่า Quality Gate
+     จะวัดแทบไม่มีอะไร (นั่นเป็นเรื่องปกติของ WP ที่ใช้แต่ปลั๊กอินสำเร็จรูป
+     ไม่ใช่สัญญาณว่าตั้งค่าผิด)
 - **ไม่มี DB (ข้อ 5 = ไม่มี)** → ลบทุกบล็อกที่ติดป้าย `[DB]`: บล็อก migrate ใน
   สเตจ Deploy ของ `Jenkinsfile`, บรรทัด `DATABASE_URL:` ใน compose **ทั้ง 2
   ไฟล์**, ตัวเลือก extension `[DB]` ใน `Dockerfile.web` และคอมเมนต์ `[DB]` ใน
@@ -400,15 +443,32 @@ render เอกสารส่ง admin (§5.7):
 
 ### 5.4 ตรวจ composer + ติดตั้ง dev tooling
 
+**ข้อนี้บังคับทุก shape ไม่มีข้อยกเว้น** — สเตจ `Install` รัน
+`composer install` และสเตจ Code Quality/Unit Tests เรียก `vendor/bin/php-cs-fixer`
+· `vendor/bin/phpstan` · `vendor/bin/phpunit` **เหมือนกันหมดทั้ง 4 shape**
+(Jenkinsfile ไม่มีสาขาแยกตาม shape) ไม่มี `composer.json` = pipeline ตายที่
+stage ที่ 1 ก่อนถึงอย่างอื่น
+
 - ต้องมี `composer.json` ที่ root — สเตจ Install รัน `composer install` และ
-  `Dockerfile.web` `COPY composer.json composer.lock* ./` ตรง ๆ. โปรเจค legacy
-  ที่ยังไม่มีเลย: `composer init --no-interaction --name org/<project>` ก่อน
+  `Dockerfile.web` `COPY composer.json composer.lock* ./` ตรง ๆ. โปรเจคที่ยัง
+  ไม่มีเลย: `composer init --no-interaction --name org/<project>` ก่อน
 - ติดตั้ง dev tooling (เนื้อหาเดียวกับ `assets/tooling/composer-require-dev.md`
   ซึ่ง **ไม่ได้ copy เข้าโปรเจค** — เป็นคำสั่งให้รัน):
 
   ```bash
   composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit
   ```
+
+> **[WP] WordPress เดินเส้นเดียวกับ legacy ข้อนี้** — repo ของโปรเจค WordPress
+> แทบไม่เคยมี `composer.json` (core มากับ base image, ปลั๊กอินติดตั้งผ่าน
+> wp-admin) แต่ **ไม่ได้แปลว่าข้ามขั้นนี้ได้** เพราะ Jenkinsfile ยังรัน
+> `composer install` + `vendor/bin/*` ให้ shape นี้เหมือนกันเป๊ะ ๆ →
+> `composer init --no-interaction --name org/<project>` แล้ว
+> `composer require --dev ...` ทั้ง 3 ตัวตามปกติ. `composer.json` ที่ได้จะมีแต่
+> `require-dev` (ไม่มี runtime dependency สักตัว) — **ถูกต้องแล้ว** ไม่ใช่ความ
+> ผิดพลาด: `Dockerfile.wordpress` ไม่รัน composer เลย ไฟล์ชุดนี้มีไว้ให้ CI
+> ใช้อย่างเดียว (`Dockerfile.web` ก็รองรับเคสนี้ด้วย `composer install --no-dev
+> ... || true` ซึ่งจะไม่ติดตั้งอะไรและไม่ fail)
 
 - **commit `composer.lock`** — Install stage กับ image ต้อง resolve ชุดเดียวกัน
   ทุกครั้ง ไม่งั้น scan กับที่ deploy คนละ dependency tree
@@ -599,7 +659,10 @@ health) — ฝั่ง server ยังต้องให้ admin ยืน�
       healthcheck ยิง `127.0.0.1:80` · volume (ถ้ามี) อยู่ใต้ `/srv/appdata/` ·
       มี `volumes:` **ก้อนเดียว** ต่อ service
 - [ ] shape = wordpress: `wp-content` อยู่ใน `volumes:` ทั้ง 2 ไฟล์ ·
-      `wp-config.php` มี `define('WP_AUTO_UPDATE_CORE', false);`
+      `wp-config.php` มี `define('WP_AUTO_UPDATE_CORE', false);` ·
+      `__ENTRY_FILE__` = `api/health/index.php` (**ไม่ใช่** `index.php` ที่ไม่มี
+      ใน repo) · มี `composer.json` + `require-dev` ครบ 3 ตัวเหมือน shape อื่น ·
+      บอกผู้ใช้แล้วว่าโค้ดใน `wp-content` ขึ้น container ทางไหน (§5.3 ข้อ 1 หรือ 2)
 - [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `mkdir -p` ของ
       บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
 - [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
@@ -616,7 +679,8 @@ health) — ฝั่ง server ยังต้องให้ admin ยืน�
 - [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `*Test.php` และ `tests/SmokeTest.php` ชี้
       `__ENTRY_FILE__` ที่มีอยู่จริง (`vendor/bin/phpunit` ผ่านในเครื่อง)
 - [ ] `.dockerignore` มี `vendor`, `coverage`, `dc-report`, `test-results`
-- [ ] `.claude/rules/ugt-php-ci.md` อยู่ในที่ของมัน
+- [ ] `.claude/rules/ugt-php-ci.md` อยู่ในที่ของมัน **และไม่มี `__PROJECT_NAME__`
+      ค้าง** (ชื่อ CI image 2 จุดในไฟล์นั้นต้องถูกแทนค่าแล้ว)
 - [ ] `docs/admin-handoff.md` ถูก render แล้ว (ไม่มี `__*__` ค้าง, หัวข้อที่ไม่
       ใช้ถูกลบ)
 
