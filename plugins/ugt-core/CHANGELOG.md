@@ -1,5 +1,14 @@
 # Changelog — ugt-core
 
+## 2.3.0 (2026-08-11)
+
+`contracts/cicd.md` gains a new section **Persistent data (bind mounts)** —
+codifies the org pattern for container data that must survive deploys (uploads,
+SQLite, `wp-content`, reports): bind mounts under `/srv/appdata/<project>/` and
+`/srv/appdata/<project>-dev/`, never named or anonymous Docker volumes. Includes
+path format, setup rules (Deploy idempotency, one-time admin setup), guardrails
+(no secrets, no code bind-mounts except `wp-content`), and backup scope.
+
 ## 2.2.0 (2026-08-09)
 
 `contracts/design.md` §Layout pins two more things that a design review kept

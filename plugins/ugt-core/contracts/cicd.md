@@ -6,7 +6,8 @@ the stages themselves.
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
 > `ugt-nextjs-cicd-setup` (primary), `ugt-nextjs-test-lint-setup` (lint/test
-> stages), and `ugt-nextjs-full-setup` (summary). Bump the platform's
+> stages), and `ugt-nextjs-full-setup` (summary); and `ugt-python-platform` ·
+> `ugt-php-platform` will restate this once available. Bump the platform's
 > `plugin.json` version and CHANGELOG when you do.
 
 ## Stages (all 10, in order)
@@ -69,6 +70,25 @@ SonarQube analysis token is bound once in the Jenkins server config
   healthchecks poll `127.0.0.1` (never `localhost`)
 - Compose: `pull_policy: never` for locally-built images, host port
   overridable, log rotation bounded
+
+## Persistent data (volumes)
+
+Containers are disposable — anything that must survive a deploy (uploads,
+SQLite files, `wp-content`, generated reports) uses a **bind mount** under the
+org path, never a named or anonymous Docker volume:
+
+```
+/srv/appdata/<project>/<name>        # prod
+/srv/appdata/<project>-dev/<name>    # dev
+```
+
+- Declared in the compose `volumes:` list; the Deploy stage ensures each
+  project path exists and is owned by the container's runtime UID before the
+  first `up -d` (idempotent). The server admin creates `/srv/appdata` itself
+  once, writable by the Jenkins user (see the skill's admin handoff).
+- Never store secrets in a volume · never bind-mount code over the image
+  (single declared exception: WordPress `wp-content`)
+- Host file backup covers `/srv/appdata` once for every project
 
 ## Server names (must match exactly)
 
