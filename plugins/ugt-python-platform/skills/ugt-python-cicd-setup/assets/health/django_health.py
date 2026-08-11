@@ -1,8 +1,8 @@
-"""org /api/health — add to urls.py: path("api/health", health)"""
+"""org /api/health — เพิ่มใน urls.py: path("api/health", health)"""
 from django.http import JsonResponse
 
 
 def health(request):
     ok = True
-    # [DB] check DB properly (SELECT 1) and set ok = False when down — do not include version/commit in response
+    # [DB] เช็ค DB แบบถูก (SELECT 1) แล้ว ok = False เมื่อพัง — ห้ามใส่ version/commit ใน response
     return JsonResponse({"status": "healthy" if ok else "degraded"}, status=200 if ok else 503)

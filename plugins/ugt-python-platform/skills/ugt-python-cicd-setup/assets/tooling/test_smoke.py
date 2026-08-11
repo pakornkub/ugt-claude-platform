@@ -1,5 +1,5 @@
-# smoke test minimum for pipeline to pass — not a real test suite
-# new code after this must have paired tests per Quality Gate (new code coverage >= 60%)
+# smoke test ขั้นต่ำให้ pipeline รันผ่าน — ไม่ใช่ test suite จริง
+# โค้ดใหม่หลังจากนี้ต้องมี test คู่กันตาม Quality Gate (coverage โค้ดใหม่ ≥ 60%)
 import importlib
 
 
