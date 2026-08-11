@@ -1,0 +1,12 @@
+# Org-standard Python batch Dockerfile — ไม่มี web server / ไม่มี health endpoint
+# รันโดย host cron: docker compose run --rm job  (ดู references/docker-deploy.md)
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN addgroup --system app && adduser --system --ingroup app app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN chown -R app:app /app
+USER app
+CMD ["python", "-m", "__APP_MODULE__"]
