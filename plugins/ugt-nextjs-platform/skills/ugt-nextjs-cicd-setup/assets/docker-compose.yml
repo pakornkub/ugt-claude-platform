@@ -18,6 +18,10 @@ services:
       # Host port comes from .env (APP_PORT) with a default; container port is
       # always 3000
       - '${APP_PORT:-__PORT_PROD__}:3000'
+    # [VOLUME] persistent data — uncomment + rename per interview; path must be
+    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # volumes:
+    #   - /srv/appdata/__PROJECT_NAME__/uploads:/app/uploads
     networks:
       - proxy-network
     environment:

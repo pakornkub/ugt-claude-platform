@@ -14,6 +14,10 @@ services:
     restart: unless-stopped
     ports:
       - '${APP_PORT:-__PORT_DEV__}:3000'
+    # [VOLUME] persistent data — uncomment + rename per interview; path must be
+    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # volumes:
+    #   - /srv/appdata/__PROJECT_NAME__-dev/uploads:/app/uploads
     networks:
       - proxy-network
     environment:

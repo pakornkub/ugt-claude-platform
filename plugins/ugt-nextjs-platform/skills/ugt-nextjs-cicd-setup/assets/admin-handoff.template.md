@@ -124,4 +124,7 @@ __APP_URL_PROD__/api/auth/oauth2/callback/keycloak
 <!-- ภาคผนวก: ใส่เฉพาะเมื่อเป็นโปรเจคแรกบน server (server-level setup) —
      ถ้าไม่ใช่ ลบทิ้ง · เนื้อหาสรุปจาก jenkins-one-time-setup.md §A + sonarqube-setup.md:
      plugins ที่ต้องลง, tool names NodeJS-22/SonarQube-Scanner/Dependency-Check,
-     credential nvd, global NOTIFY_EMAIL/SMTP_FROM, การสร้าง org Quality Gate -->
+     credential nvd, global NOTIFY_EMAIL/SMTP_FROM, การสร้าง org Quality Gate,
+     สร้าง `/srv/appdata` ครั้งเดียว (ครั้งแรกของ server):
+     `sudo mkdir -p /srv/appdata && sudo chown jenkins:jenkins /srv/appdata` —
+     โปรเจคย่อยข้างใน Deploy stage สร้างเอง -->

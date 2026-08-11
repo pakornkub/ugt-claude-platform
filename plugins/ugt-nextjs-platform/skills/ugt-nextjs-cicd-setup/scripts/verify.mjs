@@ -211,6 +211,10 @@ for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
       problems.push('no pull_policy: never (compose will try to pull a locally-built image)');
     }
     if (!/APP_PORT/.test(body)) problems.push('no APP_PORT override');
+    // volumes must live under /srv/appdata (org contract — Persistent data)
+    const vols = [...body.matchAll(/^\s*-\s*(\/[^:\s]+):/gm)].map((m) => m[1]);
+    const stray = vols.filter((v) => !v.startsWith('/srv/appdata/'));
+    if (stray.length) problems.push(`bind mount นอก /srv/appdata: ${stray.join(', ')}`);
     return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
   });
 }

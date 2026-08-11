@@ -103,6 +103,14 @@ does nothing (details → `references/docker-deploy.md`)
 `SKIP_ENV_VALIDATION=1` (skips env schema validation — **CI only; never set in
 the production container**)
 
+### 2.8 Persistent data
+
+ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/srv/appdata/<project>/<name>`
+(dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
+ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. Deploy stage สร้าง path +
+chown ให้ตรง UID ใน container (idempotent); admin เตรียม `/srv/appdata`
+ให้เขียนได้ครั้งเดียว (ดู admin handoff).
+
 ## 3. Interview — ask first (one batch)
 
 1. **Project name** (kebab-case) → becomes image/container/credential/sonar key
@@ -115,6 +123,8 @@ the production container**)
 5. **Sentry?** — absent → cut the [SENTRY] sections + credential
 6. **Deploy target** — which Docker host, is Jenkins on the same machine as the
    Docker daemon or socket-mounted, `docker-compose` v1 or v2
+7. **Volume?** — มี path ที่ต้อง persist ข้าม deploy ไหม (เช่น uploads) →
+   รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี → ลบบล็อก `[VOLUME]`
 
 ## 4. Setup Steps
 
@@ -171,6 +181,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
 - vitest must enable the JUnit reporter when `CI=true` (see the comment in the
   template's Unit Tests stage)
+- ไม่มี volume → ลบทุกบล็อกคอมเมนต์ `[VOLUME]` ในทั้ง 2 compose
 
 ### 4.4 Adjust next.config
 

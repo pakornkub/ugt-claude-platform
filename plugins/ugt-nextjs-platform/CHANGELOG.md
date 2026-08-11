@@ -1,5 +1,28 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.13.0 (2026-08-11)
+
+`ugt-nextjs-cicd-setup` follows the platform contract's new **Persistent
+data** section (`ugt-core/contracts/cicd.md`): volume: interview ข้อ 7,
+บล็อก `[VOLUME]` ใน compose, verify check, admin handoff — ตาม contract
+Persistent data.
+
+- SKILL.md §3 gains interview item **7. Volume?** — a path that must persist
+  across deploys (e.g. uploads) → list them → uncomment `[VOLUME]` in both
+  compose files; none → delete the block. §2.8 **Persistent data** restates
+  the contract (bind mount under `/srv/appdata/<project>/<name>`, dev suffixed
+  `-dev`, no named volumes, no secrets in a volume, no code bind-mounted over
+  the image). §4.3 gains the corresponding cleanup step.
+- Both `assets/docker-compose.yml` and `docker-compose.dev.yml` gain a
+  commented `[VOLUME]` block under `ports:` (default: no volume) —
+  `/srv/appdata/__PROJECT_NAME__/uploads` prod, `-dev` suffix for dev.
+- `assets/admin-handoff.template.md`: the first-project-on-server appendix
+  now also covers the one-time `/srv/appdata` bootstrap (`sudo mkdir -p
+  /srv/appdata && sudo chown jenkins:jenkins /srv/appdata`) — every project's
+  own path underneath is created by its Deploy stage.
+- `scripts/verify.mjs`: the compose check now fails on any bind mount outside
+  `/srv/appdata/`.
+
 ## 4.12.0 (2026-08-11)
 
 **The four "rule exists, asset missing" gaps are closed.** Each had a
