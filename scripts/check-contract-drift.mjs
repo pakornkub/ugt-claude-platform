@@ -17,6 +17,7 @@ import { join } from 'node:path';
 const ROOT = process.cwd();
 const CORE = 'plugins/ugt-core';
 const NEXT = 'plugins/ugt-nextjs-platform/skills';
+const PY = 'plugins/ugt-python-platform/skills';
 
 // Each check: every file must match ALL its regexes.
 // Keys are repo-relative paths; values are the patterns that pin the value.
@@ -28,6 +29,7 @@ const CHECKS = [
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
       [`${NEXT}/ugt-nextjs-test-lint-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/new_coverage/, /≥\s*60%/],
     },
   },
   {
@@ -36,6 +38,7 @@ const CHECKS = [
       [`${CORE}/contracts/cicd.md`]: [/new_violations/, /=\s*0/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_violations/, /=\s*0/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_violations/, /=\s*0/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/new_violations/, /=\s*0/],
     },
   },
   {
@@ -44,6 +47,7 @@ const CHECKS = [
       [`${CORE}/contracts/cicd.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/new_duplicated_lines_density/, /≤\s*3%/],
     },
   },
   {
@@ -52,6 +56,7 @@ const CHECKS = [
       [`${CORE}/contracts/cicd.md`]: [/new_security_hotspots_reviewed/, /100%/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/new_security_hotspots_reviewed/, /100%/],
       [`${NEXT}/ugt-nextjs-clean-code/SKILL.md`]: [/new_security_hotspots_reviewed/, /100%/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/new_security_hotspots_reviewed/, /100%/],
     },
   },
   {
@@ -59,6 +64,7 @@ const CHECKS = [
     files: {
       [`${CORE}/contracts/cicd.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/CRITICAL\s*≥\s*1/, /HIGH\s*≥\s*1/],
     },
   },
   {
@@ -66,6 +72,7 @@ const CHECKS = [
     files: {
       [`${CORE}/contracts/cicd.md`]: [/all 10, in order/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/all 10, in order|10-stage/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/all 10, in order|10-stage/],
     },
   },
   {
@@ -73,6 +80,7 @@ const CHECKS = [
     files: {
       [`${CORE}/contracts/cicd.md`]: [/env-<project>/, /env-<project>-dev/],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/env-<project>/, /env-<project>-dev/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/env-<project>/, /env-<project>-dev/],
     },
   },
   {
@@ -80,6 +88,7 @@ const CHECKS = [
     files: {
       [`${CORE}/contracts/cicd.md`]: [/\/srv\/appdata\/<project>\//],
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
     },
   },
   {
