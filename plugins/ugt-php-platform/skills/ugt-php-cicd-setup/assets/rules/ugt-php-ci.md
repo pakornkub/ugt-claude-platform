@@ -13,7 +13,7 @@ paths:
 ## รายการ stage คือ contract — แก้คำสั่งข้างในได้ แต่ห้ามตัด stage
 
 ```
-Checkout → Install → Code Quality (parallel: Lint / Format Check / Type Check)
+Checkout → Install → Code Quality (parallel: Lint / Format Check / Static Analysis)
   → Unit Tests (JUnit + coverage) → Build (no-op — PHP มี artifact เดียวคือ image)
   → OWASP Dependency Check (90-min timeout + suppression file)
   → SonarQube Analysis → Quality Gate (abortPipeline: true)
@@ -40,9 +40,11 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 
 ## Toolchain รันใน docker (มติ M8 — ไม่ใช้ Jenkins Global Tool)
 
-- ทุก stage (Install / Lint / Format Check / Type Check / Unit Tests) เปิด
-  `docker.image('php:8.1-cli').inside { ... }` ของตัวเอง — Jenkins agent
-  ไม่มี PHP tool ติดตั้งไว้ล่วงหน้า
+- **Install stage สร้าง CI image ครั้งเดียว** ด้วย `docker build -f Dockerfile.ci -t __PROJECT_NAME__-ci .`
+  (FROM php:8.3-cli + pecl pcov + composer) — ครั้งแรกช้า ครั้งถัดไปโดน cache
+- ทุก stage ถัดมา (Lint / Format Check / Static Analysis / Unit Tests) **ใช้ image เดิม**
+  `docker.image('__PROJECT_NAME__-ci').inside { ... }` — Jenkins agent ไม่มี PHP
+  tool ติดตั้งไว้ล่วงหน้า
 - `vendor` ถูกสร้างในสเตจ Install แล้วอยู่ในไฟล์ workspace (ไม่ใช่ในตัว
   container ที่ถูกทิ้งเมื่อ stage จบ) จึงรอดข้าม stage ถัดไปได้ เพราะ
   `docker.image().inside` mount workspace เดิมทุกครั้ง
