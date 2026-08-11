@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWASP Dependency-Check suppression file.
+  Referenced by the Jenkinsfile OWASP stage via: - -suppression ./owasp-suppressions.xml
+
+  RULES:
+  - Start EMPTY. Add a suppression ONLY after reviewing the CVE and confirming
+    it is a false positive or does not apply to how the dependency is used.
+  - Every suppression MUST carry a rationale comment (what CVE, why it does not
+    apply, link to the advisory or upstream issue).
+  - The Jenkins dependencyCheckPublisher is suppression-aware: suppressed CVEs
+    move to <suppressedVulnerabilities> in the report and do NOT count toward
+    the fail/unstable thresholds.
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+  <!-- Example (keep commented until you have a real, reviewed case):
+  <suppress>
+     <notes><![CDATA[
+        CVE-2023-XXXXX affects package foo only when used as an HTTP server;
+        this project uses foo purely as a build-time CLI. Upstream discussion:
+        https://github.com/foo/foo/issues/1234
+        Reviewed by: <name>, <date>
+     ]]></notes>
+     <packageUrl regex="true">^pkg:npm/foo@.*$</packageUrl>
+     <cve>CVE-2023-XXXXX</cve>
+  </suppress>
+  -->
+
+</suppressions>
