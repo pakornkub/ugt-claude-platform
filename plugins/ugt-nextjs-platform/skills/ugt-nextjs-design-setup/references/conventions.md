@@ -193,9 +193,15 @@ happens — same component, different config):
   in the URL (`?tab=`) · > ~5 tabs = split pages.
 - Tooltip: `TooltipProvider` delay 0 · never the sole carrier of essential
   info (mobile has no hover).
-- Chart: `ui/chart` (recharts via shadcn) + `--chart-1..5` only — no other
-  chart lib, no hardcoded colors.
-- Rich text: tiptap via a central `ui/tiptap-editor` — no other editor lib.
+- Chart: `ui/chart` (recharts via shadcn — `npx shadcn add chart` when the
+  project first needs one) — no other chart lib, no hardcoded colors. Colors:
+  generic series take `--chart-1..5` in order; a series that **is** a status
+  (สำเร็จ/ข้าม/ผิดพลาด) takes the matching `--status-*` so the chart and the
+  StatusBadge on the table tell the same story in the same color. Working
+  example: `ui/chart-example.tsx` (copy, adapt, delete).
+- Rich text: tiptap via the kit's `ui/tiptap-editor` — no other editor lib,
+  no second editor component. Deps are the `@tiptap/*` ^3 set; install only
+  when the project actually has rich text.
 
 ## Export (Excel/CSV)
 
@@ -259,5 +265,10 @@ and CRLF per RFC 4180.
 | `lib/table-query.ts` · `lib/table-prefs.ts` · `lib/pagination.ts` | BOI | URL-state + column prefs + page params for server-mode tables (`table-query` imports `firstParam` from `pagination`) |
 | `lib/actions-locale.ts` → `lib/actions/locale.ts` | HRMS | th+en only; Server Action guarded by `lib/auth` (auth-setup) |
 | `lib/export.ts` | merge: HRMS's two hand-written export routes, collapsed into one column spec (+ BOM, formula guard, row cap) | server-only (`exceljs`); pairs with `ui/export-menu` |
+| `components/query-provider.tsx` · `lib/http-error.ts` | HRMS `components/providers.tsx` + `lib/http-error.ts` | one QueryClient for the whole app (staleTime 0 · retry 1 · 401 → `session-expired` event); queryFns throw `HttpError`, never bare `Error` |
+| `ui/query-progress.tsx` | HRMS | top progress bar on **initial** fetches only (background refetches stay silent); needs `nprogress` + the CSS block in its header comment |
+| `ui/tiptap-editor.tsx` | HRMS (verbatim) | the app's one rich-text editor; ship only when rich text exists (`@tiptap/*` ^3 set) |
+| `ui/chart-example.tsx` | HRMS `run-trend-chart` (OT stripped) | reference to copy-adapt-delete, not a shared component; needs `npx shadcn add chart` |
+| `lib/motion.ts` | new — the agreement's numbers as importable constants | only when custom motion = มี (pairs with `docs/MOTION.md`); dep `motion` |
 | `ui/button-variants.md` | BOI → recipes on the base-mira button, colors mapped to org tokens | the sanctioned `components/ui/button.tsx` edit |
 | `brand/ube-logo-short.svg` · `brand/ube-logo-long.svg` | company asset | → `public/brand/` · `fill="currentColor"` (tint via CSS) · short = shell header, long (tagline) = login/landing |

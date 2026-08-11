@@ -1,5 +1,44 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.12.0 (2026-08-11)
+
+**The four "rule exists, asset missing" gaps are closed.** Each had a
+convention naming the required library with nothing to install, which in
+practice means every project re-derives the setup and drifts.
+
+- **React Query provider** (from HRMS `components/providers.tsx`, now standard
+  in every install): `components/query-provider.tsx` — one QueryClient for the
+  whole app, `staleTime 0` (org data changes from many hands; freshness beats
+  fetch thrift), `retry 1`, and a `QueryCache.onError` that turns a mid-session
+  401 into a `session-expired` event for auth's watcher instead of an error
+  toast. With it: `lib/http-error.ts` (queryFns throw `HttpError`, never bare
+  `Error` — the 401 routing depends on the status being attached) and
+  `ui/query-progress.tsx` (top bar on **initial** fetches only; background
+  refetches stay silent so the bar doesn't flash on every post-save
+  invalidation; its nprogress CSS rides in the header comment).
+  `pitfalls/data-fetching.md` now names the provider and the
+  never-`new QueryClient`-in-a-page rule.
+- **`ui/tiptap-editor.tsx`** — HRMS's editor verbatim (389 lines: toolbar,
+  source mode, an `insert()` handle for server-built HTML like mail-template
+  tokens). Ships only when the project has rich text; `@tiptap/*` ^3 set.
+- **`ui/chart-example.tsx`** — a reference to copy-adapt-delete, not a shared
+  component (charts are feature code; `npx shadcn add chart` provides the real
+  primitive). What it teaches is the color rule with teeth: generic series →
+  `--chart-1..5` in order; a series that *is* a status → the matching
+  `--status-*`, so the chart and the StatusBadge on the table tell the same
+  story in the same color.
+- **`lib/motion.ts`** — the agreement's numbers (0.2s ease-out, ≤12px) as
+  importable constants plus `fadeSlideUp(reduced)`/`fadeOnly()`, so pages stop
+  inventing their own durations. The decision ladder is unchanged and stated
+  in the file: don't animate → CSS → only then `motion`. HRMS's animated tab
+  underline was NOT extracted — it is built on Radix and the kit is Base UI;
+  the technique (layoutId + `useReducedMotion`) is cited instead.
+
+Install wiring: `QueryProvider` joins the layout provider chain (outermost),
+`@tanstack/react-query` + devtools + `nprogress` join the standard deps;
+chart/tiptap/motion stay opt-in per project, listed with their triggers in
+SKILL step 3.4 and the kit inventory.
+
 ## 4.11.0 (2026-08-11)
 
 **One toolbar row** (มติ 2026-08-11). The maintainer flagged the three-strip

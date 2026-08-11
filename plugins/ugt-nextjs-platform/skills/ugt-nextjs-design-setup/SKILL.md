@@ -165,7 +165,10 @@ each with a recorded decision — never silently reformat the project.
    // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
    ```
 
-   Body wraps: `ThemeProvider` (from `assets/components/theme-provider.tsx`,
+   Body wraps: **`QueryProvider` (from `assets/components/query-provider.tsx`
+   — the app's single QueryClient; also copy `assets/lib/http-error.ts`, and
+   `assets/ui/query-progress.tsx` + its CSS block rendered just inside the
+   provider)** → `ThemeProvider` (from `assets/components/theme-provider.tsx`,
    when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
@@ -180,14 +183,19 @@ each with a recorded decision — never silently reformat the project.
    registry moved form composition to the `field` primitive. It still pairs
    with zod + react-hook-form.)
    Then the kit's npm deps — **pin majors, the kit is version-coupled**:
-   `npm i @tanstack/react-table@^8 date-fns@^4 react-hook-form zod
-   lucide-react` (v9 of tanstack renames the v8 API the kit uses; `add`
-   doesn't always install lucide-react itself) · `next-themes` when dark
+   `npm i @tanstack/react-table@^8 @tanstack/react-query@^5
+   @tanstack/react-query-devtools@^5 nprogress date-fns@^4 react-hook-form
+   zod lucide-react` (v9 of tanstack-table renames the v8 API the kit uses;
+   `add` doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
    registry uses it) · `next-intl` only when ภาษา = th+en · `exceljs` only when
    the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
    skip both files otherwise; route shape and traps in
-   `references/conventions.md` §Export).
+   `references/conventions.md` §Export) · `npx shadcn@latest add chart`
+   (recharts) only when the project has charts — copy `ui/chart-example.tsx`
+   as the color-rule reference · the `@tiptap/*` ^3 set + `ui/tiptap-editor.tsx`
+   only when rich text exists · `motion` + `lib/motion.ts` only when custom
+   motion = มี (pairs with `docs/MOTION.md`).
 5. **App shell FIRST, then variants**: install the shadcn block named in
    `references/layout-shells.md` (never hand-composed) **before** touching
    `button.tsx` — `add <block>` prompts per existing file (even with

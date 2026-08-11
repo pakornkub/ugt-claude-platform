@@ -6,6 +6,13 @@ Server Actions or API routes — not pure RSC re-rendering. That choice is what
 makes the first two sections non-obvious: Next.js server-cache tools and the
 client cache are two separate worlds, and only you connect them.
 
+The client half is installed by `ugt-nextjs-design-setup`: **one**
+`QueryProvider` in the root layout (staleTime 0 · retry 1 · 401 →
+`session-expired` event) — never `new QueryClient` in a page, a second cache
+is invisible to every `invalidateQueries` from the first. queryFns that fetch
+throw `HttpError` (from `lib/http-error.ts`) so a mid-session 401 routes to
+re-login instead of surfacing as an ordinary error toast.
+
 ## 1. `revalidatePath` does not touch React Query
 
 `revalidatePath`/`revalidateTag` invalidate the **server-side** RSC/fetch cache
