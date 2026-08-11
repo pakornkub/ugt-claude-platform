@@ -47,7 +47,7 @@ Skill layout:
 | `assets/docker/Dockerfile.web` · `Dockerfile.batch` | เลือกตัวเดียวตาม shape → copy เป็น `Dockerfile` ที่ root |
 | `assets/docker-compose.yml` · `docker-compose.dev.yml` | prod/dev คนละไฟล์ · `pull_policy: never` · healthcheck 127.0.0.1 |
 | `assets/health/fastapi_health.py` · `flask_health.py` · `django_health.py` | `/api/health` ต่อ framework — เอาไปวางในซอร์สของแอป |
-| `assets/tooling/pyproject-tooling.toml` · `requirements-dev.txt` · `test_smoke.py` | tooling ขั้นต่ำ (ruff/mypy/pytest+cov) ให้ stage 2–4 รันผ่านโดยไม่แตะโค้ดเดิม (มติ M4) |
+| `assets/tooling/pyproject-tooling.toml` · `requirements-dev.txt` · `test_smoke.py` | tooling ขั้นต่ำ (ruff/mypy/pytest+cov) ให้ stage 2–4 **มีคำสั่งให้รันได้จริง** โดยไม่ต้องเขียน test เดิมใหม่ (มติ M4) — แต่โค้ดเดิมต้องผ่าน `ruff format` ก่อน ซึ่งขั้น setup จัดการให้ใน §5.6 |
 | `assets/rules/ugt-python-ci.md` | ไฟล์ `.claude/rules/` — โหลดเองเมื่อ session แตะ Jenkinsfile/Docker/Sonar (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 | `assets/admin-handoff.template.md` | เอกสารส่งทีม admin — render แล้วเขียนลงโปรเจคเป็น `docs/admin-handoff.md` |
 | `references/docker-deploy.md` | กลไก deploy เชิงลึก: [WEB] vs [BATCH], host cron, volume ownership/chown, healthcheck บน slim, `.dockerignore`, compose conventions |
@@ -161,7 +161,10 @@ compose. Shape `[BATCH]` ไม่มี health endpoint เลย (ไม่ม
 (dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. บล็อก `[VOLUME]` ในสเตจ
 Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app` ใน container ให้เอง
-เฉพาะครั้งแรก (idempotent) โดยอ่าน UID จาก image จริง ไม่ hardcode;
+เฉพาะครั้งแรก (idempotent) โดยอ่าน UID จาก image จริง ไม่ hardcode —
+แต่ **session ที่กรอก volume ต้องเติม `<name>` ทุกตัวเข้าไปในบรรทัด `mkdir -p`
+ของบล็อกนั้นเอง** (template mkdir ไว้แค่ระดับ `<project>`; subdir ที่ไม่มีจะถูก
+dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้).
 admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin handoff).
 รายละเอียดกลไก chown → `references/docker-deploy.md` §D
 
@@ -184,7 +187,7 @@ admin เตรียม `/srv/appdata` ให้เขียนได้คร�
 | Route `/api/health` เดิม | grep `"/api/health"` ทั้ง `**/*.py` | §5 (มีแล้ว → ไม่ copy ทับ แค่ตรวจว่าไม่ต้อง login และไม่คืน version) |
 | Config lint/test เดิม | `[tool.ruff]` / `[tool.pytest.ini_options]` / `[tool.mypy]` ใน `pyproject.toml`, `setup.cfg`, `ruff.toml`, `pytest.ini`, `mypy.ini` | §5 (merge ไม่ทับ) |
 | Migration tool | มี `alembic.ini`/`alembic/` → alembic · มี `manage.py` → `manage.py migrate` · ไม่มีเลย → ไม่มี DB migration | ข้อ 5 |
-| Test เดิม | มี `tests/` + ไฟล์ `test_*.py` อยู่แล้วไหม | §5 (มีแล้ว → ไม่ต้องเพิ่ม `test_smoke.py`) |
+| Test เดิม | มี `tests/` + ไฟล์ `test_*.py` อยู่แล้วไหม · มี `tests/test_smoke.py` ชื่อชนอยู่แล้วไหม | §5 (`tests/test_smoke.py` ใส่**เสมอ** — เป็นไฟล์แยกไม่ชนของเดิม; ชนชื่อพอดี → ไม่ทับ อ่านของเดิมแล้วเติม assert import `__APP_MODULE__` เข้าไปถ้ายังไม่มี) |
 
 **ของเดิมไม่เขียนทับ** — ทุกไฟล์ในตาราง §5.1 ถ้ามีอยู่แล้วให้ merge/ปรับ แล้ว
 บอกผู้ใช้ว่าไปแตะอะไรบ้าง; ยกเว้นไฟล์เดียวคือ `.claude/rules/ugt-python-ci.md`
@@ -234,7 +237,7 @@ admin เตรียม `/srv/appdata` ให้เขียนได้คร�
 | `assets/health/django_health.py` | ในซอร์สของแอป เช่น `<app>/health.py` แล้ว `path("api/health", health)` ใน `urls.py` | shape = django |
 | `assets/tooling/pyproject-tooling.toml` | **merge เข้า** `pyproject.toml` (ไม่มีไฟล์ → สร้างใหม่ด้วยเนื้อนี้) | เสมอ |
 | `assets/tooling/requirements-dev.txt` | `requirements-dev.txt` (root) | เสมอ |
-| `assets/tooling/test_smoke.py` | `tests/test_smoke.py` | เสมอ (โปรเจคที่มี test อยู่แล้วก็ใส่ได้ — เป็นไฟล์แยก ไม่ชนของเดิม) |
+| `assets/tooling/test_smoke.py` | `tests/test_smoke.py` | **เสมอ** — โปรเจคที่มี test อยู่แล้วก็ใส่ (ไฟล์แยก ไม่ชนของเดิม) · มีไฟล์ชื่อนี้อยู่แล้ว = ไม่ทับ ให้เติม test เข้าไปในไฟล์เดิมแทน |
 | `assets/rules/ugt-python-ci.md` | `.claude/rules/ugt-python-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 
 นอกจากตารางนี้ ต้อง **สร้าง `.dockerignore`** ที่ root ถ้ายังไม่มี (หรือเติม
@@ -278,7 +281,7 @@ Django   ["gunicorn", "-b", "0.0.0.0:8000", "config.wsgi:application"]
 ```
 
 placeholder อีก 5 ตัวอยู่ใน `admin-handoff.template.md` **เท่านั้น** เติมตอน
-render เอกสารส่ง admin (§5.5):
+render เอกสารส่ง admin (§5.7):
 
 | Placeholder | เติมด้วย |
 | --- | --- |
@@ -298,17 +301,38 @@ sonar keys = `<project>`, `<project>-dev`
   สเตจ Deploy ของ `Jenkinsfile`, บรรทัด `DATABASE_URL:` ใน compose **ทั้ง 2
   ไฟล์**, และคอมเมนต์ `[DB]` ในไฟล์ health (ตัว health ยัง return `healthy`
   ถูกต้องเพราะ `ok = True` อยู่แล้ว)
-- **Django (ข้อ 5 = django migrate)** → ในบล็อก `[DB]` ของสเตจ Deploy สลับ
-  `alembic upgrade head` เป็น `python manage.py migrate --noinput` (บรรทัดอ่าน
-  `DATABASE_URL` จาก `.env` คงเดิม — Django อ่านผ่าน settings ของตัวเอง ตรวจว่า
-  settings อ่าน env นี้จริง)
+- **Django (ข้อ 5 = django migrate)** → สลับบล็อก `[DB]` ของสเตจ Deploy **ทั้ง
+  ก้อน** เป็นบรรทัดเดียว (คอมเมนต์ `[DB] Django variant` ใน Jenkinsfile เขียน
+  ไว้ให้แล้ว):
+
+  ```groovy
+  sh "docker run --rm --env-file .env ${imageName}:${buildNum} python manage.py migrate --noinput"
+  ```
+
+  ใช้ `--env-file .env` **ไม่ใช่** `-e DATABASE_URL` ตัวเดียวแบบ alembic เพราะ
+  `manage.py` โหลด `settings.py` ทั้งไฟล์ก่อนทำอะไรทั้งนั้น — ขาด `SECRET_KEY`
+  หรือ `ALLOWED_HOSTS` ก็ตายตั้งแต่ `ImproperlyConfigured` ยังไม่ทันแตะ DB.
+  ผลพลอยได้คือ **ตัดบรรทัด `grep`/`cut`/`tr` ที่ parse `.env` เองทิ้งได้เลย**
+  (docker อ่านไฟล์ให้ — ไม่ต้องมาลุ้นเรื่อง quote/`\r` ใน value อีก)
 - **มี DB แต่ไม่ใช่ทั้งสองแบบ** → คงบล็อก `[DB]` ไว้แล้วเปลี่ยนคำสั่งเป็นตัวที่
   โปรเจคใช้จริง — ห้ามลบบล็อกทิ้ง เพราะ contract คือ migrate ก่อน deploy
 - **ไม่มี volume (ข้อ 6 = ไม่มี)** → ลบบล็อกคอมเมนต์ `[VOLUME]` ในทั้ง 2 compose
   **และ** บล็อก `[VOLUME]` (mkdir + chown) ในสเตจ Deploy ของ `Jenkinsfile`
 - **มี volume** → uncomment `volumes:` ในทั้ง 2 compose แล้วแทน `<name>` ด้วย
   ชื่อจริง — path ต้องอยู่ใต้ `/srv/appdata/<project>/` (dev ใช้
-  `/srv/appdata/<project>-dev/`) เท่านั้น
+  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วเติม `<name>` ทุกตัวเข้าไปใน
+  บรรทัด `mkdir -p` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วย** — งานนี้ลืมไม่ได้:
+
+  ```sh
+  mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
+  ```
+
+  compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
+  `<name>` ที่ยังไม่มีตอน `up -d` **dockerd สร้างให้เองเป็น `root:root`**
+  หลังบล็อก `[VOLUME]` รันจบไปแล้ว → `chown -R` ไม่ทัน แล้ว user `app` เขียน
+  ไม่ได้ (`PermissionError`) ทั้งที่ container ขึ้น `healthy` ปกติ. `chown -R`
+  บรรทัดถัดมาครอบทั้ง `/srv/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
+  `mkdir` ให้เอง ขอแค่ subdir มีอยู่ก่อน (→ `references/docker-deploy.md` §D)
 - **shape = web (`[WEB]`)** → ใช้ `Dockerfile.web`, คงบล็อก health poll ท้าย
   สเตจ Deploy ไว้, ลบคอมเมนต์ `[BATCH]` 2 บรรทัดท้ายสเตจทิ้ง
 - **shape = batch (`[BATCH]`)** → ใช้ `Dockerfile.batch` (ไม่มี `EXPOSE`/
@@ -338,7 +362,71 @@ sonar keys = `<project>`, `<project>-dev`
 - `requirements-dev.txt` (ruff/mypy/pytest/pytest-cov) ต้องแยกจาก
   `requirements.txt` — Dockerfile ไม่ติดตั้ง dev deps เข้า production image
 
-### 5.5 ฝั่ง server — ส่งรายการให้ admin
+### 5.5 ไฟล์ env ในเครื่อง + `.gitignore`
+
+compose อ่าน `${APP_PORT}` / `${DATABASE_URL}` จากไฟล์ชื่อ `.env` ที่อยู่ข้าง
+ไฟล์ compose (auto-load) — ตัวเดียวกับที่สเตจ Deploy สร้างด้วย
+`cp $ENV_FILE .env` จาก Secret File credential. ให้ developer รัน compose
+ในเครื่องได้โดยไม่ต้องรอ Jenkins สร้าง 2 ไฟล์นี้ **ค่าจริงทั้งคู่ gitignore
+ทั้งคู่ ไม่ commit ทั้งคู่**:
+
+| ไฟล์ | ใช้กับ | ต้องมีอย่างน้อย |
+| --- | --- | --- |
+| `.env` | `docker-compose.yml` (prod shape) | `APP_PORT=__PORT_PROD__` + `DATABASE_URL` (ถ้ามี DB) + secret ที่แอปใช้จริง |
+| `.env.dev` | `docker-compose.dev.yml` | `APP_PORT=__PORT_DEV__` + `DATABASE_URL` ชี้ DB dev คนละตัวกับ prod |
+
+```sh
+docker compose up                                            # อ่าน .env เอง
+docker compose -f docker-compose.dev.yml --env-file .env.dev up
+```
+
+(`docker-compose.dev.yml` ไม่ auto-load ไฟล์ชื่อเดียวกัน — ต้องส่ง
+`--env-file` ให้ตรง ๆ)
+
+ตรวจ `.gitignore` ให้มีครบ: `.env`, `.env.dev` (เผื่อของ Python ทั่วไปด้วย:
+`.venv/`, `__pycache__/`, `coverage/`, `coverage.xml`, `test-results/`,
+`dc-report/`) — และให้ commit **`.env.example`** ที่มีแต่ชื่อ key ค่าเปล่า
+เป็นเอกสารว่าต้องขอค่าอะไรจาก admin บ้าง ถ้า `.gitignore` ใช้ pattern กว้าง
+แบบ `.env*` ต้องเติม `!.env.example` ไม่งั้น example จะถูกกินไปด้วย
+
+> `.env` ที่มีค่าจริงหลุดขึ้น git คือ **เหตุการณ์ secret รั่ว** ไม่ใช่เรื่อง
+> สไตล์โค้ด — ตรวจด้วย `git check-ignore .env .env.dev` (exit 0 = ถูก ignore
+> แล้ว) ก่อน commit แรก
+
+### 5.6 รัน toolchain ในเครื่องให้ผ่านก่อน push
+
+**ทำก่อน commit/push เสมอ** — นี่คือขั้นที่กันไม่ให้ pipeline แดงตั้งแต่รอบแรก.
+สเตจ Code Quality รัน ruff/mypy กับ **โค้ดเดิมทั้งโปรเจค** ไม่ใช่แค่ไฟล์ที่
+skill นี้เพิ่ม — โปรเจคที่ไม่เคยใช้ ruff มาก่อน `ruff format --check .`
+จะแดงแทบแน่นอนตั้งแต่ stage ที่ 2 (จัดรูปแบบไม่ตรง formatter คนละตัว ≠ โค้ดผิด
+แต่ `--check` ไม่แยกให้):
+
+```sh
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+.venv/bin/ruff format .          # จัดรูปแบบทั้งโปรเจคหนึ่งครั้ง
+.venv/bin/ruff check --fix .     # แก้ที่ auto-fix ได้
+.venv/bin/mypy .
+.venv/bin/pytest
+```
+
+- **commit การ reformat เป็น commit แยกของมันเอง** (เช่น
+  `style: ruff format ทั้งโปรเจค (ก่อนเปิด CI)`) — diff จะใหญ่แต่เป็น whitespace
+  ล้วน ปนกับ commit setup แล้ว review ไม่ได้เลย
+- violation ที่ `--fix` แก้ไม่ได้ กับ error ของ `mypy` **ต้องแก้ให้จบ หรือ
+  baseline ไว้อย่างชัดเจน** ก่อน push แรก — baseline ที่รับได้คือ
+  `[tool.ruff.lint.per-file-ignores]` / `[[tool.mypy.overrides]]` ที่ระบุ **rule
+  code + path เจาะจง + คอมเมนต์เหตุผลกำกับ** เช่น
+  `"legacy/reports.py" = ["E501"]  # โค้ดเดิมย้ายมาจากระบบ AS400 รอ refactor Q4`
+  — **ห้าม** ปิดยกโปรเจค (ลบ rule ออกจาก `select` ทั้งชุด / `ignore_errors`
+  ทั้งไฟล์ทั้งโฟลเดอร์) เพราะนั่นคือปิดตาเครื่องมือถาวรเพื่อผ่าน stage เดียว
+- `pytest` ต้องเขียวในเครื่องก่อน — ถ้า test เดิมของโปรเจคพังอยู่แล้ว บอกผู้ใช้
+  ตรง ๆ ว่าต้องแก้หรือ mark `xfail` พร้อมเหตุผล ไม่ใช่ปล่อยให้ไปแดงบน Jenkins
+- ยืนยันว่า `coverage.xml` + `test-results/junit.xml` ถูกสร้างจริงหลัง `pytest`
+  (ไม่มี 2 ไฟล์นี้ = สเตจ Unit Tests publish ไม่ได้ และ `new_coverage` อ่านเป็น
+  0% แล้ว gate บล็อกโดยไม่มี error ชี้สาเหตุ)
+
+### 5.7 ฝั่ง server — ส่งรายการให้ admin
 
 **Render `assets/admin-handoff.template.md` → เขียนลงโปรเจคเป็น
 `docs/admin-handoff.md`** โดยแทน `__...__` ทุกตัว (ชื่อโปรเจค, credential ID,
@@ -353,7 +441,7 @@ sonar key, Jenkins host, repo URL, วันที่, ชื่อผู้ข�
 สรุปในแชทเพิ่มได้ แต่ไฟล์คือของที่ส่งจริง อย่าให้ admin ไปไล่ก๊อบชื่อจาก
 บทสนทนา
 
-### 5.6 ทดสอบ
+### 5.8 ทดสอบ
 
 push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §7
 
@@ -372,6 +460,11 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Healthcheck ยิง `127.0.0.1:8000` + poll `docker inspect` | `localhost` (slim → IPv6) / host port / `wget` จาก Jenkins |
 | Migrate ก่อน `compose up` — fail = ไม่ deploy | deploy ก่อน แล้วค่อย migrate |
 | Volume ใต้ `/srv/appdata/<project>/` (dev = `/srv/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
+| `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
+| Django migrate ส่ง `--env-file .env` ทั้งไฟล์ | `-e DATABASE_URL` ตัวเดียว (`settings.py` ต้องการ `SECRET_KEY` ฯลฯ ด้วย) |
+| `ruff format .` ทั้งโปรเจค + commit แยก **ก่อน** push แรก | ปล่อยให้ `ruff format --check` แดงบน Jenkins แล้วค่อยไล่แก้ทีละรอบ |
+| Baseline โค้ดเดิมด้วย `per-file-ignores` ระบุ rule+path+เหตุผล | ตัด rule ออกจาก `select` / `ignore_errors` ยกโฟลเดอร์ |
+| `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` | ปล่อย artifact ของ CI หลุดเข้า build context |
 | `/api/health` คืนแค่ `healthy`/`degraded` | ใส่ version/commit/hostname ลง response |
 | `sonar.sources`/`sonar.tests` ชี้ path ที่มีอยู่จริง | ปล่อย path ค้าง (sonar-scanner fail ทันที) |
@@ -407,6 +500,14 @@ node <skill-dir>/scripts/verify.mjs
 - [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
 - [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
       healthcheck ยิง `127.0.0.1:8000` · volume (ถ้ามี) อยู่ใต้ `/srv/appdata/`
+- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `mkdir -p` ของ
+      บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
+- [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
+      (`git check-ignore .env .env.dev` → exit 0) · `.env.example` commit แล้ว
+      และ **ไม่** ถูก ignore
+- [ ] `.venv/bin/ruff format --check .` · `ruff check .` · `mypy .` · `pytest`
+      ผ่านครบในเครื่องก่อน push แรก (§5.6) — baseline ที่มีระบุ rule+path+เหตุผล
+      ไม่ใช่ปิดยกโปรเจค
 - [ ] `pyproject.toml` มี `[tool.ruff]` + `[tool.pytest.ini_options]` ที่ออก
       `test-results/junit.xml` + `coverage.xml`
 - [ ] `requirements.txt` + `requirements-dev.txt` อยู่ที่ root คนละไฟล์

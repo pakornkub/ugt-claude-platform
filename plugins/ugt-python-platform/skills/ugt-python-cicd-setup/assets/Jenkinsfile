@@ -256,17 +256,27 @@ pipeline {
                         sh 'cp $ENV_FILE .env'
 
                         // [DB] migrate ก่อน deploy — migration fail = ไม่ deploy (contract)
-                        // ใช้ image ที่เพิ่ง build (มี alembic + code); Django สลับเป็น manage.py migrate
+                        // ใช้ image ที่เพิ่ง build (มี alembic + code)
                         sh """
                           DB_URL=\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
                           docker run --rm -e DATABASE_URL="\$DB_URL" ${imageName}:${buildNum} alembic upgrade head
                         """
+                        // [DB] Django variant — สลับทั้งบล็อกข้างบนเป็นบรรทัดนี้แทน:
+                        //   sh "docker run --rm --env-file .env ${imageName}:${buildNum} python manage.py migrate --noinput"
+                        // manage.py ต้องการ SECRET_KEY / ALLOWED_HOSTS / ฯลฯ ไม่ใช่แค่ DATABASE_URL
+                        // → ส่งทั้งไฟล์ด้วย --env-file (ตัด grep/cut/tr ทิ้งไปเลย ไม่ต้อง parse .env เอง)
 
                         // [VOLUME] เตรียม path ข้อมูลถาวรครั้งแรก (idempotent) — chown ผ่าน container
                         // เพราะ jenkins ไม่ใช่ root แต่อยู่ใน docker group; admin เตรียม /srv/appdata แล้ว
+                        //
+                        // สำคัญ: ต้อง mkdir ถึง "ตัว subdir ที่ compose bind จริง" ไม่ใช่แค่ระดับโปรเจค —
+                        // path ย่อยที่ยังไม่มีตอน `up -d` dockerd จะสร้างให้เองเป็น root:root แล้ว user
+                        // `app` ในคอนเทนเนอร์เขียนไม่ได้ (PermissionError) แม้ container ขึ้น healthy ปกติ
+                        // → เติมทุก <name> ที่ตอบไว้ในข้อ 6 ของ interview ต่อท้าย mkdir ข้างล่าง
+                        //   เช่น: mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
                         sh """
                           if [ ! -d /srv/appdata/${containerName} ]; then
-                            mkdir -p /srv/appdata/${containerName}
+                            mkdir -p /srv/appdata/${containerName}   # << เติม /<name> ของแต่ละ volume ต่อท้ายบรรทัดนี้
                             APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
                             docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "\$APP_UID" /d
                           fi

@@ -93,11 +93,27 @@ Persistent data) คือ:
 
 ```sh
 if [ ! -d /srv/appdata/${containerName} ]; then
-  mkdir -p /srv/appdata/${containerName}
+  mkdir -p /srv/appdata/${containerName}   # << เติม /<name> ของแต่ละ volume ต่อท้ายบรรทัดนี้
   APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
   docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "$APP_UID" /d
 fi
 ```
+
+**`mkdir` ต้องไล่ถึงตัว subdir ที่ compose bind จริง ไม่ใช่แค่ระดับโปรเจค** —
+compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ `/srv/appdata/<project>`
+เฉย ๆ ถ้า `<name>` ยังไม่มีตอน `up -d` **dockerd จะสร้างให้เองเป็น
+`root:root`** (พฤติกรรมมาตรฐานของ bind mount ที่ path ปลายทางหาย) ซึ่งเกิด
+*หลัง* บล็อกนี้รันไปแล้ว → `chown -R` ข้างบนไม่ทัน และ user `app` เขียนไม่ได้
+ทั้งที่ container ขึ้น `healthy` ปกติทุกอย่าง. ตอนกรอกรายชื่อ volume จาก
+interview ข้อ 6 จึงต้องเติมทุก `<name>` เข้าไปในบรรทัด `mkdir` ด้วย เช่น:
+
+```sh
+mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
+```
+
+`chown -R` บรรทัดถัดมาครอบ `/srv/appdata/<project>` ทั้งก้อนอยู่แล้ว จึงคลุม
+subdir ที่เพิ่ง `mkdir` ให้เองโดยไม่ต้องแก้เพิ่ม — ขอแค่ subdir **มีอยู่ก่อน**
+`chown` รัน
 
 จุดสำคัญที่ทำให้กลไกนี้ทำงานได้แม้ Jenkins agent เองไม่ใช่ root:
 
