@@ -1,5 +1,37 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.10.0 (2026-08-11)
+
+Two changes from the maintainer reviewing the admin pages against HRMS, plus a
+preview rework.
+
+**AD pre-registration removed** (มติ 2026-08-11, reverses part of 4.7.1/4.8.0):
+`addDirectoryUserAction` and the AD branch of the "เพิ่มผู้ใช้" dialog are gone.
+AD accounts behave exactly like SSO — the directory already has their data, the
+row appears on first login, and the role is assigned from `/admin/users` after
+that. Hand-typing an `ldapUsername` had only downside: one typo and the login
+upsert creates a second user, leaving the role on a row nobody uses. HRMS's
+`addHREmployeeAction` stays un-extracted, now by decision rather than omission.
+The dialog is local-only again; `lib/directory.ts` keeps its two call sites
+(LDAP login + SSO hook) — enrichment on login is unaffected.
+
+**Permission checklist brought up to the HRMS shape** (มติ 13.3). The skeleton's
+checklist was a flat two-column grid; HRMS's is the version that survived real
+use. `role-form.tsx` now renders bordered groups with a **tri-state select-all
+per group header** (with n/m counts), indented children, the **mono permission
+key beside every label** — so what a dev reads in code is what an admin sees on
+screen — and a total-selected pill. The pure helpers behind the tri-state
+(`groupState` / `groupCheckedValue` / `toggleGroup`) are extracted verbatim as
+`lib/permission-group-select.ts`.
+
+**Preview section 13 redrawn inside the app shell.** All three pages (users,
+roles, audit) now sit in the sidebar shell with a "ผู้ดูแลระบบ" nav group, as
+they will actually appear; the roles specimen shows the HRMS-style checklist in
+a Sheet (long form → Sheet, per the Dialog ladder) including an indeterminate
+group header; the add-user dialog is local-only with the reasoning shown beside
+it; disabled delete buttons demonstrate both blockers (system role · role still
+in use).
+
 ## 4.9.0 (2026-08-10)
 
 **Permission answers "may they"; nothing answered "whose data".** 4.8.0 put

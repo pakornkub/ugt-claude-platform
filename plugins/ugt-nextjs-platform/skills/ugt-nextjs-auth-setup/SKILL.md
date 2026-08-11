@@ -97,11 +97,12 @@ The org-wide contract:
    position and supervisor come from the central view over a linked server,
    refreshed on every login by one shared helper — read-only, and never
    allowed to break login (`references/directory-enrichment.md`)
-10. **No self-registration.** SSO and LDAP accounts appear on their first
-   successful login; local accounts are created by someone holding
-   `users:create` on `/admin/users`, and `disableSignUp: true` closes the
-   endpoint Better Auth would otherwise publish. An LDAP account may also be
-   pre-registered there when the role has to be in place before day one
+10. **No self-registration, and no pre-registration** (มติ 2026-08-11). SSO and
+   LDAP accounts appear on their first successful login — their data already
+   lives in the directory, so nobody creates them by hand; the role is assigned
+   from `/admin/users` after that first login. Local accounts are the only kind
+   created manually (`users:create` on `/admin/users`), and
+   `disableSignUp: true` closes the endpoint Better Auth would otherwise publish
 
 ## 3. Interview — ask the installer first (one batch)
 
@@ -182,7 +183,8 @@ exceptions:
 | `assets/lib/approval-chain.ts` | `lib/approval-chain.ts` | only when the app has an approval workflow — substitute `__HR_AUTHORIZE_VIEW__` (a **different** view from the employee one) |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
-| `assets/components/admin-user-actions.tsx` | `components/…` | LDAP/Local — the "เพิ่มผู้ใช้" dialog on `/admin/users` (local account with an initial password · AD account pre-registered) + admin set-password; **there is no sign-up page and there will not be one** |
+| `assets/components/admin-user-actions.tsx` | `components/…` | Local only — the "เพิ่มผู้ใช้ local" dialog on `/admin/users` + admin set-password; **no sign-up page, and no AD pre-registration** (SSO/AD accounts appear on first login — มติ 2026-08-11) |
+| `assets/lib/permission-group-select.ts` | `lib/permission-group-select.ts` | pure helpers behind the checklist's group select-all (tri-state + counts) — from HRMS มติ 13.3 |
 | `assets/scripts/create-first-user.ts` | `scripts/…` | Local only, run once — see §5.5 |
 | `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
 
@@ -295,7 +297,7 @@ of which login methods were chosen.
 | `emailAndPassword.disableSignUp: true` | Leave it off — `enabled: true` publishes `POST /api/auth/sign-up/email` and anyone who can reach the app can self-register |
 | Create accounts from `/admin/users` (guard + audit) | Add a sign-up page |
 | Write the user + `credential` account rows with `hashPassword` (`better-auth/crypto`) | `auth.api.signUpEmail` in an admin action — `disableSignUp` blocks it too, and it mints a session for the new user |
-| Pre-register an AD user by the **exact** `ldapUsername` they log in with | A guessed spelling — the login upsert matches on that key, so a typo yields a second user and the role sits on the unused row |
+| SSO/AD users: assign the role from `/admin/users` **after** their first login | Pre-create their row by hand — a typo in `ldapUsername` yields a second user at login and the role sits on the unused row (มติ 2026-08-11: no pre-registration) |
 | Refresh the directory fields on **every** login, from one shared helper | Fill them once at first login (people move team), or write SSO and LDAP separately (the two drift apart unnoticed) |
 | Directory lookups return `null` on failure | Let a linked-server outage throw — everyone's login dies with it |
 | `Prisma.raw` only for the view name + column list, both constants | Anything user-supplied inside `Prisma.raw` |
@@ -351,8 +353,9 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       log has a `users.create` row with **no password in `detail`**
 - [ ] [Local] Admin "ตั้งรหัสผ่าน" on a row → that user's open sessions die and
       the new password works; the button is absent on SSO/LDAP rows
-- [ ] [LDAP] Pre-register an AD user with a role, then have them log in for the
-      first time → they land on the **same** row with that role, not a second one
+- [ ] [LDAP/SSO] A brand-new AD user logs in for the first time → their row
+      appears with directory fields filled; assign the role from `/admin/users`
+      and it sticks on the next login
 - [ ] [Directory] Log in and check the `User` row: employee code, department,
       position, supervisor are filled — and by **both** SSO and LDAP, not one
 - [ ] [Directory] Change someone's department in the HR view, log in again →

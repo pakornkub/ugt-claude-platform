@@ -7,22 +7,22 @@
 // (`lib/auth.ts` จึงตั้ง `disableSignUp: true` ปิด POST /api/auth/sign-up/email
 // ที่ Better Auth เปิดให้อัตโนมัติเมื่อ emailAndPassword.enabled)
 //
-// บัญชีเกิดได้สามทางเท่านั้น และทางที่แอดมินทำเองผ่านสิทธิ์ USERS_CREATE ทุกทาง:
-//   local → createLocalUserAction — ตั้งรหัสผ่านตั้งต้นให้เลย
-//   ldap  → เกิดเองตอน bind สำเร็จครั้งแรก **หรือ** addDirectoryUserAction
-//           เมื่ออยากกำหนด role ไว้ล่วงหน้าก่อนเขา login ครั้งแรก
+// บัญชีเกิดได้สามทางเท่านั้น:
+//   local → createLocalUserAction (สิทธิ์ USERS_CREATE) — ตั้งรหัสผ่านตั้งต้นให้เลย
+//   ldap  → เกิดเองตอน bind สำเร็จครั้งแรก — ไม่ต้องเพิ่มที่นี่ (มติ 2026-08-11:
+//           ไม่มีการตั้งบัญชี AD ล่วงหน้า ข้อมูลอยู่ใน directory อยู่แล้วเหมือน SSO
+//           กำหนด role ให้หลังจากเขา login ครั้งแรกจากหน้านี้)
 //   sso   → เกิดเองตอน login ผ่าน Keycloak ครั้งแรก
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod'; // [METHOD: LDAP|LOCAL]
-import { generateId } from 'better-auth'; // [METHOD: LDAP|LOCAL]
+import { z } from 'zod'; // [METHOD: LOCAL]
+import { generateId } from 'better-auth'; // [METHOD: LOCAL]
 import { hashPassword } from 'better-auth/crypto'; // [METHOD: LOCAL]
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
-import { directoryUserFields, getDirectoryPerson } from '@/lib/directory'; // [METHOD: LDAP]
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -192,91 +192,6 @@ export async function setUserPasswordAction(values: {
         userId: session.user.id,
         action: 'users.password-set',
         detail: JSON.stringify({ targetId: userId }),
-      },
-    })
-    .catch(() => {});
-
-  revalidatePath('/admin/users');
-  return { success: true };
-}
-
-// ─── [METHOD: LDAP] ตั้งบัญชี AD ไว้ล่วงหน้า ────────────────────────────────
-//
-// ผู้ใช้ AD เกิดเองอยู่แล้วตอน bind สำเร็จครั้งแรก (ldapLoginAction) — แอ็กชันนี้
-// มีไว้เมื่อต้องกำหนด role ให้เขา **ก่อน** วันแรกที่เขาเข้าระบบ
-// `ldapUsername` ต้องตรงกับที่เขาพิมพ์ตอน login เป๊ะ ๆ เพราะ upsert ตอน login
-// จับคู่ด้วยคีย์นี้ — พิมพ์ผิดตัวเดียวได้ผู้ใช้ซ้ำสองแถว แถวที่ตั้ง role ไว้ไม่มีใครใช้
-
-const addDirectoryUserSchema = z.object({
-  ldapUsername: z
-    .string()
-    .min(1)
-    .max(100)
-    .regex(/^[a-zA-Z0-9_.@-]+$/, 'ชื่อผู้ใช้ AD ไม่ถูกต้อง'),
-  roleId: z.string().nullable(),
-});
-
-export async function addDirectoryUserAction(values: {
-  ldapUsername: string;
-  roleId: string | null;
-}): Promise<ActionResult> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
-
-  const perms = await getUserPermissions(session.user.id);
-  if (!perms.includes(PERMISSIONS.USERS_CREATE)) return { success: false, error: 'Forbidden' };
-
-  const parsed = addDirectoryUserSchema.safeParse(values);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
-  }
-  const { ldapUsername, roleId } = parsed.data;
-
-  // ชื่อ/อีเมล/รหัสพนักงานมาจากฐานพนักงานกลาง ไม่ให้แอดมินพิมพ์เอง — พิมพ์เองแล้ว
-  // ตอน login จริงข้อมูลจาก directory จะทับทันที ค่าที่พิมพ์ไว้จึงเป็นได้แค่ค่าที่
-  // ดูถูกจนถึงวันที่เขา login ครั้งแรก
-  const person = await getDirectoryPerson(ldapUsername);
-  if (!person) {
-    return {
-      success: false,
-      error: 'ไม่พบชื่อผู้ใช้นี้ในฐานพนักงาน (ตรวจการสะกด หรือฐานพนักงานอาจเชื่อมต่อไม่ได้)',
-    };
-  }
-  const email = person.email;
-  if (!email) return { success: false, error: 'พนักงานรายนี้ไม่มีอีเมลในฐานพนักงาน' };
-
-  // ชนได้สองทาง: LDAP upsert จับที่ ldapUsername ส่วน Keycloak accountLinking จับที่ email
-  const [byEmail, byLogin] = await Promise.all([
-    prisma.user.findUnique({ where: { email }, select: { id: true } }),
-    prisma.user.findFirst({ where: { ldapUsername }, select: { id: true } }),
-  ]);
-  if (byEmail || byLogin) return { success: false, error: 'มีผู้ใช้รายนี้อยู่แล้ว' };
-
-  const user = await prisma.user.create({
-    data: {
-      id: generateId(24),
-      ldapUsername,
-      name: person.nameEn ?? person.nameTh ?? ldapUsername,
-      email,
-      emailVerified: false, // ยังไม่เคย bind — ยืนยันอีเมลตอนนี้ไม่ได้
-      authType: 'ldap',
-      roleId,
-      ...directoryUserFields(person),
-    },
-  });
-
-  await prisma.activityLog
-    .create({
-      data: {
-        userId: session.user.id,
-        action: 'users.create',
-        detail: JSON.stringify({
-          targetId: user.id,
-          ldapUsername,
-          empCode: person.empCode,
-          roleId,
-          authType: 'ldap',
-        }),
       },
     })
     .catch(() => {});

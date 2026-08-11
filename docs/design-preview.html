@@ -193,8 +193,10 @@
   .ui .radio i{width:14px;height:14px;border-radius:999px;border:1px solid var(--input-c);display:inline-block;position:relative}
   .ui .radio.on i{border-color:var(--primary)}
   .ui .radio.on i::after{content:'';position:absolute;inset:3px;border-radius:999px;background:var(--primary)}
-  .ui .cbox i{width:14px;height:14px;border-radius:var(--r-chip);border:1px solid var(--input-c);display:inline-block}
+  .ui .cbox i{width:14px;height:14px;border-radius:var(--r-chip);border:1px solid var(--input-c);display:inline-block;position:relative;flex:none}
   .ui .cbox.on i{background:var(--primary);border-color:var(--primary)}
+  .ui .cbox.ind i{border-color:var(--primary)}
+  .ui .cbox.ind i::after{content:'';position:absolute;left:2.5px;right:2.5px;top:5.5px;bottom:5.5px;background:var(--primary)}
   .ui .toast{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:var(--r-overlay);
     border:1px solid;font-size:12.5px;line-height:1.5}
   .ui .toast svg{width:14px;height:14px;flex:none;margin-top:2px}
@@ -1228,196 +1230,331 @@
     <h2>หน้าจัดการผู้ใช้-บทบาท-audit ที่ติดมากับระบบ login</h2>
     <p class="lead">ระบบ login ติดตั้งหน้า admin ให้ 4 หน้า (<code>/admin/setup</code> ·
       <code>/admin/users</code> · <code>/admin/roles</code> · <code>/admin/audit-logs</code>)
-      — ทุกหน้าใช้โทเคน ตาราง ปุ่ม และ dialog ชุดเดียวกับหน้า feature ·
-      <strong>สิทธิ์ (permission) ไม่มีหน้าแยก</strong>: key มาจากโค้ดแล้ว sync เข้า DB เอง
-      หน้า roles มีหน้าที่เดียวคือจับคู่สิทธิ์เข้ากับบทบาท</p>
+      อยู่ใน shell เดียวกับหน้า feature และใช้โทเคนชุดเดียวกันทั้งหมด ·
+      <strong>บัญชี SSO/AD ไม่ต้องเพิ่มด้วยมือ</strong> — เกิดเองตอน login ครั้งแรก
+      แล้วค่อยกำหนดบทบาทจากตาราง (มติ 2026-08-11) มีแต่บัญชี local ที่แอดมินสร้างให้ ·
+      <strong>สิทธิ์ไม่มีหน้าแยก</strong>: key มาจากโค้ดแล้ว sync เข้า DB เอง
+      หน้าบทบาทคือที่จับคู่สิทธิ์เข้ากับบทบาท</p>
 
     <div class="specimen">
       <div class="specimen-bar">
-        <span>/admin/users — เพิ่มผู้ใช้ · กำหนดบทบาท · ตั้งรหัสผ่าน</span>
+        <span>/admin/users — กำหนดบทบาท · เพิ่มผู้ใช้ local · ตั้งรหัสผ่าน</span>
         <span class="toggle" role="group" aria-label="สลับธีม">
           <button type="button" data-theme="light" aria-pressed="true">Light</button>
           <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
         </span>
       </div>
-      <div class="cmp ui" data-ui>
-        <div class="pagehead">
-          <div>
-            <h4>ผู้ใช้งาน</h4>
-            <div class="muted" style="font-size:13px">บัญชี SSO/AD เกิดเองตอน login ครั้งแรก — หน้านี้เพิ่มเฉพาะ local กับ AD ที่ต้องตั้ง role ล่วงหน้า</div>
+      <div class="cmp ui" data-ui style="padding:0">
+        <div class="shell" style="min-height:360px">
+          <aside class="side">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8"/></svg>
+              <b style="font-size:14px;letter-spacing:-.01em">Leave Portal</b>
+            </div>
+            <div class="navgroup">งานหลัก</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-home"/></svg>ภาพรวม</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cal"/></svg>ใบลา</div>
+            <div class="navgroup">ผู้ดูแลระบบ</div>
+            <div class="nav on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-user"/></svg>ผู้ใช้งาน</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-lock"/></svg>บทบาทและสิทธิ์</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>Audit logs</div>
+            <div style="margin-top:auto;border-top:1px solid var(--border-c);padding-top:8px">
+              <div class="navuser">
+                <span class="ava">สจ</span>
+                <span style="display:grid;min-width:0;line-height:1.3">
+                  <span style="font-size:13px;font-weight:500" class="tr">สมชาย ใจดี</span>
+                  <span style="font-size:11px" class="muted tr">somchai@ube.co.th</span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-left:auto;opacity:.6"><use href="#i-more"/></svg>
+              </div>
+            </div>
+          </aside>
+          <div class="main">
+            <div class="pagehead">
+              <div>
+                <h4>ผู้ใช้งาน</h4>
+                <div class="muted" style="font-size:13px">บัญชี SSO/AD เกิดเองตอนเข้าสู่ระบบครั้งแรก — เพิ่มด้วยมือเฉพาะบัญชี local</div>
+              </div>
+              <button class="btn btn-primary" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่มผู้ใช้ local</button>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table class="dt">
+                <thead><tr>
+                  <th>ชื่อ</th><th>อีเมล</th><th>วิธีเข้าสู่ระบบ</th><th>บทบาท</th><th>รหัสผ่าน</th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td>สมชาย ใจดี <span class="muted" style="font-size:11px">(คุณ)</span></td><td class="muted">somchai@ube.co.th</td>
+                    <td><span class="lbadge">sso</span></td>
+                    <td><span class="field muted" style="min-width:140px;justify-content:space-between;opacity:.55">Administrator<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
+                    <td class="muted">—</td>
+                  </tr>
+                  <tr>
+                    <td>วิภา สุขใจ</td><td class="muted">wipa@ube.co.th</td>
+                    <td><span class="lbadge">ldap</span></td>
+                    <td><span class="field" style="min-width:140px;justify-content:space-between">หัวหน้างาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
+                    <td class="muted">—</td>
+                  </tr>
+                  <tr>
+                    <td>ผู้ตรวจสอบ QA</td><td class="muted">qa.tester@ube.co.th</td>
+                    <td><span class="lbadge">local</span></td>
+                    <td><span class="field" style="min-width:140px;justify-content:space-between">Tester<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
+                    <td><button class="btn btn-outline" type="button">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-key"/></svg>ตั้งรหัสผ่าน</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <button class="btn btn-primary" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่มผู้ใช้</button>
         </div>
-        <div class="card" style="padding:0;overflow:hidden">
-          <table class="dt">
-            <thead><tr>
-              <th>ชื่อ</th><th>อีเมล</th><th>วิธีเข้าสู่ระบบ</th><th>บทบาท</th><th>รหัสผ่าน</th>
-            </tr></thead>
-            <tbody>
-              <tr>
-                <td>สมชาย ใจดี</td><td class="muted">somchai@company.co.th</td>
-                <td><span class="lbadge">sso</span></td>
-                <td><span class="field" style="min-width:150px;justify-content:space-between">Administrator<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
-                <td class="muted">—</td>
-              </tr>
-              <tr>
-                <td>วิภา สุขใจ <span class="muted" style="font-size:11px">(คุณ)</span></td><td class="muted">wipa@company.co.th</td>
-                <td><span class="lbadge">ldap</span></td>
-                <td><span class="field muted" style="min-width:150px;justify-content:space-between;opacity:.55">หัวหน้างาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
-                <td class="muted">—</td>
-              </tr>
-              <tr>
-                <td>ผู้ตรวจสอบ QA</td><td class="muted">qa.tester@company.co.th</td>
-                <td><span class="lbadge">local</span></td>
-                <td><span class="field" style="min-width:150px;justify-content:space-between">Tester<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></td>
-                <td><button class="btn btn-outline" type="button">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-key"/></svg>ตั้งรหัสผ่าน</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <div style="padding:16px 20px;display:grid;gap:14px;border-top:1px solid var(--border-c)">
+          <div class="cmp-title">Dialog "เพิ่มผู้ใช้ local" — ฟอร์มสั้นอยู่ใน dialog ตามบันไดส่วน 7</div>
+          <div class="grid g2" style="align-items:start">
+            <div class="dlg">
+              <button class="dlg-x" type="button" aria-label="ปิด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-x"/></svg></button>
+              <div class="dlg-head">เพิ่มผู้ใช้ local</div>
+              <div class="dlg-body">
+                <div class="fld"><span class="lbl">ชื่อ <span class="req">*</span></span>
+                  <span class="field">ผู้ตรวจสอบ QA</span></div>
+                <div class="fld"><span class="lbl">อีเมล <span class="req">*</span></span>
+                  <span class="field">qa.tester@ube.co.th</span></div>
+                <div class="fld"><span class="lbl">รหัสผ่านตั้งต้น <span class="req">*</span></span>
+                  <span class="field" style="letter-spacing:2px">••••••••••</span>
+                  <span class="muted" style="font-size:11.5px">อย่างน้อย 8 ตัวอักษร มีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข</span></div>
+                <div class="fld"><span class="lbl">บทบาท</span>
+                  <span class="field" style="justify-content:space-between">Tester<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
+              </div>
+              <div class="dlg-foot">
+                <span></span>
+                <span style="display:flex;gap:8px">
+                  <button class="btn btn-outline" type="button">ยกเลิก</button>
+                  <button class="btn btn-primary" type="button">สร้าง</button>
+                </span>
+              </div>
+            </div>
+            <div class="mcard muted" style="align-self:start">
+              ไม่มีตัวเลือกประเภทบัญชีอีกแล้ว — SSO/AD ใช้ข้อมูลจาก directory อยู่แล้ว
+              เกิดเองตอน login ครั้งแรกทั้งคู่ การพิมพ์ชื่อผู้ใช้ AD เองมีแต่ทางพลาด
+              (พิมพ์ผิดตัวเดียวได้ผู้ใช้ซ้ำสองแถว) จึงเหลือฟอร์มเดียวสำหรับ local
+            </div>
+          </div>
         </div>
-        <p class="muted" style="font-size:12px">วิธีเข้าสู่ระบบใช้ <code>Badge</code> เปล่า (ป้ายบอกชนิด ไม่ใช่สถานะ — ไม่ใช้ StatusBadge) ·
-          ปุ่มตั้งรหัสผ่านโผล่เฉพาะแถว <code>local</code> เพราะบัญชี SSO/AD รหัสอยู่ที่ directory ·
-          แถวของตัวเองเปลี่ยนบทบาทไม่ได้ (จาง) — กันแอดมินลดสิทธิ์ตัวเองจนไม่มีใครแก้คืน ·
-          ปุ่มเพิ่ม/ตั้งรหัสผ่านถูก<strong>ซ่อน</strong>เมื่อไม่มีสิทธิ์ ไม่ใช่ disable — แต่ด่านจริงคือ guard ในแอ็กชัน</p>
+      </div>
+    </div>
+    <p class="note">ปุ่มตั้งรหัสผ่านโผล่เฉพาะแถว <code>local</code> — บัญชี SSO/AD รหัสอยู่ที่ directory ·
+      แถวของตัวเองเปลี่ยนบทบาทไม่ได้ (จาง) กันแอดมินลดสิทธิ์ตัวเองจนไม่มีใครแก้คืน ·
+      <code>authType</code> ใช้ Badge เปล่าไร้สี — ป้ายบอกชนิด ไม่ใช่สถานะ จึงไม่ใช่ StatusBadge ·
+      ปุ่มเพิ่ม/ตั้งรหัสผ่านถูก<strong>ซ่อน</strong>เมื่อไม่มีสิทธิ์ ไม่ใช่ disable — ด่านจริงคือ guard ในแอ็กชัน</p>
 
-        <div class="cmp-title">Dialog "เพิ่มผู้ใช้" — ฟอร์มเปลี่ยนตามประเภทบัญชี</div>
-        <div class="grid g2" style="align-items:start">
-          <div class="dlg">
-            <button class="dlg-x" type="button" aria-label="ปิด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-x"/></svg></button>
-            <div class="dlg-head">เพิ่มผู้ใช้</div>
-            <div class="dlg-body">
-              <div class="fld"><span class="lbl">ประเภทบัญชี</span>
-                <span class="field" style="justify-content:space-between">บัญชี local (ตั้งรหัสผ่านให้)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
-              <div class="fld"><span class="lbl">ชื่อ <span class="req">*</span></span>
-                <span class="field">ผู้ตรวจสอบ QA</span></div>
-              <div class="fld"><span class="lbl">อีเมล <span class="req">*</span></span>
-                <span class="field">qa.tester@company.co.th</span></div>
-              <div class="fld"><span class="lbl">รหัสผ่านตั้งต้น <span class="req">*</span></span>
-                <span class="field" style="letter-spacing:2px">••••••••••</span>
-                <span class="muted" style="font-size:11.5px">อย่างน้อย 8 ตัวอักษร มีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข</span></div>
-              <div class="fld"><span class="lbl">บทบาท</span>
-                <span class="field" style="justify-content:space-between">Tester<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>/admin/roles — ตารางบทบาท + Sheet แก้ไขพร้อม checklist สิทธิ์ (แบบเดียวกับ HRMS)</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui style="padding:0">
+        <div class="shell" style="min-height:330px">
+          <aside class="side">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8"/></svg>
+              <b style="font-size:14px;letter-spacing:-.01em">Leave Portal</b>
             </div>
-            <div class="dlg-foot">
-              <span></span>
-              <span style="display:flex;gap:8px">
-                <button class="btn btn-outline" type="button">ยกเลิก</button>
-                <button class="btn btn-primary" type="button">สร้าง</button>
-              </span>
+            <div class="navgroup">งานหลัก</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-home"/></svg>ภาพรวม</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cal"/></svg>ใบลา</div>
+            <div class="navgroup">ผู้ดูแลระบบ</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-user"/></svg>ผู้ใช้งาน</div>
+            <div class="nav on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-lock"/></svg>บทบาทและสิทธิ์</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>Audit logs</div>
+            <div style="margin-top:auto;border-top:1px solid var(--border-c);padding-top:8px">
+              <div class="navuser">
+                <span class="ava">สจ</span>
+                <span style="display:grid;min-width:0;line-height:1.3">
+                  <span style="font-size:13px;font-weight:500" class="tr">สมชาย ใจดี</span>
+                  <span style="font-size:11px" class="muted tr">somchai@ube.co.th</span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-left:auto;opacity:.6"><use href="#i-more"/></svg>
+              </div>
+            </div>
+          </aside>
+          <div class="main">
+            <div class="pagehead">
+              <div>
+                <h4>บทบาทและสิทธิ์</h4>
+                <div class="muted" style="font-size:13px">สิทธิ์ทั้งหมดของระบบจับคู่เข้ากับบทบาทที่หน้านี้</div>
+              </div>
+              <button class="btn btn-primary" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>สร้างบทบาท</button>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table class="dt">
+                <thead><tr>
+                  <th>บทบาท</th><th>คำอธิบาย</th><th class="num">สิทธิ์</th><th class="num">ผู้ใช้</th><th></th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td style="white-space:nowrap"><b style="font-weight:500">Administrator</b>
+                      <span class="lbadge sec" style="margin-left:6px">ระบบ</span></td>
+                    <td class="muted">สิทธิ์ทั้งหมด</td>
+                    <td class="num">9</td><td class="num">2</td>
+                    <td style="text-align:right;white-space:nowrap"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></td>
+                  </tr>
+                  <tr>
+                    <td><b style="font-weight:500">หัวหน้างาน</b></td>
+                    <td class="muted">อนุมัติและดูข้อมูลทีมตัวเอง</td>
+                    <td class="num">7</td><td class="num">14</td>
+                    <td style="text-align:right;white-space:nowrap"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></td>
+                  </tr>
+                  <tr>
+                    <td><b style="font-weight:500">Tester</b></td>
+                    <td class="muted">ทดสอบระบบ (เมลเข้าตัวเองเท่านั้น)</td>
+                    <td class="num">3</td><td class="num">0</td>
+                    <td style="text-align:right;white-space:nowrap"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="dlg">
+        </div>
+        <div style="padding:16px 20px;display:grid;gap:14px;border-top:1px solid var(--border-c)">
+          <div class="cmp-title">Sheet "แก้ไขบทบาท" — checklist ยาว จึงเป็น Sheet ไม่ใช่ dialog (บันไดส่วน 7)</div>
+          <div class="dlg" style="max-width:470px">
             <button class="dlg-x" type="button" aria-label="ปิด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-x"/></svg></button>
-            <div class="dlg-head">เพิ่มผู้ใช้</div>
+            <div class="dlg-head">แก้ไขบทบาท — หัวหน้างาน</div>
             <div class="dlg-body">
-              <div class="fld"><span class="lbl">ประเภทบัญชี</span>
-                <span class="field" style="justify-content:space-between">บัญชี AD (ตั้งค่าไว้ล่วงหน้า)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
-              <div class="fld"><span class="lbl">ชื่อผู้ใช้ AD <span class="req">*</span></span>
-                <span class="field">wipa.s</span>
-                <span class="muted" style="font-size:11.5px">ต้องตรงกับที่ใช้ login เป๊ะ ๆ — ชื่อ อีเมล รหัสพนักงาน ดึงจากฐานพนักงานให้เอง</span></div>
-              <div class="fld"><span class="lbl">บทบาท</span>
-                <span class="field" style="justify-content:space-between">หัวหน้างาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
-              <div class="muted" style="font-size:11.5px">ไม่มีช่องรหัสผ่าน — บัญชี AD ใช้รหัสของ directory ·
-                ผู้ใช้ AD ปกติไม่ต้องเพิ่มที่นี่ ใช้เมื่อต้องมี role รอก่อนวันแรกเท่านั้น</div>
+              <div class="fld"><span class="lbl">ชื่อบทบาท <span class="req">*</span></span>
+                <span class="field">หัวหน้างาน</span></div>
+              <div class="fld"><span class="lbl">คำอธิบาย</span>
+                <span class="field">อนุมัติและดูข้อมูลทีมตัวเอง</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+                <span class="lbl">สิทธิ์การใช้งาน</span>
+                <span style="background:color-mix(in oklab,var(--primary) 10%,transparent);color:var(--primary);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:500;font-variant-numeric:tabular-nums">7 / 9</span>
+              </div>
+              <div style="border:1px solid var(--border-c);border-radius:var(--r-ctl);overflow:hidden;font-size:12.5px">
+              <div style="">
+                <div style="display:flex;align-items:center;gap:8px;background:color-mix(in oklab,var(--muted) 45%,transparent);border-bottom:1px solid var(--border-c);padding:8px 10px">
+                  <span class="cbox on"><i></i></span>
+                  <b style="flex:1;font-size:12.5px;font-weight:500">ผู้ใช้งาน — users</b>
+                  <span class="muted" style="font-size:11px;font-variant-numeric:tabular-nums">5 / 5</span>
+                </div>
+                <div style="display:grid;gap:8px;padding:9px 10px 9px 33px">
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>View Users</span><span class="fmt muted" style="font-size:11px">users:read</span></span></label>
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>Create Users</span><span class="fmt muted" style="font-size:11px">users:create</span></span></label>
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>Edit Users</span><span class="fmt muted" style="font-size:11px">users:update</span></span></label>
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>Delete Users</span><span class="fmt muted" style="font-size:11px">users:delete</span></span></label>
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>Reset User Passwords</span><span class="fmt muted" style="font-size:11px">users:reset-password</span></span></label>
+                </div>
+              </div>
+              <div style="border-top:1px solid var(--border-c);">
+                <div style="display:flex;align-items:center;gap:8px;background:color-mix(in oklab,var(--muted) 45%,transparent);border-bottom:1px solid var(--border-c);padding:8px 10px">
+                  <span class="cbox ind"><i></i></span>
+                  <b style="flex:1;font-size:12.5px;font-weight:500">ใบลา — leave</b>
+                  <span class="muted" style="font-size:11px;font-variant-numeric:tabular-nums">2 / 3</span>
+                </div>
+                <div style="display:grid;gap:8px;padding:9px 10px 9px 33px">
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>ดูใบลา</span><span class="fmt muted" style="font-size:11px">leave:read</span></span></label>
+                  <label class="cbox on" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>เห็นได้ทุกคน</span><span class="fmt muted" style="font-size:11px">leave:read-all</span></span></label>
+                  <label class="cbox" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>ทำแทนผู้อื่น</span><span class="fmt muted" style="font-size:11px">leave:manage-all</span></span></label>
+                </div>
+              </div>
+              <div style="border-top:1px solid var(--border-c);">
+                <div style="display:flex;align-items:center;gap:8px;background:color-mix(in oklab,var(--muted) 45%,transparent);border-bottom:1px solid var(--border-c);padding:8px 10px">
+                  <span class="cbox"><i></i></span>
+                  <b style="flex:1;font-size:12.5px;font-weight:500">ระบบ</b>
+                  <span class="muted" style="font-size:11px;font-variant-numeric:tabular-nums">0 / 1</span>
+                </div>
+                <div style="display:grid;gap:8px;padding:9px 10px 9px 33px">
+                  <label class="cbox" style="display:flex;width:100%"><i></i><span style="flex:1;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span>โหมดทดสอบอีเมล</span><span class="fmt muted" style="font-size:11px">dev-mode:enable</span></span></label>
+                </div>
+              </div>
+              </div>
             </div>
             <div class="dlg-foot">
               <span></span>
               <span style="display:flex;gap:8px">
                 <button class="btn btn-outline" type="button">ยกเลิก</button>
-                <button class="btn btn-primary" type="button">เพิ่ม</button>
+                <button class="btn btn-primary" type="button">บันทึก</button>
               </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <p class="note">ฟอร์มสั้นอยู่ใน dialog ตามบันได Dialog ปกติ (ส่วน 7) — ปุ่ม primary มีตัวเดียวต่อ dialog ·
-      ประเภทบัญชีเป็น Select ไม่ใช่ Tabs เพราะเลือกครั้งเดียวตอนสร้าง ไม่ใช่ view ที่สลับไปมา ·
-      SSO ไม่มีในตัวเลือกโดยตั้งใจ — บัญชีเกิดเองตอน login ผ่าน Keycloak ครั้งแรก</p>
+    <p class="note">หัวกลุ่มติ๊กครั้งเดียว<strong>เลือก/เอาออกทั้งกลุ่ม</strong> — สี่เหลี่ยมทึบครึ่ง =
+      เลือกบางส่วน (indeterminate) · ทุกแถวมี key แบบ mono ต่อท้ายให้ dev อ้างในโค้ดตรงกับที่ตาเห็น ·
+      Administrator เป็น <code>isSystem</code> ลบไม่ได้ และบทบาทที่ยังมีผู้ใช้อยู่ก็ลบไม่ได้
+      (ปุ่มลบจาง + IconAction บอกเหตุผลใน tooltip) · เพิ่ม key ใหม่ = แก้
+      <code>lib/permissions.ts</code> แล้วระบบ sync เข้า DB เอง — ไม่มีหน้า CRUD สิทธิ์</p>
 
     <div class="specimen">
       <div class="specimen-bar">
-        <span>/admin/roles + /admin/audit-logs</span>
+        <span>/admin/audit-logs — อ่านอย่างเดียว</span>
         <span class="toggle" role="group" aria-label="สลับธีม">
           <button type="button" data-theme="light" aria-pressed="true">Light</button>
           <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
         </span>
       </div>
-      <div class="cmp ui" data-ui>
-        <div class="cmp-title">บทบาทและสิทธิ์ — checkbox จัดกลุ่มตาม resource · สิทธิ์ทั้งหมดของระบบเห็นที่นี่</div>
-        <div class="card" style="padding:0;overflow:hidden;display:grid;grid-template-columns:190px 1fr">
-          <div style="border-right:1px solid var(--border-c);padding:12px 10px;display:grid;gap:2px;align-content:start;font-size:13px">
-            <div style="display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:var(--r-ctl);background:var(--accent-c);font-weight:500">
-              Administrator<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;opacity:.6;margin-left:auto"><use href="#i-lock"/></svg></div>
-            <div style="padding:6px 10px" class="muted">หัวหน้างาน</div>
-            <div style="padding:6px 10px" class="muted">Tester</div>
-            <button class="btn btn-ghost" type="button" style="justify-content:flex-start;margin-top:6px">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>สร้างบทบาท</button>
-          </div>
-          <div style="padding:14px 16px;display:grid;gap:12px;align-content:start">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-              <span style="font-size:14px;font-weight:500">สิทธิ์ของ Administrator</span>
-              <button class="btn btn-outline" type="button" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg>ลบบทบาท</button>
+      <div class="cmp ui" data-ui style="padding:0">
+        <div class="shell" style="min-height:300px">
+          <aside class="side">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8"/></svg>
+              <b style="font-size:14px;letter-spacing:-.01em">Leave Portal</b>
             </div>
-            <div class="grid g3" style="gap:12px">
-              <div style="display:grid;gap:6px;align-content:start">
-                <span class="muted" style="font-size:11px">users</span>
-                <span class="cbox on"><i></i>View Users</span>
-                <span class="cbox on"><i></i>Create Users</span>
-                <span class="cbox on"><i></i>Edit Users</span>
-                <span class="cbox on"><i></i>Reset User Passwords</span>
+            <div class="navgroup">งานหลัก</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-home"/></svg>ภาพรวม</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cal"/></svg>ใบลา</div>
+            <div class="navgroup">ผู้ดูแลระบบ</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-user"/></svg>ผู้ใช้งาน</div>
+            <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-lock"/></svg>บทบาทและสิทธิ์</div>
+            <div class="nav on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>Audit logs</div>
+            <div style="margin-top:auto;border-top:1px solid var(--border-c);padding-top:8px">
+              <div class="navuser">
+                <span class="ava">สจ</span>
+                <span style="display:grid;min-width:0;line-height:1.3">
+                  <span style="font-size:13px;font-weight:500" class="tr">สมชาย ใจดี</span>
+                  <span style="font-size:11px" class="muted tr">somchai@ube.co.th</span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-left:auto;opacity:.6"><use href="#i-more"/></svg>
               </div>
-              <div style="display:grid;gap:6px;align-content:start">
-                <span class="muted" style="font-size:11px">roles · audit-logs</span>
-                <span class="cbox on"><i></i>View Roles</span>
-                <span class="cbox on"><i></i>Edit Roles</span>
-                <span class="cbox on"><i></i>View Audit Logs</span>
+            </div>
+          </aside>
+          <div class="main">
+            <div class="pagehead">
+              <div>
+                <h4>Audit logs</h4>
+                <div class="muted" style="font-size:13px">บันทึกการกระทำทั้งหมด — ไม่มีปุ่มแก้หรือลบที่ไหนเลย</div>
               </div>
-              <div style="display:grid;gap:6px;align-content:start">
-                <span class="muted" style="font-size:11px">ระบบ · ใบลา (ตัวอย่างของโปรเจค)</span>
-                <span class="cbox"><i></i>โหมดทดสอบอีเมล</span>
-                <span class="cbox on"><i></i>leave:read</span>
-                <span class="cbox on"><i></i>leave:read-all</span>
-              </div>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table class="dt">
+                <thead><tr>
+                  <th>เวลา</th><th>ผู้กระทำ</th><th>action</th><th>detail</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td class="fmt">10/08/2026 14:02</td><td>สมชาย ใจดี</td>
+                    <td class="fmt">users.create</td>
+                    <td class="fmt muted tr" style="max-width:210px">{"targetId":"…","authType":"local"}</td></tr>
+                  <tr><td class="fmt">10/08/2026 13:47</td><td>ผู้ตรวจสอบ QA</td>
+                    <td class="fmt">password.change</td>
+                    <td class="fmt muted tr" style="max-width:210px">{"ip":"10.2.14.8"}</td></tr>
+                  <tr><td class="fmt">10/08/2026 09:15</td><td>วิภา สุขใจ</td>
+                    <td class="fmt">login.success</td>
+                    <td class="fmt muted tr" style="max-width:210px">{"authType":"ldap"}</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <p class="muted" style="font-size:12px">Administrator มีแม่กุญแจ = <code>isSystem</code> ลบ/แก้ชื่อไม่ได้ (ปุ่มลบ disable) ·
-          <code>dev-mode:enable</code> (โหมดทดสอบอีเมล) กับ <code>leave:read-all</code> (data scope
-          เห็นได้ทุกคน) เป็นสิทธิ์ปกติในรายการนี้ — ติ๊กให้ role ได้เหมือนตัวอื่น ·
-          เพิ่ม key ใหม่ = แก้ <code>lib/permissions.ts</code> แล้วระบบ sync เข้า DB เอง ไม่มีหน้า CRUD สิทธิ์</p>
-
-        <div class="cmp-title">Audit logs — อ่านอย่างเดียว · ไม่มีปุ่มแก้/ลบที่ไหนเลย</div>
-        <div class="card" style="padding:0;overflow:hidden">
-          <table class="dt">
-            <thead><tr>
-              <th>เวลา</th><th>ผู้กระทำ</th><th>action</th><th>detail</th>
-            </tr></thead>
-            <tbody>
-              <tr><td class="fmt">10/08/2026 14:02</td><td>สมชาย ใจดี</td>
-                <td class="fmt">users.create</td>
-                <td class="fmt muted tr" style="max-width:230px">{"targetId":"…","authType":"local"}</td></tr>
-              <tr><td class="fmt">10/08/2026 13:47</td><td>ผู้ตรวจสอบ QA</td>
-                <td class="fmt">password.change</td>
-                <td class="fmt muted tr" style="max-width:230px">{"ip":"10.2.14.8"}</td></tr>
-              <tr><td class="fmt">10/08/2026 09:15</td><td>วิภา สุขใจ</td>
-                <td class="fmt">login.success</td>
-                <td class="fmt muted tr" style="max-width:230px">{"authType":"ldap"}</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="muted" style="font-size:12px">เวลาเป็น instant จริง → แสดงเวลาไทยผ่าน <code>formatDateTime</code> ·
-          action เป็น <code>resource.verb</code> จากค่าคงที่ · <code>detail</code> ไม่มีรหัสผ่าน/token/PII เกินจำเป็น —
-          คนอ่าน log มักเยอะกว่าคนอ่านข้อมูลจริง</p>
       </div>
     </div>
-    <p class="note">ลำดับติดตั้งบังคับ design → auth เพราะหน้าเหล่านี้ถูก generate มาแล้วต้อง
-      สืบทอดโทเคนทันที — ติดตั้งกลับด้านคือ retheme หน้า admin ทีหลัง ·
-      หน้าแรกสุด <code>/admin/setup</code> เป็นปุ่มเดียว (คนแรกที่ login กดรับ Administrator)
-      จึงไม่วาดในนี้</p>
+    <p class="note">เวลาเป็น instant จริง → เวลาไทยผ่าน <code>formatDateTime</code> ·
+      action เป็น <code>resource.verb</code> จากค่าคงที่ · <code>detail</code> ไม่มีรหัสผ่าน/token/PII
+      เกินจำเป็น — คนอ่าน log มักเยอะกว่าคนอ่านข้อมูลจริง ·
+      ลำดับติดตั้งบังคับ design → auth เพราะหน้าเหล่านี้ถูก generate มาแล้วต้องสืบทอดโทเคนทันที</p>
   </div>
 </section>
 
