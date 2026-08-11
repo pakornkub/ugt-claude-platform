@@ -269,7 +269,7 @@ build context และ Dockerfile ทั้งสอง shape ใช้ `COPY .
 | `__PROJECT_DISPLAY_NAME__` | ชื่อที่คนอ่าน (sonar `projectName`, หัวเอกสาร handoff) | `Jenkinsfile`, `sonar-project.properties`, `admin-handoff.template.md` | `Stock Sync` |
 | `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 8000 เสมอ) | `docker-compose.yml` | `8000` |
 | `__PORT_DEV__` | host port ของ dev | `docker-compose.dev.yml` | `8001` |
-| `__APP_MODULE__` | โมดูลหลักที่ import ได้ — ใช้เป็น smoke check ทั้งใน CI และใน image | `Jenkinsfile` (บล็อก `[BATCH]`), `docker/Dockerfile.batch`, `tooling/test_smoke.py` | `app` |
+| `__APP_MODULE__` | โมดูลหลักที่ import ได้ — ใช้เป็น smoke check ทั้งใน CI และใน image | **ทุก shape**: `tooling/test_smoke.py` (เสมอ — ไฟล์นี้ copy ทุกโปรเจค) · shape = batch เพิ่ม `Jenkinsfile` (บล็อก `[BATCH]`) และ `docker/Dockerfile.batch` | `app` |
 | `__START_CMD_JSON__` | คำสั่ง start เป็น **JSON array** (exec form) เติมจาก entry point จริงที่อ่านเจอใน §3 | `docker/Dockerfile.web` | `["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]` |
 
 `__START_CMD_JSON__` ต่อ framework (ตัวอย่างอยู่ในคอมเมนต์ท้าย `Dockerfile.web` ด้วย):

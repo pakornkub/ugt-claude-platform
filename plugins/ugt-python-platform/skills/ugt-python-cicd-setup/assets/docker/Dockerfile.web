@@ -1,5 +1,5 @@
 # Org-standard Python web Dockerfile — FastAPI / Flask / Django
-# Placeholders: __START_CMD_JSON__ (JSON array — ดูท้ายไฟล์), เลือกไฟล์นี้เมื่อ shape = web
+# Placeholder: START_CMD (JSON array — ดู CMD ท้ายไฟล์), เลือกไฟล์นี้เมื่อ shape = web
 FROM python:3.12-slim
 WORKDIR /app
 
@@ -21,7 +21,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health').status==200 else 1)" || exit 1
 
-# __START_CMD_JSON__ ตัวอย่าง (skill เติมจาก entry point จริงที่อ่านเจอ):
+# ตัวอย่างค่า START_CMD (JSON array) — skill เติมจาก entry point จริงที่อ่านเจอ:
 #   ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]     FastAPI
 #   ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]                          Flask
 #   ["gunicorn", "-b", "0.0.0.0:8000", "config.wsgi:application"]          Django

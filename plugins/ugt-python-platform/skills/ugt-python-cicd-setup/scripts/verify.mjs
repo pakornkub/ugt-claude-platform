@@ -38,6 +38,30 @@ const CI_FILES = [
 const jf = has('Jenkinsfile') ? read('Jenkinsfile') : '';
 const pyproject = has('pyproject.toml') ? read('pyproject.toml') : '';
 
+// The header legend (top-of-file comment block) permanently documents every
+// placeholder/tag as literal text ("[WEB]", "[DB]", "__APP_MODULE__", ...) —
+// a plain substring/regex test for a tag like [WEB] or [DB] against the
+// WHOLE file is therefore always true regardless of which shape the project
+// actually is. Anchor at the real pipeline body and drop `//`-led comment
+// lines before testing which tags are actually IN USE.
+const PIPELINE_START = jf.indexOf('pipeline {');
+const jfBody = PIPELINE_START >= 0 ? jf.slice(PIPELINE_START) : jf;
+const jfActive = jfBody
+  .split('\n')
+  .filter((l) => !l.trim().startsWith('//'))
+  .join('\n');
+
+// Web-shape signal: the active (non-comment) container health-poll loop that
+// only web shape keeps in the Deploy stage — batch shape deletes this block
+// entirely and swaps in the two `[BATCH]` lines instead (SKILL.md §5.3), so
+// a plain string search still works without extra comment-stripping here.
+// More reliable than grepping for the literal "[WEB]" tag, which is also
+// permanently present in the header legend and inside the commented-out
+// [BATCH] alternative that web-shape files keep for reference.
+const isWebShape =
+  jfActive.includes('State.Health.Status') ||
+  (has('Dockerfile') && /HEALTHCHECK|EXPOSE/.test(read('Dockerfile')));
+
 // ── 1. Required files ──────────────────────────────────────────────────────
 check('CI files present', () => {
   const missing = CI_FILES.filter((f) => !has(f));
@@ -70,9 +94,9 @@ function listPyFiles(dir, skip = new Set(['.venv', '.git', '__pycache__', 'node_
 }
 
 check('/api/health exists', () => {
-  // Only web shapes carry the [WEB] health-poll block in the Deploy stage —
-  // batch shape has no long-running process to poll (SKILL.md §2.8).
-  if (!/\[WEB\]/.test(jf)) return { ok: true };
+  // Only web shapes carry a health-poll block in the Deploy stage — batch
+  // shape has no long-running process to poll (SKILL.md §2.8).
+  if (!isWebShape) return { ok: true };
   const hits = listPyFiles(ROOT).filter((f) => readFileSync(f, 'utf8').includes('/api/health'));
   if (!hits.length) {
     return {
@@ -87,9 +111,13 @@ check('/api/health exists', () => {
 });
 
 // ── 2. Leftover placeholders ───────────────────────────────────────────────
+// tests/test_smoke.py carries its own __APP_MODULE__ placeholder (SKILL.md
+// §5.2) and is copied into every project — scan it too, skipping silently if
+// somehow absent (that absence is already caught by its own check below).
+const PLACEHOLDER_FILES = [...CI_FILES, 'tests/test_smoke.py'];
 check('No __*__ placeholders left', () => {
   const found = [];
-  for (const f of CI_FILES) {
+  for (const f of PLACEHOLDER_FILES) {
     if (!has(f)) continue;
     const hits = [...new Set([...read(f).matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
     if (hits.length) found.push(`${f}: ${hits.join(', ')}`);
@@ -175,7 +203,11 @@ check('No Groovy interpolation of secrets', () => {
 check('[DB] consistent with actual alembic/manage.py usage', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const hasDb = has('alembic.ini') || has('alembic') || has('manage.py');
-  const marked = /\[DB\]/.test(jf);
+  // The "[DB]" tag itself only ever appears inside comment lines (both in
+  // the header legend and as the label on the migrate block) — the real
+  // functional signal that the Deploy stage performs a migration is the
+  // active (non-comment) alembic/manage.py migrate command.
+  const marked = /\[DB\]/.test(jfActive) || /alembic\s+upgrade|manage\.py\s+migrate/.test(jfActive);
   if (hasDb && !marked) {
     return { ok: false, msg: 'Project has alembic/manage.py but the Jenkinsfile has no [DB] migrate block — deploys will skip migration' };
   }
@@ -232,7 +264,9 @@ for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
     if (!/pull_policy\s*:\s*never/.test(body)) {
       problems.push('no pull_policy: never (compose will try to pull a locally-built image)');
     }
-    if (!/APP_PORT/.test(body)) problems.push('no APP_PORT override');
+    // Batch shape has no `ports:` at all (SKILL.md §5.3 — cut ports/healthcheck/
+    // networks entirely), so APP_PORT only applies to web shape.
+    if (isWebShape && !/APP_PORT/.test(body)) problems.push('no APP_PORT override');
     // volumes must live under /srv/appdata (org contract — Persistent data)
     const vols = [...body.matchAll(/^\s*-\s*(\/[^:\s]+):/gm)].map((m) => m[1]);
     const stray = vols.filter((v) => !v.startsWith('/srv/appdata/'));
@@ -245,7 +279,7 @@ check('Dockerfile has a HEALTHCHECK', () => {
   if (!has('Dockerfile')) return { ok: false, msg: 'No Dockerfile' };
   // Batch shape (Dockerfile.batch) has no EXPOSE/HEALTHCHECK by design — no
   // long-running process to poll (SKILL.md §5.3). Web shape must have one.
-  if (!/\[WEB\]/.test(jf)) return { ok: true };
+  if (!isWebShape) return { ok: true };
   return /HEALTHCHECK/.test(read('Dockerfile'))
     ? { ok: true }
     : { ok: false, msg: 'No HEALTHCHECK — the Deploy stage cannot poll for healthy' };

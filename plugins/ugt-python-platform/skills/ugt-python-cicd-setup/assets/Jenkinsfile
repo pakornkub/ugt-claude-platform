@@ -7,7 +7,9 @@
 // Placeholders to replace (see SKILL.md replacement table):
 //   __PROJECT_NAME__          kebab-case id (image/container/credential/sonar key)
 //   __PROJECT_DISPLAY_NAME__  human-readable name
-//   __APP_MODULE__            main importable module, e.g. `app`
+//   APP_MODULE                main importable module, e.g. `app` — filled in
+//                              for every shape (tests/test_smoke.py always
+//                              needs it; batch shape also needs it here)
 //
 // Sections marked [DB] are OPTIONAL — delete them if the project has no
 // database / Alembic migrations.
