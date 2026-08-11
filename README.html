@@ -404,7 +404,7 @@
     </p>
     <div class="chips h-anim d3">
       <span class="chip"><span class="dot" aria-hidden="true"></span>ติดตั้งครั้งเดียวต่อเครื่อง</span>
-      <span class="chip"><span class="dot violet" aria-hidden="true"></span>ตัวช่วย 12 ตัว ครอบ 8 เรื่องหลัก</span>
+      <span class="chip"><span class="dot violet" aria-hidden="true"></span>ตัวช่วย 14 ตัว ครอบ 10 เรื่องหลัก</span>
       <span class="chip"><span class="dot green" aria-hidden="true"></span>ผลทดสอบ setup/auth/cicd 100%</span>
       <a class="chip" href="docs/design-preview.html" style="text-decoration:none">
         <span class="dot violet" aria-hidden="true"></span>ดูตัวอย่างหน้าตา UI ที่จะได้ →</a>
@@ -435,18 +435,18 @@
     <div class="grid cols-3">
       <article class="card plugin-card featured reveal">
         <span class="badge">แนะนำ — ติดตัวนี้</span>
-        <span class="ver">v2.0.0</span>
+        <span class="ver">v2.1.0</span>
         <h3>ugt-nextjs-standard</h3>
         <p>ตัวที่ควรติดตั้ง — ติดตัวเดียวได้ครบทุกอย่างข้างล่างอัตโนมัติ
         <strong>พร้อม plugin official อีก 3 ตัว</strong> (ดูกรอบล่าง) ไม่ต้องเลือกทีละชิ้น</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v3.0.0</span>
+        <span class="ver">v4.12.0</span>
         <h3>ugt-nextjs-platform</h3>
-        <p>ตัวช่วย 8 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login CI/CD และอื่น ๆ (ดูรายการถัดไป)</p>
+        <p>ตัวช่วย 10 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.0.0</span>
+        <span class="ver">v2.2.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -486,7 +486,7 @@
 <!-- ================= SKILLS ================= -->
 <section id="skills" aria-labelledby="skills-title">
   <div class="wrap">
-    <span class="kicker reveal">12 ตัวช่วย</span>
+    <span class="kicker reveal">14 ตัวช่วย</span>
     <h2 id="skills-title" class="reveal">ตัวช่วยทั้งหมด</h2>
     <p class="lead reveal">พิมพ์ <span class="inline-code">/ugt</span> จะเห็นรายการทั้งหมด — สองตัวสุดท้ายในกลุ่มเขียว<strong>ทำงานเองอัตโนมัติ</strong> ไม่ต้องเรียก</p>
     <div class="skills-grid">
@@ -511,7 +511,15 @@
       </article>
       <article class="skill reveal">
         <div class="top"><span class="emoji" aria-hidden="true">🔐</span><h3>ugt-nextjs-auth-setup</h3></div>
-        <p>ระบบ login (SSO บริษัท / AD / รหัสผ่าน) + จัดการสิทธิ์ + หน้า admin</p>
+        <p>ระบบ login (SSO บริษัท / AD / รหัสผ่าน) + สิทธิ์และขอบเขตข้อมูล + หน้า admin (ผู้ใช้/บทบาท/audit) + ลืม-เปลี่ยน-ตั้งรหัสผ่าน</p>
+      </article>
+      <article class="skill reveal">
+        <div class="top"><span class="emoji" aria-hidden="true">📧</span><h3>ugt-nextjs-mail-setup</h3></div>
+        <p>ส่งอีเมลผ่าน relay บริษัท — template แก้ได้จากหน้า admin + โหมดทดสอบที่เมลเข้าตัวเองแทนคนจริง (ตัวเลือกตอนติดตั้ง)</p>
+      </article>
+      <article class="skill reveal">
+        <div class="top"><span class="emoji" aria-hidden="true">📎</span><h3>ugt-nextjs-upload-setup</h3></div>
+        <p>แนบไฟล์: เก็บบน volume + สแกนไวรัส + ดาวน์โหลดผ่านการตรวจสิทธิ์ทุกครั้ง (ตัวเลือกตอนติดตั้ง)</p>
       </article>
       <article class="skill reveal">
         <div class="top"><span class="emoji" aria-hidden="true">🔁</span><h3>ugt-nextjs-cicd-setup</h3></div>

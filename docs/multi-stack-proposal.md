@@ -1,7 +1,7 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
-> **Last-reviewed:** 2026-08-09 — ยังไม่มี plugin ตามข้อเสนอ (Python / React SPA)
+> **Last-reviewed:** 2026-08-11 — ยังไม่มี plugin ตามข้อเสนอ (Python / React SPA)
 
 > **สถานะ (2026-08-09): ข้อเสนอที่ยังไม่ได้ทำ — ไม่ใช่บันทึกย้อนหลัง**
 >
