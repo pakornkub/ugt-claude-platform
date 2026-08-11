@@ -128,9 +128,14 @@ without `serverQuery` — client-filtering one page of a server-paginated set
 returns confident nonsense, so the component refuses rather than trusting the
 caller.
 
-**Toolbar** (right side): search input, then the column-settings icon button
-opening a Popover with drag-to-reorder + show/hide checkboxes + reset. Prefs
-persist per table `id`.
+**Toolbar** — fixed placement, matching the component (`data-table.tsx`):
+**search input leftmost**, a flex spacer, then `toolbarExtra` (export menu and
+friends) and the column-settings icon button hugging the **right** edge. The
+column-settings Popover has drag-to-reorder + show/hide checkboxes + reset;
+prefs persist per table `id`. When a page also has page-level filters, those
+form their **own row above** this toolbar (left-aligned, wide → narrow — see
+§Page-level filter bar); they never share the toolbar row, so search never
+migrates to the right side.
 
 **Pagination**: rows-per-page Select → `หน้า X จาก Y` → four icon buttons
 (first · prev · next · last; first/last are `lg`-only). **No numbered page

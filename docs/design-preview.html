@@ -554,20 +554,18 @@
             </div>
 
             <div class="card">
-              <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;
-                   align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                <div class="filterbar">
-                  <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-cal"/></svg>01/08/2026 – 31/08/2026</span>
-                  <span class="field">ทุกหน่วยงาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
-                  <span class="field">ทุกสถานะ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
-                  <button class="btn btn-icon btn-outline" type="button" aria-label="ดาวน์โหลด">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-download"/></svg></button>
-                  <button class="btn btn-icon btn-outline" type="button" aria-label="ตั้งค่าคอลัมน์">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cols"/></svg></button>
-                </div>
+              <div class="filterbar" style="padding:12px 14px 0">
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-cal"/></svg>01/08/2026 – 31/08/2026</span>
+                <span class="field">ทุกหน่วยงาน<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
+                <span class="field">ทุกสถานะ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
+              </div>
+              <div style="padding:10px 14px 12px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;gap:8px">
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
+                <span style="flex:1"></span>
+                <button class="btn btn-icon btn-outline" type="button" aria-label="ดาวน์โหลด">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-download"/></svg></button>
+                <button class="btn btn-icon btn-outline" type="button" aria-label="ตั้งค่าคอลัมน์">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cols"/></svg></button>
               </div>
               <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border-c)">
                 <span class="chip">สถานะ: รออนุมัติ<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><use href="#i-x"/></svg></span>
@@ -626,11 +624,15 @@
         </div>
       </div>
     </div>
-    <p class="note">ในหัวคอลัมน์: จุดจับลาก → ชื่อคอลัมน์ที่กด sort ได้ (ลูกศรบอกทิศ) →
-      ไอคอนกรองเปิด popover เฉพาะคอลัมน์นั้น (สีเข้ม = กำลังใช้งาน) · ปุ่มขวาสุดของ toolbar
-      เปิด popover จัดการคอลัมน์ (ลากสลับลำดับ + ติ๊กซ่อน/แสดง + คืนค่าเริ่มต้น) จำไว้ต่อผู้ใช้
-      เมื่อตารางส่ง <code>id</code> · ปุ่มดาวน์โหลดข้าง ๆ กันเปิดเมนู Excel/CSV และส่งออก
-      <strong>ตาม filter ที่เห็นอยู่</strong> ไม่ใช่ทั้งตาราง · ท้ายตาราง: แถวต่อหน้า + “หน้า X จาก Y” + ปุ่มไอคอน 4 ตัว
+    <p class="note"><strong>ผังหัวการ์ดตายตัวสองแถว</strong>: แถวบน = filter ระดับหน้า
+      (ช่วงเวลา → หน่วยงาน → สถานะ เรียงกว้าง→แคบ ชิดซ้าย — ห้ามใช้ Input เปล่าเป็น filter) ·
+      แถวล่างเป็นของ DataTable เอง: <strong>ช่องค้นหาซ้ายสุดเสมอ</strong> ปุ่มอื่น
+      (ดาวน์โหลด/ตั้งค่าคอลัมน์) ชิดขวา — หน้าที่ไม่มี filter ระดับหน้าจะเหลือแค่แถวล่าง
+      (ดูหน้า admin ในส่วน 13) · ในหัวคอลัมน์: จุดจับลาก → ชื่อคอลัมน์ที่กด sort ได้
+      (ลูกศรบอกทิศ) → ไอคอนกรองเปิด popover เฉพาะคอลัมน์นั้น (สีเข้ม = กำลังใช้งาน) ·
+      ปุ่มตั้งค่าคอลัมน์จำการตั้งค่าต่อผู้ใช้เมื่อตารางส่ง <code>id</code> ·
+      ปุ่มดาวน์โหลดส่งออก<strong>ตาม filter ที่เห็นอยู่</strong> ไม่ใช่ทั้งตาราง ·
+      ท้ายตาราง: แถวต่อหน้า + “หน้า X จาก Y” + ปุ่มไอคอน 4 ตัว
       <strong>ไม่มีรายการเลขหน้า</strong> (มติ 2026-08-09) ปุ่มไอคอนทุกตัวขนาดเดียวกัน 28px</p>
   </div>
 </section>
