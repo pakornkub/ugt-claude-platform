@@ -1,0 +1,30 @@
+{
+  "skill_name": "ugt-python-cicd-setup",
+  "notes": "Runs on a fixture FastAPI project that already has requirements.txt (uvicorn + fastapi pinned) but no tests/ directory and no pyproject.toml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = fastapi (web), no reverse-proxy subpath, no database, one upload directory (uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "fastapi-no-tests-full-setup",
+      "prompt": "โปรเจค FastAPI มี requirements.txt อยู่แล้ว แต่ไม่มี test เลย ขอ deploy ตามมาตรฐานบริษัทหน่อย",
+      "expected_output": "Produces the full 10-item file set (Jenkinsfile, sonar-project.properties, Dockerfile from Dockerfile.web, docker-compose.yml + docker-compose.dev.yml, owasp-suppressions.xml, app health router wired into the FastAPI app, pyproject.toml tooling merge + requirements-dev.txt, tests/test_smoke.py, .claude/rules/ugt-python-ci.md) with every __*__ placeholder resolved. All Python-touching stages (Install, Code Quality, Unit Tests) run inside docker.image('python:3.12-slim').inside — no Global Tool Python is assumed on the Jenkins host. Since the project had no tests/ directory, tests/test_smoke.py is created fresh and is the only test file. Because the interview surfaces an uploads directory that must survive redeploys, the [VOLUME] block is kept (not stripped) in both compose files and in the Jenkinsfile Deploy stage, bound under /srv/appdata/<project>/uploads (dev: /srv/appdata/<project>-dev/uploads) — never a named volume.",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-python-cicd-setup exits 0",
+        "All 10 file-set items exist: Jenkinsfile, sonar-project.properties, Dockerfile, docker-compose.yml, docker-compose.dev.yml, owasp-suppressions.xml, the FastAPI health router file, pyproject.toml with merged [tool.ruff]/[tool.pytest.ini_options] + requirements-dev.txt, tests/test_smoke.py, .claude/rules/ugt-python-ci.md",
+        "No __PLACEHOLDER__ of the __*__ form remains in any copied/rendered file",
+        "The Jenkinsfile has all 10 contract stages in order and opening/closing brace counts are equal",
+        "Install, Code Quality, and Unit Tests stages each open docker.image('python:3.12-slim').inside — no Jenkins Global Tool Python is referenced",
+        "The Dockerfile matches Dockerfile.web (has EXPOSE 8000 and HEALTHCHECK) with CMD as a real JSON array (uvicorn app.main:app ...), not a leftover __START_CMD_JSON__",
+        "app/health.py (or equivalent) exists, is wired via app.include_router, returns only healthy/degraded with no version or commit hash, and requires no login",
+        "No [DB] blocks remain anywhere (Jenkinsfile Deploy stage, both compose files, health file comment) since the project has no database",
+        "tests/test_smoke.py exists, imports the real app module, and is the only file under tests/ (none existed before this run)",
+        "requirements-dev.txt exists at root, separate from requirements.txt, and is not installed into the Dockerfile production image",
+        "Both compose files declare an uncommented volumes: bind for uploads at /srv/appdata/<project>/uploads (docker-compose.yml) and /srv/appdata/<project>-dev/uploads (docker-compose.dev.yml) — no named volume is used",
+        "The Jenkinsfile Deploy stage [VOLUME] block's mkdir -p line includes the uploads subdirectory (not just the <project> root) ahead of the chown -R call",
+        "Both compose healthchecks target 127.0.0.1:8000 and carry pull_policy: never",
+        "waitForQualityGate carries abortPipeline: true",
+        "Every path in sonar.sources/sonar.tests exists in the project and sonar.python.coverage.reportPaths=coverage.xml"
+      ],
+      "files": []
+    }
+  ]
+}

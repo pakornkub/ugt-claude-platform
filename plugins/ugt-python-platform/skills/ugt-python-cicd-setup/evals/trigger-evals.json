@@ -1,0 +1,46 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-python-cicd-setup. S* queries must route here (pipeline install for FastAPI/Flask/Django/batch Python projects + documented pipeline symptoms); N* must NOT (Next.js pipeline → nextjs-cicd-setup, PHP/Laravel pipeline → php-cicd-setup [Phase 3, not built yet], writing a plain unit test → ordinary dev work, login/SSO for a Python app → no Python auth skill exists yet).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "queries": {
+    "S1": {
+      "prompt": "ทำ CI/CD ให้โปรเจค python หน่อย",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "S2": {
+      "prompt": "deploy fastapi ขึ้น docker ตามมาตรฐานบริษัท",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "S3": {
+      "prompt": "โปรเจค django ยัง deploy มือทุกครั้ง",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "S4": {
+      "prompt": "python batch job อยาก deploy ด้วย jenkins",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "S5": {
+      "prompt": "pipeline python ค้างที่ Quality Gate",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "S6": {
+      "prompt": "volume ของแอป python ต้อง mount ยังไงตามมาตรฐาน",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "N1": {
+      "prompt": "ทำ CI/CD ให้โปรเจค next.js",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N2": {
+      "prompt": "deploy laravel ด้วย docker",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "N3": {
+      "prompt": "เขียน test ให้ function python นี้",
+      "expected": "(none — งาน dev ปกติ)"
+    },
+    "N4": {
+      "prompt": "ตั้ง keycloak login ให้แอป python",
+      "expected": "(none — ยังไม่มี auth skill; ดู multi-stack-proposal)"
+    }
+  }
+}
