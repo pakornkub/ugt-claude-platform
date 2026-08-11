@@ -22,6 +22,11 @@
       "name": "ugt-nextjs-standard",
       "source": "./plugins/ugt-nextjs-standard",
       "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline) + skill-creator (build project skills to the same standard)"
+    },
+    {
+      "name": "ugt-python-platform",
+      "source": "./plugins/ugt-python-platform",
+      "description": "Org standards for Python projects (deploy-only for now): Jenkins + SonarQube + OWASP + Docker deploy for FastAPI / Flask / Django / batch jobs, with minimal lint/test tooling so the org Quality Gate passes"
     }
   ]
 }
