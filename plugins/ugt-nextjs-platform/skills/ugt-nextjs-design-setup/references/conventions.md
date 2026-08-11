@@ -101,6 +101,11 @@ table's per-column filters. Fixed placement so page N+1 never moves them:
 - A filter that changes *which rows exist* must be part of the query key and
   re-fetch server-side (see `ugt-nextjs-pitfalls` → data-fetching) — the
   placement rule and the fetching rule are separate obligations.
+- **One divider only** between the whole control block (filter row → DataTable
+  toolbar → active-filter chips) and the table itself; the **last** control row
+  present carries it. Inside the control block, spacing separates the rows —
+  no hairlines between filters and search, or between search and chips: they
+  are one card header, and slicing it into strips reads as three components.
 
 ## DataTable
 
