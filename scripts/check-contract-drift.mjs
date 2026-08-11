@@ -76,6 +76,13 @@ const CHECKS = [
     },
   },
   {
+    name: 'Persistent data: bind mounts under /srv/appdata/<project>',
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/\/srv\/appdata\/<project>\//],
+      [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
+    },
+  },
+  {
     name: 'Session policy: 8h lifetime, refresh at 30m remaining',
     files: {
       [`${CORE}/contracts/auth.md`]: [/8 hours/, /30 minutes/],
