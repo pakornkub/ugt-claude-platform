@@ -43,7 +43,9 @@ RUN chown -R www-data:www-data /var/www/html/api
 
 Plugin/theme uploads (media, ปลั๊กอินที่ติดตั้งผ่าน wp-admin, custom theme)
 เขียนลง `wp-content/` ทั้งหมด — ถ้าไม่ mount เป็น volume ตาม `[WP]` block ใน
-compose (ดู §D ด้านล่าง) ของที่ upload ผ่าน wp-admin ตอน container รันจะหาย
+compose (ดู `docker-compose.yml`/`docker-compose.dev.yml` บล็อก `# [WP]` —
+หรือหัวข้อย่อย "ถ้าโปรเจคมีทั้ง `[VOLUME]` custom และ `[WP]`" ท้าย §B นี้) ของ
+ที่ upload ผ่าน wp-admin ตอน container รันจะหาย
 ทุกครั้งที่ deploy รอบถัดไปสร้าง container ใหม่จาก image (entrypoint เขียน
 core ทับ แต่ image เองไม่มี state ของ uploads เดิม) — เหมือนกับปัญหา volume
 ทั่วไปตาม `[VOLUME]` block ของ Jenkinsfile แต่ WordPress มีจุดพิเศษคือ**บังคับ
