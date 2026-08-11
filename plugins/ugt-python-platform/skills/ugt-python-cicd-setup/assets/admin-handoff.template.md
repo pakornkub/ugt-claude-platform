@@ -13,7 +13,9 @@
 | --- | --- | --- | --- |
 | 1 | Jenkins | สร้าง credentials __N_CREDS__ ตัว + pipeline job + webhook | ~15 นาที |
 | 2 | SonarQube | สร้าง 2 projects + ผูก Quality Gate + webhook | ~10 นาที |
+| 3 [BATCH] | Host cron | ตั้ง cron เรียก `docker compose run --rm job` (เฉพาะโปรเจคที่ shape = batch — ลบแถวนี้ถ้าเป็น web) | ~5 นาที |
 
+<!-- แถว 3 [BATCH]: ลบทั้งแถวถ้าโปรเจคนี้เป็น shape web (fastapi/flask/django) -->
 <!-- ลบแถว/หัวข้อของระบบที่โปรเจคนี้ไม่ใช้ออกทั้งหัวข้อ — อย่าปล่อยค้างไว้ -->
 <!-- ถ้า Jenkins server นี้เคยตั้งโปรเจคอื่นแล้ว งานระดับ server (plugins, tools,
      nvd credential, NOTIFY_EMAIL, docker group) ทำไปแล้ว — ทำเฉพาะระดับโปรเจคด้านล่าง
@@ -62,6 +64,29 @@
 
 ---
 
+## 3. Host cron [BATCH] — เฉพาะโปรเจคที่ shape = batch (ลบหัวข้อนี้ถ้าเป็น web)
+
+โปรเจค batch ไม่มี long-running container — Jenkins deploy image เสร็จแล้ว
+จบหน้าที่ ตัว job ต้องมีคนสั่งรันเป็นรอบ ๆ เอง Jenkins pipeline **ไม่ตั้ง
+cron ให้** — เป็นงานที่ host admin ทำครั้งเดียวตอน setup โปรเจค:
+
+```sh
+crontab -e
+# เพิ่มบรรทัด (ตัวอย่าง: รันทุกวันตี 2 — ปรับความถี่ตาม requirement จริงของ job):
+0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /srv/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+```
+
+รายละเอียดของแต่ละส่วนในบรรทัดนี้ (ทำไมต้อง `--rm`, ทำไม log ต้องอยู่ใต้
+`/srv/appdata`, `docker compose` vs `docker-compose`) ดูที่
+`references/docker-deploy.md` § C — ที่นี่สรุปแค่สิ่งที่ต้องทำจริงบน server:
+
+- [ ] สร้าง path log ก่อน (`mkdir -p /srv/appdata/__PROJECT_NAME__/logs`)
+- [ ] เพิ่มบรรทัด crontab ข้างบน (ปรับความถี่ตามที่ทีมพัฒนาแจ้ง)
+- [ ] ทดสอบรันมือหนึ่งรอบก่อนปล่อยให้ cron รันเอง:
+      `cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job`
+
+---
+
 ## ✅ ค่าที่ต้องส่งกลับให้ทีมพัฒนา (กรอกแล้วส่งไฟล์นี้คืน)
 
 | ค่า | มาจากไหน | กรอกตรงนี้ |
@@ -79,6 +104,7 @@
 - [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `3000`/`3001`
 - [ ] `/srv/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
 - [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
+- [ ] [BATCH] เท่านั้น: ตั้ง host cron แล้ว + ทดสอบรันมือหนึ่งรอบผ่าน (ดู § 3)
 
 ---
 

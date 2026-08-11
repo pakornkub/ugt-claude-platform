@@ -262,8 +262,15 @@ pipeline {
                           docker run --rm -e DATABASE_URL="\$DB_URL" ${imageName}:${buildNum} alembic upgrade head
                         """
 
-                        // [VOLUME] เตรียม path ข้อมูลถาวร (idempotent) — admin เตรียม /srv/appdata แล้ว
-                        sh "mkdir -p /srv/appdata/${containerName} && chmod 755 /srv/appdata/${containerName}"
+                        // [VOLUME] เตรียม path ข้อมูลถาวรครั้งแรก (idempotent) — chown ผ่าน container
+                        // เพราะ jenkins ไม่ใช่ root แต่อยู่ใน docker group; admin เตรียม /srv/appdata แล้ว
+                        sh """
+                          if [ ! -d /srv/appdata/${containerName} ]; then
+                            mkdir -p /srv/appdata/${containerName}
+                            APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
+                            docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "\$APP_UID" /d
+                          fi
+                        """
 
                         // --no-build: reuse the image from Docker Build stage.
                         // Note: docker-compose (v1) — check which binary the Jenkins host has.

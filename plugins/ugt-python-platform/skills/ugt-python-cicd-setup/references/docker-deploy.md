@@ -39,8 +39,9 @@ CI (`importlib.import_module("__APP_MODULE__")`) — แต่รันกับ
 ## C. [BATCH] shape — host cron รัน job
 
 Jenkins deploy image เสร็จแล้ว**จบหน้าที่** — ไม่มี process ไหนเรียก job ให้เอง
-ต่อ. คนตั้ง cron คือ **host admin**, ไม่ใช่ Jenkins pipeline (บันทึกไว้ใน
-`admin-handoff.template.md` ด้วย):
+ต่อ. คนตั้ง cron คือ **host admin**, ไม่ใช่ Jenkins pipeline — เป็นรายการ
+`[BATCH]` ใน `admin-handoff.template.md` (§ ภาพรวม 1 นาที + เช็คก่อนปิดงาน)
+ที่ชี้กลับมาที่ตัวอย่าง crontab นี้:
 
 ```
 0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /srv/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
@@ -84,28 +85,51 @@ Persistent data) คือ:
 `app` เขียนไฟล์ไม่ได้ (`PermissionError: [Errno 13]`) แม้ compose ขึ้น healthy
 ปกติทุกอย่าง (เพราะ error โผล่ตอนโค้ด **เขียน** volume จริง ไม่ใช่ตอน start).
 
-วิธีแก้ — หา UID จริงของ user `app` ใน image ที่ build แล้ว (ไม่ใช่เดาว่า 999
-หรือ 1000 เพราะเลข UID ของ `adduser --system` ขึ้นกับลำดับที่ base image สร้าง
-system user ไว้ก่อนหน้า):
+### กลไกหลัก — Jenkinsfile chown ให้อัตโนมัติครั้งแรก
+
+บล็อก `[VOLUME]` ในสเตจ Deploy ของ Jenkinsfile ทำเรื่องนี้ให้เองแล้ว โดยรันแค่
+**ครั้งแรกที่ path ยังไม่มี** (idempotent — deploy รอบถัดไปเจอ path มีอยู่แล้ว
+ก็ข้าม ไม่ chown ซ้ำทุกรอบ):
 
 ```sh
-docker run --rm __PROJECT_NAME__:latest id -u app
-# หรือย่อ:
-docker run --rm __PROJECT_NAME__:latest id -u
+if [ ! -d /srv/appdata/${containerName} ]; then
+  mkdir -p /srv/appdata/${containerName}
+  APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
+  docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "$APP_UID" /d
+fi
 ```
 
-แล้ว `chown` path บน host ให้ตรง UID นั้นก่อน deploy ครั้งแรก (idempotent —
-รันซ้ำได้ ไม่มีผลถ้า owner ถูกอยู่แล้ว):
+จุดสำคัญที่ทำให้กลไกนี้ทำงานได้แม้ Jenkins agent เองไม่ใช่ root:
+
+- **หา UID จริงจาก image ที่เพิ่ง build** (`docker run --rm ${imageName}:${buildNum} id -u`)
+  ไม่เดาว่า 999/1000 — เลข UID ของ `adduser --system` ขึ้นกับลำดับที่ base
+  image สร้าง system user ไว้ก่อนหน้า เปลี่ยนได้ทุกครั้งที่ `python:3.12-slim`
+  bump เวอร์ชันหรือลำดับ `RUN` ใน Dockerfile ถูกแก้ — จึงต้องอ่านจาก image จริง
+  ทุกครั้ง ไม่ hardcode
+- **`chown` เองไม่ได้เพราะ Jenkins user ไม่ใช่ root บนโฮสต์** — แต่ Jenkins
+  user อยู่ใน `docker` group (ตาม มติ M8 / เช็คลิสต์ admin-handoff) จึงสั่ง
+  `docker run` ได้; รันเป็น container `alpine` แยกที่ mount `/srv/appdata/<project>`
+  bind เข้ามาที่ `/d` แล้ว `chown -R` ข้างในนั้น — container นี้เองรันเป็น
+  root โดย default จึง chown ได้ แม้ Jenkins agent ข้างนอกจะไม่ใช่ root
+- ครอบด้วย `if [ ! -d ... ]` เพื่อไม่ต้องรัน `docker run` สองรอบ (หา UID +
+  chown) ทุก deploy โดยไม่จำเป็น — เกิดขึ้นแค่ตอน path ยังไม่เคยมี
+
+### ทางเลือกสำรอง — chown มือ (path ที่มีอยู่ก่อนกลไกนี้ หรือ debug)
+
+สำหรับ path ที่ถูกสร้างไว้ก่อนบล็อก `[VOLUME]` เวอร์ชันนี้ (เช่น อัปเดต skill
+บนโปรเจคเก่า) หรือเวลา debug ปัญหา permission เอง ใช้คำสั่งเดียวกันแบบรันมือ
+ได้:
 
 ```sh
+docker run --rm __PROJECT_NAME__:latest id -u
+# หรือระบุ group ด้วย:
 chown -R $(docker run --rm __PROJECT_NAME__:latest id -u):$(docker run --rm __PROJECT_NAME__:latest id -g) /srv/appdata/__PROJECT_NAME__/<name>
 ```
 
-Jenkinsfile ทำแค่ `mkdir -p` + `chmod 755` ให้ path มีอยู่ก่อน `up -d` — **ไม่ได้
-chown ให้อัตโนมัติ** เพราะ UID ของ image เปลี่ยนได้ทุกครั้งที่ base image
-เปลี่ยน (`python:3.12-slim` bump เวอร์ชัน) หรือลำดับ `RUN` ใน Dockerfile ถูกแก้
-— ขั้นตอนนี้จึงเป็นงาน one-time ของ admin ตอน setup โปรเจคใหม่ (บันทึกไว้ใน
-`admin-handoff.template.md`), ไม่ใช่ทุก deploy.
+ทั้งสองทางใช้ตรรกะเดียวกัน (อ่าน UID จาก image จริง แล้ว chown path ให้ตรง) —
+ต่างกันแค่ทางแรกรันอัตโนมัติผ่าน Jenkinsfile ตอน deploy ครั้งแรก ทางที่สองไว้
+แก้ปัญหากรณีพิเศษที่กลไกอัตโนมัติไม่ครอบ (path เก่า, หรือ mount เพิ่มทีหลัง
+โดยไม่ได้ผ่าน deploy รอบใหม่).
 
 ## E. Healthcheck — slim ไม่มี wget
 
