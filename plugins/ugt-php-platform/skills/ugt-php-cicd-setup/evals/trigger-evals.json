@@ -1,0 +1,46 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-php-cicd-setup. S* queries must route here (pipeline install for Laravel/WordPress/legacy PHP projects + documented pipeline symptoms); N* must NOT (Next.js pipeline → nextjs-cicd-setup, Python/FastAPI pipeline → python-cicd-setup, fixing PHP code for SonarQube → no PHP clean-code skill exists yet, login/SSO for a PHP app → no PHP auth skill exists yet).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "queries": {
+    "S1": {
+      "prompt": "ทำ CI/CD ให้โปรเจค laravel",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "S2": {
+      "prompt": "deploy wordpress บน docker ตามมาตรฐาน",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "S3": {
+      "prompt": "โปรเจค php เก่าไม่มี composer อยาก deploy",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "S4": {
+      "prompt": "pipeline php ตกที่ Quality Gate",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "S5": {
+      "prompt": "wp-content หายทุกครั้งที่ deploy ใหม่",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "S6": {
+      "prompt": "ตั้ง sonar ให้ php",
+      "expected": "ugt-php-cicd-setup"
+    },
+    "N1": {
+      "prompt": "ทำ CI/CD ให้โปรเจค next.js",
+      "expected": "ugt-nextjs-cicd-setup"
+    },
+    "N2": {
+      "prompt": "deploy python ด้วย docker",
+      "expected": "ugt-python-cicd-setup"
+    },
+    "N3": {
+      "prompt": "แก้โค้ด php ให้ sonar ไม่ฟ้อง",
+      "expected": "(none — ยังไม่มี php clean-code skill)"
+    },
+    "N4": {
+      "prompt": "อยากได้หน้า login ให้ php",
+      "expected": "(none — ยังไม่มี auth skill)"
+    }
+  }
+}

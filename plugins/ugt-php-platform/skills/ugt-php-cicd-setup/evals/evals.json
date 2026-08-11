@@ -1,0 +1,31 @@
+{
+  "skill_name": "ugt-php-cicd-setup",
+  "notes": "Runs on a fixture Laravel project that already has composer.json (with laravel/framework pinned) but no tests/ directory and no phpunit.xml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = laravel (web), no reverse-proxy subpath, one database (MySQL), one upload directory (storage/uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "laravel-no-tests-full-setup",
+      "prompt": "โปรเจค Laravel มี composer.json อยู่แล้ว แต่ไม่มี test เลย ขอ deploy ตามมาตรฐานบริษัทหน่อย",
+      "expected_output": "Produces the full 12-item file set (Jenkinsfile, sonar-project.properties, Dockerfile from Dockerfile.web with [LARAVEL] sed uncommented, Dockerfile.ci, docker-compose.yml + docker-compose.dev.yml, owasp-suppressions.xml, Laravel health route wired into routes/web.php, phpunit.xml tooling + phpstan.neon + .php-cs-fixer.php, tests/SmokeTest.php, .claude/rules/ugt-php-ci.md) with every __*__ placeholder resolved. All PHP-touching stages (Install, Code Quality, Unit Tests) run inside docker.image('__PROJECT_NAME__-ci').inside — the CI image is the __PROJECT_NAME__-ci Docker image built from Dockerfile.ci. Since the project had no tests/ directory, tests/SmokeTest.php is created fresh and is the only test file. Because the interview surfaces a storage/uploads directory that must survive redeploys, the [VOLUME] block is kept (not stripped) in both compose files and in the Jenkinsfile Deploy stage, bound under /srv/appdata/<project>/uploads (dev: /srv/appdata/<project>-dev/uploads) — never a named volume. Database migration is performed with artisan migrate --force, passing --env-file to preserve environment variable loading.",
+      "assertions": [
+        "node scripts/verify.mjs of ugt-php-cicd-setup exits 0",
+        "All 12 file-set items exist: Jenkinsfile, sonar-project.properties, Dockerfile, Dockerfile.ci, docker-compose.yml, docker-compose.dev.yml, owasp-suppressions.xml, routes/web.php with health route wired, phpunit.xml + phpstan.neon + .php-cs-fixer.php, tests/SmokeTest.php, .claude/rules/ugt-php-ci.md",
+        "No __PLACEHOLDER__ of the __*__ form remains in any copied/rendered file, except for __DIR__ magic constant in PHP code",
+        "The Jenkinsfile has all 10 contract stages in order and opening/closing brace counts are equal",
+        "Install, Code Quality, and Unit Tests stages each open docker.image('__PROJECT_NAME__-ci').inside — no Global Tool PHP is referenced",
+        "The Dockerfile matches Dockerfile.web (has EXPOSE 80 and HEALTHCHECK) with [LARAVEL] sed lines uncommented for DocumentRoot rewrite, and chown -R www-data:www-data /var/www/html present",
+        "routes/web.php contains a health route (e.g., Route::get('/api/health', ...)) that is wired and requires no login",
+        "The [DB] block is present in the Jenkinsfile Deploy stage with artisan migrate --force and --env-file flags, since the project has MySQL database",
+        "The [DB] blocks in both compose files declare the MySQL service with image and environment variables (MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD)",
+        "tests/SmokeTest.php exists, uses PHPUnit assertions, and is the only file under tests/ (none existed before this run)",
+        "phpunit.xml, phpstan.neon, and .php-cs-fixer.php exist at root and are configured for the Laravel project",
+        "Both compose files declare an uncommented volumes: bind for uploads at /srv/appdata/<project>/uploads (docker-compose.yml) and /srv/appdata/<project>-dev/uploads (docker-compose.dev.yml) — no named volume is used",
+        "The Jenkinsfile Deploy stage [VOLUME] block's mkdir -p line includes the uploads subdirectory (not just the <project> root) ahead of the chown -R call",
+        "Both compose healthchecks target http://127.0.0.1:80/api/health or equivalent and carry pull_policy: never",
+        "waitForQualityGate carries abortPipeline: true",
+        "Every path in sonar.sources/sonar.tests exists in the project and sonar.php.coverage.reportPaths=coverage/cobertura.xml"
+      ],
+      "files": []
+    }
+  ]
+}
