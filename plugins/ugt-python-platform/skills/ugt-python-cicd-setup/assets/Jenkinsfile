@@ -1,0 +1,377 @@
+// ============================================================================
+// Org-standard Jenkins pipeline — 10 stages
+// Checkout → Install → Code Quality (parallel) → Unit Tests → Build
+//   → OWASP Dependency Check → SonarQube Analysis → Quality Gate
+//   → Docker Build → Deploy
+//
+// Placeholders to replace (see SKILL.md replacement table):
+//   __PROJECT_NAME__          kebab-case id (image/container/credential/sonar key)
+//   __PROJECT_DISPLAY_NAME__  human-readable name
+//   __APP_MODULE__            main importable module, e.g. `app`
+//
+// Sections marked [DB] are OPTIONAL — delete them if the project has no
+// database / Alembic migrations.
+// Sections marked [WEB] apply when the deploy shape is a long-running web
+// service (docker-compose up + health poll).
+// Sections marked [BATCH] are the alternative for batch/job deploys — swap
+// in the commented block in the Deploy stage instead of [WEB].
+// Sections marked [VOLUME] prepare persistent-data host paths before deploy.
+// ============================================================================
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        // No global timeout — OWASP NVD download can take 60-90 min on first run
+        // Per-stage timeouts are set individually below
+        buildDiscarder(logRotator(
+            artifactDaysToKeepStr: '7',
+            numToKeepStr: '10'
+        ))
+    }
+
+    environment {
+        CI = 'true'   // activates JUnit reporter + standalone output
+        // NOTIFY_EMAIL and SMTP_FROM must be set in
+        // Manage Jenkins → System → Global properties → Environment variables
+    }
+
+    stages {
+        // ── 0. Checkout ────────────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ── 1. Install ─────────────────────────────────────────────────────
+        stage('Install') {
+            steps {
+                script {
+                    // มติ M8: toolchain รันใน docker — Jenkins ไม่มี Python tool
+                    // .venv อยู่ใน workspace จึงรอดข้าม stage (docker.inside mount workspace)
+                    docker.image('python:3.12-slim').inside {
+                        sh '''
+                            python -m venv .venv
+                            .venv/bin/pip install --no-cache-dir -r requirements.txt
+                            .venv/bin/pip install --no-cache-dir -r requirements-dev.txt
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ── 2. Code Quality (parallel) ─────────────────────────────────────
+        stage('Code Quality') {
+            parallel {
+                stage('Lint') {
+                    steps {
+                        script {
+                            docker.image('python:3.12-slim').inside {
+                                sh '.venv/bin/ruff check .'
+                            }
+                        }
+                    }
+                }
+                stage('Format Check') {
+                    steps {
+                        script {
+                            docker.image('python:3.12-slim').inside {
+                                sh '.venv/bin/ruff format --check .'
+                            }
+                        }
+                    }
+                }
+                stage('Type Check') {
+                    steps {
+                        script {
+                            docker.image('python:3.12-slim').inside {
+                                sh '.venv/bin/mypy .'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── 3. Unit Tests ──────────────────────────────────────────────────
+        stage('Unit Tests') {
+            steps {
+                script {
+                    docker.image('python:3.12-slim').inside {
+                        // junit/coverage paths มาจาก [tool.pytest.ini_options] ใน pyproject.toml
+                        sh '.venv/bin/pytest'
+                    }
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
+                                 reportDir: 'coverage', reportFiles: 'index.html', reportName: 'Coverage Report'])
+                }
+            }
+        }
+
+        // ── 4. Build ───────────────────────────────────────────────────────
+        stage('Build') {
+            steps {
+                echo 'Build absorbed into Docker Build (Python มี artifact เดียวคือ image) — stage คงไว้ตาม 10-stage contract'
+            }
+        }
+
+        // ── 5. OWASP Dependency Check ──────────────────────────────────────
+        stage('OWASP Dependency Check') {
+            options {
+                // NVD has ~20k records; first run or full refresh can take 60-90 min
+                // Subsequent runs use local cache and finish in ~5 min
+                timeout(time: 90, unit: 'MINUTES')
+            }
+            steps {
+                // nvd = Secret Text credential in Jenkins (Manage Jenkins → Credentials)
+                // Without API key: rate-limited to 5 req/30s (very slow); with key: 50 req/30s
+                // --noupdate (below) scans against the LOCAL NVD cache only — requires a
+                // separate periodic `dependency-check --updateonly` job, or remove
+                // --noupdate on the very first run (60-90 min download):
+                // see references/jenkins-one-time-setup.md → NVD data strategy
+                // Write API key to a temp properties file via sh — the SHELL expands
+                // $NVD_API_KEY, NOT Groovy. Never interpolate secrets in Groovy strings.
+                withCredentials([string(credentialsId: 'nvd', variable: 'NVD_API_KEY')]) {
+                    sh 'printf "nvd.api.key=%s\\n" "$NVD_API_KEY" > dc-nvd.properties'
+                    dependencyCheck(
+                        additionalArguments: '''
+                            --scan ./
+                            --format HTML
+                            --format XML
+                            --format JSON
+                            --out ./dc-report
+                            --suppression ./owasp-suppressions.xml
+                            --exclude ".venv/**"
+                            --exclude "coverage/**"
+                            --exclude "tests/**"
+                            --propertyfile dc-nvd.properties
+                            --noupdate
+                        ''',
+                        odcInstallation: 'Dependency-Check'   // must match Manage Jenkins → Tools name
+                    )
+                }
+            }
+            post {
+                always {
+                    // Remove temp properties file (contains NVD API key) — always runs even on failure
+                    sh 'rm -f dc-nvd.properties'
+                    // dependencyCheckPublisher thresholds are suppression-aware:
+                    // they count ONLY unsuppressed vulnerabilities from <vulnerabilities>,
+                    // ignoring items in <suppressedVulnerabilities>.
+                    // Do NOT use raw grep on the XML — grep also matches suppressed items
+                    // and causes false-positive build failures.
+                    dependencyCheckPublisher(
+                        pattern: 'dc-report/dependency-check-report.xml',
+                        failedTotalCritical: 1,   // FAIL on any CRITICAL
+                        unstableTotalHigh: 1      // UNSTABLE on any HIGH
+                    )
+                    archiveArtifacts artifacts: 'dc-report/dependency-check-report.*', allowEmptyArchive: true
+                }
+            }
+        }
+
+        // ── 6. SonarQube Analysis ──────────────────────────────────────────
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def br        = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())
+                    def isProd    = (br == 'main')
+                    // Each environment gets its own SonarQube project to keep metrics isolated.
+                    // -D flags override the values in sonar-project.properties at scan time.
+                    def sonarKey  = isProd ? '__PROJECT_NAME__'          : '__PROJECT_NAME__-dev'
+                    def sonarName = isProd ? '__PROJECT_DISPLAY_NAME__'  : '__PROJECT_DISPLAY_NAME__ (Dev)'
+                    // dc-report/ already exists from the OWASP stage above — SonarQube DC
+                    // plugin imports it via sonar.dependencyCheck.jsonReportPath
+                    // withSonarQubeEnv injects SONAR_HOST_URL + SONAR_TOKEN from Jenkins config
+                    withSonarQubeEnv('SonarQube') {
+                        sh "${tool('SonarQube-Scanner')}/bin/sonar-scanner -Dsonar.projectKey=${sonarKey} -Dsonar.projectName='${sonarName}'"
+                    }
+                }
+            }
+        }
+
+        // ── 7. Quality Gate ────────────────────────────────────────────────
+        stage('Quality Gate') {
+            steps {
+                // Waits for SonarQube webhook callback; requires webhook configured
+                // in SonarQube → Administration → Webhooks → http://<jenkins-host>:8080/sonarqube-webhook/
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        // ── 8. Docker Build (main + develop only) ──────────────────────────
+        stage('Docker Build') {
+            when {
+                expression {
+                    def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())
+                    br == 'main' || br == 'develop'
+                }
+            }
+            steps {
+                script {
+                    def br        = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())
+                    def isProd    = (br == 'main')
+                    def imageName = isProd ? '__PROJECT_NAME__'   : '__PROJECT_NAME__-dev'
+                    def buildNum  = env.BUILD_NUMBER
+
+                    sh """
+                        docker build \\
+                            --network host \\
+                            -t ${imageName}:latest \\
+                            -t ${imageName}:${buildNum} \\
+                            .
+                    """
+                }
+            }
+        }
+
+        // ── 9. Deploy (main + develop only) ────────────────────────────────
+        stage('Deploy') {
+            when {
+                expression {
+                    def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())
+                    br == 'main' || br == 'develop'
+                }
+            }
+            steps {
+                script {
+                    def br            = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())
+                    def isProd        = (br == 'main')
+                    // Branch-specific deployment targets
+                    def envCredId     = isProd ? 'env-__PROJECT_NAME__'  : 'env-__PROJECT_NAME__-dev'
+                    def imageName     = isProd ? '__PROJECT_NAME__'      : '__PROJECT_NAME__-dev'
+                    def composeFile   = isProd ? 'docker-compose.yml'    : 'docker-compose.dev.yml'
+                    def containerName = isProd ? '__PROJECT_NAME__'      : '__PROJECT_NAME__-dev'
+                    def buildNum      = env.BUILD_NUMBER
+
+                    // envCredId = Secret File credential (the environment's .env file)
+                    withCredentials([file(credentialsId: envCredId, variable: 'ENV_FILE')]) {
+                        sh 'cp $ENV_FILE .env'
+
+                        // [DB] migrate ก่อน deploy — migration fail = ไม่ deploy (contract)
+                        // ใช้ image ที่เพิ่ง build (มี alembic + code); Django สลับเป็น manage.py migrate
+                        sh """
+                          DB_URL=\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
+                          docker run --rm -e DATABASE_URL="\$DB_URL" ${imageName}:${buildNum} alembic upgrade head
+                        """
+
+                        // [VOLUME] เตรียม path ข้อมูลถาวร (idempotent) — admin เตรียม /srv/appdata แล้ว
+                        sh "mkdir -p /srv/appdata/${containerName} && chmod 755 /srv/appdata/${containerName}"
+
+                        // --no-build: reuse the image from Docker Build stage.
+                        // Note: docker-compose (v1) — check which binary the Jenkins host has.
+                        sh "docker-compose -f ${composeFile} up -d --no-build"
+
+                        // [WEB] Wait until container is healthy (max 4 minutes = 24 × 10s).
+                        // Poll docker inspect health status — not wget — so the result
+                        // matches the container's own HEALTHCHECK.
+                        sh """
+                          echo "Waiting for container to become healthy..."
+                          for i in \$(seq 1 24); do
+                            STATUS=\$(docker inspect --format='{{.State.Health.Status}}' ${containerName} 2>/dev/null || echo "not-found")
+                            echo "Attempt \$i/24 — health status: \$STATUS"
+                            if [ "\$STATUS" = "healthy" ]; then
+                              echo "Container is healthy!"
+                              exit 0
+                            elif [ "\$STATUS" = "unhealthy" ]; then
+                              echo "Container is unhealthy!"
+                              exit 1
+                            fi
+                            sleep 10
+                          done
+                          echo "Container did not become healthy within 4 minutes (last status: \$STATUS)"
+                          exit 1
+                        """
+
+                        // [BATCH] แทน compose up + health poll ทั้งหมดด้านบนด้วย 2 บรรทัดนี้:
+                        // sh "docker run --rm ${imageName}:${buildNum} python -c 'import __APP_MODULE__'"
+                        // echo 'batch image พร้อม — host cron เรียก docker compose run --rm job (ดู references/docker-deploy.md)'
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Notifications & Cleanup ────────────────────────────────────────────
+    // NOTIFY_EMAIL + SMTP_FROM come from Jenkins Global env vars — never hardcode.
+    post {
+        success {
+            emailext(
+                subject: "[Jenkins] SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <h2>Pipeline Success Notification</h2>
+                    <p><strong>Pipeline:</strong> ${env.JOB_NAME}</p>
+                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Status:</strong> <span style="color:green;">SUCCESS</span></p>
+                    <p><strong>Branch:</strong> ${env.BRANCH_NAME ?: env.GIT_BRANCH}</p>
+                    <p><strong>Details:</strong> All stages passed. Docker image deployed.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                """,
+                to: "${NOTIFY_EMAIL}",
+                from: "Jenkins CI <${env.SMTP_FROM}>",
+                mimeType: 'text/html'
+            )
+        }
+        unstable {
+            emailext(
+                subject: "[Jenkins] UNSTABLE: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <h2>Pipeline Unstable Notification</h2>
+                    <p><strong>Pipeline:</strong> ${env.JOB_NAME}</p>
+                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Status:</strong> <span style="color:orange;">UNSTABLE</span></p>
+                    <p><strong>Branch:</strong> ${env.BRANCH_NAME ?: env.GIT_BRANCH}</p>
+                    <p><strong>Details:</strong> Pipeline completed with warnings (e.g. HIGH severity vulnerabilities found). Review dc-report.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                """,
+                to: "${NOTIFY_EMAIL}",
+                from: "Jenkins CI <${env.SMTP_FROM}>",
+                mimeType: 'text/html'
+            )
+        }
+        failure {
+            emailext(
+                subject: "[Jenkins] FAILURE: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <h2>Pipeline Failure Notification</h2>
+                    <p><strong>Pipeline:</strong> ${env.JOB_NAME}</p>
+                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Status:</strong> <span style="color:red;">FAILURE</span></p>
+                    <p><strong>Branch:</strong> ${env.BRANCH_NAME ?: env.GIT_BRANCH}</p>
+                    <p><strong>Details:</strong> Check the console output for errors.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                """,
+                to: "${NOTIFY_EMAIL}",
+                from: "Jenkins CI <${env.SMTP_FROM}>",
+                mimeType: 'text/html'
+            )
+        }
+        aborted {
+            emailext(
+                subject: "[Jenkins] ABORTED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <h2>Pipeline Aborted Notification</h2>
+                    <p><strong>Pipeline:</strong> ${env.JOB_NAME}</p>
+                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Status:</strong> <span style="color:orange;">ABORTED</span></p>
+                    <p><strong>Branch:</strong> ${env.BRANCH_NAME ?: env.GIT_BRANCH}</p>
+                    <p><strong>Reason:</strong> Aborted due to SonarQube Quality Gate failure, CRITICAL/HIGH vulnerability, or timeout.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                """,
+                to: "${NOTIFY_EMAIL}",
+                from: "Jenkins CI <${env.SMTP_FROM}>",
+                mimeType: 'text/html'
+            )
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
