@@ -171,7 +171,10 @@ first principles would be documentation-shaped guesswork — exactly what v1
 avoided.
 
 **Recommendation: decisions → one pilot project built to those decisions →
-extract the plugin from the pilot.** Same path v1 took.
+extract the plugin from the pilot.** Same path v1 took. (Caveat, 2026-08-12:
+the cicd slice shipped ahead of this model per มติ 2026-08-11 — pilot is now
+the **release gate** before tag, not the authoring gate; see spec
+`docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md` §7.)
 
 ### 2.1 Org decisions required first (no code until these are made)
 
@@ -220,7 +223,9 @@ Mirror of the v1 skill set, minus what core now owns:
 - `ugt-python-database-setup`, `ugt-python-quality-setup`,
   `ugt-python-auth-setup`, `ugt-python-cicd-setup` — same SKILL.md skeleton
   (Overview / Org Standards / Interview / Steps / Quick Rules / Verification),
-  same `assets/` + `references/` + `scripts/verify.mjs` + `evals/` layout
+  same `assets/` + `references/` + `scripts/verify.mjs` + `evals/` layout.
+  **`ugt-python-cicd-setup` ทำแล้ว** (v0.1.0, ahead-of-pilot — ดู header/§2
+  note) — the other three items in this list stay open
 - `ugt-python-clean-code` — new content (SonarQube `python:S*` rule catalogue,
   duplication strategy for Python) but the same document shape and `paths:`
   frontmatter trick (`**/*.py`)
@@ -306,7 +311,7 @@ cheap part — the expensive part is **earning the gotchas**.
 | Work | Size | Reused from v1 | The actual cost driver |
 | --- | --- | --- | --- |
 | `ugt-core` extraction + platform v2 migration | **S** (days) | Everything is a file move + text extraction; release choreography per §1.3 | Getting the release order right; README/mode-B doc updates |
-| `ugt-python-platform` | **L** (the bulk is not skill-writing) | SKILL.md skeletons, router pattern, verify.mjs pattern, evals format, harness mechanism, all core contracts | D1–D8 decisions (org workshop), then a **pilot production project** to extract from; skill-writing after that is ~M |
+| `ugt-python-platform` | **L** (the bulk is not skill-writing) | SKILL.md skeletons, router pattern, verify.mjs pattern, evals format, harness mechanism, all core contracts | D1–D8 decisions (org workshop), then a **pilot production project** to extract from; skill-writing after that is ~M. **Update 2026-08-12: the cicd module is done** (v0.1.0, ahead-of-pilot); remaining skills (database/quality/auth) still follow this original decisions→pilot model |
 | `ugt-react-spa` (if ever) | **S** as a single cicd skill; **M** if a platform is insisted on | quality skill ~90 %, pipeline shape | Recommended skipped — see §3 |
 
 **Sequencing:**
@@ -320,6 +325,9 @@ cheap part — the expensive part is **earning the gotchas**.
    plugin ships *after* the pilot has been through the real pipeline, real
    Keycloak client, real SQL Server — matching how v1 earned its 100 % eval
    score. Writing the plugin before the pilot inverts the causality that made
-   v1 work.
+   v1 work. (Caveat, 2026-08-12: the cicd slice shipped ahead of this model
+   per มติ 2026-08-11 — pilot is now the **release gate** before tag, not the
+   authoring gate; see spec
+   `docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md` §7.)
 3. **SPA: no work scheduled.** Revisit only on a concrete project, at the
    single-skill rung.
