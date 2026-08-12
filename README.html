@@ -400,7 +400,8 @@
     </p>
     <p class="stack-note h-anim d2">
       ใช้ได้กับ TypeScript / React / Next.js (App Router) · SQL Server · Keycloak (SSO) ·
-      Jenkins + SonarQube + Docker — <strong>เท่านั้น</strong> stack อื่นยังไม่รองรับ
+      Jenkins + SonarQube + Docker — Python / PHP รองรับ<strong>เฉพาะส่วน deploy</strong>
+      (v0.1.0 ยังไม่ผ่าน pilot) · stack อื่นนอกนั้นยังไม่รองรับ
     </p>
     <div class="chips h-anim d3">
       <span class="chip"><span class="dot" aria-hidden="true"></span>ติดตั้งครั้งเดียวต่อเครื่อง</span>
@@ -429,9 +430,10 @@
 <!-- ================= PLUGINS ================= -->
 <section id="plugins" aria-labelledby="plugins-title">
   <div class="wrap">
-    <span class="kicker reveal">3 Plugins</span>
+    <span class="kicker reveal">5 Plugins</span>
     <h2 id="plugins-title" class="reveal">มีอะไรในชุดนี้</h2>
-    <p class="lead reveal">ติดตั้งตัวเดียวคือ <strong>ugt-nextjs-standard</strong> — ที่เหลือมาเองครบ</p>
+    <p class="lead reveal">สาย Next.js ติดตั้งตัวเดียวคือ <strong>ugt-nextjs-standard</strong> — ที่เหลือมาเองครบ
+    · สาย Python/PHP ติดตั้งแยก (ดูกรอบล่าง)</p>
     <div class="grid cols-3">
       <article class="card plugin-card featured reveal">
         <span class="badge">แนะนำ — ติดตัวนี้</span>
@@ -441,15 +443,36 @@
         <strong>พร้อม plugin official อีก 3 ตัว</strong> (ดูกรอบล่าง) ไม่ต้องเลือกทีละชิ้น</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v4.12.0</span>
+        <span class="ver">v4.13.0</span>
         <h3>ugt-nextjs-platform</h3>
         <p>ตัวช่วย 10 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.2.0</span>
+        <span class="ver">v2.3.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
+    </div>
+    <div class="subsec">
+    <span class="sub-kicker reveal">ใหม่ — stack อื่น (ติดตั้งแยก ไม่อยู่ใน bundle)</span>
+    <h3 class="sub-title reveal">Python / PHP: deploy ตามมาตรฐานองค์กร</h3>
+    <p class="sub-lead reveal">ครอบเฉพาะ delivery pipeline (Jenkins + SonarQube + OWASP + Docker + volume)
+      ยังไม่มี database/login/design — ติดตั้งด้วย <code>/plugin install ugt-python-platform@ugt</code>
+      หรือ <code>ugt-php-platform@ugt</code></p>
+    <div class="grid cols-3">
+      <article class="card plugin-card reveal">
+        <span class="ver">v0.1.0 — ยังไม่ผ่าน pilot</span>
+        <h3>ugt-python-platform</h3>
+        <p>FastAPI / Flask / Django / batch job — Jenkinsfile 10 stages (toolchain รันใน docker)
+        health endpoint และ tooling ขั้นต่ำให้ Quality Gate ผ่าน</p>
+      </article>
+      <article class="card plugin-card reveal">
+        <span class="ver">v0.1.0 — ยังไม่ผ่าน pilot</span>
+        <h3>ugt-php-platform</h3>
+        <p>Laravel / CodeIgniter / PHP legacy / WordPress — CI image (pcov), wp-content volume
+        และ tooling ขั้นต่ำให้ Quality Gate ผ่าน</p>
+      </article>
+    </div>
     </div>
     <div class="subsec">
     <span class="sub-kicker reveal">พ่วงมากับ bundle</span>
@@ -866,7 +889,7 @@
       </ul>
       <h3 style="margin-top:18px">บันทึกย้อนหลัง + งานค้าง <span style="font-weight:400;opacity:.75">— ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม</span></h3>
       <ul>
-        <li><span>ข้อเสนอรองรับ stack อื่น (ยังไม่ได้ทำ)</span> → <code>docs/multi-stack-proposal.md</code></li>
+        <li><span>ข้อเสนอรองรับ stack อื่น (Python/PHP ส่วน cicd ทำแล้ว — ที่เหลือยัง)</span> → <code>docs/multi-stack-proposal.md</code></li>
         <li><span>บันทึกการคัดความรู้เข้า pitfalls + backlog ที่ยังเปิด</span> → <code>docs/app-patterns-audit.md</code></li>
         <li><span>ร่าง design skill ปี 2026-08-03 (เนื้อหาถูก supersede แล้ว)</span> → <code>docs/design-skill-draft.md</code></li>
       </ul>
