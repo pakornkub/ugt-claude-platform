@@ -19,7 +19,9 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | --- | --- | --- |
 | `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
 | `ugt-nextjs-platform` | 4.12.0 | ตัวช่วย 10 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-core` | 2.2.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-python-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-php-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-core` | 2.3.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 รุ่นจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดแต่ละรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
@@ -240,7 +242,9 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 ⚠️ **ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม**):
 
 - [`docs/multi-stack-proposal.md`](docs/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
-  (Python / React SPA) · **ยังไม่ได้ทำ** ยังไม่มี plugin ตามข้อเสนอนี้
+  (Python / PHP / React SPA) · **ทำแล้วบางส่วน**: ส่วน cicd ของ Python/PHP
+  ทำแล้ว (v0.1.0 ยังไม่ผ่าน pilot ดูตารางด้านบน) ส่วน database/auth/design
+  ของสอง stack นี้ และ React SPA ยังไม่มี plugin
 - [`docs/app-patterns-audit.md`](docs/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
   `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · ท้ายไฟล์มี backlog ที่ยังเปิดอยู่
 - [`docs/design-skill-draft.md`](docs/design-skill-draft.md) — ร่างตอนออกแบบ design skill

@@ -1,14 +1,17 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
-> **Last-reviewed:** 2026-08-11 — ยังไม่มี plugin ตามข้อเสนอ (Python / React SPA)
+> **Last-reviewed:** 2026-08-12 — Python: ส่วน cicd ทำแล้ว (v0.1.0, ยังไม่ผ่าน
+> pilot — ดู spec `docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md`);
+> ส่วน database/auth/quality ยังเป็น backlog ตามเดิม; React SPA ยังไม่ทำ
 
-> **สถานะ (2026-08-09): ข้อเสนอที่ยังไม่ได้ทำ — ไม่ใช่บันทึกย้อนหลัง**
+> **สถานะ (2026-08-12): บางส่วนทำแล้ว — เอกสารนี้ยังไม่ใช่บันทึกย้อนหลังทั้งฉบับ**
 >
-> ส่วนที่ทำไปแล้วคือการแยก `ugt-core` ออกมา (มีจริงแล้ว) ส่วน `ugt-python-platform`
-> และ React SPA **ยังไม่มี plugin ใด ๆ** — รีโปนี้มีแค่ ugt-core,
-> ugt-nextjs-platform, ugt-nextjs-standard ไฟล์นี้จึงเป็น backlog ที่ยังเปิดอยู่
-> และเป็นที่เก็บ "ข้อที่องค์กรต้องเคาะก่อนเริ่ม" — ยังต้องอ่านก่อนเริ่มงาน stack ใหม่
+> ส่วนที่ทำไปแล้ว: การแยก `ugt-core` ออกมา (มีจริงแล้ว) และส่วน **cicd** ของ
+> `ugt-python-platform` / `ugt-php-platform` (v0.1.0 ทั้งคู่ ยังไม่ผ่าน pilot —
+> ดู §2 และ §4) ส่วน database/auth/quality ของสอง stack นี้ และ React SPA
+> **ยังไม่มี plugin** — ไฟล์นี้จึงยังเป็น backlog ที่เปิดอยู่บางส่วน และเป็นที่เก็บ
+> "ข้อที่องค์กรต้องเคาะก่อนเริ่ม" ของสิ่งที่ยังไม่ทำ — ยังต้องอ่านก่อนเริ่มงาน stack ใหม่
 >
 > ชื่อ skill/ไฟล์บางตัวเปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` ·
 > `ugt-mode`→`ugt-model-mode` · `ugt-nextjs-setup`→`ugt-nextjs-full-setup` ·
@@ -150,6 +153,15 @@ ever matters.
 
 ## 2. `ugt-python-platform` — decisions before work
 
+> **อัปเดต 2026-08-12:** D5–D7 ถูกเคาะแล้วใน spec
+> `docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md`
+> (มติ M5: volume ผ่าน bind mount ใต้ `/srv/appdata/<project>/<name>` · M6:
+> health endpoint `/api/health` เหมือน Next.js ทุก stack · M8: toolchain รันใน
+> docker container บน Jenkins ไม่ติดตั้งบน server — และ D5 ฝั่ง packaging เคาะ
+> เป็น pip/venv ขั้นต่ำ) — สโคปรอบแรกคือ cicd เท่านั้น ยังไม่มี ORM/auth
+> D1–D3 (framework, ORM, auth) **ยังเปิดอยู่** ตามเดิม — รอ pilot project
+> ก่อนขยายสโคปไปทำ database/auth skill
+
 The single most important fact about v1: **every skill was extracted from a
 production project** — the redirect loops, the `COPY .next/standalone` failure,
 the cookie-prefix rule all cost real debugging time before they became skill
@@ -253,11 +265,38 @@ Mirror of the v1 skill set, minus what core now owns:
 non-org API. Even then, start with the cheapest rung: a single
 `ugt-spa-cicd-setup` skill (nginx Dockerfile + trimmed Jenkinsfile + PKCE
 env-config notes in its references), added as one more skill or a micro-plugin
-— not a four-module platform. Estimated at that point: S (see §4).
+— not a four-module platform. Estimated at that point: S (see §5).
 
 ---
 
-## 4. Effort estimates and sequencing
+## 4. `ugt-php-platform`
+
+**สถานะเดียวกับ Python (§2): ส่วน cicd ทำแล้ว ที่เหลือ backlog.** เขียน
+`ugt-php-cicd-setup` (v0.1.0, ยังไม่ผ่าน pilot) พร้อมกับ `ugt-python-cicd-setup`
+ในรอบเดียวกัน — สโคปคือ delivery pipeline เท่านั้น (Jenkinsfile, Sonar, OWASP,
+Docker deploy, tooling ขั้นต่ำให้ stage ผ่าน สำหรับ Laravel / CodeIgniter / PHP
+legacy / WordPress) ไม่มี database / auth / design / harness skill ของ PHP
+
+มติสำคัญ (ครอบทั้ง Python และ PHP) อ้างอิงที่
+`docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md` §2:
+โครง plugin แยกต่อภาษา (M1), shape ที่รองรับต้องผ่าน pilot ก่อน tag release
+(M2), ใช้ Quality Gate เดิมไม่มีผ่อนปรน (M3), volume มาตรฐานกลาง
+`/srv/appdata/<project>/<name>` (M5, เพิ่มใน `ugt-core/contracts/cicd.md`
+2.3.0), `/api/health` เหมือนทุก stack (M6), toolchain รันใน docker container
+บน Jenkins ไม่ติดตั้งบน server (M8)
+
+**Decision ที่ยังเปิดของ PHP** (เมื่อจะขยายไปทำ skill ถัดไป, คู่ขนานกับ D1–D3
+ของ Python): framework/CMS ไหนเป็นเป้าหลักของ database/auth skill (Laravel
+Eloquent + migration เทียบกับ CodeIgniter query builder เทียบกับ WordPress
+ซึ่งมี schema ของตัวเองอยู่แล้ว), ORM/migration mechanics สำหรับ SQL Server
+(DB-level contract ยังยึด `ugt-core/contracts/database.md` เหมือน Python —
+เหลือแค่ mechanics), และ auth library ฝั่ง PHP สำหรับต่อ Keycloak OIDC
+(identity contract เดิม — session/RBAC/guard order คงที่ ต่างแค่การ render
+เป็นโค้ด PHP) — ยังไม่มีข้อเสนอ ต้องรอ pilot project ก่อนเหมือน Python
+
+---
+
+## 5. Effort estimates and sequencing
 
 T-shirt sizes, calibrated against v1 (which was ~8 phases of work including
 extraction from a live project, evals, and verify-script hardening). "Reusable"

@@ -6,9 +6,10 @@ the stages themselves.
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
 > `ugt-nextjs-cicd-setup` (primary), `ugt-nextjs-test-lint-setup` (lint/test
-> stages), and `ugt-nextjs-full-setup` (summary); and `ugt-python-platform` ·
-> `ugt-php-platform` will restate this once available. Bump the platform's
-> `plugin.json` version and CHANGELOG when you do.
+> stages), and `ugt-nextjs-full-setup` (summary); `ugt-python-platform`'s
+> `ugt-python-cicd-setup`; and `ugt-php-platform`'s `ugt-php-cicd-setup` all
+> restate this. Bump the platform's `plugin.json` version and CHANGELOG when
+> you do.
 
 ## Stages (all 10, in order)
 
