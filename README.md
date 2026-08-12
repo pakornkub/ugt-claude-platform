@@ -18,7 +18,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
 | `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
-| `ugt-nextjs-platform` | 4.14.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.15.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.3.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |

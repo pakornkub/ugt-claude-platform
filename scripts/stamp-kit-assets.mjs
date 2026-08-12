@@ -18,6 +18,12 @@
 //
 // LF-normalized because a Windows checkout flips endings — the hash must
 // survive that, or every file on Windows reports as "edited".
+//
+// The version in the stamp is the release in which the CONTENT last changed —
+// a file whose hash is unchanged keeps its old version line. Two reasons: a
+// docs-only release doesn't churn 84 asset files, and kit-sync's "ติดตั้งที่ X"
+// report tells the project when this file actually moved, not when anything
+// in the plugin last did.
 
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -76,8 +82,14 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
       const relAsset = relative(assetsDir, file).split(sep).join('/');
       const original = readFileSync(file, 'utf8');
       const hash = contentHash(original);
+
+      // Content unchanged since the last stamp → keep that release's version.
+      const prevHash = /^\/\/ kit-hash: ([0-9a-f]{12})$/m.exec(original)?.[1];
+      const prevVersion = /^\/\/ kit: \S+ (\S+) · /m.exec(original)?.[1];
+      const version = prevHash === hash && prevVersion ? prevVersion : manifest.version;
+
       const stampLines =
-        `// kit: ${manifest.name} ${manifest.version} · ${skill}/${relAsset}\n` +
+        `// kit: ${manifest.name} ${version} · ${skill}/${relAsset}\n` +
         `// kit-hash: ${hash}\n`;
 
       const withoutStamp = original.replace(STAMP_RE, '');

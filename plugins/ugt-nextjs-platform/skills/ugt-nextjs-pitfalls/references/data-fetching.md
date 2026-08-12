@@ -13,6 +13,31 @@ is invisible to every `invalidateQueries` from the first. queryFns that fetch
 throw `HttpError` (from `lib/http-error.ts`) so a mid-session 401 routes to
 re-login instead of surfacing as an ordinary error toast.
 
+## 0. Client-state ladder — where each kind of state lives (มติ 2026-08-12)
+
+Stop at the first rung that fits; going lower needs a reason written down:
+
+| State | Home | Why |
+| --- | --- | --- |
+| Data from the server | React Query (the one QueryProvider) | caching + invalidation are the hard part, and it owns them |
+| Filter / sort / page / active tab | **URL** (`lib/table-query.ts`) | shareable, survives refresh, back-button works |
+| One component's own state | `useState` / `useReducer` | nothing else needs it |
+| A subtree shares it | lift state up, or Context at the layout | explicit ownership beats a global |
+| **A store library (zustand etc.)** | **not an org standard — needs a project มติ** | see below |
+
+The zustand entry is a decision, not an omission. Evidence from both
+production apps: HRMS (the larger one) ships **zero** stores — everything fits
+the first four rungs. gov-boi's entire zustand footprint was one 18-line store
+mirroring a value whose real source of truth was a **cookie**, with one
+consumer and a comment admitting the rest was "for future use" — a third copy
+of the truth that must be kept in sync, bought before anyone needed it. A
+global store also hides who owns a value: any component can write it from
+anywhere, which is exactly the property the ladder exists to avoid. If a real
+case ever appears (state genuinely crossing distant subtrees, living longer
+than a page, and belonging in neither the URL nor the server), record it as a
+dated มติ in `docs/project-context/decisions.md` first — the library is cheap,
+the second source of truth is not.
+
 ## 1. `revalidatePath` does not touch React Query
 
 `revalidatePath`/`revalidateTag` invalidate the **server-side** RSC/fetch cache

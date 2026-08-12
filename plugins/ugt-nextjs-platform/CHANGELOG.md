@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.15.0 (2026-08-12)
+
+**The zustand question is closed: rejected, with a client-state ladder in its
+place** (มติ 2026-08-12 — the last open item from the 2026-08-04 audit
+addendum besides the two form-validation ones).
+
+The evidence made the call easy. HRMS — the larger production app — ships
+zero stores. gov-boi's entire zustand footprint turned out to be one 18-line
+store mirroring `selectedTaxId`, whose real source of truth is a **cookie**
+written by a server action, with a single consumer and an in-file comment
+admitting the rest was "for future use": a third copy of one value, bought
+before anyone needed it.
+
+- `pitfalls/references/data-fetching.md` gains **§0 Client-state ladder**:
+  server data → React Query · filter/sort/page/tab → URL · one component →
+  `useState` · a subtree → lift/Context · **a store library → not a standard,
+  needs a dated project มติ first**. Stop at the first rung that fits.
+- The audit addendum row is closed with the decision and the evidence.
+
+Also: `stamp-kit-assets.mjs` now keeps a file's stamp version when its content
+hash is unchanged — the stamp reads "the release this file last changed in",
+which is what kit-sync's "ติดตั้งที่ X" report actually wants to say, and a
+docs-only release no longer rewrites 84 asset files (this release proves it:
+zero asset churn). `--check` validates presence + hash, not version equality.
+
 ## 4.14.0 (2026-08-12)
 
 **New skill `ugt-nextjs-kit-sync` + version stamps on every copied asset** —
