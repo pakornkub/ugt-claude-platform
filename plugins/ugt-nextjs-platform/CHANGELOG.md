@@ -22,6 +22,11 @@ Persistent data.
   own path underneath is created by its Deploy stage.
 - `scripts/verify.mjs`: the compose check now fails on any bind mount outside
   `/srv/appdata/`.
+- `assets/Jenkinsfile` Deploy stage gains the `[VOLUME]` mkdir+chown block
+  (ported from `ugt-python-cicd-setup`, after the `[DB]` migrate step, before
+  `docker-compose up -d`) — without it §2.8's "Deploy stage สร้าง path + chown
+  ให้ตรง UID" was unfulfilled and an uncommented compose volume hit
+  `root:root` `PermissionError`.
 
 ## 4.12.0 (2026-08-11)
 
