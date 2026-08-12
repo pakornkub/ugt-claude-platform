@@ -27,6 +27,11 @@ Persistent data.
   `docker-compose up -d`) — without it §2.8's "Deploy stage สร้าง path + chown
   ให้ตรง UID" was unfulfilled and an uncommented compose volume hit
   `root:root` `PermissionError`.
+- `scripts/verify.mjs`: the `[DB]`/`[SENTRY]` consistency checks no longer
+  regex the whole Jenkinsfile — the header legend permanently mentions both
+  tags in comments, so a project that correctly deleted the blocks still
+  false-failed. They now test `jfActive` (pipeline body, comment lines
+  stripped), the same fix the python/php verify scripts carry.
 
 ## 4.12.0 (2026-08-11)
 

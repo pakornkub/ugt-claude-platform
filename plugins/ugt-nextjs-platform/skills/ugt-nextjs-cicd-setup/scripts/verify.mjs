@@ -37,6 +37,18 @@ const CI_FILES = [
 const pkg = has('package.json') ? JSON.parse(read('package.json')) : null;
 const jf = has('Jenkinsfile') ? read('Jenkinsfile') : '';
 
+// The Jenkinsfile's header legend permanently documents [DB]/[SENTRY]/[VOLUME]
+// in comments — a substring test for a tag against the WHOLE file is therefore
+// always true, even after the blocks were correctly deleted. Anchor at the real
+// pipeline body and drop `//`-led comment lines before testing which tags are
+// actually IN USE. (Same fix as the python/php verify scripts.)
+const PIPELINE_START = jf.indexOf('pipeline {');
+const jfBody = PIPELINE_START >= 0 ? jf.slice(PIPELINE_START) : jf;
+const jfActive = jfBody
+  .split('\n')
+  .filter((l) => !l.trim().startsWith('//'))
+  .join('\n');
+
 // ── 1. Required files ──────────────────────────────────────────────────────
 check('CI files present', () => {
   const missing = CI_FILES.filter((f) => !has(f));
@@ -147,7 +159,8 @@ check('[DB] consistent with actual Prisma usage', () => {
   if (!jf || !pkg) return { ok: false, msg: 'No Jenkinsfile or package.json' };
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const hasPrisma = Boolean(deps.prisma || deps['@prisma/client']);
-  const marked = /\[DB\]/.test(jf) || /prisma/i.test(jf);
+  // [DB] tags live in comments — the functional signal is the active prisma command
+  const marked = /\[DB\]/.test(jfActive) || /prisma/i.test(jfActive);
   if (hasPrisma && !marked) return { ok: false, msg: 'Project has Prisma but the Jenkinsfile has no prisma/migrate steps — deploys will skip migration' };
   if (!hasPrisma && marked) return { ok: false, msg: 'No Prisma but the Jenkinsfile still carries [DB] blocks — the stage will fail' };
   return { ok: true };
@@ -157,7 +170,7 @@ check('[SENTRY] consistent with actual Sentry usage', () => {
   if (!jf || !pkg) return { ok: false, msg: 'No Jenkinsfile or package.json' };
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const hasSentry = Object.keys(deps).some((d) => d.startsWith('@sentry/'));
-  const marked = /\[SENTRY\]|SENTRY_DSN/i.test(jf);
+  const marked = /\[SENTRY\]|SENTRY_DSN/i.test(jfActive);
   if (hasSentry && !marked) return { ok: 'warn', msg: 'Project has Sentry but the Jenkinsfile passes no DSN build-arg → client-side DSN will be empty' };
   if (!hasSentry && marked) return { ok: false, msg: 'No Sentry but the Jenkinsfile still references sentry-dsn-* credentials — withCredentials will fail' };
   return { ok: true };
