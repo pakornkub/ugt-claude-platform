@@ -1,5 +1,35 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.16.0 (2026-08-12)
+
+**Form validation convention — the last two audit-addendum items, closed
+together** (they were always one story told from two sides). New
+`pitfalls/references/form-validation.md`, loaded when building forms or the
+Server Actions they submit to:
+
+- **Two layers on purpose**: RHF + zod in the browser is UX; `safeParse` in
+  the Server Action is the security boundary — an action is a public HTTP
+  endpoint and TypeScript types are erased at runtime. HRMS runs this at 48
+  boundaries.
+- **Schema factory per form** in `lib/validations/`, messages injected —
+  testable without next-intl, wording owned by the component. RHF
+  `mode`/`reValidateMode` stay at library defaults (the old "org standard"
+  merely restated them; the real rule is one line: don't override).
+- **Choice values are literal unions** (`z.enum`) so fabricated values die at
+  the boundary instead of landing in the database.
+- **The rule with teeth — limits defined once**: HRMS keeps its form schema
+  and action schema aligned by a comment and a promise; when they drift the
+  user passes the form and gets rejected at save with nothing highlighted.
+  Numbers/regexes/enums live in one module both schemas import. No new asset
+  needed — the kit already ships the canonical example: `password-policy.ts`
+  is one definition consumed by the reset form, the change dialog and the
+  admin create action.
+- pitfalls' description gains the symptom trigger
+  ("ฟอร์มผ่านแต่บันทึกไม่ได้") and the reference table gains the row.
+
+With this, the 2026-08-04 audit addendum is **fully closed**: react-query
+(4.12.0) · zustand (4.15.0) · RHF/zod (4.16.0).
+
 ## 4.15.0 (2026-08-12)
 
 **The zustand question is closed: rejected, with a client-state ladder in its

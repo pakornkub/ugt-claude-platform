@@ -11,9 +11,10 @@ description: >
   exceeded" pointing at a Radix component, pagination showing "หน้า 1 จาก 0",
   a Select crashing on an empty value, Thai text showing the wrong Buddhist
   year, ticking a table row but a different row gets selected ("ติ๊กแถวนึง
-  ได้อีกแถว"), or code edits not showing in the browser while the file on disk
-  is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน" — stale dev cache). Loads itself via
-  paths on app/components/lib edits.
+  ได้อีกแถว"), a form that passes validation but gets rejected at save
+  ("ฟอร์มผ่านแต่บันทึกไม่ได้"), or code edits not showing in the browser while
+  the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน" — stale dev cache).
+  Loads itself via paths on app/components/lib edits.
   Don't use for SonarQube/Quality-Gate violations (→ ugt-nextjs-clean-code) or
   installing infrastructure (→ the ugt-nextjs-*-setup skills).
 paths:
@@ -36,6 +37,7 @@ appears.
 | Bind a date/time into `$queryRaw`/an SP, format a DB date, show a Thai year | `references/dates-timezones.md` |
 | Fetch or mutate data shown in a table/list, add a filter, call an API from the client | `references/data-fetching.md` |
 | Guard a route/action, build a batch/cron job, shape a DTO, pre-fill an edit form | `references/hardening.md` |
+| Build or change a form, add a validation rule, write the Server Action it submits to | `references/form-validation.md` |
 
 Symptom → likely file: date wrong by 1 day / hours → dates-timezones · stale UI
 after save, infinite render loop, prod-only 404 → data-fetching · a user seeing

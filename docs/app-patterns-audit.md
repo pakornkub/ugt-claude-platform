@@ -1,7 +1,7 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-nextjs-platform 4.x
-> **Last-reviewed:** 2026-08-12 — ส่วน curation เป็นบันทึกที่ไม่แก้ย้อนหลัง · ส่วน Addendum คือ backlog ที่ต้องคงความจริงไว้ (react-query ปิดใน 4.12.0 · zustand ปิดใน 4.15.0 — เหลือ RHF schema/resolver กับ zod ที่ boundary)
+> **Last-reviewed:** 2026-08-12 — ส่วน curation เป็นบันทึกที่ไม่แก้ย้อนหลัง · ส่วน Addendum **ปิดครบทุกข้อแล้ว**: react-query 4.12.0 · zustand 4.15.0 · RHF schema/resolver + zod boundary 4.16.0 — backlog ของไฟล์นี้เหลือศูนย์
 
 > **สถานะ (2026-08-09): บันทึกการตัดสินใจ + backlog ที่ยังเปิดอยู่ — ไม่ใช่มาตรฐาน**
 >
@@ -335,7 +335,7 @@ convention เรื่อง **form/state libraries** เลย ทั้งท
 
 | Lib | สถานะใน 2 โปรเจค | คำถามที่ Bucket 1 ต้องตอบ |
 | --- | --- | --- |
-| react-hook-form + zod (ฟอร์ม) | converge ทั้งคู่ (ผ่าน shadcn `ui/form`) | ฝั่ง UI ถูกเก็บใน design skill แล้ว — Bucket 1 เก็บฝั่ง schema/resolver pattern |
-| zod ที่ Server Action / DTO boundary | converge ทั้งคู่ | pattern การ validate ที่ boundary + literal-union DTO (มีบางส่วนใน Bucket 1 แล้ว) |
+| react-hook-form + zod (ฟอร์ม) | converge ทั้งคู่ (ผ่าน shadcn `ui/form`) | ~~ฝั่ง UI ถูกเก็บใน design skill แล้ว — Bucket 1 เก็บฝั่ง schema/resolver pattern~~ **ปิดแล้ว (platform 4.16.0)** → `ugt-nextjs-pitfalls/references/form-validation.md` (schema factory + ไม่ override RHF defaults) |
+| zod ที่ Server Action / DTO boundary | converge ทั้งคู่ | ~~pattern การ validate ที่ boundary + literal-union DTO (มีบางส่วนใน Bucket 1 แล้ว)~~ **ปิดแล้ว (platform 4.16.0)** → ไฟล์เดียวกัน: ตรวจซ้ำที่ action ด้วย safeParse, z.enum สำหรับค่าตัวเลือก, **นิยาม limit ที่เดียวให้สอง schema import ร่วมกัน** (ตัวอย่างจริงในชุด: password-policy.ts) |
 | @tanstack/react-query | converge ทั้งคู่ | ~~เมื่อไหร่ใช้ react-query vs server component fetch · key convention · invalidation~~ **ปิดแล้ว (platform 4.12.0)**: เกณฑ์+invalidation อยู่ `ugt-nextjs-pitfalls/references/data-fetching.md` · provider/HttpError/progress เป็น asset ของ `ugt-nextjs-design-setup` แล้ว |
 | zustand | เฉพาะ gov-boi (HRMS ไม่ใช้) | ~~ยังไม่ converge — อย่าเพิ่งตั้งเป็นมาตรฐาน บันทึกไว้เฉย ๆ~~ **ปิดแล้ว (มติ 2026-08-12, platform 4.15.0): ปฏิเสธ** — ตรวจของจริงแล้ว gov-boi มี store เดียว 18 บรรทัด mirror ค่าใน cookie (แหล่งความจริงซ้ำ + YAGNI ตามคอมเมนต์ในไฟล์เอง) ส่วน HRMS ไม่ใช้เลย → ตั้ง client-state ladder แทนใน `ugt-nextjs-pitfalls/references/data-fetching.md` §0; store library ต้องมีมติของโปรเจคก่อนใช้ |
