@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
+// kit-hash: 85578aa6049d
 'use server';
 
 import { cookies, headers } from 'next/headers';

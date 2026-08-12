@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/actions-locale.ts
+// kit-hash: 76e19ea647c7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // ship only when the project chose th+en · requires lib/auth (ugt-nextjs-auth-setup) — session guard on the Server Action
 'use server';

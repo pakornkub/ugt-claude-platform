@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
+// kit-hash: 4f8966fe05da
 // source: ugt-hrms lib/types/mail-templates.ts — generalized by ugt-nextjs-mail-setup
 // (HR workflows removed; the three keys below are a working approval example —
 // rename them to your domain and add more.)

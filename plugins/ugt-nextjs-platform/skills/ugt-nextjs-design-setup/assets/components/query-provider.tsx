@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/components/query-provider.tsx
+// kit-hash: 4fb3813036eb
 
 // source: ugt-hrms components/providers.tsx — installed by ugt-nextjs-design-setup
 // QueryClient หนึ่งตัวของทั้งแอป — ห้ามหน้าไหน new QueryClient เอง ไม่งั้น cache

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/motion.ts
+// kit-hash: 82eb215e89f4
 // installed by ugt-nextjs-design-setup — ติดตั้งเฉพาะโปรเจคที่ตอบ "มี custom
 // motion" ตอนสัมภาษณ์ (คู่กับ docs/MOTION.md) · dep: `motion`
 //

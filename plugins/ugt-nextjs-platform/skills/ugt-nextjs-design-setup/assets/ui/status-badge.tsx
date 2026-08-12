@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/status-badge.tsx
+// kit-hash: 46db836f9d1a
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 import * as React from 'react';
 import type { LucideIcon } from 'lucide-react';

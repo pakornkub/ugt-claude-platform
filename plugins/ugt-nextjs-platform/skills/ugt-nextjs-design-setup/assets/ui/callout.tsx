@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/callout.tsx
+// kit-hash: 8d7b0a55734d
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 import * as React from 'react';
 import { CircleAlert, CircleCheck, Info, TriangleAlert, type LucideIcon } from 'lucide-react';

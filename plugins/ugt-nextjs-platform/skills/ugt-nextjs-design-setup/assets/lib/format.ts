@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/format.ts
+// kit-hash: 1fdd1d0bcf9f
 // source: merged ugt-hrms lib/format-date.ts + gov-boi-smart lib/format.ts — installed by ugt-nextjs-design-setup
 // convention: จอ DD/MM/YYYY ค.ศ. · ไฟล์ export ISO yyyy-MM-dd · ทุกการ format ผ่านไฟล์นี้เท่านั้น
 

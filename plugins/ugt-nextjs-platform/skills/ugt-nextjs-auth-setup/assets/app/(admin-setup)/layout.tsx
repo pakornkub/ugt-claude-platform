@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin-setup)/layout.tsx
+// kit-hash: eed839cb1647
 // app/(admin-setup)/layout.tsx — auth required (any authenticated user, no permission
 // needed yet — permissions do not exist before bootstrap).
 import { redirect } from 'next/navigation';

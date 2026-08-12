@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+// kit-hash: 866e9d2466c6
 
 // source: ugt-hrms components/ui/tiptap-editor.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // editor rich text ตัวเดียวของทั้งแอป (ห้ามใช้ editor อื่น) — ติดตั้งเฉพาะโปรเจคที่มี rich text

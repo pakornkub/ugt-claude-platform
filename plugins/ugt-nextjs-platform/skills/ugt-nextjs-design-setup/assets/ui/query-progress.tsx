@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/query-progress.tsx
+// kit-hash: 8c2b123dbbcc
 
 // source: ugt-hrms components/ui/query-progress.tsx — installed by
 // ugt-nextjs-design-setup · ต้องอยู่ใต้ <QueryProvider> · dep: nprogress

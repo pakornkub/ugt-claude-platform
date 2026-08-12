@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/admin-nav.tsx
+// kit-hash: 85cefc8c5fc5
 // components/admin-nav.tsx — sidebar for the (admin) section.
 // UI hiding is UX only, not the security boundary — every action this nav
 // links to re-checks the permission server-side (see references/rbac.md).

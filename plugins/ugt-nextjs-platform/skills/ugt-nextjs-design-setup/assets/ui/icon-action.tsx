@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/icon-action.tsx
+// kit-hash: 8759ed1ef05e
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // ปุ่มไอคอนล้วนสำหรับ action ในตาราง (แก้ไข / ลบ / กู้คืน) — ไอคอนอย่างเดียวอ่านไม่ออกว่าทำอะไร

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/permission-group-select.ts
+// kit-hash: 1b144b0f5650
 // source: ugt-hrms lib/services/permission-group-select.ts — installed by
 // ugt-nextjs-auth-setup
 //

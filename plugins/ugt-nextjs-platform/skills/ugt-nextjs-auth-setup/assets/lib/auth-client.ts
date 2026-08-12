@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/auth-client.ts
+// kit-hash: 68b7ec54a341
 import { createAuthClient } from 'better-auth/react';
 import { genericOAuthClient } from 'better-auth/client/plugins'; // [METHOD: SSO] — remove if SSO not enabled
 

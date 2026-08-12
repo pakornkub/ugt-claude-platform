@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: 28f9b204b084
 // app/(admin)/admin/users/page.tsx — list users, assign role inline.
 // ponytail: no pagination — first 200 users, ORDER BY name. Add pagination
 // when a real project has more users than that; not worth the complexity yet.

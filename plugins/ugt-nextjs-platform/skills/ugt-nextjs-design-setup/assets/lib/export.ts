@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/export.ts
+// kit-hash: a124c77a883f
 // source: merged ugt-hrms app/api/{access-monitor,employee-monitor}/export/route.ts
 // — installed by ugt-nextjs-design-setup (org UI kit)
 //

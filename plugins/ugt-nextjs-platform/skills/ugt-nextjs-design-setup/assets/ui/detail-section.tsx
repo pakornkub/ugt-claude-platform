@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/detail-section.tsx
+// kit-hash: 92244af0c23f
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 import * as React from 'react';
 

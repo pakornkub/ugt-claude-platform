@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/admin/roles/page.tsx
+// kit-hash: ab1b04b99c07
 // app/(admin)/admin/roles/page.tsx — server guard + fetch; interactivity in RolesManager.
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';

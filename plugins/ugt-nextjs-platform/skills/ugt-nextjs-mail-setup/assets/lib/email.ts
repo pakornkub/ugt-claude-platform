@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-mail-setup/lib/email.ts
+// kit-hash: 08631b5c8986
 // source: ugt-hrms lib/email.ts — installed by ugt-nextjs-mail-setup
 import nodemailer from 'nodemailer';
 import { env } from '@/lib/env';

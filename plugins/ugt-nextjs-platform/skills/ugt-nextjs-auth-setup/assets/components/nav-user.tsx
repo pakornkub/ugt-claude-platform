@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: a70677aead6c
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)

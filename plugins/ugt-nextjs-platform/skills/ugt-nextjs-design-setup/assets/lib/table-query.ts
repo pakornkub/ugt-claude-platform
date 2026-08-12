@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/table-query.ts
+// kit-hash: 8ba537363505
 // source: ugt-hrms (port/adapt จาก gov-boi-smart) — installed by ugt-nextjs-design-setup (org UI kit)
 // port มาจาก gov-boi-smart `lib/table-query.ts` (แบบแผนเดียวกันทั้ง org)
 //

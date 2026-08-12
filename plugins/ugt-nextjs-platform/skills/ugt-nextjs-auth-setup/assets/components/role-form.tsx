@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/role-form.tsx
+// kit-hash: c7de0653d5b6
 
 // components/role-form.tsx — create/edit a role, with the permission checklist
 // in the HRMS shape (มติ 13.3): bordered groups, a tri-state select-all on each

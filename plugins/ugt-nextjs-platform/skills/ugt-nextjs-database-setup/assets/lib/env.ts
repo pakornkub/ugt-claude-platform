@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-database-setup/lib/env.ts
+// kit-hash: bcc7ee64a7b8
 // lib/env.ts — type-safe env validation via @t3-oss/env-nextjs + zod.
 // App code MUST import env from here — never read process.env directly.
 // (Non-Next.js Node projects: swap to @t3-oss/env-core and drop the client block.)

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
+// kit-hash: f95949883d3d
 'use server';
 
 // lib/actions/admin-setup.ts — first-admin bootstrap Server Action.

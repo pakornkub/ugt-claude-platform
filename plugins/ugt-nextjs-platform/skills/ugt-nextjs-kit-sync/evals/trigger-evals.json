@@ -1,0 +1,17 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-kit-sync. S* must route here (post-plugin-update file drift, outdated copied kit files, a 'fixed' bug still reproducing locally); N* must NOT — the sharpest boundaries are updating the plugin itself (/plugin update, not a skill) and design-agreement drift (design-setup's sync mode).",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "queries": {
+    "S1": { "prompt": "เพิ่ง update plugin มา ไฟล์ component ในโปรเจคตามรุ่นใหม่หรือยัง", "expected": "ugt-nextjs-kit-sync" },
+    "S2": { "prompt": "sync kit หน่อย", "expected": "ugt-nextjs-kit-sync" },
+    "S3": { "prompt": "CHANGELOG บอกว่าแก้บั๊กตารางไปแล้ว แต่ในโปรเจคเรายังเป็นอยู่เลย", "expected": "ugt-nextjs-kit-sync" },
+    "S4": { "prompt": "เอา fix ใหม่ของ data-table จาก plugin เข้าโปรเจคนี้ที", "expected": "ugt-nextjs-kit-sync" },
+    "S5": { "prompt": "ไฟล์ lib/format.ts ของเราตกรุ่นจาก plugin หรือเปล่า เช็คให้หน่อย", "expected": "ugt-nextjs-kit-sync" },
+    "N1": { "prompt": "อัปเดต plugin เป็นรุ่นล่าสุดให้หน่อย", "expected": "(/plugin update — not a skill)" },
+    "N2": { "prompt": "sync ข้อตกลง design หน่อย เพิ่ง update plugin มา", "expected": "ugt-nextjs-design-setup" },
+    "N3": { "prompt": "ตาราง DataTable ในหน้านี้เรียงข้อมูลผิด", "expected": "ugt-nextjs-pitfalls (or normal debugging)" },
+    "N4": { "prompt": "ติดตั้งชุด UI kit ให้โปรเจคใหม่ตัวนี้", "expected": "ugt-nextjs-design-setup" },
+    "N5": { "prompt": "npm update ให้ dependency ทั้งโปรเจค", "expected": "(normal dev work)" }
+  }
+}

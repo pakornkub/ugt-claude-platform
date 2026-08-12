@@ -1,5 +1,45 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.14.0 (2026-08-12)
+
+**New skill `ugt-nextjs-kit-sync` + version stamps on every copied asset** —
+closing the systemic gap that assets are copied into projects and then sit
+still while the plugin moves on (`/plugin update` refreshes the knowledge, not
+the copies; HRMS kept a `scrollX` bug for weeks after the plugin fixed it).
+
+The mechanism, per the maintainer's design (มติ 2026-08-11): check which side
+is newer, then choose per file — update or merge.
+
+- Every whole-file-copy asset (84 `.ts/.tsx` files) now carries two baked
+  header lines: `// kit: <plugin> <version> · <skill>/<path>` and
+  `// kit-hash:` (sha256-12 of the content excluding the stamp, LF-normalized
+  so a Windows checkout doesn't read as an edit). Version answers "is the copy
+  behind"; hash answers **"did the project touch it"** — the distinction that
+  makes a safe proposal possible. Merged/pasted/appended assets
+  (globals.tokens.css, prisma snippets, env.example) are deliberately
+  unstamped: they never exist in a project as a whole file.
+- `scripts/stamp-kit-assets.mjs` (repo): stamps at release, `--check` joins
+  the release gate. README release steps updated.
+- `check-kit-freshness.mjs` (in the skill, report-only, `--json` for the
+  flow): classifies every stamped project file as **CURRENT** (equals the
+  current asset — even when only the stamp label is old) / **UPDATE**
+  (outdated, never touched → safe overwrite) / **MERGE** (outdated and
+  modified — which by design includes placeholder-substituted files;
+  indistinguishable from a real edit and the careful path is right for both) /
+  **REMOVED** (asset retired or renamed → CHANGELOG). All four states proven
+  against a fixture project before shipping.
+- The skill flow: report → consent per file (or all) → UPDATE re-substitutes
+  placeholder values pulled from the file being replaced; MERGE is a
+  **semantic three-way merge with the CHANGELOG as the base narrative** —
+  read the project's file, the new asset, and every CHANGELOG entry between
+  the two versions, keep both sides, surface conflicts instead of picking the
+  plugin's side. Stamps stay verbatim; merged files truthfully report MERGE
+  again next round. Close-out = มติ in decisions.md + owning skills' verify +
+  project tests.
+- Files installed before this release carry no stamp; the skill matches them
+  to assets by path and treats them as MERGE once — the first sync adds
+  stamps.
+
 ## 4.13.0 (2026-08-11)
 
 `ugt-nextjs-cicd-setup` follows the platform contract's new **Persistent

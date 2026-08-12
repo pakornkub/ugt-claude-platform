@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/http-error.ts
+// kit-hash: 955204c396c8
 // source: ugt-hrms lib/http-error.ts — installed by ugt-nextjs-design-setup
 // ทุก queryFn ที่ fetch แล้ว response ไม่ OK ต้องโยนตัวนี้ (แนบ status) —
 // QueryProvider ใช้ status แยก 401 (session หมดอายุ) ออกจาก error ธรรมดา

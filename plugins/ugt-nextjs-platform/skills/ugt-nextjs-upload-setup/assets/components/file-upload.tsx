@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
+// kit-hash: c29a74a5cee7
 
 import * as React from 'react';
 import { Paperclip, Trash2, Upload } from 'lucide-react';

@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: 667eea691712
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/password.ts
+// kit-hash: 37d694a5de20
 'use server';
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only.

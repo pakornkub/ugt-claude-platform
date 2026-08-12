@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/directory.ts
+// kit-hash: bfe1ad6c11c1
 // source: ugt-hrms lib/hr-lookup.ts — generalized by ugt-nextjs-auth-setup
 // (HR-domain helpers removed: work-group/shift rules, leave quota, approval
 //  chains, subordinate BFS — those are feature code, not identity)

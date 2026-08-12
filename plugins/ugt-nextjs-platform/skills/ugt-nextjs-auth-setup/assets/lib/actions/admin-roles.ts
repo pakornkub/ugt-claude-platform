@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
+// kit-hash: 7b23bfed6c42
 'use server';
 
 // lib/actions/admin-roles.ts — role CRUD for the (admin)/admin/roles page.

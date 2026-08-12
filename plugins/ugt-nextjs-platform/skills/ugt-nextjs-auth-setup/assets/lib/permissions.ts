@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/permissions.ts
+// kit-hash: 3851e0baf06f
 /**
  * Permission keys — single source of truth for all permission constants.
  * Naming convention: resource:action (standard RBAC pattern)

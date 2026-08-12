@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/permissions-sync.ts
+// kit-hash: 1cecfa4e299b
 import { generateId } from 'better-auth';
 import { prisma } from '@/lib/prisma';
 import { ALL_PERMISSIONS } from '@/lib/permissions';

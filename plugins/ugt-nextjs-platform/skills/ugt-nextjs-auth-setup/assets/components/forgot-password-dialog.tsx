@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/forgot-password-dialog.tsx
+// kit-hash: a50627afdd09
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] + ต้องมี ugt-nextjs-mail-setup
 // เป็น dialog ไม่ใช่หน้าใหม่ — flow นี้มีช่องเดียวและจบในตัว ไม่คุ้มกับอีกหนึ่ง route

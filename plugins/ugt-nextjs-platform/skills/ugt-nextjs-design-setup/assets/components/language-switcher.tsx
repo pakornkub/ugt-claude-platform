@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/components/language-switcher.tsx
+// kit-hash: 75530cd66697
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // requires next-intl — ship only when the project chose th+en
 'use client';

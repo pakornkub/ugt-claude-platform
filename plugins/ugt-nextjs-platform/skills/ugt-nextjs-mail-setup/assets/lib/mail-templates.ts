@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-mail-setup/lib/mail-templates.ts
+// kit-hash: ba54c2642449
 // source: ugt-hrms lib/mail-templates.ts — installed by ugt-nextjs-mail-setup
 import { prisma } from '@/lib/prisma';
 import {

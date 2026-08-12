@@ -18,7 +18,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
 | `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
-| `ugt-nextjs-platform` | 4.12.0 | ตัวช่วย 10 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.14.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.3.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
@@ -38,6 +38,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-mail-setup` | ระบบส่งอีเมลผ่าน relay บริษัท — template แก้ได้จากหน้า admin + โหมดทดสอบที่เมลเข้าตัวเองแทนคนจริง | "ต้องส่งเมลแจ้งเตือน" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-upload-setup` | แนบไฟล์: เก็บบน volume + สแกนไวรัส + ดาวน์โหลดผ่านการตรวจสิทธิ์ทุกครั้ง | "ผู้ใช้ต้องแนบไฟล์" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-cicd-setup` | ต่อ Jenkins ให้ตรวจ-ทดสอบ-deploy อัตโนมัติเมื่อ push | งาน CI/CD + แก้ pipeline แดง |
+| `ugt-nextjs-kit-sync` | เช็คว่าไฟล์ kit ที่ copy ไว้ตกรุ่นจาก plugin ไหม แล้วเสนอ update (ไม่เคยแก้) หรือ merge (โปรเจคแก้เอง) ทีละไฟล์ | หลัง `/plugin update` ทุกครั้ง |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่านเกณฑ์คุณภาพตั้งแต่ครั้งแรก | **ทำงานเองเมื่อแตะไฟล์โค้ด** |
 | `ugt-nextjs-pitfalls` | กับดักที่เคยพังจริงบน production (วันที่เลื่อน, cache, 404) | **ทำงานเองเมื่อแตะไฟล์ที่เสี่ยง** |
 | `ugt-handoff` | ปิดงานหนึ่งรอบ: จดว่าค้างตรงไหน + อัปเดตความรู้ของโปรเจคให้ตรงปัจจุบัน | จบงานทุกครั้ง |
@@ -157,8 +158,10 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 /reload-plugins
 ```
 
-อัปเดตแล้ว**ไม่ต้องแก้อะไรในโปรเจค** — ถ้ารุ่นไหนต้องทำอะไรเพิ่มจะเขียนไว้ใน
-CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่: `/plugin`
+แล้วพิมพ์ **"sync kit"** หนึ่งครั้ง — ตัวช่วยจะเช็คว่าไฟล์ที่เคย copy เข้าโปรเจค
+(ตาราง ฟอร์ม หน้า login ฯลฯ) ตกรุ่นไหม แล้วเสนอเป็นรายไฟล์: ไฟล์ที่ไม่เคยแก้
+update ทับให้ ไฟล์ที่โปรเจคแก้เอง merge ให้โดยเก็บของที่แก้ไว้ — ไม่มีการทับเงียบ ๆ
+· ถ้ารุ่นไหนต้องทำอะไรเพิ่มอีกจะเขียนไว้ใน CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่: `/plugin`
 
 ## เจอความรู้ใหม่ เอาไปไว้ที่ไหน (สำคัญที่สุดในไฟล์นี้)
 
@@ -185,13 +188,15 @@ CHANGELOG ชัดเจน · ดูรุ่นที่ใช้อยู่
    หน้านี้คือสิ่งที่คนเห็น**ก่อน**ตัดสินใจติดตั้ง — preview ที่ล้าสมัยคือคำสัญญาที่ plugin ทำไม่ได้
    จุดที่เคยหลุดมาแล้ว: หัวตาราง (จับลาก/sort/filter), ชุดปุ่ม pagination,
    เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
-5. รันสคริปต์ตรวจ — ต้องเขียวทั้งสามตัว:
+5. **ประทับ stamp ให้ asset** (ทำหลัง bump version เสมอ) แล้วรันสคริปต์ตรวจ — ต้องเขียวทุกตัว:
    ```bash
-   node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs
+   node scripts/stamp-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
    ```
-   ตัวที่ 1 เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวที่ 2 เช็คว่า
-   เอกสารทุกไฟล์ใน `docs/` ประกาศสถานะตัวเองครบ · ตัวที่ 3 เช็คว่าสีใน design-preview
-   ยังตรงกับ token ที่ติดตั้งจริง (โครงหน้ายังต้องดูด้วยตาตามข้อ 4 — markup เทียบด้วยเครื่องไม่ได้)
+   ตัว stamp เขียนเวอร์ชัน+hash ลงหัวไฟล์ asset ทุกตัว (กลไกของ `ugt-nextjs-kit-sync`
+   ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · ตัวที่ 2 เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อป
+   ไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวที่ 3 เช็คว่าเอกสารทุกไฟล์ใน `docs/` ประกาศสถานะ
+   ตัวเองครบ · ตัวที่ 4 เช็คว่าสีใน design-preview ยังตรงกับ token ที่ติดตั้งจริง
+   (โครงหน้ายังต้องดูด้วยตาตามข้อ 4 — markup เทียบด้วยเครื่องไม่ได้)
 6. `claude plugin validate ./plugins/<ชื่อ> --strict`
 7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
    push tag ของ dependency ก่อน)

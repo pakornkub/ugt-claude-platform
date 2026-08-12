@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-database-setup/lib/prisma.ts
+// kit-hash: 5f81fd7aa73c
 // lib/prisma.ts — Prisma singleton for SQL Server via @prisma/adapter-mssql.
 // Deps: @prisma/client, @prisma/adapter-mssql (mssql is a transitive dep — type-only import below).
 import { PrismaClient } from '@prisma/client';

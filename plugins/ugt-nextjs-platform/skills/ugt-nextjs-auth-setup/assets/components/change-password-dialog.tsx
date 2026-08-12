@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/change-password-dialog.tsx
+// kit-hash: 1cc440cbac1c
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // เปิดจากเมนูโปรไฟล์ใน NavUser และแสดงเฉพาะบัญชี local เท่านั้น

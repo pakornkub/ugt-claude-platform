@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/approval-chain.ts
+// kit-hash: 82c5c2129346
 // source: ugt-hrms lib/services/workflow-resolver.ts (getAuthorizeChain) +
 // hr-lookup.ts (getFirstApproverName, getHRSyncOrgs) — generalized by
 // ugt-nextjs-auth-setup

@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: 98646929c9be
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
 import { useState, useTransition } from 'react';

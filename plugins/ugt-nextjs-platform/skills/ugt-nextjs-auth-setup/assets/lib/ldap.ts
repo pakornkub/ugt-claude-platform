@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/ldap.ts
+// kit-hash: 2489716bdbba
 // [METHOD: LDAP] — delete this file if LDAP login is not enabled.
 import { Client } from 'ldapts';
 import { env } from '@/lib/env';

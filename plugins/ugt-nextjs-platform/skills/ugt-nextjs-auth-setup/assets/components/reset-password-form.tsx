@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
+// kit-hash: b935db525796
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ปลายทางของลิงก์ในอีเมล: app/(auth)/reset-password/page.tsx ส่ง token จาก

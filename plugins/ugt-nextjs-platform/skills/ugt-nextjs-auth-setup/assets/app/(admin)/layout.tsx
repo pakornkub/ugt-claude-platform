@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
+// kit-hash: 7098d770d05e
 // app/(admin)/layout.tsx — the ongoing admin section (users/roles/audit-logs).
 // Different route group from (admin-setup): that one only requires a session
 // (permissions don't exist pre-bootstrap); this one requires an actual

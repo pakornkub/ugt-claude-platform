@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: 2db2b38dfee5
 // proxy.ts — Next.js 16 edge route protection (Next.js 16 uses proxy.ts, not middleware.ts).
 // Cookie-presence check only (Edge-safe, no DB call) + CSP nonce injection.
 import { NextResponse } from 'next/server';

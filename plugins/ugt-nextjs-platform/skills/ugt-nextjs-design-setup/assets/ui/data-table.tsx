@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 5bbf4107cc5f
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 'use client';
 

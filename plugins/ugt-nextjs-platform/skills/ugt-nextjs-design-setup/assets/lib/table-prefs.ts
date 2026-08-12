@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/table-prefs.ts
+// kit-hash: 941d63a968fa
 // source: ugt-hrms (port/adapt จาก gov-boi-smart) — installed by ugt-nextjs-design-setup (org UI kit)
 
 // จำลำดับคอลัมน์และคอลัมน์ที่ซ่อนของตารางแต่ละหน้าไว้ใน localStorage

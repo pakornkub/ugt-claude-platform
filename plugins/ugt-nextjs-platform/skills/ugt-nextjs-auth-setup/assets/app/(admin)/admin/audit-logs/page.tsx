@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit-hash: 8850909108d3
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // ponytail: no filters/pagination — latest 200 rows. Add filters (by user,
 // action, date range) when a real project needs to search beyond that.

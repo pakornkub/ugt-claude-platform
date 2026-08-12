@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
+// kit-hash: 498e187d8723
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL], run once
 //
 //   npx tsx scripts/create-first-user.ts "ชื่อ" you@company.co.th 'InitialPass1'

@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/chart-example.tsx
+// kit-hash: 807003e1dc41
 
 // source: ugt-hrms components/ot-auto/run-trend-chart.tsx (ตัดส่วน OT ออก) —
 // installed by ugt-nextjs-design-setup เป็น **ตัวอย่างอ้างอิง** ไม่ใช่ component

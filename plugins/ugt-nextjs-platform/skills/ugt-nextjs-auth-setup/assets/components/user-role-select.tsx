@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/user-role-select.tsx
+// kit-hash: 4a7b96e7c4bc
 
 // components/user-role-select.tsx — inline role-assign dropdown for one user row.
 import { useTransition } from 'react';

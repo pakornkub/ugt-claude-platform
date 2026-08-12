@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-cicd-setup/api-health-route.ts
+// kit-hash: 5fc08b1725af
 // Health endpoint hit by the Dockerfile HEALTHCHECK and both compose healthchecks.
 // Without this file the container never reports healthy → the Deploy stage
 // fails at the docker-inspect poll every time.

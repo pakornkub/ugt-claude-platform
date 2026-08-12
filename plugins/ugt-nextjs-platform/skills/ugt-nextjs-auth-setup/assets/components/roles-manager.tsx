@@ -1,4 +1,6 @@
 'use client';
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: f785fa6fee29
 
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // create/edit dialog + delete. The page itself does the server-side guard + fetch.

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/lib/virus-scan.ts
+// kit-hash: ec473854c148
 import 'server-only';
 import net from 'node:net';
 import { env } from '@/lib/env';

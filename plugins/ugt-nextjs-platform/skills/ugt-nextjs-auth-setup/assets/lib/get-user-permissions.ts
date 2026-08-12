@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/get-user-permissions.ts
+// kit-hash: 5a8921697c4c
 import { prisma } from '@/lib/prisma';
 
 /**

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/export.test.ts
+// kit-hash: 7d960d398287
 // installed by ugt-nextjs-design-setup alongside lib/export.ts
 // ล็อกเฉพาะ 4 อย่างที่พังเงียบ ๆ: BOM · formula injection · จำนวนคอลัมน์ตรงกัน · ตัวเลขยังเป็นตัวเลข
 // (toXlsx ไม่มีเทสที่นี่ — เป็น exceljs ล้วน ๆ พังแล้วเห็นทันทีตอนเปิดไฟล์)

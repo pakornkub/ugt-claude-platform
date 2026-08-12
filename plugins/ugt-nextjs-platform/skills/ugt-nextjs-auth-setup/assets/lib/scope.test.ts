@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/scope.test.ts
+// kit-hash: 0b9fb2044ef4
 // installed by ugt-nextjs-auth-setup alongside lib/scope.ts
 // ทดสอบเฉพาะส่วนที่บริสุทธิ์ — การไล่สายบังคับบัญชาและด่านตัดสินใจ
 // (ส่วนที่แตะฐานข้อมูลไม่ทดสอบที่นี่ ต้องเจอของจริงถึงจะมีความหมาย)

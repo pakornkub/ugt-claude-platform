@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/password-policy.ts
+// kit-hash: f7aa8da970e3
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only
 //
 // ที่เดียวที่นิยาม "รหัสผ่านที่รับได้" ของโปรเจค — ใช้ร่วมกันทั้งฟอร์มตั้งรหัสใหม่,

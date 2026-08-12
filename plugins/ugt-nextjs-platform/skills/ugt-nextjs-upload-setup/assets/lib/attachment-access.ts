@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/lib/attachment-access.ts
+// kit-hash: ed917fa7412a
 import 'server-only';
 
 /**

@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/scope.ts
+// kit-hash: e8f8385c0965
 // source: ugt-hrms lib/services/employee-monitor-scope.ts + hr-lookup.ts
 // (getSubordinates / collectSubtreeEmpCodes) — generalized by ugt-nextjs-auth-setup
 //

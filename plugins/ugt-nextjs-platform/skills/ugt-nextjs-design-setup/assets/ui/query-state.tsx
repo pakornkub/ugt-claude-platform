@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/query-state.tsx
+// kit-hash: 2c18e4cb6401
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 import { RotateCcw } from 'lucide-react';
 
