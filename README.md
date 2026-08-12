@@ -243,7 +243,10 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 - ให้ทีม IT ตั้ง hard boundary → `plugins/ugt-core/contracts/org-managed-settings.md`
 - ขั้นตอนออกรุ่น → หัวข้อ "สำหรับทีมดูแล platform" ด้านบน
 
-**บันทึกย้อนหลัง + งานค้าง** (เก็บไว้ตอบว่า "ทำไมตอนนั้นถึงเลือกแบบนี้" —
+**งานค้างของ platform** — [`docs/backlog.md`](docs/backlog.md) ที่เดียว:
+รอลงมือ / รอเงื่อนไข / ปิดแล้วชี้รุ่น (post-deploy, E2E, cron, evals ที่ค้าง ฯลฯ)
+
+**บันทึกย้อนหลัง** (เก็บไว้ตอบว่า "ทำไมตอนนั้นถึงเลือกแบบนี้" —
 ⚠️ **ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม**):
 
 - [`docs/multi-stack-proposal.md`](docs/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
