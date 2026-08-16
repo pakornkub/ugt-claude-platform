@@ -56,8 +56,9 @@ If the folder implies many features (drafting each brief sequentially would
 take a while), offer the user a parallel draft via the `Workflow` tool
 instead: one agent per feature drafts its `<NN>-*.md`, independently and
 read-only, then one pass reconciles cross-feature conflicts and writes
-`00-overview.md`. Only if the user opts in — a handful of features stays
-single-agent.
+`00-overview.md`. State plainly that this spawns multiple agents and costs
+more tokens than the single-agent draft. Only if the user opts in — a
+handful of features stays single-agent.
 
 ## The brief structure
 

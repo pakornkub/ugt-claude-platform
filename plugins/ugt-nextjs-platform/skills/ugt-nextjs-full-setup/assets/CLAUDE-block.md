@@ -65,11 +65,27 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (the superpowers "1% chance → must invoke" rule does not apply to read-only work) |
 | Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to the superpowers pipeline |
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
-| Small task: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
+| No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
-| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้วจึงเข้า superpowers pipeline (brainstorming → plan → TDD → review) — ไม่ต้องสำรวจโค้ดจากศูนย์ |
+| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |
+
+### Sizing a feature/bug before the pipeline
+
+Judge on the same three signals as `/ugt-model-mode`'s `auto` preset — **ambiguity**
+of the requirement, **blast radius** (files/modules touched), **risk domain**
+(auth/money/concurrency):
+
+| Size | Signals | What happens |
+| --- | --- | --- |
+| Small | Requirement is unambiguous · ~1–3 files · not a risk domain | **Ask the user**: full pipeline (brainstorming → plan → TDD → review) or the light version (skip brainstorming, straight to TDD → review)? Never pick silently |
+| Not small (ambiguous, cross-module, or risk domain) | — | Full pipeline, no need to ask — it's clearly warranted |
+
+The light version still writes a test first and still gets reviewed — those
+are the safety net against a broken change. Only brainstorming (exploring
+ambiguity) and the standalone plan step are skippable, and only when there is
+nothing ambiguous left to explore.
 
 ## Where new knowledge goes (4 ทาง)
 

@@ -58,7 +58,9 @@ If the codebase is large (many modules/routes — scanning would take several
 minutes single-threaded), offer the user a parallel scan via the `Workflow`
 tool instead: one agent drafts `architecture.md`, one `api.md`, one
 `business-rules.md`, independently and read-only, merged before the review
-step below. Only if the user opts in — small projects stay single-agent.
+step below. State plainly that this spawns multiple agents and costs more
+tokens than the single-agent scan. Only if the user opts in — small projects
+stay single-agent.
 
 1. **`architecture.md`** — from the folder layout, `package.json`, the schema
    (e.g. `prisma/schema.prisma`), and the main flows visible in routing.
