@@ -54,6 +54,12 @@ Read the project and DRAFT the three scannable files (leave `decisions.md`,
 `troubleshooting.md`, `board.md` as skeletons — those hold history no scan can
 recover):
 
+If the codebase is large (many modules/routes — scanning would take several
+minutes single-threaded), offer the user a parallel scan via the `Workflow`
+tool instead: one agent drafts `architecture.md`, one `api.md`, one
+`business-rules.md`, independently and read-only, merged before the review
+step below. Only if the user opts in — small projects stay single-agent.
+
 1. **`architecture.md`** — from the folder layout, `package.json`, the schema
    (e.g. `prisma/schema.prisma`), and the main flows visible in routing.
    Stack hints (Next.js): module map from `app/`/`components/`/`lib/`

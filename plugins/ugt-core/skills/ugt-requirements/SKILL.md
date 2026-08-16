@@ -52,6 +52,13 @@ scaffolds, or writes code — the handoff at the end is where its job stops.
      is always promoted to an Open Question naming both sources)
    - **Gaps** — what the build needs but no document answers
 
+If the folder implies many features (drafting each brief sequentially would
+take a while), offer the user a parallel draft via the `Workflow` tool
+instead: one agent per feature drafts its `<NN>-*.md`, independently and
+read-only, then one pass reconciles cross-feature conflicts and writes
+`00-overview.md`. Only if the user opts in — a handful of features stays
+single-agent.
+
 ## The brief structure
 
 Output goes to `docs/requirements-brief/` (committed). All content in
