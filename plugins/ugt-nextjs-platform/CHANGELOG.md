@@ -1,5 +1,31 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.18.0 (2026-08-16)
+
+`ugt-nextjs-full-setup`'s `CLAUDE-block.md` no longer routes every "build a
+feature / fix a bug" straight into the full superpowers pipeline
+(brainstorming → plan → TDD → review). It now **sizes the work first** on the
+same three signals `ugt-model-mode`'s `auto` preset already uses — ambiguity,
+blast radius, risk domain. Small, unambiguous, low-risk work gets offered a
+choice (full pipeline or a light version that skips brainstorming/plan but
+keeps TDD + review); anything ambiguous, cross-module, or touching a risk
+domain still goes full pipeline without asking. Fixes the previous
+all-or-nothing behavior that made a one-file, well-understood bug fix pay the
+same process cost as a multi-module feature.
+
+## 4.17.0 (2026-08-16)
+
+`ugt-nextjs-auth-setup`'s `assets/env.example` now ships
+`NODE_TLS_REJECT_UNAUTHORIZED=0` **uncommented by default** — for projects
+whose containers sit on a closed intranet with no outbound path to the
+internet, Node couldn't verify the org's internal-CA Keycloak cert and SSO
+failed with "Invalid OAuth configuration" every time until someone manually
+uncommented the line. The comment above it now says plainly why it's on and
+warns to remove it the moment the container gains any outbound access (npm
+registry, external API, etc.) — it disables TLS verification for the entire
+Node process, not just the Keycloak connection. `SKILL.md`'s Quick Rules table
+updated to match (no longer "never by default").
+
 ## 4.16.0 (2026-08-12)
 
 **Form validation convention — the last two audit-addendum items, closed

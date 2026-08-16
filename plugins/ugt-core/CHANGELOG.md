@@ -1,5 +1,16 @@
 # Changelog — ugt-core
 
+## 2.4.0 (2026-08-16)
+
+`ugt-context` (scan path) and `ugt-requirements` (reading many source docs) fit
+graph-orchestration cleanly — read-only, independently splittable, no
+mid-flight user checkpoint. Both skills now offer the user a parallel scan/
+draft via the `Workflow` tool when the scope is large enough to matter (many
+modules for context, many features for requirements), stating plainly that it
+spawns multiple agents and costs more tokens than the single-agent path.
+Opt-in only — small projects and short requirement folders stay single-agent
+as before.
+
 ## 2.3.0 (2026-08-11)
 
 `contracts/cicd.md` gains a new section **Persistent data (bind mounts)** —
