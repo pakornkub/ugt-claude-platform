@@ -1,5 +1,17 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.19.0 (2026-08-18)
+
+`ugt-nextjs-auth-setup`'s `references/directory-enrichment.md` now states
+up front that the standard pattern has **two separate HR views**, not one:
+the employee/identity view (`lib/directory.ts`) and the authorize/approval
+view (`lib/approval-chain.ts`). Previously that split was documented only in
+`references/data-scope.md`, so a reader who opened `directory-enrichment.md`
+alone had no signal a second view existed. Confirmed against `ugt-hrms`'s
+real schema (`vwHR_SC_Employee` vs `HR_SC_AuthorizeEmployee_ms`) — the
+existing column mapping in both asset files already matched; this was a
+cross-reference gap, not a code gap.
+
 ## 4.18.0 (2026-08-16)
 
 `ugt-nextjs-full-setup`'s `CLAUDE-block.md` no longer routes every "build a

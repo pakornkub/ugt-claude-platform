@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คุยกับ AI ให้ได้งานที่ต้องการ — หลักสูตรสำหรับทีม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Cascadia+Code&display=swap" rel="stylesheet">
+<style>
+  /* ============ Design tokens (light theme) — เข้าชุดกับ README.html ============ */
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f8f9fc;
+    --bg-tint:#eef2ff;
+    --ink:#1e2436;
+    --ink-soft:#4b5268;
+    --ink-faint:#6d7590;
+    --line:#e5e8f0;
+    --accent:#4f46e5;
+    --accent-deep:#4338ca;
+    --accent-soft:#e0e7ff;
+    --accent-text:#3730a3;
+    --code-bg:#1e2436;
+    --code-ink:#e6e9f4;
+    --radius:14px;
+    --shadow-sm:0 1px 2px rgba(30,36,54,.06);
+    --shadow-md:0 6px 24px -8px rgba(30,36,54,.14);
+    --shadow-lg:0 16px 40px -12px rgba(79,70,229,.18);
+    --font:'Inter','Noto Sans Thai','Segoe UI',system-ui,sans-serif;
+    --mono:'Cascadia Code',Consolas,'Courier New',monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.75;font-size:16.5px;overflow-x:hidden}
+  img,svg{max-width:100%}
+  a{color:var(--accent-deep)}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+  section{padding:72px 0}
+  section:nth-of-type(even){background:var(--bg-soft)}
+
+  h1,h2,h3{line-height:1.35;letter-spacing:-.01em}
+  h2{font-size:clamp(1.6rem,3.4vw,2.15rem);margin-bottom:10px}
+  h3{font-size:1.12rem}
+  .kicker{display:inline-block;font-size:.82rem;font-weight:700;color:var(--accent-text);
+    background:var(--accent-soft);padding:4px 14px;border-radius:999px;margin-bottom:14px;letter-spacing:.02em}
+  .lead{color:var(--ink-soft);max-width:760px;margin-bottom:36px}
+
+  /* ============ Sticky nav ============ */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;transition:border-color .2s ease,box-shadow .2s ease}
+  header.nav.scrolled{border-color:var(--line);box-shadow:var(--shadow-sm)}
+  .nav-inner{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;
+    gap:20px;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.98rem;color:var(--ink);
+    text-decoration:none;white-space:nowrap}
+  .brand .logo-svg{height:18px;width:auto;flex:none;color:var(--accent-deep)}
+  nav.links{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+  nav.links::-webkit-scrollbar{display:none}
+  nav.links a{color:var(--ink-soft);text-decoration:none;font-size:.9rem;font-weight:600;
+    padding:7px 12px;border-radius:8px;white-space:nowrap;transition:background .15s ease,color .15s ease}
+  nav.links a:hover{background:var(--bg-tint);color:var(--accent-deep)}
+
+  /* ============ Hero ============ */
+  .hero{background:radial-gradient(900px 420px at 85% -10%,var(--bg-tint) 0%,transparent 65%),
+    radial-gradient(700px 380px at -5% 30%,#f3f0ff 0%,transparent 60%),var(--bg);
+    padding:84px 0 76px;text-align:center}
+  .hero h1{font-size:clamp(2rem,5vw,2.9rem);font-weight:700;max-width:820px;margin:0 auto 18px}
+  .hero h1 .grad{background:linear-gradient(100deg,var(--accent) 10%,#8b5cf6 90%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{color:var(--ink-soft);font-size:clamp(1rem,2vw,1.16rem);max-width:720px;margin:0 auto 14px}
+  .hero .stack-note{font-size:.88rem;color:var(--ink-faint);max-width:640px;margin:0 auto 34px}
+  .chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:8px 18px;font-weight:700;font-size:.92rem;box-shadow:var(--shadow-sm);
+    text-decoration:none;color:var(--ink)}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  .chip .dot.green{background:#10b981}
+  .chip .dot.violet{background:#8b5cf6}
+
+  /* ============ Code block (ตัวอย่างคำสั่ง) ============ */
+  .codebox{position:relative;text-align:left;background:var(--code-bg);color:var(--code-ink);
+    border-radius:var(--radius);box-shadow:var(--shadow-lg);max-width:640px;margin:30px auto 0;overflow:hidden}
+  .codebox .bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;
+    border-bottom:1px solid rgba(255,255,255,.09);font-size:.8rem;color:#a6adc7}
+  .codebox pre{padding:18px 20px;overflow-x:auto;font-family:var(--font);font-size:.92rem;line-height:1.85;white-space:pre-wrap}
+  .codebox .c{color:#8f97b8;font-family:var(--mono);font-size:.82rem}
+
+  /* ============ Cards ============ */
+  .grid{display:grid;gap:20px}
+  .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;
+    box-shadow:var(--shadow-sm);position:relative}
+  .card p{color:var(--ink-soft);font-size:.94rem}
+  .card .num{display:inline-flex;width:30px;height:30px;border-radius:9px;background:var(--accent-soft);
+    color:var(--accent-text);font-weight:700;align-items:center;justify-content:center;margin-bottom:12px;font-size:.9rem}
+  .card ul{padding-left:20px;color:var(--ink-soft);font-size:.9rem;margin-top:10px;display:flex;flex-direction:column;gap:4px}
+
+  /* ============ Scenario (สถานการณ์จริง) cards ============ */
+  .scenario{display:flex;flex-direction:column;gap:14px}
+  .scenario .num{width:34px;height:34px;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:1rem}
+  .scenario h3{font-size:1.08rem}
+  .scenario .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem;
+    font-weight:600;color:var(--accent-text)}
+  .flow span{background:var(--accent-soft);padding:3px 10px;border-radius:6px}
+  .flow em{color:var(--ink-faint);font-style:normal}
+  .scenario p{color:var(--ink-soft);font-size:.92rem}
+
+  /* ============ กฎเหล็ก list ============ */
+  .rules{display:flex;flex-direction:column;gap:14px}
+  .rule{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+  .rule .mark{flex:none;width:28px;height:28px;border-radius:8px;background:#fef2f2;
+    color:#b91c1c;display:grid;place-items:center;font-weight:700}
+  .rule b{display:block;color:var(--ink);font-size:.95rem;margin-bottom:2px}
+  .rule span{color:var(--ink-soft);font-size:.88rem}
+
+  /* ============ Footer ============ */
+  footer{background:var(--code-bg);color:#aab1cc;padding:56px 0 44px;font-size:.9rem;text-align:center}
+  footer h2{color:#fff;font-size:1.3rem;margin-bottom:10px}
+  footer .lead2{color:#aab1cc;max-width:600px;margin:0 auto 26px}
+  footer .footer-brand{margin:6px 0 22px}
+  footer .footer-brand img{height:34px;width:auto;opacity:.92}
+  .copyright{margin-top:16px;font-size:.8rem;color:#7b83a4}
+
+  /* ============ Motion (opt-in only) ============ */
+  @media (prefers-reduced-motion: no-preference){
+    html{scroll-behavior:smooth}
+    .card,.chip{transition:transform .2s ease-out,box-shadow .2s ease-out}
+    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease-out,transform .5s ease-out}
+    .reveal.in{opacity:1;transform:none}
+    .hero .h-anim{opacity:0;transform:translateY(14px);animation:rise .5s ease-out forwards}
+    .hero .d1{animation-delay:.05s}
+    .hero .d2{animation-delay:.15s}
+    .hero .d3{animation-delay:.25s}
+    .hero .d4{animation-delay:.35s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+
+  @media (max-width:900px){
+    .grid.cols-2,.grid.cols-4{grid-template-columns:1fr 1fr}
+    section{padding:56px 0}
+  }
+  @media (max-width:560px){
+    body{font-size:15.5px}
+    .grid.cols-2,.grid.cols-4{grid-template-columns:1fr}
+    .nav-inner{padding:10px 16px;gap:10px}
+    .brand .txt{display:none}
+    .wrap{padding:0 18px}
+    .hero{padding:56px 0}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav" id="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="กลับขึ้นบนสุด">
+      <svg class="logo-svg" viewBox="0 0 190 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g transform="translate(0,52) scale(0.1,-0.1)" fill="currentColor" stroke="none"><path d="M52 318 c-18 -101 -32 -196 -32 -211 0 -18 11 -39 28 -57 36 -35 106 -44 300 -38 147 5 187 16 217 62 12 18 85 378 85 419 0 4 -28 7 -62 5 l-63 -3 -26 -145 c-14 -80 -29 -162 -33 -182 l-7 -38 -154 0 c-85 0 -155 3 -155 8 0 4 14 79 30 167 16 88 30 168 30 178 0 14 -10 17 -63 17 l-63 0 -32 -182z"/><path d="M720 493 c0 -5 -18 -110 -40 -236 -22 -125 -40 -232 -40 -238 0 -8 75 -10 243 -7 210 3 246 6 275 21 38 21 66 75 76 149 6 38 4 50 -12 65 -18 18 -18 19 11 44 28 23 30 31 31 93 1 62 -1 70 -27 92 -28 24 -28 24 -273 24 -134 0 -244 -3 -244 -7z m420 -112 c0 -11 -4 -31 -10 -45 -9 -26 -10 -26 -129 -26 -115 0 -119 -1 -125 -22 -3 -13 -6 -33 -6 -45 0 -23 2 -23 114 -23 65 0 117 -4 121 -10 3 -5 3 -25 -1 -45 l-6 -35 -154 0 c-85 0 -154 4 -154 8 0 12 40 236 45 250 3 9 43 12 155 12 142 0 150 -1 150 -19z"/><path d="M1403 485 c-17 -7 -39 -25 -48 -38 -17 -27 -65 -266 -65 -328 0 -49 33 -87 85 -99 54 -13 412 -13 420 0 3 5 9 32 12 60 l6 50 -197 0 c-182 0 -196 1 -196 18 0 26 38 231 45 243 4 5 91 9 204 9 l198 0 7 38 c3 20 6 43 6 50 0 18 -433 16 -477 -3z"/><path d="M1501 270 c-5 -25 -8 -46 -6 -48 1 -2 76 -3 166 -3 l164 0 6 28 c17 73 27 68 -156 68 l-164 0 -10 -45z"/></g></svg>
+      <span class="txt">คุยกับ AI ให้ได้งานที่ต้องการ</span>
+    </a>
+    <nav class="links" aria-label="เมนูหลัก">
+      <a href="#goal">เป้าหมาย</a>
+      <a href="#modules">โครงเนื้อหา</a>
+      <a href="#usecase">ตัวอย่างจริง</a>
+      <a href="#rules">ข้อควรระวัง</a>
+      <a href="#cheatsheet">Cheat Sheet</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="wrap">
+    <h1 class="h-anim d1">ใช้ AI สร้างงานให้เป็น<br><span class="grad">ไม่ใช่แค่สั่งแล้วรอ</span></h1>
+    <p class="sub h-anim d2">หลักสูตรสำหรับคนที่ใช้ Claude Code + VSCode สร้างงานด้วยการพิมพ์บอกสิ่งที่อยากได้
+      (แบบที่เรียกกันว่า "vibe coding") — ไม่ต้องเขียนโค้ดเป็นก็เรียนได้</p>
+    <p class="stack-note h-anim d2">ไม่มีพื้นฐานเขียนโปรแกรมมาก่อนก็เข้าใจได้ เน้นวิธีพูดคุยกับ AI ให้ได้งานที่ต้องการจริงๆ</p>
+    <div class="chips h-anim d3">
+      <span class="chip"><span class="dot" aria-hidden="true"></span>4 ตอน</span>
+      <span class="chip"><span class="dot violet" aria-hidden="true"></span>ลงมือทำจริงทุกตอน</span>
+      <span class="chip"><span class="dot green" aria-hidden="true"></span>ใช้กับงานจริงที่ทำอยู่</span>
+      <a class="chip" href="training-cheatsheet.html"><span class="dot violet" aria-hidden="true"></span>เปิด Cheat Sheet 1 หน้า →</a>
+    </div>
+    <div class="codebox h-anim d4">
+      <div class="bar"><span>ตัวอย่างคำสั่งที่ดี</span></div>
+      <pre><code><span class="c">// บอกรายละเอียดที่ AI เดาเองไม่ได้</span>
+อยากได้หน้าเข้าสู่ระบบ มีช่องกรอกอีเมลกับรหัสผ่าน
+ปุ่มเข้าสู่ระบบ และลิงก์ "ลืมรหัสผ่าน"
+หน้าตาให้คล้ายกับหน้าสมัครสมาชิกที่ทำไปแล้ว
+ก่อนเริ่ม ขอดูแผนงานก่อนว่าจะทำยังไง</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="goal">
+  <div class="wrap">
+    <span class="kicker reveal">เป้าหมาย</span>
+    <h2 class="reveal">ทำไมพูดกับ AI ให้ถูกวิธีถึงสำคัญ</h2>
+    <p class="lead reveal">ต่อให้ AI เก่งแค่ไหน ผลลัพธ์ที่ได้ก็ขึ้นอยู่กับวิธีที่เราสั่งงานอยู่ดี —
+      หลักสูตรนี้สอนวงจรง่ายๆ 4 ขั้น ที่ช่วยลดปัญหาที่พบบ่อยที่สุด: สั่งงานรวดเดียวหลายเรื่องจนสับสน,
+      ลืมบอกรายละเอียดสำคัญ, เชื่อ AI ทันทีโดยไม่ลองใช้งานจริงก่อน</p>
+    <div class="grid cols-2">
+      <div class="card reveal">
+        <div class="num">👤</div>
+        <h3>เหมาะกับใคร</h3>
+        <p>คนที่เพิ่งเริ่มใช้ AI สร้างงาน ไม่เคยเขียนโปรแกรมมาก่อน หรือใช้แบบ "vibe coding"
+          (บอกสิ่งที่อยากได้เป็นภาษาพูด แล้วให้ AI ทำให้)</p>
+      </div>
+      <div class="card reveal">
+        <div class="num">🎯</div>
+        <h3>สิ่งที่ได้หลังจบคอร์ส</h3>
+        <ul>
+          <li>รู้ว่าเมื่อไหร่ควรให้ AI วางแผนก่อนเริ่มทำ</li>
+          <li>พูดให้ AI เข้าใจในครั้งเดียว ไม่ต้องแก้ไปแก้มา</li>
+          <li>รู้วิธีเช็คว่า AI ทำตามที่ขอจริงก่อนเชื่อ</li>
+          <li>รู้ว่าเรื่องไหนต้องให้ AI หยุดถามก่อนลงมือ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modules">
+  <div class="wrap">
+    <span class="kicker reveal">โครงเนื้อหา</span>
+    <h2 class="reveal">4 ตอน</h2>
+    <p class="lead reveal">แต่ละตอนมีช่วงลงมือทำจริงให้ลองพิมพ์คุยกับ AI เอง ไม่ใช่แค่ดู slide เฉยๆ</p>
+    <div class="grid cols-4">
+      <div class="card reveal"><div class="num">1</div><h3>เริ่มต้นใช้งาน</h3>
+        <p>Claude Code คืออะไร ใช้กับ VSCode ยังไง คุยกับ AI แบบไหนได้บ้าง</p></div>
+      <div class="card reveal"><div class="num">2</div><h3>พูดกับ AI ให้เข้าใจ</h3>
+        <p>วงจร 4 ขั้น: คิดก่อนสั่ง → สั่งทีละเรื่อง → ดูผลก่อนเชื่อ → ลองใช้จริง</p></div>
+      <div class="card reveal"><div class="num">3</div><h3>ลงมือทำจริง</h3>
+        <p>ตัวอย่างสถานการณ์จริงที่จะเจอบ่อยที่สุด สาธิตให้ดูสด</p></div>
+      <div class="card reveal"><div class="num">4</div><h3>ข้อควรระวัง</h3>
+        <p>สิ่งที่ต้องระวังเวลาให้ AI ทำงานแทน และเรื่องไหนต้องเช็คเองเสมอ</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="usecase">
+  <div class="wrap">
+    <span class="kicker reveal">ตัวอย่างจริง</span>
+    <h2 class="reveal">สถานการณ์ที่จะสาธิตสด</h2>
+    <div class="grid cols-2">
+      <div class="card scenario reveal">
+        <span class="num">1</span>
+        <h3>เริ่มงานใหม่</h3>
+        <p>บอก AI ว่าอยากได้อะไร แล้วดูว่า AI ช่วยวางแผนงานให้เป็นขั้นตอนอัตโนมัติได้ยังไง</p>
+        <div class="flow"><span>บอกไอเดีย</span><em>→</em><span>AI วางแผน</span><em>→</em><span>เริ่มทำตามมาตรฐาน</span></div>
+      </div>
+      <div class="card scenario reveal">
+        <span class="num">2</span>
+        <h3>เพิ่มลูกเล่นใหม่ในงานเดิม</h3>
+        <p>สาธิตวงจรเต็มบนงานจริงของทีม ตั้งแต่วางแผนจนลองใช้งานจริง</p>
+        <div class="flow"><span>วางแผน</span><em>→</em><span>ลงมือทำ</span><em>→</em><span>ดูผล</span><em>→</em><span>ลองใช้จริง</span></div>
+      </div>
+      <div class="card scenario reveal">
+        <span class="num">3</span>
+        <h3>แก้ปัญหาที่เจอ</h3>
+        <p>ไม่เดา ไม่ให้แก้มั่ว — เล่าอาการที่เจอให้ AI หาสาเหตุก่อนแล้วค่อยแก้</p>
+        <div class="flow"><span>เล่าอาการ</span><em>→</em><span>หาสาเหตุ</span><em>→</em><span>ยืนยัน</span><em>→</em><span>แก้</span></div>
+      </div>
+      <div class="card scenario reveal">
+        <span class="num">4</span>
+        <h3>ทำงานให้ได้มาตรฐานองค์กร</h3>
+        <p>เห็นว่าเครื่องมือที่ทีมใช้อยู่ ช่วย "กันพลาด" เรื่องมาตรฐานให้อัตโนมัติได้ยังไง</p>
+        <div class="flow"><span>สั่งงาน</span><em>→</em><span>เช็คมาตรฐาน</span><em>→</em><span>ใช้งานได้จริง</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <span class="kicker reveal">ข้อควรระวัง</span>
+    <h2 class="reveal">กฎเหล็กที่ต้องจำ</h2>
+    <div class="rules">
+      <div class="rule reveal"><span class="mark">!</span>
+        <div><b>อย่าเชื่อ AI ทันที</b><span>ต้องลองใช้งานจริงก่อนเสมอ ไม่ใช่แค่เชื่อคำว่า "เสร็จแล้ว"</span></div></div>
+      <div class="rule reveal"><span class="mark">!</span>
+        <div><b>รู้จักหยุดคำสั่งที่แก้คืนไม่ได้</b><span>เช่น ลบข้อมูล ลบไฟล์ทิ้ง ต้องให้ AI หยุดถามก่อนเสมอ</span></div></div>
+      <div class="rule reveal"><span class="mark">!</span>
+        <div><b>บันทึกงานก่อนเลิกทำ</b><span>บอก AI สรุปเก็บสถานะงานไว้ กันต้องเล่าใหม่ทุกครั้งที่กลับมาทำต่อ</span></div></div>
+      <div class="rule reveal"><span class="mark">!</span>
+        <div><b>รู้ว่าเมื่อไหร่ไม่จำเป็นต้องใช้ AI</b><span>งานเล็กมากบางทีทำเองเร็วกว่าอธิบายให้ AI ฟัง</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="cheatsheet">
+  <div class="wrap" style="text-align:center">
+    <span class="kicker reveal">สรุปพกพา</span>
+    <h2 class="reveal">Cheat Sheet 1 หน้า</h2>
+    <p class="lead reveal" style="margin-left:auto;margin-right:auto">รวมวงจร 4 ขั้น, ตัวอย่างคำสั่งที่ดี vs ไม่ดี,
+      กฎเหล็ก และเช็คลิสต์ก่อนบอกว่าเสร็จ — พิมพ์แจกได้เลย</p>
+    <a class="chip reveal" href="training-cheatsheet.html" style="font-size:1rem;padding:10px 22px">
+      <span class="dot violet" aria-hidden="true"></span>เปิด training-cheatsheet.html →</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>พร้อมเริ่มใช้ AI สร้างงานอย่างมีวินัยแล้ว</h2>
+    <p class="lead2">แจก cheat sheet ให้ทุกคนก่อนวันลงมือทำจริง — อ่าน 5 นาทีจำได้ทั้งวงจร</p>
+    <div class="footer-brand">
+      <img src="../assets/brand/ube-logo-long-white.svg" alt="โลโก้บริษัท" height="34">
+    </div>
+    <div class="copyright">UGT Claude Platform — เนื้อหาภายในทีม</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var nav = document.getElementById("topnav");
+  function onScroll(){ nav.classList.toggle("scrolled", window.scrollY > 8); }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  var motionOK = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+  var targets = document.querySelectorAll(".reveal");
+  if (motionOK && "IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var parent = el.parentElement;
+        var siblings = parent ? Array.prototype.filter.call(parent.children, function(c){
+          return c.classList && c.classList.contains("reveal");
+        }) : [el];
+        var idx = siblings.indexOf(el);
+        el.style.transitionDelay = (idx > 0 ? Math.min(idx, 6) * 60 : 0) + "ms";
+        el.classList.add("in");
+        io.unobserve(el);
+      });
+    }, {threshold: 0.12, rootMargin: "0px 0px -8% 0px"});
+    targets.forEach(function(t){ io.observe(t); });
+  } else {
+    targets.forEach(function(t){ t.classList.add("in"); });
+  }
+})();
+</script>
+
+</body>
+</html>

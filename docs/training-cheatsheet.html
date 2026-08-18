@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheat Sheet — คุยกับ AI ให้ได้งานที่ต้องการ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#f8f9fc; --bg-tint:#eef2ff;
+    --ink:#1e2436; --ink-soft:#4b5268; --ink-faint:#6d7590;
+    --line:#e5e8f0; --accent:#4f46e5; --accent-deep:#4338ca;
+    --accent-soft:#e0e7ff; --accent-text:#3730a3;
+    --ok:#047857; --bad:#b91c1c;
+    --font:'Inter','Noto Sans Thai','Segoe UI',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg-soft);line-height:1.55;font-size:14px}
+  .sheet{max-width:820px;margin:22px auto;background:var(--bg);border:1px solid var(--line);
+    border-radius:16px;padding:34px 38px;box-shadow:0 10px 34px -18px rgba(30,36,54,.25)}
+  .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .top-row img{height:26px;width:auto;flex:none;margin-top:2px}
+  h1{font-size:1.55rem;letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:.88rem;margin-top:4px}
+  .kicker{display:inline-block;font-size:.68rem;font-weight:700;color:var(--accent-text);
+    background:var(--accent-soft);padding:3px 10px;border-radius:999px;margin-bottom:8px;letter-spacing:.03em}
+  h2{font-size:.84rem;letter-spacing:.03em;color:var(--accent-text);
+    margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  h2::after{content:'';flex:1;height:1px;background:var(--line)}
+  .loop{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .loop .step{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--bg-soft)}
+  .loop .n{display:inline-flex;width:20px;height:20px;border-radius:6px;background:var(--accent);
+    color:#fff;font-size:.72rem;font-weight:700;align-items:center;justify-content:center;margin-bottom:6px}
+  .loop b{display:block;font-size:.87rem;margin-bottom:2px}
+  .loop span{color:var(--ink-soft);font-size:.78rem;line-height:1.45}
+  table.pv{width:100%;border-collapse:collapse;font-size:.82rem}
+  table.pv th{text-align:left;color:var(--ink-faint);font-size:.7rem;
+    padding:4px 10px 6px;border-bottom:1px solid var(--line)}
+  table.pv td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+  table.pv tr:last-child td{border-bottom:none}
+  td.bad{color:var(--bad)} td.good{color:var(--ok)}
+  td.bad::before{content:'✕ ';font-weight:700} td.good::before{content:'✓ ';font-weight:700}
+  .rules{list-style:none;display:grid;gap:7px}
+  .rules li{padding-left:22px;position:relative;font-size:.84rem;color:var(--ink-soft);line-height:1.5}
+  .rules li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-weight:700}
+  .rules b{color:var(--ink)}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .checklist{list-style:none;display:grid;gap:7px}
+  .checklist li{padding-left:24px;position:relative;font-size:.84rem;color:var(--ink-soft)}
+  .checklist li::before{content:'';position:absolute;left:0;top:3px;width:13px;height:13px;
+    border:1.5px solid var(--line);border-radius:4px}
+  footer{margin-top:22px;padding-top:14px;border-top:1px dashed var(--line);
+    font-size:.74rem;color:var(--ink-faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  footer a{color:var(--accent-deep)}
+  @media print{
+    body{background:#fff}
+    .sheet{margin:0;box-shadow:none;border:none;border-radius:0;padding:14mm;max-width:none;animation:none!important}
+    h2::after{background:var(--line)}
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .sheet{animation:rise .45s ease-out}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  }
+  @media (max-width:700px){.loop,.cols2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="top-row">
+    <div>
+      <span class="kicker">Cheat Sheet · 1 หน้า</span>
+      <h1>คุยกับ AI ให้ได้งานที่ต้องการ</h1>
+      <p class="sub">ไม่ต้องเขียนโค้ดเป็นก็ใช้ได้ — จำวงจรนี้ไว้ 4 ขั้น พิมพ์แปะโต๊ะได้เลย</p>
+    </div>
+    <img src="../assets/brand/ube-logo-short.svg" alt="โลโก้บริษัท">
+  </div>
+
+  <h2>วงจรการทำงาน 4 ขั้น</h2>
+  <div class="loop">
+    <div class="step"><span class="n">1</span><b>คิดก่อนสั่ง</b><span>บอกเป้าหมายทั้งหมดก่อน ให้ AI สรุปแผนกลับมาให้ดูก่อนเริ่มทำจริง</span></div>
+    <div class="step"><span class="n">2</span><b>สั่งทีละเรื่อง</b><span>อย่าขอรวดเดียวหลายอย่าง ให้ทำทีละเรื่องจนเสร็จค่อยไปเรื่องถัดไป</span></div>
+    <div class="step"><span class="n">3</span><b>ดูผลก่อนเชื่อ</b><span>ลองเปิดดู/กดดูจริงว่า AI ทำตรงกับที่ขอไหม อย่าเชื่อแค่คำพูด</span></div>
+    <div class="step"><span class="n">4</span><b>ลองใช้จริง</b><span>ลองใช้งานเหมือนเป็นผู้ใช้จริงก่อนบอกว่า "เสร็จแล้ว"</span></div>
+  </div>
+
+  <h2>ตัวอย่างคำสั่งที่ดี vs ไม่ดี</h2>
+  <table class="pv">
+    <thead><tr><th style="width:46%">ไม่ดี</th><th>ดี</th></tr></thead>
+    <tbody>
+      <tr><td class="bad">"ทำหน้า login ให้หน่อย"</td>
+          <td class="good">"อยากได้หน้าเข้าสู่ระบบ มีช่องกรอกอีเมลกับรหัสผ่าน ปุ่มเข้าสู่ระบบ และลิงก์ 'ลืมรหัสผ่าน' หน้าตาคล้ายหน้าสมัครสมาชิกที่ทำไปแล้ว"</td></tr>
+      <tr><td class="bad">"มันพัง แก้ให้หน่อย"</td>
+          <td class="good">"ตอนกดปุ่ม 'บันทึก' แล้วหน้าจอค้าง ไม่มีอะไรเกิดขึ้น ช่วยหาสาเหตุก่อน อย่าเพิ่งแก้อะไร"</td></tr>
+      <tr><td class="bad">"ทำทั้งระบบให้เสร็จในคำสั่งเดียว"</td>
+          <td class="good">"เริ่มจากถามแผนก่อนว่าจะทำยังไง แบ่งเป็นขั้นย่อย ทำทีละขั้น"</td></tr>
+      <tr><td class="bad">เห็น AI บอก "เสร็จแล้ว" แล้วเชื่อทันที</td>
+          <td class="good">"ลองเปิดแอปแล้วกดใช้งานจริงก่อน ค่อยบอกว่าเสร็จ"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cols2">
+    <div>
+      <h2>กฎเหล็ก</h2>
+      <ul class="rules">
+        <li><b>อย่าเชื่อทันที</b> — ต้องลองใช้งานจริงก่อนเสมอ ก่อนจะบอกว่างานเสร็จ</li>
+        <li><b>สั่งทีละเรื่อง</b> — งานใหญ่ทำให้ AI สับสน แบ่งเป็นก้อนเล็กเสมอ</li>
+        <li><b>อธิบายให้ละเอียด</b> — บอกสิ่งที่ AI เดาเองไม่ได้ เช่น อยากได้หน้าตาแบบไหน</li>
+        <li><b>เรื่องแก้คืนไม่ได้ต้องหยุดถามก่อน</b> — เช่น ลบข้อมูล ลบไฟล์ ต้อง confirm ก่อนเสมอ</li>
+        <li><b>บันทึกงานก่อนเลิก</b> — บอก AI สรุปเก็บไว้ กันต้องเล่าใหม่ทุกครั้งที่เปิดมาทำต่อ</li>
+      </ul>
+    </div>
+    <div>
+      <h2>เช็คก่อนบอกว่าเสร็จ</h2>
+      <ul class="checklist">
+        <li>ลองกดใช้งานจริงครบทุกจุดที่ขอไปแล้วหรือยัง</li>
+        <li>มีอะไรพังหรือขึ้น error ไหม</li>
+        <li>ไม่มีข้อมูลลับ (รหัสผ่าน, รหัสลับ) หลุดอยู่ในสิ่งที่ AI แก้</li>
+        <li>ถ้าจะบันทึกงาน (commit) บอกเหตุผลสั้นๆ ว่าทำไมถึงเปลี่ยน</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <span>ฉบับเต็ม + ตัวอย่างสถานการณ์จริง → <a href="training-landing.html">training-landing.html</a></span>
+    <span>UGT Claude Platform</span>
+  </footer>
+</div>
+</body>
+</html>
