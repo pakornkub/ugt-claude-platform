@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.20.0 (2026-08-19)
+
+`ugt-nextjs-auth-setup` no longer ships a second sidebar into projects that
+already have one. Field feedback: installing into an existing project produced
+a separate admin sidebar (the asset default) instead of new menu items in the
+project's own nav. Three changes:
+
+- `components/admin-nav.tsx` now exports **`ADMIN_NAV_ITEMS`** (menu data with
+  per-item permission keys) separately from the `<AdminNav>` fallback sidebar,
+  so an existing sidebar can merge the three admin items directly.
+- `app/(admin)/layout.tsx` documents its two jobs — GUARD (always keep) vs
+  SHELL (fallback only) — with an inline marker showing what to delete when
+  the project's own shell wraps the admin pages.
+- `SKILL.md` gains **§5.6**: detect an existing shell first; merge
+  `ADMIN_NAV_ITEMS` + strip the shell from the admin layout when one exists,
+  copy as-is only for shell-less projects. Plus §3 Q8: ask which existing
+  menus should come under RBAC — declaring keys in `ALL_PERMISSIONS` is the
+  registration step that makes them appear in the `/admin/roles` checklist;
+  unregistered menus stay session-only by design.
+- `scripts/verify.mjs`: the admin-pages check now suffix-matches
+  `admin/<seg>/page.tsx` anywhere under the project instead of two fixed
+  paths — a §5.6 install that nests `(admin)` under the project's shell no
+  longer reports a false FAIL.
+
+Validated with a 3-eval benchmark (existing-sidebar merge / fresh no-shell /
+existing-menu RBAC) against the 4.19.0 snapshot: new skill 11/11 assertions,
+old skill 8/11 — the old version reproduced the reported double-sidebar bug
+in both existing-sidebar scenarios.
+
 ## 4.19.0 (2026-08-18)
 
 `ugt-nextjs-auth-setup`'s `references/directory-enrichment.md` now states

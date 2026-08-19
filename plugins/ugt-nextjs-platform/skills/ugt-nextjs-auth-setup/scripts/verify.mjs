@@ -85,14 +85,15 @@ check('First-admin bootstrap page exists', () => {
 });
 
 check('Ongoing admin pages exist (users / roles / audit-logs)', () => {
-  const required = [
-    ['app/(admin)/admin/users/page.tsx', 'app/admin/users/page.tsx'],
-    ['app/(admin)/admin/roles/page.tsx', 'app/admin/roles/page.tsx'],
-    ['app/(admin)/admin/audit-logs/page.tsx', 'app/admin/audit-logs/page.tsx'],
-  ];
-  const missing = required.filter((candidates) => !candidates.some((c) => has(c)));
+  // Suffix match, not fixed paths — §5.6 lets projects nest the (admin) group
+  // under their own shell (e.g. app/(app)/(admin)/admin/users/page.tsx), and
+  // route groups don't change the URL.
+  const files = sourceFiles().map((f) => relative(ROOT, f).replaceAll('\\', '/'));
+  const missing = ['users', 'roles', 'audit-logs'].filter(
+    (seg) => !files.some((f) => f.endsWith(`admin/${seg}/page.tsx`)),
+  );
   return missing.length
-    ? { ok: false, msg: `Missing: ${missing.map((c) => c[0]).join(', ')} — the RBAC data model exists but nobody can manage it` }
+    ? { ok: false, msg: `Missing admin page(s): ${missing.join(', ')} — the RBAC data model exists but nobody can manage it` }
     : { ok: true };
 });
 

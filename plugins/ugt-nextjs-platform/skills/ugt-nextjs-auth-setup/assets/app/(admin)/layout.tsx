@@ -1,9 +1,16 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
-// kit-hash: 7098d770d05e
+// kit: ugt-nextjs-platform 4.20.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
+// kit-hash: 486404c1d33a
 // app/(admin)/layout.tsx — the ongoing admin section (users/roles/audit-logs).
 // Different route group from (admin-setup): that one only requires a session
 // (permissions don't exist pre-bootstrap); this one requires an actual
 // admin-domain permission.
+//
+// Two jobs live here — keep them separate in your head:
+//   GUARD (always keep): session → syncPermissionsIfNeeded → permission → redirect
+//   SHELL (fallback only): the <AdminNav> two-pane below is for projects with
+//     NO app shell yet. If the project already has its own sidebar/layout,
+//     delete the shell part, render only {children}, and merge ADMIN_NAV_ITEMS
+//     into the existing sidebar instead — SKILL.md §5.6.
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
@@ -32,6 +39,8 @@ export default async function AdminLayout({
   const canAdmin = ADMIN_SECTION_PERMISSIONS.some((p) => perms.includes(p));
   if (!canAdmin) redirect('/'); // adjust to your app's "forbidden" landing page
 
+  // SHELL fallback — replace with plain `return <>{children}</>;` when the
+  // project's own shell wraps these pages (see header comment).
   return (
     <div className="flex min-h-svh">
       <AdminNav perms={perms} />

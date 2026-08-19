@@ -1,0 +1,27 @@
+{
+  "skill_name": "ugt-nextjs-auth-setup",
+  "note": "Behavior evals for the §5.6 sidebar merge/fallback flow (4.20.0). Trigger evals live in trigger-evals.json.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "merge-existing-sidebar",
+      "prompt": "โปรเจคนี้เป็น Next.js ที่มีระบบเดิมใช้งานอยู่แล้ว — มี sidebar ของตัวเองที่ components/app-sidebar.tsx และ protected layout ที่ app/(app)/layout.tsx ช่วยติดตั้งส่วน RBAC/admin ของ auth skill (หน้า /admin/users /admin/roles /admin/audit-logs พร้อม guard) ให้เข้ากับโปรเจคนี้ เมนูเดิมไม่ต้องคุมสิทธิ์เพิ่ม",
+      "expected_output": "เมนู admin 3 รายการถูก merge เข้า app-sidebar.tsx เดิม (filter ตาม permission), (admin)/layout.tsx เหลือ guard ไม่ render AdminNav เป็น sidebar ที่สอง",
+      "files": ["fixtures/with-shell"]
+    },
+    {
+      "id": 1,
+      "name": "fresh-no-shell",
+      "prompt": "โปรเจค Next.js ใหม่ ยังไม่มี shell หรือ sidebar อะไรเลย ติดตั้งระบบ auth + หน้า admin ตาม skill ให้หน่อย",
+      "expected_output": "ใช้ default ของ skill: (admin)/layout.tsx render AdminNav เป็น sidebar fallback ได้เลย",
+      "files": ["fixtures/no-shell"]
+    },
+    {
+      "id": 2,
+      "name": "existing-menu-permission",
+      "prompt": "โปรเจคนี้มี sidebar เดิมที่ components/app-sidebar.tsx ติดตั้งส่วน RBAC/admin ของ auth skill ให้ และเมนู 'รายงานค่าใช้จ่าย' (/reports) ของเดิมต้องคุมสิทธิ์ด้วย — ให้เห็นเฉพาะคนที่ได้รับสิทธิ์ผ่านหน้า /admin/roles",
+      "expected_output": "ประกาศ permission key ของ reports ใน ALL_PERMISSIONS, เมนู reports ถูก filter ตาม key, หน้า/action ของ reports มี guard และเมนู admin ถูก merge เข้า sidebar เดิมเหมือน eval 0",
+      "files": ["fixtures/with-shell"]
+    }
+  ]
+}

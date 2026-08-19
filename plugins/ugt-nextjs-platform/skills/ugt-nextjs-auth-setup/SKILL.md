@@ -141,6 +141,14 @@ Ask all of these **in a single message** before doing anything:
      mail-setup first. Never install the button without the mail behind it —
      Better Auth answers `RESET_PASSWORD_DISABLED` and the user gets a dead form.
    - Self-service **change password** and admin **set password** work either way.
+8. **[Existing project with menus] เมนูเดิมตัวไหนบ้างที่ต้องคุมสิทธิ์?** — before
+   asking, check whether the project already has an app shell/sidebar (that
+   check itself needs no question — read the code). If it has existing menus,
+   list them and ask which ones need permission control, because merging the
+   admin menu in (§5.6) does **not** put existing menus under RBAC — the
+   `/admin/roles` checklist only shows keys declared in `ALL_PERMISSIONS`.
+   Menus not chosen stay visible to every logged-in user, which is the right
+   default for general pages — registering everything just bloats role config.
 
 ## 4. Prerequisite
 
@@ -194,7 +202,10 @@ The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
 belonging to methods that were not selected. The RBAC/admin assets
 (`app/(admin-setup)/**`, `app/(admin)/**`, the admin components, and
 `lib/actions/admin-*.ts`) are method-agnostic — copy them as-is regardless
-of which login methods were chosen.
+of which login methods were chosen, **except the sidebar shell**: a project
+that already has its own sidebar merges the admin menu into it instead of
+shipping a second sidebar — §5.6, and skipping that step is the single most
+common install mistake.
 
 ### 5.3 Schema + migrate
 
@@ -261,6 +272,40 @@ of which login methods were chosen.
    into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
    it reaches the database the next time anyone opens an admin page, no
    migration step needed (see `references/rbac.md`)
+
+### 5.6 Sidebar: merge into the existing shell, or use the fallback
+
+Check FIRST whether the project already has an app shell with a sidebar/nav
+(`app/(app)/layout.tsx`, a design-setup shell, or any layout that renders a
+menu). The admin assets default to a standalone `<AdminNav>` sidebar — that
+default exists **only** for projects with no shell; shipping it into a project
+that has one produces two competing sidebars, which is exactly the install
+mistake this section prevents.
+
+**Project already has a sidebar** (the normal case for existing projects):
+
+1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav.tsx`) into the
+   existing nav config — as a "จัดการระบบ" group, or wherever the project's
+   menu structure puts admin items. Keep the per-item permission filter: the
+   items carry their `perm` key, so feed the nav the result of
+   `getUserPermissions()` and hide items the user lacks, exactly as
+   `<AdminNav>` does.
+2. In `app/(admin)/layout.tsx`, keep the guard (session →
+   `syncPermissionsIfNeeded()` → permission check) but delete the shell —
+   render plain `{children}` so the pages sit inside the project's own shell
+   (nest the `(admin)` group under the shell's layout, or move the three admin
+   pages under the project's protected route group with the guard preserved).
+
+**No shell yet** (fresh project): copy as-is — `<AdminNav>` renders a working
+sidebar out of the box. When the project later grows its own shell, migrate as
+above.
+
+**Existing menus under RBAC** (from §3 Q8): for each menu the installer chose,
+declare a `resource:action` key in `ALL_PERMISSIONS` (the sync in step 5
+seeds it to the database automatically — it then appears in the `/admin/roles`
+checklist), filter that menu item by the key, and guard its page/Server Action
+behind it. Declaring the key without wiring the check gives a checkbox that
+does nothing — always do both ends or neither.
 
 ## 6. Placeholders used across the assets
 
