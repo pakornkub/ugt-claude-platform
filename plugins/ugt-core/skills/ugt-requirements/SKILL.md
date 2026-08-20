@@ -42,11 +42,17 @@ scaffolds, or writes code — the handoff at the end is where its job stops.
    whole repo unprompted.
 2. Read **every** readable file in the folder (recursively): Markdown, text,
    CSV, images and PDFs via the Read tool.
-3. A file that cannot be read (e.g. `.docx`, spreadsheets, corrupt files) is
+3. If a root `CONTEXT.md` (domain glossary) or `docs/adr/` exists — output of
+   an earlier crystallization session — always read them as sources too: list
+   them in the overview's **Sources** section like any other file and cite
+   them in the briefs. Treat them as **frozen input**: once the project is
+   running, decisions live in `docs/project-context/decisions.md` — never let
+   the two systems grow in parallel.
+4. A file that cannot be read (e.g. `.docx`, spreadsheets, corrupt files) is
    listed in the overview's **Sources** section as `unread` — visibly, so
    nobody mistakes the brief for complete coverage. Do not silently skip it,
    and do not invent its contents.
-4. While reading, collect three kinds of findings:
+5. While reading, collect three kinds of findings:
    - **Facts** — what the documents actually state
    - **Conflicts** — places where documents contradict each other (a conflict
      is always promoted to an Open Question naming both sources)
@@ -59,6 +65,15 @@ read-only, then one pass reconciles cross-feature conflicts and writes
 `00-overview.md`. State plainly that this spawns multiple agents and costs
 more tokens than the single-agent draft. Only if the user opts in — a
 handful of features stays single-agent.
+
+**Pre-crystallization (optional).** If the user wants to settle open
+questions by interview *before* this skill runs (e.g. a `/grill-with-docs`
+session, where that plugin is installed), advise them to end that session by
+dumping every settled decision into `docs/requirements/00-decisions.md`. A
+glossary and sparing ADRs capture only a fraction of the answers — ordinary
+decisions that qualify for neither evaporate with the session unless written
+to a file this skill will read. Never require this step: it is an offer, and
+this skill works the same without it.
 
 ## The brief structure
 

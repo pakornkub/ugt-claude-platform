@@ -1,5 +1,22 @@
 # Changelog — ugt-core
 
+## 2.6.0 (2026-08-21)
+
+`ugt-requirements` learns to work with pre-crystallization sessions (e.g. a
+`/grill-with-docs` interview run before the brief):
+
+- **Reading the sources**: a root `CONTEXT.md` (domain glossary) or
+  `docs/adr/` is now always read as a source — listed in Sources, cited in
+  the briefs, and treated as frozen input (once the project runs, decisions
+  live in `docs/project-context/decisions.md`; the two systems never grow in
+  parallel).
+- **Pre-crystallization note**: when the user grills first, advise ending
+  that session by dumping every settled decision into
+  `docs/requirements/00-decisions.md` — glossary + sparing ADRs capture only
+  a fraction of the answers; the rest evaporates unless written to a file
+  this skill reads. Optional, never required — no dependency on any external
+  plugin.
+
 ## 2.5.0 (2026-08-20)
 
 Field report: a full-setup run took 4 hours in one session and stalled around
