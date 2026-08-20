@@ -151,6 +151,31 @@ Close out with, in this order:
    review). One feature per session keeps context clean.
 4. Remind: commit the brief, then `/ugt-handoff`.
 
+### Orchestration decision — propose ONE build plan, confirmed once
+
+Before closing, judge three signals and propose a single build plan in one
+message — never a per-feature question, and never dispatch anything silently:
+
+| Signal | Route |
+| --- | --- |
+| This session's context was already compacted, or heavy work remains | Continue in a **new session** (handoff + commit first) — never push on in a bloated session |
+| ≥ 2 features whose board `Depends on` is empty **and** whose blocking Open Questions are cleared | Offer parallel: one fresh session + git worktree per feature |
+| Features form a chain, or several touch the same tables | Sequential in dependency order; shared `schema.prisma` changes land first on the main branch, then the independent parts may parallelize |
+
+Rules the plan must state out loud:
+
+- A feature is always dispatched to a **fresh session**, never a subagent —
+  the superpowers pipeline inside it dispatches its own implementer/reviewer
+  subagents, and a subagent cannot dispatch further.
+- A feature with an unresolved blocking Open Question is not dispatchable —
+  resolving it with stakeholders is the plan's first step, not a footnote.
+- Merging a finished feature back = **integration check only**: run the full
+  test/lint suite after each merge and update the board via `/ugt-handoff` —
+  the branch was already reviewed twice inside its own pipeline; do not
+  re-review it.
+- The user confirms the plan **once**; how many parallel sessions to actually
+  open is theirs to trim (each one costs real tokens).
+
 ## Quick Rules
 
 | DO ✅ | DON'T ❌ |
@@ -162,6 +187,7 @@ Close out with, in this order:
 | Ask before touching an existing brief | Regenerate over it silently |
 | Write the brief in Thai | Mix in English prose (identifiers/table names stay as-is) |
 | Stop at the handoff | Start designing or coding the first feature |
+| One orchestration plan, confirmed once | Dispatch features silently, or interrogate the user per feature |
 
 ## Verification
 

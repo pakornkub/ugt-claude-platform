@@ -56,7 +56,8 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 - Follow that table when dispatching subagents or spawning teammates · switch
   preset with `/ugt-model-mode easy|default|god|auto` · main session model stays the
-  user's `/model`
+  user's `/model` · this table **wins over model advice inside superpowers
+  skills** (e.g. SDD's Model Selection section)
 
 ## Which skill, when
 
@@ -66,7 +67,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to the superpowers pipeline |
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
 | No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
-| Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; skip brainstorming |
+| Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path skips the **entire** superpowers pipeline (brainstorming/plans/TDD): the skill's SKILL.md is the plan, its verify script is the review |
 | Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |
@@ -86,6 +87,18 @@ The light version still writes a test first and still gets reviewed — those
 are the safety net against a broken change. Only brainstorming (exploring
 ambiguity) and the standalone plan step are skippable, and only when there is
 nothing ambiguous left to explore.
+
+### Layer contract — when work is split across sessions/subagents
+
+- A feature always goes to a **fresh session**, never a subagent — the
+  pipeline inside it dispatches its own implementer/reviewer subagents, and a
+  subagent cannot dispatch further.
+- Merging a finished feature branch = **integration check only** (run the full
+  test/lint suite, update the board via `/ugt-handoff`) — the branch was
+  already reviewed twice inside its pipeline; never re-review the code.
+- The pipeline's ledger (`.superpowers/sdd/`, git-ignored) is task-level
+  scratch for one plan · feature-level status lives only in `board.md` +
+  `handoff.md` (committed). Never copy content between the two.
 
 ## Where new knowledge goes (4 ทาง)
 

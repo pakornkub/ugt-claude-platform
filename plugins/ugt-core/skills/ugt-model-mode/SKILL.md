@@ -73,6 +73,17 @@ rewrites `model-mode.md` per task and never switches presets by itself — switc
 presets is always a human command. All three design invariants above still
 bind the judgment.
 
+## Precedence vs superpowers' own model advice
+
+`superpowers:subagent-driven-development` carries its own "Model Selection"
+section. When both apply to a dispatch, **this file wins** — it is the
+project's committed standard, and CLAUDE.md-level instructions take
+precedence over skill text. SDD's guidance still fills the gaps where this
+table is silent (e.g. turn-count-beats-token-price, fix-loop escalation).
+For heavy feature-building phases, `auto` is the preset whose logic matches
+SDD's per-task judgment best — suggest it when a project on `default` starts
+building features with real risk domains.
+
 ## Switching mode
 
 On "/ugt-model-mode <preset>" (or an equivalent phrase — "โหมดประหยัด" = `easy`,

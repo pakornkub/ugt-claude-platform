@@ -1,5 +1,27 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.23.0 (2026-08-20)
+
+Companion to ugt-core 2.5.0 (the 4-hour-setup field report). Three changes,
+all about *how the work runs*, none about what gets installed:
+
+- `ugt-nextjs-full-setup` gains **§2.5 Choose the run shape**: after the
+  interview batch, propose ONE way to run the install — straight through
+  (≤2 modules, fresh project) · chunked sessions of 1–3 modules with
+  `/ugt-handoff` between (3+ modules or careful merges) · per-module
+  subagents that follow the child SKILL.md and return only a summary +
+  verify result. Splits stay sequential (modules share `package.json` /
+  `schema.prisma`), §3 order unchanged. Codifies in writing that **the setup
+  path never enters the superpowers pipeline** — each child SKILL.md is the
+  plan, `verify.mjs` is the review.
+- `CLAUDE-block.md`: the infrastructure row now excludes the *entire*
+  pipeline (brainstorming/plans/TDD), not just brainstorming — TDD's broad
+  trigger could still fire mid-install. New **Layer contract** subsection
+  (feature = fresh session, never a subagent · merge = integration check
+  only, no re-review · SDD ledger vs board/handoff are separate territories).
+  The model-mode bullet now states the table wins over model advice inside
+  superpowers skills.
+
 ## 4.22.0 (2026-08-20)
 
 `ugt-nextjs-design-setup`: the scale question. Field report: an existing

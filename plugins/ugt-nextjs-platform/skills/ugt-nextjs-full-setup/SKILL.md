@@ -92,6 +92,27 @@ stored procedures needed · Design: prototype/brand to match?, primary color,
 shell sidebar/topbar, dark mode, ภาษา UI · Auth: Keycloak client exists yet,
 AD details, first admin · CI: Sentry?, deploy target).
 
+### 2.5 Choose the run shape — one proposal, confirmed once
+
+Every answer is now on file, so nothing below re-asks the user anything.
+Judge the load and propose ONE way to run the install:
+
+| Signal | Proposal |
+| --- | --- |
+| ≤ 2 modules, fresh project | Run straight through in this session (the default) |
+| 3+ modules, or an existing project needing careful merges | Split into chunks of 1–3 modules; end each chunk with `/ugt-handoff` (answers + progress land in `handoff.md`) and continue in a fresh session — §3 order unchanged |
+| Full install but the user wants a single session | Dispatch each module to a subagent: the dispatch prompt = the child skill's SKILL.md path + only the interview answers that module needs; the subagent follows the skill and returns a summary + its `verify.mjs` result — never file dumps |
+
+Either split keeps the §3 order: chunks/subagents run **sequentially**, never
+two modules at once — they edit the same `package.json` / `schema.prisma` /
+compose files.
+
+**The setup path never enters the superpowers pipeline** — no brainstorming,
+no plan step, no TDD skill, regardless of how aggressive their triggers are:
+each child SKILL.md already is the plan, and its `verify.mjs` + checklist
+already are the review. This binds subagents too: an installer subagent
+dispatches nothing further.
+
 ### 3. Install in order (never reorder)
 
 ```
@@ -220,6 +241,7 @@ How:
 | --- | --- |
 | Inspect existing setup before asking | Overwrite existing Prisma/auth/Jenkinsfile silently |
 | One combined interview batch (incl. child-skill questions) | Ask one-by-one / let child skills re-ask |
+| 3+ modules → propose chunked sessions or per-module subagents (§2.5) | Grind through one long session until context compaction degrades the work |
 | Always Database → Quality → Auth → CI | Install auth before a DB exists / CI before test scripts exist |
 | Not Next.js → say it plainly | Adapt the assets to another stack yourself |
 | Summarize files + admin requests at the end | Finish silently with no checklist |

@@ -1,5 +1,26 @@
 # Changelog — ugt-core
 
+## 2.5.0 (2026-08-20)
+
+Field report: a full-setup run took 4 hours in one session and stalled around
+auth — the platform had no written rule for *when to split work* or *how its
+orchestration layers relate to superpowers*. Two additions:
+
+- `ugt-requirements` §Handoff gains **Orchestration decision**: after the
+  brief + board are committed, judge three signals (context already
+  compacted → new session · ≥2 independent features with cleared Open
+  Questions → offer parallel worktree sessions · chained/shared-schema
+  features → sequential, schema-first on main) and propose ONE build plan the
+  user confirms once. The plan must state the layer rules out loud: a feature
+  goes to a fresh session (never a subagent — the pipeline inside dispatches
+  its own), a blocked feature is not dispatchable, and merging back is an
+  integration check only (no re-review).
+- `ugt-model-mode` gains **Precedence vs superpowers' own model advice**:
+  `model-mode.md` wins over SDD's Model Selection section when both apply
+  (committed project standard > skill text); SDD still fills the gaps where
+  the table is silent. `auto` is named the best-fit preset for heavy feature
+  phases.
+
 ## 2.4.0 (2026-08-16)
 
 `ugt-context` (scan path) and `ugt-requirements` (reading many source docs) fit
