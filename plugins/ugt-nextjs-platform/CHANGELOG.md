@@ -1,5 +1,32 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.22.0 (2026-08-20)
+
+`ugt-nextjs-design-setup`: the scale question. Field report: an existing
+project answered "คงของเดิมไว้ แต่ใช้ shadcn" and got a two-scale UI — legacy
+48px inputs next to kit-default 28px controls in the same form. Density/sizes
+were "deliberately not asked" (an org iron rule meant for fresh projects), and
+the scan never measured the old UI's control metrics, so nobody chose which
+scale wins. Four changes:
+
+- **§Scale scan** in `references/interview.md`: measure the existing UI from
+  real code across six dimensions — control size (height/padding/icon), shape
+  (radius/border/shadow/focus ring), typography (control/label/heading sizes),
+  density (form gap, card padding, table rows), form conventions
+  (label/required/error placement), colors (already in the main checklist) —
+  and present an old-vs-kit comparison table before asking.
+- **ข้อ 9** (ชุด 3): when the measured scale differs from the kit, ask which
+  scale wins — ยึดของเดิม (rebase kit, recommended) / ยึด kit (migrate old
+  forms) / แยกโซน (never mix in one page) — with real numbers in the question
+  and the cost of each path in the option descriptions. The un-chosen middle
+  is explicitly named as the outcome that must never happen.
+- **§Scale bridge**: how to rebase correctly — every dimension has exactly one
+  source file (`ui/input|button|select|textarea`, `--radius`, `ui/table`,
+  `ui/field`); per-page overrides are banned as the origin of round-two mess.
+- `DESIGN.template.md` §4: the mira density line became a fillable
+  `__CONTROL_SCALE__` agreement plus the scale rule (same-form controls equal
+  height; sizes change only at `components/ui/*`).
+
 ## 4.21.0 (2026-08-20)
 
 `ugt-nextjs-auth-setup`: SSO first-login hardening. Field report: a

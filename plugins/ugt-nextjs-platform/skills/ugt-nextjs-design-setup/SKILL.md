@@ -100,6 +100,12 @@ Every answer, including accepted defaults, is written into DESIGN.md.
 code actually does**, then interview only the gaps and conflicts. Conflicts
 become the Deviations table (§9 of DESIGN.md): migrate now or grandfather,
 each with a recorded decision — never silently reformat the project.
+**Scale is its own decision, not a Deviation**: run the §Scale-scan table
+(control height / padding / font / radius / density / form conventions) and,
+when the measured scale differs from the kit, ask ข้อ 9 — ยึดของเดิม (rebase
+the kit per §Scale bridge) / ยึด kit (migrate old forms) / แยกโซน. The
+un-chosen middle — kit-default controls sprinkled into legacy screens at a
+different size — is the field bug this step exists to prevent.
 
 ### Step 3 — Generate and install
 

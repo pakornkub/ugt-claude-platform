@@ -127,8 +127,14 @@
 
 ## 4. Components
 
-- Density ตระกูล mira: control `h-7` · ตาราง `text-xs` — ทุก breakpoint
-  เท่ากัน ไม่ bump บนมือถือ
+- **สเกล control**: __CONTROL_SCALE__
+  (ค่า kit = mira: control `h-7` 28px · ตาราง `text-xs` — โปรเจคใหม่ใช้ค่านี้;
+  โปรเจคเดิมที่ตอบข้อ 9 = "ยึดของเดิม" บันทึกค่าที่วัดจริงแทน เช่น
+  "control 48px `h-12` · `text-base` · radius 8px — อ้างมติในส่วน 10" และ rebase
+  `components/ui/*` ตาม §Scale bridge ของ skill) — ทุก breakpoint เท่ากัน
+  ไม่ bump บนมือถือ
+- **กฎสเกล**: control ทุกตัวในฟอร์มเดียวกันสูงเท่ากันเสมอ · เปลี่ยนขนาดได้ที่
+  `components/ui/*` ต้นทางเท่านั้น — ห้าม override ขนาดรายหน้า/รายจุด
 - เลือก control: ≤5 = RadioGroup · 6–15 = Select · >15/ค้นหา = Combobox ·
   วันที่ = `ui/date-picker` เสมอ (ยกเว้น filter ปี/เดือน = Select)
 - Form: label บนช่อง · required = `*` แดง · error ใต้ช่องผ่าน `ui/field`
