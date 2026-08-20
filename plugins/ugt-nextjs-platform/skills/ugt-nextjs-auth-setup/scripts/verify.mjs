@@ -97,6 +97,30 @@ check('Ongoing admin pages exist (users / roles / audit-logs)', () => {
     : { ok: true };
 });
 
+check('SSO auth errors land on the login page, not /api/auth/error', () => {
+  if (!has('lib/auth.ts')) return { ok: true };
+  const body = read('lib/auth.ts');
+  if (!/genericOAuth/.test(body)) return { ok: true }; // no SSO in this project
+  return /onAPIError/.test(body) && /errorURL/.test(body)
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: 'lib/auth.ts has SSO but no onAPIError.errorURL — Better Auth redirects failures to /api/auth/error, computed WITHOUT the basePath, which 404s behind a shared-domain proxy and hides the error code',
+      };
+});
+
+check('SSO resolves existing users by ldapUsername before create (email drift)', () => {
+  if (!has('lib/auth.ts')) return { ok: true };
+  const body = read('lib/auth.ts');
+  if (!/genericOAuth/.test(body)) return { ok: true };
+  return /where:\s*\{\s*ldapUsername/.test(body)
+    ? { ok: true }
+    : {
+        ok: 'warn',
+        msg: "mapProfileToUser doesn't look up the existing row by ldapUsername — when the AD email drifts from the stored email, SSO dies with unable_to_create_user (auth-flows.md §SSO)",
+      };
+});
+
 check('Bootstrap redirects into a page that actually exists', () => {
   for (const f of ['lib/actions/admin-setup.ts', 'app/(admin-setup)/admin/setup/page.tsx']) {
     if (!has(f)) continue;

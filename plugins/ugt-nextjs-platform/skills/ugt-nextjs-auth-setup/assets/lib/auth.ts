@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 4224aef9c59e
+// kit: ugt-nextjs-platform 4.21.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: 55a36af4463c
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -27,6 +27,21 @@ export const auth = betterAuth({
     cookiePrefix,
   },
   trustedOrigins: (env.BETTER_AUTH_TRUSTED_ORIGINS ?? '').split(',').filter(Boolean),
+  // Auth errors land on the login page (which exists in every deployment)
+  // instead of Better Auth's default /api/auth/error. That default is computed
+  // WITHOUT the Next.js basePath — the same trap as redirectURI and the mailed
+  // reset link — so under a shared domain it 404s at the proxy and the user
+  // sees a blank nginx page instead of the error code. login-form.tsx maps
+  // ?error=<code> to a Thai message.
+  onAPIError: {
+    errorURL: `${env.NEXT_PUBLIC_BASE_PATH}/login`,
+    onError: (error) => {
+      // The redirect carries only the error code; the real cause (Prisma
+      // constraint, missing field, hook throw) is only visible here — this log
+      // is the first thing to read when SSO fails (docker logs <container>).
+      console.error('[auth] API error:', error);
+    },
+  },
   database: prismaAdapter(prisma, {
     provider: 'sqlserver', // adjust to your DB provider (matches ugt-nextjs-database-setup)
   }),
@@ -109,6 +124,14 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ['keycloak'],
+      // Rows created by LDAP upsert / createLocalUserAction have
+      // emailVerified: false, and since better-auth 1.6.11 implicit linking
+      // into an unverified local row is blocked by default (nOAuth fix) — the
+      // first SSO login of an existing LDAP/local user would fail with
+      // account_not_linked. Relaxing it is safe HERE ONLY because
+      // self-registration is closed (มติ 2026-08-11): every local row is
+      // admin- or directory-created, never attacker-controlled.
+      requireLocalEmailVerified: false,
     },
   },
   // [METHOD: SSO] — Keycloak via genericOAuth + keycloak() helper.
@@ -131,9 +154,30 @@ export const auth = betterAuth({
                   redirectURI: `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH}/api/auth/oauth2/callback/keycloak`,
                   overrideUserInfo: true, // refresh user fields on every SSO login
                 }),
-                mapProfileToUser: (profile: Record<string, unknown>) => {
+                mapProfileToUser: async (profile: Record<string, unknown>) => {
                   const loginName = profile.preferred_username as string | undefined;
                   if (!loginName) return {};
+
+                  // Identity is the AD username, not the email. The AD email and the
+                  // stored email can drift apart (e.g. user@company.com in AD vs
+                  // user@company.co.th in an LDAP-created row) — letting the AD email
+                  // through makes Better Auth "create" instead of "link", and the
+                  // create dies on the ldapUsername unique constraint
+                  // (unable_to_create_user). Resolve the existing row first and let
+                  // ITS email win (see references/auth-flows.md §SSO).
+                  const existing = await prisma.user
+                    .findUnique({ where: { ldapUsername: loginName }, select: { email: true } })
+                    .catch(() => null);
+                  const email = existing?.email ?? (profile.email as string | undefined);
+                  if (!email) {
+                    // No stored row AND Keycloak sent no email (client missing the
+                    // "email" scope, or the AD account has no mail attribute) —
+                    // creation would fail anyway; fail with a findable log message
+                    // instead of a bare unable_to_create_user.
+                    throw new Error(
+                      `SSO profile for "${loginName}" has no email — check the Keycloak client's "email" scope and the AD account's mail attribute`,
+                    );
+                  }
 
                   // EXTENSION POINT: enrich the user from your own directory / HR source here
                   // (e.g. look up employee master data by loginName and return extra custom
@@ -141,7 +185,7 @@ export const auth = betterAuth({
                   // returned from mapProfileToUser — only standard fields (name, email, image)
                   // propagate via overrideUserInfo. Persist custom fields in the
                   // databaseHooks.session.create.after hook below instead.
-                  return { ldapUsername: loginName, authType: 'sso' };
+                  return { email, ldapUsername: loginName, authType: 'sso' };
                 },
               },
             ],

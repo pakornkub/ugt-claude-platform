@@ -91,18 +91,22 @@ Historical failure modes this prevents:
 existing user by the email `mapProfileToUser` returns — but the AD email and
 the HR/local email can drift apart (e.g. a company domain change), and then
 Better Auth "creates" instead of "links" and dies on a unique constraint
-(`unable_to_create_user`). In `mapProfileToUser`, look up the existing row
-first and let **its** email win:
+(`unable_to_create_user`). Since 4.21.0 the shipped `lib/auth.ts` already does
+this — `mapProfileToUser` looks up the existing row first and lets **its**
+email win (keep the pattern intact when editing the file):
 
 ```ts
 const existing = await prisma.user.findUnique({ where: { ldapUsername } });
 return { email: existing?.email ?? profile.email, ldapUsername, ... };
 ```
 
-Pair it with `accountLinking.requireLocalEmailVerified: false` — users created
-by upsert/sync have `emailVerified: false`, and Better Auth's default silently
-blocks linking into unverified users even for trusted providers (the failure
-just moves from `unable_to_create_user` to `account_not_linked`).
+It pairs with `accountLinking.requireLocalEmailVerified: false` (also shipped
+since 4.21.0) — users created by upsert/sync have `emailVerified: false`, and
+Better Auth ≥1.6.11 silently blocks linking into unverified users even for
+trusted providers (the failure just moves from `unable_to_create_user` to
+`account_not_linked`). Relaxing it is safe in this kit only because
+self-registration is closed (มติ 2026-08-11) — no attacker can pre-create an
+unverified row.
 
 **Conditional plugin registration**: the `keycloak()` helper calls `.replace()`
 on the issuer string internally. During `SKIP_ENV_VALIDATION=1` builds the env
@@ -262,6 +266,8 @@ never `auth.api.getSession()` (needs DB, not Edge-safe).
 | SSO shows "Invalid OAuth configuration" | Node can't verify internal CA cert on Keycloak host | Trust the CA in the runtime (`NODE_EXTRA_CA_CERTS`); last resort `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container |
 | authClient hits `…/__BASE_PATH__/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
 | `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
-| SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins |
-| SSO fails `account_not_linked` despite `trustedProviders` | Local user has `emailVerified: false` (created by sync/upsert) | `accountLinking.requireLocalEmailVerified: false` |
+| SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email (e.g. `@company.com` in AD vs `@company.co.th` in the row) → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins — **shipped in `lib/auth.ts` since 4.21.0** |
+| SSO fails `unable_to_create_user` on a genuinely new user | Keycloak profile has no email (client missing the `email` scope, or the AD account has no mail attribute) — or the DB write itself failed | `mapProfileToUser` throws a findable message for the no-email case (4.21.0); for the rest, the real cause is in `onAPIError.onError`'s log — read `docker logs <container>` first, never guess |
+| SSO fails `account_not_linked` despite `trustedProviders` | Local user has `emailVerified: false` (created by sync/upsert) — better-auth ≥1.6.11 blocks implicit linking into unverified rows (nOAuth fix) | `accountLinking.requireLocalEmailVerified: false` — safe here only because self-registration is closed (มติ 2026-08-11); shipped in `lib/auth.ts` since 4.21.0 |
+| Auth error shows a bare proxy 404 (`/api/auth/error` Not Found) instead of any message | Better Auth's default error page URL is computed WITHOUT the Next.js basePath — same trap as redirectURI and the reset link | `onAPIError.errorURL: `${NEXT_PUBLIC_BASE_PATH}/login`` — the login page maps `?error=<code>` to a Thai toast; shipped in `lib/auth.ts` since 4.21.0 |
 | LDAP always "Invalid username or password" on prod, works in dev | An `ldaps://`-only guard throws before the bind attempt | Allow plain `ldap://` for private-network AD; let the bind itself decide |

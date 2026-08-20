@@ -233,7 +233,11 @@ common install mistake.
 ### 5.5 Wire the login page + guards
 
 1. Create `app/(auth)/login/page.tsx` rendering
-   `<LoginForm sessionExpired={reason === 'session_expired'} />`
+   `<LoginForm sessionExpired={reason === 'session_expired'} ssoError={error} />`
+   — both `reason` and `error` come from `searchParams`; `error` is the code
+   Better Auth appends when `onAPIError.errorURL` (lib/auth.ts) redirects a
+   failed flow back here (e.g. `unable_to_create_user`), and the form maps it
+   to a Thai message. Without it a failed SSO login shows the user nothing.
    [Local + mail] also create `app/(auth)/reset-password/page.tsx` rendering
    `<ResetPasswordForm token={(await searchParams).token ?? ''} />`. **This route
    must stay public** — `proxy.ts` already lists it in `AUTH_ONLY_PATHS`

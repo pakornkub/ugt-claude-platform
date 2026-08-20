@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 6c5bc105605f
+// kit: ugt-nextjs-platform 4.21.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 8ef92cd89975
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -188,10 +188,21 @@ function LocalSection() {
 
 // ─── Login Form (exported) ───────────────────────────────────────────────────
 
+// Better Auth redirects failed auth flows here with ?error=<code>
+// (onAPIError.errorURL in lib/auth.ts). The full cause is in the server log —
+// these messages just tell the user it is not their fault and who to call.
+const SSO_ERROR_MESSAGES: Record<string, string> = {
+  unable_to_create_user:
+    'เข้าสู่ระบบสำเร็จ แต่สร้างบัญชีผู้ใช้ไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (unable_to_create_user)',
+  account_not_linked:
+    'บัญชีนี้ยังเชื่อมกับระบบไม่ได้ กรุณาแจ้งผู้ดูแลระบบ (account_not_linked)',
+};
+
 export function LoginForm({
   className,
   sessionExpired = false,
-}: Readonly<{ className?: string; sessionExpired?: boolean }>) {
+  ssoError,
+}: Readonly<{ className?: string; sessionExpired?: boolean; ssoError?: string }>) {
   // Direct process.env read is intentional here (same reason as lib/auth-client.ts):
   // t3-env createEnv() returns '' for NEXT_PUBLIC_* in the Turbopack client bundle.
   // ⚠️ PLACEHOLDER: replace '__PROJECT_NAME__' in the fallback below with the real app name (see SKILL.md §7)
@@ -200,8 +211,12 @@ export function LoginForm({
   useEffect(() => {
     if (sessionExpired) {
       toast.info('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
+    } else if (ssoError) {
+      toast.error(
+        SSO_ERROR_MESSAGES[ssoError] ?? `เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (${ssoError})`,
+      );
     }
-    // Only run once on mount — sessionExpired is derived from server-side searchParams
+    // Only run once on mount — both props are derived from server-side searchParams
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

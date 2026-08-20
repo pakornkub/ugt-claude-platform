@@ -1,5 +1,33 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.21.0 (2026-08-20)
+
+`ugt-nextjs-auth-setup`: SSO first-login hardening. Field report: a
+production SSO login died with `unable_to_create_user`, and the error page
+itself 404'd at the proxy — the user saw a blank nginx page. Root cause was
+email drift (AD email domain differs from the stored row's email, e.g.
+`@company.com` vs `@company.co.th`), a case `auth-flows.md` already documented
+but the shipped `lib/auth.ts` never implemented. Four changes:
+
+- `lib/auth.ts` `mapProfileToUser` now resolves the existing row by
+  `ldapUsername` first and lets its email win (prevents the
+  create-instead-of-link unique-constraint death), and throws a findable
+  message when Keycloak sends no email at all.
+- `lib/auth.ts` adds `accountLinking.requireLocalEmailVerified: false` —
+  better-auth ≥1.6.11 blocks implicit linking into `emailVerified: false`
+  rows (nOAuth fix), which every LDAP-upsert/admin-created row is. Safe here
+  because self-registration is closed (มติ 2026-08-11).
+- `lib/auth.ts` adds `onAPIError.errorURL` = `${basePath}/login` (the default
+  `/api/auth/error` is computed WITHOUT the basePath — same trap as
+  redirectURI and the reset link — and 404s behind a shared-domain proxy)
+  plus an `onError` log so the real cause lands in `docker logs`.
+  `login-form.tsx` maps `?error=<code>` to Thai messages; SKILL.md §5.5 wires
+  the new `ssoError` prop.
+- `scripts/verify.mjs`: new FAIL check (SSO without `onAPIError.errorURL`)
+  and WARN check (no `ldapUsername` lookup in `mapProfileToUser`);
+  `auth-flows.md` troubleshooting table gains the full
+  `unable_to_create_user` checklist.
+
 ## 4.20.0 (2026-08-19)
 
 `ugt-nextjs-auth-setup` no longer ships a second sidebar into projects that
