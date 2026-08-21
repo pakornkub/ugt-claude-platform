@@ -595,7 +595,9 @@
         <h3>มีโปรเจคอยู่แล้ว อยากให้เข้ามาตรฐาน</h3>
         <div class="mini-code"><button class="copy-mini" type="button" data-copy="ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย" aria-label="คัดลอกประโยค">⧉</button>ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย</div>
         <p>Claude จะ<strong>ตรวจของเดิมก่อนเสมอ</strong> (มีอะไรอยู่แล้วจะถาม ไม่ทับเงียบ ๆ)
-        → ถามคำถามชุดเดียว → ไล่ติดตั้งตามลำดับ → รันสคริปต์ตรวจจนเขียวทุกตัว →
+        → ถามคำถามชุดเดียว → <strong>เสนอวิธีรันให้เคาะหนึ่งครั้ง</strong>
+        (งานเล็กรันรวดเดียว · งานหลายเรื่องแบ่งเป็นช่วง ๆ คั่นด้วย
+        <span class="inline-code">/ugt-handoff</span>) → ไล่ติดตั้งตามลำดับ → รันสคริปต์ตรวจจนเขียวทุกตัว →
         ได้ <strong>ไฟล์ <code>docs/admin-handoff.md</code></strong> ส่งต่อทีม admin/DevOps ได้ทันที — ขั้นตอนชัดเจน ชื่อที่ต้องตั้งเป๊ะ ๆ พร้อมช่องกรอกค่าตอบกลับ</p>
         <div class="flow" aria-label="ลำดับการติดตั้ง">
           <span>Database</span><em>→</em><span>Quality</span><em>→</em><span>Design</span><em>→</em><span>Auth</span><em>→</em><span>CI</span>
@@ -612,7 +614,8 @@
           <li>ติดตั้งมาตรฐานด้วย <span class="inline-code">/ugt-nextjs-full-setup</span>
           (ตอบคำถามโดยใช้ข้อมูลจาก brief) — ตัวช่วยดีไซน์จะสร้างโปรเจค Next.js ให้เองถ้ายังไม่มี</li>
           <li>วนสร้างทีละ feature: "สร้างหน้า X ตาม requirement ใน docs/Y" —
-          ระบบคุมคุณภาพประกบเองอัตโนมัติ</li>
+          ระบบคุมคุณภาพประกบเองอัตโนมัติ (หลัง brief เสร็จ Claude เสนอแผน build
+          ให้เคาะหนึ่งครั้ง: feature ละ session ใหม่ · งานอิสระแยกทำขนานได้)</li>
           <li>จบวัน: <span class="inline-code">/ugt-handoff</span> แล้ว commit —
           พรุ่งนี้ (หรือเพื่อน) เปิดมาอ่านต่อได้ทันที</li>
         </ol>
