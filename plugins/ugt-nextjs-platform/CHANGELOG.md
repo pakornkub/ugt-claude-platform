@@ -1,6 +1,45 @@
 # Changelog — ugt-nextjs-platform
 
-## 4.23.0 (2026-08-20)
+## 4.24.0 (2026-08-21)
+
+`ugt-nextjs-auth-setup`: the three admin pages finally follow the design
+agreement they ship next to — DESIGN.md §4 says "DataTable only for tabular
+data", yet the assets still rendered raw shadcn `Table` (extracted from an HRMS
+snapshot older than HRMS's own DataTable upgrade). The preview (§13) had been
+drawing DataTables for months; the assets now match it instead of the other way
+around.
+
+- `/admin/users` + `/admin/roles` → kit `DataTable` **client mode** (bounded
+  master data fetched whole). New `components/users-table.tsx` holds the
+  column defs (client code); the password column is `[METHOD: LOCAL]`.
+  `roles-manager.tsx` drops the per-row Dialog mounts for one controlled edit
+  dialog. The users page loses its `take: 200` cap — the table paginates now.
+- `/admin/audit-logs` → **server mode**, the full contract: the page parses
+  searchParams (`parsePageParams`/`parsePageSize` fallback 20 per the
+  watch-table มติ, `parseTableQuery` allowlist `sortable: ['createdAt']`),
+  queries Prisma directly — no separate API route — and redirects when `?page`
+  runs past the end. New `components/audit-logs-table.tsx` renders toolbar
+  filters (ชื่อผู้ใช้ → ช่วงวันที่ → action, กว้าง→แคบ มติ 2026-08-11) that push
+  `q`/`from`/`to`/`action` to the URL; DataTable pushes `page`/`pageSize`/
+  `sort`/`dir` itself. Date bounds are computed at `+07:00` (createdAt is an
+  instant; the container runs UTC), the date→param round-trip reads local
+  parts (never `toISOString` — the UTC+ off-by-one-day bug HRMS already paid
+  for), and the action Select's options come from `distinct` values in the
+  log, not a hardcoded list. `detail` JSON opens in a dialog, not only a
+  title tooltip (mobile has no hover).
+- SKILL.md §4 gains the second prerequisite: the org UI kit
+  (`ugt-nextjs-design-setup`) must be installed before auth — full-setup's
+  design → auth order already guarantees it; a standalone auth install into a
+  kit-less project either runs design-setup first or knowingly downgrades the
+  admin pages to plain `Table` as a recorded DESIGN.md deviation. §5.2 lists
+  the two new assets; §8 gains the server-side-filter check.
+- `docs/design-preview.html` §13 corrected to the real component behavior:
+  audit-logs toolbar now shows the page-level filters (the preview drew only a
+  search box — drifting from reality is the defect class 4.19.0 documented),
+  its per-column filter icons are gone (server mode filters live in the
+  toolbar), pagination reads 20 แถว/หน้า, and the client-mode tables show
+  filter funnels instead of sort arrows (client mode has no sort toggle in the
+  shipped component).
 
 Companion to ugt-core 2.5.0 (the 4-hour-setup field report). Three changes,
 all about *how the work runs*, none about what gets installed:

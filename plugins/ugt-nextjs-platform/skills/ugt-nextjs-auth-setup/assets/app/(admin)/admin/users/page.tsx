@@ -1,20 +1,18 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: 28f9b204b084
-// app/(admin)/admin/users/page.tsx — list users, assign role inline.
-// ponytail: no pagination — first 200 users, ORDER BY name. Add pagination
-// when a real project has more users than that; not worth the complexity yet.
+// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: 594cf31ad19f
+// app/(admin)/admin/users/page.tsx — server guard + fetch; the table lives in UsersTable.
+// DataTable โหมด client (DESIGN.md §4): master data ดึงทั้งชุดแล้ว sort/filter/paginate
+// ในหน่วยความจำ — ponytail: ผู้ใช้หลักพันคนขึ้นไปค่อยย้ายเป็นโหมด server แบบ audit-logs
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
-import { UserRoleSelect } from '@/components/user-role-select';
-// [METHOD: LOCAL] — ลบ import + ปุ่ม/คอลัมน์ด้านล่างเมื่อไม่ได้เปิด local login
+import { UsersTable } from '@/components/users-table';
+// [METHOD: LOCAL] — ลบ import + ปุ่มด้านล่างเมื่อไม่ได้เปิด local login
 // (บัญชี SSO/AD เกิดเองตอน login ครั้งแรก ไม่มีใครต้องเพิ่ม — มติ 2026-08-11)
-import { CreateUserDialog, SetPasswordDialog } from '@/components/admin-user-actions';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { CreateUserDialog } from '@/components/admin-user-actions';
 
 export default async function AdminUsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -29,7 +27,6 @@ export default async function AdminUsersPage() {
 
   const [users, roles] = await Promise.all([
     prisma.user.findMany({
-      take: 200,
       orderBy: { name: 'asc' },
       select: { id: true, name: true, email: true, authType: true, roleId: true },
     }),
@@ -42,44 +39,13 @@ export default async function AdminUsersPage() {
         <h1 className="text-2xl font-semibold">ผู้ใช้งาน</h1>
         {canCreate && <CreateUserDialog roles={roles} />}
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ชื่อ</TableHead>
-            <TableHead>อีเมล</TableHead>
-            <TableHead>วิธีเข้าสู่ระบบ</TableHead>
-            <TableHead>บทบาท</TableHead>
-            {canResetPassword && <TableHead>รหัสผ่าน</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>
-                <Badge variant="outline">{user.authType}</Badge>
-              </TableCell>
-              <TableCell>
-                <UserRoleSelect
-                  userId={user.id}
-                  currentRoleId={user.roleId}
-                  roles={roles}
-                  disabled={!canUpdate || user.id === session.user.id}
-                />
-              </TableCell>
-              {canResetPassword && (
-                <TableCell>
-                  {/* บัญชี SSO/LDAP ตั้งรหัสผ่านที่ directory — ปุ่มนี้ทำอะไรให้ไม่ได้ */}
-                  {user.authType === 'local' && (
-                    <SetPasswordDialog userId={user.id} userName={user.name} />
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <UsersTable
+        users={users}
+        roles={roles}
+        currentUserId={session.user.id}
+        canUpdate={canUpdate}
+        canResetPassword={canResetPassword}
+      />
     </div>
   );
 }

@@ -168,64 +168,47 @@ detail: JSON.stringify({ password: 'abc123' });
 acceptable for everyone holding `audit-logs:read` to see this field?" — log
 access is usually broader than source-data access.
 
-## Viewer API
+## Viewer (server component — no API route)
+
+The shipped `/admin/audit-logs` is a **server component in DataTable server
+mode** (`assets/app/(admin)/admin/audit-logs/page.tsx` +
+`components/audit-logs-table.tsx`): the page parses `searchParams`
+(`q`/`from`/`to`/`action` from the toolbar filters, `page`/`pageSize`/`sort`
+pushed by the DataTable itself), queries Prisma directly, and re-renders. No
+`app/api/audit-logs/route.ts` exists — only add one if something *other than
+the page* needs the data (an external dashboard, an export job). The rules
+below hold for either implementation:
+
+- **Guard first, always in the same order**: session → `AUDIT_LOGS_READ` →
+  query. In the page that's two `redirect()`s; in an API route it's
+  401/403 responses.
+- **Username search resolves to userIds first** — never `LIKE` on `userId`:
 
 ```ts
-// app/api/audit-logs/route.ts
-export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const perms = await getUserPermissions(session.user.id);
-  if (!hasPermission(perms, PERMISSIONS.AUDIT_LOGS_READ)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  const page = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10));
-  const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit') ?? '20', 10)));
-
-  // Username search: resolve to userIds first (never LIKE on userId)
-  let userIdFilter: string[] | undefined;
-  if (username) {
-    const matching = await prisma.user.findMany({
-      where: { OR: [{ name: { contains: username } }, { ldapUsername: { contains: username } }] },
-      select: { id: true },
-    });
-    // Sentinel: when nobody matches, the result must be forced empty
-    userIdFilter = matching.length > 0 ? matching.map((u) => u.id) : ['__no_match__'];
-  }
-
-  const [logs, totalItems] = await Promise.all([
-    prisma.activityLog.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: limit }),
-    prisma.activityLog.count({ where }),
-  ]);
-
-  // Enrich user names in one batch — no N+1
-  const uniqueUserIds = [...new Set(logs.map((l) => l.userId))];
-  const users = await prisma.user.findMany({
-    where: { id: { in: uniqueUserIds } },
-    select: { id: true, name: true, ldapUsername: true },
+if (q) {
+  const matched = await prisma.user.findMany({
+    where: { OR: [{ name: { contains: q } }, { email: { contains: q } }] },
+    select: { id: true },
   });
-  const userMap = new Map(users.map((u) => [u.id, u]));
-
-  return NextResponse.json({
-    success: true,
-    data: logs.map((l) => ({
-      ...l,
-      detail: l.detail ? JSON.parse(l.detail) : null,
-      userName: userMap.get(l.userId)?.ldapUsername ?? userMap.get(l.userId)?.name ?? l.userId,
-    })),
-    pagination: { page, limit, totalPages: Math.ceil(totalItems / limit), totalItems },
-  });
+  where.userId = { in: matched.map((u) => u.id) };
 }
 ```
 
-**Why the `'__no_match__'` sentinel** — when a username search matches nobody
-and you pass `userId: { in: [] }`, some query paths treat that as "no filter"
-and return every row. A non-existent id forces a correctly empty result.
+  Prisma compiles `in: []` to an always-false predicate, so "nobody matched"
+  correctly yields zero rows. That guarantee is **Prisma-only**: in raw SQL /
+  `EXEC usp_*` paths an empty IN list tends to get dropped ("no filter" → every
+  row), so those paths still need the `'__no_match__'` sentinel id.
+- **Enrich user names in one batch** (`id: { in: uniqueUserIds }` + a `Map`) —
+  no N+1 query per row.
+- **Clamp paging input**: `parsePageSize` only accepts values from
+  `ROWS_PER_PAGE_OPTIONS` (กันผู้ใช้แก้ URL ขอ `pageSize=100000`), and
+  `parsePageParams` floors bad pages to 1 — both from the design kit's
+  `lib/pagination.ts`.
+- **Date-range bounds are Bangkok-time** (`T00:00:00+07:00`, upper bound = next
+  day exclusive) — `createdAt` is an instant and the container runs UTC.
 
 Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'`
-(guards both the viewer page and the API route — see `rbac.md`).
+(guards the viewer page and any API route a project adds — see `rbac.md`).
 
 ## Retention
 
@@ -239,14 +222,14 @@ DELETE FROM ActivityLogs WHERE CreatedAt < DATEADD(day, -180, GETDATE());
 
 - **Never delete rows from application code**
 
-### The viewer API must also enforce the cutoff in its WHERE clause
+### The viewer query must also enforce the cutoff in its WHERE clause
 
 The cleanup job runs on a schedule — between runs, stale rows still exist. The
-API must filter at query time too, or data declared "kept 180 days" stays
-readable longer:
+page (or API) must filter at query time too, or data declared "kept 180 days"
+stays readable longer:
 
 ```ts
-// ✅ the API enforces the 180-day floor regardless of the job schedule
+// ✅ the query enforces the 180-day floor regardless of the job schedule
 const retentionCutoff = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 const where = {
   createdAt: {
@@ -265,6 +248,6 @@ const where = { createdAt: { gte: fromDate ? new Date(fromDate) : undefined } };
 - [ ] Critical paths (login/logout) use `.catch(() => {})`, not a bare `await`
 - [ ] Every action comes from a constant in `lib/audit-actions.ts` — no raw strings
 - [ ] `detail` is structured JSON · no passwords/secrets/tokens · no over-broad PII
-- [ ] Viewer API: guarded by `audit-logs:read` · sentinel on empty username search · batch name enrichment · retention cutoff enforced
+- [ ] Viewer query: guarded by `audit-logs:read` · username search resolves to userIds (sentinel only needed on raw-SQL paths) · batch name enrichment · pageSize clamped · retention cutoff enforced
 - [ ] No code UPDATEs or DELETEs `ActivityLogs`
 - [ ] A scheduled cleanup job exists and the retention window is documented in the project

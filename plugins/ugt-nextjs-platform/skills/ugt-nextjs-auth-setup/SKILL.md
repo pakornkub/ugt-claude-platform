@@ -156,6 +156,20 @@ Ask all of these **in a single message** before doing anything:
 `lib/prisma.ts` singleton + working migrate), because Better Auth stores
 user/session/account in Prisma. If it isn't, stop and do the database first.
 
+**The org UI kit must be installed too** — the three admin pages render with
+the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
+`lib/table-query.ts` and `lib/format.ts`, all installed by
+`ugt-nextjs-design-setup` (the full-setup order design → auth guarantees this).
+Table modes follow DESIGN.md §4 and are fixed per table, not asked in the
+interview: `/admin/users` and `/admin/roles` are **client mode** (bounded
+master data fetched whole), `/admin/audit-logs` is **server mode** (unbounded —
+sort + filter + paginate all through URL state; the page parses searchParams
+and queries Prisma directly, no separate API route). If auth is being installed
+standalone into a project that will not take the design kit: run design-setup
+first (preferred), or downgrade the three admin pages to plain shadcn `Table` —
+say that out loud and record it as a DESIGN.md deviation, because "DataTable
+only for tabular data" is the org default.
+
 ## 5. Setup steps
 
 ### 5.1 Dependencies
@@ -192,6 +206,8 @@ exceptions:
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
 | `assets/components/admin-user-actions.tsx` | `components/…` | Local only — the "เพิ่มผู้ใช้ local" dialog on `/admin/users` + admin set-password; **no sign-up page, and no AD pre-registration** (SSO/AD accounts appear on first login — มติ 2026-08-11) |
+| `assets/components/users-table.tsx` | `components/users-table.tsx` | client half of `/admin/users` — DataTable **client mode**; the password column is `[METHOD: LOCAL]` (delete it with the other local sections) |
+| `assets/components/audit-logs-table.tsx` | `components/audit-logs-table.tsx` | client half of `/admin/audit-logs` — DataTable **server mode**: toolbar filters (ชื่อผู้ใช้ / ช่วงวันที่ / action) push `q`/`from`/`to`/`action` to the URL, DataTable pushes `page`/`pageSize`/`sort`/`dir` itself; needs the design kit (§4) |
 | `assets/lib/permission-group-select.ts` | `lib/permission-group-select.ts` | pure helpers behind the checklist's group select-all (tri-state + counts) — from HRMS มติ 13.3 |
 | `assets/scripts/create-first-user.ts` | `scripts/…` | Local only, run once — see §5.5 |
 | `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
@@ -433,6 +449,9 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       still reject a direct call with the wrong permission)
 - [ ] `/admin/audit-logs` shows the `roles.create` / `users.role-assign` rows
       from the steps above
+- [ ] `/admin/audit-logs` filters run server-side: กรองชื่อผู้ใช้/ช่วงวันที่/action
+      แล้ว URL เปลี่ยน (`q`/`from`/`to`/`action`), เปลี่ยนหน้าแล้ว filter ไม่หลุด,
+      refresh/แชร์ลิงก์เห็นผลเดิม
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
 - [ ] With a basePath: the cookie name in DevTools starts with `__BASE_PATH__.` (or `__Secure-__BASE_PATH__.` on https)

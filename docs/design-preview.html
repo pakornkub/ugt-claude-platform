@@ -1245,7 +1245,9 @@
       <strong>บัญชี SSO/AD ไม่ต้องเพิ่มด้วยมือ</strong> — เกิดเองตอน login ครั้งแรก
       แล้วค่อยกำหนดบทบาทจากตาราง (มติ 2026-08-11) มีแต่บัญชี local ที่แอดมินสร้างให้ ·
       <strong>สิทธิ์ไม่มีหน้าแยก</strong>: key มาจากโค้ดแล้ว sync เข้า DB เอง
-      หน้าบทบาทคือที่จับคู่สิทธิ์เข้ากับบทบาท</p>
+      หน้าบทบาทคือที่จับคู่สิทธิ์เข้ากับบทบาท · ตารางทั้งสามหน้าใช้ <code>DataTable</code>
+      กลางของ kit ตามส่วน 5: users/roles โหมด <strong>client</strong> (master data ทั้งชุด) ·
+      audit-logs โหมด <strong>server</strong> (sort + filter + paginate ผ่าน URL state ทั้งหมด)</p>
 
     <div class="specimen">
       <div class="specimen-bar">
@@ -1291,13 +1293,13 @@
             </div>
             <div class="card" style="padding:0;overflow:hidden">
               <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหาชื่อหรืออีเมล…</span>
                 <button class="btn btn-icon btn-outline" type="button" aria-label="ตั้งค่าคอลัมน์">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cols"/></svg></button>
               </div>
               <table class="dt">
                 <thead><tr>
-                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>ชื่อ<svg class="mark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-asc"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>อีเมล</span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>วิธีเข้าสู่ระบบ<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell">รหัสผ่าน</span></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>ชื่อ<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>อีเมล<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>วิธีเข้าสู่ระบบ<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท</span></th><th><span class="hcell">รหัสผ่าน</span></th>
                 </tr></thead>
                 <tbody>
                   <tr>
@@ -1422,13 +1424,13 @@
             </div>
             <div class="card" style="padding:0;overflow:hidden">
               <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหาบทบาท…</span>
                 <button class="btn btn-icon btn-outline" type="button" aria-label="ตั้งค่าคอลัมน์">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cols"/></svg></button>
               </div>
               <table class="dt">
                 <thead><tr>
-                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท<svg class="mark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-asc"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>คำอธิบาย</span></th><th class="num">สิทธิ์</th><th class="num">ผู้ใช้</th><th></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>คำอธิบาย<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th class="num">สิทธิ์</th><th class="num">ผู้ใช้</th><th></th>
                 </tr></thead>
                 <tbody>
                   <tr>
@@ -1581,14 +1583,21 @@
               </div>
             </div>
             <div class="card" style="padding:0;overflow:hidden">
-              <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหา…</span>
+              <!-- โหมด server: ช่องค้นหา + filter ระดับหน้า (กว้าง→แคบ) อยู่ใน toolbar
+                   แถวเดียว (มติ 2026-08-11) และทุกตัวยิงกลับเข้า URL — ไม่มีกรองรายคอลัมน์
+                   เพราะการกรองทั้งหมดของตารางนี้อยู่ที่ toolbar -->
+              <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหาชื่อผู้ใช้…</span>
+                <span class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-cal"/></svg>01/08/2026 – 21/08/2026</span>
+                <span class="field" style="justify-content:space-between;min-width:120px">ทุก action
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span>
+                <span style="flex:1"></span>
                 <button class="btn btn-icon btn-outline" type="button" aria-label="ตั้งค่าคอลัมน์">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-cols"/></svg></button>
               </div>
               <table class="dt">
                 <thead><tr>
-                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>เวลา<svg class="mark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-asc"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>ผู้กระทำ<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>action<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell">detail</span></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>เวลา<svg class="mark on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-sort"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>ผู้กระทำ</span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>action</span></th><th><span class="hcell">detail</span></th>
                 </tr></thead>
                 <tbody>
                   <tr><td class="fmt">10/08/2026 14:02</td><td>สมชาย ใจดี</td>
@@ -1603,12 +1612,12 @@
                 </tbody>
               </table>
               <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--border-c);font-size:12px" class="muted">
-                <span>1–10 จาก 1,248</span>
+                <span>1–20 จาก 1,248</span>
                 <span style="display:flex;align-items:center;gap:14px">
                   <span style="display:flex;align-items:center;gap:6px">แถวต่อหน้า
-                    <span class="field" style="font-size:12px">10
+                    <span class="field" style="font-size:12px">20
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></span>
-                  <span style="font-weight:500;color:var(--foreground)">หน้า 1 จาก 125</span>
+                  <span style="font-weight:500;color:var(--foreground)">หน้า 1 จาก 63</span>
                   <span style="display:flex;align-items:center;gap:6px">
                     <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าแรก" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-chevs-l"/></svg></button>
                     <button class="btn btn-icon btn-outline" type="button" aria-label="ไปหน้าก่อน" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-chev-l"/></svg></button>
@@ -1625,7 +1634,11 @@
     <p class="note">เวลาเป็น instant จริง → เวลาไทยผ่าน <code>formatDateTime</code> ·
       action เป็น <code>resource.verb</code> จากค่าคงที่ · <code>detail</code> ไม่มีรหัสผ่าน/token/PII
       เกินจำเป็น — คนอ่าน log มักเยอะกว่าคนอ่านข้อมูลจริง ·
-      ลำดับติดตั้งบังคับ design → auth เพราะหน้าเหล่านี้ถูก generate มาแล้วต้องสืบทอดโทเคนทันที</p>
+      โหมด server เต็มรูป: filter ทุกตัว (<code>q</code>/<code>from</code>/<code>to</code>/<code>action</code>)
+      + <code>page</code>/<code>pageSize</code>/<code>sort</code> อยู่ใน URL — refresh/แชร์ลิงก์เห็นหน้าเดิม
+      และตาราง 20 แถวต่อหน้าตามมติตารางเฝ้าดู · ตัวเลือก action มาจากค่าที่มีจริงใน log
+      ไม่ hardcode · ลำดับติดตั้งบังคับ design → auth เพราะหน้าเหล่านี้ถูก generate
+      มาแล้วต้องสืบทอดโทเคน + DataTable ของ kit ทันที</p>
   </div>
 </section>
 
