@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/truncated-text.tsx
-// kit-hash: d3f1e4c9201c
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/truncated-text.tsx
+// kit-hash: 90540d08bdfb
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -32,7 +32,6 @@ export function TruncatedText({ children, tooltip, ...props }: Readonly<Truncate
           <span ref={ref} onPointerEnter={checkTruncation} onFocus={checkTruncation} {...props} />
         }
       >
-        {' '}
         {children}
       </TooltipTrigger>
       {isTruncated && <TooltipContent>{tooltip ?? children}</TooltipContent>}

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 5bbf4107cc5f
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 911e39a64120
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 'use client';
 
@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { formatNumber } from '@/lib/format';
 import { ROWS_PER_PAGE_OPTIONS } from '@/lib/pagination';
 import { withTableQuery, type TableFields, type TableQuery } from '@/lib/table-query';
 import { moveKey, normalizeOrder, useTablePrefs } from '@/lib/table-prefs';
@@ -1049,7 +1050,10 @@ export function DataTable<TData>({
               const { pageIndex, pageSize: size } = table.getState().pagination;
               const start = pageIndex * size + 1;
               const end = Math.min((pageIndex + 1) * size, total);
-              return total > 0 ? `${start}–${end} จาก ${total}` : '0 รายการ';
+              // ตัวเลขทุกตัวผ่าน lib/format (§0.6) — พันขึ้นไปต้องมี comma เช่น "1–20 จาก 1,248"
+              return total > 0
+                ? `${formatNumber(start)}–${formatNumber(end)} จาก ${formatNumber(total)}`
+                : '0 รายการ';
             })()}
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">

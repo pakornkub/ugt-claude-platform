@@ -85,6 +85,7 @@ No placeholders to substitute — but adjust `coverage.include` in
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "build": "next build",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -92,6 +93,19 @@ No placeholders to substitute — but adjust `coverage.include` in
     "*.{json,md,css,yml,yaml}": ["prettier --write"]
   }
 }
+```
+
+(`build` มักมีอยู่แล้วจาก create-next-app — ถ้ามี ให้คงของโปรเจคไว้; ที่ต้องมีเพราะ
+Jenkinsfile กับ verify script เรียกทั้งสี่ตัวตามชื่อเป๊ะ)
+
+### 3.5 gitignore ผลพลอยได้ของ test
+
+เติมสองบรรทัดนี้ลง `.gitignore` (ถ้ายังไม่มี) — checklist และ verify script
+เช็คข้อนี้เป็น FAIL จึงต้องเป็นขั้นติดตั้ง ไม่ใช่แค่ข้อตรวจ:
+
+```
+coverage/
+test-results/
 ```
 
 ### 4. Enable husky

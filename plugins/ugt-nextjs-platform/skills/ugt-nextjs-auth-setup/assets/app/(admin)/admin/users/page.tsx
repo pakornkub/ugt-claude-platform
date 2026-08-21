@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: 594cf31ad19f
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: 1cdc180d9e45
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the table lives in UsersTable.
 // DataTable โหมด client (DESIGN.md §4): master data ดึงทั้งชุดแล้ว sort/filter/paginate
 // ในหน่วยความจำ — ponytail: ผู้ใช้หลักพันคนขึ้นไปค่อยย้ายเป็นโหมด server แบบ audit-logs
@@ -9,6 +9,13 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
+import {
+  PageActions,
+  PageDescription,
+  PageHeader,
+  PageHeaderText,
+  PageTitle,
+} from '@/components/ui/page-shell';
 import { UsersTable } from '@/components/users-table';
 // [METHOD: LOCAL] — ลบ import + ปุ่มด้านล่างเมื่อไม่ได้เปิด local login
 // (บัญชี SSO/AD เกิดเองตอน login ครั้งแรก ไม่มีใครต้องเพิ่ม — มติ 2026-08-11)
@@ -35,10 +42,20 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">ผู้ใช้งาน</h1>
-        {canCreate && <CreateUserDialog roles={roles} />}
-      </div>
+      {/* หัวหน้าเพจตามโครง DESIGN.md §3: title + subtitle ซ้าย · action ขวา */}
+      <PageHeader>
+        <PageHeaderText>
+          <PageTitle>ผู้ใช้งาน</PageTitle>
+          <PageDescription>
+            รายชื่อผู้ใช้ทั้งหมดของระบบ — กำหนดบทบาทได้จากคอลัมน์บทบาท
+          </PageDescription>
+        </PageHeaderText>
+        {canCreate && (
+          <PageActions>
+            <CreateUserDialog roles={roles} />
+          </PageActions>
+        )}
+      </PageHeader>
       <UsersTable
         users={users}
         roles={roles}

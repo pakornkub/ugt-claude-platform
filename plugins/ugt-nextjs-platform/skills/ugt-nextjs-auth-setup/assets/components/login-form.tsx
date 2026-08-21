@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.21.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 8ef92cd89975
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 9891ede72a23
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -8,6 +8,7 @@
 //   - SSO + one form method: replace the Tabs block with the single remaining section
 //   - No SSO: delete SsoSection + the "or" separator
 // Requires shadcn primitives: button, input, label, tabs — and sonner for toasts.
+// [METHOD: LOCAL + mail] also `dialog` (ForgotPasswordDialog mounts one).
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // [METHOD: LDAP|LOCAL]
@@ -53,7 +54,7 @@ function SsoSection() {
       <p className="text-center text-sm text-balance text-muted-foreground">
         เข้าสู่ระบบด้วยบัญชีองค์กร (Single Sign-On)
       </p>
-      <Button className="h-10 w-full" onClick={handleSsoLogin} disabled={isLoading}>
+      <Button className="w-full" onClick={handleSsoLogin} disabled={isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="size-4 animate-spin" />
@@ -160,13 +161,15 @@ function LocalSection() {
           <Label htmlFor="local-password">รหัสผ่าน</Label>
           {/* ต้องมี ugt-nextjs-mail-setup — ลบลิงก์นี้พร้อม ForgotPasswordDialog
               เมื่อโปรเจคไม่มีระบบส่งอีเมล */}
-          <button
+          <Button
             type="button"
-            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-xs text-muted-foreground"
             onClick={() => setForgotOpen(true)}
           >
             ลืมรหัสผ่าน?
-          </button>
+          </Button>
         </div>
         <Input
           id="local-password"
@@ -223,7 +226,7 @@ export function LoginForm({
   return (
     <div className={cn('flex flex-col gap-6', className)}>
       <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="text-2xl font-bold">{appName}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{appName}</h1>
         <p className="text-sm text-balance text-muted-foreground">เข้าสู่ระบบเพื่อใช้งาน</p>
       </div>
 

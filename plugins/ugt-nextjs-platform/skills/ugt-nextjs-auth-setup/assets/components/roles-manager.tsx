@@ -1,18 +1,28 @@
 'use client';
-// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: 4b2aaec713c2
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: 150191af53b4
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
-// DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit dialog +
-// delete. The page itself does the server-side guard + fetch. ต้องมี org UI kit
-// จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
-import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
+// DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
+// (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
+// ไม่ใช่ Dialog ที่สูงจน scroll ไม่ได้) + ลบผ่าน ConfirmActionDialog ตามข้อตกลง
+// (destructive ห้าม window.confirm) · ปุ่มแถวผ่าน IconAction + variant soft-*
+// ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
+import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DataTable } from '@/components/ui/data-table';
+import { IconAction } from '@/components/ui/icon-action';
+import { ConfirmActionDialog } from '@/components/ui/confirm-action-dialog';
+import {
+  PageActions,
+  PageDescription,
+  PageHeader,
+  PageHeaderText,
+  PageTitle,
+} from '@/components/ui/page-shell';
 import { RoleForm } from '@/components/role-form';
 import { deleteRoleAction } from '@/lib/actions/admin-roles';
 
@@ -38,22 +48,10 @@ export function RolesManager({
   canUpdate: boolean;
   canDelete: boolean;
 }>) {
-  const [openDialog, setOpenDialog] = useState<'create' | string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [openSheet, setOpenSheet] = useState<'create' | string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RoleRow | null>(null);
 
-  function handleDelete(role: RoleRow) {
-    // ponytail: window.confirm — a full alert-dialog component isn't worth
-    // the extra shadcn install for a single destructive action. Upgrade if
-    // the project already has alert-dialog for other reasons.
-    if (!window.confirm(`ลบบทบาท "${role.name}"? ผู้ใช้ที่มีบทบาทนี้จะกลายเป็น "ไม่มีบทบาท"`)) return;
-    startTransition(async () => {
-      const result = await deleteRoleAction(role.id);
-      if (!result.success) toast.error('ลบไม่สำเร็จ', { description: result.error });
-      else toast.success('ลบบทบาทแล้ว');
-    });
-  }
-
-  const editingRole = roles.find((r) => r.id === openDialog) ?? null;
+  const editingRole = roles.find((r) => r.id === openSheet) ?? null;
 
   const columns: ColumnDef<RoleRow>[] = [
     {
@@ -94,25 +92,22 @@ export function RolesManager({
               row.original.isSystem ? null : (
                 <div className="flex justify-end gap-1">
                   {canUpdate && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="แก้ไข"
-                      onClick={() => setOpenDialog(row.original.id)}
+                    <IconAction
+                      label="แก้ไข"
+                      variant="soft-primary"
+                      onClick={() => setOpenSheet(row.original.id)}
                     >
                       <Pencil className="size-4" strokeWidth={2} />
-                    </Button>
+                    </IconAction>
                   )}
                   {canDelete && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="ลบ"
-                      disabled={isPending}
-                      onClick={() => handleDelete(row.original)}
+                    <IconAction
+                      label="ลบ"
+                      variant="soft-destructive"
+                      onClick={() => setDeleteTarget(row.original)}
                     >
                       <Trash2 className="size-4" strokeWidth={2} />
-                    </Button>
+                    </IconAction>
                   )}
                 </div>
               ),
@@ -123,39 +118,59 @@ export function RolesManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">บทบาท</h1>
+      {/* หัวหน้าเพจตามโครง DESIGN.md §3: title + subtitle ซ้าย · action ขวา
+          (ไม่ห่อ PageShell — padding ของหน้าเป็นของ shell/layout ที่ครอบอยู่) */}
+      <PageHeader>
+        <PageHeaderText>
+          <PageTitle>บทบาท</PageTitle>
+          <PageDescription>กำหนดบทบาทและสิทธิ์การใช้งานของแต่ละบทบาท</PageDescription>
+        </PageHeaderText>
         {canCreate && (
-          <Dialog open={openDialog === 'create'} onOpenChange={(open) => setOpenDialog(open ? 'create' : null)}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 size-4" strokeWidth={2} />
-                สร้างบทบาท
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>สร้างบทบาท</DialogTitle>
-              </DialogHeader>
-              <RoleForm allPermissions={allPermissions} onSaved={() => setOpenDialog(null)} />
-            </DialogContent>
-          </Dialog>
+          <PageActions>
+            <Button onClick={() => setOpenSheet('create')}>
+              <Plus className="mr-2 size-4" strokeWidth={2} />
+              สร้างบทบาท
+            </Button>
+          </PageActions>
         )}
-      </div>
+      </PageHeader>
 
       <DataTable id="admin-roles" columns={columns} data={roles} globalSearch filterPlaceholder="ค้นหาบทบาท..." />
 
-      {/* dialog แก้ไขตัวเดียวคุมจาก state — ไม่ mount Dialog ต่อแถวเหมือนตอนใช้ Table ดิบ */}
-      <Dialog open={!!editingRole} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>แก้ไขบทบาท</DialogTitle>
-          </DialogHeader>
-          {editingRole && (
-            <RoleForm allPermissions={allPermissions} role={editingRole} onSaved={() => setOpenDialog(null)} />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Sheet ตัวเดียวคุมทั้ง create/edit จาก state — checklist สิทธิ์เลื่อนใน body ของ Sheet */}
+      <Sheet open={openSheet !== null} onOpenChange={(open) => !open && setOpenSheet(null)}>
+        <SheetContent className="flex w-full flex-col sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{editingRole ? 'แก้ไขบทบาท' : 'สร้างบทบาท'}</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            {openSheet !== null && (
+              <RoleForm
+                key={editingRole?.id ?? 'create'}
+                allPermissions={allPermissions}
+                role={editingRole}
+                onSaved={() => setOpenSheet(null)}
+                onCancel={() => setOpenSheet(null)}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* destructive = ConfirmActionDialog เสมอ (DESIGN.md §4) — ห้าม window.confirm */}
+      <ConfirmActionDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={`ลบบทบาท "${deleteTarget?.name ?? ''}"`}
+        description={'ผู้ใช้ที่มีบทบาทนี้จะกลายเป็น "ไม่มีบทบาท" และใช้งานได้เฉพาะหน้าทั่วไปจนกว่าจะได้รับบทบาทใหม่'}
+        confirmLabel="ลบบทบาท"
+        successMessage="ลบบทบาทแล้ว"
+        action={async () => {
+          if (!deleteTarget) return { error: 'ไม่พบบทบาทที่เลือก' };
+          const result = await deleteRoleAction(deleteTarget.id);
+          return result.success ? { ok: true } : { error: result.error ?? 'ลบไม่สำเร็จ' };
+        }}
+      />
     </div>
   );
 }

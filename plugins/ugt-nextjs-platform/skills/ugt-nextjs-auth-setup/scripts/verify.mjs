@@ -477,6 +477,53 @@ check('System roles protected from edit + delete', () => {
     : { ok: true };
 });
 
+// ── 7. UI kit compliance (the admin pages ship against base-mira / Base UI) ──
+check('No Radix-only APIs in UI code (asChild / onSelect on menu items)', () => {
+  // Base UI ignores both silently: the component renders fine and the button
+  // just does nothing — shipped once as "ปุ่ม logout กดไม่ได้" (4.25.0).
+  const bad = [];
+  for (const file of sourceFiles()) {
+    if (!/\.tsx$/.test(file)) continue;
+    const rel = relative(ROOT, file).replaceAll('\\', '/');
+    if (rel.startsWith('components/ui/')) continue; // shadcn primitives own their internals
+    const body = stripComments(readFileSync(file, 'utf8'));
+    const hits = [];
+    if (/\basChild\b/.test(body)) hits.push('asChild');
+    if (/<DropdownMenuItem/.test(body) && /onSelect\s*=/.test(body) && !/react-day-picker|Calendar/.test(body)) {
+      hits.push('onSelect on a menu item');
+    }
+    if (hits.length) bad.push(`${rel}: ${hits.join(', ')}`);
+  }
+  return bad.length
+    ? { ok: false, msg: `Radix idioms in a Base UI (base-mira) project — dead buttons: ${bad.slice(0, 5).join(' · ')}` }
+    : { ok: true };
+});
+
+check('Destructive confirms use ConfirmActionDialog, not window.confirm', () => {
+  const bad = sourceFiles().filter((f) => /window\.(confirm|alert)\s*\(/.test(stripComments(readFileSync(f, 'utf8'))));
+  return bad.length
+    ? {
+        ok: false,
+        msg: `${bad.map((f) => relative(ROOT, f)).join(', ')} — DESIGN.md §4: destructive = ConfirmActionDialog (the kit ships it; native confirm is unstyled and unaudited)`,
+      }
+    : { ok: true };
+});
+
+check('First-admin gate: some layout redirects to /admin/setup', () => {
+  const gated = sourceFiles().some((f) => {
+    const rel = relative(ROOT, f).replaceAll('\\', '/');
+    if (!/layout\.tsx$/.test(rel) || rel.includes('(admin-setup)')) return false;
+    const body = stripComments(readFileSync(f, 'utf8'));
+    return /isAdminInitialized/.test(body) && /admin\/setup/.test(body);
+  });
+  return gated
+    ? { ok: true }
+    : {
+        ok: 'warn',
+        msg: "no protected layout checks isAdminInitialized() → redirect('/admin/setup') — the first user lands on a blank permission-less app with no hint the setup page exists (SKILL.md §5.5)",
+      };
+});
+
 check('.env.local not committed', () => {
   if (!has('.gitignore')) return { ok: false, msg: 'No .gitignore' };
   const ig = read('.gitignore');

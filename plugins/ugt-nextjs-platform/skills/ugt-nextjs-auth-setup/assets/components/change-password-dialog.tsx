@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/change-password-dialog.tsx
-// kit-hash: 1cc440cbac1c
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/change-password-dialog.tsx
+// kit-hash: fb48b9397036
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // เปิดจากเมนูโปรไฟล์ใน NavUser และแสดงเฉพาะบัญชี local เท่านั้น
@@ -79,7 +79,9 @@ export function ChangePasswordDialog({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="current-password">รหัสผ่านปัจจุบัน</Label>
+            <Label htmlFor="current-password">
+              รหัสผ่านปัจจุบัน<span className="text-destructive">*</span>
+            </Label>
             <Input
               id="current-password"
               type="password"
@@ -90,7 +92,9 @@ export function ChangePasswordDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="change-new-password">รหัสผ่านใหม่</Label>
+            <Label htmlFor="change-new-password">
+              รหัสผ่านใหม่<span className="text-destructive">*</span>
+            </Label>
             <Input
               id="change-new-password"
               type="password"
@@ -102,7 +106,9 @@ export function ChangePasswordDialog({
             <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="change-confirm-password">ยืนยันรหัสผ่านใหม่</Label>
+            <Label htmlFor="change-confirm-password">
+              ยืนยันรหัสผ่านใหม่<span className="text-destructive">*</span>
+            </Label>
             <Input
               id="change-confirm-password"
               type="password"

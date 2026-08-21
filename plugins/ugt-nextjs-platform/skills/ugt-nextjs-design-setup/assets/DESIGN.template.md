@@ -148,6 +148,12 @@
   `fluid`/`auto`/`fill`) · ยาว = หน้าแยก · panel ค้าง = `Sheet` ·
   read-only = `detail-dialog-shell` · destructive = `ConfirmActionDialog`
   ปุ่มมีข้อความ
+  > **นิยาม "ยาว" ให้นับเนื้อหาที่โตตามข้อมูลด้วย** — ฟอร์มที่มี
+  > list/checklist ซึ่งความยาวขึ้นกับข้อมูลจริง (เช่น checklist สิทธิ์ที่โต
+  > ตาม `ALL_PERMISSIONS`) ถือว่า "ยาว" เสมอแม้วันนี้จะสั้น เพราะ Dialog
+  > สูงคงที่แต่ข้อมูลไม่คงที่ → ใช้ `Sheet` (body เลื่อน) หรือหน้าแยก
+  > (บทเรียนจริง 4.25.0: ฟอร์มบทบาท "3 ช่อง" เลยถูกยัดใส่ Dialog
+  > จน checklist สูงเกินจอแล้ว scroll ไม่ได้)
 - Footer dialog: ยกเลิก (outline) ซ้าย · ยืนยัน primary ขวาสุด · primary
   **ปุ่มเดียว**ต่อ dialog · ห้ามซ้อน dialog (ยกเว้น AlertDialog ยืนยัน 1 ชั้น)
   · ฟอร์ม dirty ปิดต้องถามก่อน

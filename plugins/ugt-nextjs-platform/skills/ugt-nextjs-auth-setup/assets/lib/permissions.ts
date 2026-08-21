@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/permissions.ts
-// kit-hash: 3851e0baf06f
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/permissions.ts
+// kit-hash: 11f340a557d1
 /**
  * Permission keys — single source of truth for all permission constants.
  * Naming convention: resource:action (standard RBAC pattern)
@@ -17,11 +17,12 @@
  * Add your project's domain permissions below, following the same pattern.
  */
 export const PERMISSIONS = {
-  // User management
+  // User management — no `users:delete`: ไม่มี action ลบผู้ใช้ใน kit โดยตั้งใจ
+  // (บัญชี SSO/AD เกิดเองตอน login — มติ 2026-08-11); เพิ่มคีย์เมื่อทำ action จริง
+  // ห้ามประกาศคีย์ล่วงหน้าโดยไม่มีของ — จะกลายเป็น checkbox ที่ติ๊กแล้วไม่ได้อะไร
   USERS_READ: 'users:read',
   USERS_CREATE: 'users:create',
   USERS_UPDATE: 'users:update',
-  USERS_DELETE: 'users:delete',
   USERS_RESET_PASSWORD: 'users:reset-password', // NOSONAR typescript:S2068 — permission key string, not a password value
 
   // Role management
@@ -33,17 +34,11 @@ export const PERMISSIONS = {
   // Audit logs
   AUDIT_LOGS_READ: 'audit-logs:read',
 
-  // Testing aid — grant to developers/testers ONLY. Holders receive workflow
-  // email themselves instead of the real recipients (see ugt-nextjs-mail-setup).
-  // On a normal account this silently hides notifications from the people who
-  // should get them.
-  DEV_MODE: 'dev-mode:enable',
-
-  // File attachments (ugt-nextjs-upload-setup). `files:read` only grants
-  // "may download files at all" — WHICH files a user may see is decided
-  // per record in lib/attachment-access.ts.
-  FILES_CREATE: 'files:create',
-  FILES_READ: 'files:read',
+  // คีย์ของ skill อื่นไม่ประกาศที่นี่ — เจ้าของเป็นคนเพิ่มทั้ง "คีย์ + seed คู่กัน"
+  // ตอนติดตั้ง: `dev-mode:enable` → ugt-nextjs-mail-setup ·
+  // `files:create`/`files:read` → ugt-nextjs-upload-setup
+  // (เคยประกาศคีย์ไว้ล่วงหน้าโดยไม่มี seed — installer เห็นคีย์แล้วข้ามขั้น seed
+  // ทำให้ upload/download 403 ถาวร — 4.25.0)
 
   // EXTENSION POINT: add project-domain permissions here (resource:action)
 } as const;
@@ -63,7 +58,6 @@ export const ALL_PERMISSIONS: Array<{
   { key: PERMISSIONS.USERS_READ, label: 'View Users', group: 'users' },
   { key: PERMISSIONS.USERS_CREATE, label: 'Create Users', group: 'users' },
   { key: PERMISSIONS.USERS_UPDATE, label: 'Edit Users', group: 'users' },
-  { key: PERMISSIONS.USERS_DELETE, label: 'Delete Users', group: 'users' },
   { key: PERMISSIONS.USERS_RESET_PASSWORD, label: 'Reset User Passwords', group: 'users' },
 
   // Role management

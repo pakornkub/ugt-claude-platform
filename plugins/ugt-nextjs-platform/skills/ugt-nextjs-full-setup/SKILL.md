@@ -90,7 +90,11 @@ every selected child skill and fold its questions into this same batch**
 (example topics, not the full list: DB: server, database name, existing or new,
 stored procedures needed · Design: prototype/brand to match?, primary color,
 shell sidebar/topbar, dark mode, ภาษา UI · Auth: Keycloak client exists yet,
-AD details, first admin · CI: Sentry?, deploy target).
+AD details, directory view, scope/approval · CI: Sentry?, deploy target).
+**Never ask "who is the first admin"** — auth-setup §3 Q5 forbids it (the
+answer cannot be used: no pre-registration, มติ 2026-08-11); the first person
+to log in becomes Administrator via `/admin/setup`, and that sentence goes in
+the summary + `docs/admin-handoff.md` instead.
 
 ### 2.5 Choose the run shape — one proposal, confirmed once
 
@@ -242,7 +246,7 @@ How:
 | Inspect existing setup before asking | Overwrite existing Prisma/auth/Jenkinsfile silently |
 | One combined interview batch (incl. child-skill questions) | Ask one-by-one / let child skills re-ask |
 | 3+ modules → propose chunked sessions or per-module subagents (§2.5) | Grind through one long session until context compaction degrades the work |
-| Always Database → Quality → Auth → CI | Install auth before a DB exists / CI before test scripts exist |
+| Always Database → Quality → Design → Auth → CI | Install auth before a DB exists / before the design kit (its admin pages render with kit DataTable) / CI before test scripts exist |
 | Not Next.js → say it plainly | Adapt the assets to another stack yourself |
 | Summarize files + admin requests at the end | Finish silently with no checklist |
 | Edit `CLAUDE.md` only inside the `ugt:start/end` block | Rewrite the whole `CLAUDE.md` (team content lost) |

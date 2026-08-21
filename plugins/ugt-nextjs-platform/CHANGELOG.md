@@ -1,6 +1,112 @@
 # Changelog — ugt-nextjs-platform
 
-## 4.24.0 (2026-08-21)
+## 4.25.0 (2026-08-21)
+
+`ugt-nextjs-auth-setup` + a new release gate. Field report from a full-setup
+pilot (CR System): six defects, five of them living in this repo's own assets —
+the admin UI was ported from HRMS (radix-mira era) into the Base UI kit and
+nothing ever enforced the design agreement on shipped assets.
+
+- **nav-user.tsx: the logout / profile menu items did nothing when clicked.**
+  Three `DropdownMenuItem`s still used Radix's `onSelect`; base-mira (Base UI)
+  menu items take `onClick` and ignore `onSelect` silently — the menu opened,
+  the items rendered, clicks were no-ops. Now `onClick` (logout keeps the menu
+  open via `closeOnClick={false}` so the spinner is visible).
+- **roles-manager.tsx rewritten to the design agreement it ships next to**:
+  delete confirms through the kit's `ConfirmActionDialog` (was `window.confirm`
+  — DESIGN.md §4 forbids it, and the ponytail excuse was wrong: the kit already
+  ships the dialog); row buttons are `IconAction` + `soft-primary`/
+  `soft-destructive` (was bare ghost buttons with no tooltip/color); create/edit
+  moved from a fixed-height `Dialog` (unscrollable once the permission list
+  grew) to a `Sheet` with a scrolling body, matching the dialog ladder and what
+  design-preview §13 has drawn all along; the stray `asChild` is gone.
+- **Admin pages get real page headers**: users / roles / audit-logs now compose
+  `PageHeader`/`PageTitle`/`PageDescription`/`PageActions` from `ui/page-shell`
+  (subtitle included) instead of hand-written `<h1>`.
+- **First-admin flow**: SKILL.md §3 no longer asks "who is the first admin" —
+  the answer was unusable by design (มติ 2026-08-11: no pre-registration), so
+  asking only created the expectation of a seeded account. Instead the
+  protected app layout gates on `isAdminInitialized()` (now caches its positive
+  result) and redirects every login to `/admin/setup` until the bootstrap
+  happens — no more blank permission-less first login — and the install summary
+  + `docs/admin-handoff.md` must state in Thai that the first person to log in
+  becomes Administrator. §5.1 also stops suggesting a bare `npx shadcn init`
+  (it initializes the Radix style; the kit is Base UI — design-setup's preset
+  init is the only sanctioned path) and now lists every component the admin
+  UI actually imports (`alert-dialog sheet avatar dropdown-menu`).
+- **Enforcement, so this class of defect stops shipping**: new release gate
+  `scripts/lint-kit-assets.mjs` (in the README release chain) fails on
+  `asChild`, `onSelect` on menu items, `window.confirm/alert/prompt`,
+  `@radix-ui/*` imports, and raw control bytes, across **all** `.ts`/`.tsx`
+  assets; auth's `verify.mjs` gains the same checks project-side plus a warn
+  when no layout wires the first-admin gate; SKILL.md §7/§8 document the Base
+  UI API rule and the new manual checks. `stamp-kit-assets.mjs`'s stamp regex
+  now strips CRLF stamps (a Windows checkout previously left stray `\r`s and
+  `--check` never converged).
+
+**Then a 4-agent full-plugin audit** (Base UI API · DESIGN compliance · SKILL
+flows · stale ports) swept everything else. Fixed in this release; the
+remainder is recorded in `docs/backlog.md` §5:
+
+- **Functional breaks**: `upload-setup/lib/storage.ts` carried three raw
+  control bytes (NUL included) in a regex — the file read as *binary* to every
+  grep-based gate, making it invisible to the very lint written above; now the
+  escape text `[\x00-\x1f\x7f]` and a lint rule against control bytes.
+  `lib/permissions.ts` declared `files:*` / `dev-mode:enable` keys **without**
+  `ALL_PERMISSIONS` seeds — they could never be granted (upload/download 403
+  forever) and their presence steered installers past the mail/upload skills'
+  own "add key + seed" step; the keys now belong to their owning skills, and
+  the unshipped `users:delete` seed (a checkbox granting nothing) is gone.
+  `admin-setup.ts` now seeds via the idempotent `syncPermissionsIfNeeded()` —
+  the old bare `createMany` wedged the bootstrap forever if a prior attempt
+  died between seeding and role-creation (`skipDuplicates` doesn't exist on
+  SQL Server).
+- **More Radix leftovers, same shipped-bug class**: `role-form.tsx` fed the
+  group checkbox Radix's `'indeterminate'` string — truthy, so a
+  partially-selected permission group rendered fully checked; now Base UI's
+  `checked` + `indeterminate` (the helper producing the Radix value is
+  deleted). `nav-user.tsx` styled its trigger with `data-[state=open]` (Base
+  UI emits `data-popup-open` — the open-highlight never fired);
+  `combobox.tsx` had six dead `data-[state=…]` animation selectors
+  (`data-open`/`data-closed` now); `tiptap-editor.tsx`'s link button used
+  `window.prompt` → a kit Popover+Input.
+- **Kit component fixes**: `ConfirmActionDialog` confirms destructive in red
+  (`confirmVariant`, default `destructive` — was the primary/blue registry
+  default); `date-picker` closes its popover on select (it used to stay open
+  covering the "to" field); `truncated-text` drops a stray `{' '}` that skewed
+  its overflow measurement; `query-state` retry icon `RotateCcw`→`RefreshCw`
+  (RotateCcw = กู้คืน per the icon map); DataTable's row-range line formats
+  through `formatNumber` ("1–20 จาก 1,248").
+- **DESIGN.md §4 form/footer pass over the auth forms**: required `*` on every
+  mandatory label, `Callout` for the forgot-password confirmation box,
+  `IconAction soft-primary` for the set-password row button, role-form gets a
+  ยกเลิก/บันทึก footer, `Badge` for its count pill, dead `done` state removed
+  from admin-setup-form, `Button variant="link"` for "ลืมรหัสผ่าน?", size
+  overrides (`h-10`, `size="lg"`, `font-bold`) dropped.
+- **Dialog ladder sharpened** (template + conventions + design rules file):
+  "ยาว" now explicitly includes any form whose list/checklist **grows with
+  data** — long even if short today, so it goes in a `Sheet`/page, never a
+  fixed-height Dialog. Encodes the exact judgment the role-form bug slipped
+  through ("3 ช่อง" looked ≤6 while the permission checklist grew unbounded).
+- **Drift & dead-ends closed**: `RoleInput.permissionKeys` renamed
+  `permissionIds` (it always carried ids); `ActivityLogs` gains
+  `@@index([createdAt]/[action]/[userId])` (the unbounded audit table had
+  none); audit-log date filters get ตั้งแต่/ถึง labels; the auth rules file
+  (`.claude/rules/ugt-nextjs-auth.md`) now **covers the admin UI components**
+  (nav-user shipped its bug outside the rules' path globs) and states the
+  Base UI contract + ConfirmActionDialog/IconAction/page-shell rules — the
+  design rules file states the Base UI API rule too, since it is the one that
+  loads on every UI file; `ugt-nextjs-full-setup` no longer re-asks the
+  banned first-admin question and its Quick Rule restores Design to the
+  install order; cicd's `admin-handoff.template.md` gains the
+  "ผู้ดูแลระบบคนแรก" section auth §5.5 depends on; upload-setup's compose
+  snippet switches from named volumes to `/srv/appdata` bind mounts (it
+  contradicted cicd §2.8's ห้าม-named-volume contract) and declares its
+  design-kit prerequisite; test-lint ships the `build` script + the
+  `.gitignore` step its own verify demanded; database's `lib/env.ts` gains
+  the client-block/runtimeEnv EXTENSION POINT that `NEXT_PUBLIC_BASE_PATH`
+  keeps being lost to; `scope.ts` documents that `ownOrgCode` has no
+  enforcing helper yet.
 
 `ugt-nextjs-auth-setup`: the three admin pages finally follow the design
 agreement they ship next to — DESIGN.md §4 says "DataTable only for tabular

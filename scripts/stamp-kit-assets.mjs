@@ -32,7 +32,9 @@ import { join, relative, sep } from 'node:path';
 const ROOT = process.cwd();
 const CHECK = process.argv.includes('--check');
 
-const STAMP_RE = /^\/\/ kit(?:-hash)?: .*\n?/gm;
+// \r? — a CRLF checkout must strip the whole line; `.` stops at \r, and a
+// leftover \r becomes a stray blank line that makes --check never converge.
+const STAMP_RE = /^\/\/ kit(?:-hash)?: .*\r?\n?/gm;
 
 export function contentHash(text) {
   const body = text.replace(/\r\n/g, '\n').replace(STAMP_RE, '');

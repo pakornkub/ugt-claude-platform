@@ -12,6 +12,12 @@ paths:
 project's design source of truth and wins over code, habit, and any
 beautification skill. The short version that catches 90% of violations:
 
+- **The kit is Base UI (base-mira), not Radix**: triggers take
+  `render={<X />}`, menu items take `onClick`, checkbox tri-state is
+  `checked` (boolean) + `indeterminate`, open-state styling is
+  `data-[popup-open]`/`data-open`. Radix idioms — `asChild`, `onSelect` on a
+  menu item, `checked="indeterminate"`, `data-[state=open]` — are **ignored
+  silently**: the component renders and the button just does nothing.
 - shadcn component exists → use it. Never hand-build, never raw CSS /
   CSS-in-JS / inline styles (only truly dynamic values).
 - Sizes stay `default` (exceptions: `size="icon"` in table rows via
@@ -31,8 +37,11 @@ beautification skill. The short version that catches 90% of violations:
 - Icon-only buttons → `IconAction` (label mandatory). Destructive actions →
   `ConfirmActionDialog`, text button.
 - Forms → `ui/field` (zod + react-hook-form), short forms in `FormDialog`,
-  long forms on a page. One primary button per dialog; dirty forms confirm
-  before closing.
+  long forms on a page. "Long" includes any form with a list/checklist that
+  **grows with data** (permission checklists, option lists) — always long
+  even if short today; those go in a `Sheet` (scrolling body) or a page,
+  never a fixed-height Dialog. One primary button per dialog; dirty forms
+  confirm before closing.
 - New colors or token edits → run the design skill's `check-contrast.mjs`
   before committing.
 - Deviating from DESIGN.md on purpose? Add a dated มติ to its §10 — a silent

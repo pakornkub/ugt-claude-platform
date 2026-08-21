@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 9d317cefcacc
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: 2f7cc26d6383
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · toolbar filter (ชื่อผู้ใช้ → ช่วงวันที่ → action
@@ -24,7 +24,7 @@ import {
 import { formatDateTime } from '@/lib/format';
 import type { TableFields, TableQuery } from '@/lib/table-query';
 
-const ALL_ACTIONS = '__all__'; // Radix Select rejects an empty-string item value
+const ALL_ACTIONS = '__all__'; // Base UI Select ถือว่า value="" คือ "ยังไม่เลือก" — ดู ugt-nextjs-pitfalls
 
 type AuditLogRow = {
   id: number;
@@ -123,7 +123,7 @@ export function AuditLogsTable({
             {row.original.detail}
           </button>
         ) : (
-          '—'
+          '-' // ค่าว่าง = '-' (DESIGN.md §5)
         ),
     },
   ];
@@ -159,6 +159,8 @@ export function AuditLogsTable({
               />
             </div>
             <DateRangePicker
+              fromLabel="ตั้งแต่"
+              toLabel="ถึง"
               from={parseDateParam(filters.from)}
               to={parseDateParam(filters.to)}
               onFromChange={(d) => applyFilters({ from: d ? toDateParam(d) : '' })}

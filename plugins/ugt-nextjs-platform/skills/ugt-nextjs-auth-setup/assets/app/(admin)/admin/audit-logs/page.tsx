@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
-// kit-hash: 5a60a2519d31
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit-hash: d75f7f9bdb29
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
 // ผ่าน URL state ทั้งหมด "never half" · หน้านี้ parse searchParams แล้ว query จริง
@@ -12,6 +12,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { firstParam, getTotalPages, parsePageParams, parsePageSize, withPage } from '@/lib/pagination';
 import { parseTableQuery, toOrderBy, type TableFields } from '@/lib/table-query';
+import { PageDescription, PageHeader, PageHeaderText, PageTitle } from '@/components/ui/page-shell';
 import { AuditLogsTable } from '@/components/audit-logs-table';
 
 // allowlist ของตารางนี้ — sort ได้เฉพาะเวลา · ไม่มีกรองรายคอลัมน์ (การกรองอยู่ที่
@@ -100,10 +101,13 @@ export default async function AdminAuditLogsPage({
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">บันทึกกิจกรรม</h1>
-        <p className="text-sm text-muted-foreground">อ่านอย่างเดียว — ตารางนี้ไม่มีปุ่มแก้หรือลบ</p>
-      </div>
+      {/* หัวหน้าเพจตามโครง DESIGN.md §3 — ใช้ page-shell ของ kit ไม่เขียน h1 เอง */}
+      <PageHeader>
+        <PageHeaderText>
+          <PageTitle>บันทึกกิจกรรม</PageTitle>
+          <PageDescription>อ่านอย่างเดียว — ตารางนี้ไม่มีปุ่มแก้หรือลบ</PageDescription>
+        </PageHeaderText>
+      </PageHeader>
       <AuditLogsTable
         rows={logs.map((log) => {
           const user = userById.get(log.userId);

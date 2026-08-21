@@ -163,5 +163,10 @@ model activityLog {
   detail    String?  @db.NVarChar(Max) @map("Detail")
   createdAt DateTime @default(now()) @map("CreatedAt")
 
+  // ตารางนี้โตไม่หยุด และ /admin/audit-logs กรอง/เรียง/นับบนสามคอลัมน์นี้ทุกครั้ง
+  // — ไม่มี index คือ full scan ที่เงียบใน UAT แล้วช้าจริงหลังใช้งานเป็นปี
+  @@index([createdAt])
+  @@index([action])
+  @@index([userId])
   @@map("ActivityLogs")
 }

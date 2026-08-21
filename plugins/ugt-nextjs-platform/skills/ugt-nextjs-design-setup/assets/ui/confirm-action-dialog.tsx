@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
-// kit-hash: d5d0b3acb522
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: 5c7ee2da4867
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
@@ -9,6 +9,7 @@
 // ไม่มี onSuccess — server action เรียก revalidatePath อยู่แล้ว หน้ารีเฟรชเอง
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { buttonVariants } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,7 @@ export function ConfirmActionDialog({
   confirmLabel,
   successMessage,
   action,
+  confirmVariant = 'destructive',
 }: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,6 +38,9 @@ export function ConfirmActionDialog({
   confirmLabel: string;
   successMessage: string;
   action: () => Promise<{ ok: true } | { error: string }>;
+  /** สีปุ่มยืนยัน — dialog นี้ใช้กับ destructive เป็นหลัก (ลบ=แดง DESIGN.md §1)
+      งานยืนยันที่ไม่ทำลายข้อมูล ส่ง 'default' หรือ 'success' มาแทน */
+  confirmVariant?: 'destructive' | 'default' | 'success';
 }>) {
   const [pending, setPending] = useState(false);
 
@@ -68,7 +73,13 @@ export function ConfirmActionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>ยกเลิก</AlertDialogCancel>
-          <AlertDialogAction disabled={pending} onClick={() => void confirm()}>
+          {/* ส่งเป็น className (twMerge ใน wrapper ให้ตัวหลังชนะ) — ไม่พึ่งว่า
+              AlertDialogAction รุ่นที่ติดตั้งจะมี prop variant หรือไม่ */}
+          <AlertDialogAction
+            className={buttonVariants({ variant: confirmVariant })}
+            disabled={pending}
+            onClick={() => void confirm()}
+          >
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

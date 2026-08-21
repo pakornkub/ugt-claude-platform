@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
-// kit-hash: b935db525796
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
+// kit-hash: 072e0060a67e
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ปลายทางของลิงก์ในอีเมล: app/(auth)/reset-password/page.tsx ส่ง token จาก
@@ -57,7 +57,9 @@ export function ResetPasswordForm({ token }: Readonly<{ token: string }>) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="new-password">รหัสผ่านใหม่</Label>
+        <Label htmlFor="new-password">
+          รหัสผ่านใหม่<span className="text-destructive">*</span>
+        </Label>
         <Input
           id="new-password"
           type="password"
@@ -69,7 +71,9 @@ export function ResetPasswordForm({ token }: Readonly<{ token: string }>) {
         <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="confirm-password">ยืนยันรหัสผ่านใหม่</Label>
+        <Label htmlFor="confirm-password">
+          ยืนยันรหัสผ่านใหม่<span className="text-destructive">*</span>
+        </Label>
         <Input
           id="confirm-password"
           type="password"

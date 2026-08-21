@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: 667eea691712
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: bc426c3ff664
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
@@ -11,6 +11,7 @@ import { useState, useTransition } from 'react';
 import { KeyRound, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { IconAction } from '@/components/ui/icon-action';
 import {
   Dialog,
   DialogContent,
@@ -97,7 +98,9 @@ export function CreateUserDialog({
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="new-user-name">ชื่อ</Label>
+              <Label htmlFor="new-user-name">
+                ชื่อ<span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="new-user-name"
                 value={name}
@@ -106,7 +109,9 @@ export function CreateUserDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="new-user-email">อีเมล</Label>
+              <Label htmlFor="new-user-email">
+                อีเมล<span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="new-user-email"
                 type="email"
@@ -117,7 +122,9 @@ export function CreateUserDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="new-user-password">รหัสผ่านตั้งต้น</Label>
+              <Label htmlFor="new-user-password">
+                รหัสผ่านตั้งต้น<span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="new-user-password"
                 type="password"
@@ -191,10 +198,10 @@ export function SetPasswordDialog({
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      {/* ปุ่มใน row ตาราง = IconAction เสมอ (DESIGN.md §0.4/§4) — tooltip + aria มากับ label */}
+      <IconAction label="ตั้งรหัสผ่าน" variant="soft-primary" onClick={() => setOpen(true)}>
         <KeyRound className="size-4" strokeWidth={2} />
-        ตั้งรหัสผ่าน
-      </Button>
+      </IconAction>
 
       <Dialog
         open={open}
@@ -216,7 +223,9 @@ export function SetPasswordDialog({
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="set-password">รหัสผ่านใหม่</Label>
+              <Label htmlFor="set-password">
+                รหัสผ่านใหม่<span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="set-password"
                 type="password"

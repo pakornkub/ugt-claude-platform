@@ -1,7 +1,8 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/query-state.tsx
-// kit-hash: 2c18e4cb6401
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/query-state.tsx
+// kit-hash: 10e960118030
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
-import { RotateCcw } from 'lucide-react';
+// RefreshCw = ลองใหม่/รีเฟรช · RotateCcw สงวนไว้กับ "กู้คืน" (icon mapping DESIGN.md §4)
+import { RefreshCw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Callout } from '@/components/ui/callout';
@@ -43,7 +44,7 @@ export function QueryErrorBanner({
       tone="danger"
       action={
         <Button size="sm" variant="outline" className="gap-1.5" onClick={onRetry}>
-          <RotateCcw className="size-3.5" strokeWidth={2} />
+          <RefreshCw className="size-3.5" strokeWidth={2} />
           {retryLabel}
         </Button>
       }

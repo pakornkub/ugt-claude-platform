@@ -1,9 +1,9 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
-// kit-hash: 98646929c9be
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: 97fe46c7ef3f
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { Settings, Loader2 } from 'lucide-react';
 import { initializeAdminAction } from '@/lib/actions/admin-setup';
@@ -12,15 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export function AdminSetupForm() {
   const [isPending, startTransition] = useTransition();
-  const [done, setDone] = useState(false);
 
   function handleSetup() {
     startTransition(async () => {
+      // สำเร็จ = action redirect('/admin/users') เอง — โค้ดหลัง await ไม่ได้รันต่อ
       const result = await initializeAdminAction();
       if (result?.error) {
         toast.error('ตั้งค่าไม่สำเร็จ', { description: result.error });
-      } else {
-        setDone(true);
       }
     });
   }
@@ -38,7 +36,7 @@ export function AdminSetupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button size="lg" className="w-full" disabled={isPending || done} onClick={handleSetup}>
+        <Button className="w-full" disabled={isPending} onClick={handleSetup}>
           {isPending ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" strokeWidth={2} />

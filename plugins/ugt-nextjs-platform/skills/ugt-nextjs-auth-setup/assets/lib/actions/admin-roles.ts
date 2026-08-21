@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
-// kit-hash: 7b23bfed6c42
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
+// kit-hash: a1c1f4b83643
 'use server';
 
 // lib/actions/admin-roles.ts — role CRUD for the (admin)/admin/roles page.
@@ -13,7 +13,9 @@ import { getUserPermissions } from '@/lib/get-user-permissions';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
-type RoleInput = { name: string; description: string; permissionKeys: string[] };
+// permissionIds = id ของแถวในตาราง Permission (ไม่ใช่คีย์ 'users:read') —
+// เคยชื่อ permissionKeys แล้วหลอกคนต่อ caller ให้ส่งคีย์จน connect ไม่เจอแถว
+type RoleInput = { name: string; description: string; permissionIds: string[] };
 
 async function requirePermission(key: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -40,7 +42,7 @@ export async function createRoleAction(input: RoleInput): Promise<ActionResult> 
       description: input.description.trim() || null,
       isSystem: false,
       permissions: {
-        create: input.permissionKeys.map((permissionId) => ({ permission: { connect: { id: permissionId } } })),
+        create: input.permissionIds.map((permissionId) => ({ permission: { connect: { id: permissionId } } })),
       },
     },
   });
@@ -70,7 +72,7 @@ export async function updateRoleAction(roleId: string, input: RoleInput): Promis
     }),
     prisma.rolePermission.deleteMany({ where: { roleId } }),
     prisma.rolePermission.createMany({
-      data: input.permissionKeys.map((permissionId) => ({ roleId, permissionId })),
+      data: input.permissionIds.map((permissionId) => ({ roleId, permissionId })),
     }),
   ]);
 

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/permission-group-select.ts
-// kit-hash: 1b144b0f5650
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/permission-group-select.ts
+// kit-hash: c90aff517653
 // source: ugt-hrms lib/services/permission-group-select.ts — installed by
 // ugt-nextjs-auth-setup
 //
@@ -20,13 +20,6 @@ export function groupState(
   if (count === 0) return 'none';
   if (count === groupIds.length) return 'all';
   return 'some';
-}
-
-/** แปลงสถานะกลุ่ม → ค่า checked ของ Checkbox (เลี่ยง nested ternary ที่ call site) */
-export function groupCheckedValue(state: GroupSelectState): boolean | 'indeterminate' {
-  if (state === 'all') return true;
-  if (state === 'some') return 'indeterminate';
-  return false;
 }
 
 /**

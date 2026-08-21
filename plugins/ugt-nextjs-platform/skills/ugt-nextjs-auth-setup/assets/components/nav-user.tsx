@@ -1,12 +1,14 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: a70677aead6c
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: 17a009314691
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
+// Base UI (base-mira) API: menu items take `onClick` — Radix's `onSelect` is
+// silently ignored here, which shipped once as "ปุ่ม logout กดไม่ได้" (4.25.0).
 'use client';
 
 import { useState, useTransition } from 'react';
-import { KeyRound, LogOut, Mail, MoreVertical, RefreshCw, UserCircle2 } from 'lucide-react';
+import { KeyRound, Loader2, LogOut, Mail, MoreVertical, UserCircle2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -115,7 +117,7 @@ export function NavUser({
             <DropdownMenuTrigger render={
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground"
               />
             }>
               <Avatar className="size-8 rounded-lg">
@@ -150,24 +152,14 @@ export function NavUser({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    setProfileOpen(true);
-                  }}
-                >
+                <DropdownMenuItem onClick={() => setProfileOpen(true)}>
                   <UserCircle2 strokeWidth={2} aria-hidden />
                   บัญชีผู้ใช้
                 </DropdownMenuItem>
                 {/* [METHOD: LOCAL] เฉพาะบัญชีที่รหัสผ่านอยู่ในระบบนี้ — บัญชี
                     SSO/LDAP เปลี่ยนที่ directory ขององค์กร */}
                 {authType === 'local' && (
-                  <DropdownMenuItem
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      setPasswordOpen(true);
-                    }}
-                  >
+                  <DropdownMenuItem onClick={() => setPasswordOpen(true)}>
                     <KeyRound strokeWidth={2} aria-hidden />
                     เปลี่ยนรหัสผ่าน
                   </DropdownMenuItem>
@@ -176,15 +168,15 @@ export function NavUser({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={isPending}
-                onSelect={(event) => {
-                  event.preventDefault();
+                closeOnClick={false} // ค้างเมนูไว้ให้เห็น spinner ระหว่างรอ server action
+                onClick={() => {
                   startTransition(async () => {
                     await signOut();
                   });
                 }}
               >
                 {isPending ? (
-                  <RefreshCw className="size-4 animate-spin" aria-hidden />
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
                 ) : (
                   <LogOut strokeWidth={2} aria-hidden />
                 )}

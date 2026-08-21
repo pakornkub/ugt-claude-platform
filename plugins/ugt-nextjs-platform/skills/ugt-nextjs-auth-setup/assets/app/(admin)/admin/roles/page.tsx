@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/app/(admin)/admin/roles/page.tsx
-// kit-hash: ab1b04b99c07
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/app/(admin)/admin/roles/page.tsx
+// kit-hash: 547f0679ea65
 // app/(admin)/admin/roles/page.tsx — server guard + fetch; interactivity in RolesManager.
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
@@ -32,7 +32,10 @@ export default async function AdminRolesPage() {
 
   return (
     <RolesManager
-      roles={roles.map((r) => ({ ...r, permissionIds: r.permissions.map((p) => p.permissionId) }))}
+      roles={roles.map(({ permissions, ...r }) => ({
+        ...r,
+        permissionIds: permissions.map((p) => p.permissionId),
+      }))}
       allPermissions={allPermissions}
       canCreate={perms.includes(PERMISSIONS.ROLES_CREATE)}
       canUpdate={perms.includes(PERMISSIONS.ROLES_UPDATE)}

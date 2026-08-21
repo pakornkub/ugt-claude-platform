@@ -194,7 +194,7 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
    เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
 5. **ประทับ stamp ให้ asset** (ทำหลัง bump version เสมอ) แล้วรันสคริปต์ตรวจ — ต้องเขียวทุกตัว:
    ```bash
-   node scripts/stamp-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
+   node scripts/stamp-kit-assets.mjs && node scripts/lint-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
    ```
    ตัว stamp เขียนเวอร์ชัน+hash ลงหัวไฟล์ asset ทุกตัว (กลไกของ `ugt-nextjs-kit-sync`
    ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · ตัวที่ 2 เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อป

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-database-setup/lib/env.ts
-// kit-hash: bcc7ee64a7b8
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-database-setup/lib/env.ts
+// kit-hash: 5a6ed3abd1c4
 // lib/env.ts — type-safe env validation via @t3-oss/env-nextjs + zod.
 // App code MUST import env from here — never read process.env directly.
 // (Non-Next.js Node projects: swap to @t3-oss/env-core and drop the client block.)
@@ -29,7 +29,15 @@ export const env = createEnv({
    * Must be prefixed with NEXT_PUBLIC_.
    */
   client: {
-    // (none yet — add NEXT_PUBLIC_* vars here as features need them)
+    // ── EXTENSION POINT ──────────────────────────────────────────────────
+    // NEXT_PUBLIC_* vars go HERE (not in `server`) **and** must be listed in
+    // runtimeEnv below, or they are undefined at runtime. auth-setup's
+    // NEXT_PUBLIC_BASE_PATH is the critical one — missing it silently falls
+    // back to the default cookie prefix → ERR_TOO_MANY_REDIRECTS on a shared
+    // domain. Example:
+    //   NEXT_PUBLIC_BASE_PATH: z.string().default(''),
+    //   NEXT_PUBLIC_APP_NAME: z.string().optional(),
+    // ─────────────────────────────────────────────────────────────────────
   },
 
   /**
@@ -40,6 +48,8 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    // EXTENSION POINT: every client var above must appear here too, e.g.
+    //   NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH,
   },
 
   /**

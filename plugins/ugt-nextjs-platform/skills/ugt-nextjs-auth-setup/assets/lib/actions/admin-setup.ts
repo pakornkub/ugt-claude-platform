@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
-// kit-hash: f95949883d3d
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
+// kit-hash: 339222ee9a89
 'use server';
 
 // lib/actions/admin-setup.ts — first-admin bootstrap Server Action.
@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 import { generateId } from 'better-auth';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { ALL_PERMISSIONS } from '@/lib/permissions';
+import { syncPermissionsIfNeeded } from '@/lib/permissions-sync';
 import { isAdminInitialized } from '@/lib/get-user-permissions';
 
 type PermissionIdRow = { id: string };
@@ -30,18 +30,11 @@ export async function initializeAdminAction(): Promise<{
   const alreadyDone = await isAdminInitialized();
   if (alreadyDone) return { error: 'Admin system already initialized' };
 
-  // 1. Seed permissions
-  // Guard: isAdminInitialized was false, so the permission table should be empty.
-  // createMany without skipDuplicates is safe here. (Permissions added AFTER this
-  // initial seed must be upserted by a separate sync — see references/rbac.md.)
-  await prisma.permission.createMany({
-    data: ALL_PERMISSIONS.map((p) => ({
-      id: generateId(24),
-      key: p.key,
-      label: p.label,
-      group: p.group,
-    })),
-  });
+  // 1. Seed permissions — upsert เสมอ ห้าม createMany เปล่า: isAdminInitialized
+  // เช็คแค่ role ระบบ ไม่ได้เช็คตาราง Permission — bootstrap รอบก่อนที่พังกลางคัน
+  // (seed สำเร็จแต่ยังไม่ได้สร้าง role) จะทิ้งแถวไว้ แล้ว retry ชน unique key ค้าง
+  // อยู่หน้า setup ตลอด (skipDuplicates ก็ใช้ไม่ได้บน SQL Server)
+  await syncPermissionsIfNeeded();
 
   // 2. Load all permission rows (by key to avoid stale ids)
   const permissions: PermissionIdRow[] = await prisma.permission.findMany({ select: { id: true } });

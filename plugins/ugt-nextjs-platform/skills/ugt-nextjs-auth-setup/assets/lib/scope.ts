@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/scope.ts
-// kit-hash: e8f8385c0965
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/scope.ts
+// kit-hash: 91529294adc6
 // source: ugt-hrms lib/services/employee-monitor-scope.ts + hr-lookup.ts
 // (getSubordinates / collectSubtreeEmpCodes) — generalized by ugt-nextjs-auth-setup
 //
@@ -20,7 +20,10 @@ export interface DataScope {
   viewAll: boolean;
   /** รหัสพนักงานของเจ้าของ session; null เมื่อบัญชียังไม่ผูกกับพนักงาน */
   ownEmpCode: string | null;
-  /** หน่วยงานของเจ้าของ session — ใช้ทำ scope ระดับหน่วยงาน */
+  /** หน่วยงานของเจ้าของ session — **ข้อมูลดิบเฉย ๆ ยังไม่มี helper บังคับใช้**:
+   * isEmpCodeAllowed/scopeWhere ทำงานด้วย empCode ล้วน · ถ้าจะ scope ระดับ
+   * หน่วยงาน ให้เพิ่ม scopeWhereOrg ที่นี่ อย่า filter orgCode เองราย route
+   * (จะเกิดช่อง "list กรองแบบหนึ่ง detail เช็คอีกแบบ" ที่ rules เตือนไว้) */
   ownOrgCode: string | null;
   /** รหัสพนักงานของลูกน้องทั้งสาย (ไม่รวมตัวเอง); ว่างเมื่อไม่มีหรือยังไม่ผูก */
   subordinateEmpCodes: string[];

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/components/forgot-password-dialog.tsx
-// kit-hash: a50627afdd09
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/forgot-password-dialog.tsx
+// kit-hash: 52d71caed9c8
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] + ต้องมี ugt-nextjs-mail-setup
 // เป็น dialog ไม่ใช่หน้าใหม่ — flow นี้มีช่องเดียวและจบในตัว ไม่คุ้มกับอีกหนึ่ง route
@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Callout } from '@/components/ui/callout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { forgotPasswordAction } from '@/lib/actions/password';
@@ -65,13 +66,11 @@ export function ForgotPasswordDialog({
 
         {sent ? (
           <>
-            <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm">
-              <MailCheck className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-              <p>
-                หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว
-                ลิงก์ใช้ได้ครั้งเดียวและหมดอายุใน 60 นาที
-              </p>
-            </div>
+            {/* กล่องแจ้งมาตรฐาน = Callout (DESIGN.md §6) — ไม่ทำกล่อง border เอง */}
+            <Callout tone="success" icon={MailCheck}>
+              หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว
+              ลิงก์ใช้ได้ครั้งเดียวและหมดอายุใน 60 นาที
+            </Callout>
             <DialogFooter>
               <Button onClick={() => handleOpenChange(false)}>ปิด</Button>
             </DialogFooter>
@@ -79,7 +78,9 @@ export function ForgotPasswordDialog({
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="forgot-email">อีเมล</Label>
+              <Label htmlFor="forgot-email">
+                อีเมล<span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="forgot-email"
                 type="email"

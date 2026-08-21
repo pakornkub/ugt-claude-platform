@@ -4,11 +4,27 @@ paths:
   - "lib/auth-client.ts"
   - "lib/ldap.ts"
   - "lib/permissions.ts"
+  - "lib/permissions-sync.ts"
+  - "lib/permission-group-select.ts"
   - "lib/get-user-permissions.ts"
   - "lib/actions/**"
   - "proxy.ts"
   - "app/api/auth/**"
+  - "app/(admin)/**"
+  - "app/(admin-setup)/**"
   - "components/login-form.tsx"
+  - "components/nav-user.tsx"
+  - "components/admin-nav.tsx"
+  - "components/roles-manager.tsx"
+  - "components/role-form.tsx"
+  - "components/users-table.tsx"
+  - "components/audit-logs-table.tsx"
+  - "components/admin-user-actions.tsx"
+  - "components/user-role-select.tsx"
+  - "components/change-password-dialog.tsx"
+  - "components/forgot-password-dialog.tsx"
+  - "components/reset-password-form.tsx"
+  - "components/admin-setup-form.tsx"
   - "lib/password-policy.ts"
   - "lib/directory.ts"
   - "lib/scope.ts"
@@ -18,6 +34,23 @@ paths:
 <!-- Owned by ugt-nextjs-auth-setup — may be overwritten wholesale on /plugin update. -->
 
 # Auth / RBAC rules (loads when touching auth, guards, server actions)
+
+## Admin UI — Base UI (base-mira) + design agreement
+
+The admin pages/components in this list are kit UI. Two rules that already
+shipped as bugs once (4.25.0):
+
+- **Base UI API, never Radix**: triggers `render={<X />}` · menu items
+  `onClick` (Radix's `asChild`/`onSelect` are ignored silently — the button
+  renders and does nothing) · checkbox tri-state = `checked` boolean +
+  `indeterminate` prop.
+- **DESIGN.md applies here too**: destructive → `ConfirmActionDialog`
+  (never `window.confirm`) · row buttons → `IconAction` + `soft-*` ·
+  page headers → `ui/page-shell` (title + subtitle) · long checklists →
+  `Sheet`, not a fixed-height Dialog.
+- **Permission keys ship in pairs**: a key in `PERMISSIONS` must have its
+  `ALL_PERMISSIONS` seed entry (and vice versa) — a key without a seed can
+  never be granted; a seed without a consumer is a checkbox that does nothing.
 
 ## Cookie prefix — the single most common breakage
 

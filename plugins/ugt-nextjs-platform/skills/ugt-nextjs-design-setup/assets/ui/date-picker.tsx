@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 6a676ff5f9cb
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: c02046f30fdc
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -57,6 +57,10 @@ export function DatePicker({
   triggerSuffix,
   holidays,
 }: Readonly<DatePickerProps>) {
+  // ปิด popover ทันทีที่เลือกวัน — ปล่อยค้างไว้จะบังช่องถัดไป (เจ็บจริงตอนใช้คู่ใน
+  // DateRangePicker: เลือก "จาก" แล้วปฏิทินบังช่อง "ถึง")
+  const [open, setOpen] = React.useState(false);
+
   const holidaySet = React.useMemo(() => new Set(holidays ?? []), [holidays]);
   const hasHolidays = holidaySet.size > 0;
 
@@ -69,7 +73,7 @@ export function DatePicker({
     : modifiersClassNames;
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button
@@ -92,7 +96,10 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={value}
-          onSelect={onSelect}
+          onSelect={(date) => {
+            onSelect(date);
+            setOpen(false);
+          }}
           disabled={disabled}
           autoFocus
           locale={dateFnsLocale}

@@ -13,8 +13,10 @@ description: >
   (served from `public/`), or an uploaded `.svg`/`.html` running as script on
   your own domain.
   Needs the database and auth installed first (the table, the permissions and
-  the audit log all come from there). Not for exporting/downloading generated
-  files such as Excel reports — that is ordinary feature work with no storage.
+  the audit log all come from there), and the org UI kit from
+  ugt-nextjs-design-setup (the upload component imports `ui/icon-action` and
+  `lib/format`). Not for exporting/downloading generated files such as Excel
+  reports — that is ordinary feature work with no storage.
 ---
 
 # UGT Upload Setup — attachments on a volume, scanned, and guarded

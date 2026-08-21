@@ -1,7 +1,8 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
-// kit-hash: c29a74a5cee7
-
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
+// kit-hash: 17db42bc396d
+// ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — ไฟล์นี้ import
+// ui/icon-action กับ lib/format (formatFileSize) ซึ่ง kit เป็นคนติดตั้ง
 import * as React from 'react';
 import { Paperclip, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';

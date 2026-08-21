@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.21.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 55a36af4463c
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: 86c1b84e6c4e
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -124,11 +124,11 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ['keycloak'],
-      // Rows created by LDAP upsert / createLocalUserAction have
-      // emailVerified: false, and since better-auth 1.6.11 implicit linking
-      // into an unverified local row is blocked by default (nOAuth fix) — the
-      // first SSO login of an existing LDAP/local user would fail with
-      // account_not_linked. Relaxing it is safe HERE ONLY because
+      // better-auth ≥1.6.11 blocks implicit linking into a local row unless
+      // emailVerified is true (nOAuth fix). Our LDAP upsert / admin-create DO
+      // set emailVerified: true, but the flag stays relaxed so linking never
+      // hinges on that invariant holding across every code path (e.g. a row
+      // written before that fix, or a future writer that forgets). Safe HERE ONLY because
       // self-registration is closed (มติ 2026-08-11): every local row is
       // admin- or directory-created, never attacker-controlled.
       requireLocalEmailVerified: false,

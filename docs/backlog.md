@@ -1,7 +1,7 @@
 # Platform Backlog — งานที่รู้แล้วว่าต้องทำ แต่ยังไม่ได้ทำ
 
 > **Status:** Living · **Date:** 2026-08-12 · **Applies-to:** ทั้ง marketplace
-> **Last-reviewed:** 2026-08-21 (ไล่เทียบกับ 4.17.0–4.24.0 + core 2.4.0–2.6.0 แล้ว — ไม่มีข้อไหนถูกปิดเพิ่ม รายการเปิดยังเปิดจริงทุกข้อ) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
+> **Last-reviewed:** 2026-08-21 (audit ปูพรม 4 agents หลัง field report CR System — ของวิกฤตปิดใน 4.25.0, ที่เหลือลงข้อ 5) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
 
 กติกา: ข้อที่ปิดแล้ว**ขีดทิ้งพร้อมชี้รุ่น** ไม่ลบ (ประวัติว่าเคยเป็น backlog มีค่า) ·
 งานที่เป็นของโปรเจคใดโปรเจคหนึ่งไม่อยู่ที่นี่ (ไปที่ project-notes/decisions ของโปรเจคนั้น
@@ -52,6 +52,39 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HSTS, X-Frame-Options ฯลฯ) · rate limiter
 ของ auth เป็น in-memory ต่อ instance (มี TODO ในโค้ดกำกับแล้ว) — deploy เดี่ยว
 ตามมาตรฐานปัจจุบันไม่กระทบ ต้องแก้เมื่อไปหลาย instance
+
+### 5. คงค้างจาก audit ปูพรม 2026-08-21 (4 agents: Base UI API / DESIGN / SKILL flows / stale ports)
+
+ของวิกฤตแก้ไปแล้วใน 4.25.0 (ดู CHANGELOG) — ที่เหลือจัดกลุ่มตามชนิด:
+
+**ต้องมีมติ design ก่อน (ขัดกันเองระหว่างข้อตกลง/preview/asset):**
+- ปุ่ม "เพิ่ม/สร้าง" — DESIGN §1 บอกเขียวทึบ (`success`) แต่ preview+asset ใช้ primary ทั้งคู่ · เลือกฝั่งแล้วแก้อีกฝั่ง
+- badge ชื่อ role — §4 บอก `outline` แต่ preview+asset ใช้ `secondary` · เลือกฝั่ง
+- แถว system role — asset ซ่อนปุ่มแก้/ลบ, preview วาด disabled+tooltip (และมีคอลัมน์ "ผู้ใช้" ที่ asset ไม่มี) · เลือกแบบแล้ว sync
+- `detail-row.tsx` docblock ประกาศ "label ซ้ายคงที่" ขัด §4 `justify-between` + gap/สูงต่ำกว่า spec
+- ฟอร์ม auth ทั้งชุดเป็น useState ไม่ใช่ ui/field+RHF+zod ตาม §4 — จะ migrate หรือบันทึกเป็นข้อยกเว้น §9/§10
+- ข้อความ title/subtitle/หัวคอลัมน์หน้า admin ใน preview ไม่ตรง asset หลายจุด (preview §13 ใช้ "Audit logs" อังกฤษ ขัด §5 เอง) — sync ทีเดียวทั้ง §13
+- audit-logs: ขอบ filter คิดที่ +07:00 แต่จอ format ตาม timezone ผู้ดู — ต้องเลือก contract เดียว (แล้วบันทึกใน format.ts)
+- audit-logs toolbar มี Input ค้นหาเปล่าที่ชน §3 (ช่องค้นหาเป็นของ DataTable) และชน verify ของ skill เอง — ต้องออกแบบ global-search โหมด server ใน DataTable
+- DataTable สามก้อน (toolbar/ตาราง/pagination) ยังไม่ห่อการ์ดตาม §3 — กระทบทุกหน้า ทุกโปรเจค ต้องทำเป็นรุ่นเฉพาะ
+- `theme-toggle` เป็นปุ่ม icon นอก IconAction — จะทำ exception topbar เป็นมติ หรือย้ายเข้า IconAction
+
+**งานโค้ดที่ตามมาได้เลย (ยังไม่เข้า 4.25.0 เพราะใหญ่/ต้องทดสอบ):**
+- `AdminNav` fallback เป็น hand-rolled nav — rebuild บน shadcn Sidebar (+SidebarProvider) ไม่งั้น NavUser crash ในโปรเจค fallback · ระหว่างนี้ header ไฟล์ต้องเตือน
+- date-picker label ผ่าน date-fns ตรง ไม่ผ่าน lib/format → โปรเจค พ.ศ. จอไม่ตรงตาราง · รวม toDateKey ซ้ำสองที่เข้า formatExportDate
+- `admin-setup-form`/`(admin-setup)` ยังไม่เข้า kit scale (text-2xl override, hand-built icon circle)
+- tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title — ควรเข้า IconAction/ระบบขนาด
+- `check-kit-freshness.mjs` ไม่ scan root files (`proxy.ts`, `vitest.config.ts`, `prisma.config.ts`) + จำกัด .ts/.tsx — fix ของ proxy จะไม่ถูกรายงานตลอดกาล
+- mail-setup สัญญา `/admin/mail-templates` ไว้ 3 ที่แต่ไม่มีหน้า — ทำหน้า หรือลดคำสัญญา
+- upload-setup: คำถาม retention ไม่มี cleanup job รองรับ (รอมติ cron ข้อ 3) · ไม่มี placeholder table/verify · ลำดับ Upload↔CI ใน full-setup ต้องสลับหรือเพิ่มขั้น close-out
+- verify script หลายตัวมีข้อ checklist ที่ machine-checkable แต่ไม่ implement (mkdir-p↔compose-bind ทั้ง 3 CI skills · admin-handoff placeholder scan · no-memo ของ pitfalls · zod deprecated ของ clean-code · ฯลฯ — รายละเอียดใน audit report ของ session 2026-08-21)
+- pitfalls references ยังอธิบายด้วยพฤติกรรม Radix (Select value="") — re-verify กับ Base UI แล้ว re-word
+- full-setup: rules ของ mail/upload ไม่อยู่ในลิสต์ §4.2 + verify · เลขข้อ interview ซ้ำ
+- database: คำถาม dev/prod แยก + requestTimeout ไม่มีผู้บริโภค · naming-conventions.md ไม่มีข้อยกเว้น Better Auth singular · `__LINKED_SERVER__` อยู่ผิดตาราง
+- design-setup: ไม่มี placeholder table (13 ตัว) · verify ไม่ scan MOTION.md/design-questions.md · export.test.ts ไม่อยู่ใน inventory
+- python/php cicd: subpath answer ไม่มี step รองรับ · `[BATCH]` marker หายใน dev compose (python) · `.env.example` ไม่มี asset (python) · `[WEB]` checklist ขัด §2.8 (php)
+- nextjs cicd: ไม่มี `.dockerignore` step (พี่น้อง php/python มี) · ตาราง placeholder ไม่ครบ 5 ตัวของ admin-handoff
+- ugt-core: ugt-requirements สร้าง board.md เองไม่ copy skeleton ของ ugt-context · ugt-handoff template `YYYY-MM-DD` ไม่มีวงเล็บแหลมให้ตรง verify
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

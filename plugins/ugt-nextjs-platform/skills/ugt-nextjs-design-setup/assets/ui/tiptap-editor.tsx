@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
-// kit-hash: 866e9d2466c6
+// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+// kit-hash: 965c2e3b1848
 
 // source: ugt-hrms components/ui/tiptap-editor.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // editor rich text ตัวเดียวของทั้งแอป (ห้ามใช้ editor อื่น) — ติดตั้งเฉพาะโปรเจคที่มี rich text
@@ -35,6 +35,8 @@ import {
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 export interface TiptapEditorHandle {
@@ -121,6 +123,16 @@ function ToolbarAction({
 }
 
 function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonly<ToolbarProps>) {
+  const [linkOpen, setLinkOpen] = React.useState(false);
+  const [linkUrl, setLinkUrl] = React.useState('');
+
+  // url ว่าง (หรือกด "ลบลิงก์") = เอาลิงก์ออก — พฤติกรรมเดิมของ prompt
+  const applyLink = (url = linkUrl) => {
+    if (url === '') editor.chain().focus().unsetLink().run();
+    else editor.chain().focus().setLink({ href: url, target: '_blank' }).run();
+    setLinkOpen(false);
+  };
+
   const s = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -259,21 +271,59 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
 
       <ToolbarSep />
 
-      <ToolbarToggle
-        onClick={() => {
-          if (globalThis.window === undefined) return;
-          const prev = (editor.getAttributes('link').href as string) ?? '';
-          const url = globalThis.window.prompt('URL:', prev);
-          if (url === null) return;
-          if (url === '') editor.chain().focus().unsetLink().run();
-          else editor.chain().focus().setLink({ href: url, target: '_blank' }).run();
+      {/* ลิงก์ผ่าน Popover ของ kit — native window.prompt ต้องห้าม (ไม่ theme,
+          บล็อกทั้ง thread และ lint-kit-assets ตรวจจับ) */}
+      <Popover
+        open={linkOpen}
+        onOpenChange={(open) => {
+          setLinkOpen(open);
+          if (open) setLinkUrl((editor.getAttributes('link').href as string) ?? '');
         }}
-        active={s.link}
-        title="Link"
-        disabled={disabled}
       >
-        <Link2 className="size-3.5" />
-      </ToolbarToggle>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-pressed={s.link}
+              title="Link"
+              aria-label="Link"
+              disabled={disabled}
+              className={cn(
+                'size-7 p-0',
+                s.link && 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
+              )}
+            />
+          }
+        >
+          <Link2 className="size-3.5" />
+        </PopoverTrigger>
+        <PopoverContent className="w-72 space-y-2 p-3">
+          <Input
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            placeholder="https://…"
+            aria-label="URL"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                applyLink();
+              }
+            }}
+          />
+          <div className="flex justify-end gap-2">
+            {s.link && (
+              <Button type="button" variant="outline" size="sm" onClick={() => applyLink('')}>
+                ลบลิงก์
+              </Button>
+            )}
+            <Button type="button" size="sm" onClick={() => applyLink()}>
+              บันทึก
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
       <ToolbarAction
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
         title="Horizontal rule"

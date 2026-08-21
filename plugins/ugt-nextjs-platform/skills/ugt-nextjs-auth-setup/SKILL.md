@@ -121,7 +121,14 @@ Ask all of these **in a single message** before doing anything:
      `docs/admin-handoff.md` already exists (e.g. cicd-setup wrote it),
      update its Keycloak section instead of overwriting the file.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
-5. **Who is the first admin?** (first person to log in visits `/admin/setup` and becomes Administrator with one click)
+5. ~~Who is the first admin?~~ — **do NOT ask this.** The answer cannot be
+   used: SSO/LDAP rows may not be pre-created (มติ 2026-08-11), so nothing can
+   be seeded from a name given in an interview — asking creates the
+   expectation that it will be. Instead: (a) the protected app layout gates on
+   `isAdminInitialized()` and redirects every login to `/admin/setup` until the
+   first admin exists (§5.5), and (b) the install summary + `docs/admin-handoff.md`
+   must state, in Thai, that **the first person to log in becomes Administrator
+   with one click on `/admin/setup`** — so the team chooses who logs in first.
 6. **Is there a central employee database to read over a linked server?**
    (default: yes for org apps) — SSO/LDAP give only username + email + display
    name. If the app needs employee code, department, position or supervisor,
@@ -177,10 +184,22 @@ only for tabular data" is the org default.
 ```bash
 npm i better-auth zod
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
-npx shadcn@latest init    # only if the project has no shadcn yet — creates components.json + lib/utils.ts (the cn() the login form uses)
-npx shadcn@latest add button input label tabs card sonner   # login/setup forms
-npx shadcn@latest add table select checkbox badge dialog    # the admin pages (users/roles/audit-logs)
+npx shadcn@latest add button input label tabs card sonner            # login/setup forms
+npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avatar dropdown-menu sidebar tooltip   # admin pages + NavUser (NavUser imports ui/sidebar even in a topbar shell; IconAction/TruncatedText need tooltip)
 ```
+
+> `TooltipProvider` must already wrap the root layout (design-setup step 3
+> installs it) — mira's Tooltip does not self-wrap a provider, and IconAction
+> in the admin tables crashes prerender without it.
+
+> **No shadcn yet?** Never run a plain `npx shadcn@latest init` here — it
+> initializes the default (Radix) style while every kit asset is written for
+> **base-mira (Base UI, `render`/`onClick` API)**; the components would render
+> but menu items silently stop responding. The org preset init belongs to
+> `ugt-nextjs-design-setup` (its §Step 3 has the exact command) — run that
+> skill first, as §4 already requires. With design-setup installed, the `add`
+> lines above are mostly no-ops (its base set covers them) — keep them for
+> projects that trimmed the base set.
 
 Then mount `<Toaster richColors />` (from sonner) in the root layout
 (`app/layout.tsx`) — otherwise `toast.*()` in the login form renders nothing.
@@ -263,7 +282,18 @@ common install mistake.
 2. Protected group layout (`app/(app)/layout.tsx`):
    `auth.api.getSession({ headers: await headers() })` → no session →
    `redirect('/login')` (distinguish `?reason=session_expired` when the cookie
-   is still present — see `references/auth-flows.md`)
+   is still present — see `references/auth-flows.md`), **then the first-admin
+   gate** — without it, the first user logs in to a blank permission-less app
+   with no hint that `/admin/setup` exists (field report 2026-08-21):
+
+   ```tsx
+   if (!(await isAdminInitialized())) redirect('/admin/setup');
+   ```
+
+   (`isAdminInitialized` caches its positive result, so this costs one COUNT
+   query per request only until the bootstrap happens, then nothing. The setup
+   page explains itself and bounces away once an admin exists, so the redirect
+   is safe for every user.)
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
 4. **Identity block in the shell** — render `<NavUser>` in the sidebar footer
@@ -274,8 +304,12 @@ common install mistake.
    (email · last login method). DESIGN.md §3 fixes the placement and the two
    menu items, so users find "who am I / sign out" in the same spot in every
    app.
-5. First deployment: log in → visit `/admin/setup` → one click → Administrator
-   role → redirects to `/admin/users`, which now really exists
+5. First deployment: log in → the layout gate (step 2) lands on `/admin/setup`
+   → one click → Administrator role → redirects to `/admin/users`, which now
+   really exists. Write this into `docs/admin-handoff.md` (section "ผู้ดูแลระบบ
+   คนแรก", Thai): *คนแรกที่ login จะถูกพาไปหน้า `/admin/setup` และกดปุ่มเดียว
+   เพื่อเป็น Administrator — เลือกคนที่จะ login คนแรกให้ถูกคน* — do not promise
+   any pre-seeded admin account; there is none by design (§3 Q5).
    **[Local-only projects have a chicken-and-egg here]**: a local account can
    only be made from `/admin/users`, which needs a login, and nobody has one
    yet. SSO/LDAP never hit this — their accounts appear on the first successful
@@ -331,7 +365,7 @@ does nothing — always do both ends or neither.
 
 | Placeholder | Meaning | Example |
 | --- | --- | --- |
-| `__PROJECT_NAME__` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (~line 181, flagged with a ⚠️ PLACEHOLDER comment); don't miss it** | `expense-portal` |
+| `__PROJECT_NAME__` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (flagged with a ⚠️ PLACEHOLDER comment — grep for it; line numbers drift); don't miss it** | `expense-portal` |
 | `__BASE_PATH__` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
 | `__KEYCLOAK_HOST__` | the org's central Keycloak host | — |
 | `__REALM__` | the org's central realm | — |
@@ -383,6 +417,8 @@ does nothing — always do both ends or neither.
 | Block edit/delete of `role.isSystem` roles in `admin-roles.ts` | Let the Administrator role's permissions be edited away (locks out everyone) |
 | Block a user changing their own role in `assignUserRoleAction` | Let an admin accidentally demote themselves with no one else to undo it |
 | Call `syncPermissionsIfNeeded()` from `app/(admin)/layout.tsx` | Add to `ALL_PERMISSIONS` and forget the seed reaches the database |
+| UI follows the kit's Base UI (base-mira) API: `render` on triggers, `onClick` on menu items | Radix idioms `asChild` / `onSelect` — they are silently ignored by Base UI and the button just stops working (shipped once: "ปุ่ม logout กดไม่ได้") |
+| Destructive actions confirm via the kit's `ConfirmActionDialog`; row buttons via `IconAction` + `soft-*`; page headers via `page-shell` | `window.confirm`, bare ghost icon buttons, hand-written `<h1>` — DESIGN.md §3/§4 apply to these admin pages too |
 
 ## 8. Verification Checklist
 
@@ -436,8 +472,18 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
 - [ ] [Approval] An employee with no chain configured gets "ติดต่อฝ่ายบุคคล",
       not the same message as a system error
 - [ ] Static assets load (no `Unexpected token '<'` in the console)
+- [ ] Fresh database: log in as anyone → the app layout redirects to
+      `/admin/setup` (no blank permission-less page); after bootstrap the
+      redirect stops for everyone
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away
+- [ ] NavUser (มุมล่าง sidebar): เปิดเมนูแล้วกด "บัญชีผู้ใช้" เปิดการ์ดโปรไฟล์จริง
+      และ "ออกจากระบบ" ออกจริง (จับ `onSelect`/`asChild` ค้างจาก Radix —
+      Base UI เมินเงียบ ปุ่มจะดูปกติแต่กดแล้วไม่เกิดอะไร)
+- [ ] `/admin/roles`: ปุ่มลบเปิด `ConfirmActionDialog` (ไม่ใช่ browser confirm),
+      ฟอร์ม create/edit เปิดเป็น Sheet ที่ checklist สิทธิ์เลื่อนได้จนสุด,
+      ปุ่มแถวเป็น `IconAction` สี soft (แก้ไข=น้ำเงิน · ลบ=แดง) มี tooltip
+- [ ] ทั้งสามหน้า admin มี title + subtitle จาก `page-shell` (ไม่ใช่ `<h1>` เปล่า)
 - [ ] `/admin/users`: the Administrator (or any user with `USERS_READ`) sees
       every user, and can reassign another user's role — but not their own
       (the dropdown is disabled on their own row)
