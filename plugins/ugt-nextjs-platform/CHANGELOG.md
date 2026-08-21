@@ -41,6 +41,8 @@ around.
   filter funnels instead of sort arrows (client mode has no sort toggle in the
   shipped component).
 
+## 4.23.0 (2026-08-20)
+
 Companion to ugt-core 2.5.0 (the 4-hour-setup field report). Three changes,
 all about *how the work runs*, none about what gets installed:
 
