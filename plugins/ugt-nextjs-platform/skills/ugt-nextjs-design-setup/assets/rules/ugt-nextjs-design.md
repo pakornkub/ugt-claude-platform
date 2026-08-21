@@ -25,7 +25,12 @@ beautification skill. The short version that catches 90% of violations:
 - lucide only, per the fixed icon mapping in DESIGN.md §4 — never emoji,
   never a different icon for the same action.
 - Tables → `DataTable`. Server-paginated data must sort/filter server-side
-  (URL state) — client-sorting a partial page silently lies.
+  (URL state) — client-sorting a partial page silently lies. DataTable wraps
+  itself in the §3 card — never wrap it in another Card (`card={false}` for
+  tables inside a dialog/sheet).
+- Can't-do-because-of-**permission** → hide the button. Can't-do-because-of-
+  **business rule** (system row, record in use) → `IconAction disabled` with
+  the reason as its label/tooltip (มติ 2026-08-21).
 - Dates/numbers → `lib/format.ts` only. Screen `DD/MM/YYYY`; exported files
   ISO `yyyy-MM-dd` — different on purpose.
 - Excel/CSV export → `lib/export.ts` + `ui/export-menu` from a **Route

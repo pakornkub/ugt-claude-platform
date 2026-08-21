@@ -359,7 +359,8 @@
 
         <div class="cmp-title">สีประจำ action (ในตารางใช้ variant soft-* เพื่อไม่ให้สีตะโกนทุกแถว)</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <button class="btn btn-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่ม / Import = เขียวทึบ</button>
+          <button class="btn btn-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่ม / สร้าง = primary</button>
+          <button class="btn btn-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-check"/></svg>อนุมัติ = เขียวทึบ</button>
           <button class="btn btn-soft-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg>แก้ไข = น้ำเงิน</button>
           <button class="btn btn-soft-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-rotate"/></svg>กู้คืน = เขียว</button>
           <button class="btn btn-soft-destructive" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg>ลบ = แดง</button>
@@ -978,7 +979,7 @@
               <span class="ava" style="width:56px;height:56px;border-radius:999px;font-size:18px;
                 box-shadow:0 0 0 4px var(--popover)">สจ</span>
               <p style="margin-top:8px;font-size:14px;font-weight:600">สมชาย ใจดี</p>
-              <span class="lbadge sec" style="margin-top:6px">ผู้อนุมัติระดับต้น</span>
+              <span class="lbadge" style="margin-top:6px">ผู้อนุมัติระดับต้น</span>
             </div>
             <div style="padding:14px 16px 18px">
               <div style="border:1px solid var(--border-c);border-radius:var(--r-card);background:var(--card)">
@@ -1430,26 +1431,26 @@
               </div>
               <table class="dt">
                 <thead><tr>
-                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>คำอธิบาย<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th class="num">สิทธิ์</th><th class="num">ผู้ใช้</th><th></th>
+                  <th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>บทบาท<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th><span class="hcell"><svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-grip"/></svg>คำอธิบาย<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-filter"/></svg></span></th><th class="num">สิทธิ์</th><th></th>
                 </tr></thead>
                 <tbody>
                   <tr>
                     <td style="white-space:nowrap"><b style="font-weight:500">Administrator</b>
-                      <span class="lbadge sec" style="margin-left:6px">ระบบ</span></td>
+                      <span class="lbadge" style="margin-left:6px">ระบบ</span></td>
                     <td class="muted">สิทธิ์ทั้งหมด</td>
-                    <td class="num">9</td><td class="num">2</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td class="num">9</td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="บทบาทระบบ — แก้ไขไม่ได้" title="บทบาทระบบ — แก้ไขไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="บทบาทระบบ — ลบไม่ได้" title="บทบาทระบบ — ลบไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                   <tr>
                     <td><b style="font-weight:500">หัวหน้างาน</b></td>
                     <td class="muted">อนุมัติและดูข้อมูลทีมตัวเอง</td>
-                    <td class="num">7</td><td class="num">14</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td class="num">7</td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                   <tr>
                     <td><b style="font-weight:500">Tester</b></td>
                     <td class="muted">ทดสอบระบบ (เมลเข้าตัวเองเท่านั้น)</td>
-                    <td class="num">3</td><td class="num">0</td>
+                    <td class="num">3</td>
                     <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                 </tbody>

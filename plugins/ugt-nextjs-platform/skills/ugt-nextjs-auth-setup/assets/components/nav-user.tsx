@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: 17a009314691
+// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: 6c6c1f86ee37
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -206,8 +206,9 @@ export function NavUser({
               <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
             <p className="mt-3 text-base font-semibold">{name}</p>
+            {/* ป้ายชื่อ role = ตัวระบุ → Badge outline (มติ 2026-08-21) */}
             {roleName && (
-              <Badge variant="secondary" className="mt-2">
+              <Badge variant="outline" className="mt-2">
                 {roleName}
               </Badge>
             )}

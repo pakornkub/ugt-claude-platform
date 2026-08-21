@@ -1,5 +1,31 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.26.0 (2026-08-21)
+
+Four design มติ (2026-08-21) resolving the contract-vs-artifact contradictions
+the 4.25.0 audit surfaced — each decided, then contract + assets + preview
+aligned in the same change:
+
+- **เพิ่ม/สร้าง buttons are `primary`** (DESIGN §1 amended; it said เขียวทึบ
+  while every shipped artifact used primary). `success` now explicitly means
+  อนุมัติ/ยืนยันเชิงบวก. Preview's action-color demo updated.
+- **Business-rule-disabled row buttons show disabled + tooltip reason** —
+  hiding stays permission-only (§3). `IconAction` gains `disabled` support
+  (span-wrapped trigger so the tooltip still fires — disabled buttons swallow
+  pointer events); system-role rows in `/admin/roles` render both buttons
+  disabled with "บทบาทระบบ — แก้ไข/ลบไม่ได้". Preview §13 aligned (both
+  Administrator buttons disabled; the fictional "delete disabled because the
+  role has users" state and the "ผู้ใช้" column the asset never shipped are
+  removed).
+- **`DataTable` wraps itself in the §3 card** (toolbar as card head, table
+  flush, pagination as card foot — ≥sm only; mobile keeps its row-cards).
+  New `card` prop defaults on; pass `card={false}` inside dialogs/sheets.
+  Rules file forbids double-wrapping.
+- **Identifier badges are `Badge variant="outline"`** per the §4 semantic
+  table (`secondary` stays reserved for closable filter chips) — NavUser role
+  badge and the roles-table "ระบบ" badge (also un-Englished from "system")
+  switched; preview's two `lbadge sec` sites aligned.
+
 ## 4.25.0 (2026-08-21)
 
 `ugt-nextjs-auth-setup` + a new release gate. Field report from a full-setup

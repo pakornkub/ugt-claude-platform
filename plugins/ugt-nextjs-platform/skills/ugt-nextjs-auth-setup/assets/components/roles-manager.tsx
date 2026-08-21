@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: 150191af53b4
+// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: 26e28adf6e79
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -60,9 +60,10 @@ export function RolesManager({
       cell: ({ row }) => (
         <>
           {row.original.name}
+          {/* ตัวระบุ = Badge outline (มติ 2026-08-21 — secondary สงวนให้ chip ตัวกรอง) */}
           {row.original.isSystem && (
-            <Badge variant="secondary" className="ml-2">
-              system
+            <Badge variant="outline" className="ml-2">
+              ระบบ
             </Badge>
           )}
         </>
@@ -80,37 +81,40 @@ export function RolesManager({
       },
       cell: ({ row }) => row.original.permissionIds.length,
     },
-    // id 'actions' = คอลัมน์ตรึงท้ายของ DataTable (ลาก/ซ่อนไม่ได้) · บทบาท system
-    // แก้/ลบไม่ได้ · ปุ่มถูกซ่อนเมื่อไม่มีสิทธิ์ ไม่ใช่ disable — ด่านจริงอยู่ในแอ็กชัน
+    // id 'actions' = คอลัมน์ตรึงท้ายของ DataTable (ลาก/ซ่อนไม่ได้) ·
+    // ไม่มีสิทธิ์ = ซ่อนปุ่ม (กฎ §3 — เรื่อง permission) · บทบาท system =
+    // disabled + tooltip บอกเหตุผล (มติ 2026-08-21 — business rule ต้องมองเห็น
+    // ว่าปุ่มมีแต่ใช้ไม่ได้เพราะอะไร) — ด่านจริงยังอยู่ในแอ็กชันฝั่ง server
     ...(canUpdate || canDelete
       ? [
           {
             id: 'actions',
             header: '',
             meta: { mobileLabel: 'จัดการ' },
-            cell: ({ row }) =>
-              row.original.isSystem ? null : (
-                <div className="flex justify-end gap-1">
-                  {canUpdate && (
-                    <IconAction
-                      label="แก้ไข"
-                      variant="soft-primary"
-                      onClick={() => setOpenSheet(row.original.id)}
-                    >
-                      <Pencil className="size-4" strokeWidth={2} />
-                    </IconAction>
-                  )}
-                  {canDelete && (
-                    <IconAction
-                      label="ลบ"
-                      variant="soft-destructive"
-                      onClick={() => setDeleteTarget(row.original)}
-                    >
-                      <Trash2 className="size-4" strokeWidth={2} />
-                    </IconAction>
-                  )}
-                </div>
-              ),
+            cell: ({ row }) => (
+              <div className="flex justify-end gap-1">
+                {canUpdate && (
+                  <IconAction
+                    label={row.original.isSystem ? 'บทบาทระบบ — แก้ไขไม่ได้' : 'แก้ไข'}
+                    variant="soft-primary"
+                    disabled={row.original.isSystem}
+                    onClick={() => setOpenSheet(row.original.id)}
+                  >
+                    <Pencil className="size-4" strokeWidth={2} />
+                  </IconAction>
+                )}
+                {canDelete && (
+                  <IconAction
+                    label={row.original.isSystem ? 'บทบาทระบบ — ลบไม่ได้' : 'ลบ'}
+                    variant="soft-destructive"
+                    disabled={row.original.isSystem}
+                    onClick={() => setDeleteTarget(row.original)}
+                  >
+                    <Trash2 className="size-4" strokeWidth={2} />
+                  </IconAction>
+                )}
+              </div>
+            ),
           } satisfies ColumnDef<RoleRow>,
         ]
       : []),

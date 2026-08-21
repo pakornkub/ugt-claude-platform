@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 911e39a64120
+// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 3648c811923f
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 'use client';
 
@@ -638,6 +638,13 @@ interface DataTableProps<TData> {
    * the server query — placement here is layout only.
    */
   toolbarFilters?: React.ReactNode;
+  /**
+   * ห่อทั้งชุด (toolbar + ตาราง + pagination) ในการ์ดเดียว — default ตาม
+   * DESIGN.md §3 "เนื้อหาในการ์ด" (มติ 2026-08-21) · ส่ง `false` เมื่อตาราง
+   * อยู่ในภาชนะที่เป็นการ์ด/พื้นผิวของตัวเองอยู่แล้ว (dialog, sheet, tab card)
+   * · มีผลเฉพาะ ≥sm — มือถือเป็นโหมดการ์ดรายแถวอยู่แล้ว ไม่ซ้อนการ์ดอีกชั้น
+   */
+  card?: boolean;
 }
 
 /**
@@ -674,6 +681,7 @@ export function DataTable<TData>({
   onRowClick,
   toolbarExtra,
   toolbarFilters,
+  card = true,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
   const router = useRouter();
@@ -872,7 +880,15 @@ export function DataTable<TData>({
   }));
 
   return (
-    <div className="flex flex-col gap-4">
+    // การ์ดเดียวทั้งชุดบนจอ ≥sm (มติ 2026-08-21 — DESIGN.md §3): หัวการ์ด =
+    // toolbar+chips (เส้นคั่นล่าง) · ตารางชิดขอบ · ท้ายการ์ด = pagination
+    <div
+      className={cn(
+        'flex flex-col gap-4',
+        card && 'sm:gap-0 sm:overflow-clip sm:rounded-lg sm:border sm:bg-card'
+      )}
+    >
+      <div className={cn('flex flex-col gap-3', card && 'sm:border-b sm:p-3')}>
       {/* toolbar แถวเดียว (มติ 2026-08-11): ค้นหาซ้ายสุด → filter ระดับหน้า
           (toolbarFilters, กว้าง→แคบ) → ช่องว่าง → toolbarExtra + ปุ่มตั้งค่าคอลัมน์
           ชิดขวา · จอแคบ wrap ลงบรรทัดใหม่เอง */}
@@ -939,10 +955,13 @@ export function DataTable<TData>({
           </Button>
         </div>
       )}
+      </div>
 
       <div
         className={cn(
           'hidden overflow-clip rounded-lg border sm:block',
+          // ในการ์ด: ตารางชิดขอบการ์ด — เส้นขอบ/มุมโค้งเป็นของการ์ด ไม่ใช่ของตาราง
+          card && 'rounded-none border-0',
           // default: the inner container scrolls sideways · scrollX={false}
           // CLIPS — columns past the edge become unreachable, so it is opt-in
           !scrollX && '[&_[data-slot=table-container]]:overflow-x-clip',
@@ -1041,7 +1060,7 @@ export function DataTable<TData>({
       </div>
 
       {!disablePagination && (
-        <div className="flex items-center justify-between">
+        <div className={cn('flex items-center justify-between', card && 'sm:border-t sm:p-3')}>
           <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
             {(() => {
               // server mode: `data` is one page, so the row count must come from

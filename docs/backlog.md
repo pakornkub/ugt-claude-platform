@@ -58,15 +58,15 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 ของวิกฤตแก้ไปแล้วใน 4.25.0 (ดู CHANGELOG) — ที่เหลือจัดกลุ่มตามชนิด:
 
 **ต้องมีมติ design ก่อน (ขัดกันเองระหว่างข้อตกลง/preview/asset):**
-- ปุ่ม "เพิ่ม/สร้าง" — DESIGN §1 บอกเขียวทึบ (`success`) แต่ preview+asset ใช้ primary ทั้งคู่ · เลือกฝั่งแล้วแก้อีกฝั่ง
-- badge ชื่อ role — §4 บอก `outline` แต่ preview+asset ใช้ `secondary` · เลือกฝั่ง
-- แถว system role — asset ซ่อนปุ่มแก้/ลบ, preview วาด disabled+tooltip (และมีคอลัมน์ "ผู้ใช้" ที่ asset ไม่มี) · เลือกแบบแล้ว sync
+- ~~ปุ่ม "เพิ่ม/สร้าง" — เขียวทึบ vs primary~~ → มติ primary, 4.26.0
+- ~~badge ชื่อ role — outline vs secondary~~ → มติ outline, 4.26.0
+- ~~แถว system role — ซ่อน vs disabled+tooltip~~ → มติ disabled+tooltip (business rule) / ซ่อน (permission), 4.26.0
 - `detail-row.tsx` docblock ประกาศ "label ซ้ายคงที่" ขัด §4 `justify-between` + gap/สูงต่ำกว่า spec
 - ฟอร์ม auth ทั้งชุดเป็น useState ไม่ใช่ ui/field+RHF+zod ตาม §4 — จะ migrate หรือบันทึกเป็นข้อยกเว้น §9/§10
 - ข้อความ title/subtitle/หัวคอลัมน์หน้า admin ใน preview ไม่ตรง asset หลายจุด (preview §13 ใช้ "Audit logs" อังกฤษ ขัด §5 เอง) — sync ทีเดียวทั้ง §13
 - audit-logs: ขอบ filter คิดที่ +07:00 แต่จอ format ตาม timezone ผู้ดู — ต้องเลือก contract เดียว (แล้วบันทึกใน format.ts)
 - audit-logs toolbar มี Input ค้นหาเปล่าที่ชน §3 (ช่องค้นหาเป็นของ DataTable) และชน verify ของ skill เอง — ต้องออกแบบ global-search โหมด server ใน DataTable
-- DataTable สามก้อน (toolbar/ตาราง/pagination) ยังไม่ห่อการ์ดตาม §3 — กระทบทุกหน้า ทุกโปรเจค ต้องทำเป็นรุ่นเฉพาะ
+- ~~DataTable สามก้อนยังไม่ห่อการ์ดตาม §3~~ → มติห่อใน DataTable กลาง (prop `card` default เปิด), 4.26.0
 - `theme-toggle` เป็นปุ่ม icon นอก IconAction — จะทำ exception topbar เป็นมติ หรือย้ายเข้า IconAction
 
 **งานโค้ดที่ตามมาได้เลย (ยังไม่เข้า 4.25.0 เพราะใหญ่/ต้องทดสอบ):**

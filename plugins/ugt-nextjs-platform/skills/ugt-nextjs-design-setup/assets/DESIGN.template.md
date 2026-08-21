@@ -38,8 +38,10 @@
   amber=รอ/เตือน · emerald=สำเร็จ · red=ปฏิเสธ/ลบ · coral=ขอยกเลิก ·
   sky=ข้อมูล/ระบบ (**ไม่ใช่ของกดได้ — นั่นคือ primary**) · gray=ยกเลิก/ร่าง ·
   ใช้ผ่าน `StatusBadge` เท่านั้น (tone + icon บังคับ)
-- **สีปุ่ม action**: ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/Import=
-  เขียวทึบ · ในตารางใช้ variant `soft-*`
+- **สีปุ่ม action**: ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/สร้าง/Import=
+  **primary** (มติ 2026-08-21 — CTA หลักของหน้า; เดิมเคยเขียนเขียวทึบแต่ของจริง
+  ทั้งหมดเป็น primary) · อนุมัติ/ยืนยันเชิงบวก=เขียวทึบ (`success`) ·
+  ในตารางใช้ variant `soft-*`
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
   translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
 - **มุมโค้ง = ใช้ของ preset `base-mira` ทั้งชุด ไม่ตั้งทับ** (มติ 2026-08-09):
@@ -161,6 +163,10 @@
   `soft-destructive`, `soft-success`, `field` (trigger ของ
   datepicker/combobox — ผิวเหมือน Input) — เพิ่มอื่นต้องเป็นมติส่วน 10
 - Row actions: ≤3 = `IconAction` · >3 = `DropdownMenu` + `MoreHorizontal`
+  > **ทำไม่ได้เพราะสิทธิ์ = ซ่อนปุ่ม** (กฎ §3) · **ทำไม่ได้เพราะ business
+  > rule** (แถว system, มีข้อมูลผูกอยู่) = **disabled + tooltip บอกเหตุผล**
+  > (มติ 2026-08-21 — ผู้ใช้ต้องเห็นว่าปุ่มมีแต่ใช้ไม่ได้เพราะอะไร;
+  > `IconAction` รองรับ `disabled` พร้อม tooltip แล้ว ให้ label เป็นเหตุผล)
 - **Icon mapping**: เพิ่ม `Plus` · แก้ไข `Pencil` · ลบ `Trash2` · กู้คืน
   `RotateCcw` · ดู `Eye` · Import `Upload` · Export `Download` · ค้นหา
   `Search` · กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2`
@@ -190,7 +196,9 @@
 - **DataTable ชุดมาตรฐานเต็ม**: global search · filter รายคอลัมน์
   (Popover+chip+clear) · sort · pagination (default 10 · 10/20/50) · dnd
   สลับคอลัมน์ · ซ่อน/แสดงคอลัมน์ (จำ localStorage) · คืนค่าเริ่มต้น — ปิดได้
-  ราย prop
+  ราย prop · **ห่อการ์ดเดียวทั้งชุดเอง** (toolbar หัวการ์ด · ตารางชิดขอบ ·
+  pagination ท้ายการ์ด — มติ 2026-08-21 ตาม §3 "เนื้อหาในการ์ด") ห้ามห่อการ์ด
+  ซ้อนอีกชั้น; ตารางใน dialog/sheet ส่ง `card={false}`
 - **Pagination ของตาราง = แถวต่อหน้า + "หน้า X จาก Y" + ปุ่มไอคอน 4 ตัว**
   (แรก · ก่อน · ถัดไป · สุดท้าย — ตัวแรก/สุดท้ายซ่อนบนจอเล็ก) — **ไม่มีรายการเลขหน้า
   2 3 4 … 10 11** (มติ 2026-08-09: เลขหน้ากินพื้นที่และพังตอนข้อมูลว่าง

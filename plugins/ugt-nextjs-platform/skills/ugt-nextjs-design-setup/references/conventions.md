@@ -82,7 +82,8 @@ first. Mobile: dialog renders as bottom sheet (built into the primitive).
 กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2` · ปิด `X`.
 Decorative icons (text alongside) get `aria-hidden`. Icon-only buttons only
 via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
-ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/Import=เขียวทึบ; in table rows
+ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/สร้าง/Import=primary (มติ
+2026-08-21) · อนุมัติ/ยืนยันเชิงบวก=เขียวทึบ (`success`); in table rows
 use the `soft-*` button variants so colors don't shout on every row.
 
 ## Page-level filter bar (outside the table)
