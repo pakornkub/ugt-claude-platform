@@ -48,7 +48,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 
 ## ติดตั้ง (ครั้งเดียวต่อเครื่อง)
 
-> รีโปนี้เป็น private — ต้องมีสิทธิ์อ่าน + login GitHub ในเครื่อง (`gh auth login`)
+> รีโปนี้เป็น public — ติดตั้งได้เลยไม่ต้องขอสิทธิ์หรือ login GitHub
 
 เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรันทีละบรรทัด:
 

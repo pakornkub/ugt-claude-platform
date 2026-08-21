@@ -1,5 +1,6 @@
 # Claude Code local artifacts (this repo is the plugin source, not a project)
 .claude/logs/
 .claude/settings.local.json
+.claude/launch.json
 .claude/worktrees/
 node_modules/
