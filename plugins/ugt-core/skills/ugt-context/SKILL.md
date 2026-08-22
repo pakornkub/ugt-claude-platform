@@ -60,7 +60,9 @@ tool instead: one agent drafts `architecture.md`, one `api.md`, one
 `business-rules.md`, independently and read-only, merged before the review
 step below. State plainly that this spawns multiple agents and costs more
 tokens than the single-agent scan. Only if the user opts in — small projects
-stay single-agent.
+stay single-agent. (Harness without a `Workflow` tool: dispatch the same
+read-only fan-out via the `Agent`/`Task` tool instead — same split, same
+merge step.)
 
 1. **`architecture.md`** — from the folder layout, `package.json`, the schema
    (e.g. `prisma/schema.prisma`), and the main flows visible in routing.

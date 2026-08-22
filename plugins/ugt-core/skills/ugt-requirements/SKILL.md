@@ -64,7 +64,8 @@ instead: one agent per feature drafts its `<NN>-*.md`, independently and
 read-only, then one pass reconciles cross-feature conflicts and writes
 `00-overview.md`. State plainly that this spawns multiple agents and costs
 more tokens than the single-agent draft. Only if the user opts in — a
-handful of features stays single-agent.
+handful of features stays single-agent. (Harness without a `Workflow` tool:
+dispatch the same fan-out via the `Agent`/`Task` tool instead.)
 
 **Pre-crystallization (optional).** If the user wants to settle open
 questions by interview *before* this skill runs (e.g. a `/grill-with-docs`
@@ -94,8 +95,11 @@ Output goes to `docs/requirements-brief/` (committed). All content in
 
 **Feature board**: this skill also writes one row per feature into
 `docs/project-context/board.md` — a table
-`| Feature | Brief | Priority | Depends on | สถานะ |` — creating the file if
-missing (the folder normally exists via `ugt-context`). Every row starts
+`| Feature | Brief | Priority | Depends on | สถานะ |` — if the file is
+missing, **copy `ugt-context`'s `assets/board.md` skeleton first, then append
+rows** — never hand-author the table (the skeleton's header comment carries
+the single-writer rule + status legend that `/ugt-handoff` depends on;
+a bare table loses them). Every row starts
 `☐ todo`; updating statuses later is `/ugt-handoff`'s job, and only the
 สถานะ column — one writer per column, so the board cannot drift from the
 handoff file. Status values: `☐ todo` · `🔨 in progress` ·

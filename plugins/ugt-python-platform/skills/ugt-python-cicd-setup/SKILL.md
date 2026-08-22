@@ -238,6 +238,7 @@ admin เตรียม `/srv/appdata` ให้เขียนได้คร�
 | `assets/tooling/pyproject-tooling.toml` | **merge เข้า** `pyproject.toml` (ไม่มีไฟล์ → สร้างใหม่ด้วยเนื้อนี้) | เสมอ |
 | `assets/tooling/requirements-dev.txt` | `requirements-dev.txt` (root) | เสมอ |
 | `assets/tooling/test_smoke.py` | `tests/test_smoke.py` | **เสมอ** — โปรเจคที่มี test อยู่แล้วก็ใส่ (ไฟล์แยก ไม่ชนของเดิม) · มีไฟล์ชื่อนี้อยู่แล้ว = ไม่ทับ ให้เติม test เข้าไปในไฟล์เดิมแทน |
+| `assets/env.example` | `.env.example` (root — key อย่างเดียว, commit ได้; verify เช็คว่ามีไฟล์นี้) | เสมอ — ลบ/คงบรรทัด `[DB]`/`[SUBPATH]` ตามคำตอบ interview |
 | `assets/rules/ugt-python-ci.md` | `.claude/rules/ugt-python-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 
 นอกจากตารางนี้ ต้อง **สร้าง `.dockerignore`** ที่ root ถ้ายังไม่มี (หรือเติม
@@ -344,6 +345,18 @@ sonar keys = `<project>`, `<project>-dev`
   (batch รันจบต้องหายไป — restart loop = รัน job ซ้ำไม่หยุด). ตัว job เรียก
   โดย **host cron** ไม่ใช่ Jenkins → เป็นรายการ `[BATCH]` ใน admin handoff
   (ดู `references/docker-deploy.md` §B–C)
+- **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็น
+  config ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (เคยเป็นคำถามที่ไม่มี step
+  รองรับ — แอป 404 หลัง proxy โดยไม่มีอะไรจับ):
+  - **FastAPI**: `FastAPI(root_path=os.environ.get("ROOT_PATH", ""))` +
+    เพิ่ม `ROOT_PATH` ลง compose ทั้ง 2 ไฟล์ (prod = path prod, dev = path dev)
+  - **Flask**: ตั้ง `SCRIPT_NAME` env ใน compose ทั้ง 2 ไฟล์ (gunicorn/werkzeug
+    อ่านเอง) หรือใช้ `ProxyFix` + ให้ proxy ส่ง `X-Forwarded-Prefix`
+  - **Django**: `FORCE_SCRIPT_NAME = os.environ.get("FORCE_SCRIPT_NAME")` ใน
+    settings + ปรับ `STATIC_URL`/`MEDIA_URL` ให้ขึ้นต้นด้วย path เดียวกัน +
+    ตัวแปรลง compose ทั้ง 2 ไฟล์
+  - แล้วเช็คของจริงตาม checklist: เปิดแอป **ผ่าน URL เต็มหลัง proxy** ไม่ใช่
+    `localhost:port` ตรง ๆ (อย่างหลังผ่านเสมอแม้ config ผิด)
 - **`docker compose` v2 บน host (ข้อ 7)** → เปลี่ยน `docker-compose -f ... up`
   ใน Jenkinsfile เป็น `docker compose -f ... up` (สอง binary ไม่ compatible
   100%)
@@ -494,6 +507,9 @@ node <skill-dir>/scripts/verify.mjs
       จริง ไม่ใช่ `__START_CMD_JSON__` ค้าง
 - [ ] health endpoint (shape web): `/api/health` มีจริงในซอร์ส · เข้าได้โดยไม่
       ต้อง login · 200 healthy / 503 degraded · ไม่มี version/commit ใน response
+- [ ] [subpath] เปิดแอป**ผ่าน URL เต็มหลัง reverse proxy** ได้จริง (ตั้ง
+      `root_path`/`SCRIPT_NAME`/`FORCE_SCRIPT_NAME` ตาม §5.3 แล้ว) — ทดสอบแค่
+      `localhost:port` ตรง ๆ ผ่านเสมอแม้ config ผิด จึงพิสูจน์อะไรไม่ได้
 - [ ] `sonar-project.properties`: `sonar.projectKey`/`projectName` แทนค่าแล้ว ·
       **ทุก path ใน `sonar.sources`/`sonar.tests` มีอยู่จริงในโปรเจค** ·
       `sonar.python.coverage.reportPaths=coverage.xml`

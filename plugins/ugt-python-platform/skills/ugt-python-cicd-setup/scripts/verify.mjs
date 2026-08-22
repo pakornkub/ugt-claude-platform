@@ -114,7 +114,7 @@ check('/api/health exists', () => {
 // tests/test_smoke.py carries its own __APP_MODULE__ placeholder (SKILL.md
 // §5.2) and is copied into every project — scan it too, skipping silently if
 // somehow absent (that absence is already caught by its own check below).
-const PLACEHOLDER_FILES = [...CI_FILES, 'tests/test_smoke.py'];
+const PLACEHOLDER_FILES = [...CI_FILES, 'tests/test_smoke.py', 'docs/admin-handoff.md'];
 check('No __*__ placeholders left', () => {
   const found = [];
   for (const f of PLACEHOLDER_FILES) {
@@ -123,6 +123,22 @@ check('No __*__ placeholders left', () => {
     if (hits.length) found.push(`${f}: ${hits.join(', ')}`);
   }
   return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
+});
+
+check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () => {
+  // ขั้นที่ "ห้ามลืม" ของ §5.3: bind mount ที่ Deploy stage ไม่ได้ mkdir/chown
+  // → docker สร้างเป็น root:root แล้วแอปเขียนไม่ได้ตั้งแต่ deploy แรก
+  const names = new Set();
+  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
+    if (!has(f)) continue;
+    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+  }
+  if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
+  const mkdirLines = [...jf.matchAll(/mkdir -p[^\n]*/g)].map((m) => m[0]).join('\n');
+  const missing = [...names].filter((n) => !new RegExp(`/srv/appdata/[^/\\s]+/${n}\\b`).test(mkdirLines));
+  return missing.length
+    ? { ok: false, msg: `compose binds with no mkdir -p in the Deploy stage: ${missing.join(', ')}` }
+    : { ok: true };
 });
 
 // ── 3. Jenkinsfile — structure ─────────────────────────────────────────────

@@ -82,9 +82,9 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~full-setup: rules mail/upload + เลขข้อ interview~~ → 4.27.0
 - ~~database: dev/prod question, requestTimeout, naming exception, `__LINKED_SERVER__`~~ → 4.27.0
 - ~~design-setup: placeholder table · verify scan MOTION/design-questions · export.test.ts inventory~~ → 4.27.0
-- python/php cicd: subpath answer ไม่มี step รองรับ · `[BATCH]` marker หายใน dev compose (python) · `.env.example` ไม่มี asset (python) · `[WEB]` checklist ขัด §2.8 (php) · mkdir-p↔bind + admin-handoff placeholder checks ยังไม่ implement
+- ~~python/php cicd: subpath steps · `[BATCH]` dev marker · `.env.example` · `[WEB]` checklist · mkdir-p↔bind + handoff placeholder checks~~ → python/php 0.2.0 (ยังไม่ tag — รอ pilot)
 - ~~nextjs cicd: `.dockerignore` + ตาราง placeholder admin-handoff~~ → 4.27.0
-- ugt-core: ugt-requirements สร้าง board.md เองไม่ copy skeleton ของ ugt-context · ugt-handoff template `YYYY-MM-DD` ไม่มีวงเล็บแหลมให้ตรง verify
+- ~~ugt-core: board.md copy skeleton · ugt-handoff date format~~ → core 2.7.0 (Workflow-tool ที่ audit ว่า "ไม่มีจริง" ตรวจแล้วมีจริงใน harness ปัจจุบัน — เพิ่มแค่ fallback สำหรับ harness ที่ไม่มี)
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

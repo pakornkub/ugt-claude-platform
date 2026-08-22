@@ -44,7 +44,7 @@ sections — keep all four, add none:
 ```markdown
 # Handoff
 
-Last updated: YYYY-MM-DD
+Last updated: <YYYY-MM-DD>
 
 ## In progress
 - <work genuinely mid-flight, with the files touched halfway — or "Nothing in progress">

@@ -1,5 +1,20 @@
 # Changelog — ugt-core
 
+## 2.7.0 (2026-08-21)
+
+จากผล audit ปูพรม 2026-08-21 (backlog §5 — ฝั่ง ugt-core):
+
+- `ugt-requirements`: board.md ที่ยังไม่มี ให้ **copy skeleton ของ
+  `ugt-context` ก่อนแล้วค่อยเติมแถว** ไม่ hand-author ตารางเอง — ตารางเปล่า
+  ทำ header comment (กติกา single-writer + status legend ที่ `/ugt-handoff`
+  พึ่ง) หายไป
+- `ugt-handoff`: template ในตัว SKILL ใช้ `<YYYY-MM-DD>` ให้ตรงกับ skeleton
+  ที่ ship จริงและ regex ตรวจความสดของ full-setup (เดิมไม่มีวงเล็บแหลม —
+  handoff ที่เขียนตาม template ทิ้ง `YYYY-MM-DD` ดิบไว้โดยไม่มีตัวตรวจจับ)
+- `ugt-context` / `ugt-requirements`: ข้อเสนอ parallel ผ่าน `Workflow` tool
+  ระบุ fallback สำหรับ harness ที่ไม่มี tool นี้ (fan-out เดิมผ่าน
+  `Agent`/`Task` แทน)
+
 ## 2.6.0 (2026-08-21)
 
 `ugt-requirements` learns to work with pre-crystallization sessions (e.g. a

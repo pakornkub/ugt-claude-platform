@@ -432,6 +432,16 @@ render เอกสารส่ง admin (§5.7):
     - /srv/appdata/hr-portal/uploads:/var/www/html/uploads
   ```
 
+- **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็นค่า
+  env ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (เคยเป็นคำถามที่ไม่มี step
+  รองรับ): เพิ่มลง `.env`/`.env.dev` (§5.5) ให้ตรง shape —
+  - **Laravel**: `APP_URL=<URL เต็มรวม path>` (+ `ASSET_URL` เมื่อ asset โดน
+    proxy ตัด path)
+  - **CodeIgniter 4**: `app.baseURL=<URL เต็มรวม path>/`
+  - **WordPress**: `WP_HOME` + `WP_SITEURL` = URL เต็มรวม path
+  - CI3/legacy: `base_url` ใน config ของโปรเจคเอง
+  แล้วเช็คของจริงตาม checklist: เปิดแอป**ผ่าน URL เต็มหลัง proxy** ไม่ใช่
+  `localhost:port` (อย่างหลังผ่านเสมอแม้ config ผิด)
 - **`docker compose` v2 บน host (ข้อ 7)** → เปลี่ยน `docker-compose -f ... up`
   ใน Jenkinsfile เป็น `docker compose -f ... up` (สอง binary ไม่ compatible 100%)
 - **มี config lint/test เดิมอยู่แล้ว** → merge ค่าจาก asset เข้าของเดิม ไม่ทับ
@@ -639,13 +649,18 @@ health) — ฝั่ง server ยังต้องให้ admin ยืน�
 
 - [ ] `Jenkinsfile` ครบ 10 stages + post (emailext ×4 + `cleanWs`) — ไม่มี
       `__*__` ค้าง
-- [ ] บล็อก `[DB]` / `[VOLUME]` / `[WEB]` / `[WP]` / `[LARAVEL]` คงหรือถูกลบ
-      ตรงตามคำตอบ interview — และ Groovy ยัง parse ผ่านหลังลบ (brace ครบ)
+- [ ] บล็อก `[DB]` / `[VOLUME]` / `[WP]` / `[LARAVEL]` คงหรือถูกลบตรงตามคำตอบ
+      interview — และ Groovy ยัง parse ผ่านหลังลบ (brace ครบ) · **`[WEB]` คงไว้
+      เสมอ** (PHP มี shape เดียว — §2.8; ป้ายนี้มีไว้บอกว่าก้อนไหนคือ health
+      poll ไม่ใช่ให้เลือกลบ)
 - [ ] `Dockerfile` มาจาก shape ที่ถูก (`Dockerfile.web` สำหรับ laravel/
       codeigniter/legacy · `Dockerfile.wordpress` สำหรับ wordpress) ·
       `Dockerfile.ci` อยู่ที่ **root** ด้วยอีกไฟล์
 - [ ] Laravel/CI4: บล็อก `[LARAVEL]` (sed DocumentRoot → `public/`) ถูก
       uncomment แล้ว · shape อื่น: ถูกลบทิ้งแล้ว
+- [ ] [subpath] เปิดแอป**ผ่าน URL เต็มหลัง reverse proxy** ได้จริง (ตั้ง
+      `APP_URL`/`ASSET_URL` · `app.baseURL` · `WP_HOME`/`WP_SITEURL` ตาม §5.3
+      แล้ว) — ทดสอบแค่ `localhost:port` ผ่านเสมอแม้ config ผิด
 - [ ] health endpoint: `/api/health` เข้าถึงได้จริงตาม docroot ของ shape นั้น
       (Laravel = route ใน `routes/web.php` นอก middleware `auth` · CI4 =
       `public/api/health/index.php` · CI3/legacy/WordPress =

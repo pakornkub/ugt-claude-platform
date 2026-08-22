@@ -119,7 +119,7 @@ const PHP_MAGIC_CONSTANTS = new Set([
   '__TRAIT__',
   '__COMPILER_HALT_OFFSET__',
 ]);
-const PLACEHOLDER_FILES = [...CI_FILES, 'tests/SmokeTest.php', '.claude/rules/ugt-php-ci.md'];
+const PLACEHOLDER_FILES = [...CI_FILES, 'tests/SmokeTest.php', '.claude/rules/ugt-php-ci.md', 'docs/admin-handoff.md'];
 check('No __*__ placeholders left (PHP magic constants excluded)', () => {
   const found = [];
   for (const f of PLACEHOLDER_FILES) {
@@ -130,6 +130,23 @@ check('No __*__ placeholders left (PHP magic constants excluded)', () => {
     if (hits.length) found.push(`${f}: ${hits.join(', ')}`);
   }
   return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
+});
+
+check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () => {
+  // ขั้นที่ "ห้ามลืม": bind mount ที่ Deploy stage ไม่ได้ mkdir/chown → docker
+  // สร้างเป็น root:root — เคส WordPress (`wp-content`) คือข้อมูลหายตั้งแต่
+  // deploy แรกถ้าพลาดข้อนี้
+  const names = new Set();
+  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
+    if (!has(f)) continue;
+    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+  }
+  if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
+  const mkdirLines = [...jf.matchAll(/mkdir -p[^\n]*/g)].map((m) => m[0]).join('\n');
+  const missing = [...names].filter((n) => !new RegExp(`/srv/appdata/[^/\\s]+/${n}\\b`).test(mkdirLines));
+  return missing.length
+    ? { ok: false, msg: `compose binds with no mkdir -p in the Deploy stage: ${missing.join(', ')}` }
+    : { ok: true };
 });
 
 // ── 4. Jenkinsfile — structure ─────────────────────────────────────────────

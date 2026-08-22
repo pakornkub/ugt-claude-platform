@@ -2,6 +2,9 @@
 # Same shape as docker-compose.yml but with dev image/container names and dev
 # host port.
 #
+# [BATCH] shape: เปลี่ยน service name เป็น job, ตัด ports/healthcheck/restart → restart: "no"
+# (ต้องแปลง "ทั้ง 2 ไฟล์" — ไฟล์ prod มี marker เดียวกัน)
+#
 # Placeholders: __PROJECT_NAME__, __PORT_DEV__
 services:
   app:
