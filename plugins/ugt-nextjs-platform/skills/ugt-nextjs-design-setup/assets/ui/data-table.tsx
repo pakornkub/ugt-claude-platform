@@ -1,6 +1,11 @@
-// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 3648c811923f
+// kit: ugt-nextjs-platform 4.29.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 296b3a839a42
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
+// MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
+// default on). A page that used to wrap <DataTable> in its own <Card> now shows
+// a card inside a card — when taking this file into an existing project, remove
+// that hand-written wrapper (or pass card={false} where the table sits inside a
+// dialog/sheet that is already a surface).
 'use client';
 
 import * as React from 'react';

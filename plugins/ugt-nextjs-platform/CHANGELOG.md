@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.29.0 (2026-08-21)
+
+The rest of the code review's findings — two a11y/tooling fixes plus the
+migration note 4.26.0 should have shipped with:
+
+- **`IconAction` disabled state is now `aria-disabled`, not a focus trap.**
+  4.26.0 made a disabled icon button focusable by wrapping it in a bare
+  `<span tabIndex={0} aria-label>` (a real `disabled` button never fires the
+  tooltip). That span has no role, so a screen-reader user tabbed into an
+  unexplained stop that read out the reason text as a nameless label while
+  the button itself was skipped. The button now stays a real, focusable
+  button with `aria-disabled`, its click handler dropped and a
+  cursor-not-allowed/50%-opacity look — assistive tech announces
+  "button, disabled" with the reason as its name, and the tooltip still
+  fires on hover and focus. It also gains `type="button"` so an
+  aria-disabled row action can never submit a surrounding form.
+- **`ugt-nextjs-auth-setup`'s Radix-idiom check no longer fails `src/`
+  layouts.** Its shadcn-primitives exemption used
+  `rel.startsWith('components/ui/')` while the same script explicitly
+  supports `src/app/...` projects, so any primitive under
+  `src/components/ui/` carrying `asChild` failed the run (exit 1) over a
+  file the check was written to ignore. Now `rel.includes()`.
+- **Migration note for 4.26.0's self-carding `DataTable`.** DESIGN §3 has
+  always said content lives in a card, so existing pages wrapped
+  `<DataTable>` in their own `<Card>` — after 4.26.0 those render a card
+  inside a card, and nothing told anyone to remove the wrapper. The note now
+  rides in the component's own header comment (where a kit-sync merge
+  cannot miss it): drop the hand-written wrapper, or pass `card={false}`
+  where the table already sits on a dialog/sheet surface.
 ## 4.28.0 (2026-08-21)
 
 Two bugs a code review caught in 4.27.0's own additions:

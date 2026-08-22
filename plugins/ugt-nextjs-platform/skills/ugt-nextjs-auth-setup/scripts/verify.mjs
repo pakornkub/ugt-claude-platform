@@ -485,7 +485,10 @@ check('No Radix-only APIs in UI code (asChild / onSelect on menu items)', () => 
   for (const file of sourceFiles()) {
     if (!/\.tsx$/.test(file)) continue;
     const rel = relative(ROOT, file).replaceAll('\\', '/');
-    if (rel.startsWith('components/ui/')) continue; // shadcn primitives own their internals
+    // includes(), not startsWith(): this script also supports src/ layouts
+    // (see the /admin/setup candidates above) and src/components/ui/* is the
+    // same shadcn-owned territory — startsWith failed those projects.
+    if (rel.includes('components/ui/')) continue; // shadcn primitives own their internals
     const body = stripComments(readFileSync(file, 'utf8'));
     const hits = [];
     if (/\basChild\b/.test(body)) hits.push('asChild');
