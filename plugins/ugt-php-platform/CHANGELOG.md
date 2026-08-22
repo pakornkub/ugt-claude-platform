@@ -12,7 +12,10 @@
   (§2.8) `[WEB]` คงไว้เสมอ ป้ายมีไว้ชี้ก้อน health poll ไม่ใช่ให้เลือกลบ
 - verify: เพิ่ม check "ทุก compose bind ใต้ /srv/appdata มี `mkdir -p` ใน
   Deploy stage" (เคส WordPress `wp-content` คือข้อมูลหายตั้งแต่ deploy แรก)
-  และ scan placeholder ครอบ `docs/admin-handoff.md` ด้วย
+  และ scan placeholder ครอบ `docs/admin-handoff.md` ด้วย · check นี้อ่าน
+  `jfActive` (ตัดคอมเมนต์แล้ว) ไม่ใช่ไฟล์ดิบ — Jenkinsfile ที่ ship มีคอมเมนต์
+  ตัวอย่างที่ระบุ `/uploads` กับ `/reports` อยู่ ถ้าอ่านดิบคอมเมนต์นั้นจะทำให้
+  volume สองชื่อนี้ผ่านการตรวจโดยไม่ต้องมี mkdir จริง
 
 ## 0.1.0 (2026-08-12)
 

@@ -1,5 +1,26 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.28.0 (2026-08-21)
+
+Two bugs a code review caught in 4.27.0's own additions:
+
+- **The fallback admin shell was unreachable on mobile.** The rebuilt
+  `(admin)` layout renders `SidebarProvider` + `Sidebar` + `SidebarInset`
+  but shipped no `SidebarTrigger` — and shadcn's Sidebar renders as a
+  *closed* Sheet on mobile, openable only from that trigger. A phone user in
+  a fallback-shell project could reach a page but never the admin menu (the
+  hand-rolled `<nav>` it replaced was always visible, so 4.27.0 regressed
+  it). `SidebarInset` now opens with a slim header carrying the trigger,
+  which doubles as the icon-collapse toggle on desktop.
+- **The new mkdir↔bind check could be satisfied by a comment.** It scanned
+  the raw Jenkinsfile instead of the comment-stripped `jfActive` the same
+  scripts already keep for this exact reason — and the shipped Jenkinsfile
+  documents the step in a `//` comment that names `/uploads` and
+  `/reports`. A project binding either of those and forgetting the real
+  `mkdir -p` line passed the check, i.e. the root:root first-deploy failure
+  the check exists to catch shipped green. Fixed here and in the python/php
+  siblings (still 0.2.0 there — untagged, so the fix folds into that entry).
+
 ## 4.27.0 (2026-08-21)
 
 Works through the backlog §5 remainder from the 2026-08-21 audit — every

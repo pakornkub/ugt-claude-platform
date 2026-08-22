@@ -134,7 +134,10 @@ check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () 
     for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
   }
   if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
-  const mkdirLines = [...jf.matchAll(/mkdir -p[^\n]*/g)].map((m) => m[0]).join('\n');
+  // jfActive, never jf: the shipped Jenkinsfile documents the step in a `//`
+  // comment that already names /uploads and /reports, so scanning the raw file
+  // lets the example satisfy the check for exactly those two volumes.
+  const mkdirLines = [...jfActive.matchAll(/mkdir -p[^\n]*/g)].map((m) => m[0]).join('\n');
   const missing = [...names].filter((n) => !new RegExp(`/srv/appdata/[^/\\s]+/${n}\\b`).test(mkdirLines));
   return missing.length
     ? { ok: false, msg: `compose binds with no mkdir -p in the Deploy stage: ${missing.join(', ')}` }

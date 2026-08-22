@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
-// kit-hash: ab1968ca47ac
+// kit: ugt-nextjs-platform 4.28.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
+// kit-hash: 64c11f771e61
 // app/(admin)/layout.tsx — the ongoing admin section (users/roles/audit-logs).
 // Different route group from (admin-setup): that one only requires a session
 // (permissions don't exist pre-bootstrap); this one requires an actual
@@ -18,7 +18,7 @@ import { prisma } from '@/lib/prisma';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { syncPermissionsIfNeeded } from '@/lib/permissions-sync';
 import { PERMISSIONS } from '@/lib/permissions';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminNav } from '@/components/admin-nav';
 
 // Section-level guard: derived from sub-permissions, no separate "admin:read"
@@ -64,6 +64,12 @@ export default async function AdminLayout({
         }}
       />
       <SidebarInset>
+        {/* SidebarTrigger ต้องมีเสมอ — บนมือถือ Sidebar render เป็น Sheet ที่ปิดอยู่
+            และเปิดได้ทางปุ่มนี้ทางเดียว (ไม่มีปุ่ม = เมนู admin เข้าไม่ถึงบนมือถือ)
+            บนจอใหญ่ปุ่มเดียวกันคือตัวยุบ sidebar เป็นแถบไอคอน */}
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+        </header>
         <main className="p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
