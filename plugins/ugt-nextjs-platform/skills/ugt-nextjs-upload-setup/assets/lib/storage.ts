@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-upload-setup/lib/storage.ts
-// kit-hash: 658152d75b07
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-upload-setup/lib/storage.ts
+// kit-hash: 902ad080c68a
 import 'server-only';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
@@ -74,8 +74,8 @@ export function safeDisplayName(name: string): string {
     .split('/')
     .pop()!
     // eslint-disable-next-line no-control-regex -- stripping control chars is the point
-    .replace(/[\x00-\x1f\x7f]/g, '')
-    .replace(/\s+/g, ' ')
+    .replaceAll(/[\x00-\x1f\x7f]/g, '')
+    .replaceAll(/\s+/g, ' ')
     .trim();
   return (cleaned || 'file').slice(0, 200);
 }

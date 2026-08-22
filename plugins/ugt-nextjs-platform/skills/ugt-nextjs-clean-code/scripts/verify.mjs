@@ -96,6 +96,26 @@ const RULES = [
     fix: 'catch (error) or catch (error_)',
   },
   {
+    id: 'S1874',
+    name: 'deprecated Zod API — ZodError.flatten() / z.string().datetime()',
+    test: (l) => /\.error\.flatten\s*\(|\berror\.flatten\s*\(|z\.string\(\)\.datetime\s*\(/.test(l),
+    fix: 'z.flattenError(error) (or read error.issues) · z.iso.datetime()',
+  },
+  {
+    id: 'S6606/S7735',
+    name: 'a !== null/undefined ? a : b (and a ? a : b) — must be ?? / ||',
+    test: (l) =>
+      /(\w[\w.]*)\s*[!=]==?\s*(null|undefined)\s*\?\s*\1\b/.test(l) ||
+      /(?<![\w.])(\w[\w.]*)\s*\?\s*\1\s*:/.test(l),
+    fix: 'a ?? b (null/undefined fallback) · a || b (any-falsy fallback)',
+  },
+  {
+    id: 'S3735',
+    name: 'void <expression> as a statement (confusing discard)',
+    test: (l) => /^\s*void\s+[\w(]/.test(l),
+    fix: 'call it plainly, or `.catch(...)` a floating promise instead of voiding it',
+  },
+  {
     id: 'NOSONAR',
     name: 'NOSONAR inside a JSX block comment (suppresses nothing)',
     test: (l) => /\{\s*\/\*[^*]*NOSONAR/.test(l),

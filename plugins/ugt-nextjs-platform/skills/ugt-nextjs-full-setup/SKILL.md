@@ -79,11 +79,11 @@ Ask all of this in a single message (use AskUserQuestion if available):
 
 **Shared identity (used by every module — ask once, don't let child skills re-ask):**
 
-3. Project name in kebab-case (e.g. `expense-portal`) + display name
-4. Deployed under a basePath / shared domain? If yes → basePath prod/dev
+6. Project name in kebab-case (e.g. `expense-portal`) + display name
+7. Deployed under a basePath / shared domain? If yes → basePath prod/dev
    (e.g. `/expense-portal`, `/expense-portal-dev`)
-5. Host ports prod / dev (e.g. 3000 / 3001)
-6. Full app URLs prod / dev including basePath (e.g. `https://apps.example.com/expense-portal`)
+8. Host ports prod / dev (e.g. 3000 / 3001)
+9. Full app URLs prod / dev including basePath (e.g. `https://apps.example.com/expense-portal`)
 
 **Module-specific questions** — **open the Interview section in the SKILL.md of
 every selected child skill and fold its questions into this same batch**
@@ -141,8 +141,13 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
   `test:coverage` by exact name; without them it goes red at the third stage on
   the very first push.
 - **Upload comes after Auth and before CI** — it needs the permissions and
-  audit log from Auth, and it adds a volume plus a `clamav` service that CI's
-  compose files must already contain. Optional: only when users attach files.
+  audit log from Auth. **But its compose/Dockerfile snippet waits for CI**:
+  the storage bind mount + `clamav` service are edits to files cicd-setup is
+  the one that writes — so at Upload time install everything except that
+  snippet, then apply upload-setup §4.4 as a close-out step right after
+  cicd-setup lays down the Dockerfile + both compose files (and add
+  `storage` + `clamav-db` to the Jenkinsfile `[VOLUME]` `mkdir -p` line).
+  Optional: only when users attach files.
 - **CI comes last** — the pipeline needs to know whether a DB exists (migrate
   stage) and the build must pass first.
 - Skip unselected modules; the relative order of the rest is unchanged.
@@ -189,7 +194,9 @@ How:
    > a project ever needs it: `agentRules: false` in next.config.
 2. **`.claude/rules/`** — verify each installed module's child skill wrote its
    rule file (`ugt-nextjs-database.md` / `ugt-nextjs-auth.md` /
-   `ugt-nextjs-ci.md` / `ugt-nextjs-design.md`). These files carry `paths`
+   `ugt-nextjs-ci.md` / `ugt-nextjs-design.md` — plus `ugt-nextjs-mail.md` /
+   `ugt-nextjs-upload.md` when those optional modules were selected). These
+   files carry `paths`
    frontmatter, so the runtime loads them by itself when Claude touches
    matching files — there is no need to write "if you edit X, read Y" into
    CLAUDE.md.

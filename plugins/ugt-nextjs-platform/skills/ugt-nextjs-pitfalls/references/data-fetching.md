@@ -80,7 +80,9 @@ a list showing one month reads as "my items disappeared".
 (`[...rows].sort()`, `.filter()`, `.map()` inline), its identity changes every
 render → effect fires → parent `setState` with a new array → re-render → loop.
 React cuts it at an arbitrary commit, so the error ("Maximum update depth
-exceeded") points at an innocent child — often a Radix `SelectItemText`.
+exceeded") points at an innocent child — often a deep UI-primitive leaf
+(a Select item text node; the incident that taught this was Radix-era, the
+mechanism is identical on Base UI).
 
 - Wrap every derived array passed as a prop (or used in effect deps) in
   `useMemo` with correct deps.

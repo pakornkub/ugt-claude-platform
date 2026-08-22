@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
-// kit-hash: d75f7f9bdb29
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit-hash: 9aa7c1c252b6
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
 // ผ่าน URL state ทั้งหมด "never half" · หน้านี้ parse searchParams แล้ว query จริง
@@ -105,7 +105,7 @@ export default async function AdminAuditLogsPage({
       <PageHeader>
         <PageHeaderText>
           <PageTitle>บันทึกกิจกรรม</PageTitle>
-          <PageDescription>อ่านอย่างเดียว — ตารางนี้ไม่มีปุ่มแก้หรือลบ</PageDescription>
+          <PageDescription>บันทึกการกระทำทั้งหมด — ไม่มีปุ่มแก้หรือลบที่ไหนเลย</PageDescription>
         </PageHeaderText>
       </PageHeader>
       <AuditLogsTable

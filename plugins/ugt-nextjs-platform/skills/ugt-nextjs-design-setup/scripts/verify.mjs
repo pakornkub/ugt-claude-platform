@@ -56,6 +56,18 @@ check('docs/design-questions.md exists', () =>
   has('docs', 'design-questions.md') ? { ok: true } : { ok: false, msg: 'Pending-questions doc missing' }
 );
 
+check('No leftover placeholders in MOTION.md / design-questions.md', () => {
+  // ไฟล์รองสองตัวถูก gen จาก template เดียวกัน — สแกนเฉพาะเมื่อมีไฟล์
+  // (MOTION.md มีเฉพาะโปรเจคที่ตอบ custom motion = มี)
+  const found = [];
+  for (const f of ['MOTION.md', 'design-questions.md']) {
+    if (!has('docs', f)) continue;
+    const hits = [...new Set(read('docs', f).match(/__[A-Z][A-Z0-9_]*__/g) ?? [])];
+    if (hits.length) found.push(`docs/${f}: ${hits.join(', ')}`);
+  }
+  return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
+});
+
 // ── shadcn config ──────────────────────────────────────────────────────────
 check("components.json style is 'base-mira' + lucide", () => {
   if (!has('components.json')) return { ok: false, msg: 'No components.json — shadcn not initialized' };

@@ -152,6 +152,42 @@ check('Compose mounts a storage volume and runs the scanner', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+check('Storage binds under /srv/appdata (no named volume) + no __*__ left', () => {
+  // cicd contract §2.8: persistent data = bind mounts under /srv/appdata —
+  // named volume มองไม่เห็นจาก host และ backup ขององค์กรกวาดไม่ถึง
+  const files = ['docker-compose.yml', 'docker-compose.dev.yml'].filter((f) => has(f));
+  if (!files.length) return { ok: 'warn', msg: 'no compose files yet — apply the snippet after cicd-setup' };
+  const problems = [];
+  for (const f of files) {
+    const body = read(f);
+    if (/^\s*-\s*[\w-]+:\/app\/storage/m.test(body)) {
+      problems.push(`${f}: /app/storage mounts a NAMED volume — must be a /srv/appdata bind (cicd §2.8)`);
+    }
+    const hits = [...new Set(body.match(/__[A-Z][A-Z0-9_]*__/g) ?? [])];
+    if (hits.length) problems.push(`${f}: placeholders left: ${hits.join(', ')}`);
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('Admin handoff covers the storage-dir backup', () => {
+  if (!has('docs/admin-handoff.md')) {
+    return { ok: false, msg: 'docs/admin-handoff.md missing the upload section — §4.5 appends it; the storage dir will have no backup job' };
+  }
+  const body = read('docs/admin-handoff.md');
+  return /storage|ไฟล์แนบ/.test(body) && /backup|สำรอง/i.test(body)
+    ? { ok: true }
+    : { ok: false, msg: 'docs/admin-handoff.md never mentions backing up the storage dir — the only copy of every attachment' };
+});
+
+check('Attachment linking pattern recorded in decisions.md', () => {
+  if (!has('docs/project-context/decisions.md')) {
+    return { ok: 'warn', msg: 'no docs/project-context/decisions.md — run ugt-context, then record the §3 Q2 linking choice' };
+  }
+  return /attachment|entityType|Attachments|ไฟล์แนบ/i.test(read('docs/project-context/decisions.md'))
+    ? { ok: true }
+    : { ok: false, msg: 'the attachment→record linking choice (§3 Q2) is not recorded in decisions.md' };
+});
+
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;
 let warned = 0;

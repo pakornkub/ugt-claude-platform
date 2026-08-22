@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/format.ts
-// kit-hash: 1fdd1d0bcf9f
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-design-setup/lib/format.ts
+// kit-hash: 313fcea53716
 // source: merged ugt-hrms lib/format-date.ts + gov-boi-smart lib/format.ts — installed by ugt-nextjs-design-setup
 // convention: จอ DD/MM/YYYY ค.ศ. · ไฟล์ export ISO yyyy-MM-dd · ทุกการ format ผ่านไฟล์นี้เท่านั้น
 
@@ -164,7 +164,7 @@ export function formatNumber(value: string | number | null | undefined): string 
   const text = String(value);
   const m = NUMERIC_RE.exec(text);
   if (!m) return text; // ไม่ใช่ตัวเลขล้วน (เช่นค่าที่ format มาแล้ว) — คืนตามเดิม ไม่ทำพัง
-  return `${m[1]}${m[2].replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${m[3] ?? ''}`;
+  return `${m[1]}${m[2].replaceAll(/\B(?=(\d{3})+(?!\d))/g, ',')}${m[3] ?? ''}`;
 }
 
 // ─── ขนาดไฟล์ ────────────────────────────────────────────────────────────────

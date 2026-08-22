@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/export.ts
-// kit-hash: a124c77a883f
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-design-setup/lib/export.ts
+// kit-hash: 8e85e60d55a7
 // source: merged ugt-hrms app/api/{access-monitor,employee-monitor}/export/route.ts
 // — installed by ugt-nextjs-design-setup (org UI kit)
 //
@@ -87,7 +87,7 @@ const CONTENT_TYPE: Record<ExportFormat, string> = {
 
 /** ชื่อไฟล์ไปอยู่ใน HTTP header — ปล่อย " หรือขึ้นบรรทัดใหม่ผ่านไปคือ header injection */
 function safeFilename(name: string): string {
-  return name.replace(/[^\w.\-]+/g, '-').slice(0, 120) || 'export';
+  return name.replaceAll(/[^\w.\-]+/g, '-').slice(0, 120) || 'export';
 }
 
 /**

@@ -350,9 +350,12 @@ mistake this section prevents.
    (nest the `(admin)` group under the shell's layout, or move the three admin
    pages under the project's protected route group with the guard preserved).
 
-**No shell yet** (fresh project): copy as-is — `<AdminNav>` renders a working
-sidebar out of the box. When the project later grows its own shell, migrate as
-above.
+**No shell yet** (fresh project): copy as-is — the (admin) layout wraps
+`SidebarProvider` + `<AdminNav>` (shadcn Sidebar with `NavUser` in the footer)
+and works out of the box. Requires the `sidebar` + `tooltip` components (§5.1
+installs them) and `TooltipProvider` in the root layout. When the project
+later grows its own shell, migrate as above — and remove this fallback so
+there is exactly one sidebar and one NavUser.
 
 **Existing menus under RBAC** (from §3 Q8): for each menu the installer chose,
 declare a `resource:action` key in `ALL_PERMISSIONS` (the sync in step 5

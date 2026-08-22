@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: 1cdc180d9e45
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: ee9e82532290
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the table lives in UsersTable.
 // DataTable โหมด client (DESIGN.md §4): master data ดึงทั้งชุดแล้ว sort/filter/paginate
 // ในหน่วยความจำ — ponytail: ผู้ใช้หลักพันคนขึ้นไปค่อยย้ายเป็นโหมด server แบบ audit-logs
@@ -47,7 +47,7 @@ export default async function AdminUsersPage() {
         <PageHeaderText>
           <PageTitle>ผู้ใช้งาน</PageTitle>
           <PageDescription>
-            รายชื่อผู้ใช้ทั้งหมดของระบบ — กำหนดบทบาทได้จากคอลัมน์บทบาท
+            บัญชี SSO/AD เกิดเองตอนเข้าสู่ระบบครั้งแรก — เพิ่มด้วยมือเฉพาะบัญชี local
           </PageDescription>
         </PageHeaderText>
         {canCreate && (

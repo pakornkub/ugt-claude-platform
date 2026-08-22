@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: 6c6c1f86ee37
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: c6aa1a1d2a4d
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -8,8 +8,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { KeyRound, Loader2, LogOut, Mail, MoreVertical, UserCircle2 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { KeyRound, Loader2, LogOut, Mail, MoreVertical, UserCircle2, type LucideIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {

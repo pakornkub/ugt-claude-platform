@@ -69,21 +69,21 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~DataTable สามก้อนยังไม่ห่อการ์ดตาม §3~~ → มติห่อใน DataTable กลาง (prop `card` default เปิด), 4.26.0
 - `theme-toggle` เป็นปุ่ม icon นอก IconAction — จะทำ exception topbar เป็นมติ หรือย้ายเข้า IconAction
 
-**งานโค้ดที่ตามมาได้เลย (ยังไม่เข้า 4.25.0 เพราะใหญ่/ต้องทดสอบ):**
-- `AdminNav` fallback เป็น hand-rolled nav — rebuild บน shadcn Sidebar (+SidebarProvider) ไม่งั้น NavUser crash ในโปรเจค fallback · ระหว่างนี้ header ไฟล์ต้องเตือน
+**งานโค้ดที่ตามมาได้เลย:**
+- ~~`AdminNav` fallback rebuild บน shadcn Sidebar~~ → 4.27.0
 - date-picker label ผ่าน date-fns ตรง ไม่ผ่าน lib/format → โปรเจค พ.ศ. จอไม่ตรงตาราง · รวม toDateKey ซ้ำสองที่เข้า formatExportDate
 - `admin-setup-form`/`(admin-setup)` ยังไม่เข้า kit scale (text-2xl override, hand-built icon circle)
 - tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title — ควรเข้า IconAction/ระบบขนาด
-- `check-kit-freshness.mjs` ไม่ scan root files (`proxy.ts`, `vitest.config.ts`, `prisma.config.ts`) + จำกัด .ts/.tsx — fix ของ proxy จะไม่ถูกรายงานตลอดกาล
-- mail-setup สัญญา `/admin/mail-templates` ไว้ 3 ที่แต่ไม่มีหน้า — ทำหน้า หรือลดคำสัญญา
-- upload-setup: คำถาม retention ไม่มี cleanup job รองรับ (รอมติ cron ข้อ 3) · ไม่มี placeholder table/verify · ลำดับ Upload↔CI ใน full-setup ต้องสลับหรือเพิ่มขั้น close-out
-- verify script หลายตัวมีข้อ checklist ที่ machine-checkable แต่ไม่ implement (mkdir-p↔compose-bind ทั้ง 3 CI skills · admin-handoff placeholder scan · no-memo ของ pitfalls · zod deprecated ของ clean-code · ฯลฯ — รายละเอียดใน audit report ของ session 2026-08-21)
-- pitfalls references ยังอธิบายด้วยพฤติกรรม Radix (Select value="") — re-verify กับ Base UI แล้ว re-word
-- full-setup: rules ของ mail/upload ไม่อยู่ในลิสต์ §4.2 + verify · เลขข้อ interview ซ้ำ
-- database: คำถาม dev/prod แยก + requestTimeout ไม่มีผู้บริโภค · naming-conventions.md ไม่มีข้อยกเว้น Better Auth singular · `__LINKED_SERVER__` อยู่ผิดตาราง
-- design-setup: ไม่มี placeholder table (13 ตัว) · verify ไม่ scan MOTION.md/design-questions.md · export.test.ts ไม่อยู่ใน inventory
-- python/php cicd: subpath answer ไม่มี step รองรับ · `[BATCH]` marker หายใน dev compose (python) · `.env.example` ไม่มี asset (python) · `[WEB]` checklist ขัด §2.8 (php)
-- nextjs cicd: ไม่มี `.dockerignore` step (พี่น้อง php/python มี) · ตาราง placeholder ไม่ครบ 5 ตัวของ admin-handoff
+- ~~`check-kit-freshness.mjs` ไม่ scan root files~~ → 4.27.0 (root files + prisma/; ชนิดไฟล์อื่นยัง out of scope โดยประกาศใน SKILL แล้ว)
+- ~~mail-setup สัญญา `/admin/mail-templates` แต่ไม่มีหน้า~~ → 4.27.0 (หน้า+editor+preview+actions ครบ)
+- ~~upload-setup: placeholder table/verify · ลำดับ Upload↔CI~~ → 4.27.0 · คำถาม retention ยังรอมติ cron ข้อ 3 (SKILL บอกตรง ๆ แล้วว่าเป็นแค่ decision record)
+- ~~verify checks ที่ประกาศแต่ไม่ implement (ฝั่ง nextjs: mkdir-p↔bind, handoff scan, no-memo, zod deprecated, S6606/S3735, design placeholder scan, full-setup rules list)~~ → 4.27.0 · **ฝั่ง php/python ยังค้าง** (ดูข้อ python/php ล่าง)
+- ~~pitfalls อธิบายด้วยพฤติกรรม Radix~~ → 4.27.0 (re-word เป็น Base UI-first)
+- ~~full-setup: rules mail/upload + เลขข้อ interview~~ → 4.27.0
+- ~~database: dev/prod question, requestTimeout, naming exception, `__LINKED_SERVER__`~~ → 4.27.0
+- ~~design-setup: placeholder table · verify scan MOTION/design-questions · export.test.ts inventory~~ → 4.27.0
+- python/php cicd: subpath answer ไม่มี step รองรับ · `[BATCH]` marker หายใน dev compose (python) · `.env.example` ไม่มี asset (python) · `[WEB]` checklist ขัด §2.8 (php) · mkdir-p↔bind + admin-handoff placeholder checks ยังไม่ implement
+- ~~nextjs cicd: `.dockerignore` + ตาราง placeholder admin-handoff~~ → 4.27.0
 - ugt-core: ugt-requirements สร้าง board.md เองไม่ copy skeleton ของ ugt-context · ugt-handoff template `YYYY-MM-DD` ไม่มีวงเล็บแหลมให้ตรง verify
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)

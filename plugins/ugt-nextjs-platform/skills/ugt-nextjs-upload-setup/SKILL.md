@@ -73,8 +73,11 @@ as a starting point that the first real project will sharpen.
    `docs/project-context/decisions.md`.
 3. **Who may upload / download** — two permissions are added
    (`files:create`, `files:read`); decide which roles get them.
-4. **Retention** — how long a soft-deleted attachment's bytes are kept before
-   the cleanup job removes them.
+4. **Retention** — how long a soft-deleted attachment's bytes should be kept.
+   **บอกตรง ๆ ตอนถาม**: ยังไม่มี cleanup job ให้ติดตั้ง (รอมติองค์กรว่า
+   background job รันที่ไหน — `docs/backlog.md` ข้อ 3 ของ platform) — คำตอบนี้
+   ถูก**บันทึกไว้ใน `docs/project-context/decisions.md`** เพื่อให้ job ที่จะมา
+   ทีหลังใช้ ไม่ใช่ config ที่มีผลวันนี้ อย่าสัญญาว่าไฟล์จะถูกกวาดอัตโนมัติ
 
 ## 4. Setup steps
 
@@ -89,8 +92,12 @@ as a starting point that the first real project will sharpen.
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
 | `assets/components/file-upload.tsx` | `components/file-upload.tsx` |
 | `assets/prisma/schema-attachment.prisma` | paste INTO `prisma/schema.prisma` |
-| `assets/env.example` | append to `.env.example` (+ real values in `.env.local`) |
+| `assets/env.example` | append to `.env.example` (+ real values in `.env.local`) — **substitute the interviewed max size** into `UPLOAD_MAX_BYTES` here and in the compose default (§3 Q1's answer has no other landing spot) |
 | `assets/rules/ugt-nextjs-upload.md` | `.claude/rules/ugt-nextjs-upload.md` |
+| `assets/compose-and-dockerfile.snippet.md` | **not copied** — applied to the Dockerfile + both compose files in §4.4 (after cicd-setup has written them) |
+
+**Placeholders**: `__PROJECT_NAME__` (in the compose snippet — bind-mount
+paths + container names). `verify.mjs` checks nothing is left.
 
 ### 4.2 Env schema
 
@@ -116,10 +123,21 @@ FILES_READ:   'files:read',
 ### 4.4 Infrastructure
 
 Apply `assets/compose-and-dockerfile.snippet.md` to the Dockerfile and **both**
-compose files: the mount point owned by `nextjs`, the named volume, the clamav
-service with a 5-minute `start_period`, and the persisted signature DB.
+compose files: the mount point owned by `nextjs`, the `/srv/appdata` bind
+mounts (never a named volume — cicd contract §2.8), the clamav service with a
+5-minute `start_period`, the persisted signature DB, and `storage` +
+`clamav-db` added to the Jenkinsfile `[VOLUME]` `mkdir -p` line.
+These files are written by cicd-setup — when running under full-setup, this
+step waits until after cicd-setup and runs as a close-out.
 
-### 4.5 Health + migrate
+### 4.5 Handoff to the admin team
+
+Append the snippet's §3 bullets (volume backup · deleting the host dir ·
+clamav RAM · reverse-proxy body limit) to `docs/admin-handoff.md` — create the
+file from cicd-setup's template if it does not exist yet. The checklist below
+fails without it.
+
+### 4.6 Health + migrate
 
 Add the scanner to `/api/health` so a dead clamd is visible before users find
 it (`pingScanner()` from `lib/virus-scan.ts`), then:
@@ -158,8 +176,8 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] Upload something just over `UPLOAD_MAX_BYTES` → clean 413 from the app
       (if the proxy answers instead, raise its limit)
 - [ ] `canReadAttachment` no longer returns `false` for every case
-- [ ] `docs/admin-handoff.md` mentions the volume backup and the
-      `docker compose down -v` warning
+- [ ] `docs/admin-handoff.md` mentions the storage-dir backup and that
+      deleting the host dir deletes every attachment (verify.mjs greps this)
 - [ ] The attachment→record linking pattern is recorded in
       `docs/project-context/decisions.md` (polymorphic / FK / single column),
       not left as "whatever the skeleton did"

@@ -1,5 +1,60 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.27.0 (2026-08-21)
+
+Works through the backlog §5 remainder from the 2026-08-21 audit — every
+nextjs-platform item that needed no further มติ:
+
+- **AdminNav fallback rebuilt on the shadcn Sidebar primitives** — the old
+  hand-rolled `<nav>` broke the kit's own "shadcn exists → use it" rule, had
+  no active state, and couldn't host `NavUser` (`useSidebar` throws with no
+  provider). The `(admin)` layout fallback now wraps `SidebarProvider` +
+  `SidebarInset`, feeds `NavUser` (footer, per DESIGN §3) from one extra
+  query, and the nav highlights by longest-prefix per the layout-shells rule.
+- **`/admin/mail-templates` now actually ships** (mail-setup promised it in
+  three places with no asset): page + `MailTemplatesManager` (grouped list ·
+  subject/body editor with token hints · Sheet preview rendered by the same
+  server-side `renderComposedMail` used at send time · reset via
+  `ConfirmActionDialog`) + `admin-mail-templates.ts` actions (guard order
+  session → `mail-templates:manage` → action → audit, upsert/delete of the
+  `AppSettings` override). SKILL §4.4/§4.5 wire the permission pair and the
+  nav/section-guard entries.
+- **Preview §13 ↔ asset text drift closed, both directions**: assets adopt
+  the preview's better wording (nav+title "บทบาทและสิทธิ์", roles subtitle,
+  users subtitle teaching the no-pre-registration rule, "ผู้กระทำ" column);
+  the preview drops its English "Audit logs" (×4, §5 ภาษา UI) and its
+  action/detail headers, gains a mail glyph, and the NavUser "2 รายการตายตัว"
+  line (template §3 + preview) now names the local-only เปลี่ยนรหัสผ่าน item.
+- **Declared-but-unimplemented verify checks, implemented**: cicd — compose
+  `/srv/appdata` binds diffed against the Jenkinsfile `mkdir -p` line (the
+  root:root failure), `docs/admin-handoff.md` placeholder scan, and a
+  `.dockerignore` check with a new shipped `assets/dockerignore` (php/python
+  had this; the Next.js `COPY . .` ran over the whole workspace) ·
+  pitfalls — NO-MEMO (`useReactTable` without `'use no memo'`) plus the doc
+  list finally mentions DATE-BIND · clean-code — S1874 (Zod `.flatten()` /
+  `z.string().datetime()`), S6606/S7735 (`a ? a : b`), S3735 (statement
+  `void`) · design — placeholder scan extended to MOTION.md +
+  design-questions.md · full-setup — mail/upload rule files join the
+  installed-rules check · upload — named-volume/placeholder/handoff/decisions
+  checks. Running the new clean-code rules on this repo then caught four
+  `.replace(/g)` and two duplicate-import Sonar idioms in shipped assets —
+  fixed, so kit code no longer trips the gate it installs.
+- **kit-sync sees root-level kit files** — `check-kit-freshness` now scans
+  `proxy.ts` / `vitest.config.ts` / `prisma.config.ts` (+ `prisma/`); a
+  shipped proxy fix was previously unreportable forever. SKILL wording now
+  states the paste-into-file assets are deliberately unstamped.
+- **Interview hygiene**: cicd §4.2 documents the 5 handoff-only placeholders;
+  upload §3 says out loud that retention is a recorded decision awaiting the
+  org cron มติ (no cleanup job exists), and the max-size answer now has a
+  landing spot; upload §4.4/§4.5 sequence the compose snippet after
+  cicd-setup and append the admin-handoff section; database §Interview stops
+  asking the dev/prod split nothing consumes, tells no-SP projects to lower
+  `requestTimeout`, and the Better-Auth singular exception finally appears in
+  `naming-conventions.md` + the schema skeleton (the two files people
+  actually open); test-lint reads `package.json` instead of asking about it;
+  full-setup renumbers the colliding interview items and sequences
+  upload-vs-CI correctly.
+
 ## 4.26.0 (2026-08-21)
 
 Four design มติ (2026-08-21) resolving the contract-vs-artifact contradictions

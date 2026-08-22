@@ -84,6 +84,8 @@ check('Rules exist for every installed module', () => {
   if (deps.prisma || deps['@prisma/client']) expected.push('ugt-nextjs-database.md');
   if (deps['better-auth']) expected.push('ugt-nextjs-auth.md');
   if (has('Jenkinsfile')) expected.push('ugt-nextjs-ci.md');
+  if (deps.nodemailer) expected.push('ugt-nextjs-mail.md');
+  if (has('lib/storage.ts')) expected.push('ugt-nextjs-upload.md');
   const missing = expected.filter((f) => !has('.claude/rules', f));
   return missing.length
     ? { ok: false, msg: `Module installed but rules missing: ${missing.join(', ')} — its rules will never load while editing` }

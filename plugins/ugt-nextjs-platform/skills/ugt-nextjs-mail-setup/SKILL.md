@@ -88,6 +88,9 @@ Assets mirror their destination — copy the tree, then substitute:
 | `assets/lib/email.ts` | `lib/email.ts` |
 | `assets/lib/mail-templates.ts` | `lib/mail-templates.ts` |
 | `assets/lib/types/mail-templates.ts` | `lib/types/mail-templates.ts` |
+| `assets/lib/actions/admin-mail-templates.ts` | `lib/actions/admin-mail-templates.ts` — needs auth-setup installed (guard + audit) |
+| `assets/app/(admin)/admin/mail-templates/page.tsx` | `app/(admin)/admin/mail-templates/page.tsx` — inside auth-setup's `(admin)` group so its guard + permission sync apply |
+| `assets/components/mail-templates-manager.tsx` | `components/mail-templates-manager.tsx` — needs the design kit (`ConfirmActionDialog`, `page-shell`, `textarea` from the base set) |
 | `assets/prisma/schema-mail.prisma` | paste INTO `prisma/schema.prisma` |
 | `assets/env.example` | append to `.env.example` (+ real values in `.env.local`) |
 | `assets/rules/ugt-nextjs-mail.md` | `.claude/rules/ugt-nextjs-mail.md` (whole-file overwritable) |
@@ -109,19 +112,41 @@ SMTP_PASS: z.string().optional(),
 SMTP_FROM: z.string().optional(),
 ```
 
-### 4.4 Add the dev-mode permission
+### 4.4 Add the permissions — key + seed ALWAYS in pairs
 
-In `lib/permissions.ts` (from `ugt-nextjs-auth-setup`):
+In `lib/permissions.ts` (from `ugt-nextjs-auth-setup`) add **both the keys and
+their `ALL_PERMISSIONS` entries together** — a key without its seed can never
+be granted (shipped once as permanently-403 uploads, 4.25.0):
 
 ```ts
 DEV_MODE: 'dev-mode:enable',
+MAIL_TEMPLATES_MANAGE: 'mail-templates:manage',
 ```
 
-plus its `ALL_PERMISSIONS` entry (group: `ระบบ`, label: "โหมดทดสอบอีเมล").
-Grant it to testers/developers only — it silently redirects mail away from real
-recipients, which is exactly what you do not want on a normal account.
+seeds: `{ key: DEV_MODE, label: 'โหมดทดสอบอีเมล', group: 'ระบบ' }` and
+`{ key: MAIL_TEMPLATES_MANAGE, label: 'แก้ไขเทมเพลตอีเมล', group: 'ระบบ' }`.
+Grant `dev-mode:enable` to testers/developers only — it silently redirects
+mail away from real recipients, which is exactly what you do not want on a
+normal account. The sync in auth's `(admin)` layout seeds both keys to the
+database the next time anyone opens an admin page.
 
-### 4.5 [Local login only] Hand the password-reset template back to auth
+### 4.5 Wire `/admin/mail-templates` into the admin section
+
+The page ships in §4.2; two wires make it reachable:
+
+1. `components/admin-nav.tsx` (auth-setup) — add to `ADMIN_NAV_ITEMS`:
+
+   ```ts
+   { href: '/admin/mail-templates', label: 'เทมเพลตอีเมล', icon: Mail, perm: PERMISSIONS.MAIL_TEMPLATES_MANAGE },
+   ```
+
+   (import `Mail` from lucide; projects with their own sidebar merge this item
+   the same way as the rest — auth SKILL.md §5.6.)
+2. `app/(admin)/layout.tsx` — add `PERMISSIONS.MAIL_TEMPLATES_MANAGE` to
+   `ADMIN_SECTION_PERMISSIONS`, so a user whose only admin permission is
+   template editing can enter the section.
+
+### 4.6 [Local login only] Hand the password-reset template back to auth
 
 `auth.password-reset` ships in `MAIL_TEMPLATE_KEYS` because the reset email is
 an ordinary editable template. It is **used from `lib/auth.ts`**
@@ -130,7 +155,7 @@ back to `ugt-nextjs-auth-setup` §5.5 and install the reset pieces now that
 `lib/email.ts` exists. Projects with no local login should delete the key, its
 definition and its default together.
 
-### 4.6 Migrate + send a test
+### 4.7 Migrate + send a test
 
 ```bash
 npx prisma migrate dev --name add-app-settings && npx prisma generate

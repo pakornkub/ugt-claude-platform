@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.26.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: 26e28adf6e79
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: f684abc03f34
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -56,7 +56,7 @@ export function RolesManager({
   const columns: ColumnDef<RoleRow>[] = [
     {
       accessorKey: 'name',
-      header: 'ชื่อ',
+      header: 'บทบาท',
       cell: ({ row }) => (
         <>
           {row.original.name}
@@ -126,8 +126,8 @@ export function RolesManager({
           (ไม่ห่อ PageShell — padding ของหน้าเป็นของ shell/layout ที่ครอบอยู่) */}
       <PageHeader>
         <PageHeaderText>
-          <PageTitle>บทบาท</PageTitle>
-          <PageDescription>กำหนดบทบาทและสิทธิ์การใช้งานของแต่ละบทบาท</PageDescription>
+          <PageTitle>บทบาทและสิทธิ์</PageTitle>
+          <PageDescription>สิทธิ์ทั้งหมดของระบบจับคู่เข้ากับบทบาทที่หน้านี้</PageDescription>
         </PageHeaderText>
         {canCreate && (
           <PageActions>

@@ -39,10 +39,15 @@ code lives in `assets/`.
 
 ## Interview
 
-1. What test/lint tooling already exists? (jest present → discuss first: migrate
-   to vitest or keep jest with adjusted reporters · existing eslint/prettier → merge, don't overwrite)
-2. Which dirs hold source? (default `app/ components/ lib/ hooks/` — drives `coverage.include`)
-3. Tailwind in use? (no → drop `prettier-plugin-tailwindcss` + `tailwindStylesheet` from `.prettierrc`)
+**อ่านจากโค้ดก่อน อย่าถามสิ่งที่ `package.json` ตอบได้** — tooling ที่มีอยู่
+(jest/eslint/prettier ใน deps + config files), dirs ที่มีจริง, และ Tailwind
+(`tailwindcss` ใน deps + `@import "tailwindcss"` ใน globals.css) ตรวจเองทั้งหมด
+คำถามเดียวที่เป็นการตัดสินใจจริง:
+
+1. [เมื่อเจอ jest] migrate เป็น vitest หรือคง jest ไว้ (ปรับ reporters ให้
+   pipeline อ่านได้)? — เสนอ migrate เป็น default พร้อมเหตุผล · ของเดิม
+   (eslint/prettier config) = merge เสมอ ไม่ overwrite แล้วสรุปแผน merge
+   ให้ยืนยันหนึ่งครั้ง
 
 ## Setup Steps
 

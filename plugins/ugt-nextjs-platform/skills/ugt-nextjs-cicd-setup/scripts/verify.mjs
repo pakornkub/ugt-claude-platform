@@ -272,6 +272,49 @@ check('.env / .env.dev are gitignored (and .env.example is not)', () => {
   return { ok: true };
 });
 
+check('docs/admin-handoff.md rendered (no __*__ left)', () => {
+  if (!has('docs/admin-handoff.md')) {
+    return { ok: 'warn', msg: 'docs/admin-handoff.md missing — §4.6 renders it; the admin gets a chat snippet instead of a file' };
+  }
+  const hits = [...new Set([...read('docs/admin-handoff.md').matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
+  return hits.length
+    ? { ok: false, msg: `placeholders left in docs/admin-handoff.md: ${hits.join(', ')} — the admin cannot act on a template` }
+    : { ok: true };
+});
+
+check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () => {
+  // The documented root:root failure (§4.3): a bind mount whose host dir the
+  // Deploy stage never creates/chowns → docker creates it as root and the app
+  // cannot write. Compare the <name> segment after /srv/appdata/<project>/.
+  const names = new Set();
+  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
+    if (!has(f)) continue;
+    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+  }
+  if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
+  const mkdirLines = [...jf.matchAll(/mkdir -p[^\n]*/g)].map((m) => m[0]).join('\n');
+  const missing = [...names].filter((n) => !new RegExp(`/srv/appdata/[^/\\s]+/${n}\\b`).test(mkdirLines));
+  return missing.length
+    ? { ok: false, msg: `compose binds with no mkdir -p in the Deploy stage: ${missing.join(', ')} — first deploy creates them root-owned and the app cannot write` }
+    : { ok: true };
+});
+
+check('.dockerignore exists and covers the heavy build debris', () => {
+  // COPY . . in the builder stage runs over a Jenkins workspace that already
+  // holds node_modules/.next/coverage from earlier stages — without a
+  // .dockerignore the build context balloons and stale artifacts leak in.
+  if (!has('.dockerignore')) {
+    return { ok: false, msg: 'No .dockerignore — Dockerfile does COPY . . over a workspace containing node_modules/.next/coverage/test-results/dc-report' };
+  }
+  const body = read('.dockerignore');
+  const missing = ['node_modules', '.next', 'coverage', 'test-results', 'dc-report', '.git'].filter(
+    (entry) => !body.split('\n').some((l) => l.trim().replace(/\/$/, '') === entry)
+  );
+  return missing.length
+    ? { ok: 'warn', msg: `.dockerignore missing entries: ${missing.join(', ')}` }
+    : { ok: true };
+});
+
 check('owasp-suppressions.xml is readable XML', () => {
   if (!has('owasp-suppressions.xml')) return { ok: false, msg: 'No owasp-suppressions.xml' };
   const body = read('owasp-suppressions.xml');

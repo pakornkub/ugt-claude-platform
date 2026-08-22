@@ -77,10 +77,19 @@ for (const skill of readdirSync(skillsDir)) {
 // ── scan the project for stamped copies ─────────────────────────────────────
 const SKIP = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', 'dist', '.claude']);
 const rows = [];
-for (const dir of ['app', 'components', 'lib', 'features', 'scripts', 'src']) {
+// ไฟล์ kit ที่ติดตั้งไว้ที่ root โปรเจคโดยตรง — เดินเฉพาะ dir จะมองไม่เห็นตลอดกาล
+// (proxy.ts ของ auth · vitest.config.ts ของ test-lint · prisma.config.ts ของ database)
+const ROOT_FILES = ['proxy.ts', 'middleware.ts', 'vitest.config.ts', 'prisma.config.ts']
+  .map((f) => join(PROJECT, f))
+  .filter((f) => existsSync(f));
+const scanTargets = [ROOT_FILES];
+for (const dir of ['app', 'components', 'lib', 'features', 'scripts', 'src', 'prisma']) {
   const abs = join(PROJECT, dir);
   if (!existsSync(abs)) continue;
-  for (const file of walk(abs, SKIP)) {
+  scanTargets.push(walk(abs, SKIP));
+}
+for (const target of scanTargets) {
+  for (const file of target) {
     if (!/\.tsx?$/.test(file)) continue;
     const text = readFileSync(file, 'utf8');
     const stamp = parseStamp(text);

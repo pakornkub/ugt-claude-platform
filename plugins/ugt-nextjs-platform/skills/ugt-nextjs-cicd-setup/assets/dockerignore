@@ -1,0 +1,14 @@
+# .dockerignore — ugt-nextjs-cicd-setup
+# The builder stage does `COPY . .` over a Jenkins workspace that already ran
+# install/test/scan stages — without this file the context drags in
+# node_modules (rebuilt inside the image anyway), stale .next output, coverage
+# and scan reports, and the whole git history.
+node_modules
+.next
+coverage
+test-results
+dc-report
+.git
+.env
+.env.*
+!.env.example

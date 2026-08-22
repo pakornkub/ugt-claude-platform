@@ -54,9 +54,15 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
 
 1. **Database name**, and does it already exist? (existing → introspect /
    `migrate resolve`; new → `migrate dev` from the start)
-2. **Server/instance + port** (separate dev and prod?)
+2. **Server/instance + port** — this skill wires ONE `DATABASE_URL`
+   (`.env.local` = the dev/local DB); the dev/prod split arrives later with
+   cicd-setup §4.5 (`env-<project>` / `env-<project>-dev` credentials), so
+   don't ask "separate dev and prod?" here — nothing in this skill consumes
+   the answer
 3. Will it call **stored procedures** or read across a **linked server**?
-   (affects `requestTimeout` and the raw-SQL patterns)
+   (affects the raw-SQL patterns — and `requestTimeout`: the copied
+   `lib/prisma.ts` ships 5 นาที for long SPs; **no SPs → lower it to the
+   mssql default 15s** in that file, a hung query should fail fast)
 
 ## Setup Steps
 
@@ -93,7 +99,7 @@ the placeholder table below go into `.env.local` only.
 | `__DB_PASSWORD__` | password (`.env.local` only — never committed) |
 | `__PROJECT_NAME__` | project name (used in comments/app name) |
 | `__EXT__` | prefix of read-only tables populated externally (if any) |
-| `__LINKED_SERVER__` | linked-server name (only for projects reading across servers) |
+| `__LINKED_SERVER__` | linked-server name — **no database asset contains it**; it lives in auth-setup's `lib/directory.ts` (same value there). Kept in this table so the interview answer is recorded once |
 
 > If the project has **no** external read-only tables / linked server →
 > **delete the related comment lines** from the copied files (e.g. the `__EXT___`

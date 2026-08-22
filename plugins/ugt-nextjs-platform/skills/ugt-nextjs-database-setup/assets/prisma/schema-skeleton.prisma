@@ -3,6 +3,9 @@
 // MS SQL Server standard: PascalCase, plural, no reserved words.
 //   ✅  @@map("Users")          ✅  @@map("RolePermissions")
 //   ❌  @@map("user")           ❌  @@map("rolePermission")
+// EXCEPTION: the Better Auth tables pasted in by ugt-nextjs-auth-setup map
+// SINGULAR (@@map("User"), @@map("Session"), …) per that library's own
+// convention — do not pluralize them.
 // Column names in the DB are PascalCase via @map(); Prisma fields and
 // relation names stay camelCase (Prisma convention).
 // Tables populated by external jobs (read-only to the app) use a distinct

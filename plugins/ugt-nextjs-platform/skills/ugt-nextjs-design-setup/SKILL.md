@@ -231,6 +231,31 @@ different size — is the field bug this step exists to prevent.
 8. Install the harness rule: copy `assets/rules/ugt-nextjs-design.md` →
    `.claude/rules/ugt-nextjs-design.md` (whole-file overwritable on update).
 
+### Placeholders (ทุกตัว — จับคู่กับคำถาม interview)
+
+ทุก `__…__` ในไฟล์ template (DESIGN.template.md · MOTION.template.md ·
+design-questions.template.md · globals.tokens.css) พร้อมที่มาของคำตอบ —
+"fill every `__...__`" เฉย ๆ เคยทำให้ตัวที่ไม่มีคำถามตรง ๆ ถูกข้าม:
+
+| Placeholder | มาจาก |
+| --- | --- |
+| `__PROJECT_NAME__` | ชื่อโปรเจค (full-setup ถามแล้ว / ถามเองเมื่อ standalone) |
+| `__DATE__` | วันที่รันติดตั้ง |
+| `__STD_VERSION__` | เวอร์ชัน ugt-core ใน `plugins/ugt-core/.claude-plugin/plugin.json` ณ ตอนติดตั้ง |
+| `__REFERENCE__` | ข้อ 1 — prototype/brand ที่ต้อง match |
+| `__PRIMARY__` / `__PRIMARY_DARK__` | ข้อ 2 — สีหลัก (dark ต้องสว่างกว่า light) |
+| `__DARK_MODE__` | ข้อ 3 |
+| `__SHELL__` | ข้อ 5 (sidebar/topbar/ทั้งคู่) |
+| `__LANDING__` | ข้อ 6 |
+| `__LANG__` | ข้อ 7 (th / th+en) |
+| `__ERA__` | ข้อ 8 (พ.ศ. / ค.ศ.) |
+| `__CONTROL_SCALE__` | ข้อ 9 (ค่า kit = mira · โปรเจคเดิม = ค่าที่วัดจริงจาก §Scale scan) |
+| `__DEVIATIONS__` | ผล scan โปรเจคเดิม (Step 1) — โปรเจคใหม่ = "-" |
+| `__ANSWERS_SUMMARY__` / `__ANSWERED_BY__` | สรุปคำตอบ + ผู้ตอบ ลงมติแถวแรกของ §10 |
+
+(`verify.mjs` สแกน DESIGN.md / globals.css / MOTION.md / design-questions.md
+หา `__*__` ที่ตกค้างให้แล้ว)
+
 ### Step 4 — Close out
 
 1. Run `node <skill-dir>/scripts/verify.mjs` (cwd = project root); fix every

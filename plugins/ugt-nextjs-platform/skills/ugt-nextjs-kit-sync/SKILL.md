@@ -26,7 +26,11 @@ but the copies sit still. HRMS shipped the founding example: the plugin fixed
 `scrollX` clipping data, and the project that discovered that bug kept its old
 copy for weeks.
 
-Every asset ships with two stamp lines (baked at release):
+Every **copied `.ts`/`.tsx`** asset ships with two stamp lines (baked at
+release). Paste-into-file assets (`schema-*.prisma`, `globals.tokens.css`,
+compose/Jenkinsfile snippets) are deliberately out of scope — they never exist
+in a project as a whole-file copy, so a whole-file hash means nothing there:
+token drift is design-setup's sync mode, schema drift is the migration history.
 
 ```ts
 // kit: ugt-nextjs-platform 4.13.0 · ugt-nextjs-design-setup/ui/data-table.tsx

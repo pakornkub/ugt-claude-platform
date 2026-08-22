@@ -137,6 +137,7 @@ assets/Dockerfile                 → Dockerfile
 assets/docker-compose.yml         → docker-compose.yml
 assets/docker-compose.dev.yml     → docker-compose.dev.yml
 assets/owasp-suppressions.xml     → owasp-suppressions.xml
+assets/dockerignore               → .dockerignore   (COPY . . วิ่งบน workspace ที่มี node_modules/.next/รายงาน scan อยู่แล้ว — ไม่มีไฟล์นี้ context บวมและของค้างรั่วเข้า image; php/python มีข้อนี้มาก่อนแล้ว)
 assets/api-health-route.ts        → app/api/health/route.ts
 assets/rules/ugt-nextjs-ci.md     → .claude/rules/ugt-nextjs-ci.md   (whole-file overwritable on plugin update)
 ```
@@ -163,6 +164,17 @@ assets/rules/ugt-nextjs-ci.md     → .claude/rules/ugt-nextjs-ci.md   (whole-fi
 Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 `<project>-dev` · credentials = `env-<project>`, `env-<project>-dev`,
 `sentry-dsn-<project>` · sonar keys = `<project>`, `<project>-dev`
+
+**5 more, only in `admin-handoff.template.md`** — filled at §4.6 render time
+(same second-table convention as the php/python siblings):
+
+| Placeholder | Meaning |
+| --- | --- |
+| `__DATE__` | วันที่ render เอกสาร |
+| `__REQUESTER__` | ชื่อ/อีเมลผู้ขอ (คนที่ admin ติดต่อกลับ) |
+| `__REPO_URL__` | URL ของ git repo |
+| `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
+| `__N_CREDS__` | จำนวน credentials ที่ต้องสร้าง (2 หรือ 3 เมื่อมี Sentry) |
 
 ### 4.3 Adjust per interview answers
 

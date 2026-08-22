@@ -20,6 +20,13 @@ model rolePermission {
 | `@@map("RolePermissions")` | `@@map("rolePermission")` |
 | `@@map("HolidayItems")` | `@@map("holiday_items")` |
 
+> **ข้อยกเว้นเดียว — ตาราง auth ของ Better Auth** (ติดตั้งโดย
+> ugt-nextjs-auth-setup): `User` / `Session` / `Account` / `Verification` /
+> `RateLimit` / `Role` / `Permission` / `RolePermission` map เป็น
+> PascalCase-**เอกพจน์**ตาม convention ของไลบรารี (ส่วน `ActivityLogs`
+> ตามกฎปกติ) — อย่า "แก้ให้ถูก" เป็นพหูพจน์ ไลบรารีจะหาตารางไม่เจอ ·
+> `verify.mjs` ของ auth เช็คชุดนี้ไว้แล้ว
+
 ### Read-only tables populated by external systems
 
 Tables that a **SQL Server Agent Job / ETL / external SP** INSERTs into (the

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 2f7cc26d6383
+// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: 5161a73641f4
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · toolbar filter (ชื่อผู้ใช้ → ช่วงวันที่ → action
@@ -105,7 +105,7 @@ export function AuditLogsTable({
       // instant จริง → เวลาไทยผ่าน lib/format.ts เท่านั้น (DESIGN.md §5)
       cell: ({ row }) => formatDateTime(row.original.createdAt),
     },
-    { accessorKey: 'userName', header: 'ผู้ใช้' },
+    { accessorKey: 'userName', header: 'ผู้กระทำ' },
     { accessorKey: 'action', header: 'การกระทำ', meta: { cellClassName: 'font-mono text-xs' } },
     {
       accessorKey: 'detail',

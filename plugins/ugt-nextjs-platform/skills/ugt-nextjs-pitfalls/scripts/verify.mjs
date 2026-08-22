@@ -75,9 +75,9 @@ const RULES = [
   {
     id: 'SELECT-EMPTY',
     severity: 'error',
-    name: '<SelectItem value=""> — Radix throws at runtime',
+    name: '<SelectItem value=""> — value ว่างชนกลไก "ยังไม่เลือก" ของ Select (Base UI เงียบ ๆ · Radix เดิม throw)',
     test: (l) => /<SelectItem\b[^>]*value=(""|''|\{\s*(''|"")\s*\})/.test(l),
-    fix: 'use the "__none__" sentinel and map it back to undefined in onValueChange',
+    fix: 'use the "__none__" sentinel and map it back to undefined/null in onValueChange',
   },
   {
     id: 'BE-YEAR',
@@ -106,6 +106,7 @@ const RULES = [
 const findings = new Map();
 const swallowCatches = [];
 const missingGetRowId = [];
+const missingNoMemo = [];
 
 for (const file of files) {
   const rel = relative(ROOT, file).split('\\').join('/');
@@ -129,6 +130,12 @@ for (const file of files) {
   for (const m of body.matchAll(/catch\s*(\([^)]*\))?\s*\{\s*(?:\/\/[^\n]*\s*)?return\s+(\[\]|null|undefined|\{\}|'')\s*;?\s*\}/g)) {
     const lineNo = body.slice(0, m.index).split('\n').length;
     swallowCatches.push(`${rel}:${lineNo}`);
+  }
+
+  // useReactTable without 'use no memo' (file-level, error) — React Compiler
+  // memoizes the table's state reads away and sort/filter/pagination freeze
+  if (/useReactTable\s*\(/.test(body) && !/['"]use no memo['"]/.test(body)) {
+    missingNoMemo.push(rel);
   }
 
   // selectable DataTable without getRowId (multi-line, warn)
@@ -170,6 +177,12 @@ if (files.length === 0) {
     'warn',
     missingGetRowId,
     'pass getRowId={(row) => row.id} so selection survives data swaps',
+  );
+  report(
+    "NO-MEMO — useReactTable without a 'use no memo' directive (React Compiler freezes sort/filter/pagination)",
+    'error',
+    missingNoMemo,
+    "add 'use no memo'; as the first statement of the component that calls useReactTable",
   );
   if (!errors && !warns) console.log('  ✔ no greppable pitfalls found in the checked scope');
 }
