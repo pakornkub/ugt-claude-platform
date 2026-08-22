@@ -1,5 +1,55 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.30.0 (2026-08-21)
+
+Two มติ (2026-08-21) plus the contract fixes they unblocked.
+
+**มติ — auth forms migrate to RHF (option B).** All six shipped forms
+(login LDAP+local, forgot, reset, change password, create local user, set
+password, role) now run `react-hook-form` + `zodResolver` + `ui/field`:
+per-field errors sit under their field, form-level and server errors are a
+`Callout` banner instead of a toast that vanishes before it is read, and the
+dialogs move from raw `Dialog` to the kit `FormDialog` (header/body/footer,
+submit wired by `form="…"` rather than `display:contents`). Password rules
+stay in `lib/password-policy.ts` — it now also exports the change-password
+and set-password form schemas, built by extending the shared field object
+*before* `.refine()` (a refined schema is no longer a ZodObject and cannot
+be extended). The login form deliberately validates only "is it filled in":
+binding the password policy there would lock out anyone whose password
+predates the current rules.
+  - **`@hookform/resolvers` was never in any dependency list** even though
+    `form-validation.md` has always told projects to use `zodResolver` —
+    a latent break that this migration would have shipped everywhere. Added
+    to design-setup's dep line and to auth-setup §5.1, along with the
+    `field` component (auth §5.1 installed neither).
+
+**มติ — `size="icon"` is allowed outside table rows** (§0.4 amended to match
+three years of shipped reality: theme toggle, SidebarTrigger, the column
+settings button, pagination). `aria-label` stays mandatory, **row actions
+still must go through `IconAction`** (there the tooltip is the only thing
+naming the icon), and overriding size via className (`size-7 p-0`) is now
+explicitly banned — fix `ui/button.tsx` instead. §0.7 reworded to match.
+
+**Contract fixes the agreement had already decided** (§0.8: DESIGN.md wins
+over code — no new มติ needed, the assets were simply wrong):
+
+- `ui/detail-row.tsx` claimed "label ซ้ายคงที่" as a locked decision while
+  §4 *and* design-preview both specify `justify-between`, centred, ≥16px gap,
+  ~24px min row height — the spec exists so a `StatusBadge` value cannot
+  collide with its label. The component now matches; `nav-user`'s profile
+  rows get the same 16px gap.
+- `formatDateTime` rendered instants in the **viewer's** timezone while §5
+  says Asia/Bangkok. On the audit-log page — whose server-side filter pins
+  day boundaries to +07:00 — a viewer outside UTC+7 saw timestamps that
+  disagreed with the range they had just picked. Now pinned, with a separate
+  `hourCycle: h23` time formatter so midnight reads `00:00`, not `24:00`.
+- `ui/date-picker` formatted its trigger label with `date-fns` directly,
+  bypassing `lib/format` (§0.6): a project answering `__ERA__` = พ.ศ. got a
+  button showing a different year from every table cell. The `dateFormat`
+  prop is replaced by `formatLabel`, defaulting to `formatDate` (no call
+  site passed the old prop).
+- `admin-setup-form` dropped its `text-2xl` CardTitle override (§2: the type
+  scale lives in the component, not per page).
 ## 4.29.0 (2026-08-21)
 
 The rest of the code review's findings — two a11y/tooling fixes plus the

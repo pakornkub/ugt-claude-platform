@@ -1,22 +1,32 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 9891ede72a23
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: e409f3e089c3
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
 //   - SSO only (default): keep SsoSection, delete LdapSection/LocalSection + Tabs block
 //   - SSO + one form method: replace the Tabs block with the single remaining section
 //   - No SSO: delete SsoSection + the "or" separator
-// Requires shadcn primitives: button, input, label, tabs — and sonner for toasts.
+// Requires shadcn primitives: button, input, tabs, field — and sonner for toasts.
 // [METHOD: LOCAL + mail] also `dialog` (ForgotPasswordDialog mounts one).
+//
+// ฟอร์ม = react-hook-form + zodResolver + ui/field (DESIGN.md §4) · error ของการ
+// เข้าสู่ระบบเป็น Callout ค้างบนฟอร์ม ไม่ใช่ toast (§6: error ระดับหน้า = banner) —
+// toast หายไปก่อนผู้ใช้อ่านจบ และหน้า login คือที่ที่คนอ่านข้อความผิดพลาดจริง ๆ
+// หมายเหตุ: ฟอร์ม login ตรวจแค่ "กรอกครบไหม" ห้ามผูก password-policy ที่นี่ —
+// รหัสผ่านเดิมที่ตั้งไว้ก่อนนโยบายปัจจุบันต้องยังเข้าระบบได้
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form'; // [METHOD: LDAP|LOCAL]
+import { zodResolver } from '@hookform/resolvers/zod'; // [METHOD: LDAP|LOCAL]
+import { z } from 'zod'; // [METHOD: LDAP|LOCAL]
 import { useRouter } from 'next/navigation'; // [METHOD: LDAP|LOCAL]
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input'; // [METHOD: LDAP|LOCAL]
-import { Label } from '@/components/ui/label'; // [METHOD: LDAP|LOCAL]
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'; // [METHOD: LDAP|LOCAL]
+import { Callout } from '@/components/ui/callout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // [METHOD: LDAP|LOCAL]
 import { Loader2, Building2 } from 'lucide-react';
 import { authClient } from '@/lib/auth-client'; // [METHOD: SSO]
@@ -73,49 +83,65 @@ function SsoSection() {
 
 // ─── [METHOD: LDAP] AD / LDAP username + password ────────────────────────────
 
+const ldapLoginSchema = z.object({
+  username: z.string().trim().min(1, 'กรอกชื่อผู้ใช้ AD'),
+  password: z.string().min(1, 'กรอกรหัสผ่าน'),
+});
+type LdapValues = z.infer<typeof ldapLoginSchema>;
+
 function LdapSection() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LdapValues>({
+    resolver: zodResolver(ldapLoginSchema),
+    defaultValues: { username: '', password: '' },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
-    const result = await ldapLoginAction({ username, password });
+  const onSubmit = handleSubmit(async (values) => {
+    const result = await ldapLoginAction(values);
     if (result?.error) {
-      toast.error(result.error);
-      setIsLoading(false);
+      // ไม่ชี้ว่าช่องไหนผิด — บอกว่า "username หรือรหัสผ่านไม่ถูกต้อง" ช่องใดช่องหนึ่ง
+      // คือการยืนยันให้คนเดาว่ามี username นี้อยู่จริง
+      setError('root', { message: result.error });
       return;
     }
     router.push('/'); // Next.js is basePath-aware here
-  }
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="ldap-username">Username (AD)</Label>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+      <Field data-invalid={!!errors.username}>
+        <FieldLabel htmlFor="ldap-username">
+          Username (AD)<span className="text-destructive">*</span>
+        </FieldLabel>
         <Input
           id="ldap-username"
           autoComplete="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
+          aria-invalid={!!errors.username}
+          {...register('username')}
         />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="ldap-password">รหัสผ่าน</Label>
+        <FieldError errors={errors.username ? [errors.username] : undefined} />
+      </Field>
+      <Field data-invalid={!!errors.password}>
+        <FieldLabel htmlFor="ldap-password">
+          รหัสผ่าน<span className="text-destructive">*</span>
+        </FieldLabel>
         <Input
           id="ldap-password"
           type="password"
           autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          aria-invalid={!!errors.password}
+          {...register('password')}
         />
-      </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading && <Loader2 className="size-4 animate-spin" />}
+        <FieldError errors={errors.password ? [errors.password] : undefined} />
+      </Field>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting && <Loader2 className="size-4 animate-spin" />}
         เข้าสู่ระบบ
       </Button>
     </form>
@@ -124,41 +150,55 @@ function LdapSection() {
 
 // ─── [METHOD: LOCAL] Local email + password ──────────────────────────────────
 
+const localLoginSchema = z.object({
+  email: z.string().trim().min(1, 'กรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
+  password: z.string().min(1, 'กรอกรหัสผ่าน'),
+});
+type LocalValues = z.infer<typeof localLoginSchema>;
+
 function LocalSection() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false); // ต้องมี ugt-nextjs-mail-setup
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LocalValues>({
+    resolver: zodResolver(localLoginSchema),
+    defaultValues: { email: '', password: '' },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
-    const result = await localLoginAction({ email, password });
+  const onSubmit = handleSubmit(async (values) => {
+    const result = await localLoginAction(values);
     if (result?.error) {
-      toast.error(result.error);
-      setIsLoading(false);
+      setError('root', { message: result.error });
       return;
     }
     router.push('/'); // Next.js is basePath-aware here
-  }
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="local-email">อีเมล</Label>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+      <Field data-invalid={!!errors.email}>
+        <FieldLabel htmlFor="local-email">
+          อีเมล<span className="text-destructive">*</span>
+        </FieldLabel>
         <Input
           id="local-email"
           type="email"
           autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          aria-invalid={!!errors.email}
+          {...register('email')}
         />
-      </div>
-      <div className="grid gap-2">
+        <FieldError errors={errors.email ? [errors.email] : undefined} />
+      </Field>
+      <Field data-invalid={!!errors.password}>
         <div className="flex items-center justify-between">
-          <Label htmlFor="local-password">รหัสผ่าน</Label>
+          <FieldLabel htmlFor="local-password">
+            รหัสผ่าน<span className="text-destructive">*</span>
+          </FieldLabel>
           {/* ต้องมี ugt-nextjs-mail-setup — ลบลิงก์นี้พร้อม ForgotPasswordDialog
               เมื่อโปรเจคไม่มีระบบส่งอีเมล */}
           <Button
@@ -175,13 +215,13 @@ function LocalSection() {
           id="local-password"
           type="password"
           autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          aria-invalid={!!errors.password}
+          {...register('password')}
         />
-      </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading && <Loader2 className="size-4 animate-spin" />}
+        <FieldError errors={errors.password ? [errors.password] : undefined} />
+      </Field>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting && <Loader2 className="size-4 animate-spin" />}
         เข้าสู่ระบบ
       </Button>
       <ForgotPasswordDialog open={forgotOpen} onOpenChange={setForgotOpen} />
@@ -211,17 +251,18 @@ export function LoginForm({
   // ⚠️ PLACEHOLDER: replace '__PROJECT_NAME__' in the fallback below with the real app name (see SKILL.md §7)
   const appName = process.env.NEXT_PUBLIC_APP_NAME ?? '__PROJECT_NAME__';
 
-  useEffect(() => {
-    if (sessionExpired) {
-      toast.info('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
-    } else if (ssoError) {
-      toast.error(
-        SSO_ERROR_MESSAGES[ssoError] ?? `เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (${ssoError})`,
-      );
-    }
-    // Only run once on mount — both props are derived from server-side searchParams
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // แบนเนอร์ค้างไว้แทน toast ที่เด้งตอน mount: ทั้งสองกรณีมาจาก searchParams ฝั่ง
+  // server และเป็นเหตุผลว่า "ทำไมถึงมาอยู่หน้านี้" — ผู้ใช้ต้องอ่านทันได้ตลอด
+  const banner = sessionExpired
+    ? { tone: 'warning' as const, text: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง' }
+    : ssoError
+      ? {
+          tone: 'danger' as const,
+          text:
+            SSO_ERROR_MESSAGES[ssoError] ??
+            `เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (${ssoError})`,
+        }
+      : null;
 
   return (
     <div className={cn('flex flex-col gap-6', className)}>
@@ -229,6 +270,8 @@ export function LoginForm({
         <h1 className="text-2xl font-semibold tracking-tight">{appName}</h1>
         <p className="text-sm text-balance text-muted-foreground">เข้าสู่ระบบเพื่อใช้งาน</p>
       </div>
+
+      {banner && <Callout tone={banner.tone}>{banner.text}</Callout>}
 
       {/* [METHOD: SSO] */}
       <SsoSection />

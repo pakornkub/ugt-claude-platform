@@ -183,8 +183,9 @@ only for tabular data" is the org default.
 
 ```bash
 npm i better-auth zod
+npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
-npx shadcn@latest add button input label tabs card sonner            # login/setup forms
+npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)
 npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avatar dropdown-menu sidebar tooltip   # admin pages + NavUser (NavUser imports ui/sidebar even in a topbar shell; IconAction/TruncatedText need tooltip)
 ```
 

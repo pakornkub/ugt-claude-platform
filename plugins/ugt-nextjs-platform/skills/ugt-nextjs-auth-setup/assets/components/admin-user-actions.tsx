@@ -1,27 +1,32 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: bc426c3ff664
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: f58070a7600c
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
 // บัญชี SSO/AD ไม่ต้องเพิ่มที่นี่: เกิดเองตอน login ครั้งแรก (มติ 2026-08-11)
 // แล้วค่อยกำหนด role จาก dropdown ในตาราง — ลบไฟล์นี้เมื่อไม่ได้เปิด local login
+// ฟอร์ม = react-hook-form + zodResolver + ui/field (DESIGN.md §4) · กฎรหัสผ่าน
+// มาจาก lib/password-policy.ts ที่เดียว ห้ามประกาศซ้ำที่นี่
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { KeyRound, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { IconAction } from '@/components/ui/icon-action';
+import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  FormDialogBody,
+  FormDialogContent,
+  FormDialogFooter,
+  FormDialogHeader,
+} from '@/components/ui/form-dialog';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
+import { Callout } from '@/components/ui/callout';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -29,49 +34,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PASSWORD_POLICY_HINT } from '@/lib/password-policy';
+import {
+  passwordSchema,
+  PASSWORD_POLICY_HINT,
+  setPasswordFormSchema,
+} from '@/lib/password-policy';
 import { createLocalUserAction, setUserPasswordAction } from '@/lib/actions/admin-users';
 
 const NO_ROLE = '__none__'; // Select ห้าม value="" (ดู ugt-nextjs-pitfalls)
+const CREATE_FORM_ID = 'create-local-user-form';
+const SET_PASSWORD_FORM_ID = 'set-user-password-form';
+
+const createUserFormSchema = z.object({
+  name: z.string().trim().min(1, 'กรอกชื่อผู้ใช้'),
+  email: z.string().trim().min(1, 'กรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
+  password: passwordSchema,
+  roleId: z.string(),
+});
+type CreateUserValues = z.infer<typeof createUserFormSchema>;
 
 export function CreateUserDialog({
   roles,
 }: Readonly<{ roles: { id: string; name: string }[] }>) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [roleId, setRoleId] = useState(NO_ROLE);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateUserValues>({
+    resolver: zodResolver(createUserFormSchema),
+    defaultValues: { name: '', email: '', password: '', roleId: NO_ROLE },
+  });
 
-  function reset() {
-    setName('');
-    setEmail('');
-    setPassword('');
-    setRoleId(NO_ROLE);
-    setError(null);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
+  const onSubmit = handleSubmit(async (values) => {
     const result = await createLocalUserAction({
-      name,
-      email,
-      password,
-      roleId: roleId === NO_ROLE ? null : roleId,
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      roleId: values.roleId === NO_ROLE ? null : values.roleId,
     });
-    setIsLoading(false);
     if (!result.success) {
-      setError(result.error);
+      // "อีเมลนี้ถูกใช้แล้ว" เป็นความผิดของช่องอีเมลโดยตรง — ชี้ที่ช่องนั้น
+      // ที่เหลือ (สิทธิ์/ระบบ) ขึ้นเป็นแบนเนอร์
+      if (/อีเมล|email/i.test(result.error)) setError('email', { message: result.error });
+      else setError('root', { message: result.error });
       return;
     }
     // รหัสผ่านตั้งต้นนี้ไม่ถูกเก็บไว้ที่ไหนอีก — แจ้งเจ้าตัวแล้วให้เปลี่ยนทันที
     toast.success('สร้างผู้ใช้แล้ว — แจ้งรหัสผ่านตั้งต้นให้เจ้าตัวและให้เปลี่ยนทันที');
     setOpen(false);
     reset();
-  }
+  });
 
   return (
     <>
@@ -87,82 +103,92 @@ export function CreateUserDialog({
           if (!next) reset();
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <FormDialogContent className="sm:max-w-md">
+          <FormDialogHeader>
             <DialogTitle>เพิ่มผู้ใช้ local</DialogTitle>
             <DialogDescription>
               บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก
               แล้วค่อยกำหนดบทบาทจากตาราง
             </DialogDescription>
-          </DialogHeader>
+          </FormDialogHeader>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-name">
-                ชื่อ<span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="new-user-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-email">
-                อีเมล<span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="new-user-email"
-                type="email"
-                autoComplete="off"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-password">
-                รหัสผ่านตั้งต้น<span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="new-user-password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="new-user-role">บทบาท</Label>
-              <Select value={roleId} onValueChange={setRoleId}>
-                <SelectTrigger id="new-user-role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NO_ROLE}>ยังไม่กำหนด</SelectItem>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                ยกเลิก
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="size-4 animate-spin" />}
-                สร้าง
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
+          <FormDialogBody>
+            <form id={CREATE_FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-4">
+              {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+
+              <Field data-invalid={!!errors.name}>
+                <FieldLabel htmlFor="new-user-name">
+                  ชื่อ<span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input id="new-user-name" aria-invalid={!!errors.name} {...register('name')} />
+                <FieldError errors={errors.name ? [errors.name] : undefined} />
+              </Field>
+
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="new-user-email">
+                  อีเมล<span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="new-user-email"
+                  type="email"
+                  autoComplete="off"
+                  aria-invalid={!!errors.email}
+                  {...register('email')}
+                />
+                <FieldError errors={errors.email ? [errors.email] : undefined} />
+              </Field>
+
+              <Field data-invalid={!!errors.password}>
+                <FieldLabel htmlFor="new-user-password">
+                  รหัสผ่านตั้งต้น<span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="new-user-password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.password}
+                  {...register('password')}
+                />
+                <FieldDescription>{PASSWORD_POLICY_HINT}</FieldDescription>
+                <FieldError errors={errors.password ? [errors.password] : undefined} />
+              </Field>
+
+              {/* Select ไม่ใช่ native input — ต้องผ่าน Controller ไม่ใช่ register */}
+              <Field>
+                <FieldLabel htmlFor="new-user-role">บทบาท</FieldLabel>
+                <Controller
+                  control={control}
+                  name="roleId"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="new-user-role">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NO_ROLE}>ยังไม่กำหนด</SelectItem>
+                        {roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </Field>
+            </form>
+          </FormDialogBody>
+
+          <FormDialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" form={CREATE_FORM_ID} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              สร้าง
+            </Button>
+          </FormDialogFooter>
+        </FormDialogContent>
       </Dialog>
     </>
   );
@@ -177,24 +203,27 @@ export function SetPasswordDialog({
   userName,
 }: Readonly<{ userId: string; userName: string }>) {
   const [open, setOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<{ password: string }>({
+    resolver: zodResolver(setPasswordFormSchema),
+    defaultValues: { password: '' },
+  });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    startTransition(async () => {
-      const result = await setUserPasswordAction({ userId, newPassword });
-      if (!result.success) {
-        setError(result.error);
-        return;
-      }
-      toast.success('ตั้งรหัสผ่านใหม่แล้ว — แจ้งเจ้าตัวและให้เปลี่ยนเองทันทีที่เข้าระบบ');
-      setOpen(false);
-      setNewPassword('');
-      setError(null);
-    });
-  }
+  const onSubmit = handleSubmit(async (values) => {
+    const result = await setUserPasswordAction({ userId, newPassword: values.password });
+    if (!result.success) {
+      setError('root', { message: result.error });
+      return;
+    }
+    toast.success('ตั้งรหัสผ่านใหม่แล้ว — แจ้งเจ้าตัวและให้เปลี่ยนเองทันทีที่เข้าระบบ');
+    setOpen(false);
+    reset();
+  });
 
   return (
     <>
@@ -207,47 +236,47 @@ export function SetPasswordDialog({
         open={open}
         onOpenChange={(next) => {
           setOpen(next);
-          if (!next) {
-            setNewPassword('');
-            setError(null);
-          }
+          if (!next) reset();
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <FormDialogContent height="auto" className="sm:max-w-md">
+          <FormDialogHeader>
             <DialogTitle>ตั้งรหัสผ่านใหม่</DialogTitle>
             <DialogDescription>
               {userName} — ทุกอุปกรณ์ที่เขาเข้าระบบค้างไว้จะถูกออกจากระบบทันที
             </DialogDescription>
-          </DialogHeader>
+          </FormDialogHeader>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="set-password">
-                รหัสผ่านใหม่<span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="set-password"
-                type="password"
-                autoComplete="new-password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">{PASSWORD_POLICY_HINT}</p>
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                ยกเลิก
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="size-4 animate-spin" />}
-                ตั้งรหัสผ่าน
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
+          <FormDialogBody>
+            <form id={SET_PASSWORD_FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-4">
+              {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+              <Field data-invalid={!!errors.password}>
+                <FieldLabel htmlFor="set-password">
+                  รหัสผ่านใหม่<span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="set-password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.password}
+                  {...register('password')}
+                />
+                <FieldDescription>{PASSWORD_POLICY_HINT}</FieldDescription>
+                <FieldError errors={errors.password ? [errors.password] : undefined} />
+              </Field>
+            </form>
+          </FormDialogBody>
+
+          <FormDialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" form={SET_PASSWORD_FORM_ID} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              ตั้งรหัสผ่าน
+            </Button>
+          </FormDialogFooter>
+        </FormDialogContent>
       </Dialog>
     </>
   );

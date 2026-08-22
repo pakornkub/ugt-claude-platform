@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
-// kit-hash: 97fe46c7ef3f
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: 61a81abc1e03
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
 import { useTransition } from 'react';
@@ -29,7 +29,7 @@ export function AdminSetupForm() {
         <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10">
           <Settings className="size-7 text-primary" strokeWidth={2} />
         </div>
-        <CardTitle className="text-2xl">ตั้งค่าผู้ดูแลระบบครั้งแรก</CardTitle>
+        <CardTitle>ตั้งค่าผู้ดูแลระบบครั้งแรก</CardTitle>
         <CardDescription>
           กดปุ่มด้านล่างเพื่อสร้าง role ผู้ดูแลระบบ (Administrator)
           พร้อมสิทธิ์ทั้งหมด และกำหนดให้บัญชีของคุณเป็นผู้ดูแลระบบคนแรก

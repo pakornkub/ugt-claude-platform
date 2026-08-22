@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: c6aa1a1d2a4d
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: b56501151c0a
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -78,8 +78,9 @@ function getInitials(name: string): string {
 }
 
 function InfoRow({ icon: Icon, label, children }: Readonly<Omit<ProfileRow, 'value'> & { children: React.ReactNode }>) {
+  // gap-4 = 16px ตาม §4 (แถว label–ค่า ระยะระหว่างคอลัมน์ ≥16px)
   return (
-    <div className="flex items-center gap-3 px-3.5 py-2.5">
+    <div className="flex items-center gap-4 px-3.5 py-2.5">
       <Icon strokeWidth={2} className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       <span className="text-muted-foreground">{label}</span>
       <span className="ml-auto text-right font-medium break-all">{children}</span>

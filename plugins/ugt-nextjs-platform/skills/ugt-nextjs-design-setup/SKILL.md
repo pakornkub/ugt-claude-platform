@@ -84,7 +84,15 @@ Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables 
 ### Step 1 — Detect project state
 
 - `components.json` or `components/ui/` exists → **existing project** path.
-- Neither → **fresh project** path.
+- Neither, but the project already has real routes/components (`app/` or
+  `pages/` beyond the create-next-app scaffold) or a non-shadcn UI
+  dependency in `package.json` (MUI, Ant Design, Bootstrap, Chakra,
+  styled-components, etc.) → **still existing project** path — no
+  `components.json` to diff, but there's a real design already in place
+  that a blind default-interview would clash with. Run the scan (§Scan in
+  `references/interview.md`) with the package.json/CSS checks substituting
+  for the components.json ones.
+- Neither, and no real UI yet (bare scaffold) → **fresh project** path.
 - Not Next.js App Router at all → say so plainly and stop; never adapt
   assets to another stack.
 
@@ -191,6 +199,7 @@ different size — is the field bug this step exists to prevent.
    Then the kit's npm deps — **pin majors, the kit is version-coupled**:
    `npm i @tanstack/react-table@^8 @tanstack/react-query@^5
    @tanstack/react-query-devtools@^5 nprogress date-fns@^4 react-hook-form
+   @hookform/resolvers
    zod lucide-react` (v9 of tanstack-table renames the v8 API the kit uses;
    `add` doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the

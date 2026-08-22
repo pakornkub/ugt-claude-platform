@@ -61,18 +61,18 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~ปุ่ม "เพิ่ม/สร้าง" — เขียวทึบ vs primary~~ → มติ primary, 4.26.0
 - ~~badge ชื่อ role — outline vs secondary~~ → มติ outline, 4.26.0
 - ~~แถว system role — ซ่อน vs disabled+tooltip~~ → มติ disabled+tooltip (business rule) / ซ่อน (permission), 4.26.0
-- `detail-row.tsx` docblock ประกาศ "label ซ้ายคงที่" ขัด §4 `justify-between` + gap/สูงต่ำกว่า spec
-- ฟอร์ม auth ทั้งชุดเป็น useState ไม่ใช่ ui/field+RHF+zod ตาม §4 — จะ migrate หรือบันทึกเป็นข้อยกเว้น §9/§10
-- ข้อความ title/subtitle/หัวคอลัมน์หน้า admin ใน preview ไม่ตรง asset หลายจุด (preview §13 ใช้ "Audit logs" อังกฤษ ขัด §5 เอง) — sync ทีเดียวทั้ง §13
-- audit-logs: ขอบ filter คิดที่ +07:00 แต่จอ format ตาม timezone ผู้ดู — ต้องเลือก contract เดียว (แล้วบันทึกใน format.ts)
+- ~~`detail-row.tsx` docblock ขัด §4~~ → 4.30.0 (justify-between + gap 16px + min-h 24px)
+- ~~ฟอร์ม auth เป็น useState ไม่ใช่ ui/field+RHF+zod~~ → มติ migrate ทั้งหมด, 4.30.0 (พ่วง: `@hookform/resolvers` ไม่เคยอยู่ใน dep list ทั้งที่ form-validation.md สั่งใช้ zodResolver — เพิ่มแล้ว)
+- ~~ข้อความ title/subtitle/หัวคอลัมน์ admin ไม่ตรง preview~~ → 4.27.0 (sync สองทางทั้ง §13)
+- ~~audit-logs: ขอบ filter +07:00 แต่จอ format ตาม timezone ผู้ดู~~ → 4.30.0 (formatDateTime pin Asia/Bangkok ตาม §5)
 - audit-logs toolbar มี Input ค้นหาเปล่าที่ชน §3 (ช่องค้นหาเป็นของ DataTable) และชน verify ของ skill เอง — ต้องออกแบบ global-search โหมด server ใน DataTable
 - ~~DataTable สามก้อนยังไม่ห่อการ์ดตาม §3~~ → มติห่อใน DataTable กลาง (prop `card` default เปิด), 4.26.0
-- `theme-toggle` เป็นปุ่ม icon นอก IconAction — จะทำ exception topbar เป็นมติ หรือย้ายเข้า IconAction
+- ~~theme-toggle / ปุ่ม icon นอกตาราง~~ → มติขยาย §0.4, 4.30.0 (size=icon ใช้ได้ทุกที่ + aria-label บังคับ · ในตารางยังต้องผ่าน IconAction · ห้าม override ขนาดด้วย className)
 
 **งานโค้ดที่ตามมาได้เลย:**
 - ~~`AdminNav` fallback rebuild บน shadcn Sidebar~~ → 4.27.0
-- date-picker label ผ่าน date-fns ตรง ไม่ผ่าน lib/format → โปรเจค พ.ศ. จอไม่ตรงตาราง · รวม toDateKey ซ้ำสองที่เข้า formatExportDate
-- `admin-setup-form`/`(admin-setup)` ยังไม่เข้า kit scale (text-2xl override, hand-built icon circle)
+- ~~date-picker label ไม่ผ่าน lib/format~~ → 4.30.0 (prop `formatLabel` default `formatDate`) · เหลือรวม `toDateKey` ซ้ำสองที่เข้า formatExportDate
+- ~~admin-setup-form `text-2xl` override~~ → 4.30.0 · เหลือ hand-built icon circle ของหน้า (admin-setup)
 - tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title — ควรเข้า IconAction/ระบบขนาด
 - ~~`check-kit-freshness.mjs` ไม่ scan root files~~ → 4.27.0 (root files + prisma/; ชนิดไฟล์อื่นยัง out of scope โดยประกาศใน SKILL แล้ว)
 - ~~mail-setup สัญญา `/admin/mail-templates` แต่ไม่มีหน้า~~ → 4.27.0 (หน้า+editor+preview+actions ครบ)

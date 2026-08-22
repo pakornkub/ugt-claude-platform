@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/password-policy.ts
-// kit-hash: f7aa8da970e3
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/lib/password-policy.ts
+// kit-hash: 85dfdeb22d0a
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only
 //
 // ที่เดียวที่นิยาม "รหัสผ่านที่รับได้" ของโปรเจค — ใช้ร่วมกันทั้งฟอร์มตั้งรหัสใหม่,
@@ -29,13 +29,37 @@ export const passwordSchema = z
 // EXTENSION POINT: โปรเจคที่ต้องบังคับอักขระพิเศษเพิ่มบรรทัดนี้ แล้วแก้ HINT ให้ตรง
 //   .regex(/[^\w\s]/, 'ต้องมีอักขระพิเศษอย่างน้อย 1 ตัว')
 
-/** ฟอร์มที่ให้กรอกรหัสใหม่สองครั้ง — ใช้ร่วมกันทั้งหน้า reset และ dialog เปลี่ยนรหัส */
-export const newPasswordSchema = z
-  .object({
-    password: passwordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((v) => v.password === v.confirmPassword, {
-    message: 'รหัสผ่านทั้งสองช่องไม่ตรงกัน',
-    path: ['confirmPassword'],
-  });
+// ─── ฟอร์ม ───────────────────────────────────────────────────────────────────
+// ทุกฟอร์มรหัสผ่าน resolve จาก schema ในไฟล์นี้ (react-hook-form + zodResolver)
+// — อย่าประกาศกฎซ้ำที่ component ไม่งั้นกฎที่หลวมกว่าจะกลายเป็นกฎจริง
+
+/** ช่อง "รหัสใหม่ + ยืนยัน" ก่อนผูกกฎว่าต้องตรงกัน — ฐานของสองฟอร์มล่าง */
+const newPasswordFields = z.object({
+  password: passwordSchema,
+  confirmPassword: z.string(),
+});
+
+const confirmMatches = (v: { password: string; confirmPassword: string }) =>
+  v.password === v.confirmPassword;
+const confirmMismatch = {
+  message: 'รหัสผ่านทั้งสองช่องไม่ตรงกัน',
+  path: ['confirmPassword'] as const,
+};
+
+/** หน้า reset จากลิงก์ในอีเมล — ไม่มีรหัสเดิมให้กรอก (ผู้ใช้จำไม่ได้อยู่แล้ว) */
+export const newPasswordSchema = newPasswordFields.refine(confirmMatches, confirmMismatch);
+export type NewPasswordValues = z.infer<typeof newPasswordFields>;
+
+/**
+ * เปลี่ยนรหัสผ่านเอง — ต้องยืนยันรหัสเดิมด้วย (แลปท็อปที่เปิดค้างไว้ = ยึดบัญชี
+ * ได้ทันทีถ้าเชื่อแค่ session) · refine ผูกหลัง extend ไม่ใช่ก่อน เพราะผลลัพธ์
+ * ของ .refine() ไม่ใช่ ZodObject อีกต่อไปจึง .extend() ต่อไม่ได้
+ */
+export const changePasswordFormSchema = newPasswordFields
+  .extend({ currentPassword: z.string().min(1, 'กรอกรหัสผ่านปัจจุบัน') })
+  .refine(confirmMatches, confirmMismatch);
+export type ChangePasswordValues = z.infer<typeof newPasswordFields> & { currentPassword: string };
+
+/** แอดมินตั้งรหัสให้ผู้ใช้คนอื่น — ไม่ต้องยืนยันสองครั้ง (คนตั้งไม่ใช่เจ้าของรหัส) */
+export const setPasswordFormSchema = z.object({ password: passwordSchema });
+export type SetPasswordValues = z.infer<typeof setPasswordFormSchema>;

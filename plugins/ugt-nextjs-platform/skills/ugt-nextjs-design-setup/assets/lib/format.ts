@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-design-setup/lib/format.ts
-// kit-hash: 313fcea53716
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-design-setup/lib/format.ts
+// kit-hash: 587f567c54ca
 // source: merged ugt-hrms lib/format-date.ts + gov-boi-smart lib/format.ts — installed by ugt-nextjs-design-setup
 // convention: จอ DD/MM/YYYY ค.ศ. · ไฟล์ export ISO yyyy-MM-dd · ทุกการ format ผ่านไฟล์นี้เท่านั้น
 
@@ -11,7 +11,10 @@
  *
  * Timezone contract:
  * - formatDate       = วันที่ wall-clock (SQL date) → อ่าน UTC parts เสมอ กัน +7h เลื่อนวัน
- * - formatDateTime   = instant จริง (เช่น ActivityLog.createdAt) → เวลาท้องถิ่นของผู้ดู
+ * - formatDateTime   = instant จริง (เช่น ActivityLog.createdAt) → เวลาไทย
+ *                      Asia/Bangkok เสมอ (DESIGN.md §5) ไม่ใช่เวลาเครื่องผู้ดู —
+ *                      ตัวกรองช่วงวันฝั่ง server คิดที่ +07:00 ถ้าจออ่านตามเครื่อง
+ *                      ผู้ดูที่อยู่คนละโซน แถวที่เห็นจะไม่ตรงกับช่วงที่เพิ่งเลือก
  * - formatExportDate = วันที่ wall-clock → ISO สำหรับไฟล์ export (UTC parts เดียวกับ formatDate)
  */
 
@@ -29,17 +32,33 @@ const DATE_PARTS: Intl.DateTimeFormatOptions = {
 // (DataTable เรียกใน cell ทุกแถว)
 const FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 
+/** โซนเวลาขององค์กร — instant ทุกตัวแสดงที่โซนนี้ ไม่ใช่โซนเครื่องผู้ดู (DESIGN.md §5) */
+const APP_TIME_ZONE = 'Asia/Bangkok';
+
 function getFormatter(locale: AppLocale, utc: boolean): Intl.DateTimeFormat {
-  const key = `${locale}:${utc ? 'utc' : 'local'}`;
+  const key = `${locale}:${utc ? 'utc' : 'app'}`;
   let formatter = FORMATTER_CACHE.get(key);
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat(
-      INTL_LOCALES[locale],
-      utc ? { ...DATE_PARTS, timeZone: 'UTC' } : DATE_PARTS
-    );
+    formatter = new Intl.DateTimeFormat(INTL_LOCALES[locale], {
+      ...DATE_PARTS,
+      timeZone: utc ? 'UTC' : APP_TIME_ZONE,
+    });
     FORMATTER_CACHE.set(key, formatter);
   }
   return formatter;
+}
+
+// เวลาแยก formatter ของตัวเอง: hourCycle h23 กัน '24:00' ที่บาง engine คืนให้
+// ตอนเที่ยงคืนเมื่อใช้ hour12:false เปล่า ๆ
+let timeFormatter: Intl.DateTimeFormat | undefined;
+function getTimeFormatter(): Intl.DateTimeFormat {
+  timeFormatter ??= new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: APP_TIME_ZONE,
+  });
+  return timeFormatter;
 }
 
 function toWallClockDate(value: string | Date): Date | null {
@@ -59,15 +78,14 @@ export function formatDate(value: string | Date | null | undefined, locale: AppL
   return getFormatter(locale, true).format(d);
 }
 
-/** instant → `DD/MM/YYYY HH:MM` เวลาท้องถิ่น (ค.ศ. เสมอ). คืน '' เมื่อว่าง/ไม่ valid. */
+/** instant → `DD/MM/YYYY HH:MM` เวลาไทย Asia/Bangkok (ค.ศ. เสมอ). คืน '' เมื่อว่าง/ไม่ valid. */
 export function formatDateTime(value: string | Date | null | undefined, locale: AppLocale = 'th'): string {
   if (!value) return '';
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
-  const date = getFormatter(locale, false).format(d);
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${date} ${hh}:${mm}`;
+  // ห้ามใช้ d.getHours() — นั่นคือเวลาเครื่องผู้ดู ซึ่งไม่ตรงกับวันที่ที่ formatter
+  // ด้านบนคำนวณจาก Asia/Bangkok (เครื่องโซนอื่นจะได้วันกับเวลาคนละโซนปนกัน)
+  return `${getFormatter(locale, false).format(d)} ${getTimeFormatter().format(d)}`;
 }
 
 // ─── Export (Excel/CSV) ──────────────────────────────────────────────────────

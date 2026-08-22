@@ -16,11 +16,16 @@
 2. **แก้ไฟล์ใน `components/ui/` ได้เฉพาะ** variant ที่ประกาศในส่วน 4 —
    นอกนั้นห้ามแตะ (อัปเดตจาก registry: `npx shadcn@latest add <x> --overwrite`)
 3. **Icon = lucide เท่านั้น ห้าม emoji** · mapping งาน→icon ตายตัว (ส่วน 4)
-4. **ขนาด = `default` ทุกตัว** · ข้อยกเว้น: ปุ่มใน row ตาราง = `size="icon"`
-   (ผ่าน `IconAction`) · toolbar แน่น = `sm` — จบแค่นี้
+4. **ขนาด = `default` ทุกตัว** · ข้อยกเว้น: **ปุ่มไอคอนล้วนใช้ `size="icon"`
+   ได้ทุกที่** (`aria-label` บังคับ — มติ 2026-08-21 ขยายกฎให้ตรงของจริง: theme
+   toggle · SidebarTrigger · ปุ่มตั้งค่าคอลัมน์ · ปุ่ม pagination) · **แต่ปุ่มใน
+   row ตารางต้องผ่าน `IconAction` เสมอ** — ที่นั่น tooltip คือสิ่งเดียวที่บอกว่า
+   ไอคอนแต่ละตัวทำอะไร · toolbar แน่น = `sm` · **ห้าม override ขนาดด้วย className**
+   (`size-7 p-0` ฯลฯ) — ขนาดที่มีไม่พอให้แก้ที่ `components/ui/button.tsx`
 5. **ตาราง = `DataTable` กลางเท่านั้น** — ห้าม `<table>`/`ui/table` ตรงในหน้า
 6. **วันที่/ตัวเลขผ่าน `lib/format.ts` เท่านั้น** — ห้าม format inline
-7. **A11y ขั้นต่ำ**: สถานะ = สี+icon เสมอ · ปุ่ม icon ล้วนผ่าน `IconAction` ·
+7. **A11y ขั้นต่ำ**: สถานะ = สี+icon เสมอ · ปุ่ม icon ล้วนต้องมี `aria-label`
+   (ในตาราง = ผ่าน `IconAction` ซึ่งบังคับ label ให้เอง) ·
    ห้ามปิด focus ring · motion เงียบเมื่อ `prefers-reduced-motion` ·
    แก้สีเมื่อไรรัน `check-contrast` ซ้ำ
 8. ไฟล์นี้ชนะโค้ดและชนะ skill เสริมความสวยงาม (`frontend-design`,

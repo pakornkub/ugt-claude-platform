@@ -80,6 +80,7 @@ Read these before drafting; the draft agreement states what the code
 | อ่าน | หาอะไร | ไปตอบคำถาม |
 | --- | --- | --- |
 | `components.json` | style (`base-mira` = ตรงมาตรฐาน · `radix-*` = conflict), baseColor, icon lib | preset conflict → Deviations |
+| `package.json` (เมื่อไม่มี `components.json` — โปรเจคเดิมที่ไม่เคยใช้ shadcn) | UI lib เดิม (MUI, Ant Design, Bootstrap, Chakra, styled-components, ...) และเวอร์ชัน | ข้อ 8 — grandfather (อยู่ร่วมกับ shadcn ช่วงเปลี่ยนผ่าน) หรือ migrate หน้าเดิมมาที่ shadcn |
 | `app/globals.css` | palette จริง (`--primary`, status tokens มีไหม), radius, font vars | ข้อ 1–2 · token gaps |
 | `app/layout.tsx` | ฟ้อนต์จริง (`next/font`), `lang` | font conflict |
 | `app/**/layout.tsx` + `components/` | shell จริง (sidebar? topbar?), nav pattern | ข้อ 5 |
@@ -89,6 +90,11 @@ Read these before drafting; the draft agreement states what the code
 | grep `#[0-9a-fA-F]{6}` ใน `app/ components/` (`*.tsx`) | สี hardcode นอก token | Deviations |
 | grep `<table` ใน `app/ components/` | ตาราง hand-rolled | Deviations |
 | grep `toLocaleDateString\|toLocaleString` | format inline นอก formatter | Deviations |
+
+No `components.json` yet (the package.json exception): skip that row, run
+every other row as normal, and treat the existing UI lib itself as the
+first Deviation — the shadcn init in Step 3 still runs and installs
+alongside it; the existing lib's pages are what ข้อ 8 decides on.
 
 Conflicts found → present as a numbered list with the org rule each violates,
 then ask ข้อ 8. Grandfathered items go into DESIGN.md §9 verbatim — the

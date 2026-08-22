@@ -1,11 +1,11 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: c02046f30fdc
+// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 44e5e630b288
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
 import * as React from 'react';
-import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { formatDate } from '@/lib/format';
 import { CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -23,8 +23,11 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: (date: Date) => boolean;
   className?: string;
-  /** date-fns format for the trigger label. Defaults to `dd/MM/yyyy`. */
-  dateFormat?: string;
+  /**
+   * ป้ายบนปุ่ม override เฉพาะเมื่อจำเป็นจริง — default ผ่าน `lib/format.formatDate`
+   * เพื่อให้ปุ่มกับตารางแสดงปีแบบเดียวกัน (โปรเจค พ.ศ. เคยได้คนละปี §0.6)
+   */
+  formatLabel?: (value: Date) => string;
   /** react-day-picker modifiers — predicate per named modifier (e.g. holidays). */
   modifiers?: Record<string, (date: Date) => boolean>;
   /** Tailwind classes applied to days matching each modifier. */
@@ -50,7 +53,7 @@ export function DatePicker({
   placeholder,
   disabled,
   className,
-  dateFormat = 'dd/MM/yyyy',
+  formatLabel = formatDate,
   modifiers,
   modifiersClassNames,
   footer,
@@ -87,9 +90,7 @@ export function DatePicker({
         }
       >
         <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
-        {value
-          ? format(value, dateFormat, { locale: dateFnsLocale })
-          : (placeholder ?? 'เลือกวันที่')}
+        {value ? formatLabel(value) : (placeholder ?? 'เลือกวันที่')}
         {triggerSuffix}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
