@@ -1,5 +1,48 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.39.0 (2026-08-23)
+เดิมชนเลข 4.35.0 กับอีก branch ที่ถือ tag นั้นอยู่ — ย้ายมา 4.39.0 ตอน merge
+
+
+ต่อจาก 4.34.0: เพิ่ม verify สองข้อใน `ugt-nextjs-auth-setup` — (1) header ครบทุก
+response ไม่ใช่แค่หน้า HTML (`curl -sI` ทั้ง `/login` และ `/api/health`) เพราะจุดที่
+มันหายเงียบคือ `return NextResponse.next()` เปล่า ๆ ที่ไม่ผ่าน
+`applySecurityHeaders()` และ (2) HSTS ต้องไม่โผล่บน `http://localhost` และบน https
+ต้องยังไม่มี `includeSubDomains`/`preload`
+
+## 4.38.0 (2026-08-23)
+
+**tiptap toolbar เข้าระบบขนาดของ kit** (backlog §5). ปุ่มทุกตัวใน toolbar เคยเป็น
+`<Button size="sm">` ที่เขียนเองแล้วทับด้วย `className="size-7 p-0"` — override
+กล่องขนาดของ control ตรงที่ DESIGN.md §0.4 ห้ามไว้ — บวก native `title` เป็น label.
+ที่จริง preset วาดปุ่มนั้นให้อยู่แล้ว: `size="icon"` ของ base-mira **คือ** `size-7`
+พร้อมไอคอน `size-3.5` — override ทั้งก้อนจึงเป็นการเขียนขนาดที่มีอยู่แล้วซ้ำ
+
+- `ToolbarToggle` + `ToolbarAction` ยุบเหลือ `ToolbarButton` ตัวเดียวบน
+  `ui/icon-action` → ได้ `size="icon"` + `aria-label` + Tooltip ของ kit แทน `title`
+  ตอนนี้ไม่เหลือ `h-*`/`p-*`/`size-*` บน control ตัวไหนในไฟล์นี้เลย
+- สถานะ active วิ่งตาม `aria-pressed` ไม่ใช่ boolean ฝั่ง JS: สีคือ
+  `aria-pressed:bg-primary/10 …` — toggle ที่ลืมใส่ attribute จะไม่ติดสีไปด้วย
+  ปุ่มที่ไม่ใช่ toggle ไม่ส่ง `active` มา attribute จึงหายไปทั้งอัน (ไม่ใช่ `false`)
+  screen reader อ่านว่าเป็นปุ่มสั่งงานธรรมดา
+- `<Icon className="size-3.5" />` 20 จุดหายไป — `size="icon"` ตั้งขนาด svg ให้เอง
+- ปุ่ม Link เป็น trigger ของทั้ง Popover และ Tooltip จึงซ้อน render prop:
+  `TooltipTrigger render={<PopoverTrigger render={<Button/>} />}` ตามที่ Base UI
+  documented ไว้ (children ตกไปที่ชั้นในสุด) — ไม่ต้องมี wrapper เพิ่ม
+- `disabled` ในปุ่ม toolbar = `aria-disabled` แล้ว (กติกาของ IconAction ตั้งแต่
+  4.29.0): Undo ที่จางอยู่ยังโฟกัสได้และยังบอกเหตุผลตอน hover
+- `references/conventions.md` เลิกเรียกไฟล์นี้ว่า "HRMS (verbatim)" และบันทึกว่า
+  ต้องมี `ui/icon-action` + `tooltip` ติดตั้งไว้ก่อน
+
+**และปิดทางไม่ให้ของแบบเดิมกลับมา** — `scripts/lint-kit-assets.mjs` (ด่านใน
+release chain) เพิ่มกฎ FAIL สองข้อ: className ที่ทับกล่องขนาดของ `<Button>` /
+`<IconAction>` (`h-*` `p*-*` `size-*` — `w-*` ผ่านเพราะเป็น layout,
+`variant="link"` ยกเว้นตาม §0.4) และ native `title=` บนสองตัวนั้น เดิมกฎนี้อยู่
+ใน DESIGN.md อย่างเดียวจึงไม่มีอะไรตรวจ asset จริง (เหตุผลเดียวกับตอนตั้งด่านนี้
+ใน 4.25.0) · สแกนทั้ง 89 asset แล้ว: ของเดิมไม่ติดสักตัว ส่วนไฟล์ tiptap ก่อนแก้
+ติด 6 จุด — ตัว lint อ่าน opening tag แบบรู้วงเล็บ/quote ไม่ใช่ regex ตัดที่ `>`
+ตัวแรก ไม่งั้น `onClick={() => …}` จะทำให้มองไม่เห็น className ที่ตามมา
+
 ## 4.37.0 (2026-08-23)
 
 **A wrong `shadcn init` is now a failing check, not a paragraph in a SKILL.**
@@ -25,74 +68,6 @@ full-setup:
 Verified against fixtures: a plain-init project (new-york + `radix-ui` +
 `asChild` + `onSelect` + `checked="indeterminate"`) fails with all six
 findings named; a preset-correct Base UI project passes both.
-## 4.35.0 (2026-08-23)
-
-ต่อจาก 4.34.0: เพิ่ม verify สองข้อใน `ugt-nextjs-auth-setup` — (1) header ครบทุก
-response ไม่ใช่แค่หน้า HTML (`curl -sI` ทั้ง `/login` และ `/api/health`) เพราะจุดที่
-มันหายเงียบคือ `return NextResponse.next()` เปล่า ๆ ที่ไม่ผ่าน
-`applySecurityHeaders()` และ (2) HSTS ต้องไม่โผล่บน `http://localhost` และบน https
-ต้องยังไม่มี `includeSubDomains`/`preload`
-
-## 4.34.0 (2026-08-23)
-
-**Security headers ชุดเต็มใน `proxy.ts`** (backlog ข้อ 4 ครึ่งแรก). เดิม
-proxy ตั้งแค่ `Content-Security-Policy` และตั้งเฉพาะ response สุดท้าย —
-static pass-through, redirect ของ guard และ 401 JSON ออกไปโดยไม่มี header
-อะไรเลย. ตอนนี้มี `applySecurityHeaders(response, request, nonce)` ตัวเดียว
-เรียกที่ทุกจุด return ทั้ง 5 จุด และเพิ่มที่ขาด:
-
-- `X-Frame-Options: DENY` — clickjacking สำหรับ browser ที่ไม่อ่าน
-  `frame-ancestors` (CSP มี `frame-ancestors 'none'` อยู่แล้ว, สองตัวนี้ต้องตรงกัน)
-- `X-Content-Type-Options: nosniff` — กัน MIME sniffing
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Permissions-Policy` — ปิด camera/microphone/geolocation/payment/usb
-- `Strict-Transport-Security: max-age=31536000` — **ยิงเฉพาะเมื่อ request เป็น
-  https** (อ่าน `x-forwarded-proto` ก่อน เพราะหลัง reverse proxy ที่ terminate
-  TLS request จะมาถึงเป็น http) ดังนั้น dev บน `http://localhost` ไม่โดน pin
-  — ถ้า pin ไปแล้ว browser cache ไว้และไม่มี https dev server ให้ถอย.
-  **ไม่ใส่ `includeSubDomains` และไม่ใส่ `preload`** ทั้งคู่เป็นข้อผูกพัน
-  ระดับโดเมนที่ถอยยาก (preload ฝังในตัว browser) และบน shared domain
-  `includeSubDomains` ลากแอปเพื่อนบ้านไปด้วย — รอเจ้าของโดเมนตัดสิน
-
-ครึ่ง rate limiting ของ backlog ข้อ 4 **ยังเปิดอยู่** — in-memory ต่อ instance
-รับได้ตามมาตรฐาน deploy ปัจจุบัน (deploy เดี่ยว) และมี TODO กำกับในโค้ดแล้ว
-## 4.35.0 (2026-08-23)
-
-เศษสองข้อสุดท้ายที่ค้างจาก 4.30.0 ใน `docs/backlog.md` §5 — ทั้งคู่ปิดแล้ว.
-
-**`toDateKey` มีบ้านเดียวใน `lib/format.ts`.** `ui/date-picker.tsx` เคยนิยาม
-เองซ้ำกับ formatter กลาง ซึ่งชน §5 ("วันเวลาทุกจุดผ่าน `lib/format`") — ตอนนี้
-`import { formatDate, toDateKey } from '@/lib/format'` แล้ว.
-
-**แต่ไม่ได้ยุบเข้า `formatExportDate` ตามที่ backlog เดาไว้ — สองตัวนี้ให้คนละ
-คำตอบ.** วัดจริง (`node --experimental-strip-types`, TZ=Asia/Bangkok) จาก
-`new Date(2026, 7, 23)` ซึ่งคือสิ่งที่ react-day-picker ส่งกลับมาตอนคลิกเซลล์:
-
-| ฟังก์ชัน | ผล |
-| --- | --- |
-| `toDateKey(picked)` | `2026-08-23` ← วันที่ผู้ใช้คลิกจริง |
-| `formatExportDate(picked)` | `2026-08-22` ← **ร่นไปหนึ่งวัน** |
-
-`formatExportDate` อ่าน **UTC parts** โดยเจตนา เพราะ input ของมันคือ wall-clock
-date (คอลัมน์ SQL `date` = เที่ยงคืน UTC) — พอเจอเที่ยงคืน **local** ที่ +07:00
-มันก็ตกไปเป็นเมื่อวาน. ถ้ายุบเข้าไป วันหยุดบนปฏิทินจะทำเครื่องหมายผิดวันเงียบ ๆ.
-สองฟังก์ชันจึงแยกกันที่ **input มาจากไหน** ไม่ใช่หน้าตา output และเขียนกำกับไว้ทั้ง
-ใน docblock ของทั้งคู่, DESIGN.md §5 และ `ugt-core/contracts/design.md` (ประโยค
-"never through a local `Date`" ของ contract ครอบเกินจริง — เติมข้อยกเว้นเดียวที่มี).
-
-- ใหม่: `assets/lib/format.test.ts` — ล็อก timezone contract 5 ข้อ (pin
-  Asia/Bangkok ของ `formatDateTime` ยังได้ค่าเดิม `24/08/2026 00:30`, wall-clock
-  ไม่เลื่อน, `toDateKey` ตรงเซลล์) · ทุกข้อผ่านโดยไม่ขึ้นกับ TZ ของเครื่องที่รัน
-  · ship คู่กับ `lib/format.ts` แบบเดียวกับ `lib/export.test.ts`
-
-**วงกลมไอคอน hero ของ `admin-setup-form` — ตัดสินว่า *ไม่* ทำ component.**
-shadcn ไม่มีของกลางให้จริง: ตัวที่ใกล้สุดคือ `EmptyMedia variant="icon"` ซึ่งเป็น
-สี่เหลี่ยม `size-8 rounded-md bg-muted` และเป็นช่องของ empty state คนละงานกัน.
-markup ปัจจุบันเป็น Tailwind utilities ล้วนซึ่ง §0.1 อนุญาตอยู่แล้ว และมีที่ใช้
-**ที่เดียวทั้ง kit** — component กลางที่มี consumer เดียวคือ abstraction เปล่า.
-สิ่งที่ขาดคือ "สเปคตายตัว" ไม่ใช่ component จึงเขียนค่าชุดเดียว (`size-14` ·
-`rounded-full` · `bg-primary/10` · ไอคอน `size-7 text-primary`) ลง DESIGN.md §4
-พร้อมเงื่อนไขยกระดับ: ใช้ครบ 3 ที่เมื่อไรค่อยยกเป็น component.
 ## 4.36.0 (2026-08-23)
 
 **DataTable gets a server-mode global search (prop `serverSearch`) — the
@@ -131,39 +106,66 @@ placeholder reads like a search.
   scanned exactly as before.
 
 Closes the last open หมวด "ต้องมีมติ design ก่อน" item in `docs/backlog.md` §5.
-## 4.38.0 (2026-08-23)
+## 4.35.0 (2026-08-23)
 
-**tiptap toolbar เข้าระบบขนาดของ kit** (backlog §5). ปุ่มทุกตัวใน toolbar เคยเป็น
-`<Button size="sm">` ที่เขียนเองแล้วทับด้วย `className="size-7 p-0"` — override
-กล่องขนาดของ control ตรงที่ DESIGN.md §0.4 ห้ามไว้ — บวก native `title` เป็น label.
-ที่จริง preset วาดปุ่มนั้นให้อยู่แล้ว: `size="icon"` ของ base-mira **คือ** `size-7`
-พร้อมไอคอน `size-3.5` — override ทั้งก้อนจึงเป็นการเขียนขนาดที่มีอยู่แล้วซ้ำ
+เศษสองข้อสุดท้ายที่ค้างจาก 4.30.0 ใน `docs/backlog.md` §5 — ทั้งคู่ปิดแล้ว.
 
-- `ToolbarToggle` + `ToolbarAction` ยุบเหลือ `ToolbarButton` ตัวเดียวบน
-  `ui/icon-action` → ได้ `size="icon"` + `aria-label` + Tooltip ของ kit แทน `title`
-  ตอนนี้ไม่เหลือ `h-*`/`p-*`/`size-*` บน control ตัวไหนในไฟล์นี้เลย
-- สถานะ active วิ่งตาม `aria-pressed` ไม่ใช่ boolean ฝั่ง JS: สีคือ
-  `aria-pressed:bg-primary/10 …` — toggle ที่ลืมใส่ attribute จะไม่ติดสีไปด้วย
-  ปุ่มที่ไม่ใช่ toggle ไม่ส่ง `active` มา attribute จึงหายไปทั้งอัน (ไม่ใช่ `false`)
-  screen reader อ่านว่าเป็นปุ่มสั่งงานธรรมดา
-- `<Icon className="size-3.5" />` 20 จุดหายไป — `size="icon"` ตั้งขนาด svg ให้เอง
-- ปุ่ม Link เป็น trigger ของทั้ง Popover และ Tooltip จึงซ้อน render prop:
-  `TooltipTrigger render={<PopoverTrigger render={<Button/>} />}` ตามที่ Base UI
-  documented ไว้ (children ตกไปที่ชั้นในสุด) — ไม่ต้องมี wrapper เพิ่ม
-- `disabled` ในปุ่ม toolbar = `aria-disabled` แล้ว (กติกาของ IconAction ตั้งแต่
-  4.29.0): Undo ที่จางอยู่ยังโฟกัสได้และยังบอกเหตุผลตอน hover
-- `references/conventions.md` เลิกเรียกไฟล์นี้ว่า "HRMS (verbatim)" และบันทึกว่า
-  ต้องมี `ui/icon-action` + `tooltip` ติดตั้งไว้ก่อน
+**`toDateKey` มีบ้านเดียวใน `lib/format.ts`.** `ui/date-picker.tsx` เคยนิยาม
+เองซ้ำกับ formatter กลาง ซึ่งชน §5 ("วันเวลาทุกจุดผ่าน `lib/format`") — ตอนนี้
+`import { formatDate, toDateKey } from '@/lib/format'` แล้ว.
 
-**และปิดทางไม่ให้ของแบบเดิมกลับมา** — `scripts/lint-kit-assets.mjs` (ด่านใน
-release chain) เพิ่มกฎ FAIL สองข้อ: className ที่ทับกล่องขนาดของ `<Button>` /
-`<IconAction>` (`h-*` `p*-*` `size-*` — `w-*` ผ่านเพราะเป็น layout,
-`variant="link"` ยกเว้นตาม §0.4) และ native `title=` บนสองตัวนั้น เดิมกฎนี้อยู่
-ใน DESIGN.md อย่างเดียวจึงไม่มีอะไรตรวจ asset จริง (เหตุผลเดียวกับตอนตั้งด่านนี้
-ใน 4.25.0) · สแกนทั้ง 89 asset แล้ว: ของเดิมไม่ติดสักตัว ส่วนไฟล์ tiptap ก่อนแก้
-ติด 6 จุด — ตัว lint อ่าน opening tag แบบรู้วงเล็บ/quote ไม่ใช่ regex ตัดที่ `>`
-ตัวแรก ไม่งั้น `onClick={() => …}` จะทำให้มองไม่เห็น className ที่ตามมา
+**แต่ไม่ได้ยุบเข้า `formatExportDate` ตามที่ backlog เดาไว้ — สองตัวนี้ให้คนละ
+คำตอบ.** วัดจริง (`node --experimental-strip-types`, TZ=Asia/Bangkok) จาก
+`new Date(2026, 7, 23)` ซึ่งคือสิ่งที่ react-day-picker ส่งกลับมาตอนคลิกเซลล์:
 
+| ฟังก์ชัน | ผล |
+| --- | --- |
+| `toDateKey(picked)` | `2026-08-23` ← วันที่ผู้ใช้คลิกจริง |
+| `formatExportDate(picked)` | `2026-08-22` ← **ร่นไปหนึ่งวัน** |
+
+`formatExportDate` อ่าน **UTC parts** โดยเจตนา เพราะ input ของมันคือ wall-clock
+date (คอลัมน์ SQL `date` = เที่ยงคืน UTC) — พอเจอเที่ยงคืน **local** ที่ +07:00
+มันก็ตกไปเป็นเมื่อวาน. ถ้ายุบเข้าไป วันหยุดบนปฏิทินจะทำเครื่องหมายผิดวันเงียบ ๆ.
+สองฟังก์ชันจึงแยกกันที่ **input มาจากไหน** ไม่ใช่หน้าตา output และเขียนกำกับไว้ทั้ง
+ใน docblock ของทั้งคู่, DESIGN.md §5 และ `ugt-core/contracts/design.md` (ประโยค
+"never through a local `Date`" ของ contract ครอบเกินจริง — เติมข้อยกเว้นเดียวที่มี).
+
+- ใหม่: `assets/lib/format.test.ts` — ล็อก timezone contract 5 ข้อ (pin
+  Asia/Bangkok ของ `formatDateTime` ยังได้ค่าเดิม `24/08/2026 00:30`, wall-clock
+  ไม่เลื่อน, `toDateKey` ตรงเซลล์) · ทุกข้อผ่านโดยไม่ขึ้นกับ TZ ของเครื่องที่รัน
+  · ship คู่กับ `lib/format.ts` แบบเดียวกับ `lib/export.test.ts`
+
+**วงกลมไอคอน hero ของ `admin-setup-form` — ตัดสินว่า *ไม่* ทำ component.**
+shadcn ไม่มีของกลางให้จริง: ตัวที่ใกล้สุดคือ `EmptyMedia variant="icon"` ซึ่งเป็น
+สี่เหลี่ยม `size-8 rounded-md bg-muted` และเป็นช่องของ empty state คนละงานกัน.
+markup ปัจจุบันเป็น Tailwind utilities ล้วนซึ่ง §0.1 อนุญาตอยู่แล้ว และมีที่ใช้
+**ที่เดียวทั้ง kit** — component กลางที่มี consumer เดียวคือ abstraction เปล่า.
+สิ่งที่ขาดคือ "สเปคตายตัว" ไม่ใช่ component จึงเขียนค่าชุดเดียว (`size-14` ·
+`rounded-full` · `bg-primary/10` · ไอคอน `size-7 text-primary`) ลง DESIGN.md §4
+พร้อมเงื่อนไขยกระดับ: ใช้ครบ 3 ที่เมื่อไรค่อยยกเป็น component.
+## 4.34.0 (2026-08-23)
+
+**Security headers ชุดเต็มใน `proxy.ts`** (backlog ข้อ 4 ครึ่งแรก). เดิม
+proxy ตั้งแค่ `Content-Security-Policy` และตั้งเฉพาะ response สุดท้าย —
+static pass-through, redirect ของ guard และ 401 JSON ออกไปโดยไม่มี header
+อะไรเลย. ตอนนี้มี `applySecurityHeaders(response, request, nonce)` ตัวเดียว
+เรียกที่ทุกจุด return ทั้ง 5 จุด และเพิ่มที่ขาด:
+
+- `X-Frame-Options: DENY` — clickjacking สำหรับ browser ที่ไม่อ่าน
+  `frame-ancestors` (CSP มี `frame-ancestors 'none'` อยู่แล้ว, สองตัวนี้ต้องตรงกัน)
+- `X-Content-Type-Options: nosniff` — กัน MIME sniffing
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` — ปิด camera/microphone/geolocation/payment/usb
+- `Strict-Transport-Security: max-age=31536000` — **ยิงเฉพาะเมื่อ request เป็น
+  https** (อ่าน `x-forwarded-proto` ก่อน เพราะหลัง reverse proxy ที่ terminate
+  TLS request จะมาถึงเป็น http) ดังนั้น dev บน `http://localhost` ไม่โดน pin
+  — ถ้า pin ไปแล้ว browser cache ไว้และไม่มี https dev server ให้ถอย.
+  **ไม่ใส่ `includeSubDomains` และไม่ใส่ `preload`** ทั้งคู่เป็นข้อผูกพัน
+  ระดับโดเมนที่ถอยยาก (preload ฝังในตัว browser) และบน shared domain
+  `includeSubDomains` ลากแอปเพื่อนบ้านไปด้วย — รอเจ้าของโดเมนตัดสิน
+
+ครึ่ง rate limiting ของ backlog ข้อ 4 **ยังเปิดอยู่** — in-memory ต่อ instance
+รับได้ตามมาตรฐาน deploy ปัจจุบัน (deploy เดี่ยว) และมี TODO กำกับในโค้ดแล้ว
 ## 4.33.0 (2026-08-21)
 
 **มติ 2026-08-21 — ยึด preset สำหรับปุ่ม destructive.** base-mira ships a
