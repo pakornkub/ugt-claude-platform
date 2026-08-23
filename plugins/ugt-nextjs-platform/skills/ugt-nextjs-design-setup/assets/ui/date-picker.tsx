@@ -1,11 +1,11 @@
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 44e5e630b288
+// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: e760bb68d507
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
 import * as React from 'react';
 import { th } from 'date-fns/locale';
-import { formatDate } from '@/lib/format';
+import { formatDate, toDateKey } from '@/lib/format';
 import { CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -41,10 +41,6 @@ interface DatePickerProps {
    * ทางเดียวในการโชว์วันหยุดใน date picker; อย่า hand-wire modifiers เอง.
    */
   holidays?: string[];
-}
-
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 export function DatePicker({

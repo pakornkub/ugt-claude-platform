@@ -181,6 +181,13 @@
   > rule** (แถว system, มีข้อมูลผูกอยู่) = **disabled + tooltip บอกเหตุผล**
   > (มติ 2026-08-21 — ผู้ใช้ต้องเห็นว่าปุ่มมีแต่ใช้ไม่ได้เพราะอะไร;
   > `IconAction` รองรับ `disabled` พร้อม tooltip แล้ว ให้ label เป็นเหตุผล)
+- **ไอคอนในวงกลม** (hero ของหน้าเดี่ยว: setup / ยืนยัน / สำเร็จ) — **ไม่มีของกลาง
+  ใน shadcn**: `EmptyMedia` ของ registry เป็นสี่เหลี่ยม `size-8 bg-muted` และเป็นช่อง
+  ของ empty state คนละงานกัน · จึงใช้ utility ตรง ๆ ตาม §0.1 แต่ **ค่าตายตัวชุดเดียว
+  ทั้งองค์กร** ห้ามคิดขนาด/สีเอง:
+  `<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10">`
+  + ไอคอน `className="size-7 text-primary" strokeWidth={2}` · ใช้ครบ 3 ที่เมื่อไร
+  ค่อยยกเป็น component กลาง (วันนี้มีที่เดียว = `admin-setup-form`)
 - **Icon mapping**: เพิ่ม `Plus` · แก้ไข `Pencil` · ลบ `Trash2` · กู้คืน
   `RotateCcw` · ดู `Eye` · Import `Upload` · Export `Download` · ค้นหา
   `Search` · กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2`
@@ -239,6 +246,9 @@
   อ่าน UTC parts (กันเลื่อนวัน) · instant จริงแสดงเวลาไทย Asia/Bangkok
 - **ไฟล์ export (Excel/CSV): ISO `yyyy-MM-dd` เสมอ** — คนละมาตรฐานกับจอ
   โดยตั้งใจ (DD/MM ทำ Excel สลับวัน-เดือนตาม locale ผู้รับ)
+- **`Date` ที่มาจาก local** (เซลล์ปฏิทินที่ผู้ใช้คลิก, `new Date()`) → `toDateKey()`
+  เท่านั้น **ห้าม `formatExportDate`** — ตัวนั้นอ่าน UTC parts พอเจอเที่ยงคืน local
+  ที่ +07:00 วันร่นไปหนึ่ง (คลิก 23 ได้ 22) · แยกกันที่ input มาจากไหน ไม่ใช่หน้าตา output
 - ตัวเลข: comma คั่นหลักพัน · ทศนิยมตามที่ DB ให้ ไม่ปัดเอง · ค่าว่าง = `-`
 - **ภาษา UI**: __LANG__
 - ศัพท์บังคับ: `requirements/glossary.md` (ถ้ามี)

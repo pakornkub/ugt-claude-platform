@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-design-setup/lib/format.ts
-// kit-hash: 587f567c54ca
+// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-design-setup/lib/format.ts
+// kit-hash: 9aa79fc5e643
 // source: merged ugt-hrms lib/format-date.ts + gov-boi-smart lib/format.ts — installed by ugt-nextjs-design-setup
 // convention: จอ DD/MM/YYYY ค.ศ. · ไฟล์ export ISO yyyy-MM-dd · ทุกการ format ผ่านไฟล์นี้เท่านั้น
 
@@ -16,6 +16,8 @@
  *                      ตัวกรองช่วงวันฝั่ง server คิดที่ +07:00 ถ้าจออ่านตามเครื่อง
  *                      ผู้ดูที่อยู่คนละโซน แถวที่เห็นจะไม่ตรงกับช่วงที่เพิ่งเลือก
  * - formatExportDate = วันที่ wall-clock → ISO สำหรับไฟล์ export (UTC parts เดียวกับ formatDate)
+ * - toDateKey        = Date ที่ "สร้างจาก local" (เซลล์ปฏิทิน, new Date()) → ISO key
+ *                      อ่าน local parts — คนละขั้วกับสามตัวบน อย่าสลับกันใช้
  */
 
 export type AppLocale = 'th' | 'en';
@@ -107,6 +109,20 @@ export function formatExportDate(value: string | Date | null | undefined): strin
   const m = String(d.getUTCMonth() + 1).padStart(2, '0');
   const day = String(d.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+/**
+ * `Date` ที่สร้างจาก local — เซลล์ปฏิทินที่ผู้ใช้เพิ่งคลิก, `new Date()` — → key ISO `yyyy-MM-dd`
+ * สำหรับเทียบกับวันที่ในโดเมนที่เป็น string (เช่น เซ็ตวันหยุดของ date-picker).
+ *
+ * **ห้ามใช้ `formatExportDate` กับ Date แบบนี้**: ตัวนั้นอ่าน UTC parts ตาม contract ของ
+ * wall-clock date (SQL date = เที่ยงคืน UTC) พอเจอเที่ยงคืน local ที่ +07:00 วันจะร่นไป
+ * หนึ่งวันเงียบ ๆ — คลิก 23 ส.ค. ได้ `'2026-08-22'`. สองตัวนี้แยกกันที่ **input มาจากไหน**
+ * ไม่ใช่หน้าตา output: ค่าจาก DB/string `yyyy-MM-dd` → `formatExportDate` ·
+ * `Date` ที่ผู้ใช้คลิกบนปฏิทิน → `toDateKey`.
+ */
+export function toDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 // ─── Long form (เดือนเป็นชื่อ) ────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 # Platform Backlog — งานที่รู้แล้วว่าต้องทำ แต่ยังไม่ได้ทำ
 
 > **Status:** Living · **Date:** 2026-08-12 · **Applies-to:** ทั้ง marketplace
-> **Last-reviewed:** 2026-08-21 (audit ปูพรม 4 agents หลัง field report CR System — ของวิกฤตปิดใน 4.25.0, ที่เหลือลงข้อ 5) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
+> **Last-reviewed:** 2026-08-23 (เศษสองข้อสุดท้ายของ audit ปิดใน 4.35.0) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
 
 กติกา: ข้อที่ปิดแล้ว**ขีดทิ้งพร้อมชี้รุ่น** ไม่ลบ (ประวัติว่าเคยเป็น backlog มีค่า) ·
 งานที่เป็นของโปรเจคใดโปรเจคหนึ่งไม่อยู่ที่นี่ (ไปที่ project-notes/decisions ของโปรเจคนั้น
@@ -73,8 +73,8 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 
 **งานโค้ดที่ตามมาได้เลย:**
 - ~~`AdminNav` fallback rebuild บน shadcn Sidebar~~ → 4.27.0
-- ~~date-picker label ไม่ผ่าน lib/format~~ → 4.30.0 (prop `formatLabel` default `formatDate`) · เหลือรวม `toDateKey` ซ้ำสองที่เข้า formatExportDate
-- ~~admin-setup-form `text-2xl` override~~ → 4.30.0 · เหลือ hand-built icon circle ของหน้า (admin-setup)
+- ~~date-picker label ไม่ผ่าน lib/format~~ → 4.30.0 (prop `formatLabel` default `formatDate`) · ~~`toDateKey` ซ้ำสองที่~~ → 4.35.0 ย้ายเข้า `lib/format` เป็นบ้านเดียว **แต่ไม่ยุบเข้า `formatExportDate`** — วัดแล้วให้คนละคำตอบ (local midnight ร่นวัน) คนละ input contract กัน + `lib/format.test.ts` ล็อกไว้
+- ~~admin-setup-form `text-2xl` override~~ → 4.30.0 · ~~hand-built icon circle~~ → มติ 4.35.0 **ไม่ทำ component** (shadcn ไม่มีของกลาง · `EmptyMedia` คนละงาน · มีที่ใช้ที่เดียว) แต่ตรึงสเปคใน DESIGN §4 — ครบ 3 ที่ค่อยยกเป็น component
 - tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title — ควรเข้า IconAction/ระบบขนาด
 - ~~`check-kit-freshness.mjs` ไม่ scan root files~~ → 4.27.0 (root files + prisma/; ชนิดไฟล์อื่นยัง out of scope โดยประกาศใน SKILL แล้ว)
 - ~~mail-setup สัญญา `/admin/mail-templates` แต่ไม่มีหน้า~~ → 4.27.0 (หน้า+editor+preview+actions ครบ)
