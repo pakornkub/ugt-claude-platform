@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.40.0 (2026-08-23)
+
+**`ui/bulk-action-bar.tsx` — เลือกหลายแถวแล้วสั่งงานรวม.** `conventions.md`
+โฆษณา "row selection + bulk bar" มาตั้งแต่ต้นทั้งที่ bulk bar ไม่เคยมีในโค้ด
+(row selection มีจริง) · มติ 2026-08-23: **ทำของให้มีจริง** ไม่ใช่ลบคำสัญญาทิ้ง
+เพราะ HRMS ใช้แพตเทิร์นนี้อยู่ 4 หน้า (อนุมัติลา · อนุมัติ OT · approvals ของ
+employee-monitor · hr-sync) และพิสูจน์ตัวเองมาแล้ว
+
+พอร์ตจาก `ugt-hrms components/ui/bulk-action-bar.tsx` (ยุค radix-mira) มาเป็น
+Base UI + สเกลขององค์กร:
+
+- Checkbox ของ Base UI ส่ง `(checked, eventDetails)` ไม่ใช่ค่าเดียว และแสดง
+  สถานะด้วย `data-checked` ไม่ใช่ `data-[state=checked]`
+- ปุ่มล้างการเลือกเป็น `variant="link"` แทน `<button>` เปล่า (§0.4 ห้ามปุ่มดิบ)
+- `rounded-xl` ของต้นทางไม่อยู่ในสเกล 4 ระดับที่ตกลงไว้ → ใช้ `rounded-lg`
+  (ระดับการ์ด) ตาม §1
+- ตัวอักษรเป็น `text-xs/relaxed` ตามความหนาแน่นของ preset (ต้นทางเป็น `text-sm`)
+
+`DataTable` ไม่ต้องแก้อะไรเลย — `onSelectionChange` กับ `resetSelectionKey` ที่
+ต้องใช้มีอยู่แล้วทั้งคู่ ตัวแถบจึงเป็น presentational ล้วน ไม่มี state ของตัวเอง
+
+กติกาสองข้อที่มากับแพตเทิร์น เขียนลง DESIGN §3 แล้ว: โผล่เมื่อเลือก **ตั้งแต่ 2
+แถวขึ้นไป** (แถวเดียวใช้ปุ่มในแถว) · ระหว่างที่แถบขึ้นให้ **ซ่อนปุ่มสั่งงานรายแถว**
+ไม่ให้มีสองทางสั่งงานพร้อมกัน · `design-preview.html` §5 มี specimen แล้ว
+(พ่วง `.btn-link` กับ checkbox ที่ preview ยังไม่เคยมี CSS ให้)
 ## 4.39.0 (2026-08-23)
 เดิมชนเลข 4.35.0 กับอีก branch ที่ถือ tag นั้นอยู่ — ย้ายมา 4.39.0 ตอน merge
 

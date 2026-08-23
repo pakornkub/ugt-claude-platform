@@ -166,7 +166,14 @@ search (toolbar) · per-column filter (header icon → Popover, active-filter
 chips with per-chip ✕ and clear-all) · sort · pagination (default 10,
 options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
-table→card · row selection + bulk bar · built-in Empty state.
+table→card · row selection · built-in Empty state.
+
+Row selection alone renders no toolbar of its own. The bulk bar is a
+separate component the page composes — `ui/bulk-action-bar.tsx` — fed by
+the table's `onSelectionChange` and cleared through its `resetSelectionKey`.
+It appears only above **2 or more** selected rows, and while it is up the
+page hides its per-row action buttons so there is never a second way to
+issue the same command.
 
 **Header cell anatomy** (left → right inside one cell, only what is enabled):
 drag handle (`GripVertical`, dimmed) → column label as a sort button with a
@@ -306,6 +313,7 @@ and CRLF per RFC 4180.
 | `ui/page-shell.tsx` · `ui/detail-dialog-shell.tsx` · `ui/detail-row.tsx` · `ui/detail-section.tsx` | HRMS | |
 | `ui/query-state.tsx` · `ui/truncated-text.tsx` | HRMS | query-state needs `ui/callout` |
 | `ui/callout.tsx` | HRMS | page-level banner; tones reuse `TONE_STYLES` |
+| `ui/bulk-action-bar.tsx` | HRMS (4 approval pages) | เลือกหลายแถวแล้วสั่งงานรวม; needs `checkbox`; pairs with `DataTable` `onSelectionChange` + `resetSelectionKey` |
 | `ui/export-menu.tsx` | HRMS | ปุ่ม Excel/CSV สำหรับ `toolbarExtra`; ship only when a page exports (needs `dropdown-menu` + `sonner`) |
 | `components/theme-provider.tsx` | standard next-themes wrapper | **fallback only** — the org preset scaffold ships its own (superset: hotkey + disableTransitionOnChange); keep the registry's file when present |
 | `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |

@@ -128,6 +128,18 @@
   .ui .btn-soft-destructive:hover{background:color-mix(in oklab,var(--destructive) 10%,transparent)}
   .ui .btn-soft-success{background:transparent;color:var(--status-emerald)}
   .ui .btn-soft-success:hover{background:color-mix(in oklab,var(--status-emerald) 10%,transparent)}
+  /* variant link ของ preset: สีเท่านั้น + ขีดเส้นตอน hover ไม่มีพื้น ไม่มีกล่อง */
+  .ui .btn-link{background:none;height:auto;padding:0;color:var(--primary);text-underline-offset:4px}
+  .ui .btn-link:hover{text-decoration:underline}
+  /* checkbox ที่ติ๊กแล้ว — ใช้ในแถบเลือกหลายแถว (§5) */
+  .ui .ck{width:16px;height:16px;border-radius:4px;background:var(--primary);color:var(--primary-foreground);
+    display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .ui .ck svg{width:11px;height:11px}
+  /* แถบสั่งงานหลายรายการ — พื้น primary จาง ขอบ primary จาง โค้งระดับการ์ด */
+  .ui .bulkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 16px;border-radius:var(--r-card);
+    border:1px solid color-mix(in oklab,var(--primary) 20%,transparent);
+    background:color-mix(in oklab,var(--primary) 5%,transparent)}
   .ui .btn-icon{width:28px;height:28px;padding:0}
   .ui .btn[disabled]{opacity:.5;cursor:not-allowed}
   .ui .field{height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 10px;font-size:13px;
@@ -739,6 +751,34 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>เลือกหลายแถวแล้วสั่งงานรวม — <code>BulkActionBar</code></span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <div class="bulkbar">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0">
+            <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><use href="#i-check"/></svg></span>
+            <span style="font-size:12px;font-weight:500">เลือก 12 รายการ</span>
+            <button class="btn btn-link" type="button">ล้างการเลือก</button>
+          </div>
+          <div style="display:flex;gap:8px;flex:none">
+            <button class="btn btn-success" type="button">อนุมัติทั้งหมด</button>
+            <button class="btn btn-destructive" type="button">ไม่อนุมัติทั้งหมด</button>
+          </div>
+        </div>
+        <p class="muted" style="font-size:11.5px;margin-top:10px">
+          โผล่เมื่อเลือก <strong>ตั้งแต่ 2 แถวขึ้นไป</strong> — แถวเดียวใช้ปุ่มในแถวตามเดิม ·
+          ระหว่างที่แถบขึ้น <strong>ซ่อนปุ่มสั่งงานรายแถว</strong> ไม่ให้มีสองทางสั่งงานพร้อมกัน ·
+          ล้างการเลือกผ่าน <code>resetSelectionKey</code> ของ <code>DataTable</code>
+          (ไม่ remount ทั้งตาราง เพราะจะทำให้หน้า/การเรียงหลุด)
+        </p>
       </div>
     </div>
   </div>
