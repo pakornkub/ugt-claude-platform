@@ -46,8 +46,11 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
 - ตัวต้นทางมี `focus-visible:ring` เฉพาะสีบน variant `destructive` — ถ้า button.tsx ปลายทาง
   มีแบบแผนนั้น จะเพิ่มให้ `success` ด้วยก็ได้:
   `focus-visible:ring-status-emerald/20 dark:focus-visible:ring-status-emerald/40`
-- variant `soft-*` ออกแบบมาใช้คู่กับ `size="icon"` ใน `<IconAction>` (ดู `ui/icon-action.tsx`)
-  — พื้นโปร่งใส ตัวอักษร/ไอคอนมีสี แล้วค่อยขึ้นพื้นจาง (10%) ตอน hover
+- variant `soft-*` = พื้นโปร่งใสตอนพัก ขึ้นพื้นจาง (10%) ตอน hover
+  > **ตั้งแต่ 2026-08-23 นี่ไม่ใช่ค่าเริ่มต้นของปุ่มในแถวตารางแล้ว** — แถวตาราง
+  > ใช้ prop `tone` ของ `<IconAction>` ซึ่งมีพื้นตั้งแต่ตอนพัก (มือถือไม่มี hover
+  > จึงต้องเห็นว่ากดได้ตั้งแต่แรก) · `soft-*` เหลือไว้สำหรับ **toolbar ที่ปุ่ม
+  > เรียงติดกันเยอะ** ที่การมีพื้นทุกใบจะหนักเกิน — ดู `ui/icon-action.tsx`
 
 ## variant `field` (จำเป็น — `ui/date-picker` ใช้)
 

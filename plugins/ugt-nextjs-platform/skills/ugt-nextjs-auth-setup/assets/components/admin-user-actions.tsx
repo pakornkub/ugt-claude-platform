@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: f58070a7600c
+// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: 519ba0bffede
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
@@ -228,7 +228,7 @@ export function SetPasswordDialog({
   return (
     <>
       {/* ปุ่มใน row ตาราง = IconAction เสมอ (DESIGN.md §0.4/§4) — tooltip + aria มากับ label */}
-      <IconAction label="ตั้งรหัสผ่าน" variant="soft-primary" onClick={() => setOpen(true)}>
+      <IconAction label="ตั้งรหัสผ่าน" tone="info" onClick={() => setOpen(true)}>
         <KeyRound className="size-4" strokeWidth={2} />
       </IconAction>
 

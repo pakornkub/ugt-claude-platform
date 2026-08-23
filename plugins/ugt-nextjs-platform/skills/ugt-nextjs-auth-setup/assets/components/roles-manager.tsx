@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: f684abc03f34
+// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: 8bd83ab1f01a
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -96,7 +96,7 @@ export function RolesManager({
                 {canUpdate && (
                   <IconAction
                     label={row.original.isSystem ? 'บทบาทระบบ — แก้ไขไม่ได้' : 'แก้ไข'}
-                    variant="soft-primary"
+                    tone="info"
                     disabled={row.original.isSystem}
                     onClick={() => setOpenSheet(row.original.id)}
                   >
@@ -106,7 +106,7 @@ export function RolesManager({
                 {canDelete && (
                   <IconAction
                     label={row.original.isSystem ? 'บทบาทระบบ — ลบไม่ได้' : 'ลบ'}
-                    variant="soft-destructive"
+                    tone="danger"
                     disabled={row.original.isSystem}
                     onClick={() => setDeleteTarget(row.original)}
                   >

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
-// kit-hash: 17db42bc396d
+// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
+// kit-hash: 818460894311
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — ไฟล์นี้ import
 // ui/icon-action กับ lib/format (formatFileSize) ซึ่ง kit เป็นคนติดตั้ง
 import * as React from 'react';
@@ -111,7 +111,7 @@ export function FileUpload({
               {!disabled && (
                 <IconAction
                   label="ลบไฟล์แนบ"
-                  variant="soft-destructive"
+                  tone="danger"
                   onClick={() => onChange(items.filter((x) => x.id !== item.id))}
                 >
                   <Trash2 strokeWidth={2} aria-hidden />

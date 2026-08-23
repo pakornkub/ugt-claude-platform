@@ -128,6 +128,16 @@
   .ui .btn-soft-destructive:hover{background:color-mix(in oklab,var(--destructive) 10%,transparent)}
   .ui .btn-soft-success{background:transparent;color:var(--status-emerald)}
   .ui .btn-soft-success:hover{background:color-mix(in oklab,var(--status-emerald) 10%,transparent)}
+  /* tone ของ IconAction — พื้น 10% ตอนพัก 20% ตอน hover ดึงจาก --status-* ชุดเดียวกับป้ายสถานะ
+     (มติ 2026-08-23: แถวตารางต้องเห็นว่ากดได้ตั้งแต่ยังไม่ hover เพราะมือถือไม่มี hover) */
+  .ui .btn-tone-neutral{background:color-mix(in oklab,var(--status-gray) 10%,transparent);color:var(--status-gray-fg)}
+  .ui .btn-tone-neutral:hover{background:color-mix(in oklab,var(--status-gray) 20%,transparent)}
+  .ui .btn-tone-info{background:color-mix(in oklab,var(--status-sky) 10%,transparent);color:var(--status-sky-fg)}
+  .ui .btn-tone-info:hover{background:color-mix(in oklab,var(--status-sky) 20%,transparent)}
+  .ui .btn-tone-danger{background:color-mix(in oklab,var(--status-red) 10%,transparent);color:var(--status-red-fg)}
+  .ui .btn-tone-danger:hover{background:color-mix(in oklab,var(--status-red) 20%,transparent)}
+  .ui .btn-tone-success{background:color-mix(in oklab,var(--status-emerald) 10%,transparent);color:var(--status-emerald-fg)}
+  .ui .btn-tone-success:hover{background:color-mix(in oklab,var(--status-emerald) 20%,transparent)}
   /* variant link ของ preset: สีเท่านั้น + ขีดเส้นตอน hover ไม่มีพื้น ไม่มีกล่อง */
   .ui .btn-link{background:none;height:auto;padding:0;color:var(--primary);text-underline-offset:4px}
   .ui .btn-link:hover{text-decoration:underline}
@@ -385,14 +395,19 @@
         </div>
         <p class="muted" style="font-size:12.5px">sky ≠ primary — sky บอก “ข้อมูล” · primary บอก “กดได้” ห้ามสลับ</p>
 
-        <div class="cmp-title">สีประจำ action (ในตารางใช้ variant soft-* เพื่อไม่ให้สีตะโกนทุกแถว)</div>
+        <div class="cmp-title">สีประจำ action — ในแถวตารางส่งผ่าน prop <code>tone</code> ของ IconAction (พื้นจาง 10% ตอนพัก 20% ตอน hover)</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
           <button class="btn btn-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่ม / สร้าง = primary</button>
           <button class="btn btn-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-check"/></svg>อนุมัติ = เขียวทึบ</button>
-          <button class="btn btn-soft-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg>แก้ไข = น้ำเงิน</button>
-          <button class="btn btn-soft-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-rotate"/></svg>กู้คืน = เขียว</button>
-          <button class="btn btn-soft-destructive" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg>ลบ = แดง</button>
+          <button class="btn btn-tone-info" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg>แก้ไข = น้ำเงิน</button>
+          <button class="btn btn-tone-success" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-rotate"/></svg>กู้คืน = เขียว</button>
+          <button class="btn btn-tone-danger" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg>ลบ = แดง</button>
         </div>
+        <p class="muted" style="font-size:11.5px;margin-top:8px">4 โทนเท่านี้ ห้ามเพิ่ม — สีบอก
+          <strong>อันตรายแค่ไหน</strong> ไม่ใช่ "action ตัวที่เท่าไร" (กล่อง 28px คนแยกออกแค่ 3-4 สี) ·
+          <strong>ดู = เทา</strong> เพราะไม่เปลี่ยนข้อมูล · โทนดึงจาก <code>--status-*</code> ชุดเดียวกับ
+          ป้ายสถานะ ทั้งแอปจึงมีระบบสีชุดเดียว · <strong>toolbar ที่ปุ่มเรียงติดกันเยอะ</strong>
+          (เช่น rich text) ใช้ <code>ghost</code>/<code>soft-*</code> ที่พื้นใสตามเดิม — พื้น 8-10 กล่องติดกันหนักเกิน</p>
 
         <div class="cmp-title">Chart — ใช้ <code>--chart-1..5</code> เท่านั้น ห้ามสี hardcode</div>
         <div class="bars">
@@ -621,8 +636,8 @@
                     <td class="num">3</td>
                     <td><span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>รออนุมัติ</span></td>
                     <td style="text-align:right;white-space:nowrap">
-                      <button class="btn btn-icon btn-soft-primary" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-eye"/></svg></button>
-                      <button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button>
+                      <button class="btn btn-icon btn-tone-neutral" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-eye"/></svg></button>
+                      <button class="btn btn-icon btn-tone-danger" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button>
                     </td></tr>
                   <tr><td>LV-0240</td><td>วิภา สุขใจ</td><td>ลากิจ</td><td>08/08/2026</td>
                     <td class="num">1</td>
@@ -719,9 +734,9 @@
         <div>
           <div class="cmp-title">≤ 3 action</div>
           <div style="display:flex;gap:6px;margin-top:8px">
-            <button class="btn btn-icon btn-soft-primary" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-eye"/></svg></button>
-            <button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button>
-            <button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button>
+            <button class="btn btn-icon btn-tone-neutral" type="button" aria-label="ดูรายละเอียด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-eye"/></svg></button>
+            <button class="btn btn-icon btn-tone-info" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button>
+            <button class="btn btn-icon btn-tone-danger" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button>
           </div>
           <div style="margin-top:10px"><span class="tip">แก้ไข</span></div>
           <p class="muted" style="font-size:11.5px;margin-top:6px">tooltip delay 0 · ห้ามซ่อนข้อมูลจำเป็น
@@ -1564,19 +1579,19 @@
                       <span class="lbadge" style="margin-left:6px">ระบบ</span></td>
                     <td class="muted">สิทธิ์ทั้งหมด</td>
                     <td class="num">9</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="บทบาทระบบ — แก้ไขไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="บทบาทระบบ — ลบไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-tone-info" type="button" aria-label="บทบาทระบบ — แก้ไขไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-tone-danger" type="button" aria-label="บทบาทระบบ — ลบไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                   <tr>
                     <td><b style="font-weight:500">หัวหน้างาน</b></td>
                     <td class="muted">อนุมัติและดูข้อมูลทีมตัวเอง</td>
                     <td class="num">7</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-tone-info" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-tone-danger" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                   <tr>
                     <td><b style="font-weight:500">Tester</b></td>
                     <td class="muted">ทดสอบระบบ (เมลเข้าตัวเองเท่านั้น)</td>
                     <td class="num">3</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-tone-info" type="button" aria-label="แก้ไข"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-tone-danger" type="button" aria-label="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                 </tbody>
               </table>
