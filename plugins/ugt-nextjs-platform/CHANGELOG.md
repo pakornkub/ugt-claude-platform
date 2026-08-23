@@ -25,6 +25,38 @@ full-setup:
 Verified against fixtures: a plain-init project (new-york + `radix-ui` +
 `asChild` + `onSelect` + `checked="indeterminate"`) fails with all six
 findings named; a preset-correct Base UI project passes both.
+## 4.35.0 (2026-08-23)
+
+ต่อจาก 4.34.0: เพิ่ม verify สองข้อใน `ugt-nextjs-auth-setup` — (1) header ครบทุก
+response ไม่ใช่แค่หน้า HTML (`curl -sI` ทั้ง `/login` และ `/api/health`) เพราะจุดที่
+มันหายเงียบคือ `return NextResponse.next()` เปล่า ๆ ที่ไม่ผ่าน
+`applySecurityHeaders()` และ (2) HSTS ต้องไม่โผล่บน `http://localhost` และบน https
+ต้องยังไม่มี `includeSubDomains`/`preload`
+
+## 4.34.0 (2026-08-23)
+
+**Security headers ชุดเต็มใน `proxy.ts`** (backlog ข้อ 4 ครึ่งแรก). เดิม
+proxy ตั้งแค่ `Content-Security-Policy` และตั้งเฉพาะ response สุดท้าย —
+static pass-through, redirect ของ guard และ 401 JSON ออกไปโดยไม่มี header
+อะไรเลย. ตอนนี้มี `applySecurityHeaders(response, request, nonce)` ตัวเดียว
+เรียกที่ทุกจุด return ทั้ง 5 จุด และเพิ่มที่ขาด:
+
+- `X-Frame-Options: DENY` — clickjacking สำหรับ browser ที่ไม่อ่าน
+  `frame-ancestors` (CSP มี `frame-ancestors 'none'` อยู่แล้ว, สองตัวนี้ต้องตรงกัน)
+- `X-Content-Type-Options: nosniff` — กัน MIME sniffing
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` — ปิด camera/microphone/geolocation/payment/usb
+- `Strict-Transport-Security: max-age=31536000` — **ยิงเฉพาะเมื่อ request เป็น
+  https** (อ่าน `x-forwarded-proto` ก่อน เพราะหลัง reverse proxy ที่ terminate
+  TLS request จะมาถึงเป็น http) ดังนั้น dev บน `http://localhost` ไม่โดน pin
+  — ถ้า pin ไปแล้ว browser cache ไว้และไม่มี https dev server ให้ถอย.
+  **ไม่ใส่ `includeSubDomains` และไม่ใส่ `preload`** ทั้งคู่เป็นข้อผูกพัน
+  ระดับโดเมนที่ถอยยาก (preload ฝังในตัว browser) และบน shared domain
+  `includeSubDomains` ลากแอปเพื่อนบ้านไปด้วย — รอเจ้าของโดเมนตัดสิน
+
+ครึ่ง rate limiting ของ backlog ข้อ 4 **ยังเปิดอยู่** — in-memory ต่อ instance
+รับได้ตามมาตรฐาน deploy ปัจจุบัน (deploy เดี่ยว) และมี TODO กำกับในโค้ดแล้ว
+
 ## 4.33.0 (2026-08-21)
 
 **มติ 2026-08-21 — ยึด preset สำหรับปุ่ม destructive.** base-mira ships a

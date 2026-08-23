@@ -47,11 +47,15 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 (polymorphic) ต้องการ orphan sweep ด้วย · คำตอบ infra ข้อ 3 ของ post-deploy
 อาจตอบข้อนี้ไปพร้อมกัน
 
-### 4. Security headers + rate limiting ชุดเต็ม
+### 4. ~~Security headers~~ + rate limiting ชุดเต็ม
 
-proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HSTS, X-Frame-Options ฯลฯ) · rate limiter
-ของ auth เป็น in-memory ต่อ instance (มี TODO ในโค้ดกำกับแล้ว) — deploy เดี่ยว
-ตามมาตรฐานปัจจุบันไม่กระทบ ต้องแก้เมื่อไปหลาย instance
+- ~~proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HSTS, X-Frame-Options ฯลฯ)~~ → 4.34.0
+  (HSTS ยิงเฉพาะ https · ไม่ใส่ `includeSubDomains`/`preload` รอมติเจ้าของโดเมน ·
+  X-Frame-Options / X-Content-Type-Options / Referrer-Policy / Permissions-Policy
+  ครบ และย้ายไปตั้งที่ทุกจุด return ไม่ใช่เฉพาะ response สุดท้าย)
+- **ยังเปิดอยู่:** rate limiter ของ auth เป็น in-memory ต่อ instance (มี TODO
+  ในโค้ดกำกับแล้ว) — deploy เดี่ยวตามมาตรฐานปัจจุบันไม่กระทบ ต้องแก้เมื่อไป
+  หลาย instance
 
 ### 5. คงค้างจาก audit ปูพรม 2026-08-21 (4 agents: Base UI API / DESIGN / SKILL flows / stale ports)
 
