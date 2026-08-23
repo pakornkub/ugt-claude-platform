@@ -1,5 +1,29 @@
 # Changelog — ugt-python-platform
 
+## 0.4.0 (2026-08-23)
+
+**Blocker สองข้อที่พบจาก pilot ฝั่ง PHP แต่ใช้กลไกเดียวกันเป๊ะ ๆ** —
+`ugt-php-platform` 0.4.0 เจอจากโปรเจคจริง ตรวจแล้วฝั่ง python เป็นเหมือนกันทั้งคู่
+(Jenkinsfile ใช้ `docker.image().inside{}` 5 จุดเหมือนกัน) จึงแก้พร้อมกัน ·
+ยังไม่ tag — **ฝั่ง python ยังไม่มี pilot ของตัวเอง**
+
+- **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ไม่เคยถูกบอกให้ admin ติดตั้ง**
+  — มติ M8 ให้ทุก stage รันใน `docker.image().inside{}` ซึ่งเป็น syntax ของ
+  ปลั๊กอินตัวนี้ ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
+  `groovy.lang.MissingPropertyException: No such property: docker` ที่อ่านไม่ออก
+  ว่าหมายถึงปลั๊กอินหาย · **คนละเรื่องกับการมี Docker CLI บนเครื่อง** — `sh
+  'docker …'` ทำงานได้อยู่แล้วโดยไม่ต้องมีปลั๊กอินนี้ · เพิ่มเข้า checklist,
+  ภาคผนวก, §7 และตัวสรุปท้าย `verify.mjs`
+- **ภาคผนวก server setup ใน `admin-handoff.template.md` เป็น HTML comment ที่
+  อ้าง `jenkins-one-time-setup.md` + `sonarqube-setup.md`** — สองไฟล์นั้นไม่มีใน
+  skill นี้ (มีแต่ใน `ugt-nextjs-cicd-setup` — ตอนแตก plugin ก๊อป template กับ
+  คอมเมนต์มาแต่ไม่ได้ก๊อป reference ตาม) ทุกโปรเจคจึงต้องเขียนภาคผนวกเอง ซึ่งเป็น
+  สาเหตุโดยตรงที่ข้อบนหลุด · เขียนจริงแล้วครบ 9 หัวข้อ (ปลั๊กอิน · tools ·
+  credential · global env · docker group · `proxy-network` · `/srv/appdata` ·
+  NVD data strategy · org Quality Gate) และลบการอ้างไฟล์ผีใน `Jenkinsfile` ทิ้ง
+- checklist ของ admin เพิ่ม `proxy-network` (compose ทั้งสองไฟล์ประกาศ
+  `external: true` แต่ handoff ไม่เคยบอก admin ให้สร้าง) และคำถาม compose v1/v2
+
 ## 0.3.0 (2026-08-23)
 
 ปิด backlog §5 "verify checks ที่ประกาศแต่ไม่ implement — ฝั่ง php/python"

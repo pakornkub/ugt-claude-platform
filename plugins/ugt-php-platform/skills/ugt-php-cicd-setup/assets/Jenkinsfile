@@ -132,7 +132,7 @@ pipeline {
                 // --noupdate (below) scans against the LOCAL NVD cache only — requires a
                 // separate periodic `dependency-check --updateonly` job, or remove
                 // --noupdate on the very first run (60-90 min download):
-                // see references/jenkins-one-time-setup.md → NVD data strategy
+                // see the "NVD data strategy" section in the admin-handoff appendix
                 // Write API key to a temp properties file via sh — the SHELL expands
                 // $NVD_API_KEY, NOT Groovy. Never interpolate secrets in Groovy strings.
                 withCredentials([string(credentialsId: 'nvd', variable: 'NVD_API_KEY')]) {

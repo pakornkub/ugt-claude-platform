@@ -1,4 +1,11 @@
 # CI-only image — ใช้ใน Jenkins stage Install/Quality/Tests เท่านั้น ห้าม deploy
 FROM php:8.3-cli
-RUN pecl install pcov && docker-php-ext-enable pcov
+# unzip ต้องมาก่อน composer: base image ไม่มีทั้ง zip extension และ binary unzip
+# → `composer install` ตายทันทีด้วย "zip extension and unzip/7z commands are both
+# missing" (ยืนยันจาก build จริงของโปรเจค pilot 2026-08) · composer แตก package
+# จาก dist ด้วย unzip ซึ่งเป็นเส้นทางปกติเมื่อมี composer.lock
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && pecl install pcov && docker-php-ext-enable pcov
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

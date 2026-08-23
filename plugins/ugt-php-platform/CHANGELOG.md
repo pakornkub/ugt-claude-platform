@@ -1,5 +1,95 @@
 # Changelog — ugt-php-platform
 
+## 0.4.0 (2026-08-23)
+
+**pilot จริงตัวแรกเกิดขึ้นแล้ว** — `ugt-mscpl-ana` (legacy PHP · `public/` เป็น
+webroot · SQL Server ผ่าน pdo_sqlsrv) เอา skill นี้ไปใช้จนขึ้น server จริง
+รุ่นนี้คือ feedback ที่ได้กลับมา · ยังไม่ tag — ของที่แก้ยังไม่ได้พิสูจน์ซ้ำบน
+โปรเจค pilot
+
+### Blocker — โปรเจคใหม่ที่ติดตั้งวันนี้เจอ build/pipeline พังทันที
+
+- **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ไม่เคยถูกบอกให้ admin ติดตั้ง**
+  — grep ทั้ง plugin เดิมได้ 0 hit ทั้งที่มติ M8 ใช้ `docker.image().inside{}`
+  ใน 5 stage · ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
+  `groovy.lang.MissingPropertyException: No such property: docker` ซึ่งอ่านไม่ออก
+  เลยว่าแปลว่าปลั๊กอินหาย · **คนละเรื่องกับการมี Docker CLI** — `sh 'docker …'`
+  ทำงานได้อยู่แล้วโดยไม่ต้องมีปลั๊กอินนี้ · ตอนนี้อยู่ใน checklist, ภาคผนวก,
+  SKILL §2.2 และตัวสรุปท้าย `verify.mjs`
+- **ภาคผนวก server setup ใน `admin-handoff.template.md` เป็น HTML comment ที่
+  บอกให้ไปสรุปจาก `jenkins-one-time-setup.md` + `sonarqube-setup.md`** — สองไฟล์
+  นั้น**ไม่มีอยู่ใน skill นี้** (มีแต่ใน `ugt-nextjs-cicd-setup`; ตอนแตก plugin
+  ก๊อป template กับคอมเมนต์มาแต่ไม่ได้ก๊อป reference ตาม) ผลคือทุกโปรเจคต้องเขียน
+  ภาคผนวกเอง ซึ่งเป็นสาเหตุโดยตรงที่ข้อบนหลุด · เขียนจริงแล้วครบ 9 หัวข้อ
+  (ปลั๊กอิน · tools · credential · global env · docker group · `proxy-network` ·
+  `/srv/appdata` · NVD data strategy · org Quality Gate) และลบการอ้างไฟล์ผีใน
+  `Jenkinsfile` ทิ้ง
+- **`FROM php:8.3-apache` ไม่ pin codename** — tag นั้นเลื่อนไป Debian trixie (13)
+  แล้ว ทำให้ Microsoft ODBC apt repo (`debian/12`) พังสองชั้น: codename ไม่ตรง
+  และ apt ของ trixie ไม่รับ ASCII-armored key ใน `trusted.gpg.d` · pin
+  `php:8.3-apache-bookworm` แล้ว · `references/docker-deploy.md` §C เคยยืนยันไว้
+  เองว่า "`php:8.3-apache` ปัจจุบันอิง bookworm" ซึ่งกลายเป็นเท็จ — แก้แล้ว
+- **snippet ติดตั้ง `pdo_sqlsrv` ใน §C ขาด `$PHPIZE_DEPS`** — `pecl` คอมไพล์จาก
+  source จริง ไม่มี toolchain แล้ว configure ไม่ผ่าน · เขียนบล็อกใหม่ทั้งก้อน
+  พร้อม `gpg --dearmor` (apt ใหม่ไม่รับ key แบบเดิม), `apt-get upgrade -y`
+  (ไม่งั้น image ตกรุ่น security patch) และ purge toolchain ใน RUN เดียวกัน
+- **`Dockerfile.ci` ไม่มี `unzip`** — `php:8.3-cli` ไม่มีทั้ง zip extension และ
+  binary `unzip` → `composer install` ตายทันทีด้วย "zip extension and unzip/7z
+  commands are both missing"
+
+### เขียวทั้งที่ควรแดง — healthcheck ที่รายงานว่าปกติขณะแอปตาย
+
+- **`php -r file_get_contents` พังเงียบเมื่อ `allow_url_fopen = Off`** (hardening
+  มาตรฐาน OWASP กัน RFI) — คืน `false` เสมอ container จึงไม่มีวันขึ้น healthy และ
+  สเตจ Deploy ตายที่ poll โดยไม่มี error บอกสาเหตุ · เปลี่ยนเป็น
+  `curl -fsS -L` ทั้ง 6 ที่ (Dockerfile ×2, compose ×2, references §D, SKILL §2.8)
+  และ Dockerfile ลง `curl` เอง **ห้าม purge**
+- **`-L` ไม่ใช่ของเลือกได้** — `/api/health` โดน 301 **คนละทิศแล้วแต่ shape**:
+  Laravel (route + `.htaccess` มาตรฐาน) 301 ตัด `/` ท้ายทิ้ง · CI4/legacy/WordPress
+  (ไฟล์ `index.php`) mod_dir 301 เติม `/` เข้ามา · `curl -f` ที่ไม่มี `-L` นับ 3xx
+  ว่าสำเร็จ = เขียวหลอกทั้งที่ข้างใต้ 503 · มี `-L` แล้ว `-f` ตัดสินจาก status
+  สุดท้าย = semantics เดียวกับ `file_get_contents` เดิม (ตัวนั้นตาม redirect ให้
+  เองอยู่แล้ว จึงไม่เคยมีปัญหาข้อนี้ — ปัญหาเกิดตอนสลับไป curl ต่างหาก) และใช้
+  บรรทัดเดียวถูกทั้ง 4 shape
+- **`assets/health/index.php` เคยเป็น stub** (`// [DB] เช็ค DB แบบถูก`) ไม่มี
+  ตัวอย่างจริง · ตอนนี้มีบล็อก `[DB]` แบบ comment ที่ใช้ได้จริง พร้อมกฎที่
+  pilot จ่ายค่าเรียนมาแล้ว: **`LoginTimeout` เป็น DSN parameter ห้ามใช้
+  `PDO::ATTR_TIMEOUT`** (pdo_sqlsrv เมินค่านั้นในเฟส connect แล้วค้างยาวเกิน
+  `--timeout=10s` ของ HEALTHCHECK → container ค้าง `starting` แทนที่จะ fail เร็ว)
+  และห้าม `echo $e->getMessage()` (ชื่อ server/database/user รั่วทาง endpoint สาธารณะ)
+
+### `verify.mjs`
+
+- check ใหม่ **`healthcheck survives redirects and PHP hardening`** — FAIL เมื่อ
+  ยังใช้ `file_get_contents` หรือใช้ curl โดยไม่มีทั้ง `-L` และ trailing slash
+- **เลิกเตือนผิดใส่ shape legacy ที่ใช้ `public/` เป็น webroot จริง** — `isCI4`
+  ดูที่ `public/index.php` โปรเจคที่ entry เป็น `public/index.html` (JS app คู่กับ
+  PHP API) จึงอ่านว่า "ไม่ใช่ CI4" แล้วถูกสั่งให้ลบบล็อก `[LARAVEL]` ที่ใช้อยู่
+  ถูกต้อง ทั้งที่ §5.3 รองรับเคสนี้ไว้แล้ว · `publicDocroot` + มี `public/` จริง
+  = สถานะที่ตั้งค่าถูกแล้ว
+- check `Dockerfile composer ordering` (ใหม่ในรุ่นนี้ ดูข้างล่าง) เคยทิ้ง finding
+  ที่สะสมไว้เพราะ `return` ในเส้นทาง warn — แยก `problems`/`warnings` แล้ว
+
+### Laravel: `composer install` ก่อน `COPY . .` ทำ `package:discover` fail เงียบ
+
+`Dockerfile.web` รัน `composer install … || true` ก่อน `COPY . .` — Laravel ผูก
+post-autoload-dump ไว้กับ `php artisan package:discover` ซึ่งต้องการ `artisan`
+ที่ยังไม่ถูก copy เข้ามา จึง fail ทุกครั้งแล้วถูก `|| true` กลืน (ซึ่งกลืน error
+จริงของ composer เช่น dependency resolve พัง ไปด้วยพร้อมกัน) · แก้เป็น
+`--no-scripts --no-autoloader` ตอน install แล้ว `composer dump-autoload
+--optimize --no-dev` หลัง `COPY . .` โดย **`chown` ปิดท้ายเสมอ** (ถ้า chown ก่อน
+dump-autoload ไฟล์ `vendor/composer/autoload_*.php` และ
+`bootstrap/cache/{packages,services}.php` ที่เขียนใหม่จะเป็นของ root แล้ว
+www-data เขียน `bootstrap/cache` ไม่ได้ตอนรัน) · มี verify check คุมทั้ง flag
+และลำดับ
+
+### อื่น ๆ
+
+- checklist ของ admin เพิ่ม `proxy-network` (compose ทั้งสองไฟล์ประกาศ
+  `external: true` แต่ handoff ไม่เคยบอก admin ให้สร้าง) และคำถาม compose v1/v2
+- `rules/ugt-php-ci.md` (copy เข้าทุกโปรเจค) ได้กฎ healthcheck ชุดใหม่ และแก้
+  คำอธิบาย CI image เป็น "unzip + pcov + composer"
+
 ## 0.3.0 (2026-08-23)
 
 ปิด backlog §5 "verify checks ที่ประกาศแต่ไม่ implement — ฝั่ง php/python"

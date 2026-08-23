@@ -561,6 +561,10 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
 
 - [ ] Jenkins tool ชื่อตรงเป๊ะ: `SonarQube-Scanner`, `Dependency-Check` ·
       SonarQube server entry ชื่อ `SonarQube`
+- [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** (มติ M8 ใช้
+      `docker.image().inside{}`) — ขาดแล้วตายตั้งแต่ Install ด้วย
+      `MissingPropertyException: No such property: docker` · คนละเรื่องกับการมี
+      Docker CLI บนเครื่อง
 - [ ] **Jenkins user อยู่ใน `docker` group** (มติ M8 — ไม่มีข้อนี้ทุก stage พัง
       ตั้งแต่ Install)
 - [ ] Credentials ครบ: `nvd`, `env-<project>`, `env-<project>-dev`

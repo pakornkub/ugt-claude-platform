@@ -148,44 +148,93 @@ extension ต้องคอมไพล์กับ Microsoft ODBC Driver (`mso
 
 ```dockerfile
 # [DB] SQL Server — วางก่อนบรรทัด pecl install sqlsrv ที่ comment ไว้ด้านบน
-RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https unixodbc-dev && \
-    curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc && \
-    curl -sSL https://packages.microsoft.com/config/debian/12/prod.list | tee /etc/apt/sources.list.d/mssql-release.list && \
+# ต้องคู่กับ `FROM php:8.3-apache-bookworm` (pin codename) ใน Dockerfile.web
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+      curl gnupg2 apt-transport-https ca-certificates unixodbc-dev && \
+    curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
+      | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg && \
+    curl -sSL https://packages.microsoft.com/config/debian/12/prod.list \
+      > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
+    ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 && \
+    apt-get install -y --no-install-recommends $PHPIZE_DEPS && \
     pecl install sqlsrv pdo_sqlsrv && \
-    docker-php-ext-enable sqlsrv pdo_sqlsrv
+    docker-php-ext-enable sqlsrv pdo_sqlsrv && \
+    apt-get purge -y --auto-remove gnupg2 apt-transport-https $PHPIZE_DEPS && \
+    rm -rf /var/lib/apt/lists/*
 ```
 
 จุดที่พลาดบ่อย:
 
-- **`unixodbc-dev` ต้องมาก่อน `pecl install`** — `pecl` คอมไพล์ extension จาก
-  source ต้องการ ODBC header files ไม่ใช่แค่ตัว runtime driver ขาดบรรทัดนี้
-  `pecl install sqlsrv` จะ fail ตอน `configure` ด้วย error หา `sql.h`/
-  `sqlext.h` ไม่เจอ
+- **`$PHPIZE_DEPS` ต้องมาก่อน `pecl install`** — `pecl` คอมไพล์จาก source จริง
+  ต้องมี toolchain (`autoconf` `gcc` `make` ฯลฯ) ซึ่ง `php:*` image ไม่ได้ลงมาให้
+  ตัวแปร `$PHPIZE_DEPS` มีติดมากับ image อยู่แล้ว ใช้ได้เลย · ติดตั้งกับ purge
+  ใน `RUN` เดียวกันเพื่อไม่ให้ toolchain ค้างอยู่ใน layer สุดท้าย
+- **`unixodbc-dev` ต้องมาก่อน `pecl install`** — `pecl` ต้องการ ODBC header
+  files ไม่ใช่แค่ตัว runtime driver ขาดบรรทัดนี้ `pecl install sqlsrv` จะ fail
+  ตอน `configure` ด้วย error หา `sql.h`/`sqlext.h` ไม่เจอ
 - **`ACCEPT_EULA=Y` ต้องเป็น env ของบรรทัด `apt-get install` เดียวกัน**
   (ไม่ใช่ `ENV ACCEPT_EULA=Y` แยกบรรทัดก่อนหน้า) — `msodbcsql18` เป็น
   interactive postinst script ที่เช็ค EULA acceptance จาก env ตอนรันจริง
   ไม่ใช่ตอน build-arg resolve
+- **`gpg --dearmor` ไม่ใช่ `tee` ลง `trusted.gpg.d`** — apt รุ่นใหม่ (trixie
+  ขึ้นไป) ไม่รับ key แบบ ASCII-armored ใน `trusted.gpg.d` อีกแล้ว ต้อง dearmor
+  ลง `/usr/share/keyrings/` · วิธีเดิมยังพอทำงานบน bookworm แต่จะพังทันทีที่ใคร
+  ขยับ base image ขึ้น — ใช้แบบใหม่ไปเลยทั้งสองกรณี
 - **codename ของ apt repo (`debian/12`) ต้องตรงกับ base image จริง** —
-  `php:8.3-apache` ปัจจุบันอิง Debian bookworm (12) เช็คด้วย `cat
-  /etc/os-release` ในคอนเทนเนอร์ก่อนถ้าจะ pin เวอร์ชันอื่น ผิด codename แล้ว
-  `apt-get update` จะหา package ไม่เจอเงียบ ๆ (404 ทีละบรรทัด ไม่ fail ทั้ง
-  build จนกว่าจะถึง `apt-get install`)
+  ⚠️ `php:8.3-apache` **เปล่า ๆ ตอนนี้ resolve เป็น trixie (13) แล้ว** ไม่ใช่
+  bookworm อีกต่อไป (ยืนยันจาก build ที่ fail จริง โปรเจค pilot 2026-08) จึงต้อง
+  pin `php:8.3-apache-bookworm` ใน `Dockerfile.web` เสมอ ไม่ใช่แค่ "เช็คก่อน" ·
+  ผิด codename แล้ว `apt-get update` จะหา package ไม่เจอเงียบ ๆ (404 ทีละบรรทัด
+  ไม่ fail ทั้ง build จนกว่าจะถึง `apt-get install`)
+- **SQL Server = PHP ≥ 8.3 เป็นเพดานแข็ง** — PECL `sqlsrv`/`pdo_sqlsrv` รุ่น
+  ปัจจุบันตัด 8.2 ทิ้งแล้ว (`pecl/sqlsrv requires PHP >= 8.3.0`) โปรเจค legacy
+  ที่อยากถอย base image ลงไปต่ำกว่านี้ต้องยอมสละ SQL Server ไปด้วย
+- **`apt-get upgrade -y` ไม่ใช่ของฟุ่มเฟือย** — base image ถูก rebuild ห่างกว่า
+  รอบออก security patch ของ Debian ถ้าโปรเจคเปิดสแกน image (Trivy) จะโดนบล็อก
+  ด้วย CVE ที่ **แก้ได้แล้ว** ใน apt แต่ image ยังไม่ได้รับ
 - **`Dockerfile.wordpress` ไม่มีบล็อก `[DB]` นี้** — WordPress ใช้ `mysqli`/
   `pdo_mysql` ที่มากับ base image `wordpress:*` อยู่แล้ว SQL Server ไม่ใช่
   ทางเลือกมาตรฐานของ WordPress ในชุดนี้
 
-## D. Healthcheck — apache image ไม่มี wget/curl
+## D. Healthcheck — `curl -fsS -L` (ต้องลง curl เอง)
 
-`php:8.3-apache` และ `wordpress:php8.3-apache` ไม่มี `curl`/`wget` ติดมาให้
-เหมือน distro ทั่วไปที่ตัด tool ที่ไม่จำเป็นออกเพื่อลดขนาด image — healthcheck
-ทั้งใน Dockerfile และ compose จึงยิงด้วย `php -r` ตรง ๆ (standard library
-`file_get_contents` ไม่ต้องติดตั้งอะไรเพิ่ม):
+`php:8.3-apache` และ `wordpress:php8.3-apache` ไม่มี `curl`/`wget` ติดมาให้ —
+ทั้งสอง Dockerfile จึง **ลง `curl` เองและไม่ purge ทิ้ง** เพราะ healthcheck
+ต้องใช้:
 
 ```sh
-php -r 'exit(@file_get_contents("http://127.0.0.1:80/api/health") !== false ? 0 : 1);' || exit 1
+curl -fsS -L http://127.0.0.1:80/api/health || exit 1
 ```
+
+**ทำไมไม่ใช้ `php -r 'file_get_contents(...)'` เหมือนเดิม** — วิธีนั้นไม่ต้องลง
+package จริง แต่ `file_get_contents("http://…")` **คืน `false` เสมอ**เมื่อ
+`allow_url_fopen = Off` ซึ่งเป็นค่า hardening มาตรฐานของ OWASP (กัน RFI) ที่
+โปรเจคตั้งกันเป็นปกติ ผลคือ container **ไม่มีวันขึ้น healthy** และสเตจ Deploy
+ตายที่ poll โดยไม่มี error บอกสาเหตุสักบรรทัด (ยืนยันจากโปรเจค pilot 2026-08)
+ราคาที่จ่ายคือ apt layer เพิ่มหนึ่งชั้น — ถูกกว่าการดีบั๊ก healthcheck ที่ไม่
+เคยเขียวมาก
+
+**`-L` ห้ามตัดทิ้งเด็ดขาด** — `/api/health` โดน 301 ได้**สองทิศตรงข้ามกัน**
+แล้วแต่ shape:
+
+| Shape | health คือ | Apache/framework ทำอะไร | `curl -f` ไม่มี `-L` |
+| --- | --- | --- | --- |
+| Laravel | route (`Route::get('/api/health')`) | `.htaccess` มาตรฐาน 301 **ตัด** `/` ท้ายทิ้ง | ยิง `/api/health/` → 301 → **เขียวหลอก** |
+| CI4 / legacy / WordPress | ไฟล์ `api/health/index.php` | mod_dir 301 **เติม** `/` ท้ายเข้ามา | ยิง `/api/health` → 301 → **เขียวหลอก** |
+
+`curl -f` นับ 3xx ว่า "สำเร็จ" ถ้าไม่มี `-L` → healthcheck เขียวทั้งที่ endpoint
+ข้างใต้อาจคืน 503 อยู่ ซึ่งเป็น false-green ที่แย่ที่สุดแบบหนึ่ง (deploy ผ่าน
+ทั้งที่แอปตาย) · ใส่ `-L` แล้ว curl ตาม redirect ไปจนสุดแล้ว `-f` ตัดสินจาก
+status **สุดท้าย** — ได้ semantics เดียวกับ `file_get_contents` เดิมเป๊ะ ๆ
+(ตัวนั้นตาม redirect ให้เองอยู่แล้วโดย default จึงไม่เคยมีปัญหาข้อนี้) และใช้
+บรรทัดเดียวถูกต้องทั้ง 4 shape ไม่ต้องแยกตาม shape
+
+> `-L` ปลอดภัยที่นี่เพราะ `/api/health` เป็น endpoint สาธารณะตาม contract
+> (เข้าได้โดยไม่ต้อง login) จึงไม่มีเคส redirect ไปหน้า login ที่คืน 200 —
+> ถ้าโปรเจคไหนเอา health ไปไว้หลัง auth **นั่นผิด contract ตั้งแต่แรก** ไม่ใช่
+> เหตุผลให้ถอด `-L`
 
 จุดที่พลาดบ่อย:
 
@@ -202,9 +251,15 @@ php -r 'exit(@file_get_contents("http://127.0.0.1:80/api/health") !== false ? 0 
 - `start_period: 60s` ในทั้งสอง compose ให้เวลาแอป boot ก่อนเริ่มนับ retry —
   ลดค่านี้จะทำให้ deploy ล้มเพราะ "unhealthy" ระหว่างที่แอปแค่ยังไม่ทันบูตเสร็จ
   (ต่างจาก unhealthy จริง)
-- `@` หน้า `file_get_contents` จำเป็น — กัน PHP warning (connection refused,
-  timeout) หลุดไปโผล่ใน `docker inspect` health log จนอ่านผลยาก ตัว exit code
-  (0/1) คือสิ่งที่ Docker ใช้ตัดสิน ไม่ใช่ output
+- **`-fsS` ครบทั้งสามตัว** — `-f` ทำให้ status ≥ 400 เป็น exit code ไม่ใช่
+  หน้า error ที่ curl พิมพ์ออกมาแล้ว exit 0 · `-s` ปิด progress meter ที่จะไป
+  รกใน `docker inspect` health log · `-S` ดึง error message กลับมาเมื่อ `-s`
+  ปิดเสียงไปแล้ว (ไม่มีตัวนี้เวลา fail จะไม่รู้เลยว่าเพราะอะไร) · ตัว exit code
+  คือสิ่งที่ Docker ใช้ตัดสิน ไม่ใช่ output
+- **ห้าม purge `curl` ทิ้งท้าย Dockerfile** — โปรเจคที่ลง curl ไว้แค่ตอน build
+  (เช่นเพื่อดึง key ของ Microsoft repo ในบล็อก `[DB]`) แล้ว `apt-get purge`
+  ปิดท้ายเพื่อลดขนาด image จะทำให้ healthcheck ตายทุกครั้งด้วย `curl: not found`
+  ซึ่งใน health log อ่านเหมือนแอปพังมากกว่า tool หาย
 
 ## E. Gotchas เร็ว ๆ — build & lint
 

@@ -31,7 +31,9 @@ services:
       # AUTH_SECRET: ${AUTH_SECRET}
       # SENTRY_DSN: ${SENTRY_DSN:-}
     healthcheck:
-      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1:80/api/health\") !== false ? 0 : 1);' || exit 1"]
+      # `-L` is NOT optional — see the comment in docker-compose.yml (a 301 without
+      # it scores as healthy while the endpoint underneath may be returning 503)
+      test: ["CMD", "curl", "-fsS", "-L", "http://127.0.0.1:80/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5

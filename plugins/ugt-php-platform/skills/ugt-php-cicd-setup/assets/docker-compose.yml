@@ -38,8 +38,12 @@ services:
     healthcheck:
       # Always 127.0.0.1 (NOT localhost — Alpine/slim resolves it to IPv6 ::1)
       # and always internal port 80 (container-internal, not the host port).
-      # Same php one-liner as the Dockerfile HEALTHCHECK — apache image has no wget/curl.
-      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1:80/api/health\") !== false ? 0 : 1);' || exit 1"]
+      # Same curl form as the Dockerfile HEALTHCHECK — curl is installed there on
+      # purpose. `-L` is NOT optional: /api/health gets 301'd in opposite
+      # directions depending on shape (Laravel strips the trailing slash, file-based
+      # shapes add one) and `curl -f` without `-L` scores a 301 as success, so the
+      # container would report healthy while the endpoint underneath returns 503.
+      test: ["CMD", "curl", "-fsS", "-L", "http://127.0.0.1:80/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5

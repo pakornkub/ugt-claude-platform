@@ -41,7 +41,9 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 ## Toolchain รันใน docker (มติ M8 — ไม่ใช้ Jenkins Global Tool)
 
 - **Install stage สร้าง CI image ครั้งเดียว** ด้วย `docker build -f Dockerfile.ci -t __PROJECT_NAME__-ci .`
-  (FROM php:8.3-cli + pecl pcov + composer) — ครั้งแรกช้า ครั้งถัดไปโดน cache
+  (FROM php:8.3-cli + unzip + pecl pcov + composer — unzip ต้องมี ไม่งั้น
+  `composer install` ตายด้วย "zip extension and unzip/7z commands are both
+  missing") — ครั้งแรกช้า ครั้งถัดไปโดน cache
 - ทุก stage ถัดมา (Lint / Format Check / Static Analysis / Unit Tests) **ใช้ image เดิม**
   `docker.image('__PROJECT_NAME__-ci').inside { ... }` — Jenkins agent ไม่มี PHP
   tool ติดตั้งไว้ล่วงหน้า
@@ -81,6 +83,12 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
   (ไม่งั้น rollback ไม่ได้)
 - Healthcheck ยิงที่ `127.0.0.1` ห้ามใช้ `localhost` (สภาพแวดล้อม slim/alpine
   บาง image resolve `localhost` เป็น IPv6 แล้ว fail)
+- Healthcheck ใช้ `curl -fsS -L` — **`-L` ห้ามตัดทิ้ง** (`/api/health` โดน 301
+  คนละทิศแล้วแต่ shape: Laravel ตัด `/` ท้ายทิ้ง · shape ที่เป็นไฟล์เติม `/`
+  เข้ามา — `curl -f` ที่ไม่มี `-L` นับ 301 ว่าสำเร็จ = เขียวหลอกทั้งที่ข้างใต้
+  อาจ 503) · **ห้ามเปลี่ยนกลับไปใช้ `php -r file_get_contents`** — คืน `false`
+  เสมอเมื่อ `allow_url_fopen = Off` ทำให้ container ไม่มีวัน healthy · และ
+  **ห้าม purge `curl`** ทิ้งท้าย Dockerfile
 - Deploy ด้วย `--no-build` (reuse image จากสเตจ Docker Build) — ปล่อยให้
   compose build เองจะได้ image คนละตัวกับที่ผ่าน Quality Gate มาแล้ว
 - `pull_policy: never` ใน compose — image build ในเครื่องเอง ไม่ได้ดึงจาก registry

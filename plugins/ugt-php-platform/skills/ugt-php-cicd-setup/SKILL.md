@@ -47,7 +47,7 @@ Skill layout:
 | `assets/sonar-project.properties` | projectKey/Name + `sonar.php.*` + exclude `vendor`/`wp-admin`/`wp-includes` + import DC report |
 | `assets/owasp-suppressions.xml` | skeleton ว่าง + กติกาการเพิ่ม suppression |
 | `assets/docker/Dockerfile.web` · `Dockerfile.wordpress` | เลือกตัวเดียวตาม shape → copy เป็น `Dockerfile` ที่ root |
-| `assets/docker/Dockerfile.ci` | image สำหรับ CI เท่านั้น (`php:8.3-cli` + pcov + composer) → copy เป็น `Dockerfile.ci` ที่ root — สเตจ Install `docker build -f Dockerfile.ci` |
+| `assets/docker/Dockerfile.ci` | image สำหรับ CI เท่านั้น (`php:8.3-cli` + unzip + pcov + composer) → copy เป็น `Dockerfile.ci` ที่ root — สเตจ Install `docker build -f Dockerfile.ci` |
 | `assets/docker-compose.yml` · `docker-compose.dev.yml` | prod/dev คนละไฟล์ · `pull_policy: never` · healthcheck 127.0.0.1:80 |
 | `assets/health/index.php` | `/api/health` ไฟล์เดียวใช้ได้ทุก shape **ยกเว้น Laravel** (Laravel ใช้ route แทน — โค้ดอยู่ในคอมเมนต์บรรทัดสุดท้ายของไฟล์นี้) |
 | `assets/tooling/phpstan.neon` · `.php-cs-fixer.php` · `phpunit.xml` · `SmokeTest.php` · `composer-require-dev.md` | tooling ขั้นต่ำ (php-cs-fixer/phpstan/PHPUnit + smoke test) ให้ stage 2–3 **มีคำสั่งให้รันได้จริง** โดยไม่ต้องเขียน test เดิมใหม่ (มติ M4) — แต่โค้ดเดิมต้องผ่าน `php-cs-fixer fix` ก่อน ซึ่งขั้น setup จัดการให้ใน §5.6 |
@@ -88,14 +88,24 @@ post: emailext (success/unstable/failure/aborted) + cleanWs
 (`Install` / `Lint` / `Format Check` / `Static Analysis` / `Unit Tests`) เปิด
 `docker.image('<project>-ci').inside { ... }` ของตัวเอง — Jenkins server ไม่ต้อง
 ติดตั้ง PHP/composer เพิ่มเลย. ที่ต้องมี image ของตัวเองแทนที่จะใช้
-`php:8.3-cli` ตรง ๆ เพราะ image ทางการ **ไม่มี coverage driver และไม่มี
-composer** — `Dockerfile.ci` เติมให้ 2 อย่างพอดี (`pecl install pcov` +
-`COPY --from=composer:2`) ไม่มีอย่างอื่น และ **ห้ามเอา image นี้ไป deploy**.
+`php:8.3-cli` ตรง ๆ เพราะ image ทางการ **ไม่มี coverage driver, ไม่มี composer,
+และไม่มี unzip** — `Dockerfile.ci` เติมให้ 3 อย่างพอดี (`unzip` — ไม่มีแล้ว
+`composer install` ตายด้วย "zip extension and unzip/7z commands are both
+missing", `pecl install pcov`, `COPY --from=composer:2`) ไม่มีอย่างอื่น และ
+**ห้ามเอา image นี้ไป deploy**.
 `vendor/` ถูกสร้างในสเตจ `Install` แล้วอยู่ใน **workspace** (ไม่ใช่ในตัว
 container ที่ถูกทิ้งเมื่อ stage จบ) จึงรอดข้ามไปสเตจถัดไปได้ เพราะ
-`docker.image().inside` mount workspace เดิมทุกครั้ง. เงื่อนไขฝั่ง server
-ข้อเดียว: **Jenkins user ต้องอยู่ใน `docker` group** ไม่งั้นทุก stage fail ด้วย
-permission denied ต่อ `/var/run/docker.sock` (อยู่ในเช็คลิสต์ admin handoff แล้ว)
+`docker.image().inside` mount workspace เดิมทุกครั้ง. เงื่อนไขฝั่ง server **สองข้อ**
+(อยู่ในเช็คลิสต์ + ภาคผนวกของ admin handoff แล้วทั้งคู่):
+
+1. **ปลั๊กอิน Docker Pipeline (`docker-workflow`)** — เป็นตัวที่ให้ global
+   variable `docker` ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
+   `groovy.lang.MissingPropertyException: No such property: docker` ซึ่งอ่านไม่
+   ออกว่าหมายถึงปลั๊กอินหาย (ยืนยันจากโปรเจค pilot 2026-08) · **คนละเรื่องกับการ
+   มี Docker CLI** — `sh 'docker …'` ไม่ต้องใช้ปลั๊กอินนี้ แต่
+   `docker.image().inside{}` ต้องใช้
+2. **Jenkins user อยู่ใน `docker` group** ไม่งั้นทุก stage fail ด้วย permission
+   denied ต่อ `/var/run/docker.sock`
 
 ### 2.3 Branch model
 
@@ -158,10 +168,16 @@ stack นี้ **ไม่มี** `sentry-dsn-<project>` (ไม่มี clie
 version หรือ commit hash ใน response**. Container healthcheck ยิง `127.0.0.1`
 เท่านั้น (ห้าม `localhost` — resolver บางระบบไปที่ IPv6 `::1` ขณะที่ apache
 ผูก IPv4) และยิง **port 80 ภายใน container** เสมอ ไม่ใช่ host port.
-`php:8.3-apache` / `wordpress:php8.3-apache` ไม่มี `wget`/`curl` → healthcheck
-ใช้ `php -r 'exit(@file_get_contents("http://127.0.0.1:80/api/health") !== false ? 0 : 1);'`
-(stdlib ล้วน) ทั้งใน Dockerfile และ compose. PHP มี deploy shape เดียวคือ
-`[WEB]` — ไม่มี shape ที่ยกเว้น health endpoint ได้ (→ `references/docker-deploy.md` §A, §D)
+`php:8.3-apache` / `wordpress:php8.3-apache` ไม่มี `curl` → ทั้งสอง Dockerfile
+**ลง `curl` เองและห้าม purge ทิ้ง** แล้ว healthcheck ใช้
+`curl -fsS -L http://127.0.0.1:80/api/health` ทั้งใน Dockerfile และ compose.
+**`-L` ห้ามตัด** — `/api/health` โดน 301 คนละทิศแล้วแต่ shape (Laravel ตัด `/`
+ท้ายทิ้ง · shape ที่เป็นไฟล์เติม `/` เข้ามา) และ `curl -f` ที่ไม่มี `-L` นับ 301
+ว่าสำเร็จ = เขียวหลอกทั้งที่ข้างใต้ 503. **ห้ามกลับไปใช้
+`php -r file_get_contents`** — พังเงียบเมื่อโปรเจคตั้ง `allow_url_fopen = Off`
+ตาม OWASP (container ไม่มีวัน healthy โดยไม่มี error บอก). PHP มี deploy shape
+เดียวคือ `[WEB]` — ไม่มี shape ที่ยกเว้น health endpoint ได้
+(→ `references/docker-deploy.md` §A, §D)
 
 ### 2.9 Persistent data
 
@@ -477,8 +493,9 @@ stage ที่ 1 ก่อนถึงอย่างอื่น
 > `composer require --dev ...` ทั้ง 3 ตัวตามปกติ. `composer.json` ที่ได้จะมีแต่
 > `require-dev` (ไม่มี runtime dependency สักตัว) — **ถูกต้องแล้ว** ไม่ใช่ความ
 > ผิดพลาด: `Dockerfile.wordpress` ไม่รัน composer เลย ไฟล์ชุดนี้มีไว้ให้ CI
-> ใช้อย่างเดียว (`Dockerfile.web` ก็รองรับเคสนี้ด้วย `composer install --no-dev
-> ... || true` ซึ่งจะไม่ติดตั้งอะไรและไม่ fail)
+> ใช้อย่างเดียว (`Dockerfile.web` ก็รองรับเคสนี้ด้วย — `composer install
+> --no-dev` บน composer.json ที่ไม่มี runtime dependency แค่ไม่ติดตั้งอะไร
+> แล้วจบแบบสำเร็จเฉย ๆ ไม่ต้องมี `|| true` มากลืน error)
 
 - **commit `composer.lock`** — Install stage กับ image ต้อง resolve ชุดเดียวกัน
   ทุกครั้ง ไม่งั้น scan กับที่ deploy คนละ dependency tree
@@ -616,7 +633,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Secret ขยายค่าโดย shell (`"$VAR"`) | Groovy interpolation (`"${VAR}"` รั่วลง log) |
 | `dependencyCheckPublisher` นับ CVE | `grep` XML ดิบ (นับ suppressed ด้วย → fail หลอก) |
 | Tag image ด้วย `BUILD_NUMBER` | `latest` อย่างเดียว (rollback ไม่ได้) |
-| Healthcheck ยิง `127.0.0.1:80` ด้วย `php -r` | `localhost` / host port / `wget`-`curl` (apache image ไม่มีให้) |
+| Healthcheck ยิง `127.0.0.1:80` ด้วย `curl -fsS -L` (ลง curl เอง ห้าม purge) | `localhost` / host port / ตัด `-L` (301 = เขียวหลอก) / `php -r file_get_contents` (พังเมื่อ `allow_url_fopen=Off`) |
 | Laravel migrate ส่ง `--env-file .env` ทั้งไฟล์ ก่อน `compose up` | `-e DATABASE_URL` ตัวเดียว (`artisan` boot ทั้ง framework ต้องการ `APP_KEY` ด้วย) |
 | Volume ใต้ `/srv/appdata/<project>/` (dev = `/srv/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
 | `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
@@ -643,10 +660,12 @@ node <skill-dir>/scripts/verify.mjs
 
 ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง — ยกเว้น `__DIR__`, ครบ 10 stages +
 `emailext` ×4, brace balance หลังลบบล็อก, บล็อก `[LARAVEL]` ตรงกับ framework,
-`/api/health` อยู่ใต้ docroot ที่เสิร์ฟจริง, `volumes:` ก้อนเดียวต่อ service,
-`mkdir -p` ↔ bind, composer + require-dev 3 ตัว, schema `phpunit.xml` ตรงกับ
-เวอร์ชันที่ composer resolve, path ใน `sonar.sources` มีจริง, compose, tooling,
-health, ไฟล์ที่ §5.1 copy มาครบ) — ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+`composer install` ใน `Dockerfile.web` ต้องมี `--no-scripts` (ไม่ใช่ `|| true`)
+พร้อม `composer dump-autoload` หลัง `COPY . .`, `/api/health` อยู่ใต้ docroot
+ที่เสิร์ฟจริง, `volumes:` ก้อนเดียวต่อ service, `mkdir -p` ↔ bind, composer +
+require-dev 3 ตัว, schema `phpunit.xml` ตรงกับเวอร์ชันที่ composer resolve,
+path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟล์ที่ §5.1 copy มาครบ)
+— ฝั่ง server ยังต้องให้ admin ยืนยันเอง
 
 > **ทุก check ที่อ่าน Jenkinsfile / Dockerfile / compose อ่านเฉพาะบรรทัดที่ยัง
 > ทำงานจริง** (ตัดคอมเมนต์ออกก่อน) — ไฟล์ template พก legend, บล็อก `[LARAVEL]`

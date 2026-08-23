@@ -171,9 +171,68 @@ check('[LARAVEL] DocumentRoot block matches the framework', () => {
       msg: '[LARAVEL] sed lines are active but there is no public/ directory — apache starts with a DocumentRoot that does not exist',
     };
   }
+  // A legacy project may legitimately serve out of public/ — §5.3 allows it
+  // ("เว้นแต่โปรเจคใช้ public/ เป็น webroot จริง ๆ"). isCI4 keys off
+  // public/index.php, so a front-end whose entry is public/index.html (a JS app
+  // on a PHP API) reads as "not CI4" and used to get told to delete a block it
+  // is correctly using. An active sed + a real public/ IS a configured state.
+  if (publicDocroot) return { ok: true };
   return /\[LARAVEL\]/.test(dockerfile)
-    ? { ok: 'warn', msg: 'shape is not Laravel/CI4 — §5.3 says delete the commented [LARAVEL] block instead of leaving it in the Dockerfile' }
+    ? { ok: 'warn', msg: 'shape is not Laravel/CI4 and DocumentRoot is the repo root — §5.3 says delete the commented [LARAVEL] block instead of leaving it in the Dockerfile' }
     : { ok: true };
+});
+
+// §5.4 — `composer install` necessarily runs before `COPY . .` (it must, to keep
+// the dependency layer cacheable), so any composer script firing at that point
+// runs without app code. Laravel's post-autoload-dump hook is
+// `php artisan package:discover`, which needs `artisan` — hence --no-scripts
+// --no-autoloader on install, and a real `composer dump-autoload` after COPY.
+check('Dockerfile composer ordering (--no-scripts → COPY → dump-autoload → chown)', () => {
+  if (!dockerfile || isWordPress) return { ok: true }; // Dockerfile.wordpress runs no composer
+  const lines = dockerfileActive.split('\n');
+  const lineOf = (re) => lines.findIndex((l) => re.test(l));
+  const install = lineOf(/composer install/);
+  if (install < 0) return { ok: true }; // no composer step at all — not this check's concern
+
+  // Accumulate BOTH severities to the end — an early return on the warn path
+  // would throw away a `|| true` finding already collected above (caught by the
+  // ugt-mscpl-ana pilot, whose legacy Dockerfile has `|| true` and no --no-scripts:
+  // it reported only the warning and stayed silent about the swallowed errors).
+  const problems = [];
+  const warnings = [];
+  if (/\|\|\s*true/.test(lines[install])) {
+    problems.push(
+      '`composer install ... || true` swallows every install failure (dependency resolve, missing ext-*), not just the post-autoload-dump one it was added for — drop it and use --no-scripts',
+    );
+  }
+  if (!/--no-scripts/.test(lines[install])) {
+    // Only Laravel/CI4 ship a hook that actually needs app code; for other
+    // shapes a plain install is harmless today, so warn rather than fail.
+    const msg =
+      'composer install runs before `COPY . .` without --no-scripts — a post-autoload-dump hook fires with no app code present';
+    if (isLaravel || isCI4) {
+      problems.push(`${msg} (Laravel/CI4: \`php artisan package:discover\` needs artisan → fails every build)`);
+    } else {
+      warnings.push(`${msg} — harmless for this shape today, but any hook added later will break the build`);
+    }
+  }
+
+  if (/--no-autoloader/.test(lines[install])) {
+    const copy = lineOf(/^COPY\s+\.\s+\./);
+    const dump = lineOf(/composer dump-autoload/);
+    const chown = lineOf(/chown -R www-data/);
+    if (dump < 0) {
+      problems.push('install uses --no-autoloader but nothing runs `composer dump-autoload` afterwards — the image ships without an autoloader');
+    } else if (copy >= 0 && dump < copy) {
+      problems.push('`composer dump-autoload` runs BEFORE `COPY . .` — that is the ordering the --no-autoloader flag exists to avoid');
+    } else if (chown >= 0 && chown < dump) {
+      problems.push(
+        '`chown -R www-data` runs BEFORE `composer dump-autoload` — the regenerated autoload_*.php and Laravel bootstrap/cache/*.php stay root-owned and www-data cannot write bootstrap/cache at runtime',
+      );
+    }
+  }
+  if (problems.length) return { ok: false, msg: [...problems, ...warnings].join(' · ') };
+  return warnings.length ? { ok: 'warn', msg: warnings.join(' · ') } : { ok: true };
 });
 
 // ── 3. Leftover placeholders ───────────────────────────────────────────────
@@ -406,6 +465,36 @@ check('Dockerfile has a HEALTHCHECK', () => {
     : { ok: false, msg: 'No HEALTHCHECK — the Deploy stage cannot poll for healthy' };
 });
 
+// §2.8 — the two ways a healthcheck reports green while the app is down.
+// Both were found on the pilot project, both are invisible in a build log.
+check('healthcheck survives redirects and PHP hardening', () => {
+  const spots = [
+    ['Dockerfile', dockerfileActive],
+    ...COMPOSE_FILES.filter((f) => has(f)).map((f) => [f, composeActive(f)]),
+  ];
+  const problems = [];
+  for (const [name, body] of spots) {
+    const line = body.split('\n').find((l) => /HEALTHCHECK|healthcheck|127\.0\.0\.1/.test(l) && /curl|file_get_contents|wget/.test(l))
+      ?? body.split('\n').find((l) => /curl|file_get_contents|wget/.test(l) && /api\/health/.test(l));
+    if (!line) continue;
+    if (/file_get_contents/.test(line)) {
+      problems.push(
+        `${name}: healthcheck uses php file_get_contents — returns false whenever the project sets allow_url_fopen=Off (standard OWASP RFI hardening), so the container never reports healthy and nothing logs why (§2.8: use curl -fsS -L)`,
+      );
+      continue;
+    }
+    // curl -f scores a 3xx as success, and /api/health is redirected in
+    // opposite directions per shape (Laravel strips the trailing slash, file
+    // shapes add one) — without -L that is a green healthcheck over a 503.
+    if (/\bcurl\b/.test(line) && !/-[a-zA-Z]*L\b|--location/.test(line) && !/api\/health\/["'\s]|api\/health\/$/.test(line)) {
+      problems.push(
+        `${name}: curl healthcheck has neither -L nor a trailing slash on /api/health/ — curl -f treats Apache's 301 as success, so it reports healthy even when the endpoint underneath returns 503 (§2.8)`,
+      );
+    }
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 // [WP] contract: wp-content must always be a mounted volume under /srv/appdata
 // when the Dockerfile is WordPress-shaped (SKILL.md §5.3/§2.9) — this is the
 // one exception to "delete [VOLUME] block if nothing persists", so it is
@@ -604,8 +693,10 @@ for (const r of results) {
 }
 console.log(
   `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
-    'Still needs admin confirmation: Jenkins tools (SonarQube-Scanner, Dependency-Check — no PHP/composer/NodeJS ' +
-    'Global Tool needed, toolchain runs in docker per มติ M8) · Jenkins user in the docker group · ' +
+    'Still needs admin confirmation: the Docker Pipeline plugin (docker-workflow — without it every stage dies at ' +
+    'Install with "No such property: docker"; not the same as having the Docker CLI) · Jenkins tools ' +
+    '(SonarQube-Scanner, Dependency-Check — no PHP/composer/NodeJS Global Tool needed, toolchain runs in docker ' +
+    'per มติ M8) · Jenkins user in the docker group · the proxy-network docker network · ' +
     'credentials (nvd, env-<project>, env-<project>-dev) + global env (NOTIFY_EMAIL, SMTP_FROM) · SonarQube projects + Quality Gate · ' +
     'both webhooks · Lightweight checkout disabled · /srv/appdata writable\n'
 );

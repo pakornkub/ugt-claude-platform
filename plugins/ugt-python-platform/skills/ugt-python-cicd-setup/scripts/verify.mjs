@@ -514,7 +514,9 @@ for (const r of results) {
 }
 console.log(
   `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
-    'Still needs admin confirmation: Jenkins tools (SonarQube-Scanner, Dependency-Check) · Jenkins user in the docker group · ' +
+    'Still needs admin confirmation: the Docker Pipeline plugin (docker-workflow — without it every stage dies at ' +
+    'Install with "No such property: docker"; not the same as having the Docker CLI) · Jenkins tools ' +
+    '(SonarQube-Scanner, Dependency-Check) · Jenkins user in the docker group · the proxy-network docker network · ' +
     'credentials (nvd, env-<project>, env-<project>-dev) + global env (NOTIFY_EMAIL, SMTP_FROM) · SonarQube projects + Quality Gate · ' +
     'both webhooks · Lightweight checkout disabled · /srv/appdata writable\n'
 );
