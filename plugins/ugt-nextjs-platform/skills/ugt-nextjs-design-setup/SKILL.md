@@ -186,7 +186,14 @@ different size — is the field bug this step exists to prevent.
    // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
    ```
 
-   Body wraps: **`QueryProvider` (from `assets/components/query-provider.tsx`
+   `<html lang="th">` → `<html lang={locale}>` เมื่อ ภาษา = th+en (อ่าน locale
+   ด้วย `getLocale()` จาก `next-intl/server` ใน RootLayout ซึ่งเป็น Server
+   Component อยู่แล้ว) — `lang` ที่ไม่ตรงภาษาจริงทำให้ screen reader อ่านผิดภาษา
+   และ `:lang()` ใน CSS เลือกฟอนต์ผิด
+
+   Body wraps: **`NextIntlClientProvider` (นอกสุด — provider อื่นและ children
+   ทุกตัวต้องอยู่ข้างใน ไม่งั้น `useTranslations` โยน error ตอน render)** →
+   **`QueryProvider` (from `assets/components/query-provider.tsx`
    — the app's single QueryClient; also copy `assets/lib/http-error.ts`, and
    `assets/ui/query-progress.tsx` + its CSS block rendered just inside the
    provider)** → `ThemeProvider` (from `assets/components/theme-provider.tsx`,
@@ -215,7 +222,8 @@ different size — is the field bug this step exists to prevent.
    zod lucide-react` (v9 of tanstack-table renames the v8 API the kit uses;
    `add` doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
-   registry uses it) · `next-intl` only when ภาษา = th+en · `exceljs` only when
+   registry uses it) · `next-intl` เสมอทุกโปรเจค (มติ 2.2 — kit อ่านสตริงผ่าน
+   catalog) · `exceljs` only when
    the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
    skip both files otherwise; route shape and traps in
    `references/conventions.md` §Export) · `npx shadcn@latest add chart`
@@ -233,7 +241,11 @@ different size — is the field bug this step exists to prevent.
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
    th+en only; `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
-   `references/conventions.md` §Kit). **theme-provider: the preset scaffold
+   `references/conventions.md` §Kit). `assets/i18n/` → `i18n/` และ
+   `assets/messages/` → `messages/` (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en** — kit
+   ทั้งชุดอ่านสตริงผ่าน catalog ตั้งแต่ 4.46.0 โปรเจคไทยล้วนได้ catalog
+   ภาษาเดียวและไม่ต้องแปลอะไร มติ 2.2) · ตั้ง `next-intl` เป็น dependency
+   เสมอ ไม่ใช่เฉพาะ th+en. **theme-provider: the preset scaffold
    already ships `components/theme-provider.tsx` (a superset of our asset)
    — keep the registry's file; the asset is only a fallback for projects
    that somehow lack it.** Apply `assets/ui/button-variants.md` to the
