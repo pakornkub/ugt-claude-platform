@@ -1,7 +1,7 @@
 # Platform Backlog — งานที่รู้แล้วว่าต้องทำ แต่ยังไม่ได้ทำ
 
 > **Status:** Living · **Date:** 2026-08-12 · **Applies-to:** ทั้ง marketplace
-> **Last-reviewed:** 2026-08-23 (เศษสองข้อสุดท้ายของ audit ปิดใน 4.35.0) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
+> **Last-reviewed:** 2026-08-23 (เพิ่มข้อ 6 — php pilot feedback ที่เหลือหลัง blocker 5 ข้อปิดใน 0.4.0 + hardening spec ที่พักไว้) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
 
 กติกา: ข้อที่ปิดแล้ว**ขีดทิ้งพร้อมชี้รุ่น** ไม่ลบ (ประวัติว่าเคยเป็น backlog มีค่า) ·
 งานที่เป็นของโปรเจคใดโปรเจคหนึ่งไม่อยู่ที่นี่ (ไปที่ project-notes/decisions ของโปรเจคนั้น
@@ -91,6 +91,44 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 - ~~python/php cicd: subpath steps · `[BATCH]` dev marker · `.env.example` · `[WEB]` checklist · mkdir-p↔bind + handoff placeholder checks~~ → python/php 0.2.0 (ยังไม่ tag — รอ pilot)
 - ~~nextjs cicd: `.dockerignore` + ตาราง placeholder admin-handoff~~ → 4.27.0
 - ~~ugt-core: board.md copy skeleton · ugt-handoff date format~~ → core 2.7.0 (Workflow-tool ที่ audit ว่า "ไม่มีจริง" ตรวจแล้วมีจริงใน harness ปัจจุบัน — เพิ่มแค่ fallback สำหรับ harness ที่ไม่มี)
+
+### 6. php pilot feedback ที่ยังไม่ได้แก้ — จาก `ugt-mscpl-ana` (2026-08-23, หลัง blocker 5 ข้อปิดใน 0.4.0)
+
+**ยังกัด "deploy ได้" อยู่จริง (คุ้มก่อน hardening):**
+- `Jenkinsfile` Deploy stage ยังเรียก `docker-compose` (v1, EOL 2023) เป็นค่า
+  default ทั้งที่ SKILL §5.5 เขียนตัวอย่างเป็น `docker compose` (v2) —
+  ทุกโปรเจคต้องแก้บรรทัดเดียวกันซ้ำ · เทียบกับ nextjs ที่ตัดสินใจแล้วว่าใช้ v2
+- `[VOLUME]` guard (`if [ ! -d /srv/appdata/<project> ]`) เช็คแค่ dir บนสุด —
+  volume ที่เพิ่มหลัง release แรกไม่ถูก mkdir/chown ให้ (เหมือนกันทั้ง php/python)
+- ไม่มีที่ไหนพูดถึง DNS resolution ของ container network — SQL Server ที่ตั้ง
+  host แบบ short name (ไม่ใช่ FQDN/IP) resolve ไม่ได้ในเน็ตเวิร์ก container แม้
+  resolve ได้จาก host ปกติ (`Login timeout expired`) — ควรมีย่อหน้าเตือนไว้ใน
+  references + คำถามใน admin-handoff
+- subpath ของ CI3/legacy ทิ้งไว้ที่ "`base_url` ใน config ของโปรเจคเอง" — ไม่มี
+  สูตรสำหรับแอปที่ใช้ relative path (ต้อง inline redirect เติม/ตัด trailing
+  slash ใน `<head>` ไม่งั้น asset พังหลัง proxy)
+
+**Container hardening — ออกแบบไว้แล้ว พักเป็น backlog ตามที่คุยกัน 2026-08-23:**
+spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-container-hardening-design.md`
+(ตรวจกับ Docker จริงแล้ว ไม่ใช่แค่ทฤษฎี) — non-root ผ่าน `setcap`+`cap_add`,
+ปิด banner, security headers พื้นฐาน, ห้าม `no-new-privileges` (พังบน docker02)
+· **ไม่ใช่ของที่ทำให้ deploy ไม่ได้** — ไม่มีใครในองค์กรร้องขอ พักไว้จนกว่าจะมี
+โปรเจคที่ต้องการจริง
+
+**Cosmetic ที่เหลือ (ไม่บล็อกอะไร):**
+- `CI = 'true'` คอมเมนต์สไตล์ Next.js/vitest หลงเหลือใน `Jenkinsfile` ทั้ง php
+  และ python (ไม่มีความหมายในบริบท PHPUnit/pytest)
+- php admin-handoff ตัวอย่าง dev port `8080` ชนกับ port default ของ Jenkins เอง
+- python admin-handoff ยังโชว์ port `3000`/`3001` (ของเหลือจาก Next.js) ทั้งที่
+  Dockerfile ใช้ 8000 จริง
+
+**มาตรฐานที่ยังขาด (แยกจาก hardening):**
+- OWASP Dependency Check สแกน `composer.lock` ที่มักมีแต่ dev tooling (runtime
+  0 package) แต่ threshold บล็อก deploy ได้จากช่องโหว่ที่ไม่เคยขึ้น production —
+  ควรมี Trivy (image scan) เป็นส่วนหนึ่งของ "Dependency Scan" ตามที่ contract
+  ตั้งชื่อ stageไว้กว้างอยู่แล้ว ไม่ต้องแก้ contract
+- `.dockerignore` บังคับแค่ 4 บรรทัด (CI artifact) ไม่ครอบไฟล์ secret
+  (`db_config.php`, `.env`) ที่ `COPY . .` จะพาเข้า image ได้ถ้าไม่กันเอง
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
