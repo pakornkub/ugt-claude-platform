@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.35.0 (2026-08-23)
+
+ต่อจาก 4.34.0: เพิ่ม verify สองข้อใน `ugt-nextjs-auth-setup` — (1) header ครบทุก
+response ไม่ใช่แค่หน้า HTML (`curl -sI` ทั้ง `/login` และ `/api/health`) เพราะจุดที่
+มันหายเงียบคือ `return NextResponse.next()` เปล่า ๆ ที่ไม่ผ่าน
+`applySecurityHeaders()` และ (2) HSTS ต้องไม่โผล่บน `http://localhost` และบน https
+ต้องยังไม่มี `includeSubDomains`/`preload`
+
 ## 4.34.0 (2026-08-23)
 
 **Security headers ชุดเต็มใน `proxy.ts`** (backlog ข้อ 4 ครึ่งแรก). เดิม

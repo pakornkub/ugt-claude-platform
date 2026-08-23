@@ -505,4 +505,14 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
 - [ ] With a basePath: the cookie name in DevTools starts with `__BASE_PATH__.` (or `__Secure-__BASE_PATH__.` on https)
+- [ ] Security headers ออกครบ **ทุก** response ไม่ใช่แค่หน้า HTML —
+      `curl -sI http://localhost:3000/login` และ `curl -sI http://localhost:3000/api/health`
+      ต้องเห็นทั้ง `content-security-policy`, `x-frame-options: DENY`,
+      `x-content-type-options: nosniff`, `referrer-policy`, `permissions-policy`
+      (ทุกจุด `return` ใน `proxy.ts` ต้องผ่าน `applySecurityHeaders()` — คัดลอกไฟล์
+      แล้วเผลอ `return NextResponse.next()` เปล่า ๆ คือวิธีที่มันหายไปเงียบ ๆ)
+- [ ] HSTS ยิงถูกที่: บน `http://localhost` ต้อง **ไม่มี** `strict-transport-security`
+      (ถ้ามี browser จะ pin โดเมนไว้และไม่มี https dev server ให้ถอย) · บน https จริง
+      ต้องมี `max-age=31536000` และยัง **ไม่มี** `includeSubDomains`/`preload`
+      จนกว่าเจ้าของโดเมนจะตัดสิน
 - [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)
