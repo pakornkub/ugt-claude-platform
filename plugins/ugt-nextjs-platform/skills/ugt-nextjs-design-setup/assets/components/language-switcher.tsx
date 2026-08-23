@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/components/language-switcher.tsx
-// kit-hash: 75530cd66697
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/components/language-switcher.tsx
+// kit-hash: 784cd110c3f4
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // requires next-intl — ship only when the project chose th+en
 'use client';
@@ -10,7 +10,7 @@ import { useTransition } from 'react';
 import { setLocale } from '@/lib/actions/locale';
 
 export function LanguageSwitcher() {
-  const t = useTranslations('LanguageSwitcher');
+  const t = useTranslations('kit.languageSwitcher');
   const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

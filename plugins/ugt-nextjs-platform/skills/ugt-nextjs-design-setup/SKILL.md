@@ -186,13 +186,38 @@ different size — is the field bug this step exists to prevent.
    // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
    ```
 
-   Body wraps: **`QueryProvider` (from `assets/components/query-provider.tsx`
+   `<html lang="th">` → `<html lang={locale}>` เมื่อ ภาษา = th+en (อ่าน locale
+   ด้วย `getLocale()` จาก `next-intl/server` ใน RootLayout ซึ่งเป็น Server
+   Component อยู่แล้ว) — `lang` ที่ไม่ตรงภาษาจริงทำให้ screen reader อ่านผิดภาษา
+   และ `:lang()` ใน CSS เลือกฟอนต์ผิด
+
+   Body wraps: **`NextIntlClientProvider` (นอกสุด — provider อื่นและ children
+   ทุกตัวต้องอยู่ข้างใน ไม่งั้น `useTranslations` โยน error ตอน render)** →
+   **`QueryProvider` (from `assets/components/query-provider.tsx`
    — the app's single QueryClient; also copy `assets/lib/http-error.ts`, and
    `assets/ui/query-progress.tsx` + its CSS block rendered just inside the
    provider)** → `ThemeProvider` (from `assets/components/theme-provider.tsx`,
    when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
+
+   **แล้วลงทะเบียน plugin ของ next-intl ใน `next.config.ts` — ไม่ใช่ของเสริม**:
+
+   ```ts
+   import createNextIntlPlugin from 'next-intl/plugin';
+   const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+   // ...existing nextConfig...
+   export default withNextIntl(nextConfig);
+   ```
+
+   next-intl หา `getRequestConfig` ผ่าน alias ที่ plugin ตัวนี้สร้างให้ตอน build
+   เท่านั้น ไม่ลงทะเบียน = `i18n/request.ts` ไม่เคยถูกโหลดเลยสักครั้ง แล้ว
+   `getLocale()` ใน RootLayout กับ `t()` ทุกตัวโยน error ตอน render —
+   **แอปไม่ขึ้นทั้งแอป ไม่ใช่แค่ประสบการณ์ที่แย่ลง** และตั้งแต่ 4.46.0 คิต 5 ตัว
+   เรียก `useTranslations` โดย `next-intl` เป็น dependency ของทุกโปรเจค
+   จึงพังทุกโปรเจค ไม่ใช่เฉพาะที่ตอบ th+en · ต้องส่ง path `'./i18n/request.ts'`
+   ให้ชัด เพราะเรา copy ไฟล์ไปไว้ที่ `i18n/` ไม่ใช่ตำแหน่ง default ของ next-intl ·
+   `scripts/verify.mjs` fail ถ้าไม่มีบรรทัดนี้
 4. Install the base component set with `npx shadcn@latest add` (the CLI
    resolves `components.json` → base-mira, so it installs the right style).
    **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
@@ -215,7 +240,8 @@ different size — is the field bug this step exists to prevent.
    zod lucide-react` (v9 of tanstack-table renames the v8 API the kit uses;
    `add` doesn't always install lucide-react itself) · `next-themes` when dark
    mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
-   registry uses it) · `next-intl` only when ภาษา = th+en · `exceljs` only when
+   registry uses it) · `next-intl` เสมอทุกโปรเจค (มติ 2.2 — kit อ่านสตริงผ่าน
+   catalog) · `exceljs` only when
    the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
    skip both files otherwise; route shape and traps in
    `references/conventions.md` §Export) · `npx shadcn@latest add chart`
@@ -233,7 +259,11 @@ different size — is the field bug this step exists to prevent.
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
    th+en only; `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
-   `references/conventions.md` §Kit). **theme-provider: the preset scaffold
+   `references/conventions.md` §Kit). `assets/i18n/` → `i18n/` และ
+   `assets/messages/` → `messages/` (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en** — kit
+   ทั้งชุดอ่านสตริงผ่าน catalog ตั้งแต่ 4.46.0 โปรเจคไทยล้วนได้ catalog
+   ภาษาเดียวและไม่ต้องแปลอะไร มติ 2.2) · ตั้ง `next-intl` เป็น dependency
+   เสมอ ไม่ใช่เฉพาะ th+en. **theme-provider: the preset scaffold
    already ships `components/theme-provider.tsx` (a superset of our asset)
    — keep the registry's file; the asset is only a fallback for projects
    that somehow lack it.** Apply `assets/ui/button-variants.md` to the
@@ -342,3 +372,13 @@ node <skill-dir>/scripts/check-contrast.mjs
       light **and** dark if dark mode was selected
 - [ ] the installed UI matches `docs/design-preview.html` — that page is the
       promise the org makes to the reader
+- [ ] `node <skill-dir>/scripts/check-i18n.mjs` เขียว — catalog `th`/`en` มี key
+      ชุดเดียวกัน และไฟล์ที่แปลงแล้วไม่มีสตริงไทยนอกคอมเมนต์
+- [ ] `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.*.ts` copy เข้าโปรเจคแล้ว
+      (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en**) และ `NextIntlClientProvider` อยู่นอกสุด
+      ของ provider stack ใน `app/layout.tsx`
+- [ ] `next.config.ts` ลงทะเบียน `createNextIntlPlugin('./i18n/request.ts')` แล้ว
+      (ขาดข้อนี้ = `t()` ทุกตัวโยนตอน render, แอปไม่ขึ้น)
+- [ ] th+en เท่านั้น: กดสลับภาษาแล้ว **ข้อความในตารางเปลี่ยนจริง** (หัวคอลัมน์
+      ที่ผู้เรียกส่งมาจะยังเป็นภาษาเดิมจนกว่าโปรเจคจะแปลเอง — ที่ต้องเปลี่ยนคือ
+      ปุ่มหน้า, ตัวกรอง, empty state, สรุปจำนวนแถว)

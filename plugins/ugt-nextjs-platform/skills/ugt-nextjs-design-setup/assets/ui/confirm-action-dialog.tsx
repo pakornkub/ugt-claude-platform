@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.32.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
-// kit-hash: 69004817aa96
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: c55d4a88ea6a
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
@@ -8,6 +8,7 @@
 // (ข้อความอย่าง "ลบไม่ได้ — ยังมีข้อมูลผูกอยู่ ..." ยาวเกินกว่าจะอ่านทันใน toast ที่หายเอง)
 // ไม่มี onSuccess — server action เรียก revalidatePath อยู่แล้ว หน้ารีเฟรชเอง
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -42,6 +43,7 @@ export function ConfirmActionDialog({
   confirmVariant?: 'destructive' | 'default' | 'success';
 }>) {
   const [pending, setPending] = useState(false);
+  const t = useTranslations('kit.confirmDialog');
 
   const confirm = async (): Promise<void> => {
     setPending(true);
@@ -57,7 +59,7 @@ export function ConfirmActionDialog({
       // throw = ข้อผิดพลาดที่ action ไม่ได้ดักเอง (network / bug) — toast บอกผู้ใช้แค่
       // "เกิดข้อผิดพลาด" ถ้าไม่ log ไว้ด้วยจะไม่เหลือร่องรอยให้ตามเลย
       console.error('ConfirmActionDialog action failed', error);
-      toast.error('เกิดข้อผิดพลาด'); // throw ก็ค้าง dialog ไว้เช่นกัน
+      toast.error(t('genericError')); // throw ก็ค้าง dialog ไว้เช่นกัน
     } finally {
       setPending(false);
     }
@@ -71,7 +73,7 @@ export function ConfirmActionDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>ยกเลิก</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{t('cancel')}</AlertDialogCancel>
           {/* base-mira: AlertDialogAction = ComponentProps<typeof Button> จึงส่ง
               variant ตรงได้ (ยืนยันกับ registry base-mira/alert-dialog) */}
           <AlertDialogAction variant={confirmVariant} disabled={pending} onClick={() => void confirm()}>

@@ -71,8 +71,12 @@
 เรียก `useTranslations`/`useLocale` อยู่แล้ว · `lib/actions-locale.ts` เป็น
 Server Action ที่ guard session + `z.enum(['en','th'])` แล้วเขียนคุกกี้อายุ 1 ปี ·
 `__LANG__` อยู่ใน interview ข้อ 7 และ `DESIGN.md §5` แล้ว — **งานนี้คือต่อของที่มี
-ไม่ใช่สร้างใหม่** ที่ขาดจริงมี 3 ชิ้น: `i18n/request.ts` · `NextIntlClientProvider`
-ใน `app/layout.tsx` · ตัว catalog
+ไม่ใช่สร้างใหม่** ที่ขาดจริงมี 4 ชิ้น: `i18n/request.ts` · `NextIntlClientProvider`
+ใน `app/layout.tsx` · ตัว catalog · **การลงทะเบียน plugin ของ next-intl ใน
+`next.config.ts`** (`createNextIntlPlugin('./i18n/request.ts')` แล้ว
+`export default withNextIntl(nextConfig)`) — ไม่มีบรรทัดนี้ Next ก็ไม่สร้าง alias
+ที่ next-intl ใช้หา `getRequestConfig` แปลว่า `i18n/request.ts` ไม่เคยถูกโหลด และ
+`getLocale()` กับ `t()` โยน error ตอน render ทุกครั้ง = แอปไม่ขึ้น
 
 **4.2 design kit ออกแบบมาให้แปลได้อยู่แล้วโดยตั้งใจ.** 18 จาก 26 ไฟล์ที่มีอักษร
 ไทยเป็น**คอมเมนต์ล้วน** เพราะ label ทุกตัวเป็น prop — `ui/bulk-action-bar.tsx:13`

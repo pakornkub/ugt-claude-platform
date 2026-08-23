@@ -1,5 +1,43 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.46.0 (2026-08-24)
+
+**เฟส 0+1 ของ i18n — ปุ่มสลับภาษาเปลี่ยนภาษาได้จริงแล้ว** (spec:
+`docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md`)
+
+เดิมโปรเจคที่ตอบ `ภาษา = th+en` ได้ `next-intl`, ปุ่มสลับภาษา และ Server Action
+เขียนคุกกี้ — แต่ไม่มี catalog, ไม่มี `i18n/request.ts`, ไม่มี provider และไม่มี
+ไฟล์ไหนในคิตเรียก `useTranslations` เลย กดสลับแล้วคุกกี้เปลี่ยน จอเหมือนเดิมทุก
+ตัวอักษร (ตัวปุ่มเองก็ throw ตอน render เพราะไม่มี provider ให้ `t()` อ่าน)
+
+- `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.{th,en}.ts` — catalog
+  เป็น `.ts` **ไม่ใช่ `.json`** เพราะ `check-kit-freshness.mjs` และ
+  `stamp-kit-assets.mjs` กรอง `/\.tsx?$/` ทั้งคู่ ไฟล์ json จะล่องหนจาก kit-sync
+  คือตกรุ่นเงียบ ซึ่งเป็นความล้มเหลวแบบเดียวกับที่ kit-sync มีไว้กัน
+- `next-intl` กลายเป็น dependency ของ **ทุกโปรเจค** ไม่ใช่เฉพาะ th+en — แจกไฟล์
+  สองเวอร์ชันหรือ codemod ตอนติดตั้งจะตัดทุกโปรเจคขาดจาก kit-sync ถาวร
+  โปรเจคไทยล้วนได้ catalog ภาษาเดียวและไม่ต้องแปลอะไร
+- **5 คอมโพเนนต์อ่านจาก catalog แล้ว รวม 33 key**: `ui/data-table.tsx` (24) ·
+  `ui/export-menu.tsx` (3) · `ui/confirm-action-dialog.tsx` (2) ·
+  `ui/date-picker.tsx` (2) · `ui/tiptap-editor.tsx` (2) · คอมโพเนนต์ที่รับ label
+  เป็น prop อยู่แล้วไม่ต้องแตะ — คิตส่วนใหญ่ออกแบบมาแบบนั้นตั้งแต่ต้น (18 จาก 26
+  ไฟล์ที่มีอักษรไทยเป็นคอมเมนต์ล้วน) · ข้อความที่มีตัวแปรใช้ `{name}` ของ next-intl
+  ไม่ใช่ `${name}` ของ JS · ช่วงแถวคงรูป ternary ไว้ ไม่แปลงเป็น ICU plural เพราะ
+  ตัวเลขผ่าน `formatNumber` มาเป็น string แล้ว
+- `scripts/check-i18n.mjs` — ด่านสองข้อ: key `th`/`en` ตรงกัน และไฟล์ที่แปลงแล้ว
+  ห้ามมีสตริงไทยนอกคอมเมนต์ (ตัวแยกคอมเมนต์เดินทีละอักขระ ไม่ใช่ตัดที่ `//`
+  ตัวแรก เพราะ backtick คร่อมหลายบรรทัดและ `//` โผล่ใน URL)
+- **ผู้ติดตั้งต้องลงทะเบียน plugin ของ next-intl ใน `next.config.ts` ด้วย**
+  (`createNextIntlPlugin('./i18n/request.ts')` + `export default withNextIntl(nextConfig)`
+  — SKILL §Step 3) ไม่มีบรรทัดนี้ `i18n/request.ts` ไม่เคยถูกโหลด และ `t()` ทุกตัว
+  โยนตอน render คือแอปไม่ขึ้น · `verify.mjs` fail ถ้าไม่มี
+- `kit-sync/scripts/check-kit-freshness.mjs` เดิน `i18n/` กับ `messages/` ด้วยแล้ว
+  — สอง dir นี้อยู่ที่ root โปรเจค ไม่อยู่ในรายการที่สแกน ทั้งที่เหตุผลที่ catalog
+  เป็น `.ts` คือให้ kit-sync เห็น
+
+**ยังไม่ครบทุกหน้า** — auth-setup (166 ข้อความ), mail admin UI (36) และ
+upload-setup (16) เป็นเฟส 2-3 ดู spec §6.2
+
 ## 4.45.0 (2026-08-24)
 
 สามข้อที่ทำให้ **ผลลัพธ์ต่างกันระหว่างโปรเจค** ทั้งที่ติดตั้งจาก plugin ตัวเดียวกัน

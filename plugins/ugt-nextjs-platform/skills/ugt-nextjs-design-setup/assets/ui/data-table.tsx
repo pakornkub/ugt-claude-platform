@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.42.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 4bc80f4fd359
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: d6ee12a2c1bc
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -9,6 +9,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   flexRender,
@@ -169,18 +170,18 @@ interface EmptyStateProps {
 }
 
 function DataTableEmpty({ searchable, title, description }: Readonly<EmptyStateProps>) {
+  const t = useTranslations('kit.dataTable');
   return (
     <Empty className="border-none">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Inbox />
         </EmptyMedia>
-        <EmptyTitle>{title ?? (searchable ? 'ไม่พบข้อมูล' : 'ยังไม่มีรายการ')}</EmptyTitle>
+        <EmptyTitle>{title ?? (searchable ? t('emptyTitleSearchable') : t('emptyTitle'))}</EmptyTitle>
         {/* `description=""` = ตั้งใจไม่มีคำอธิบาย (หัวข้อบอกครบแล้ว) */}
         {description !== '' && (
           <EmptyDescription>
-            {description ??
-              (searchable ? 'ลองปรับ filter หรือค้นหาด้วยคำอื่น' : 'เมื่อมีข้อมูลจะแสดงที่นี่')}
+            {description ?? (searchable ? t('emptyBodySearchable') : t('emptyBody'))}
           </EmptyDescription>
         )}
       </EmptyHeader>
@@ -207,6 +208,35 @@ export function rowIncludesQuery(original: unknown, query: string): boolean {
 }
 
 /**
+ * หัวคอลัมน์ติ๊กเลือก — แยกเป็น component จริงเพราะมันเรียก `useTranslations`
+ * และ `react-hooks/rules-of-hooks` อ่านชื่อฟังก์ชันที่ครอบ hook อยู่: เขียนคาไว้
+ * ใน `header: ({ table }) => …` ชื่อที่มันเห็นคือ `header` ซึ่งไม่ใช่ทั้ง
+ * component และ hook → `npm run lint` แดงทุกโปรเจคที่ใช้คอลัมน์ติ๊ก
+ * (ตอน runtime ทำงานได้ทั้งคู่ — `flexRender` เรียก function header เป็น component)
+ */
+function SelectAllHeader<TData>({
+  table,
+  allLabel,
+}: Readonly<{
+  table: TanstackTable<TData>;
+  allLabel?: string;
+}>) {
+  // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
+  const t = useTranslations('kit.dataTable');
+  const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
+  const picked = rows.filter((r) => r.getIsSelected()).length;
+  return (
+    <Checkbox
+      checked={rows.length > 0 && picked === rows.length}
+      indeterminate={picked > 0 && picked < rows.length}
+      disabled={rows.length === 0}
+      onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
+      aria-label={allLabel ?? t('selectAllFiltered')}
+    />
+  );
+}
+
+/**
  * คอลัมน์ติ๊กเลือกแถว — ใส่เป็นคอลัมน์ **แรก** ของ `columns` เสมอ
  *
  *     const columns = [selectionColumn<Leave>({ rowLabel: (r) => `เลือก ${r.code}` }), ...]
@@ -227,7 +257,7 @@ export function rowIncludesQuery(original: unknown, query: string): boolean {
  */
 export function selectionColumn<TData>({
   rowLabel,
-  allLabel = 'เลือกทุกแถวที่กรองอยู่',
+  allLabel,
 }: Readonly<{
   /** ข้อความ aria ของติ๊กรายแถว — ต้องระบุแถวได้ เช่น `เลือก ${row.code}` */
   rowLabel: (row: TData) => string;
@@ -240,20 +270,7 @@ export function selectionColumn<TData>({
     enableHiding: false,
     enableResizing: false,
     size: 36,
-    header: ({ table }) => {
-      // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
-      const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
-      const picked = rows.filter((r) => r.getIsSelected()).length;
-      return (
-        <Checkbox
-          checked={rows.length > 0 && picked === rows.length}
-          indeterminate={picked > 0 && picked < rows.length}
-          disabled={rows.length === 0}
-          onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
-          aria-label={allLabel}
-        />
-      );
-    },
+    header: ({ table }) => <SelectAllHeader table={table} allLabel={allLabel} />,
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
@@ -355,6 +372,7 @@ function DataTableFilterPopover({
   value,
   onApply,
 }: Readonly<{ label: string; value: string; onApply: (value: string) => void }>) {
+  const t = useTranslations('kit.dataTable');
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState(value);
   const active = value !== '';
@@ -374,7 +392,7 @@ function DataTableFilterPopover({
         render={
           <button
             type="button"
-            aria-label={`กรอง ${label}`}
+            aria-label={t('filterAria', { label })}
             className={cn(
               'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
               active && 'text-primary opacity-100'
@@ -387,7 +405,7 @@ function DataTableFilterPopover({
       <PopoverContent align="start" className="flex w-56 flex-col gap-2 p-3">
         <Input
           value={draft}
-          placeholder="ค่าที่ต้องการกรอง..."
+          placeholder={t('filterValuePlaceholder')}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') apply(draft);
@@ -402,10 +420,10 @@ function DataTableFilterPopover({
               apply('');
             }}
           >
-            ล้าง
+            {t('clear')}
           </Button>
           <Button className="flex-1" onClick={() => apply(draft)}>
-            กรอง
+            {t('apply')}
           </Button>
         </div>
       </PopoverContent>
@@ -431,17 +449,18 @@ function DataTableColumnSettings({
   onMove: (from: string, to: string) => void;
   onReset: () => void;
 }>) {
+  const t = useTranslations('kit.dataTable');
   const idBase = React.useId();
   // แยกสถานะลากของเมนูคอลัมน์ออกจากหัวตาราง ไม่งั้นลากในเมนูแล้วหัวตารางกะพริบตาม
   const [dragKey, setDragKey] = React.useState<string | null>(null);
   const [overKey, setOverKey] = React.useState<string | null>(null);
   return (
     <Popover>
-      <PopoverTrigger render={<Button variant="outline" size="icon" aria-label="ตั้งค่าคอลัมน์" />}>
+      <PopoverTrigger render={<Button variant="outline" size="icon" aria-label={t('columnSettings')} />}>
         <Settings2 strokeWidth={2} />
       </PopoverTrigger>
       <PopoverContent align="end" className="flex w-60 flex-col gap-1 p-2">
-        <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">คอลัมน์</p>
+        <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">{t('columns')}</p>
         {entries.map((entry, i) => (
           <div
             key={entry.key}
@@ -471,7 +490,7 @@ function DataTableColumnSettings({
                 ใช้กับคีย์บอร์ดและ screen reader ไม่ได้ */}
             <button
               type="button"
-              aria-label={`ลำดับของ ${entry.label} — ลากเพื่อสลับ หรือกดลูกศรขึ้น/ลง`}
+              aria-label={t('reorderAria', { label: entry.label })}
               className="cursor-grab rounded-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               onKeyDown={(e) => {
                 if (e.key === 'ArrowUp' && i > 0) {
@@ -498,7 +517,7 @@ function DataTableColumnSettings({
         ))}
         <Button variant="ghost" size="sm" className="mt-1 justify-start gap-2" onClick={onReset}>
           <RotateCcw strokeWidth={2} />
-          คืนค่าเริ่มต้น
+          {t('resetColumns')}
         </Button>
       </PopoverContent>
     </Popover>
@@ -769,9 +788,10 @@ export function DataTable<TData>({
   card = true,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
+  const t = useTranslations('kit.dataTable');
   const router = useRouter();
   const pathname = usePathname();
-  const placeholder = filterPlaceholder ?? 'กรอกเพื่อกรอง...';
+  const placeholder = filterPlaceholder ?? t('filterPlaceholder');
   const emptyProps = {
     searchable: searchable ?? (!!filterColumn || !!globalSearch || !!serverSearch),
     title: emptyTitle,
@@ -1054,7 +1074,7 @@ export function DataTable<TData>({
                 {value}
                 <button
                   type="button"
-                  aria-label={`ล้างกรอง ${label}`}
+                  aria-label={t('clearFilterAria', { label })}
                   className="rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
                   onClick={() => applyColumnFilter(key, '')}
                 >
@@ -1064,7 +1084,7 @@ export function DataTable<TData>({
             );
           })}
           <Button variant="ghost" size="sm" onClick={clearAllColumnFilters}>
-            ล้างตัวกรองทั้งหมด
+            {t('clearAllFilters')}
           </Button>
         </div>
       )}
@@ -1184,14 +1204,18 @@ export function DataTable<TData>({
               const end = Math.min((pageIndex + 1) * size, total);
               // ตัวเลขทุกตัวผ่าน lib/format (§0.6) — พันขึ้นไปต้องมี comma เช่น "1–20 จาก 1,248"
               return total > 0
-                ? `${formatNumber(start)}–${formatNumber(end)} จาก ${formatNumber(total)}`
-                : '0 รายการ';
+                ? t('rangeSummary', {
+                    start: formatNumber(start),
+                    end: formatNumber(end),
+                    total: formatNumber(total),
+                  })
+                : t('rangeEmpty');
             })()}
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
               <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                แถวต่อหน้า
+                {t('rowsPerPage')}
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
@@ -1212,7 +1236,10 @@ export function DataTable<TData>({
               </Select>
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
-              {`หน้า ${table.getState().pagination.pageIndex + 1} จาก ${Math.max(1, table.getPageCount())}`}
+              {t('pageSummary', {
+                page: table.getState().pagination.pageIndex + 1,
+                pages: Math.max(1, table.getPageCount()),
+              })}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               {/* ขนาดปุ่มไอคอน = `size="icon"` ตาม density กลาง (มติ 2026-08-09)
@@ -1225,7 +1252,7 @@ export function DataTable<TData>({
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">ไปหน้าแรก</span>
+                <span className="sr-only">{t('firstPage')}</span>
                 <ChevronsLeft strokeWidth={2} />
               </Button>
               <Button
@@ -1234,7 +1261,7 @@ export function DataTable<TData>({
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">ไปหน้าก่อน</span>
+                <span className="sr-only">{t('prevPage')}</span>
                 <ChevronLeft strokeWidth={2} />
               </Button>
               <Button
@@ -1243,7 +1270,7 @@ export function DataTable<TData>({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">ไปหน้าถัดไป</span>
+                <span className="sr-only">{t('nextPage')}</span>
                 <ChevronRight strokeWidth={2} />
               </Button>
               <Button
@@ -1253,7 +1280,7 @@ export function DataTable<TData>({
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">ไปหน้าสุดท้าย</span>
+                <span className="sr-only">{t('lastPage')}</span>
                 <ChevronsRight strokeWidth={2} />
               </Button>
             </div>

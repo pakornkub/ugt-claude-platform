@@ -1,9 +1,10 @@
-// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: e760bb68d507
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: ea15da3aafbb
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { th } from 'date-fns/locale';
 import { formatDate, toDateKey } from '@/lib/format';
 import { CalendarIcon } from 'lucide-react';
@@ -59,6 +60,7 @@ export function DatePicker({
   // ปิด popover ทันทีที่เลือกวัน — ปล่อยค้างไว้จะบังช่องถัดไป (เจ็บจริงตอนใช้คู่ใน
   // DateRangePicker: เลือก "จาก" แล้วปฏิทินบังช่อง "ถึง")
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations('kit.datePicker');
 
   const holidaySet = React.useMemo(() => new Set(holidays ?? []), [holidays]);
   const hasHolidays = holidaySet.size > 0;
@@ -86,7 +88,7 @@ export function DatePicker({
         }
       >
         <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
-        {value ? formatLabel(value) : (placeholder ?? 'เลือกวันที่')}
+        {value ? formatLabel(value) : (placeholder ?? t('placeholder'))}
         {triggerSuffix}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -105,7 +107,7 @@ export function DatePicker({
         />
         {hasHolidays && (
           <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-muted-foreground">
-            <span className="size-2 rounded-full bg-status-red" /> วันหยุดประเพณี
+            <span className="size-2 rounded-full bg-status-red" /> {t('holidayLegend')}
           </div>
         )}
         {footer}

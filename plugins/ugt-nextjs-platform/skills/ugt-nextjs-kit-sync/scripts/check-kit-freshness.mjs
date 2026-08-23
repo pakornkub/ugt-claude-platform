@@ -83,7 +83,10 @@ const ROOT_FILES = ['proxy.ts', 'middleware.ts', 'vitest.config.ts', 'prisma.con
   .map((f) => join(PROJECT, f))
   .filter((f) => existsSync(f));
 const scanTargets = [ROOT_FILES];
-for (const dir of ['app', 'components', 'lib', 'features', 'scripts', 'src', 'prisma']) {
+// i18n/ + messages/ ของ design-setup อยู่ที่ root เหมือนกัน (4.46.0) — เหตุผลที่
+// catalog เป็น .ts ไม่ใช่ .json คือให้ kit-sync เห็น ถ้าไม่เดินสอง dir นี้ก็เท่ากับ
+// ไม่เห็นอยู่ดี
+for (const dir of ['app', 'components', 'lib', 'features', 'scripts', 'src', 'prisma', 'i18n', 'messages']) {
   const abs = join(PROJECT, dir);
   if (!existsSync(abs)) continue;
   scanTargets.push(walk(abs, SKIP));
