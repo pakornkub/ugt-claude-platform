@@ -65,7 +65,7 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~ฟอร์ม auth เป็น useState ไม่ใช่ ui/field+RHF+zod~~ → มติ migrate ทั้งหมด, 4.30.0 (พ่วง: `@hookform/resolvers` ไม่เคยอยู่ใน dep list ทั้งที่ form-validation.md สั่งใช้ zodResolver — เพิ่มแล้ว)
 - ~~ข้อความ title/subtitle/หัวคอลัมน์ admin ไม่ตรง preview~~ → 4.27.0 (sync สองทางทั้ง §13)
 - ~~audit-logs: ขอบ filter +07:00 แต่จอ format ตาม timezone ผู้ดู~~ → 4.30.0 (formatDateTime pin Asia/Bangkok ตาม §5)
-- audit-logs toolbar มี Input ค้นหาเปล่าที่ชน §3 (ช่องค้นหาเป็นของ DataTable) และชน verify ของ skill เอง — ต้องออกแบบ global-search โหมด server ใน DataTable
+- ~~audit-logs toolbar มี Input ค้นหาเปล่าที่ชน §3 (ช่องค้นหาเป็นของ DataTable) และชน verify ของ skill เอง — ต้องออกแบบ global-search โหมด server ใน DataTable~~ → 4.36.0 (prop `serverSearch={{ value, onChange }}` — DataTable วาดช่องเดิม + debounce ให้ ไม่แตะ client filter · หน้าแม่ push คำค้นลง URL เอง)
 - ~~DataTable สามก้อนยังไม่ห่อการ์ดตาม §3~~ → มติห่อใน DataTable กลาง (prop `card` default เปิด), 4.26.0
 - ~~theme-toggle / ปุ่ม icon นอกตาราง~~ → มติขยาย §0.4, 4.30.0 (size=icon ใช้ได้ทุกที่ + aria-label บังคับ · ในตารางยังต้องผ่าน IconAction · ห้าม override ขนาดด้วย className)
 

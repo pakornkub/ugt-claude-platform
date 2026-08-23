@@ -184,6 +184,14 @@ Popover has drag-to-reorder + show/hide checkboxes + reset; prefs persist per
 table `id`. Search never migrates to the right side, and filters never get
 their own row above the toolbar (มติ 2026-08-11).
 
+That search box belongs to the DataTable in **both** modes — client mode
+passes `globalSearch`/`filterColumn`, server mode passes `serverSearch`
+({ value, onChange, debounceMs? }): same box, same position, but the table
+only debounces the typing and hands the trimmed term back, leaving the query
+to the page (its meaning is page-specific — audit-logs searches across the
+user table). A server-paginated page that hand-rolls its own `<Input>` +
+magnifier is the drift this prop exists to remove (4.36.0).
+
 **Pagination**: rows-per-page Select → `หน้า X จาก Y` → four icon buttons
 (first · prev · next · last; first/last are `lg`-only). **No numbered page
 list** — มติ 2026-08-09. All icon buttons use `size="icon"`; hardcoding

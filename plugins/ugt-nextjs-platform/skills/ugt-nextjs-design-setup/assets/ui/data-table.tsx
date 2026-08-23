@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.32.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 183d64678ed3
+// kit: ugt-nextjs-platform 4.36.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 1a55b605e79d
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -578,8 +578,8 @@ interface DataTableProps<TData> {
    * Server-paginated mode: `data` is already the current page, so the table
    * stops slicing and reports page/size changes instead. `totalItems` drives
    * the range line and the page count. Mutually exclusive with
-   * `disablePagination`; search must be server-side too (use `toolbarExtra`,
-   * not `filterColumn`) or it would filter one page only.
+   * `disablePagination`; search must be server-side too (use `serverSearch`,
+   * not `filterColumn`/`globalSearch`) or it would filter one page only.
    */
   serverPagination?: {
     /** 0-based, like TanStack's own `pageIndex`. */
@@ -606,6 +606,22 @@ interface DataTableProps<TData> {
     /** allowlist เดียวกับที่ส่งให้ `parseTableQuery` — ถ้าส่งมา ปุ่ม sort/กรอง
      * จะโชว์เฉพาะคอลัมน์ในรายการ (กัน UI ชวนกดคอลัมน์ที่ server ไม่รับ) */
     fields?: TableFields;
+  };
+  /**
+   * ค้นหาอิสระโหมด server (คู่กับ `serverPagination`) — DataTable วาดช่องค้นหา
+   * ตัวเดิมที่ซ้ายสุดของ toolbar แต่ไม่กรองฝั่ง client เลย: หน่วงการพิมพ์แล้วส่ง
+   * คำค้น (trim แล้ว) กลับให้หน้าแม่ทาง `onChange` ให้หน้าแม่ push ลง URL +
+   * query ใหม่เอง เพราะความหมายของ "ค้น" เป็นของหน้านั้น (audit-logs ค้นชื่อ/
+   * อีเมลข้ามไปตาราง user) · ข้อความช่องใช้ `filterPlaceholder` ตัวเดียวกับ
+   * โหมด client · ห้ามใช้คู่กับ `globalSearch`/`filterColumn` — ค้น client บน
+   * ข้อมูลหน้าเดียวให้ผลลัพธ์ลวง; ถ้าส่งมาทั้งคู่ `serverSearch` ชนะ
+   */
+  serverSearch?: {
+    /** คำค้นปัจจุบันจากหน้าแม่ (มาจาก URL) — ช่องนี้เป็น controlled */
+    value: string;
+    onChange: (value: string) => void;
+    /** หน่วงก่อนยิง `onChange` — default 400ms */
+    debounceMs?: number;
   };
   /**
    * Does this table have a search/filter the user can actually adjust? Drives the
@@ -681,6 +697,7 @@ export function DataTable<TData>({
   pageSize = 10,
   serverPagination,
   serverQuery,
+  serverSearch,
   searchable,
   emptyTitle,
   emptyDescription,
@@ -696,13 +713,16 @@ export function DataTable<TData>({
   const pathname = usePathname();
   const placeholder = filterPlaceholder ?? 'กรอกเพื่อกรอง...';
   const emptyProps = {
-    searchable: searchable ?? (!!filterColumn || !!globalSearch),
+    searchable: searchable ?? (!!filterColumn || !!globalSearch || !!serverSearch),
     title: emptyTitle,
     description: emptyDescription,
   };
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
+  // โหมด server: ช่องค้นหาถือ draft ของตัวเอง แล้วค่อยรายงานออกไปหลังหยุดพิมพ์ —
+  // ไม่แตะ globalFilter ของ tanstack เลย (ข้อมูลในมือมีหน้าเดียว กรอง client = ผลลวง)
+  const [searchDraft, setSearchDraft] = React.useState(serverSearch?.value ?? '');
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialColumnVisibility);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -809,6 +829,27 @@ export function DataTable<TData>({
     if (resetSelectionKey !== undefined) setRowSelection({});
   }, [resetSelectionKey]);
 
+  // ค้นหาโหมด server — ค่าจากข้างนอกเปลี่ยน (back/forward, หน้าแม่ล้าง filter)
+  // ให้ sync ลง draft
+  React.useEffect(() => {
+    const value = serverSearch?.value ?? '';
+    // draft ที่ trim แล้วตรงกับค่าที่เพิ่ง push ไป = เสียงสะท้อนของการพิมพ์เอง
+    // ไม่ใช่คำสั่งจากข้างนอก — ปล่อยข้อความที่ผู้ใช้กำลังพิมพ์ไว้ (ไม่กระตุกเคอร์เซอร์)
+    setSearchDraft((prev) => (prev.trim() === value ? prev : value));
+  }, [serverSearch?.value]);
+
+  // ...แล้วหน่วงการพิมพ์ก่อนรายงานออกไป — ยิงทุก keystroke = query ต่อทุกตัวอักษร
+  React.useEffect(() => {
+    if (!serverSearch) return;
+    const next = searchDraft.trim();
+    if (next === serverSearch.value.trim()) return;
+    const timer = setTimeout(() => serverSearch.onChange(next), serverSearch.debounceMs ?? 400);
+    return () => clearTimeout(timer);
+    // onChange เป็น arrow inline ของ call site (identity เปลี่ยนทุก render) — ใส่ใน
+    // deps แล้ว timer จะถูกตั้งใหม่ทุกครั้งที่หน้าแม่ render ระหว่างผู้ใช้พิมพ์
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchDraft, serverSearch?.value, serverSearch?.debounceMs]);
+
   const serverPaginationState = serverPagination && {
     pageIndex: serverPagination.pageIndex,
     pageSize: serverPagination.pageSize,
@@ -881,6 +922,18 @@ export function DataTable<TData>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  // ช่องค้นหาช่องเดียว สามโหมด: server (draft+debounce) · global client · คอลัมน์เดียว
+  let searchValue = '';
+  if (serverSearch) searchValue = searchDraft;
+  else if (globalSearch) searchValue = globalFilter;
+  else if (filterColumn)
+    searchValue = (table.getColumn(filterColumn)?.getFilterValue() as string) ?? '';
+  const onSearchChange = (value: string) => {
+    if (serverSearch) setSearchDraft(value);
+    else if (globalSearch) setGlobalFilter(value);
+    else table.getColumn(filterColumn!)?.setFilterValue(value);
+  };
+
   const settingsEntries: ColumnSettingsEntry[] = order.map((key) => ({
     key,
     label: labelByKey.get(key) ?? key,
@@ -901,7 +954,7 @@ export function DataTable<TData>({
           (toolbarFilters, กว้าง→แคบ) → ช่องว่าง → toolbarExtra + ปุ่มตั้งค่าคอลัมน์
           ชิดขวา · จอแคบ wrap ลงบรรทัดใหม่เอง */}
       <div className="flex flex-wrap items-center gap-2">
-        {(filterColumn || globalSearch) && (
+        {(filterColumn || globalSearch || serverSearch) && (
           <div className="relative">
             <Search
               className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
@@ -909,16 +962,8 @@ export function DataTable<TData>({
             />
             <Input
               placeholder={placeholder}
-              value={
-                globalSearch
-                  ? globalFilter
-                  : ((table.getColumn(filterColumn!)?.getFilterValue() as string) ?? '')
-              }
-              onChange={(e) =>
-                globalSearch
-                  ? setGlobalFilter(e.target.value)
-                  : table.getColumn(filterColumn!)?.setFilterValue(e.target.value)
-              }
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
               className="max-w-sm pl-8"
             />
           </div>
