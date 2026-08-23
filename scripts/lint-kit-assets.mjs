@@ -10,6 +10,16 @@
 //
 // FAIL rules (exit 1):
 //   - `asChild`             — Radix idiom; Base UI ignores it (kit rule: grep must stay 0)
+//   - Radix-only overlay props (onEscapeKeyDown / onPointerDownOutside /
+//     onInteractOutside / onOpenAutoFocus / onCloseAutoFocus / forceMount /
+//     delayDuration) — Base UI names them differently, so they are silently
+//     dropped: the dialog/tooltip just behaves like the prop was never passed
+//   - `checked="indeterminate"` — Radix tri-state; Base UI Checkbox takes a
+//     separate `indeterminate` boolean, and the string is truthy → shows as
+//     fully checked (shipped once in role-form)
+//   - `data-[state=…]` on a PRIMITIVE — Base UI emits data-open / data-closed /
+//     data-popup-open; a data-[state=open] class is a dead selector. Markup that
+//     sets its own data-state is exempt via an inline // lint-ok:data-state note
 //   - `onSelect=` in a file that renders <DropdownMenuItem> — Radix menu API;
 //     Base UI menu items take onClick (react-day-picker Calendar files exempt:
 //     Calendar's own onSelect prop is legitimate)
@@ -67,6 +77,31 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
       }
       if (/\basChild\b/.test(body)) {
         failures.push(`${rel} — asChild (Radix; Base UI ignores it — use render={<... />})`);
+      }
+      const radixProps = [
+        'onEscapeKeyDown',
+        'onPointerDownOutside',
+        'onInteractOutside',
+        'onOpenAutoFocus',
+        'onCloseAutoFocus',
+        'forceMount',
+        'delayDuration',
+      ].filter((prop) => new RegExp('\\b' + prop + '\\s*=').test(body));
+      if (radixProps.length) {
+        failures.push(
+          `${rel} — Radix-only prop(s): ${radixProps.join(', ')} (Base UI drops them silently; TooltipProvider uses \`delay\`, overlays use their own close handlers)`
+        );
+      }
+      if (/checked\s*=\s*[{"']\s*['"]indeterminate/.test(body)) {
+        failures.push(
+          `${rel} — checked="indeterminate" (Radix tri-state; Base UI Checkbox wants checked={boolean} + indeterminate={boolean} — the string is truthy and renders fully checked)`
+        );
+      }
+      // data-[state=…] is only valid on markup that sets data-state itself
+      if (/data-\[state=/.test(body) && !/lint-ok:data-state/.test(raw)) {
+        failures.push(
+          `${rel} — data-[state=…] selector (Base UI emits data-open / data-closed / data-popup-open). If this element sets its own data-state, add a // lint-ok:data-state comment`
+        );
       }
       if (
         /<DropdownMenuItem/.test(body) &&

@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.32.0 (2026-08-21)
+
+A full Radix→Base UI sweep, this time verified against the **shadcn registry
+itself** (`https://ui.shadcn.com/r/styles/base-mira/<name>.json` — the source
+the shadcn MCP reads; the MCP was not connected this session) plus the
+installed `@base-ui/react` type declarations.
+
+**Result: the shipped code is Radix-free.** All 30 base-mira registry items
+the kit uses were pulled and diffed against every asset usage — no
+`@radix-ui/*` import, no `asChild`, no `onSelect` on a menu item, no
+`checked="indeterminate"`, no Radix overlay props. Every API the kit passes
+was confirmed present on the real base-mira wrapper or its Base UI primitive:
+`DropdownMenuContent` side/align/sideOffset · `SidebarMenuButton`
+render/isActive/tooltip · `SheetContent side` · `Checkbox`
+checked+indeterminate · `FieldError errors` · `SelectValue placeholder` ·
+`Tabs.Tab`/`Tabs.Panel` value. The only remaining "Radix" strings in the repo
+are prose that deliberately teaches the difference.
+
+What actually changed:
+
+- **`ConfirmActionDialog` passes `variant` directly.** 4.26.0 routed it
+  through `buttonVariants()` in `className` because it could not confirm the
+  prop existed; the registry shows `AlertDialogAction` is typed
+  `ComponentProps<typeof Button>`, so the indirection is gone.
+- **`button-variants.md` had a false rationale.** It claimed `success` uses
+  `text-white` "like base-mira's `destructive`" — but the current registry
+  ships a **tinted** destructive (`bg-destructive/10 text-destructive`), not a
+  solid one. Corrected, and the doc now states the registry URL as the thing
+  to check before trusting it (verified: the registry ships no `success`,
+  `soft-*` or `field` variant, so this file is still required).
+  ⚠️ Consequence worth a decision: with the preset as-is, the delete-confirm
+  button renders tinted red, while `design-preview.html` draws it solid.
+  Logged in backlog §5.
+- **The lint gate now blocks the whole class**, not just the three patterns
+  that had already bitten: Radix overlay props (`onEscapeKeyDown`,
+  `onPointerDownOutside`, `onInteractOutside`, `onOpenAutoFocus`,
+  `onCloseAutoFocus`, `forceMount`, `delayDuration`),
+  `checked="indeterminate"`, and `data-[state=…]` selectors — the last with
+  an opt-out (`// lint-ok:data-state`) for markup that sets `data-state`
+  itself, which is exactly the one legitimate case in `data-table.tsx`.
+- **The lookup procedure is now written down** so no future session guesses:
+  `references/conventions.md` gains §ตรวจ API with the source order (MCP →
+  registry curl → installed `@base-ui/react` types → a real base-mira
+  project) and a Radix-vs-Base-UI difference table; design-setup §Step 3.4
+  points at the registry URL for when the MCP is unavailable.
 ## 4.31.0 (2026-08-21)
 
 Follow-up to 4.30.0's §0.4 amendment, after checking the rule against the

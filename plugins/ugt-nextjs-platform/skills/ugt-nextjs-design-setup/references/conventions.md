@@ -43,6 +43,40 @@ Base UI native, same base as the org standard since มติ 2026-08-04).
 | > 15 หรือต้องค้นหา | `Combobox` (command + popover) |
 | วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ยกเว้น filter ปี/เดือนใน toolbar ใช้ `Select` ได้ |
 
+## ตรวจ API ของ primitive กับ registry ก่อนเขียน (อย่าเดาจากความจำ Radix)
+
+ทุก component ใน `components/ui/` มาจาก preset **base-mira = Base UI** ไม่ใช่
+Radix — ความจำจาก shadcn ยุค Radix จะพาไป API ที่ Base UI **เมินเงียบ ๆ**
+(component render ปกติ แต่ prop ไม่ทำงาน) ซึ่งตรวจด้วยตาไม่เจอและเคยหลุดถึง
+production มาแล้ว ("ปุ่ม logout กดไม่ได้", checkbox กลุ่มโชว์ติ๊กเต็ม)
+
+**แหล่งอ้างอิงที่ถือว่าจริง** เรียงตามลำดับ:
+
+1. **shadcn MCP** (plugin ประกาศ server ไว้) — ถ้า session นั้นต่อได้
+2. **registry ตรง ๆ** — แหล่งเดียวกับที่ MCP อ่าน ใช้ได้เสมอถ้ามีเน็ต:
+
+   ```bash
+   curl -s https://ui.shadcn.com/r/styles/base-mira/<component>.json
+   ```
+
+3. **type ของ Base UI ที่ติดตั้งจริง** — `node_modules/@base-ui/react/<part>/…d.ts`
+   (คำตอบสุดท้ายเรื่อง prop ของ primitive เช่น `CheckboxRoot.d.ts`)
+4. โปรเจคจริงที่เป็น base-mira (เช่น `gov-boi-smart`) — ระวัง: โปรเจคอาจแก้
+   variant ของตัวเองไว้ จึงยืนยัน "ของ preset" ไม่ได้ 100%
+
+**ตารางความต่างที่กัดบ่อย** (ตรวจกับ registry แล้ว 2026-08-21):
+
+| Radix (ความจำเก่า) | base-mira / Base UI |
+| --- | --- |
+| `asChild` | `render={<X />}` |
+| `onSelect` บน menu item | `onClick` (+ `closeOnClick={false}` ถ้าอยากค้างเมนู) |
+| `checked="indeterminate"` | `checked={boolean}` + `indeterminate={boolean}` แยก prop |
+| `data-[state=open]` | `data-open` / `data-closed` / `data-popup-open` |
+| `TooltipProvider delayDuration` | `TooltipProvider delay` |
+| `onEscapeKeyDown` / `onPointerDownOutside` / `onInteractOutside` / `forceMount` | ไม่มี — Base UI จัดการเอง/ชื่ออื่น |
+
+`scripts/lint-kit-assets.mjs` ของรีโปนี้บล็อกทุกแถวในตารางตอน release แล้ว
+
 ## Dialog ladder
 
 | งาน | ภาชนะ |

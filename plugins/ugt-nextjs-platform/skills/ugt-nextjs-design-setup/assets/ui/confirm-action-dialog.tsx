@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
-// kit-hash: 5c7ee2da4867
+// kit: ugt-nextjs-platform 4.32.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: 69004817aa96
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
@@ -9,7 +9,6 @@
 // ไม่มี onSuccess — server action เรียก revalidatePath อยู่แล้ว หน้ารีเฟรชเอง
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { buttonVariants } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,13 +72,9 @@ export function ConfirmActionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>ยกเลิก</AlertDialogCancel>
-          {/* ส่งเป็น className (twMerge ใน wrapper ให้ตัวหลังชนะ) — ไม่พึ่งว่า
-              AlertDialogAction รุ่นที่ติดตั้งจะมี prop variant หรือไม่ */}
-          <AlertDialogAction
-            className={buttonVariants({ variant: confirmVariant })}
-            disabled={pending}
-            onClick={() => void confirm()}
-          >
+          {/* base-mira: AlertDialogAction = ComponentProps<typeof Button> จึงส่ง
+              variant ตรงได้ (ยืนยันกับ registry base-mira/alert-dialog) */}
+          <AlertDialogAction variant={confirmVariant} disabled={pending} onClick={() => void confirm()}>
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

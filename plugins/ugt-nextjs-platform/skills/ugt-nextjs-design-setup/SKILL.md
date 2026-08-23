@@ -188,7 +188,11 @@ different size — is the field bug this step exists to prevent.
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 4. Install the base component set — prefer the **shadcn MCP** (`ToolSearch`
    for `shadcn` tools; the plugin declares the server) to browse/add, fall
-   back to `npx shadcn@latest add`:
+   back to `npx shadcn@latest add`. **อ่าน API จริงของ component** เมื่อ MCP
+   ต่อไม่ได้: ดึง registry item ตรง ๆ (แหล่งเดียวกับที่ MCP อ่าน) —
+   `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` ·
+   ห้ามตอบคำถาม Base UI vs Radix จากความจำ (ลำดับแหล่งอ้างอิง + ตารางความต่าง
+   อยู่ที่ `references/conventions.md` §ตรวจ API):
    `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea

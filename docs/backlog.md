@@ -69,6 +69,8 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~DataTable สามก้อนยังไม่ห่อการ์ดตาม §3~~ → มติห่อใน DataTable กลาง (prop `card` default เปิด), 4.26.0
 - ~~theme-toggle / ปุ่ม icon นอกตาราง~~ → มติขยาย §0.4, 4.30.0 (size=icon ใช้ได้ทุกที่ + aria-label บังคับ · ในตารางยังต้องผ่าน IconAction · ห้าม override ขนาดด้วย className)
 
+- **ใหม่ 2026-08-21 (จาก sweep เทียบ registry):** `destructive` ของ base-mira ปัจจุบันเป็น**พื้นจาง** (`bg-destructive/10 text-destructive`) ไม่ใช่แดงทึบ — ปุ่มยืนยันลบใน ConfirmActionDialog จึงออกมาจางกว่าที่ design-preview วาดไว้ (solid) · เลือก: ยึด preset แล้วแก้ preview · หรือเพิ่ม variant แดงทึบของ kit เอง (บันทึกเป็นมติ)
+
 **งานโค้ดที่ตามมาได้เลย:**
 - ~~`AdminNav` fallback rebuild บน shadcn Sidebar~~ → 4.27.0
 - ~~date-picker label ไม่ผ่าน lib/format~~ → 4.30.0 (prop `formatLabel` default `formatDate`) · เหลือรวม `toDateKey` ซ้ำสองที่เข้า formatExportDate

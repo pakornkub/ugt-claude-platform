@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.29.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 296b3a839a42
+// kit: ugt-nextjs-platform 4.32.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 183d64678ed3
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -237,6 +237,9 @@ function DataTableMobileCards<TData>({
           (c) => c.column.id !== 'select' && c.column.id !== 'actions'
         );
         return (
+          // lint-ok:data-state — data-state ที่นี่เป็นของ div ตัวนี้เอง (บรรทัดถัดไป)
+          // ไม่ใช่ attribute ของ primitive ตัวไหน · Base UI ใช้ data-open/data-closed/
+          // data-popup-open ส่วนของเราเป็น plain HTML จึงเขียน data-[state=selected] ได้
           <div
             key={row.id}
             data-slot="data-table-mobile-card"
