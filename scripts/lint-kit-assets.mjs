@@ -28,12 +28,12 @@
 //   - control-box override on <Button>/<IconAction> — `h-*` `p*-*` `size-*` in
 //     className (DESIGN.md §0.4: size comes from the `size` prop; if no size
 //     fits, the fix is components/ui/button.tsx). `w-*` is layout, not box, and
-//     `variant="link"` is text not a button — both exempt. Added 4.37.0 after
+//     `variant="link"` is text not a button — both exempt. Added 4.38.0 after
 //     tiptap-editor shipped `size="sm"` + `size-7 p-0`, which hand-rolled the
 //     box `size="icon"` already draws
 //   - native `title=` on <Button>/<IconAction> — the kit's Tooltip is the
 //     label carrier; the browser tooltip is unthemed, ~1s late and never
-//     appears on touch (same 4.37.0 tiptap report)
+//     appears on touch (same 4.38.0 tiptap report)
 // WARN rules (reported, exit 0):
 //   - `<h1` — pages compose PageTitle from ui/page-shell, not raw headings
 

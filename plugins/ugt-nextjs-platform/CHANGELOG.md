@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## 4.37.0 (2026-08-23)
+## 4.38.0 (2026-08-23)
 
 **tiptap toolbar เข้าระบบขนาดของ kit** (backlog §5). ปุ่มทุกตัวใน toolbar เคยเป็น
 `<Button size="sm">` ที่เขียนเองแล้วทับด้วย `className="size-7 p-0"` — override

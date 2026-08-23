@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.37.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
-// kit-hash: 824481def734
+// kit: ugt-nextjs-platform 4.38.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+// kit-hash: 49ec6f5bb3e3
 
 // source: ugt-hrms components/ui/tiptap-editor.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // editor rich text ตัวเดียวของทั้งแอป (ห้ามใช้ editor อื่น) — ติดตั้งเฉพาะโปรเจคที่มี rich text
@@ -65,7 +65,7 @@ interface ToolbarProps {
 const ToolbarSep = () => <Separator orientation="vertical" className="mx-0.5 h-5 shrink-0" />;
 
 // ปุ่ม toolbar ทุกตัวเป็นไอคอนล้วน → ผ่าน IconAction ตัวกลาง: ได้ size="icon"
-// ของ preset (size-7 พอดีกับที่ไฟล์นี้เคย hardcode `size-7 p-0` ทับไว้ ก่อน 4.37.0)
+// ของ preset (size-7 พอดีกับที่ไฟล์นี้เคย hardcode `size-7 p-0` ทับไว้ ก่อน 4.38.0)
 // + aria-label + Tooltip ของ kit แทน native `title` ซึ่งไม่ theme และช้า
 // สถานะ toggle สื่อด้วย `aria-pressed` แล้วปล่อยให้สีวิ่งตาม attribute นั้น —
 // ปุ่มที่ไม่ใช่ toggle ไม่ส่ง `active` มา attribute จึงหายไปทั้งอันและไม่ติดสี
