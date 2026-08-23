@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
-// kit-hash: 61a81abc1e03
+// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: f4bb2076121b
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
 import { useTransition } from 'react';
@@ -26,6 +26,8 @@ export function AdminSetupForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
+        {/* วงกลมไอคอน hero — สเปคตายตัวใน DESIGN.md §4 (shadcn ไม่มีของกลางให้;
+            EmptyMedia เป็นสี่เหลี่ยมของ empty state) ห้ามแก้ค่าเอง */}
         <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10">
           <Settings className="size-7 text-primary" strokeWidth={2} />
         </div>

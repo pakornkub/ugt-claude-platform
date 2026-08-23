@@ -83,7 +83,9 @@
   only when the value carries time.
 - Timezone contract: wall-clock dates (SQL `date`) are read as UTC parts —
   never through a local `Date` — so containers in UTC don't shift the day;
-  real instants display in Asia/Bangkok.
+  real instants display in Asia/Bangkok. The one local `Date` that exists —
+  the calendar cell a user just clicked — is keyed by its LOCAL parts (UTC
+  parts would shift it a day) and still goes through the formatter module.
 - **Exported files (Excel/CSV) use ISO `yyyy-MM-dd`** — deliberately a
   different standard from the screen: `DD/MM` makes Excel swap day/month
   by recipient locale.

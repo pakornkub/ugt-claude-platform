@@ -303,6 +303,7 @@ and CRLF per RFC 4180.
 | `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |
 | `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |
+| `lib/format.test.ts` | kit-native | ships with `lib/format.ts` — ล็อก timezone contract (Asia/Bangkok pin + `toDateKey` ของปฏิทินต้องไม่ร่นวัน) |
 | `lib/table-query.ts` · `lib/table-prefs.ts` · `lib/pagination.ts` | BOI | URL-state + column prefs + page params for server-mode tables (`table-query` imports `firstParam` from `pagination`) |
 | `lib/actions-locale.ts` → `lib/actions/locale.ts` | HRMS | th+en only; Server Action guarded by `lib/auth` (auth-setup) |
 | `lib/export.ts` | merge: HRMS's two hand-written export routes, collapsed into one column spec (+ BOM, formula guard, row cap) | server-only (`exceljs`); pairs with `ui/export-menu` |

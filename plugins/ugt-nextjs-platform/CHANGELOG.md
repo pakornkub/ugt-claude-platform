@@ -56,6 +56,43 @@ static pass-through, redirect ของ guard และ 401 JSON ออกไป
 
 ครึ่ง rate limiting ของ backlog ข้อ 4 **ยังเปิดอยู่** — in-memory ต่อ instance
 รับได้ตามมาตรฐาน deploy ปัจจุบัน (deploy เดี่ยว) และมี TODO กำกับในโค้ดแล้ว
+## 4.35.0 (2026-08-23)
+
+เศษสองข้อสุดท้ายที่ค้างจาก 4.30.0 ใน `docs/backlog.md` §5 — ทั้งคู่ปิดแล้ว.
+
+**`toDateKey` มีบ้านเดียวใน `lib/format.ts`.** `ui/date-picker.tsx` เคยนิยาม
+เองซ้ำกับ formatter กลาง ซึ่งชน §5 ("วันเวลาทุกจุดผ่าน `lib/format`") — ตอนนี้
+`import { formatDate, toDateKey } from '@/lib/format'` แล้ว.
+
+**แต่ไม่ได้ยุบเข้า `formatExportDate` ตามที่ backlog เดาไว้ — สองตัวนี้ให้คนละ
+คำตอบ.** วัดจริง (`node --experimental-strip-types`, TZ=Asia/Bangkok) จาก
+`new Date(2026, 7, 23)` ซึ่งคือสิ่งที่ react-day-picker ส่งกลับมาตอนคลิกเซลล์:
+
+| ฟังก์ชัน | ผล |
+| --- | --- |
+| `toDateKey(picked)` | `2026-08-23` ← วันที่ผู้ใช้คลิกจริง |
+| `formatExportDate(picked)` | `2026-08-22` ← **ร่นไปหนึ่งวัน** |
+
+`formatExportDate` อ่าน **UTC parts** โดยเจตนา เพราะ input ของมันคือ wall-clock
+date (คอลัมน์ SQL `date` = เที่ยงคืน UTC) — พอเจอเที่ยงคืน **local** ที่ +07:00
+มันก็ตกไปเป็นเมื่อวาน. ถ้ายุบเข้าไป วันหยุดบนปฏิทินจะทำเครื่องหมายผิดวันเงียบ ๆ.
+สองฟังก์ชันจึงแยกกันที่ **input มาจากไหน** ไม่ใช่หน้าตา output และเขียนกำกับไว้ทั้ง
+ใน docblock ของทั้งคู่, DESIGN.md §5 และ `ugt-core/contracts/design.md` (ประโยค
+"never through a local `Date`" ของ contract ครอบเกินจริง — เติมข้อยกเว้นเดียวที่มี).
+
+- ใหม่: `assets/lib/format.test.ts` — ล็อก timezone contract 5 ข้อ (pin
+  Asia/Bangkok ของ `formatDateTime` ยังได้ค่าเดิม `24/08/2026 00:30`, wall-clock
+  ไม่เลื่อน, `toDateKey` ตรงเซลล์) · ทุกข้อผ่านโดยไม่ขึ้นกับ TZ ของเครื่องที่รัน
+  · ship คู่กับ `lib/format.ts` แบบเดียวกับ `lib/export.test.ts`
+
+**วงกลมไอคอน hero ของ `admin-setup-form` — ตัดสินว่า *ไม่* ทำ component.**
+shadcn ไม่มีของกลางให้จริง: ตัวที่ใกล้สุดคือ `EmptyMedia variant="icon"` ซึ่งเป็น
+สี่เหลี่ยม `size-8 rounded-md bg-muted` และเป็นช่องของ empty state คนละงานกัน.
+markup ปัจจุบันเป็น Tailwind utilities ล้วนซึ่ง §0.1 อนุญาตอยู่แล้ว และมีที่ใช้
+**ที่เดียวทั้ง kit** — component กลางที่มี consumer เดียวคือ abstraction เปล่า.
+สิ่งที่ขาดคือ "สเปคตายตัว" ไม่ใช่ component จึงเขียนค่าชุดเดียว (`size-14` ·
+`rounded-full` · `bg-primary/10` · ไอคอน `size-7 text-primary`) ลง DESIGN.md §4
+พร้อมเงื่อนไขยกระดับ: ใช้ครบ 3 ที่เมื่อไรค่อยยกเป็น component.
 
 ## 4.33.0 (2026-08-21)
 
