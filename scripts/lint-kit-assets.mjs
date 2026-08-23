@@ -25,6 +25,15 @@
 //     Calendar's own onSelect prop is legitimate)
 //   - `window.confirm(` / `window.alert(` — destructive = ConfirmActionDialog (DESIGN.md §4)
 //   - import from `@radix-ui/` — the kit is Base UI (มติ 2026-08-04)
+//   - control-box override on <Button>/<IconAction> — `h-*` `p*-*` `size-*` in
+//     className (DESIGN.md §0.4: size comes from the `size` prop; if no size
+//     fits, the fix is components/ui/button.tsx). `w-*` is layout, not box, and
+//     `variant="link"` is text not a button — both exempt. Added 4.38.0 after
+//     tiptap-editor shipped `size="sm"` + `size-7 p-0`, which hand-rolled the
+//     box `size="icon"` already draws
+//   - native `title=` on <Button>/<IconAction> — the kit's Tooltip is the
+//     label carrier; the browser tooltip is unthemed, ~1s late and never
+//     appears on touch (same 4.38.0 tiptap report)
 // WARN rules (reported, exit 0):
 //   - `<h1` — pages compose PageTitle from ui/page-shell, not raw headings
 
@@ -34,6 +43,34 @@ import { join, relative, sep } from 'node:path';
 const ROOT = process.cwd();
 
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+// เก็บ opening tag ของ JSX element ชื่อหนึ่งทั้งอัน แบบรู้ quote/วงเล็บ — หยุดที่
+// `>` ที่ depth 0 เท่านั้น ไม่งั้น `onClick={() => …}` ตัดแท็กขาดกลางทางแล้วกฎ
+// ข้างล่างจะมองไม่เห็น className ที่ตามมา
+function openingTags(src, name) {
+  const tags = [];
+  const re = new RegExp('<' + name + '(?![A-Za-z0-9])', 'g');
+  let m;
+  while ((m = re.exec(src))) {
+    let depth = 0;
+    let quote = null;
+    let i = m.index + m[0].length;
+    for (; i < src.length; i++) {
+      const c = src[i];
+      if (quote) {
+        if (c === quote) quote = null;
+      } else if (c === '"' || c === "'" || c === '`') quote = c;
+      else if (c === '{' || c === '(') depth++;
+      else if (c === '}' || c === ')') depth--;
+      else if (c === '>' && depth === 0) break;
+    }
+    tags.push(src.slice(m.index, i));
+  }
+  return tags;
+}
+
+// utility ที่กำหนด "กล่อง" ของ control · `w-*` ไม่อยู่ในนี้เพราะเป็น layout
+const BOX_UTILITY = /^(?:h|p|px|py|pt|pb|pl|pr|size)-/;
 
 function* walk(dir) {
   let entries;
@@ -115,6 +152,31 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
       }
       if (/from\s+['"]@radix-ui\//.test(body)) {
         failures.push(`${rel} — imports @radix-ui/* (the kit is Base UI / base-mira, มติ 2026-08-04)`);
+      }
+      for (const name of ['Button', 'IconAction']) {
+        for (const tag of openingTags(body, name)) {
+          const flat = tag.replace(/\s+/g, ' ').slice(0, 70);
+          if (/\btitle\s*=/.test(tag)) {
+            failures.push(
+              `${rel} — native title= on <${name}> (label goes in aria-label + the kit Tooltip; the browser tooltip is unthemed, late and invisible on touch) → ${flat}`
+            );
+          }
+          if (/variant\s*=\s*"link"/.test(tag)) continue;
+          const cls = tag.match(/className\s*=\s*(?:"([^"]*)"|\{([\s\S]*)\})/);
+          if (!cls) continue;
+          const literals =
+            cls[1] === undefined
+              ? [...cls[2].matchAll(/['"`]([^'"`]*)['"`]/g)].map((x) => x[1])
+              : [cls[1]];
+          const box = literals
+            .flatMap((literal) => literal.split(/\s+/))
+            .filter((token) => BOX_UTILITY.test(token.replace(/^(?:[a-z-]+:)+/, '')));
+          if (box.length) {
+            failures.push(
+              `${rel} — control-box override on <${name}>: ${box.join(' ')} (DESIGN.md §0.4 — size comes from the \`size\` prop; no size fits → fix components/ui/button.tsx) → ${flat}`
+            );
+          }
+        }
       }
       // ui/* primitives own their internals (page-shell itself renders the h1);
       // login-form's h1 is the login-page hero title — no PageShell exists there;

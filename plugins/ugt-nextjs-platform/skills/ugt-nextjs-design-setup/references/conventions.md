@@ -318,7 +318,7 @@ and CRLF per RFC 4180.
 | `lib/export.test.ts` | kit-native | ships with `lib/export.ts` — copy/skip the pair together (covers BOM, formula guard, row cap) |
 | `components/query-provider.tsx` · `lib/http-error.ts` | HRMS `components/providers.tsx` + `lib/http-error.ts` | one QueryClient for the whole app (staleTime 0 · retry 1 · 401 → `session-expired` event); queryFns throw `HttpError`, never bare `Error` |
 | `ui/query-progress.tsx` | HRMS | top progress bar on **initial** fetches only (background refetches stay silent); needs `nprogress` + the CSS block in its header comment |
-| `ui/tiptap-editor.tsx` | HRMS (verbatim) | the app's one rich-text editor; ship only when rich text exists (`@tiptap/*` ^3 set) |
+| `ui/tiptap-editor.tsx` | HRMS + kit toolbar (4.38.0) | the app's one rich-text editor; ship only when rich text exists (`@tiptap/*` ^3 set). Toolbar buttons go through `ui/icon-action` (so `tooltip` must be installed) — no hand-rolled icon button, no native `title` |
 | `ui/chart-example.tsx` | HRMS `run-trend-chart` (OT stripped) | reference to copy-adapt-delete, not a shared component; needs `npx shadcn add chart` |
 | `lib/motion.ts` | new — the agreement's numbers as importable constants | only when custom motion = มี (pairs with `docs/MOTION.md`); dep `motion` |
 | `ui/button-variants.md` | BOI → recipes on the base-mira button, colors mapped to org tokens | the sanctioned `components/ui/button.tsx` edit |

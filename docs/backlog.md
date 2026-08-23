@@ -79,7 +79,7 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 - ~~`AdminNav` fallback rebuild บน shadcn Sidebar~~ → 4.27.0
 - ~~date-picker label ไม่ผ่าน lib/format~~ → 4.30.0 (prop `formatLabel` default `formatDate`) · ~~`toDateKey` ซ้ำสองที่~~ → 4.35.0 ย้ายเข้า `lib/format` เป็นบ้านเดียว **แต่ไม่ยุบเข้า `formatExportDate`** — วัดแล้วให้คนละคำตอบ (local midnight ร่นวัน) คนละ input contract กัน + `lib/format.test.ts` ล็อกไว้
 - ~~admin-setup-form `text-2xl` override~~ → 4.30.0 · ~~hand-built icon circle~~ → มติ 4.35.0 **ไม่ทำ component** (shadcn ไม่มีของกลาง · `EmptyMedia` คนละงาน · มีที่ใช้ที่เดียว) แต่ตรึงสเปคใน DESIGN §4 — ครบ 3 ที่ค่อยยกเป็น component
-- tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title — ควรเข้า IconAction/ระบบขนาด
+- ~~tiptap toolbar: ปุ่ม `size="sm"`+`size-7 p-0` override + native title~~ → 4.38.0 (ToolbarToggle/ToolbarAction ยุบเป็น ToolbarButton บน `IconAction` · `size="icon"` ของ preset = size-7 อยู่แล้ว · tooltip ของ kit แทน title · ปุ่ม Link ซ้อน TooltipTrigger→PopoverTrigger→Button) · lint-kit-assets ตั้งกฎ FAIL กัน override กล่องขนาด + native title แล้ว
 - ~~`check-kit-freshness.mjs` ไม่ scan root files~~ → 4.27.0 (root files + prisma/; ชนิดไฟล์อื่นยัง out of scope โดยประกาศใน SKILL แล้ว)
 - ~~mail-setup สัญญา `/admin/mail-templates` แต่ไม่มีหน้า~~ → 4.27.0 (หน้า+editor+preview+actions ครบ)
 - ~~upload-setup: placeholder table/verify · ลำดับ Upload↔CI~~ → 4.27.0 · คำถาม retention ยังรอมติ cron ข้อ 3 (SKILL บอกตรง ๆ แล้วว่าเป็นแค่ decision record)
