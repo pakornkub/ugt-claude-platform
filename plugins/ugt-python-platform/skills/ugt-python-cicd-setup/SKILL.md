@@ -492,9 +492,31 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 node <skill-dir>/scripts/verify.mjs
 ```
 
-ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง, ครบ 10 stages, brace balance หลัง
-ลบบล็อก, path ใน `sonar.sources` มีจริง, compose, tooling, health) — ฝั่ง server
-ยังต้องให้ admin ยืนยันเอง
+ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง, ครบ 10 stages + `emailext` ×4,
+brace balance หลังลบบล็อก, shape `[WEB]`/`[BATCH]` ตรงกันทั้ง Dockerfile /
+Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path ใน
+`sonar.sources` มีจริง, compose, tooling, health, ไฟล์ที่ §5.1 copy มาครบ) —
+ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+
+> **ทุก check ที่อ่าน Jenkinsfile / Dockerfile / compose อ่านเฉพาะบรรทัดที่ยัง
+> ทำงานจริง** (ตัดคอมเมนต์ออกก่อน) — ไฟล์ template พก legend + บล็อกทางเลือกของ
+> อีก shape ไว้เป็นคอมเมนต์ถาวร ถ้าอ่านดิบ ๆ ป้าย `[DB]`/`[WEB]`/`volumes:` และ
+> ชื่อ volume ตัวอย่างจะทำให้ check ผ่านฟรีทั้งที่ไม่ได้ตั้งค่าอะไรเลย
+
+**ไม่ตรวจโดยตั้งใจ (out of scope ของ script — ต้องตรวจเอง):**
+
+- **พฤติกรรมตอนรันจริงของ `/api/health`** — script พิสูจน์แค่ว่า route/ไฟล์มีจริง
+  และไม่ส่ง version/commit; ส่วน "เข้าได้โดยไม่ต้อง login" กับ "200 healthy /
+  503 degraded" ต้องยิงจริงตามหัวข้อ **รันจริง** ท้ายหน้านี้
+- **[subpath] เปิดผ่าน URL เต็มหลัง proxy** — script ตรวจได้แค่ว่า
+  `ROOT_PATH`/`SCRIPT_NAME`/`FORCE_SCRIPT_NAME` ตั้งครบทั้ง 2 compose หรือไม่ตั้ง
+  เลย (ตั้งข้างเดียว = fail) ตัวค่าที่ถูกต้องพิสูจน์ได้ทางเดียวคือเปิดจริง
+- **§5.6 toolchain ในเครื่อง** (`ruff` / `mypy` / `pytest`) — ต้องมี `.venv`
+  จริงถึงจะรู้ผล script ไม่รันแทนให้
+- **ค่าใน `.env` / `.env.dev`** — เช็คแค่ว่ามีไฟล์และมี `APP_PORT` (เตือน ไม่
+  fail เพราะ clone ใหม่ยังไม่มีทั้งคู่ตามปกติ) · **ไม่อ่านค่า secret ใด ๆ**
+- **ฝั่ง server ทั้งหมด** (Jenkins tools/credentials/global env, docker group,
+  SonarQube projects + gate, webhook, host cron ของ `[BATCH]`) — อยู่นอก repo
 
 **ไฟล์ในโปรเจค:**
 

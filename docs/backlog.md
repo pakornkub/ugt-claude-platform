@@ -79,7 +79,7 @@ proxy มี CSP แล้ว แต่ยังไม่ครบชุด (HST
 - ~~`check-kit-freshness.mjs` ไม่ scan root files~~ → 4.27.0 (root files + prisma/; ชนิดไฟล์อื่นยัง out of scope โดยประกาศใน SKILL แล้ว)
 - ~~mail-setup สัญญา `/admin/mail-templates` แต่ไม่มีหน้า~~ → 4.27.0 (หน้า+editor+preview+actions ครบ)
 - ~~upload-setup: placeholder table/verify · ลำดับ Upload↔CI~~ → 4.27.0 · คำถาม retention ยังรอมติ cron ข้อ 3 (SKILL บอกตรง ๆ แล้วว่าเป็นแค่ decision record)
-- ~~verify checks ที่ประกาศแต่ไม่ implement (ฝั่ง nextjs: mkdir-p↔bind, handoff scan, no-memo, zod deprecated, S6606/S3735, design placeholder scan, full-setup rules list)~~ → 4.27.0 · **ฝั่ง php/python ยังค้าง** (ดูข้อ python/php ล่าง)
+- ~~verify checks ที่ประกาศแต่ไม่ implement (ฝั่ง nextjs: mkdir-p↔bind, handoff scan, no-memo, zod deprecated, S6606/S3735, design placeholder scan, full-setup rules list)~~ → 4.27.0 · ~~ฝั่ง php/python~~ → python/php 0.3.0 (ยังไม่ tag — รอ pilot): emailext ×4, shape `[WEB]`/`[BATCH]` ตรงกัน 3 ที่, `CMD` JSON array, subpath สองฝั่ง, coverage.xml, `[LARAVEL]`↔framework, health ใต้ docroot จริง, `volumes:` ก้อนเดียว, composer/require-dev, schema `phpunit.xml`↔lock, SmokeTest entry file, ไฟล์ §5.1 ที่ copy ทุกโปรเจค · ทุก check อ่านเฉพาะบรรทัดที่ยังทำงานจริง (เพิ่ม `dockerfileActive`/`composeActive` คู่กับ `jfActive`) · ข้อที่ไม่ตรวจประกาศไว้ใน SKILL §7 แล้ว
 - ~~pitfalls อธิบายด้วยพฤติกรรม Radix~~ → 4.27.0 (re-word เป็น Base UI-first)
 - ~~full-setup: rules mail/upload + เลขข้อ interview~~ → 4.27.0
 - ~~database: dev/prod question, requestTimeout, naming exception, `__LINKED_SERVER__`~~ → 4.27.0
