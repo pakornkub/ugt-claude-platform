@@ -1,5 +1,35 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.43.0 (2026-08-23)
+
+**ถอด shadcn MCP ออกจาก plugin** — ลบ `.mcp.json` ที่ประกาศ
+`npx shadcn@latest mcp` มาตั้งแต่ 4.x ต้น
+
+เหตุผล ตรวจจริงสองรอบ (2026-08-21 และ 2026-08-23):
+
+- `get_component("button")` คืน **style default ของ shadcn** — `import { Slot }
+  from "radix-ui"` · `asChild` · ขนาด `h-9` · `destructive` แดงทึบ — ตรงข้ามกับ
+  preset `base-mira` ของเราทุกข้อ และ **ไม่มีพารามิเตอร์ให้เลือก style**
+- `list_blocks` ซึ่งเป็นเหตุผลเดียวที่เหลือให้เก็บไว้ (ชื่อ block ดริฟต์ ต้องมี
+  ที่ไล่ดู) ตอบ error `Unexpected response from GitHub API`
+
+ที่จ่ายไปคือทุกโปรเจคที่ติดตั้ง plugin spawn subprocess เพิ่มหนึ่งตัว แล้วได้ tool
+ชุดหนึ่งที่ตอบคนละ style วางไว้ให้เรียก — เอกสารเตือนไม่พอ เพราะบั๊ก 4.25.0
+(ปุ่ม logout กดไม่ได้เพราะ `onSelect` แบบ Radix) เกิดจากโค้ดสไตล์นี้พอดี
+
+**ไม่มีอะไรหายไป** — งานที่เคยพึ่ง MCP มีทางอื่นครบ:
+
+| เคยใช้ MCP ทำ | ทำแทนด้วย |
+| --- | --- |
+| ติดตั้ง component | `npx shadcn@latest add` (CLI อ่าน `components.json` → base-mira) |
+| อ่าน API ของ component | `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` |
+| ยืนยัน prop ของ primitive | `node_modules/@base-ui/react/**/*.d.ts` |
+| เช็คว่าชื่อ block ยังใช้ได้ | `curl -s -o /dev/null -w '%{http_code}' .../base-mira/sidebar-07.json` ต้องได้ `200` |
+
+`layout-shells.md` เขียนคำสั่งเช็คชื่อ block ไว้ให้แล้ว พร้อมหมายเหตุว่า
+`/r/index.json` ลิสต์เฉพาะ component ไม่มี block · ทั้งสี่ที่ที่เคยอ้าง MCP
+(SKILL §Step 3.4 · conventions §ตรวจ API · layout-shells · button-variants)
+เปลี่ยนเป็นบอกว่าถอดแล้วและห้ามลอกโค้ดจากมันถ้าเครื่องไหนยังต่อไว้เอง
 ## 4.42.0 (2026-08-23)
 
 **`selectionColumn()` — คอลัมน์ติ๊กเลือกแถวที่เป็นมาตรฐาน.** `DataTable` มีกลไก

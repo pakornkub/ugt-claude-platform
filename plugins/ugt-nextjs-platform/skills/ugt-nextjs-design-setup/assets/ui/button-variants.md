@@ -31,8 +31,9 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
 หมายเหตุ:
 
 - **ตรวจกับ registry ก่อนเชื่อเอกสารนี้เสมอ** — ค่าจริงของ preset อยู่ที่
-  `https://ui.shadcn.com/r/styles/base-mira/button.json` · **ไม่ใช่ shadcn MCP**
-  ซึ่งตอบ style default (Radix) · ตรวจล่าสุด 2026-08-21: registry **ไม่มี**
+  `https://ui.shadcn.com/r/styles/base-mira/button.json` — **URL นี้เท่านั้น**
+  (shadcn MCP ตอบ style default ที่เป็น Radix จึงถอดออกจาก plugin แล้ว) ·
+  ตรวจล่าสุด 2026-08-23: registry **ไม่มี**
   `success` / `soft-*` / `field` จึงยังต้องเพิ่มเองทั้งหมดตามไฟล์นี้
 - `success` ใช้ `text-white` เพราะเป็นปุ่มพื้น solid — ไม่ใช้
   `text-status-emerald-foreground` ซึ่งเป็นสีตัวอักษรสำหรับพื้นจาง (badge/tint)

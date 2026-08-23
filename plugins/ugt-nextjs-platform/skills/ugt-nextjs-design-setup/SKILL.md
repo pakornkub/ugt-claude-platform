@@ -197,9 +197,9 @@ different size — is the field bug this step exists to prevent.
    resolves `components.json` → base-mira, so it installs the right style).
    **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
    `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` ·
-   ⚠️ **shadcn MCP ตอบ style default (Radix) ไม่ใช่ base-mira** (ตรวจ
-   2026-08-21: button ของมันมี `asChild` + `Slot` + `h-9`) — ใช้ไล่ดูรายการ
-   component/demo ได้ แต่ห้ามลอกโค้ดจากมัน · ลำดับแหล่งอ้างอิงเต็ม +
+   ⚠️ **plugin ไม่ประกาศ shadcn MCP แล้ว** (ถอดออก 4.43.0 — มันตอบ style
+   default ที่เป็น Radix โดยไม่มีทางสั่งให้ตอบ base-mira) · ถ้าเครื่องไหนยัง
+   ต่อ MCP ตัวนี้อยู่เอง **ห้ามลอกโค้ดจากมัน** · ลำดับแหล่งอ้างอิงเต็ม +
    ตารางความต่าง Radix↔Base UI อยู่ที่ `references/conventions.md` §ตรวจ API:
    `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton

@@ -91,8 +91,8 @@ check('components.json matches the org preset', () => {
 });
 
 // The check above reads intent; this one reads what is actually on disk — a
-// wrong init, a copy off the shadcn MCP (it answers with the Radix default
-// style), or a hand-port from a radix-mira project all land here.
+// wrong init, a copy off any shadcn source that serves the default (Radix)
+// style, or a hand-port from a radix-mira project all land here.
 check('No Radix anywhere in the project (the kit is Base UI)', () => {
   const problems = [];
 

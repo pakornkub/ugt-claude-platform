@@ -63,12 +63,15 @@ production มาแล้ว ("ปุ่ม logout กดไม่ได้", c
    curl -s https://ui.shadcn.com/r/styles/base-mira/<component>.json
    ```
 
-   > ⚠️ **shadcn MCP ตอบ style default (Radix) ไม่ใช่ base-mira** — ตรวจแล้ว
-   > 2026-08-21: `get_component("button")` คืนโค้ดที่ `import { Slot } from
-   > "radix-ui"`, มี `asChild`, ขนาด `h-9` และ `destructive` แบบ solid ซึ่ง
-   > **ตรงข้ามกับ preset ของเราทุกข้อ** · ใช้ MCP ได้แค่ไล่ดูว่ามี component
-   > อะไรบ้าง/ดู demo — **ห้ามลอกโค้ดจากมันเข้า kit** เพราะจะพา `asChild`
-   > กลับมาอีกรอบ (บั๊กเดียวกับที่ 4.25.0 ต้องไล่แก้)
+   > ⚠️ **plugin เคยประกาศ shadcn MCP ไว้ ถอดออกแล้วใน 4.43.0** — ตรวจ
+   > 2026-08-21/23: `get_component("button")` คืนโค้ดที่ `import { Slot } from
+   > "radix-ui"`, มี `asChild`, ขนาด `h-9`, `destructive` แบบ solid คือ
+   > **ตรงข้ามกับ preset ทุกข้อ** และไม่มีพารามิเตอร์ให้เลือก style · ส่วน
+   > `list_blocks` ที่เป็นเหตุผลเดียวที่เหลือให้เก็บไว้ ก็ error
+   > (`Unexpected response from GitHub API`) · ถ้าเครื่องไหนยังต่อ MCP ตัวนี้
+   > อยู่เอง **ห้ามลอกโค้ดจากมันเข้า kit** เพราะจะพา `asChild` กลับมา
+   > (บั๊กเดียวกับที่ 4.25.0 ต้องไล่แก้)
+
 2. **type ของ Base UI ที่ติดตั้งจริง** — `node_modules/@base-ui/react/<part>/…d.ts`
    (คำตอบสุดท้ายเรื่อง prop ของ primitive เช่น `CheckboxRoot.d.ts`)
 3. โปรเจคจริงที่เป็น base-mira (เช่น `gov-boi-smart`) — ระวัง: โปรเจคอาจแก้

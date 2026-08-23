@@ -2,10 +2,12 @@
 
 Never hand-compose a shell. Start from the shadcn block, then apply the org
 rules below. Install a block with `npx shadcn@latest add <block>` — the CLI
-reads `components.json`, so it pulls the base-mira (Base UI) build. The
-shadcn MCP is fine for **browsing what blocks exist**, but never copy code
-out of it: it answers with the default (Radix) style. Block names drift, so
-confirm the current one in the registry before installing.
+reads `components.json`, so it pulls the base-mira (Base UI) build.
+Block names drift, so confirm the one below still resolves before installing:
+`curl -s -o /dev/null -w '%{http_code}' https://ui.shadcn.com/r/styles/base-mira/sidebar-07.json`
+must print `200`. (The registry index at `/r/index.json` lists components
+only, not blocks, and the shadcn MCP that used to list them is no longer
+declared by this plugin — see `conventions.md` §ตรวจ API.)
 
 ## Shell mapping
 
