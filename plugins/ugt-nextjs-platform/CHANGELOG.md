@@ -1,5 +1,38 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.37.0 (2026-08-23)
+
+**tiptap toolbar เข้าระบบขนาดของ kit** (backlog §5). ปุ่มทุกตัวใน toolbar เคยเป็น
+`<Button size="sm">` ที่เขียนเองแล้วทับด้วย `className="size-7 p-0"` — override
+กล่องขนาดของ control ตรงที่ DESIGN.md §0.4 ห้ามไว้ — บวก native `title` เป็น label.
+ที่จริง preset วาดปุ่มนั้นให้อยู่แล้ว: `size="icon"` ของ base-mira **คือ** `size-7`
+พร้อมไอคอน `size-3.5` — override ทั้งก้อนจึงเป็นการเขียนขนาดที่มีอยู่แล้วซ้ำ
+
+- `ToolbarToggle` + `ToolbarAction` ยุบเหลือ `ToolbarButton` ตัวเดียวบน
+  `ui/icon-action` → ได้ `size="icon"` + `aria-label` + Tooltip ของ kit แทน `title`
+  ตอนนี้ไม่เหลือ `h-*`/`p-*`/`size-*` บน control ตัวไหนในไฟล์นี้เลย
+- สถานะ active วิ่งตาม `aria-pressed` ไม่ใช่ boolean ฝั่ง JS: สีคือ
+  `aria-pressed:bg-primary/10 …` — toggle ที่ลืมใส่ attribute จะไม่ติดสีไปด้วย
+  ปุ่มที่ไม่ใช่ toggle ไม่ส่ง `active` มา attribute จึงหายไปทั้งอัน (ไม่ใช่ `false`)
+  screen reader อ่านว่าเป็นปุ่มสั่งงานธรรมดา
+- `<Icon className="size-3.5" />` 20 จุดหายไป — `size="icon"` ตั้งขนาด svg ให้เอง
+- ปุ่ม Link เป็น trigger ของทั้ง Popover และ Tooltip จึงซ้อน render prop:
+  `TooltipTrigger render={<PopoverTrigger render={<Button/>} />}` ตามที่ Base UI
+  documented ไว้ (children ตกไปที่ชั้นในสุด) — ไม่ต้องมี wrapper เพิ่ม
+- `disabled` ในปุ่ม toolbar = `aria-disabled` แล้ว (กติกาของ IconAction ตั้งแต่
+  4.29.0): Undo ที่จางอยู่ยังโฟกัสได้และยังบอกเหตุผลตอน hover
+- `references/conventions.md` เลิกเรียกไฟล์นี้ว่า "HRMS (verbatim)" และบันทึกว่า
+  ต้องมี `ui/icon-action` + `tooltip` ติดตั้งไว้ก่อน
+
+**และปิดทางไม่ให้ของแบบเดิมกลับมา** — `scripts/lint-kit-assets.mjs` (ด่านใน
+release chain) เพิ่มกฎ FAIL สองข้อ: className ที่ทับกล่องขนาดของ `<Button>` /
+`<IconAction>` (`h-*` `p*-*` `size-*` — `w-*` ผ่านเพราะเป็น layout,
+`variant="link"` ยกเว้นตาม §0.4) และ native `title=` บนสองตัวนั้น เดิมกฎนี้อยู่
+ใน DESIGN.md อย่างเดียวจึงไม่มีอะไรตรวจ asset จริง (เหตุผลเดียวกับตอนตั้งด่านนี้
+ใน 4.25.0) · สแกนทั้ง 89 asset แล้ว: ของเดิมไม่ติดสักตัว ส่วนไฟล์ tiptap ก่อนแก้
+ติด 6 จุด — ตัว lint อ่าน opening tag แบบรู้วงเล็บ/quote ไม่ใช่ regex ตัดที่ `>`
+ตัวแรก ไม่งั้น `onClick={() => …}` จะทำให้มองไม่เห็น className ที่ตามมา
+
 ## 4.33.0 (2026-08-21)
 
 **มติ 2026-08-21 — ยึด preset สำหรับปุ่ม destructive.** base-mira ships a

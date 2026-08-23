@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
-// kit-hash: 965c2e3b1848
+// kit: ugt-nextjs-platform 4.37.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+// kit-hash: 824481def734
 
 // source: ugt-hrms components/ui/tiptap-editor.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // editor rich text ตัวเดียวของทั้งแอป (ห้ามใช้ editor อื่น) — ติดตั้งเฉพาะโปรเจคที่มี rich text
@@ -35,8 +35,10 @@ import {
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { IconAction } from '@/components/ui/icon-action';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export interface TiptapEditorHandle {
@@ -62,63 +64,39 @@ interface ToolbarProps {
 
 const ToolbarSep = () => <Separator orientation="vertical" className="mx-0.5 h-5 shrink-0" />;
 
-function ToolbarToggle({
+// ปุ่ม toolbar ทุกตัวเป็นไอคอนล้วน → ผ่าน IconAction ตัวกลาง: ได้ size="icon"
+// ของ preset (size-7 พอดีกับที่ไฟล์นี้เคย hardcode `size-7 p-0` ทับไว้ ก่อน 4.37.0)
+// + aria-label + Tooltip ของ kit แทน native `title` ซึ่งไม่ theme และช้า
+// สถานะ toggle สื่อด้วย `aria-pressed` แล้วปล่อยให้สีวิ่งตาม attribute นั้น —
+// ปุ่มที่ไม่ใช่ toggle ไม่ส่ง `active` มา attribute จึงหายไปทั้งอันและไม่ติดสี
+const TOGGLE_ACTIVE =
+  'aria-pressed:bg-primary/10 aria-pressed:text-primary aria-pressed:hover:bg-primary/15 aria-pressed:hover:text-primary';
+
+function ToolbarButton({
   children,
   active,
   onClick,
-  title,
+  label,
   disabled,
 }: Readonly<{
   children: React.ReactNode;
+  /** ส่งเฉพาะปุ่ม toggle — undefined = ปุ่มสั่งงานธรรมดา (ไม่มี aria-pressed) */
   active?: boolean;
   onClick: () => void;
-  title: string;
+  label: string;
   disabled?: boolean;
 }>) {
   return (
-    <Button
-      type="button"
+    <IconAction
       variant="ghost"
-      size="sm"
+      label={label}
       aria-pressed={active}
       onClick={onClick}
       disabled={disabled}
-      title={title}
-      aria-label={title}
-      className={cn(
-        'size-7 p-0',
-        active && 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
-      )}
+      className={TOGGLE_ACTIVE}
     >
       {children}
-    </Button>
-  );
-}
-
-function ToolbarAction({
-  children,
-  onClick,
-  title,
-  disabled,
-}: Readonly<{
-  children: React.ReactNode;
-  onClick: () => void;
-  title: string;
-  disabled?: boolean;
-}>) {
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      aria-label={title}
-      className="size-7 p-0"
-    >
-      {children}
-    </Button>
+    </IconAction>
   );
 }
 
@@ -154,120 +132,120 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 px-2 py-1.5">
-      <ToolbarAction
+      <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
-        title="Undo"
+        label="Undo"
         disabled={!s.canUndo || disabled}
       >
-        <Undo2 className="size-3.5" />
-      </ToolbarAction>
-      <ToolbarAction
+        <Undo2 />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
-        title="Redo"
+        label="Redo"
         disabled={!s.canRedo || disabled}
       >
-        <Redo2 className="size-3.5" />
-      </ToolbarAction>
+        <Redo2 />
+      </ToolbarButton>
 
       <ToolbarSep />
 
-      <ToolbarToggle
+      <ToolbarButton
         onClick={() => editor.chain().focus().setParagraph().run()}
         active={!s.h2}
-        title="Normal text"
+        label="Normal text"
         disabled={disabled}
       >
-        <Pilcrow className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <Pilcrow />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={s.h2}
-        title="Heading"
+        label="Heading"
         disabled={disabled}
       >
-        <Heading2 className="size-3.5" />
-      </ToolbarToggle>
+        <Heading2 />
+      </ToolbarButton>
 
       <ToolbarSep />
 
-      <ToolbarToggle
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         active={s.bold}
-        title="Bold"
+        label="Bold"
         disabled={disabled}
       >
-        <Bold className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <Bold />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={s.italic}
-        title="Italic"
+        label="Italic"
         disabled={disabled}
       >
-        <Italic className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <Italic />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={s.underline}
-        title="Underline"
+        label="Underline"
         disabled={disabled}
       >
-        <Underline className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <Underline />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={s.strike}
-        title="Strikethrough"
+        label="Strikethrough"
         disabled={disabled}
       >
-        <Strikethrough className="size-3.5" />
-      </ToolbarToggle>
+        <Strikethrough />
+      </ToolbarButton>
 
       <ToolbarSep />
 
-      <ToolbarToggle
+      <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
         active={s.alignLeft}
-        title="Align left"
+        label="Align left"
         disabled={disabled}
       >
-        <AlignLeft className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <AlignLeft />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
         active={s.alignCenter}
-        title="Align center"
+        label="Align center"
         disabled={disabled}
       >
-        <AlignCenter className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <AlignCenter />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
         active={s.alignRight}
-        title="Align right"
+        label="Align right"
         disabled={disabled}
       >
-        <AlignRight className="size-3.5" />
-      </ToolbarToggle>
+        <AlignRight />
+      </ToolbarButton>
 
       <ToolbarSep />
 
-      <ToolbarToggle
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         active={s.bulletList}
-        title="Bullet list"
+        label="Bullet list"
         disabled={disabled}
       >
-        <List className="size-3.5" />
-      </ToolbarToggle>
-      <ToolbarToggle
+        <List />
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         active={s.orderedList}
-        title="Numbered list"
+        label="Numbered list"
         disabled={disabled}
       >
-        <ListOrdered className="size-3.5" />
-      </ToolbarToggle>
+        <ListOrdered />
+      </ToolbarButton>
 
       <ToolbarSep />
 
@@ -280,25 +258,31 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
           if (open) setLinkUrl((editor.getAttributes('link').href as string) ?? '');
         }}
       >
-        <PopoverTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              aria-pressed={s.link}
-              title="Link"
-              aria-label="Link"
-              disabled={disabled}
-              className={cn(
-                'size-7 p-0',
-                s.link && 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
-              )}
-            />
-          }
-        >
-          <Link2 className="size-3.5" />
-        </PopoverTrigger>
+        {/* ปุ่มนี้เป็นทั้ง trigger ของ Popover และ trigger ของ Tooltip —
+            Base UI ซ้อน render prop ได้ (children ตกไปที่ชั้นในสุด) จึงไม่ต้อง
+            มี wrapper เพิ่ม และไม่ต้องกลับไปใช้ native title */}
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-pressed={s.link}
+                    aria-label="Link"
+                    disabled={disabled}
+                    className={TOGGLE_ACTIVE}
+                  >
+                    <Link2 />
+                  </Button>
+                }
+              />
+            }
+          />
+          <TooltipContent>Link</TooltipContent>
+        </Tooltip>
         <PopoverContent className="w-72 space-y-2 p-3">
           <Input
             value={linkUrl}
@@ -324,30 +308,30 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
           </div>
         </PopoverContent>
       </Popover>
-      <ToolbarAction
+      <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="Horizontal rule"
+        label="Horizontal rule"
         disabled={disabled}
       >
-        <Minus className="size-3.5" />
-      </ToolbarAction>
+        <Minus />
+      </ToolbarButton>
 
       <ToolbarSep />
 
-      <ToolbarAction
+      <ToolbarButton
         onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
-        title="Clear formatting"
+        label="Clear formatting"
         disabled={disabled}
       >
-        <RemoveFormatting className="size-3.5" />
-      </ToolbarAction>
+        <RemoveFormatting />
+      </ToolbarButton>
 
       <ToolbarSep />
 
       {/* HTML source toggle */}
-      <ToolbarToggle onClick={onSourceToggle} active={sourceMode} title="HTML source view">
-        <Code2 className="size-3.5" />
-      </ToolbarToggle>
+      <ToolbarButton onClick={onSourceToggle} active={sourceMode} title="HTML source view">
+        <Code2 />
+      </ToolbarButton>
     </div>
   );
 }
