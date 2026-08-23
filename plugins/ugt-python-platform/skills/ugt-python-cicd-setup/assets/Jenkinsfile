@@ -271,22 +271,29 @@ pipeline {
                         // [VOLUME] เตรียม path ข้อมูลถาวรครั้งแรก (idempotent) — chown ผ่าน container
                         // เพราะ jenkins ไม่ใช่ root แต่อยู่ใน docker group; admin เตรียม /srv/appdata แล้ว
                         //
-                        // สำคัญ: ต้อง mkdir ถึง "ตัว subdir ที่ compose bind จริง" ไม่ใช่แค่ระดับโปรเจค —
-                        // path ย่อยที่ยังไม่มีตอน `up -d` dockerd จะสร้างให้เองเป็น root:root แล้ว user
-                        // `app` ในคอนเทนเนอร์เขียนไม่ได้ (PermissionError) แม้ container ขึ้น healthy ปกติ
-                        // → เติมทุก <name> ที่ตอบไว้ในข้อ 6 ของ interview ต่อท้าย mkdir ข้างล่าง
-                        //   เช่น: mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
+                        // สำคัญ: เช็ค **ทีละ subdir ที่ compose bind จริง** ไม่ใช่เช็คที่ระดับโปรเจค —
+                        // guard แบบเดิม (`if [ ! -d <project> ]`) กลายเป็น no-op ถาวรทันทีที่ deploy
+                        // แรกสร้างโฟลเดอร์โปรเจคขึ้นมา แล้ว volume ที่เพิ่มทีหลังจะไม่มีวันถูกสร้าง:
+                        // dockerd สร้างให้เองเป็น root:root ตอน `up -d` แล้ว user `app` ในคอนเทนเนอร์
+                        // เขียนไม่ได้ (PermissionError) ทั้งที่ container ขึ้น healthy ปกติ
+                        // → แทน uploads/reports ด้วยชื่อ volume จริงทุกตัวที่ตอบไว้ในข้อ 6 ของ interview
+                        // ไม่มี volume → ลบบล็อกนี้ทั้งหมด
                         sh """
-                          if [ ! -d /srv/appdata/${containerName} ]; then
-                            mkdir -p /srv/appdata/${containerName}   # << เติม /<name> ของแต่ละ volume ต่อท้ายบรรทัดนี้
-                            APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
-                            docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "\$APP_UID" /d
-                          fi
+                          APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
+                          for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+                            if [ ! -d "\$p" ]; then
+                              mkdir -p "\$p"
+                              docker run --rm -v "\$p":/d alpine chown -R "\$APP_UID" /d
+                            fi
+                          done
                         """
 
                         // --no-build: reuse the image from Docker Build stage.
-                        // Note: docker-compose (v1) — check which binary the Jenkins host has.
-                        sh "docker-compose -f ${composeFile} up -d --no-build"
+                        // `docker compose` (v2, no hyphen) — org default. The standalone
+                        // `docker-compose` (v1) has been EOL since mid-2023 and ships with
+                        // no current Docker Engine; a host that still only has v1 needs
+                        // this one line changed back (`docker-compose -f ...`).
+                        sh "docker compose -f ${composeFile} up -d --no-build"
 
                         // [WEB] Wait until container is healthy (max 4 minutes = 24 × 10s).
                         // Poll docker inspect health status — not wget — so the result

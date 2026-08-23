@@ -45,7 +45,7 @@ cp $ENV_FILE .env                        # Secret File credential → workspace
   ↓
 [DB] docker run --rm ...-builder prisma migrate deploy   # migrate BEFORE deploy
   ↓                                      # migrate fail = no deploy (no partial deploy)
-docker-compose -f <file> up -d --no-build
+docker compose -f <file> up -d --no-build
   ↓
 poll: docker inspect .State.Health.Status  # until healthy (max 24×10s = 4 min)
 ```

@@ -81,7 +81,8 @@
 - [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
 - [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** — คนละเรื่องกับ `docker` group ข้างบน ถ้าขาดตัวนี้ pipeline ตายตั้งแต่ stage แรก (ดูภาคผนวก)
 - [ ] Docker network `proxy-network` สร้างแล้วบน host (compose ทั้งสองไฟล์ประกาศเป็น `external: true`)
-- [ ] ตอบทีมพัฒนาว่า host มี compose ตัวไหน: `docker-compose` (v1) หรือ `docker compose` (v2) — Jenkinsfile ที่ส่งมาเรียก v1 เป็นค่าตั้งต้น ถ้า host มีแต่ v2 ทีมพัฒนาต้องแก้สเตจ Deploy หนึ่งบรรทัด
+- [ ] **คอนเทนเนอร์ต่อถึง DB ได้** — ไม่ใช่แค่ตัว host ต่อได้ · คอนเทนเนอร์ใช้ DNS ของ Docker จึงมัก resolve ชื่อสั้น (`SQLSRV01`) ไม่ได้ · ถ้าเป็นแบบนั้นกรุณาแจ้ง **FQDN หรือ IP ของ DB** กลับมาให้ทีมพัฒนา (หรือ IP ของ DNS server องค์กร)
+- [ ] host มี `docker compose` (v2, ไม่มีขีด) — เช็คด้วย `docker compose version` · Jenkinsfile ที่ส่งมาเรียก v2 ซึ่งเป็นค่ามาตรฐาน **ถ้า host มีแต่ `docker-compose` (v1) ตัวเก่า กรุณาแจ้งทีมพัฒนา** ให้แก้สเตจ Deploy หนึ่งบรรทัด (v1 EOL ตั้งแต่กลางปี 2023)
 
 ---
 

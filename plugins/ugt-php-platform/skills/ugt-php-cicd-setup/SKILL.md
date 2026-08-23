@@ -186,12 +186,13 @@ version หรือ commit hash ใน response**. Container healthcheck ยิ
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image (ข้อยกเว้นเดียวที่ contract
 ประกาศไว้คือ `wp-content` ของ WordPress ซึ่ง **บังคับ** ต้องเป็น volume).
 บล็อก `[VOLUME]` ในสเตจ Deploy สร้าง path + `chown` ให้ตรง UID ของ user ใน
-container ให้เองเฉพาะครั้งแรก (idempotent) โดยอ่าน UID จาก image จริง ไม่
-hardcode — แต่ **session ที่กรอก volume ต้องเติม `<name>` ทุกตัวเข้าไปในบรรทัด
-`mkdir -p` ของบล็อกนั้นเอง** (template mkdir ไว้แค่ระดับ `<project>`; subdir
-ที่ไม่มีจะถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียน
-ไม่ได้). admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin
-handoff). รายละเอียดกลไก chown → `references/docker-deploy.md` §B
+container ให้เอง โดยอ่าน UID จาก image จริง ไม่ hardcode — **มันวนเช็คทีละ
+subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่มทีหลัง release แรกให้ด้วย และ
+ข้ามตัวที่มีอยู่แล้วโดยไม่ chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน
+`uploads`/`reports` ในบรรทัด `for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่
+ในลิสต์จะถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้
+(`verify.mjs` จับข้อนี้ให้). admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียว
+ต่อ server (ดู admin handoff). รายละเอียดกลไก chown → `references/docker-deploy.md` §B
 
 ### 2.10 CI env
 
@@ -242,9 +243,9 @@ handoff). รายละเอียดกลไก chown → `references/docke
    ลบบล็อก. **shape = wordpress ข้อนี้ไม่ใช่คำถาม** — `wp-content` เป็น volume
    บังคับเสมอ ถามได้แค่ว่า *นอกจาก* `wp-content` แล้วมีอะไรอีก
 7. **Deploy target** — docker host ไหน, Jenkins อยู่เครื่องเดียวกับ docker
-   daemon หรือ mount socket, `docker-compose` (v1, hyphen) หรือ
-   `docker compose` (v2 plugin) — Jenkinsfile ที่ให้มาใช้ v1 ต้องแก้ถ้า host
-   มีแต่ v2
+   daemon หรือ mount socket, `docker compose` (v2, ไม่มีขีด) หรือ
+   `docker-compose` (v1, มีขีด) — **Jenkinsfile ที่ให้มาใช้ v2** ซึ่งเป็น
+   ค่ามาตรฐาน ต้องแก้กลับเฉพาะ host เก่าที่มีแต่ v1 (v1 EOL ตั้งแต่กลางปี 2023)
 8. **(optional) สร้าง test ครอบคลุมโค้ดเดิมไหม** — **default: ไม่**
    (สร้างแค่ `tests/SmokeTest.php` พอให้สเตจ Unit Tests รันผ่านจริงโดยไม่แตะ
    โค้ดเดิม) ถ้าตอบใช่ → **ทำใน session แยกหลัง pipeline เขียวแล้ว** ตาม
@@ -422,11 +423,11 @@ render เอกสารส่ง admin (§5.7):
   (shape = wordpress ข้ามข้อนี้ — `[WP]` บังคับให้มี volume เสมอ)
 - **มี volume** → uncomment `volumes:` ในทั้ง 2 compose แล้วแทน `<name>` ด้วย
   ชื่อจริง — path ต้องอยู่ใต้ `/srv/appdata/<project>/` (dev ใช้
-  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วเติม `<name>` ทุกตัวเข้าไปใน
-  บรรทัด `mkdir -p` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วย** — งานนี้ลืมไม่ได้:
+  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
+  `for p in` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วยชื่อจริงทุกตัว** — งานนี้ลืมไม่ได้:
 
   ```sh
-  mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/storage
+  for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/storage; do
   ```
 
   compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
@@ -458,8 +459,9 @@ render เอกสารส่ง admin (§5.7):
   - CI3/legacy: `base_url` ใน config ของโปรเจคเอง
   แล้วเช็คของจริงตาม checklist: เปิดแอป**ผ่าน URL เต็มหลัง proxy** ไม่ใช่
   `localhost:port` (อย่างหลังผ่านเสมอแม้ config ผิด)
-- **`docker compose` v2 บน host (ข้อ 7)** → เปลี่ยน `docker-compose -f ... up`
-  ใน Jenkinsfile เป็น `docker compose -f ... up` (สอง binary ไม่ compatible 100%)
+- **host มีแต่ `docker-compose` v1 (ข้อ 7)** → เปลี่ยน `docker compose -f ... up`
+  ใน Jenkinsfile กลับเป็น `docker-compose -f ... up` (สอง binary ไม่ compatible
+  100%) — กรณีนี้ควรเป็นข้อยกเว้น ไม่ใช่ค่าปกติ
 - **มี config lint/test เดิมอยู่แล้ว** → merge ค่าจาก asset เข้าของเดิม ไม่ทับ
   ทั้งไฟล์; แต่ 3 ค่านี้ **ต้องได้ผลลัพธ์ตามนี้เสมอ** ไม่งั้น pipeline พังเงียบ ๆ:
   PHPUnit ต้องออก `test-results/junit.xml` และ `clover.xml` (สเตจ Unit Tests
@@ -724,7 +726,7 @@ path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟ
       `__ENTRY_FILE__` = `api/health/index.php` (**ไม่ใช่** `index.php` ที่ไม่มี
       ใน repo) · มี `composer.json` + `require-dev` ครบ 3 ตัวเหมือน shape อื่น ·
       บอกผู้ใช้แล้วว่าโค้ดใน `wp-content` ขึ้น container ทางไหน (§5.3 ข้อ 1 หรือ 2)
-- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `mkdir -p` ของ
+- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `for p in` ของ
       บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
 - [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
       (`git check-ignore .env .env.dev` → exit 0) · `.env.example` commit แล้ว

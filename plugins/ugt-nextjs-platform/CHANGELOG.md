@@ -1,5 +1,40 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.45.0 (2026-08-24)
+
+สามข้อที่ทำให้ **ผลลัพธ์ต่างกันระหว่างโปรเจค** ทั้งที่ติดตั้งจาก plugin ตัวเดียวกัน
+— มาจาก pilot ฝั่ง PHP (`ugt-mscpl-ana`) แต่สองข้อแรกเป็นบั๊กเดียวกันเป๊ะใน nextjs ด้วย
+จึงแก้พร้อมกันทั้ง 3 stack (php/python 0.5.0)
+
+**`[VOLUME]` guard เช็คแค่ dir ระดับโปรเจค — volume ที่เพิ่มทีหลังไม่มีวันถูกสร้าง.**
+บล็อกเดิมห่อทุกอย่างไว้ใน `if [ ! -d /srv/appdata/<project> ]` ซึ่งกลายเป็น
+no-op ถาวรทันทีที่ deploy แรกสร้างโฟลเดอร์นั้นขึ้นมา · โปรเจคที่เพิ่ม volume
+ในรุ่นถัดไปจึงได้ subdir ที่ dockerd สร้างเองเป็น `root:root` ตอน `up -d` แล้ว
+user `nextjs` เขียนไม่ได้ — **ทั้งที่ container ขึ้น healthy ปกติ** อาการโผล่
+ตอนแอปเขียนไฟล์จริงเท่านั้น · เปลี่ยนเป็นวนเช็คทีละ subdir
+(`for p in …; do [ ! -d "$p" ] && mkdir + chown; done`) ซึ่งสร้าง volume ที่เพิ่ม
+ทีหลังให้ และยังข้ามตัวที่มีอยู่แล้วโดยไม่ `chown -R` ซ้ำทุก deploy เหมือนเดิม
+
+> `verify.mjs` ต้องแก้คู่กัน: check เดิมอ่านชื่อ volume จากบรรทัด `mkdir -p`
+> ตรง ๆ ซึ่งพอเป็นลูปแล้วเหลือแค่ `"$p"` — ไม่แก้พร้อมกันจะ **false-fail ทุก
+> โปรเจคที่ตั้ง volume ถูกต้อง** · ตอนนี้สแกนทั้ง Jenkinsfile ที่ตัดคอมเมนต์แล้ว
+> จึงทนต่อรูปแบบคำสั่งด้วย ไม่ผูกกับ `mkdir`
+
+**`docker compose` (v2) เป็นค่าตั้งต้นแทน `docker-compose` (v1).** v1 เป็น
+Python standalone ที่ EOL ตั้งแต่กลางปี 2023 และไม่มีใน Docker Engine
+ปัจจุบัน — template จึงบังคับให้ทุกโปรเจคแก้บรรทัดเดียวกันซ้ำ ๆ หรือ Deploy
+stage ตาย · แถม `SKILL.md` เองก็เขียนตัวอย่างเป็น v2 อยู่แล้ว (template ขัดกับ
+SKILL ของตัวเอง) · host เก่าที่มีแต่ v1 ยังแก้กลับได้ที่บรรทัดเดียว —
+`references/jenkins-one-time-setup.md` §A7 กลับทิศคำอธิบายให้ตรงแล้ว
+
+**`ugt-nextjs-full-setup/scripts/verify.mjs` ไม่เคยเช็ค design module.**
+§4.2 ประกาศว่าเช็ค rule file ของ database/auth/ci/design แต่โค้ดสร้างรายการจาก
+signal ของ prisma/better-auth/Jenkinsfile/nodemailer/storage.ts เท่านั้น —
+`ugt-nextjs-design.md` จึงไม่มีวันเข้า `expected` และโปรเจคที่ขาดไฟล์กติกา
+design ผ่านการเช็คไปเงียบ ๆ ทั้งที่ full-setup ติดตั้ง Design ให้ทุกครั้ง ·
+ใช้ `docs/DESIGN.md` เป็น signal (dependency ระบุไม่ได้ เพราะ shadcn/tailwind
+โปรเจคอาจมีอยู่ก่อน)
+
 ## 4.44.0 (2026-08-23)
 
 **`IconAction` ได้ prop `tone` — ปุ่ม action ในแถวตารางมีพื้นตั้งแต่ตอนพัก**

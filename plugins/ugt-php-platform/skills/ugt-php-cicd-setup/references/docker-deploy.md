@@ -13,7 +13,7 @@ Jenkins Deploy stage resolves ทุกค่านี้จาก `env.BRANCH_N
 
 ทุก branch build image ของตัวเองเสมอ (tag `latest` + `BUILD_NUMBER` คู่กัน — ห้าม
 tag แค่ `latest`, ไม่งั้น rollback ไม่ได้เพราะไม่มีเลขอ้างอิงย้อนกลับ). Deploy
-ใช้ `docker-compose -f <file> up -d --no-build` เสมอ — flag นี้บังคับให้ compose
+ใช้ `docker compose -f <file> up -d --no-build` เสมอ — flag นี้บังคับให้ compose
 reuse image ที่เพิ่งผ่าน Quality Gate ในสเตจ Docker Build แทนที่จะ build ใหม่
 จาก `build:` section (ซึ่งจะได้ image คนละตัวที่ไม่ผ่าน scan).
 
@@ -197,6 +197,35 @@ RUN apt-get update && apt-get upgrade -y && \
 - **`Dockerfile.wordpress` ไม่มีบล็อก `[DB]` นี้** — WordPress ใช้ `mysqli`/
   `pdo_mysql` ที่มากับ base image `wordpress:*` อยู่แล้ว SQL Server ไม่ใช่
   ทางเลือกมาตรฐานของ WordPress ในชุดนี้
+
+### DNS: ชื่อ host สั้นของ DB มัก resolve ไม่ได้จากในคอนเทนเนอร์
+
+อาการ: `Login timeout expired` (หรือ connect ค้างจนครบ timeout) ทั้งที่ค่า
+`DB_SERVER`/`DATABASE_URL` ถูกต้อง และ **เปิดจากเครื่อง host เดียวกันได้ปกติ**
+
+สาเหตุ: คอนเทนเนอร์ใช้ DNS resolver ของ Docker ไม่ใช่ของเครื่อง host — ชื่อสั้น
+อย่าง `SQLSRV01` หรือ `tcl_ryg2` ที่ resolve ได้บน Windows/โดเมนองค์กร (ผ่าน DNS
+suffix search list ของเครื่อง) มักไม่มีความหมายในเน็ตเวิร์กของคอนเทนเนอร์
+(ยืนยันจากโปรเจค pilot 2026-08 — เสียเวลาไล่หาเพราะ error ชี้ไปที่ credential
+มากกว่า network)
+
+ทางแก้ เรียงตามลำดับที่ควรลอง:
+
+1. **ใช้ FQDN** (`SQLSRV01.corp.example.co.th`) แทนชื่อสั้น — สะอาดสุด ไม่ผูก IP
+2. **ใช้ IP ตรง ๆ** — ได้ผลแน่นอน แต่ต้องตามแก้เมื่อ DB ย้ายเครื่อง
+3. **ชี้ DNS ขององค์กรให้คอนเทนเนอร์** ใน compose ทั้งสองไฟล์:
+   ```yaml
+   dns:
+     - 10.x.x.x   # DNS ขององค์กร
+   ```
+
+ตรวจก่อนสรุปว่าเป็นเรื่อง credential — ยิงจากในคอนเทนเนอร์จริง:
+
+```bash
+docker exec <container> getent hosts <ชื่อที่ตั้งใน DB_SERVER>
+```
+
+ไม่มีผลลัพธ์ = ปัญหา DNS ไม่ใช่รหัสผ่าน
 
 ## D. Healthcheck — `curl -fsS -L` (ต้องลง curl เอง)
 

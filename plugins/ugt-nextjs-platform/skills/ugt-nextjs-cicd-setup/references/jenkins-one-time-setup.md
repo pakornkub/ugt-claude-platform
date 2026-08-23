@@ -111,18 +111,20 @@ deceptively). Pick one:
    full NVD set (⚠️ 60–90 minutes — the stage's 90-minute timeout allows for
    it), then put it back
 
-### A7. docker-compose v1 vs v2
+### A7. docker compose v2 vs docker-compose v1
 
-Some servers only have **`docker-compose`** (v1 standalone), not
-`docker compose` (v2 plugin) — the Jenkinsfile template defaults to
-`docker-compose` (v1). Check first:
+The Jenkinsfile template uses **`docker compose`** (v2, no hyphen) — the org
+default. The standalone **`docker-compose`** (v1) has been EOL since mid-2023
+and is not part of any current Docker Engine install. Check what the host has:
 
 ```bash
-docker-compose version   # v1 standalone
-docker compose version   # v2 plugin
+docker compose version   # v2 plugin — expected
+docker-compose version   # v1 standalone — legacy only
 ```
 
-v2-only host → change the Deploy stage to `docker compose` (with the space).
+v1-only host → change the Deploy stage back to `docker-compose` (with the
+hyphen). Treat that as an exception worth flagging to whoever maintains the
+host, not a normal configuration.
 
 ---
 

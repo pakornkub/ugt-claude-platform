@@ -198,9 +198,10 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 - vitest must enable the JUnit reporter when `CI=true` (see the comment in the
   template's Unit Tests stage)
 - ไม่มี volume → ลบทุกบล็อกคอมเมนต์ `[VOLUME]` ในทั้ง 2 compose **และลบบล็อก
-  `[VOLUME]` ใน Jenkinsfile ด้วย**; มี volume → เติม `/<name>` ของแต่ละ volume
-  ต่อท้ายบรรทัด `mkdir` ใน Jenkinsfile (มิฉะนั้น dockerd จะสร้าง subdir เป็น
-  `root:root` เมื่อ compose ขึ้น container)
+  `[VOLUME]` ใน Jenkinsfile ด้วย**; มี volume → แทนชื่อตัวอย่างในบรรทัด
+  `for p in` ของ Jenkinsfile ด้วยชื่อ volume จริงทุกตัว (มิฉะนั้น dockerd จะ
+  สร้าง subdir เป็น `root:root` เมื่อ compose ขึ้น container) — บล็อกวนเช็คทีละ
+  subdir จึงรองรับ volume ที่เพิ่มทีหลัง release แรกด้วย
 
 ### 4.4 Adjust next.config
 

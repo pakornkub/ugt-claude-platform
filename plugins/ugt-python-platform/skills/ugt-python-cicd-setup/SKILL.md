@@ -160,11 +160,12 @@ compose. Shape `[BATCH]` ไม่มี health endpoint เลย (ไม่ม
 ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/srv/appdata/<project>/<name>`
 (dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. บล็อก `[VOLUME]` ในสเตจ
-Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app` ใน container ให้เอง
-เฉพาะครั้งแรก (idempotent) โดยอ่าน UID จาก image จริง ไม่ hardcode —
-แต่ **session ที่กรอก volume ต้องเติม `<name>` ทุกตัวเข้าไปในบรรทัด `mkdir -p`
-ของบล็อกนั้นเอง** (template mkdir ไว้แค่ระดับ `<project>`; subdir ที่ไม่มีจะถูก
-dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้).
+Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app` ใน container ให้เอง โดย
+อ่าน UID จาก image จริง ไม่ hardcode — **มันวนเช็คทีละ subdir** (`for p in …`)
+จึงสร้าง volume ที่เพิ่มทีหลัง release แรกให้ด้วย และข้ามตัวที่มีอยู่แล้วโดยไม่
+chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน `uploads`/`reports` ในบรรทัด
+`for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่ในลิสต์จะถูก dockerd สร้างเป็น
+`root:root` ตอน `up -d` แล้ว container เขียนไม่ได้ (`verify.mjs` จับข้อนี้ให้).
 admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin handoff).
 รายละเอียดกลไก chown → `references/docker-deploy.md` §D
 
@@ -211,9 +212,9 @@ admin เตรียม `/srv/appdata` ให้เขียนได้คร�
    รายงานที่ generate) → รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี →
    ลบบล็อก
 7. **Deploy target** — docker host ไหน, Jenkins อยู่เครื่องเดียวกับ docker
-   daemon หรือ mount socket, `docker-compose` (v1, hyphen) หรือ
-   `docker compose` (v2 plugin) — Jenkinsfile ที่ให้มาใช้ v1 ต้องแก้ถ้า host
-   มีแต่ v2
+   daemon หรือ mount socket, `docker compose` (v2, ไม่มีขีด) หรือ
+   `docker-compose` (v1, มีขีด) — **Jenkinsfile ที่ให้มาใช้ v2** ซึ่งเป็น
+   ค่ามาตรฐาน ต้องแก้กลับเฉพาะ host เก่าที่มีแต่ v1 (v1 EOL ตั้งแต่กลางปี 2023)
 8. **(optional) สร้าง test ครอบคลุมโค้ดเดิมไหม** — **default: ไม่**
    (สร้างแค่ `tests/test_smoke.py` พอให้สเตจ Unit Tests รันผ่านจริงโดยไม่แตะ
    โค้ดเดิม) ถ้าตอบใช่ → **ทำใน session แยกหลัง pipeline เขียวแล้ว** ตาม
@@ -321,11 +322,11 @@ sonar keys = `<project>`, `<project>-dev`
   **และ** บล็อก `[VOLUME]` (mkdir + chown) ในสเตจ Deploy ของ `Jenkinsfile`
 - **มี volume** → uncomment `volumes:` ในทั้ง 2 compose แล้วแทน `<name>` ด้วย
   ชื่อจริง — path ต้องอยู่ใต้ `/srv/appdata/<project>/` (dev ใช้
-  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วเติม `<name>` ทุกตัวเข้าไปใน
-  บรรทัด `mkdir -p` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วย** — งานนี้ลืมไม่ได้:
+  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
+  `for p in` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วยชื่อจริงทุกตัว** — งานนี้ลืมไม่ได้:
 
   ```sh
-  mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
+  for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
   ```
 
   compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
@@ -357,9 +358,9 @@ sonar keys = `<project>`, `<project>-dev`
     ตัวแปรลง compose ทั้ง 2 ไฟล์
   - แล้วเช็คของจริงตาม checklist: เปิดแอป **ผ่าน URL เต็มหลัง proxy** ไม่ใช่
     `localhost:port` ตรง ๆ (อย่างหลังผ่านเสมอแม้ config ผิด)
-- **`docker compose` v2 บน host (ข้อ 7)** → เปลี่ยน `docker-compose -f ... up`
-  ใน Jenkinsfile เป็น `docker compose -f ... up` (สอง binary ไม่ compatible
-  100%)
+- **host มีแต่ `docker-compose` v1 (ข้อ 7)** → เปลี่ยน `docker compose -f ... up`
+  ใน Jenkinsfile กลับเป็น `docker-compose -f ... up` (สอง binary ไม่ compatible
+  100%) — กรณีนี้ควรเป็นข้อยกเว้น ไม่ใช่ค่าปกติ
 - **มี config lint/test เดิมอยู่แล้ว** → merge ค่าจาก `pyproject-tooling.toml`
   เข้าของเดิม ไม่ทับทั้ง section; แต่ 2 ค่านี้ **ต้องได้ผลลัพธ์ตามนี้เสมอ**
   ไม่งั้น pipeline พังเงียบ ๆ: pytest ต้องออก `test-results/junit.xml` และ
@@ -538,7 +539,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
 - [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
 - [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
       healthcheck ยิง `127.0.0.1:8000` · volume (ถ้ามี) อยู่ใต้ `/srv/appdata/`
-- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `mkdir -p` ของ
+- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `for p in` ของ
       บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
 - [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
       (`git check-ignore .env .env.dev` → exit 0) · `.env.example` commit แล้ว

@@ -1,5 +1,31 @@
 # Changelog — ugt-python-platform
 
+## 0.5.0 (2026-08-24)
+
+สามข้อจาก pilot ฝั่ง PHP ที่กลไกเหมือนกันทุกภาษา — ทำพร้อมกันทั้ง 3 stack
+(nextjs 4.45.0, php 0.5.0) · ยังไม่ tag — **ฝั่ง python ยังไม่มี pilot ของตัวเอง**
+
+**`[VOLUME]` guard เช็คแค่ dir ระดับโปรเจค — volume ที่เพิ่มทีหลังไม่มีวันถูกสร้าง.**
+บล็อกเดิมห่อทุกอย่างไว้ใน `if [ ! -d /srv/appdata/<project> ]` ซึ่งกลายเป็น
+no-op ถาวรทันทีที่ deploy แรกสร้างโฟลเดอร์นั้น · volume ที่เพิ่มในรุ่นถัดไปจึง
+ถูก dockerd สร้างเองเป็น `root:root` ตอน `up -d` แล้ว user `app` เขียนไม่ได้
+**ทั้งที่ container ขึ้น healthy ปกติ** — และ **[BATCH] เจอยากกว่า** เพราะ job
+รันแล้วจบ ไม่มี healthcheck คอยส่งสัญญาณ · เปลี่ยนเป็นวนเช็คทีละ subdir
+(`for p in …`) พร้อมแก้ `verify.mjs` คู่กัน (check เดิมอ่านชื่อจากบรรทัด
+`mkdir -p` ซึ่งพอเป็นลูปแล้วเหลือ `"$p"` — ไม่แก้พร้อมกันจะ false-fail ทุก
+โปรเจคที่ตั้ง volume ถูกต้อง)
+
+**`docker compose` (v2) เป็นค่าตั้งต้นแทน `docker-compose` (v1).** v1 EOL ตั้งแต่
+กลางปี 2023 ไม่มีใน Docker Engine ปัจจุบัน · §4.7 (interview), §5.3 และ
+checklist ของ admin กลับทิศคำอธิบายแล้ว · cron ของ shape `[BATCH]` ใช้ v2 อยู่
+ก่อนแล้ว — ตอนนี้ Jenkinsfile ตรงกับมันเสียที
+
+**DNS: ชื่อ host สั้นของ DB มัก resolve ไม่ได้จากในคอนเทนเนอร์** —
+`references/docker-deploy.md` §G หัวข้อใหม่ (Compose conventions เลื่อนเป็น §H) ·
+คอนเทนเนอร์ใช้ DNS ของ Docker ไม่ใช่ suffix search list ของเครื่อง ทางแก้เรียง
+ลำดับ FQDN → IP → `dns:` ใน compose พร้อมคำสั่งวินิจฉัยชี้ขาด และเพิ่มคำถามใน
+admin-handoff ให้ยืนยัน connectivity จาก**คอนเทนเนอร์** ไม่ใช่จาก host
+
 ## 0.4.0 (2026-08-23)
 
 **Blocker สองข้อที่พบจาก pilot ฝั่ง PHP แต่ใช้กลไกเดียวกันเป๊ะ ๆ** —

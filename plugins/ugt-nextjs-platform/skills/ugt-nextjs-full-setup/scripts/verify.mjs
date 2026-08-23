@@ -86,6 +86,11 @@ check('Rules exist for every installed module', () => {
   if (has('Jenkinsfile')) expected.push('ugt-nextjs-ci.md');
   if (deps.nodemailer) expected.push('ugt-nextjs-mail.md');
   if (has('lib/storage.ts')) expected.push('ugt-nextjs-upload.md');
+  // docs/DESIGN.md is the design module's own deliverable — no dependency
+  // identifies it (the kit installs shadcn/tailwind that a project may already
+  // have), so the agreement file is the signal. Without this line the design
+  // module was the one §4.2 names that nothing ever checked.
+  if (has('docs/DESIGN.md')) expected.push('ugt-nextjs-design.md');
   const missing = expected.filter((f) => !has('.claude/rules', f));
   return missing.length
     ? { ok: false, msg: `Module installed but rules missing: ${missing.join(', ')} — its rules will never load while editing` }
