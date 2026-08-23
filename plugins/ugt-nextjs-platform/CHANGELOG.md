@@ -1,5 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.31.0 (2026-08-21)
+
+Follow-up to 4.30.0's §0.4 amendment, after checking the rule against the
+shipped base-mira button (`gov-boi-smart`, the reference base-mira project):
+the new "no className size overrides" line banned two shapes the kit itself
+uses correctly. §0.4 now states both exemptions —
+`w-*`/`w-full` is layout, not the control size box, and `variant="link"` is
+text rather than a button, so `h-auto p-0` on it is right (base-mira's `link`
+variant only sets colour + underline; it does not clear the size padding).
+Without this the login form's "ลืมรหัสผ่าน?" link and every `w-full` submit
+button read as violations of a rule written the same day.
 ## 4.30.0 (2026-08-21)
 
 Two มติ (2026-08-21) plus the contract fixes they unblocked.

@@ -20,8 +20,11 @@
    ได้ทุกที่** (`aria-label` บังคับ — มติ 2026-08-21 ขยายกฎให้ตรงของจริง: theme
    toggle · SidebarTrigger · ปุ่มตั้งค่าคอลัมน์ · ปุ่ม pagination) · **แต่ปุ่มใน
    row ตารางต้องผ่าน `IconAction` เสมอ** — ที่นั่น tooltip คือสิ่งเดียวที่บอกว่า
-   ไอคอนแต่ละตัวทำอะไร · toolbar แน่น = `sm` · **ห้าม override ขนาดด้วย className**
-   (`size-7 p-0` ฯลฯ) — ขนาดที่มีไม่พอให้แก้ที่ `components/ui/button.tsx`
+   ไอคอนแต่ละตัวทำอะไร · toolbar แน่น = `sm` · **ห้าม override กล่องขนาดของ control
+   ด้วย className** (`h-*` `p-*` `size-*` เช่น `size-7 p-0`) — ไม่พอให้แก้ที่
+   `components/ui/button.tsx` · ข้อยกเว้นสองอย่าง: `w-*`/`w-full` เป็น layout
+   ไม่ใช่ขนาด control · `variant="link"` เป็นข้อความไม่ใช่ปุ่ม จึงถอด `h-auto p-0`
+   ได้ (base-mira ไม่ได้ล้าง padding ให้ variant นี้)
 5. **ตาราง = `DataTable` กลางเท่านั้น** — ห้าม `<table>`/`ui/table` ตรงในหน้า
 6. **วันที่/ตัวเลขผ่าน `lib/format.ts` เท่านั้น** — ห้าม format inline
 7. **A11y ขั้นต่ำ**: สถานะ = สี+icon เสมอ · ปุ่ม icon ล้วนต้องมี `aria-label`
