@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.37.0 (2026-08-23)
+
+**A wrong `shadcn init` is now a failing check, not a paragraph in a SKILL.**
+4.25.0 forbade a plain `npx shadcn init` in prose (it resolves to the Radix
+default style while the kit is base-mira/Base UI), but nothing enforced it:
+`lint-kit-assets.mjs` only scans the assets in this repo, so Radix reaching a
+target project was invisible. `ugt-nextjs-design-setup/scripts/verify.mjs`
+now gates both halves, and it runs at close-out of every design-setup and
+full-setup:
+
+- **components.json matches the org preset** — the old check compared only
+  `style` and `iconLibrary`; it now also fails on `rtl: true` and a
+  `baseColor` other than `neutral`, and a wrong `style` names the fix
+  (`--preset b1ZzrZbs0`) instead of just reporting the mismatch.
+- **No Radix anywhere in the project** (new) — fails on a `radix-ui` or
+  `@radix-ui/*` dependency, on a missing `@base-ui/react`, and on any source
+  file under `app`/`components`/`features`/`src` using `asChild`, importing
+  `radix-ui`, putting `onSelect` on a menu item, `checked="indeterminate"`,
+  or `delayDuration`. These are exactly the idioms Base UI ignores silently —
+  the component renders and the control does nothing, which is how the
+  4.25.0 dead-logout-button shipped. Opt out per file with `// lint-ok:radix`.
+
+Verified against fixtures: a plain-init project (new-york + `radix-ui` +
+`asChild` + `onSelect` + `checked="indeterminate"`) fails with all six
+findings named; a preset-correct Base UI project passes both.
 ## 4.33.0 (2026-08-21)
 
 **มติ 2026-08-21 — ยึด preset สำหรับปุ่ม destructive.** base-mira ships a

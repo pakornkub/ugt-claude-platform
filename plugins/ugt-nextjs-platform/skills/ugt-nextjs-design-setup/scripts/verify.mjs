@@ -69,13 +69,62 @@ check('No leftover placeholders in MOTION.md / design-questions.md', () => {
 });
 
 // ── shadcn config ──────────────────────────────────────────────────────────
-check("components.json style is 'base-mira' + lucide", () => {
+// ── the preset (มติ 2026-08-04: b1ZzrZbs0 = base-mira / Base UI / neutral) ──
+check('components.json matches the org preset', () => {
   if (!has('components.json')) return { ok: false, msg: 'No components.json — shadcn not initialized' };
   const cj = JSON.parse(read('components.json'));
   const problems = [];
-  if (cj.style !== 'base-mira') problems.push(`style is '${cj.style}' (org standard: base-mira — มติ 2026-08-04 supersedes radix-mira)`);
-  if (cj.iconLibrary && cj.iconLibrary !== 'lucide') problems.push(`iconLibrary is '${cj.iconLibrary}'`);
+  if (cj.style !== 'base-mira') {
+    problems.push(
+      "style is '" +
+        cj.style +
+        "' — a plain 'shadcn init' was run. Re-init with " +
+        'npx shadcn@latest init --preset b1ZzrZbs0 --pointer --yes ' +
+        '(มติ 2026-08-04: base-mira supersedes radix-mira)'
+    );
+  }
+  if (cj.iconLibrary && cj.iconLibrary !== 'lucide') problems.push("iconLibrary is '" + cj.iconLibrary + "' (preset: lucide)");
+  if (cj.rtl === true) problems.push('rtl is true (preset: false)');
+  const baseColor = cj.tailwind?.baseColor ?? cj.baseColor;
+  if (baseColor && baseColor !== 'neutral') problems.push("baseColor is '" + baseColor + "' (preset: neutral)");
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+// The check above reads intent; this one reads what is actually on disk — a
+// wrong init, a copy off the shadcn MCP (it answers with the Radix default
+// style), or a hand-port from a radix-mira project all land here.
+check('No Radix anywhere in the project (the kit is Base UI)', () => {
+  const problems = [];
+
+  if (has('package.json')) {
+    const pkg = JSON.parse(read('package.json'));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    const radix = Object.keys(deps).filter((d) => d === 'radix-ui' || d.startsWith('@radix-ui/'));
+    if (radix.length) problems.push('package.json depends on ' + radix.join(', ') + ' — uninstall');
+    if (!deps['@base-ui/react']) problems.push('@base-ui/react is missing — the base-mira primitives are not installed');
+  }
+
+  // Base UI ignores Radix idioms silently: the component renders and the
+  // control just does nothing, so only a scan catches them.
+  const idioms = [
+    [/\basChild\b/, 'asChild (Base UI: render={<X />})'],
+    [/from ['"](radix-ui|@radix-ui\/[^'"]+)['"]/, 'imports radix-ui'],
+    [/<\w*(Menu|Dropdown\w*)Item[^>]*\sonSelect=/s, 'onSelect on a menu item (Base UI: onClick)'],
+    [/checked=["']indeterminate["']/, 'checked="indeterminate" (Base UI: checked + indeterminate booleans)'],
+    [/\bdelayDuration=/, 'delayDuration (Base UI Tooltip: delay)'],
+  ];
+  for (const file of sourceTsx()) {
+    const code = readFileSync(file, 'utf8');
+    if (/\/\/ lint-ok:radix/.test(code)) continue;
+    for (const [re, why] of idioms) {
+      if (re.test(code)) problems.push(relative(ROOT, file) + ': ' + why);
+    }
+  }
+
+  const shown = problems.slice(0, 8).join('\n      ');
+  return problems.length
+    ? { ok: false, msg: shown + (problems.length > 8 ? '\n      …+' + (problems.length - 8) + ' more' : '') }
+    : { ok: true };
 });
 
 // ── tokens ────────────────────────────────────────────────────────────────

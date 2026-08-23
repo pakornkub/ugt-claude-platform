@@ -140,12 +140,19 @@ different size — is the field bug this step exists to prevent.
    ever stops resolving: `npx shadcn@latest init --preset mira` — there is
    NO `--style base-mira` flag.)
    **After init**: rename `package.json`'s `"name"` (the template writes
-   `next-app`) to the project slug · verify `components.json` — expected:
-   `style: "base-mira"` · `iconLibrary: "lucide"` (mira presets can default
-   to `hugeicons` — fix and uninstall any `@hugeicons/*` deps) ·
-   `rtl: false` · `menuColor: "default"`. If the org preset ever writes a
-   different `style` string than `base-mira`, update `scripts/verify.mjs`'s
-   expectation in the same change — never leave the two disagreeing.
+   `next-app`) to the project slug, then **run the gate instead of eyeballing
+   it**: `node <skill-dir>/scripts/verify.mjs` fails on any `components.json`
+   that is not `style: base-mira` · `iconLibrary: lucide` · `rtl: false` ·
+   `baseColor: neutral`, and separately fails on any Radix that reached the
+   project — a `radix-ui`/`@radix-ui/*` dependency, a missing
+   `@base-ui/react`, or a source file using `asChild` / `onSelect` on a menu
+   item / `checked="indeterminate"` / `delayDuration`. Both checks are
+   re-runnable at any time, so a wrong init cannot survive close-out. (mira
+   presets can default to `hugeicons` — fix and uninstall any `@hugeicons/*`
+   deps; `menuColor: "default"` is expected but not gated.) If the org preset
+   ever writes a different `style` string than `base-mira`, update
+   `scripts/verify.mjs`'s expectation in the same change — never leave the two
+   disagreeing.
    If the init dies mid-install (postinstall spawn errors happen in
    sandboxes) it can leave a scaffold **without `components.json`** — run
    `npm install`, then re-run the init in existing-project mode (no
