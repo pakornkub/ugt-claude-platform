@@ -275,6 +275,9 @@ check('Page-level filters use the control ladder, not bare Inputs', () => {
   for (const file of sourceTsx()) {
     const body = readFileSync(file, 'utf8');
     const rel = relative(ROOT, file).split('\\').join('/');
+    // components/ui/ คือ kit เอง — ช่องค้นหาที่ถูกต้องตามข้อตกลง (และช่องกรอง
+    // รายคอลัมน์) อยู่ใน data-table.tsx เช็คนี้ถามถึงโค้ดหน้า ไม่ใช่ตัว component
+    if (/(?:^|\/)components\/ui\//.test(rel)) continue;
     for (const m of body.matchAll(/<Input\b([\s\S]*?)(?:\/>|>)/g)) {
       const attrs = m[1];
       if (/(?:placeholder|name|id|aria-label)\s*=\s*[^>]*?(?:ค้นหา|กรอง|filter|search)/i.test(attrs)) {

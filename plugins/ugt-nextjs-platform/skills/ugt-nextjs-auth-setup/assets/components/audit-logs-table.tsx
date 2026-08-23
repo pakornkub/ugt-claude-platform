@@ -1,17 +1,16 @@
 'use client';
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 5161a73641f4
+// kit: ugt-nextjs-platform 4.36.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: 374ac64c9022
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
-// เห็นหน้าเดียวกัน refresh ไม่หลุด · toolbar filter (ชื่อผู้ใช้ → ช่วงวันที่ → action
-// เรียงกว้าง→แคบ มติ 2026-08-11) push URL เอง ส่วน page/sort DataTable push ให้ ·
+// เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
+// โหมด server — หน้านี้ไม่วาด Input เอง ตาม DESIGN.md §3) ส่วน filter ที่เหลือ
+// (ช่วงวันที่ → action เรียงกว้าง→แคบ มติ 2026-08-11) push URL เอง ·
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import { Input } from '@/components/ui/input';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
@@ -83,7 +82,6 @@ export function AuditLogsTable({
 }>) {
   const router = useRouter();
   const pathname = usePathname();
-  const [draftQ, setDraftQ] = useState(filters.q);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
 
   // filter เปลี่ยน = เงื่อนไขใหม่ → กลับหน้า 1 เสมอ (ลบ page ทิ้ง ให้ server default)
@@ -130,34 +128,17 @@ export function AuditLogsTable({
 
   return (
     <>
+      {/* ค้นหาฝั่ง server: DataTable หน่วงการพิมพ์ให้แล้วส่งคำค้นกลับมาที่ applyFilters */}
       <DataTable
         id="audit-logs"
         columns={columns}
         data={rows}
-        searchable
+        filterPlaceholder="ค้นหาชื่อผู้ใช้หรืออีเมล..."
+        serverSearch={{ value: filters.q, onChange: (q) => applyFilters({ q }) }}
         serverPagination={{ pageIndex, pageSize, totalItems }}
         serverQuery={{ query, baseParams, fields }}
         toolbarFilters={
           <>
-            <div className="relative">
-              <Search
-                className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-                strokeWidth={2}
-              />
-              <Input
-                value={draftQ}
-                placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล..."
-                className="w-56 pl-8"
-                onChange={(e) => setDraftQ(e.target.value)}
-                // ค้นฝั่ง server — apply ตอน Enter/ออกจากช่อง ไม่ยิงทุก keystroke
-                onBlur={() => {
-                  if (draftQ.trim() !== filters.q) applyFilters({ q: draftQ.trim() });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') applyFilters({ q: draftQ.trim() });
-                }}
-              />
-            </div>
             <DateRangePicker
               fromLabel="ตั้งแต่"
               toLabel="ถึง"

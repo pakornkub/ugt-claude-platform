@@ -93,6 +93,44 @@ markup ปัจจุบันเป็น Tailwind utilities ล้วนซ�
 สิ่งที่ขาดคือ "สเปคตายตัว" ไม่ใช่ component จึงเขียนค่าชุดเดียว (`size-14` ·
 `rounded-full` · `bg-primary/10` · ไอคอน `size-7 text-primary`) ลง DESIGN.md §4
 พร้อมเงื่อนไขยกระดับ: ใช้ครบ 3 ที่เมื่อไรค่อยยกเป็น component.
+## 4.36.0 (2026-08-23)
+
+**DataTable gets a server-mode global search (prop `serverSearch`) — the
+last page that hand-rolled its own search box now uses it.** Until now the
+toolbar search only existed in client mode (`globalSearch` / `filterColumn`),
+so a server-paginated page had no sanctioned way to offer free-text search
+and `/admin/audit-logs` drew its own `<Input>` + magnifier inside
+`toolbarFilters`. That broke two rules at once: DESIGN.md §3 ("the free-text
+search belongs to the DataTable, never repeat it in the filter bar") and the
+design skill's own `verify.mjs` check, which warns on any `<Input>` whose
+placeholder reads like a search.
+
+- `ui/data-table.tsx`: new `serverSearch={{ value, onChange, debounceMs? }}`.
+  Same box, same leftmost slot, same `filterPlaceholder`; the difference is
+  that the table keeps a local draft, debounces it (400ms default) and hands
+  the trimmed term back — it never touches tanstack `globalFilter`, so client
+  filtering stays off in server mode (filtering one page = confident
+  nonsense, same rule as the per-column filter guard). The query itself stays
+  the page's job because its meaning is page-specific — audit-logs searches
+  across the *user* table, not the rows on screen. External changes to
+  `value` (back/forward, a page-level clear) sync back into the box without
+  stomping on what the user is currently typing.
+- `components/audit-logs-table.tsx`: the hand-built search block, its
+  `draftQ` state and the `Search`/`Input` imports are gone — one prop now.
+  Behaviour change worth knowing: search used to apply on Enter/blur, it now
+  applies after the user stops typing.
+- DESIGN.md §3 and `references/conventions.md` say it explicitly: server mode
+  is **not** an exception to "the search box belongs to the DataTable".
+  `design-preview.html` had already drawn the audit-logs toolbar this way;
+  only its placeholder text was synced to the asset's.
+- `scripts/verify.mjs`: that same check now skips `components/ui/` before
+  matching. It was flagging the kit's own `data-table.tsx` twice (the toolbar
+  search and the per-column filter box — the two Inputs the rule exists to
+  send people *to*), so it could never come back clean and a real offender
+  would have been lost among two permanent warnings. Page code is still
+  scanned exactly as before.
+
+Closes the last open หมวด "ต้องมีมติ design ก่อน" item in `docs/backlog.md` §5.
 
 ## 4.33.0 (2026-08-21)
 
