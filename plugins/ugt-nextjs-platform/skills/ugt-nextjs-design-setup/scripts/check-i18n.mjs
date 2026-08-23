@@ -111,19 +111,31 @@ function stripComments(src) {
   return out;
 }
 
+// `assets/ui/` is copied to `components/ui/` in a consuming project (SKILL §Step 6),
+// while a dev-time run against `assets/` sees it at `ui/`. Resolve either shape.
+// A file present at neither is not installed — several kit components ship
+// conditionally (export-menu needs Excel export, tiptap-editor needs rich text),
+// so absence is a valid state, not a failure.
+function resolveConverted(rel) {
+  for (const candidate of [join(ROOT, rel), join(ROOT, 'components', rel)]) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 check('converted files carry no Thai outside comments', () => {
   const problems = [];
+  let scanned = 0;
   for (const rel of CONVERTED_FILES) {
-    const file = join(ROOT, rel);
-    if (!existsSync(file)) {
-      problems.push(`${rel}: listed as converted but the file is missing`);
-      continue;
-    }
+    const file = resolveConverted(rel);
+    if (!file) continue;
+    scanned++;
     const code = stripComments(readFileSync(file, 'utf8'));
     const hits = code.split('\n').reduce((n, l) => n + (/[฀-๿]/.test(l) ? 1 : 0), 0);
     if (hits) problems.push(`${rel}: ${hits} line(s) still hold Thai in code — move them into messages/`);
   }
-  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+  if (problems.length) return { ok: false, msg: problems.join(' · ') };
+  return { ok: true, msg: `${scanned}/${CONVERTED_FILES.length} converted file(s) present and clean` };
 });
 
 const icon = { true: '✔', false: '✘' };
