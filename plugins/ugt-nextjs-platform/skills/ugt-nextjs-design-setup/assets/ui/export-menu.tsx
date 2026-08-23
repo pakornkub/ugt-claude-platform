@@ -8,6 +8,7 @@
 // เพื่อให้แถบเครื่องมือของทุกหน้าหน้าตาเหมือนกัน
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ interface ExportMenuProps {
 
 export function ExportMenu({ endpoint, buildBody, disabled }: Readonly<ExportMenuProps>) {
   const [exporting, setExporting] = useState<'excel' | 'csv' | null>(null);
+  const t = useTranslations('kit.exportMenu');
 
   async function handleExport(format: 'excel' | 'csv') {
     setExporting(format);
@@ -42,7 +44,7 @@ export function ExportMenu({ endpoint, buildBody, disabled }: Readonly<ExportMen
       if (!res.ok) {
         const data: unknown = await res.json().catch(() => null);
         toast.error(
-          (data as { error?: { message?: string } } | null)?.error?.message ?? 'ดาวน์โหลดไม่สำเร็จ'
+          (data as { error?: { message?: string } } | null)?.error?.message ?? t('failed')
         );
         return;
       }
@@ -60,9 +62,9 @@ export function ExportMenu({ endpoint, buildBody, disabled }: Readonly<ExportMen
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('ดาวน์โหลดแล้ว');
+      toast.success(t('success'));
     } catch {
-      toast.error('ดาวน์โหลดไม่สำเร็จ');
+      toast.error(t('failed'));
     } finally {
       setExporting(null);
     }
@@ -74,7 +76,7 @@ export function ExportMenu({ endpoint, buildBody, disabled }: Readonly<ExportMen
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="outline" size="icon" disabled={disabled || busy} aria-label="ดาวน์โหลด" />
+          <Button variant="outline" size="icon" disabled={disabled || busy} aria-label={t('trigger')} />
         }
       >
         {busy ? (

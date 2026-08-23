@@ -66,6 +66,66 @@ check('catalog key parity across locales', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+// Files that have been through an i18n phase. Adding a file here is the commit
+// that finishes it — the gate then keeps Thai from creeping back in as the next
+// person adds a feature out of habit.
+const CONVERTED_FILES = [
+  'ui/data-table.tsx',
+  'ui/confirm-action-dialog.tsx',
+  'ui/export-menu.tsx',
+  'ui/date-picker.tsx',
+  'ui/tiptap-editor.tsx',
+];
+
+// A regex that cuts at the first `//` is wrong here: the kit uses backtick
+// template literals spanning lines, and `//` appears inside URLs. Track quote
+// and comment state character by character instead.
+function stripComments(src) {
+  let out = '';
+  let i = 0;
+  let quote = null;
+  while (i < src.length) {
+    const c = src[i];
+    const next = src[i + 1];
+    if (quote) {
+      if (c === '\\') { out += '  '; i += 2; continue; }
+      if (c === quote) quote = null;
+      out += c;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; out += c; i++; continue; }
+    if (c === '/' && next === '/') {
+      while (i < src.length && src[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && next === '*') {
+      i += 2;
+      while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
+check('converted files carry no Thai outside comments', () => {
+  const problems = [];
+  for (const rel of CONVERTED_FILES) {
+    const file = join(ROOT, rel);
+    if (!existsSync(file)) {
+      problems.push(`${rel}: listed as converted but the file is missing`);
+      continue;
+    }
+    const code = stripComments(readFileSync(file, 'utf8'));
+    const hits = code.split('\n').reduce((n, l) => n + (/[฀-๿]/.test(l) ? 1 : 0), 0);
+    if (hits) problems.push(`${rel}: ${hits} line(s) still hold Thai in code — move them into messages/`);
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 const icon = { true: '✔', false: '✘' };
 let failed = 0;
 for (const r of results) {

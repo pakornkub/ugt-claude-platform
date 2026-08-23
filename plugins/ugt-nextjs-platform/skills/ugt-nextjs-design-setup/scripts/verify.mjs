@@ -7,6 +7,7 @@
 // can't be found is a FAIL, never a pass.
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const ROOT = process.cwd();
 const results = [];
@@ -341,6 +342,14 @@ check('.claude/rules/ugt-nextjs-design.md installed', () => {
   }
   const r = read('.claude', 'rules', 'ugt-nextjs-design.md');
   return /paths:/.test(r) ? { ok: true } : { ok: false, msg: 'Rule file has no paths frontmatter — it will never load' };
+});
+
+check('i18n catalogs consistent (delegates to check-i18n.mjs)', () => {
+  const script = join(import.meta.dirname, 'check-i18n.mjs');
+  const r = spawnSync(process.execPath, [script, ROOT], { encoding: 'utf8' });
+  return r.status === 0
+    ? { ok: true }
+    : { ok: false, msg: (r.stdout + r.stderr).trim().split('\n').slice(-3).join(' · ') };
 });
 
 // ── report ────────────────────────────────────────────────────────────────

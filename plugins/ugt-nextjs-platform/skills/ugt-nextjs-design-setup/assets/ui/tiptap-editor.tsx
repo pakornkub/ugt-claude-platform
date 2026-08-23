@@ -8,6 +8,7 @@
 //   @tiptap/extension-{text-align,text-style,color,highlight,link,underline}
 // `insert()` ผ่าน ref มีไว้แทรก HTML ที่ server สร้าง (เช่น {{token}} ของ mail template)
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { useEditor, EditorContent, useEditorState, type Editor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { TextAlign } from '@tiptap/extension-text-align';
@@ -103,6 +104,7 @@ function ToolbarButton({
 function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonly<ToolbarProps>) {
   const [linkOpen, setLinkOpen] = React.useState(false);
   const [linkUrl, setLinkUrl] = React.useState('');
+  const t = useTranslations('kit.tiptap');
 
   // url ว่าง (หรือกด "ลบลิงก์") = เอาลิงก์ออก — พฤติกรรมเดิมของ prompt
   const applyLink = (url = linkUrl) => {
@@ -299,11 +301,11 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
           <div className="flex justify-end gap-2">
             {s.link && (
               <Button type="button" variant="outline" size="sm" onClick={() => applyLink('')}>
-                ลบลิงก์
+                {t('removeLink')}
               </Button>
             )}
             <Button type="button" size="sm" onClick={() => applyLink()}>
-              บันทึก
+              {t('save')}
             </Button>
           </div>
         </PopoverContent>
