@@ -11,17 +11,17 @@
     {
       "name": "ugt-core",
       "source": "./plugins/ugt-core",
-      "description": "Stack-agnostic foundation: ugt-handoff work-state skill, ugt-context knowledge-base bootstrap (docs/project-context/), audit-trail hooks, and the normative org contracts (database, cicd, auth, design, harness). Installed automatically as a dependency of stack platforms."
+      "description": "Stack-agnostic foundation: ugt-handoff work-state skill, ugt-context knowledge-base bootstrap (docs/project-context/), ugt-requirements requirement-doc reader, ugt-model-mode model preset, audit-trail hooks, and the normative org contracts (database, cicd, auth, design, harness). Installed automatically as a dependency of stack platforms."
     },
     {
       "name": "ugt-nextjs-platform",
       "source": "./plugins/ugt-nextjs-platform",
-      "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)"
+      "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, design agreement + shadcn tokens and the org UI kit, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)"
     },
     {
       "name": "ugt-nextjs-standard",
       "source": "./plugins/ugt-nextjs-standard",
-      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline) + skill-creator (build project skills to the same standard)"
+      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
     },
     {
       "name": "ugt-python-platform",

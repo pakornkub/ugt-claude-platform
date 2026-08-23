@@ -380,6 +380,13 @@ does nothing — always do both ends or neither.
 | `__LINKED_SERVER__` · `__HR_DB__` · `__HR_EMPLOYEE_VIEW__` | the four-part name of the org employee view in `lib/directory.ts` (same `__LINKED_SERVER__` as ugt-nextjs-database-setup) | `thsrv01` · `HRPortal` · `vwEmployee` |
 | `__HR_AUTHORIZE_VIEW__` | the approval-chain view in `lib/approval-chain.ts` — **a different object** from the employee view | `HR_AuthorizeEmployee_ms` |
 
+> **ห้ามเขียน token พวกนี้ลงในคอมเมนต์ของ asset** — ตัวตรวจ placeholder ไม่แยก
+> คอมเมนต์กับโค้ด มันจะฟ้อง ✘ ใส่ไฟล์ที่ถูกอยู่แล้ว แล้วคนติดตั้งจะไปแก้ของที่
+> ไม่ได้เสีย · คอมเมนต์ที่ต้องยกตัวอย่าง basePath ให้ใช้ค่าจริงสมมติ เช่น
+> `expense-portal` (แก้ไป 3 ไฟล์แล้วใน 4.41.0: `lib/auth-client.ts` ·
+> `lib/auth.ts` · `proxy.ts`) · `env.example` ยังใช้ token ได้ตามเดิม เพราะ
+> ตัวตรวจอ่านเฉพาะ `.ts` / `.tsx` / `.prisma`
+
 ## 7. Quick Rules — DO / DON'T
 
 | DO ✅ | DON'T ❌ |
@@ -504,7 +511,7 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       refresh/แชร์ลิงก์เห็นผลเดิม
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
-- [ ] With a basePath: the cookie name in DevTools starts with `__BASE_PATH__.` (or `__Secure-__BASE_PATH__.` on https)
+- [ ] With a basePath: the cookie name in DevTools starts with your basePath (e.g. `expense-portal.`, or `__Secure-expense-portal.` on https)
 - [ ] Security headers ออกครบ **ทุก** response ไม่ใช่แค่หน้า HTML —
       `curl -sI http://localhost:3000/login` และ `curl -sI http://localhost:3000/api/health`
       ต้องเห็นทั้ง `content-security-policy`, `x-frame-options: DENY`,

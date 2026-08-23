@@ -1,9 +1,14 @@
 # Component conventions — the deep rules behind DESIGN.md §4–6
 
 DESIGN.md carries the agreement; this file carries the how + the edge cases.
-Provenance: HRMS = `ugt-hrms` (radix-mira — kit files from there are ported
-`asChild` → Base UI `render` on sync) · BOI = `gov-boi-smart` (base-mira —
-Base UI native, same base as the org standard since มติ 2026-08-04).
+Provenance — two source projects, two eras: HRMS = `ugt-hrms` (**radix-mira,
+Radix**) · BOI = `gov-boi-smart` (**base-mira, Base UI** — same base as the
+org standard since มติ 2026-08-04). Anything taken from HRMS was ported by
+hand at the time it was added (`asChild` → `render`, `onSelect` → `onClick`,
+`data-[state=…]` → `data-open`); **neither source repo syncs into the kit
+and the kit does not sync back**. Copying UI code between the two repos by
+hand is what produced the 4.25.0 dead-button bug — do not do it. (This is
+unrelated to `ugt-nextjs-kit-sync`, which pushes kit → project.)
 
 ## ถูก/ผิด — the five violations that cover 90% of review comments
 
@@ -124,6 +129,10 @@ via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
 ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/สร้าง/Import=primary (มติ
 2026-08-21) · อนุมัติ/ยืนยันเชิงบวก=เขียวทึบ (`success`); in table rows
 use the `soft-*` button variants so colors don't shout on every row.
+
+หมายเหตุ "แดง": `destructive` ของ preset เป็น**พื้นจาง**
+(`bg-destructive/10 text-destructive`) ไม่ใช่แดงทึบ — มติ 2026-08-21 ยึด preset
+ไม่เพิ่ม variant แดงทึบของเราเอง ปุ่มยืนยันลบจึงออกมาเป็นแดงจาง.
 
 ## Page-level filter bar (outside the table)
 

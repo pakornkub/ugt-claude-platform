@@ -1,14 +1,14 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
-> **Last-reviewed:** 2026-08-12 — Python: ส่วน cicd ทำแล้ว (v0.1.0, ยังไม่ผ่าน
+> **Last-reviewed:** 2026-08-23 — Python: ส่วน cicd ทำแล้ว (v0.3.0, ยังไม่ผ่าน
 > pilot — ดู spec `docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md`);
 > ส่วน database/auth/quality ยังเป็น backlog ตามเดิม; React SPA ยังไม่ทำ
 
 > **สถานะ (2026-08-12): บางส่วนทำแล้ว — เอกสารนี้ยังไม่ใช่บันทึกย้อนหลังทั้งฉบับ**
 >
 > ส่วนที่ทำไปแล้ว: การแยก `ugt-core` ออกมา (มีจริงแล้ว) และส่วน **cicd** ของ
-> `ugt-python-platform` / `ugt-php-platform` (v0.1.0 ทั้งคู่ ยังไม่ผ่าน pilot —
+> `ugt-python-platform` / `ugt-php-platform` (v0.3.0 ทั้งคู่ ยังไม่ผ่าน pilot —
 > ดู §2 และ §4) ส่วน database/auth/quality ของสอง stack นี้ และ React SPA
 > **ยังไม่มี plugin** — ไฟล์นี้จึงยังเป็น backlog ที่เปิดอยู่บางส่วน และเป็นที่เก็บ
 > "ข้อที่องค์กรต้องเคาะก่อนเริ่ม" ของสิ่งที่ยังไม่ทำ — ยังต้องอ่านก่อนเริ่มงาน stack ใหม่
@@ -224,7 +224,7 @@ Mirror of the v1 skill set, minus what core now owns:
   `ugt-python-auth-setup`, `ugt-python-cicd-setup` — same SKILL.md skeleton
   (Overview / Org Standards / Interview / Steps / Quick Rules / Verification),
   same `assets/` + `references/` + `scripts/verify.mjs` + `evals/` layout.
-  **`ugt-python-cicd-setup` ทำแล้ว** (v0.1.0, ahead-of-pilot — ดู header/§2
+  **`ugt-python-cicd-setup` ทำแล้ว** (v0.3.0, ahead-of-pilot — ดู header/§2
   note) — the other three items in this list stay open
 - `ugt-python-clean-code` — new content (SonarQube `python:S*` rule catalogue,
   duplication strategy for Python) but the same document shape and `paths:`
@@ -277,7 +277,7 @@ env-config notes in its references), added as one more skill or a micro-plugin
 ## 4. `ugt-php-platform`
 
 **สถานะเดียวกับ Python (§2): ส่วน cicd ทำแล้ว ที่เหลือ backlog.** เขียน
-`ugt-php-cicd-setup` (v0.1.0, ยังไม่ผ่าน pilot) พร้อมกับ `ugt-python-cicd-setup`
+`ugt-php-cicd-setup` (v0.3.0, ยังไม่ผ่าน pilot) พร้อมกับ `ugt-python-cicd-setup`
 ในรอบเดียวกัน — สโคปคือ delivery pipeline เท่านั้น (Jenkinsfile, Sonar, OWASP,
 Docker deploy, tooling ขั้นต่ำให้ stage ผ่าน สำหรับ Laravel / CodeIgniter / PHP
 legacy / WordPress) ไม่มี database / auth / design / harness skill ของ PHP
@@ -311,7 +311,7 @@ cheap part — the expensive part is **earning the gotchas**.
 | Work | Size | Reused from v1 | The actual cost driver |
 | --- | --- | --- | --- |
 | `ugt-core` extraction + platform v2 migration | **S** (days) | Everything is a file move + text extraction; release choreography per §1.3 | Getting the release order right; README/mode-B doc updates |
-| `ugt-python-platform` | **L** (the bulk is not skill-writing) | SKILL.md skeletons, router pattern, verify.mjs pattern, evals format, harness mechanism, all core contracts | D1–D8 decisions (org workshop), then a **pilot production project** to extract from; skill-writing after that is ~M. **Update 2026-08-12: the cicd module is done** (v0.1.0, ahead-of-pilot); remaining skills (database/quality/auth) still follow this original decisions→pilot model |
+| `ugt-python-platform` | **L** (the bulk is not skill-writing) | SKILL.md skeletons, router pattern, verify.mjs pattern, evals format, harness mechanism, all core contracts | D1–D8 decisions (org workshop), then a **pilot production project** to extract from; skill-writing after that is ~M. **Update 2026-08-12: the cicd module is done** (v0.3.0, ahead-of-pilot); remaining skills (database/quality/auth) still follow this original decisions→pilot model |
 | `ugt-react-spa` (if ever) | **S** as a single cicd skill; **M** if a platform is insisted on | quality skill ~90 %, pipeline shape | Recommended skipped — see §3 |
 
 **Sequencing:**

@@ -6,7 +6,8 @@ Next.js ที่ทีมสร้าง (รวมถึงโปรเจค�
 และ deploy ขึ้น server จริงได้ — โดยความรู้ทั้งหมดสกัดมาจากโปรเจคที่ใช้งานจริงแล้ว
 
 **ใช้ได้กับ**: TypeScript / React / Next.js (App Router) · SQL Server ·
-Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** stack อื่นยังไม่รองรับ
+Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรับ
+**เฉพาะส่วน deploy** (ยังไม่ผ่าน pilot) · stack อื่นนอกนั้นยังไม่รองรับ
 
 > 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [`docs/design-preview.html`](docs/design-preview.html)
 > (เปิดด้วย browser ได้เลย ไม่ต้องติดตั้งอะไร) — สี ปุ่ม ตาราง ฟอร์ม สถานะ light/dark
@@ -18,10 +19,10 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
 | `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
-| `ugt-nextjs-platform` | 4.24.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-python-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-php-platform` | 0.1.0 — ยังไม่ผ่าน pilot | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.6.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-nextjs-platform` | 4.40.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-python-platform` | 0.3.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-php-platform` | 0.3.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-core` | 2.7.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 รุ่นจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดแต่ละรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
@@ -38,7 +39,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — **เท่านั้น** 
 | `ugt-nextjs-mail-setup` | ระบบส่งอีเมลผ่าน relay บริษัท — template แก้ได้จากหน้า admin + โหมดทดสอบที่เมลเข้าตัวเองแทนคนจริง | "ต้องส่งเมลแจ้งเตือน" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-upload-setup` | แนบไฟล์: เก็บบน volume + สแกนไวรัส + ดาวน์โหลดผ่านการตรวจสิทธิ์ทุกครั้ง | "ผู้ใช้ต้องแนบไฟล์" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-cicd-setup` | ต่อ Jenkins ให้ตรวจ-ทดสอบ-deploy อัตโนมัติเมื่อ push | งาน CI/CD + แก้ pipeline แดง |
-| `ugt-nextjs-kit-sync` | เช็คว่าไฟล์ kit ที่ copy ไว้ตกรุ่นจาก plugin ไหม แล้วเสนอ update (ไม่เคยแก้) หรือ merge (โปรเจคแก้เอง) ทีละไฟล์ | หลัง `/plugin update` ทุกครั้ง |
+| `ugt-nextjs-kit-sync` | เช็คว่าไฟล์ kit (ชุดไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค — component, ตัวช่วย, proxy) ตกรุ่นจาก plugin ไหม แล้วเสนอทีละไฟล์ว่าจะทับของเดิม (ถ้าโปรเจคไม่เคยแก้) หรือรวมของสองฝั่ง (ถ้าโปรเจคแก้เอง) | หลัง `/plugin update` ทุกครั้ง |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่านเกณฑ์คุณภาพตั้งแต่ครั้งแรก | **ทำงานเองเมื่อแตะไฟล์โค้ด** |
 | `ugt-nextjs-pitfalls` | กับดักที่เคยพังจริงบน production (วันที่เลื่อน, cache, 404) | **ทำงานเองเมื่อแตะไฟล์ที่เสี่ยง** |
 | `ugt-handoff` | ปิดงานหนึ่งรอบ: จดว่าค้างตรงไหน + อัปเดตความรู้ของโปรเจคให้ตรงปัจจุบัน | จบงานทุกครั้ง |
@@ -181,31 +182,6 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 
 ## สำหรับทีมดูแล platform
 
-1. รับ PR → merge เข้า `main`
-2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
-3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
-   ถ้าใช่ ตัดสินตามชนิดเอกสาร — `Living` = แก้ให้ตรงแล้วอัปเดต `Last-reviewed` ·
-   บันทึกการตัดสินใจ (`Accepted`/`Done`) = **ห้ามแก้เนื้อหา** ให้เปลี่ยนเป็น `Superseded`
-   พร้อมชี้ `Superseded-by` ไปที่ของใหม่แทน (แก้ย้อนหลังทำให้บันทึกประวัติเพี้ยน)
-4. **ถ้า release นี้แตะ UI kit** (`components/ui/*`, token, หรือกติกาใน DESIGN template)
-   → เปิด [`docs/design-preview.html`](docs/design-preview.html) เทียบกับของจริงว่ายังตรงไหม
-   หน้านี้คือสิ่งที่คนเห็น**ก่อน**ตัดสินใจติดตั้ง — preview ที่ล้าสมัยคือคำสัญญาที่ plugin ทำไม่ได้
-   จุดที่เคยหลุดมาแล้ว: หัวตาราง (จับลาก/sort/filter), ชุดปุ่ม pagination,
-   เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
-5. **ประทับ stamp ให้ asset** (ทำหลัง bump version เสมอ) แล้วรันสคริปต์ตรวจ — ต้องเขียวทุกตัว:
-   ```bash
-   node scripts/stamp-kit-assets.mjs && node scripts/lint-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
-   ```
-   ตัว stamp เขียนเวอร์ชัน+hash ลงหัวไฟล์ asset ทุกตัว (กลไกของ `ugt-nextjs-kit-sync`
-   ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · ตัวที่ 2 เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อป
-   ไปอยู่ในหลายตัวช่วยยังตรงกัน · ตัวที่ 3 เช็คว่าเอกสารทุกไฟล์ใน `docs/` ประกาศสถานะ
-   ตัวเองครบ · ตัวที่ 4 เช็คว่าสีใน design-preview ยังตรงกับ token ที่ติดตั้งจริง
-   (โครงหน้ายังต้องดูด้วยตาตามข้อ 4 — markup เทียบด้วยเครื่องไม่ได้)
-6. `claude plugin validate ./plugins/<ชื่อ> --strict`
-7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
-   push tag ของ dependency ก่อน)
-8. ประกาศให้ทีมรันคำสั่งอัปเดต
-
 **กติกาเอกสารใน `docs/`** — ทุกไฟล์ `.md` ต้องมีบล็อกนี้ใต้หัวข้อ H1:
 
 ```markdown
@@ -217,15 +193,58 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 `Superseded` = ถูกแทนที่แล้ว (ต้องมี `Superseded-by` ชี้ path จริง) · `Done` = งานจบแล้ว เก็บเป็นประวัติ
 · **เอกสารไม่มี version ของตัวเอง** — แกน version มีแกนเดียวคือ tag ของ plugin ส่วนประวัติการแก้อยู่ใน git
 
+1. รับ PR → merge เข้า `main`
+2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
+3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
+   ถ้าใช่ ตัดสินตามชนิดเอกสาร (นิยามอยู่ในกล่องด้านบน) — `Living` = แก้ให้ตรง
+   แล้วอัปเดต `Last-reviewed` ·
+   บันทึกการตัดสินใจ (`Accepted`/`Done`) = **ห้ามแก้เนื้อหา** ให้เปลี่ยนเป็น `Superseded`
+   พร้อมชี้ `Superseded-by` ไปที่ของใหม่แทน (แก้ย้อนหลังทำให้บันทึกประวัติเพี้ยน)
+4. **ถ้า release นี้แตะ UI kit** (`components/ui/*`, token, หรือกติกาใน DESIGN template)
+   → เปิด [`docs/design-preview.html`](docs/design-preview.html) เทียบกับของจริงว่ายังตรงไหม
+   หน้านี้คือสิ่งที่คนเห็น**ก่อน**ตัดสินใจติดตั้ง — preview ที่ล้าสมัยคือคำสัญญาที่ plugin ทำไม่ได้
+   จุดที่เคยหลุดมาแล้ว: หัวตาราง (จับลาก/sort/filter), ชุดปุ่ม pagination,
+   เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
+5. **ประทับ stamp ให้ asset** (ทำหลัง bump version เสมอ) แล้วรันสคริปต์ตรวจ — ต้องเขียวทุกตัว:
+   ```bash
+   node scripts/stamp-kit-assets.mjs && node scripts/lint-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
+   ```
+   แต่ละตัวทำคนละอย่าง:
+
+   - `stamp-kit-assets` เขียนเวอร์ชัน+hash ลงหัวไฟล์ asset ทุกตัว (กลไกของ
+     `ugt-nextjs-kit-sync` ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · ตัวเดียวกัน
+     ท้ายแถวใส่ `--check` เพื่อยืนยันว่า stamp นิ่งแล้ว
+   - `lint-kit-assets` เช็คว่า asset ที่แจกไม่มีของ Radix หลงเหลือ (`asChild`,
+     `onSelect` บนเมนู, `@radix-ui/*`), ไม่มี `window.confirm`, ไม่ override
+     ขนาดปุ่มด้วย className และไม่มี native `title=` บนปุ่ม
+   - `check-contract-drift` เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วย
+     ยังตรงกัน
+   - `check-doc-status` เช็คว่า `.md` **ชั้นบนสุด** ของ `docs/` ประกาศสถานะ
+     ตัวเองครบ (ยังไม่ลง subfolder และไม่อ่านไฟล์ `.html` — `docs/superpowers/**`
+     กับ `design-preview.html` จึงต้องดูด้วยตา)
+   - `check-preview-tokens` เช็คว่า**สี**ใน design-preview ยังตรงกับ token ที่
+     ติดตั้งจริง — โครงหน้าและข้อความยังต้องดูด้วยตาตามข้อ 4
+6. `claude plugin validate ./plugins/<ชื่อ> --strict`
+7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
+   push tag ของ dependency ก่อน) · **ยกเว้น `ugt-python-platform` และ
+   `ugt-php-platform` — สองตัวนี้ bump version + push ได้ แต่ยังไม่ tag
+   จนกว่าจะผ่าน pilot จริง** (มติเดิม · ดูแถว pilot ใน `docs/backlog.md`
+   §รอเงื่อนไข) ถ้าเผลอ tag ไปแล้ว ให้ลบ tag ทั้ง local และ origin
+8. ประกาศให้ทีมรันคำสั่งอัปเดต
+
 กติกา: ทุกตัวช่วยต้องพึ่งตัวเองได้ (ห้ามอ้างไฟล์ข้าม plugin) · เนื้อหาที่โหลดเข้า
 context เป็นภาษาอังกฤษ (เว้นประโยค trigger) · มาตรฐานกลางแก้ที่
 `plugins/ugt-core/contracts/` ก่อนเสมอ แล้วค่อยตามแก้ในตัวช่วยของ stack
 
 ## หลักฐานว่าใช้ได้จริง
 
-ทุกตัวช่วยมีสคริปต์ตรวจ (`verify.mjs`) และชุดทดสอบ (`evals/`) — ผลวัดล่าสุด:
+ตัวช่วยฝั่ง stack ทุกตัวมีสคริปต์ตรวจของตัวเอง (`verify.mjs` — `ugt-nextjs-kit-sync`
+ใช้ `check-kit-freshness.mjs` แทน เพราะงานมันคือเทียบไฟล์ ไม่ใช่ตรวจการติดตั้ง)
+ส่วนตัวช่วยใน `ugt-core` เป็นงานเขียนเอกสาร ไม่มีอะไรให้ตรวจด้วยสคริปต์ จึงมีแต่
+`evals/` (ชุดคำถามวัดว่า AI ทำงานถูกจริงไหม) — **ทุกตัวมี `evals/`** · ผลวัดล่าสุด:
 
-- setup/auth/cicd: มีตัวช่วย **34/34 (100%)** vs ไม่มี **18/34 (53%)**
+- **34/34 (100%) เทียบกับ 18/34 (53%)** — จำนวนข้อที่ทำถูกในโจทย์ setup/auth/cicd
+  ชุดเดียวกัน ตอนมีตัวช่วย เทียบกับตอนสั่ง AI เปล่า ๆ
 - design-setup: จับ trigger ถูก **42/42** · ทดสอบจริงบนโปรเจคเปล่า **14/14**
   vs ไม่มีตัวช่วย 2/14 — และรอบสองผ่านเต็มแบบไม่ต้องแก้อะไรหน้างานเลย
 - pitfalls **9/9 vs 6/9** · ugt-model-mode **9/9 + trigger 69/69**
@@ -258,7 +277,8 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
   ทำแล้ว (v0.1.0 ยังไม่ผ่าน pilot ดูตารางด้านบน) ส่วน database/auth/design
   ของสอง stack นี้ และ React SPA ยังไม่มี plugin
 - [`docs/app-patterns-audit.md`](docs/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
-  `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · ท้ายไฟล์มี backlog ที่ยังเปิดอยู่
+  `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · งานค้างของไฟล์นี้ปิดครบแล้ว
+  — อ่านก่อนเสนอเพิ่มเนื้อหาเข้า pitfalls
 - [`docs/design-skill-draft.md`](docs/design-skill-draft.md) — ร่างตอนออกแบบ design skill
   (2026-08-03) · **เนื้อหาถูก supersede แล้ว** (เช่นยังพูดถึง `radix-mira` ทั้งที่มติ
   2026-08-04 เปลี่ยนเป็น `base-mira`) — มาตรฐานดีไซน์ปัจจุบันอยู่ที่

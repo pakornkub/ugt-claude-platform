@@ -77,7 +77,7 @@ What lands in the project:
 Org defaults (interview only asks "เปลี่ยนไหม"): primary indigo
 `oklch(0.488 0.243 264.4)` · neutral hue ~258 · semantic-6 `--status-*` set ·
 Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables text-xs)
-· radius tiers control 6 / card 12 / overlay 14 px.
+· radius มาจากปุ่มเดียว `--radius: 0.45rem` แล้ว preset คูณออกเป็น 4 ระดับ (control 5.8 / card 7.2 / overlay 10.1 px — มติ 2026-08-09 ยกให้ preset คุม).
 
 ## 3. Workflow
 

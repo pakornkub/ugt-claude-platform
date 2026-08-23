@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.34.0 · ugt-nextjs-auth-setup/proxy.ts
-// kit-hash: b27a4078f522
+// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: dddb3b0085d0
 // proxy.ts — Next.js 16 edge route protection (Next.js 16 uses proxy.ts, not middleware.ts).
 // Cookie-presence check only (Edge-safe, no DB call) + CSP nonce injection
 // + the standard security headers on every response (see applySecurityHeaders).
@@ -95,7 +95,7 @@ function applySecurityHeaders(
 
 export function proxy(request: NextRequest) {
   // Next.js 16 + Turbopack includes basePath in request.nextUrl.pathname
-  // (e.g. "/__BASE_PATH__/login", not "/login"). Strip it so the route checks below
+  // (e.g. "/expense-portal/login", not "/login"). Strip it so the route checks below
   // are basePath-agnostic. The guard makes this a no-op when the prefix is
   // already absent, so it stays correct regardless of that behaviour.
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';

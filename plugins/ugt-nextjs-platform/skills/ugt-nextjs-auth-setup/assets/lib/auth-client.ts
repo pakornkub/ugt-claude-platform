@@ -1,16 +1,16 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/auth-client.ts
-// kit-hash: 68b7ec54a341
+// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/lib/auth-client.ts
+// kit-hash: 3da810e534f2
 import { createAuthClient } from 'better-auth/react';
 import { genericOAuthClient } from 'better-auth/client/plugins'; // [METHOD: SSO] — remove if SSO not enabled
 
 // Do NOT pass baseURL here. Better Auth's withPath() checks whether the URL already has
 // a non-root pathname. If it does it returns the URL unchanged and never appends basePath.
-// e.g. "http://localhost:3000/__BASE_PATH__" has a path, so passing it as baseURL would
-// yield "…/__BASE_PATH__/get-session" (404) instead of "…/__BASE_PATH__/api/auth/get-session".
+// e.g. "http://localhost:3000/expense-portal" has a path, so passing it as baseURL would
+// yield "…/expense-portal/get-session" (404) instead of "…/expense-portal/api/auth/get-session".
 //
 // Without baseURL the client runs in-browser and falls back to window.location.origin
 // (a bare origin with no path) then appends basePath correctly:
-//   http://localhost:3000  +  /__BASE_PATH__/api/auth  →  correct endpoint ✓
+//   http://localhost:3000  +  /expense-portal/api/auth  →  correct endpoint ✓
 //
 // Use process.env directly — reading NEXT_PUBLIC_BASE_PATH through a createEnv()
 // wrapper (@t3-oss/env-nextjs) returns '' in the Turbopack client bundle (compile-time

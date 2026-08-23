@@ -112,6 +112,12 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
     [/<\w*(Menu|Dropdown\w*)Item[^>]*\sonSelect=/s, 'onSelect on a menu item (Base UI: onClick)'],
     [/checked=["']indeterminate["']/, 'checked="indeterminate" (Base UI: checked + indeterminate booleans)'],
     [/\bdelayDuration=/, 'delayDuration (Base UI Tooltip: delay)'],
+    // มติ 2026-08-23: `data-[state=…]` อยู่นอกรายการนี้โดยตั้งใจ. It is a Radix
+    // idiom AND a perfectly ordinary attribute a plain element can set for
+    // itself — the kit's own data-table.tsx marks its mobile card with
+    // data-state={selected}. grep cannot tell the two apart, and a gate that
+    // fails on correct shipped code is worse than one that misses a case the
+    // repo-side lint-kit-assets already covers.
   ];
   for (const file of sourceTsx()) {
     const code = readFileSync(file, 'utf8');

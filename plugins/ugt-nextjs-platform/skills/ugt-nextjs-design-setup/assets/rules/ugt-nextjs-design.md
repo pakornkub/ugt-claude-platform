@@ -18,10 +18,19 @@ beautification skill. The short version that catches 90% of violations:
   `data-[popup-open]`/`data-open`. Radix idioms — `asChild`, `onSelect` on a
   menu item, `checked="indeterminate"`, `data-[state=open]` — are **ignored
   silently**: the component renders and the button just does nothing.
+  When in doubt about a prop, the answer is the base-mira registry —
+  `curl -s https://ui.shadcn.com/r/styles/base-mira/<component>.json` — then
+  the installed types in `node_modules/@base-ui/react`. **Not the shadcn
+  MCP**: it answers with the default (Radix) style, which is how the
+  dead-button bug got in.
 - shadcn component exists → use it. Never hand-build, never raw CSS /
   CSS-in-JS / inline styles (only truly dynamic values).
-- Sizes stay `default` (exceptions: `size="icon"` in table rows via
-  `IconAction`, `sm` in dense toolbars — that's the whole list).
+- Sizes come from the `size` prop, never from `className`. `default`
+  everywhere; `size="icon"` for an icon-only button **anywhere** as long as
+  it carries an `aria-label` (in a table row it must go through
+  `IconAction`); `sm` in dense toolbars. `xs`/`icon-xs` are for kit
+  internals only. Overriding `h-*`/`p-*`/`size-*` on a Button is a lint
+  failure — if no size fits, fix `components/ui/button.tsx` instead.
 - lucide only, per the fixed icon mapping in DESIGN.md §4 — never emoji,
   never a different icon for the same action.
 - Tables → `DataTable`. Server-paginated data must sort/filter server-side

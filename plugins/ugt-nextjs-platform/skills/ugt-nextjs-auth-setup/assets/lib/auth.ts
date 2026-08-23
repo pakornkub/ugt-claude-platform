@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 86c1b84e6c4e
+// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: 4e22ba6dc92a
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -10,7 +10,7 @@ import { sendTemplatedMail } from '@/lib/email'; // [METHOD: LOCAL] — needs ug
 // project has no central employee directory to read from
 import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
 
-// Derive a unique cookie prefix from NEXT_PUBLIC_BASE_PATH (e.g. '/__BASE_PATH__' → '__BASE_PATH__').
+// Derive a unique cookie prefix from NEXT_PUBLIC_BASE_PATH (e.g. '/expense-portal' → 'expense-portal').
 // This prevents cross-app cookie collisions when multiple apps share the same domain
 // (two apps both using Better Auth would otherwise create identically-named cookies at
 // path=/, causing an infinite redirect loop — ERR_TOO_MANY_REDIRECTS — via HMAC mismatch
@@ -23,7 +23,7 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   advanced: {
     // Scope all auth cookies to this app's base path prefix.
-    // Cookie names become e.g. "__BASE_PATH__.session_token" or "__Secure-__BASE_PATH__.session_token".
+    // Cookie names become e.g. "expense-portal.session_token" or "__Secure-expense-portal.session_token".
     cookiePrefix,
   },
   trustedOrigins: (env.BETTER_AUTH_TRUSTED_ORIGINS ?? '').split(',').filter(Boolean),
