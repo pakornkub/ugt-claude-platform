@@ -43,7 +43,12 @@ function loadCatalog(file) {
 
 check('catalog key parity across locales', () => {
   const dir = join(ROOT, 'messages');
-  if (!existsSync(dir)) return { ok: true, msg: 'no messages/ — nothing to compare' };
+  // ไม่ใช่ "ไม่มีอะไรให้เทียบ" แต่คือยังไม่ได้ติดตั้ง: ตั้งแต่ 4.46.0 คิตทั้งชุด
+  // อ่านสตริงผ่าน catalog และ SKILL §Step 6 ให้ copy `messages/` ทุกโปรเจค
+  // ไม่ใช่เฉพาะ th+en — ไม่มี dir นี้ = `t()` ทุกตัวโยนตอน render
+  if (!existsSync(dir)) {
+    return { ok: false, msg: 'no messages/ — copy assets/messages/ into the project (required in every project since 4.46.0)' };
+  }
   const byNamespace = new Map();
   for (const f of readdirSync(dir)) {
     const m = /^(.+)\.(th|en)\.ts$/.exec(f);
@@ -69,13 +74,16 @@ check('catalog key parity across locales', () => {
 // Files that have been through an i18n phase. Adding a file here is the commit
 // that finishes it — the gate then keeps Thai from creeping back in as the next
 // person adds a feature out of habit.
-const CONVERTED_FILES = [
-  'ui/data-table.tsx',
-  'ui/confirm-action-dialog.tsx',
-  'ui/export-menu.tsx',
-  'ui/date-picker.tsx',
-  'ui/tiptap-editor.tsx',
-];
+//
+// Split in two because "absent" means opposite things: these two ship with every
+// install (SKILL §Step 6), so missing = the kit was never copied and the gate
+// must say so instead of passing an empty project.
+const REQUIRED_CONVERTED_FILES = ['ui/data-table.tsx', 'ui/confirm-action-dialog.tsx'];
+// …while these ship only when the project needs them (export-menu needs Excel
+// export, tiptap-editor needs rich text, date-picker when dates are picked),
+// so absence is a valid state, not a failure.
+const OPTIONAL_CONVERTED_FILES = ['ui/export-menu.tsx', 'ui/date-picker.tsx', 'ui/tiptap-editor.tsx'];
+const CONVERTED_FILES = [...REQUIRED_CONVERTED_FILES, ...OPTIONAL_CONVERTED_FILES];
 
 // A regex that cuts at the first `//` is wrong here: the kit uses backtick
 // template literals spanning lines, and `//` appears inside URLs. Track quote
@@ -113,9 +121,8 @@ function stripComments(src) {
 
 // `assets/ui/` is copied to `components/ui/` in a consuming project (SKILL §Step 6),
 // while a dev-time run against `assets/` sees it at `ui/`. Resolve either shape.
-// A file present at neither is not installed — several kit components ship
-// conditionally (export-menu needs Excel export, tiptap-editor needs rich text),
-// so absence is a valid state, not a failure.
+// A file present at neither is not installed — which is a failure for the
+// required set and a valid state for the optional one (see the split above).
 function resolveConverted(rel) {
   for (const candidate of [join(ROOT, rel), join(ROOT, 'components', rel)]) {
     if (existsSync(candidate)) return candidate;
@@ -128,7 +135,12 @@ check('converted files carry no Thai outside comments', () => {
   let scanned = 0;
   for (const rel of CONVERTED_FILES) {
     const file = resolveConverted(rel);
-    if (!file) continue;
+    if (!file) {
+      if (REQUIRED_CONVERTED_FILES.includes(rel)) {
+        problems.push(`${rel}: not installed — this file ships with every project (SKILL §Step 6)`);
+      }
+      continue;
+    }
     scanned++;
     const code = stripComments(readFileSync(file, 'utf8'));
     const hits = code.split('\n').reduce((n, l) => n + (/[฀-๿]/.test(l) ? 1 : 0), 0);

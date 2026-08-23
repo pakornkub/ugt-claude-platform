@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: e60818b08016
+// kit-hash: a501b88f6ff1
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -45,5 +45,12 @@ export const kitTh = {
   tiptap: {
     removeLink: 'ลบลิงก์',
     save: 'บันทึก',
+  },
+  // ค่าสองตัวนี้ "ซ้ำ" กับ kit.en.ts โดยตั้งใจ — ห้ามแปล. ปุ่มสลับภาษาต้องเขียน
+  // ชื่อแต่ละภาษาด้วยอักษรของภาษานั้นเอง คนที่อ่านไทยไม่ออกจึงจะหาปุ่มของตัวเอง
+  // เจอตอนจอเป็นภาษาอังกฤษ และกลับกัน — เป็นข้อตกลง accessibility ไม่ใช่ของตกค้าง
+  languageSwitcher: {
+    english: 'English',
+    thai: 'ไทย',
   },
 } as const;

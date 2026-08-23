@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: af6e15c035f7
+// kit-hash: d6ee12a2c1bc
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -208,6 +208,35 @@ export function rowIncludesQuery(original: unknown, query: string): boolean {
 }
 
 /**
+ * หัวคอลัมน์ติ๊กเลือก — แยกเป็น component จริงเพราะมันเรียก `useTranslations`
+ * และ `react-hooks/rules-of-hooks` อ่านชื่อฟังก์ชันที่ครอบ hook อยู่: เขียนคาไว้
+ * ใน `header: ({ table }) => …` ชื่อที่มันเห็นคือ `header` ซึ่งไม่ใช่ทั้ง
+ * component และ hook → `npm run lint` แดงทุกโปรเจคที่ใช้คอลัมน์ติ๊ก
+ * (ตอน runtime ทำงานได้ทั้งคู่ — `flexRender` เรียก function header เป็น component)
+ */
+function SelectAllHeader<TData>({
+  table,
+  allLabel,
+}: Readonly<{
+  table: TanstackTable<TData>;
+  allLabel?: string;
+}>) {
+  // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
+  const t = useTranslations('kit.dataTable');
+  const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
+  const picked = rows.filter((r) => r.getIsSelected()).length;
+  return (
+    <Checkbox
+      checked={rows.length > 0 && picked === rows.length}
+      indeterminate={picked > 0 && picked < rows.length}
+      disabled={rows.length === 0}
+      onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
+      aria-label={allLabel ?? t('selectAllFiltered')}
+    />
+  );
+}
+
+/**
  * คอลัมน์ติ๊กเลือกแถว — ใส่เป็นคอลัมน์ **แรก** ของ `columns` เสมอ
  *
  *     const columns = [selectionColumn<Leave>({ rowLabel: (r) => `เลือก ${r.code}` }), ...]
@@ -241,21 +270,7 @@ export function selectionColumn<TData>({
     enableHiding: false,
     enableResizing: false,
     size: 36,
-    header: ({ table }) => {
-      // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
-      const t = useTranslations('kit.dataTable');
-      const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
-      const picked = rows.filter((r) => r.getIsSelected()).length;
-      return (
-        <Checkbox
-          checked={rows.length > 0 && picked === rows.length}
-          indeterminate={picked > 0 && picked < rows.length}
-          disabled={rows.length === 0}
-          onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
-          aria-label={allLabel ?? t('selectAllFiltered')}
-        />
-      );
-    },
+    header: ({ table }) => <SelectAllHeader table={table} allLabel={allLabel} />,
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}

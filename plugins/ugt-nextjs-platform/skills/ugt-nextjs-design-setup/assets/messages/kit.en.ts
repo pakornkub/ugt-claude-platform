@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: 889138099fdb
+// kit-hash: eb9f6da17e16
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -44,5 +44,11 @@ export const kitEn = {
   tiptap: {
     removeLink: 'Remove link',
     save: 'Save',
+  },
+  // Deliberately identical to kit.th.ts — each language is named in its own
+  // script so a reader finds their language whichever locale is active.
+  languageSwitcher: {
+    english: 'English',
+    thai: 'ไทย',
   },
 } as const;

@@ -200,6 +200,24 @@ different size — is the field bug this step exists to prevent.
    when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
+
+   **แล้วลงทะเบียน plugin ของ next-intl ใน `next.config.ts` — ไม่ใช่ของเสริม**:
+
+   ```ts
+   import createNextIntlPlugin from 'next-intl/plugin';
+   const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+   // ...existing nextConfig...
+   export default withNextIntl(nextConfig);
+   ```
+
+   next-intl หา `getRequestConfig` ผ่าน alias ที่ plugin ตัวนี้สร้างให้ตอน build
+   เท่านั้น ไม่ลงทะเบียน = `i18n/request.ts` ไม่เคยถูกโหลดเลยสักครั้ง แล้ว
+   `getLocale()` ใน RootLayout กับ `t()` ทุกตัวโยน error ตอน render —
+   **แอปไม่ขึ้นทั้งแอป ไม่ใช่แค่ประสบการณ์ที่แย่ลง** และตั้งแต่ 4.46.0 คิต 5 ตัว
+   เรียก `useTranslations` โดย `next-intl` เป็น dependency ของทุกโปรเจค
+   จึงพังทุกโปรเจค ไม่ใช่เฉพาะที่ตอบ th+en · ต้องส่ง path `'./i18n/request.ts'`
+   ให้ชัด เพราะเรา copy ไฟล์ไปไว้ที่ `i18n/` ไม่ใช่ตำแหน่ง default ของ next-intl ·
+   `scripts/verify.mjs` fail ถ้าไม่มีบรรทัดนี้
 4. Install the base component set with `npx shadcn@latest add` (the CLI
    resolves `components.json` → base-mira, so it installs the right style).
    **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
@@ -359,6 +377,8 @@ node <skill-dir>/scripts/check-contrast.mjs
 - [ ] `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.*.ts` copy เข้าโปรเจคแล้ว
       (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en**) และ `NextIntlClientProvider` อยู่นอกสุด
       ของ provider stack ใน `app/layout.tsx`
+- [ ] `next.config.ts` ลงทะเบียน `createNextIntlPlugin('./i18n/request.ts')` แล้ว
+      (ขาดข้อนี้ = `t()` ทุกตัวโยนตอน render, แอปไม่ขึ้น)
 - [ ] th+en เท่านั้น: กดสลับภาษาแล้ว **ข้อความในตารางเปลี่ยนจริง** (หัวคอลัมน์
       ที่ผู้เรียกส่งมาจะยังเป็นภาษาเดิมจนกว่าโปรเจคจะแปลเอง — ที่ต้องเปลี่ยนคือ
       ปุ่มหน้า, ตัวกรอง, empty state, สรุปจำนวนแถว)

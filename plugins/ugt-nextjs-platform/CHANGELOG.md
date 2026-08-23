@@ -27,6 +27,13 @@
 - `scripts/check-i18n.mjs` — ด่านสองข้อ: key `th`/`en` ตรงกัน และไฟล์ที่แปลงแล้ว
   ห้ามมีสตริงไทยนอกคอมเมนต์ (ตัวแยกคอมเมนต์เดินทีละอักขระ ไม่ใช่ตัดที่ `//`
   ตัวแรก เพราะ backtick คร่อมหลายบรรทัดและ `//` โผล่ใน URL)
+- **ผู้ติดตั้งต้องลงทะเบียน plugin ของ next-intl ใน `next.config.ts` ด้วย**
+  (`createNextIntlPlugin('./i18n/request.ts')` + `export default withNextIntl(nextConfig)`
+  — SKILL §Step 3) ไม่มีบรรทัดนี้ `i18n/request.ts` ไม่เคยถูกโหลด และ `t()` ทุกตัว
+  โยนตอน render คือแอปไม่ขึ้น · `verify.mjs` fail ถ้าไม่มี
+- `kit-sync/scripts/check-kit-freshness.mjs` เดิน `i18n/` กับ `messages/` ด้วยแล้ว
+  — สอง dir นี้อยู่ที่ root โปรเจค ไม่อยู่ในรายการที่สแกน ทั้งที่เหตุผลที่ catalog
+  เป็น `.ts` คือให้ kit-sync เห็น
 
 **ยังไม่ครบทุกหน้า** — auth-setup (166 ข้อความ), mail admin UI (36) และ
 upload-setup (16) เป็นเฟส 2-3 ดู spec §6.2

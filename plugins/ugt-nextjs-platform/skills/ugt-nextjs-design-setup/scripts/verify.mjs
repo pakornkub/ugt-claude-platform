@@ -344,6 +344,56 @@ check('.claude/rules/ugt-nextjs-design.md installed', () => {
   return /paths:/.test(r) ? { ok: true } : { ok: false, msg: 'Rule file has no paths frontmatter — it will never load' };
 });
 
+// ── i18n ──────────────────────────────────────────────────────────────────
+// Four pieces, all load-bearing: miss any one and `t()` / `getLocale()` throw at
+// render — the app does not boot, it is not a degraded experience. The plugin
+// registration is the one that reads as optional and is not: without it Next
+// never aliases next-intl's request config and `i18n/request.ts` is dead code.
+check('next-intl wired end to end (plugin · request config · provider · catalog)', () => {
+  if (!has('package.json')) return { ok: false, msg: 'No package.json — cannot tell whether next-intl is installed' };
+  const pkg = JSON.parse(read('package.json'));
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+  if (!deps['next-intl']) {
+    return {
+      ok: 'warn',
+      msg: 'next-intl is not a dependency — since 4.46.0 the whole kit reads its strings through the catalog, so it belongs in every project (มติ 2.2)',
+    };
+  }
+
+  const problems = [];
+
+  if (!has('i18n', 'request.ts')) problems.push('i18n/request.ts missing — copy assets/i18n/');
+
+  // Registration lives in next.config, in whatever extension the project uses.
+  const configFile = ['next.config.ts', 'next.config.mjs', 'next.config.js', 'next.config.cjs'].find((f) => has(f));
+  if (!configFile) {
+    problems.push('no next.config.* — the next-intl plugin has nowhere to be registered');
+  } else {
+    const cfg = read(configFile);
+    if (!/next-intl\/plugin/.test(cfg)) {
+      problems.push(
+        `${configFile} never imports next-intl/plugin — i18n/request.ts is then never loaded and every t()/getLocale() throws at render (SKILL §Step 3)`
+      );
+    } else if (!/withNextIntl\s*\(/.test(cfg)) {
+      problems.push(`${configFile} creates the plugin but never wraps the config with it (export default withNextIntl(nextConfig))`);
+    }
+  }
+
+  if (!has('messages')) {
+    problems.push('messages/ missing — copy assets/messages/ (every project, not just th+en)');
+  } else if (!readdirSync(p('messages')).some((f) => f.endsWith('.th.ts'))) {
+    problems.push('messages/ holds no *.th.ts catalog');
+  }
+
+  if (!has('app', 'layout.tsx')) {
+    problems.push('No app/layout.tsx');
+  } else if (!/NextIntlClientProvider/.test(read('app', 'layout.tsx'))) {
+    problems.push('app/layout.tsx has no NextIntlClientProvider — useTranslations throws in every Client Component');
+  }
+
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 check('i18n catalogs consistent (delegates to check-i18n.mjs)', () => {
   const script = join(import.meta.dirname, 'check-i18n.mjs');
   const r = spawnSync(process.execPath, [script, ROOT], { encoding: 'utf8' });
