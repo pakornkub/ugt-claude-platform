@@ -177,6 +177,12 @@ options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
 table→card · row selection · built-in Empty state.
 
+ติ๊กเลือกแถวใช้ `selectionColumn()` จาก `ui/data-table` เป็นคอลัมน์แรกเสมอ —
+อย่าเขียน header/cell เอง: helper บังคับ `aria-label` ที่ระบุแถวได้ (ไม่งั้น
+screen reader อ่านทุกแถวว่า "checkbox") และให้ติ๊กหัวตารางนับจากแถว **ที่กรองอยู่**
+ไม่ใช่ทั้งชุดข้อมูล · แถวที่ห้ามเลือกส่งผ่าน prop `enableRowSelection` ของตาราง
+ทางเดียว ไม่ตั้งซ้ำในคอลัมน์
+
 Row selection alone renders no toolbar of its own. The bulk bar is a
 separate component the page composes — `ui/bulk-action-bar.tsx` — fed by
 the table's `onSelectionChange` and cleared through its `resetSelectionKey`.

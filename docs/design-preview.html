@@ -135,6 +135,12 @@
   .ui .ck{width:16px;height:16px;border-radius:4px;background:var(--primary);color:var(--primary-foreground);
     display:inline-flex;align-items:center;justify-content:center;flex:none}
   .ui .ck svg{width:11px;height:11px}
+  .ui .ck-off{width:16px;height:16px;border-radius:4px;border:1px solid var(--input-c);
+    background:var(--card);display:inline-block;flex:none;vertical-align:middle}
+  /* ติ๊กครึ่ง = เลือกบางแถวของหน้านี้ (Base UI ใช้ prop `indeterminate` ไม่ใช่ checked="indeterminate") */
+  .ui .ck-half{position:relative;background:var(--primary);border-color:var(--primary)}
+  .ui .ck-half::after{content:"";position:absolute;left:3px;right:3px;top:7px;height:2px;
+    border-radius:1px;background:var(--primary-foreground)}
   /* แถบสั่งงานหลายรายการ — พื้น primary จาง ขอบ primary จาง โค้งระดับการ์ด */
   .ui .bulkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:10px 16px;border-radius:var(--r-card);
@@ -524,12 +530,12 @@
                 </div>
                 <div style="display:flex;gap:8px">
                   <button class="btn btn-outline" type="button">ยกเลิกคำขอ</button>
-                  <button class="btn btn-primary" type="button">อนุมัติ</button>
+                  <button class="btn btn-success" type="button">อนุมัติ</button>
                 </div>
               </div>
             </div>
             <div class="card muted" style="padding:14px;font-size:13px">
-              เนื้อหาของหน้าอยู่ในการ์ดเสมอ — ชื่อหน้าอยู่นอกการ์ด ปุ่มหลักอยู่ขวาบน
+              เนื้อหาของหน้าอยู่ในการ์ดเสมอ — ชื่อหน้าอยู่นอกการ์ด ปุ่มหลักอยู่ขวาบน · <strong>อนุมัติ = เขียวทึบ</strong> (น้ำเงิน primary สงวนให้ เพิ่ม/สร้าง/Import)
             </div>
           </div>
         </div>
@@ -755,6 +761,44 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>คอลัมน์ติ๊กเลือกแถว — <code>selectionColumn()</code></span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <table class="dt" style="max-width:520px">
+          <thead>
+            <tr>
+              <th style="width:36px"><span class="ck-off ck-half" role="img" aria-label="เลือกทุกแถวที่กรองอยู่ — เลือกบางส่วน"></span></th>
+              <th>รหัส</th><th>พนักงาน</th><th>สถานะ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><use href="#i-check"/></svg></span></td>
+              <td>LV-0241</td><td>สมชาย ใจดี</td><td><span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>รออนุมัติ</span></td></tr>
+            <tr><td><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><use href="#i-check"/></svg></span></td>
+              <td>LV-0238</td><td>ธนา พูลผล</td><td><span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>รออนุมัติ</span></td></tr>
+            <tr><td><span class="ck-off"></span></td>
+              <td>LV-0240</td><td>วิภา สุขใจ</td><td><span class="sb sb-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-check"/></svg>อนุมัติแล้ว</span></td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="font-size:11.5px;margin-top:10px">
+          คอลัมน์แรกเสมอ · <strong>ห้ามเขียน header/cell เอง</strong> ใช้
+          <code>selectionColumn()</code> ของ <code>ui/data-table</code> เพราะมันบังคับสองอย่างที่
+          พลาดกันประจำ: <strong>(1)</strong> <code>aria-label</code> รายแถวต้องบอกได้ว่าแถวไหน
+          (เขียนเองมักได้แค่ "checkbox" ทุกแถว) <strong>(2)</strong> ติ๊กหัวตารางนับจากแถว
+          <strong>ที่กรองอยู่</strong> ไม่ใช่ทั้งชุด — ไม่งั้นกรองเหลือ 3 แถวแล้วกด "ทั้งหมด"
+          จะไปโดนแถวที่มองไม่เห็นด้วย · เลือกบางส่วน = ติ๊กครึ่ง (prop
+          <code>indeterminate</code> ของ Base UI ไม่ใช่ <code>checked="indeterminate"</code>
+          แบบ Radix ซึ่งใช้ไม่ได้) · แถวที่ห้ามเลือกส่งผ่าน
+          <code>enableRowSelection</code> ของตาราง ไม่ตั้งซ้ำในคอลัมน์
+        </p>
       </div>
     </div>
     <div class="specimen">

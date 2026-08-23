@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.36.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 1a55b605e79d
+// kit: ugt-nextjs-platform 4.42.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 4bc80f4fd359
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -205,6 +205,66 @@ export function rowIncludesQuery(original: unknown, query: string): boolean {
     (v) => v != null && String(v).toLowerCase().includes(q)
   );
 }
+
+/**
+ * คอลัมน์ติ๊กเลือกแถว — ใส่เป็นคอลัมน์ **แรก** ของ `columns` เสมอ
+ *
+ *     const columns = [selectionColumn<Leave>({ rowLabel: (r) => `เลือก ${r.code}` }), ...]
+ *     <DataTable columns={columns} enableRowSelection onSelectionChange={setSelected}
+ *                resetSelectionKey={clearKey} />
+ *
+ * `id: "select"` ไม่ใช่ชื่อเล่น — `DataTable` มองหา id นี้ตรง ๆ เพื่อดึง
+ * ติ๊กออกมาวางหัวการ์ดตอนจอมือถือ ตั้งชื่ออื่นแล้วมือถือจะไม่มีที่ให้เลือก
+ *
+ * ทำไมต้องเป็น helper ไม่ปล่อยให้เขียนเอง: `aria-label` ของติ๊กแต่ละแถวต้อง
+ * บอกให้ได้ว่าเป็นแถวไหน ไม่งั้น screen reader อ่านทั้งตารางว่า "checkbox" เฉย ๆ
+ * และหัวตารางต้องนับจากแถว **ที่กรองอยู่** ไม่ใช่ทั้งชุดข้อมูล ไม่งั้นติ๊ก "ทั้งหมด"
+ * ทั้งที่หน้าจอกรองเหลือ 3 แถว แล้วไปโดนแถวที่มองไม่เห็นด้วย
+ *
+ * แถวที่ห้ามเลือก (เช่น แถวระบบ) ไม่ได้ตั้งที่นี่ — ส่งเป็นฟังก์ชันให้ตาราง
+ * `<DataTable enableRowSelection={(row) => !row.original.isSystem} />`
+ * แล้ว `row.getCanSelect()` ที่นี่จะรู้เอง (ทางเดียว ไม่มีสองที่ให้ตั้ง)
+ */
+export function selectionColumn<TData>({
+  rowLabel,
+  allLabel = 'เลือกทุกแถวที่กรองอยู่',
+}: Readonly<{
+  /** ข้อความ aria ของติ๊กรายแถว — ต้องระบุแถวได้ เช่น `เลือก ${row.code}` */
+  rowLabel: (row: TData) => string;
+  /** ข้อความ aria ของติ๊กหัวตาราง */
+  allLabel?: string;
+}>): ColumnDef<TData> {
+  return {
+    id: 'select',
+    enableSorting: false,
+    enableHiding: false,
+    enableResizing: false,
+    size: 36,
+    header: ({ table }) => {
+      // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
+      const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
+      const picked = rows.filter((r) => r.getIsSelected()).length;
+      return (
+        <Checkbox
+          checked={rows.length > 0 && picked === rows.length}
+          indeterminate={picked > 0 && picked < rows.length}
+          disabled={rows.length === 0}
+          onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
+          aria-label={allLabel}
+        />
+      );
+    },
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
+        onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+        aria-label={rowLabel(row.original)}
+      />
+    ),
+  };
+}
+
 
 function DataTableMobileCards<TData>({
   table,
