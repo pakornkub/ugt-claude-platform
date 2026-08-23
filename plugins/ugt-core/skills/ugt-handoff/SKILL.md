@@ -36,7 +36,9 @@ Auto memory (`~/.claude/projects/...`) is one person's machine. Anything the
 team must share lives in these committed files — **on conflict, committed
 files win**.
 
-## Step 1 — update the handoff file (every run)
+## Workflow
+
+### Step 1 — update the handoff file (every run)
 
 Read the existing `.claude/state/handoff.md` and bring it up to date. Fixed
 sections — keep all four, add none:
@@ -62,7 +64,7 @@ Last updated: <YYYY-MM-DD>
 Entries are **traceable** (file names, function names, PR numbers — not
 "fixed the user page") and dated. No secrets — the file is committed.
 
-## Step 2 — fan out this chunk's results (only the rows that apply)
+### Step 2 — fan out this chunk's results (only the rows that apply)
 
 | What happened this chunk | Write to | How |
 | --- | --- | --- |
@@ -103,7 +105,7 @@ extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 | Stack-wide gotcha → PR to the platform | Keep it in one project and let others rediscover it |
 | Commit handoff + context changes together | Commit state but leave knowledge dirty |
 
-## Verification
+## Verification Checklist
 
 - [ ] `handoff.md` has exactly the 4 sections, "Last updated" is today, Done ≤ ~10 rows
 - [ ] `docs/project-context/board.md` สถานะ agrees with handoff's In progress/Done

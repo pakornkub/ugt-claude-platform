@@ -98,6 +98,8 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 | --- | --- | --- |
 | Behavior evals 3 ชุด (ugt-context / mail / upload) | โปรเจคจริงที่ติดตั้ง | `evals.json` ทั้งสามประกาศ `"date": null` เอง |
 | Trigger baseline ของ `ugt-nextjs-kit-sync` | release gate รอบถัดไป (ผู้ตัดสิน 3 คนตามแบบแผน) | `trigger-evals.json` ประกาศ pending เอง |
+| Behavior evals ของ `ugt-nextjs-kit-sync` (ยังไม่เคยเขียน — เป็นตัวเดียวที่ไม่มี `evals.json`) | โปรเจคจริงที่มีไฟล์ kit ถูกแก้เอง เพื่อวัดการตัดสิน merge vs overwrite | แถวนี้ |
+| Trigger baseline ของ php/python (ประกาศ `date: null` แล้ว 2026-08-23) | pilot จริงของสอง stack นี้ | `evals/trigger-evals.json` ของแต่ละตัว |
 | Pilot `ugt-python-platform` / `ugt-php-platform` 0.3.0 → tag | โปรเจค pilot จริง | README ตาราง plugin |
 | Multi-stack ต่อ (React SPA ฯลฯ) | มีโปรเจค stack นั้นจริง | `docs/multi-stack-proposal.md` |
 

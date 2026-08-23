@@ -23,6 +23,12 @@ description: >
 
 ## 1. Overview
 
+> **ต้องติดตั้งก่อน**: `ugt-nextjs-database-setup` (ตาราง `Attachments` +
+> Prisma client) → `ugt-nextjs-auth-setup` (session + permission ที่ด่าน
+> ดาวน์โหลดใช้) → `ugt-nextjs-design-setup` (ตัวอัปโหลดเรียก `ui/icon-action`).
+> ขาดตัวไหนให้หยุดแล้วไปติดตั้งตัวนั้นก่อน — ลำดับใน `ugt-nextjs-full-setup`
+> รับประกันให้อยู่แล้ว
+
 **Nothing was extracted here.** Unlike the other skills, `ugt-hrms` has no
 upload path at all — no `formData()` handler, no volume, no storage dependency,
 only CSV/XLSX *exports*. This skill is built from the org's three decisions
@@ -35,7 +41,7 @@ as a starting point that the first real project will sharpen.
 | Which types | **All types, virus-scanned** |
 | Downloads | **Permission-checked on every request** |
 
-## 2. Org standards
+## 2. Org Standards
 
 1. **Scan before the volume.** Bytes are scanned in memory; an infected file is
    never written to disk, not even briefly.
@@ -159,7 +165,7 @@ npx prisma migrate dev --name add-attachments && npx prisma generate
 | Implement `canReadAttachment` from session identity | `!canSeeAll`, or leaving the deny-all skeleton in place |
 | Route Handler for upload | Server Action (1 MB body cap) |
 
-## 6. Verification checklist
+## 6. Verification Checklist
 
 ```bash
 node <skill-dir>/scripts/verify.mjs

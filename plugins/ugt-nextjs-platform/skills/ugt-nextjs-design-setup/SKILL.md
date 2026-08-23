@@ -49,7 +49,7 @@ What lands in the project:
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules/ugt-nextjs-design.md` |
 
-## 2. Org standards (summary — full text in ugt-core `contracts/design.md`)
+## 2. Org Standards (summary — full text in ugt-core `contracts/design.md`)
 
 1. **shadcn-first ladder**: primitive → block/template → compose → custom
    Tailwind-utilities-only. Never hand-build what shadcn provides. No raw
@@ -321,3 +321,24 @@ contain project มติ that deliberately deviate.
 | Diff-and-ask on existing `components/ui/` files | Overwrite the project's components silently |
 | Run check-contrast + verify before closing | Close with a failing script "to fix later" |
 | Sync mode diffs and records มติ | Regenerate DESIGN.md over project decisions |
+
+## 6. Verification Checklist
+
+Run first, then walk what a script cannot see (details in Step 4 — Close out):
+
+```bash
+node <skill-dir>/scripts/verify.mjs      # cwd = project root
+node <skill-dir>/scripts/check-contrast.mjs
+```
+
+- [ ] both scripts exit 0 — never close with a ✘ outstanding
+- [ ] `components.json` is the org preset and no Radix reached the project
+      (verify.mjs gates both — a plain `shadcn init` fails here)
+- [ ] `docs/DESIGN.md` has no `__...__` left and its มติ table has today's entry
+- [ ] every `<DataTable>` has a unique `id`; page filters sit inside the
+      table's card, left-aligned (verify.mjs checks both)
+- [ ] `npm run build` passes
+- [ ] a page using Button / Input / Table renders with the new tokens, in
+      light **and** dark if dark mode was selected
+- [ ] the installed UI matches `docs/design-preview.html` — that page is the
+      promise the org makes to the reader

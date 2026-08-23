@@ -208,7 +208,7 @@ Rules the plan must state out loud:
 | Stop at the handoff | Start designing or coding the first feature |
 | One orchestration plan, confirmed once | Dispatch features silently, or interrogate the user per feature |
 
-## Verification
+## Verification Checklist
 
 Before closing out, confirm:
 

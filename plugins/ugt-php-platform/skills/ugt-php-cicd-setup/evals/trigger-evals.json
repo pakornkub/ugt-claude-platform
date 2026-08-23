@@ -1,6 +1,10 @@
 {
   "purpose": "Trigger-boundary regression set for ugt-php-cicd-setup. S* queries must route here (pipeline install for Laravel/WordPress/legacy PHP projects + documented pipeline symptoms); N* must NOT (Next.js pipeline → nextjs-cicd-setup, Python/FastAPI pipeline → python-cicd-setup, fixing PHP code for SonarQube → no PHP clean-code skill exists yet, login/SSO for a PHP app → no PHP auth skill exists yet).",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": {
+    "date": null,
+    "note": "pending — run with the 0.x pilot (the plugin is deliberately untagged until then)"
+  },
   "queries": {
     "S1": {
       "prompt": "ทำ CI/CD ให้โปรเจค laravel",

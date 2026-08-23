@@ -66,7 +66,7 @@ upstream library docs.
 | "Page matches the last commit but ignores my edits" in a worktree → delete `.next`, restart dev | Hard-reloading the browser repeatedly — it's the Turbopack build cache, not the browser |
 | Type test mocks with `satisfies` + full-shape factory helpers | Partial mock literals — they stop compiling when generated types drift |
 
-## Verification
+## Verification Checklist
 
 Run the greppable checks (cwd = project root; by default checks only files
 changed vs HEAD, `--all` for the whole project):

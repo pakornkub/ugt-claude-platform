@@ -259,3 +259,24 @@ How:
 | Edit `CLAUDE.md` only inside the `ugt:start/end` block | Rewrite the whole `CLAUDE.md` (team content lost) |
 | Leave existing `.claude/state/` untouched | Reset team state because it "looks like a skeleton" |
 | Install the harness every time (step 4) | Install only code and stop — knowledge dies with the session |
+
+## Verification Checklist
+
+Every installed module has its own `verify.mjs`; this skill has one too, for
+the harness layer. Run them all, then the smoke test (details in §5 Close out):
+
+```bash
+node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module
+```
+
+- [ ] every module's `verify.mjs` exits 0, **including this skill's own**
+- [ ] `CLAUDE.md` stays under 200 lines (this skill's verify.mjs enforces it)
+- [ ] `.claude/rules/` and `.claude/state/` exist and the rule files carry a
+      `paths:` frontmatter — without it a rule never loads
+- [ ] `docs/admin-handoff.md` exists with no `__...__` left, and the user has
+      been told to forward it (it is a FILE, not a chat message)
+- [ ] `npm run build` passes
+- [ ] login works with every enabled method → protected page reachable →
+      logout clears the cookie
+- [ ] `/admin/setup` grants Administrator on one click
+- [ ] push `develop` → pipeline green through all stages

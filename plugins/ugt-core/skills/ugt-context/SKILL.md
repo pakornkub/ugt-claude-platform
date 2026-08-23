@@ -110,7 +110,7 @@ project (except to regenerate after a major restructure, on explicit request).
 | Leave decisions/troubleshooting/board as skeletons on scan | Fabricate history no scan can know |
 | Stop if the folder already exists | Regenerate over team knowledge silently |
 
-## Verification
+## Verification Checklist
 
 - [ ] `docs/project-context/` has all 7 files
 - [ ] `00-index.md` table rows match the files that actually exist

@@ -23,6 +23,11 @@ description: >
 
 ## 1. Overview
 
+> **ต้องติดตั้งก่อน**: `ugt-nextjs-database-setup` (ตาราง `AppSettings` ที่เก็บ
+> template) → `ugt-nextjs-auth-setup` (หน้า `/admin/mail-templates` อยู่ในกลุ่ม
+> `(admin)` ของ auth และใช้ guard + audit ของมัน) → `ugt-nextjs-design-setup`
+> (หน้า admin ใช้ชุด component ของ kit) · ขาดตัวไหนให้หยุดแล้วไปติดตั้งก่อน
+
 Extracted from `ugt-hrms`, where this exact code sends every approval email in
 production. Three pieces:
 
@@ -36,7 +41,7 @@ The split matters: **an admin can edit wording, never layout**. The card frame,
 header, greeting, status banner, CTA button and the "do not reply" footer are
 assembled in code at send time; only the inner prose is stored and editable.
 
-## 2. Org standards
+## 2. Org Standards
 
 1. **`sendTemplatedMail` is the only entry point** for workflow mail. Direct
    `sendMail` is for one-off system mail; a fresh nodemailer transport is never
@@ -182,7 +187,7 @@ Details, token rules and the escaping trap → `references/templates-and-tokens.
 | Edit chrome in `lib/types/mail-templates.ts` | Let the admin editor own layout or the disclaimer |
 | Leave `SMTP_USER`/`PASS` blank for an internal relay | Invent credentials the relay does not want |
 
-## 7. Verification checklist
+## 7. Verification Checklist
 
 Run the script first (cwd = project root):
 

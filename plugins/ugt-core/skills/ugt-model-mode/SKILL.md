@@ -172,7 +172,7 @@ offer `/ugt-model-mode default` to create it.
 | Let `auto` judge in-session at dispatch time | Rewrite `model-mode.md` per task or auto-switch presets |
 | Leave `handoff.md` / `docs/project-context/` alone | Record the switch in `decisions.md` (it's config, not history) |
 
-## Verification
+## Verification Checklist
 
 - [ ] `.claude/state/model-mode.md` has a `Current mode: **easy|default|god|auto**` line
 - [ ] Fixed preset: the table's non-mechanical rows match that preset's column

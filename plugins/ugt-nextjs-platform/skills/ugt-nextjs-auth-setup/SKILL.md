@@ -27,6 +27,9 @@ description: >
 
 ## 1. Overview
 
+> **ต้องติดตั้งก่อน**: `ugt-nextjs-database-setup` แล้วตามด้วย
+> `ugt-nextjs-design-setup` — เหตุผลเต็มอยู่ที่ §4 Prerequisite
+
 This skill installs the org-standard login system into a project that has no
 auth yet (including AI-generated projects). The installer **chooses the login
 methods**:
@@ -488,13 +491,15 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       redirect stops for everyone
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
       `/admin/users`; revisiting `/admin/setup` redirects away
-- [ ] NavUser (มุมล่าง sidebar): เปิดเมนูแล้วกด "บัญชีผู้ใช้" เปิดการ์ดโปรไฟล์จริง
-      และ "ออกจากระบบ" ออกจริง (จับ `onSelect`/`asChild` ค้างจาก Radix —
-      Base UI เมินเงียบ ปุ่มจะดูปกติแต่กดแล้วไม่เกิดอะไร)
-- [ ] `/admin/roles`: ปุ่มลบเปิด `ConfirmActionDialog` (ไม่ใช่ browser confirm),
-      ฟอร์ม create/edit เปิดเป็น Sheet ที่ checklist สิทธิ์เลื่อนได้จนสุด,
-      ปุ่มแถวเป็น `IconAction` สี soft (แก้ไข=น้ำเงิน · ลบ=แดง) มี tooltip
-- [ ] ทั้งสามหน้า admin มี title + subtitle จาก `page-shell` (ไม่ใช่ `<h1>` เปล่า)
+- [ ] NavUser (bottom of the sidebar): opening the menu and clicking
+      "บัญชีผู้ใช้" really opens the profile card, and "ออกจากระบบ" really logs
+      out — this is the check that catches a leftover Radix `onSelect`/`asChild`,
+      which Base UI ignores in silence: the button looks fine and does nothing
+- [ ] `/admin/roles`: delete opens `ConfirmActionDialog`, never the browser
+      confirm · create/edit opens a Sheet whose permission checklist scrolls
+      all the way · row buttons are `IconAction` in soft colours (edit = blue ·
+      delete = red) and each has a tooltip
+- [ ] All three admin pages get title + subtitle from `page-shell`, not a bare `<h1>`
 - [ ] `/admin/users`: the Administrator (or any user with `USERS_READ`) sees
       every user, and can reassign another user's role — but not their own
       (the dropdown is disabled on their own row)
@@ -506,20 +511,23 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       still reject a direct call with the wrong permission)
 - [ ] `/admin/audit-logs` shows the `roles.create` / `users.role-assign` rows
       from the steps above
-- [ ] `/admin/audit-logs` filters run server-side: กรองชื่อผู้ใช้/ช่วงวันที่/action
-      แล้ว URL เปลี่ยน (`q`/`from`/`to`/`action`), เปลี่ยนหน้าแล้ว filter ไม่หลุด,
-      refresh/แชร์ลิงก์เห็นผลเดิม
+- [ ] `/admin/audit-logs` filters run server-side: filtering by user / date
+      range / action changes the URL (`q`/`from`/`to`/`action`), and paging
+      keeps the filter, and a refresh or a shared link shows the same result
 - [ ] ActivityLogs has `login.success` / `logout` rows after testing
 - [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
 - [ ] With a basePath: the cookie name in DevTools starts with your basePath (e.g. `expense-portal.`, or `__Secure-expense-portal.` on https)
-- [ ] Security headers ออกครบ **ทุก** response ไม่ใช่แค่หน้า HTML —
-      `curl -sI http://localhost:3000/login` และ `curl -sI http://localhost:3000/api/health`
-      ต้องเห็นทั้ง `content-security-policy`, `x-frame-options: DENY`,
-      `x-content-type-options: nosniff`, `referrer-policy`, `permissions-policy`
-      (ทุกจุด `return` ใน `proxy.ts` ต้องผ่าน `applySecurityHeaders()` — คัดลอกไฟล์
-      แล้วเผลอ `return NextResponse.next()` เปล่า ๆ คือวิธีที่มันหายไปเงียบ ๆ)
-- [ ] HSTS ยิงถูกที่: บน `http://localhost` ต้อง **ไม่มี** `strict-transport-security`
-      (ถ้ามี browser จะ pin โดเมนไว้และไม่มี https dev server ให้ถอย) · บน https จริง
-      ต้องมี `max-age=31536000` และยัง **ไม่มี** `includeSubDomains`/`preload`
-      จนกว่าเจ้าของโดเมนจะตัดสิน
+- [ ] Security headers reach **every** response, not just HTML pages —
+      `curl -sI http://localhost:3000/login` and
+      `curl -sI http://localhost:3000/api/health` must both show
+      `content-security-policy`, `x-frame-options: DENY`,
+      `x-content-type-options: nosniff`, `referrer-policy` and
+      `permissions-policy`. Every `return` in `proxy.ts` has to go through
+      `applySecurityHeaders()` — copying the file and then writing a bare
+      `return NextResponse.next()` is how they disappear silently
+- [ ] HSTS lands in the right place: on `http://localhost` there must be **no**
+      `strict-transport-security` at all (pinning localhost to https is cached
+      by the browser and there is no https dev server to fall back to), and on
+      https it must carry neither `includeSubDomains` nor `preload` until the
+      domain owner says so
 - [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)

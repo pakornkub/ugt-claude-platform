@@ -21,6 +21,10 @@ description: >
 
 ## 1. Overview
 
+> **ต้องติดตั้งก่อน**: `ugt-nextjs-test-lint-setup` — pipeline เรียก npm script
+> ชื่อ `lint`, `format:check`, `test:coverage` ตรง ๆ ถ้าไม่มีสักตัว stage
+> Code Quality กับ Unit Tests จะแดงทันทีตั้งแต่รันแรก
+
 Installs the org-standard CI/CD into an existing project:
 **10-stage Jenkins declarative pipeline + SonarQube Quality Gate (blocking) +
 OWASP Dependency Check + two-image Docker build/deploy** — extracted from a

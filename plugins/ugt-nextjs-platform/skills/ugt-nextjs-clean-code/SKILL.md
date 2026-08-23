@@ -39,21 +39,21 @@ shortcut — design it out from the start.
 
 ## 1. Modern-JS idioms SonarQube enforces
 
-Write the right column by default.
+Write the **left** column by default — the right one is what SonarQube flags.
 
-| ❌ Flagged | ✅ Write instead | Rule |
+| DO ✅ | DON'T ❌ | Rule |
 | --- | --- | --- |
-| `str.replace(/x/g, 'y')` | `str.replaceAll('x', 'y')` | S7781 |
-| `parseInt(v, 10)` / `parseFloat(v)` | `Number.parseInt(v, 10)` / `Number.parseFloat(v)` | S7773 |
-| `typeof window !== 'undefined'` | `globalThis.window !== undefined` | S7764 |
-| `typeof x === 'undefined'` | `x === undefined` | S7741 |
-| `arr[arr.length - 1]` | `arr.at(-1)` | S7755 |
-| `x > 0 ? x : 0` | `Math.max(0, x)` | S7766 |
-| `a !== null ? a : b` / `a ? a : b` | `a ?? b` | S6606 / S7735 |
-| `if (!notReady)` in a ternary | flip the branches → positive condition | S7735 |
-| `catch (err)` / `catch (e)` | `catch (error_)` or `catch (error)` | S7718 |
-| `value as Foo` where TS already narrows | remove the assertion | S4325 |
-| `void someExpr;` | delete the dead expression | S3735 |
+| `str.replaceAll('x', 'y')` | `str.replace(/x/g, 'y')` | S7781 |
+| `Number.parseInt(v, 10)` / `Number.parseFloat(v)` | `parseInt(v, 10)` / `parseFloat(v)` | S7773 |
+| `globalThis.window !== undefined` | `typeof window !== 'undefined'` | S7764 |
+| `x === undefined` | `typeof x === 'undefined'` | S7741 |
+| `arr.at(-1)` | `arr[arr.length - 1]` | S7755 |
+| `Math.max(0, x)` | `x > 0 ? x : 0` | S7766 |
+| `a ?? b` | `a !== null ? a : b` / `a ? a : b` | S6606 / S7735 |
+| flip the branches → positive condition | `if (!notReady)` in a ternary | S7735 |
+| `catch (error_)` or `catch (error)` | `catch (err)` / `catch (e)` | S7718 |
+| remove the assertion | `value as Foo` where TS already narrows | S4325 |
+| delete the dead expression | `void someExpr;` | S3735 |
 
 **Component / type rules:**
 
@@ -132,7 +132,7 @@ delegating ARIA to a parent.
 `console.*` in fire-and-forget catch blocks → `// NOSONAR typescript:S106`
 on the same line.
 
-## Pre-commit checklist
+## Verification Checklist
 
 **Run the script first** (cwd = project root) — by default it checks only files
 changed vs HEAD, which matches what the gate measures (new code); add `--all`

@@ -101,7 +101,7 @@ new path, or a retirement → propose deleting the copy).
 | Run verify + tests before closing | Trust that a semantic merge compiled |
 | Old un-stamped files: match them to assets by path, then treat as MERGE | Assume no stamp = not a kit file |
 
-## 4. Verification checklist
+## 4. Verification Checklist
 
 - [ ] `check-kit-freshness.mjs` re-run after applying → previously-UPDATE files
       now CURRENT; merged files still MERGE (expected) but on the new version
