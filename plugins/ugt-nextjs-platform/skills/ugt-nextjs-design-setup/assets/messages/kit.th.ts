@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: PENDING
+// kit-hash: e60818b08016
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {

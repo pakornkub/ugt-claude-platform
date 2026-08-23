@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.42.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 4bc80f4fd359
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: af6e15c035f7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows

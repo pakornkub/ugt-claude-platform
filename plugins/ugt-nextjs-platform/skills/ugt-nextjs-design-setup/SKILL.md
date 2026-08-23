@@ -354,3 +354,11 @@ node <skill-dir>/scripts/check-contrast.mjs
       light **and** dark if dark mode was selected
 - [ ] the installed UI matches `docs/design-preview.html` — that page is the
       promise the org makes to the reader
+- [ ] `node <skill-dir>/scripts/check-i18n.mjs` เขียว — catalog `th`/`en` มี key
+      ชุดเดียวกัน และไฟล์ที่แปลงแล้วไม่มีสตริงไทยนอกคอมเมนต์
+- [ ] `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.*.ts` copy เข้าโปรเจคแล้ว
+      (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en**) และ `NextIntlClientProvider` อยู่นอกสุด
+      ของ provider stack ใน `app/layout.tsx`
+- [ ] th+en เท่านั้น: กดสลับภาษาแล้ว **ข้อความในตารางเปลี่ยนจริง** (หัวคอลัมน์
+      ที่ผู้เรียกส่งมาจะยังเป็นภาษาเดิมจนกว่าโปรเจคจะแปลเอง — ที่ต้องเปลี่ยนคือ
+      ปุ่มหน้า, ตัวกรอง, empty state, สรุปจำนวนแถว)

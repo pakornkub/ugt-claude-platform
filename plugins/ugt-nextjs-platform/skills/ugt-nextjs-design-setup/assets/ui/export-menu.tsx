@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/export-menu.tsx
-// kit-hash: 3474a82f2b4a
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/export-menu.tsx
+// kit-hash: 6d7dc55a8cd0
 
 // source: ugt-hrms components/ui/export-menu.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // ปุ่ม export Excel/CSV สำหรับวางใน `toolbarExtra` ของ DataTable

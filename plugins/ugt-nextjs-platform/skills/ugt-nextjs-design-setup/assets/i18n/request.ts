@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/i18n/request.ts
-// kit-hash: PENDING
+// kit-hash: 248d1b85c62a
 // Cookie-based locale — no [locale] segment in the URL. The cookie is written
 // by lib/actions/locale.ts (session-guarded Server Action); this only reads it.
 import { getRequestConfig } from 'next-intl/server';

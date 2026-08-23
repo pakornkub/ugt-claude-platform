@@ -368,3 +368,25 @@ and CRLF per RFC 4180.
 | `lib/motion.ts` | new — the agreement's numbers as importable constants | only when custom motion = มี (pairs with `docs/MOTION.md`); dep `motion` |
 | `ui/button-variants.md` | BOI → recipes on the base-mira button, colors mapped to org tokens | the sanctioned `components/ui/button.tsx` edit |
 | `brand/ube-logo-short.svg` · `brand/ube-logo-long.svg` | company asset | → `public/brand/` · `fill="currentColor"` (tint via CSS) · short = shell header, long (tagline) = login/landing |
+
+## i18n — เพิ่มข้อความใหม่ต้องทำอะไร
+
+ตั้งแต่ 4.46.0 ทุกข้อความที่ผู้ใช้เห็นในคิตอ่านจาก `messages/` ไม่ใช่จาก jsx
+
+**เพิ่มข้อความในคอมโพเนนต์ของคิต** (ไฟล์ใต้ `components/ui/`):
+
+1. เพิ่ม key ใน `messages/kit.th.ts` **และ** `messages/kit.en.ts` — key ต้องตรงกัน
+   ทั้งสองไฟล์ ไม่งั้น `check-i18n.mjs` FAIL
+2. เรียกด้วย `const t = useTranslations('kit.<namespace>')` แล้ว `t('key')`
+3. มีตัวแปรแทรก ใช้ `{name}` ของ next-intl **ไม่ใช่** `${name}` ของ JS:
+   `t('filterAria', { label })` คู่กับ `filterAria: 'กรอง {label}'`
+
+**เพิ่มข้อความของโปรเจคเอง** (ไม่ใช่ของคิต): สร้าง `messages/app.th.ts` /
+`app.en.ts` ของตัวเองแล้วลงทะเบียนใน `i18n/messages.ts` — **ห้ามเพิ่ม key ลง
+ไฟล์ `kit.*`** เพราะ `/plugin update` เขียนทับไฟล์ของคิตทั้งไฟล์ ของที่เพิ่มเข้าไป
+จะหายเงียบ (`ugt-nextjs-kit-sync` เตือนตอนไฟล์ตกรุ่น แต่กู้ของที่หายไปแล้วไม่ได้)
+
+**คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action.tsx`,
+`ui/bulk-action-bar.tsx`, `ui/status-badge.tsx`, `ui/page-shell.tsx`,
+`ui/query-state.tsx`, `ui/detail-*.tsx` ออกแบบมาให้ผู้เรียกประกอบข้อความเอง
+ตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล

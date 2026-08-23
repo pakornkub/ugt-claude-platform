@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.32.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
-// kit-hash: 69004817aa96
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: c55d4a88ea6a
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ

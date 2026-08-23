@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/i18n/messages.ts
-// kit-hash: PENDING
+// kit-hash: 38f13ae13a66
 // Every namespace the kit ships, merged per locale. A skill that adds its own
 // catalog (auth, mail, upload) registers it here — one import + one spread.
 // Project-owned strings belong in messages/app.*.ts, NOT in a kit namespace:
