@@ -202,7 +202,7 @@
   .dlg .dlg-head{border-bottom:1px solid var(--border-c);padding:12px 16px;font-size:15px;font-weight:600}
   .dlg .dlg-body{padding:16px;display:grid;gap:10px}
   .dlg .dlg-foot{border-top:1px solid var(--border-c);padding:12px 16px;display:flex;
-    justify-content:space-between;gap:8px}
+    justify-content:flex-end;gap:8px}
   .dlg .dlg-x{position:absolute;top:10px;right:12px;opacity:.55;cursor:pointer;
     background:transparent;border:0;color:inherit;padding:2px;line-height:0}
   .dlg .dlg-x svg{width:14px;height:14px}
@@ -256,6 +256,10 @@
 
 <svg class="sprite" aria-hidden="true"><defs>
   <g id="i-plus"><path d="M5 12h14"/><path d="M12 5v14"/></g>
+  <g id="i-bold"><path d="M6 4h8a4 4 0 0 1 0 8H6z"/><path d="M6 12h9a4 4 0 0 1 0 8H6z"/></g>
+  <g id="i-italic"><path d="M19 4h-9"/><path d="M14 20H5"/><path d="M15 4 9 20"/></g>
+  <g id="i-list"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></g>
+  <g id="i-link"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></g>
   <g id="i-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></g>
   <g id="i-trash"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></g>
   <g id="i-rotate"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></g>
@@ -544,7 +548,7 @@
     <h2>หน้ารายการ — แบบที่ทีมจะสร้างซ้ำทุกวัน</h2>
     <p class="lead">แถบ filter อยู่ใน<strong>หัวการ์ดเดียวกับตาราง ชิดซ้าย เรียงกว้างไปแคบ</strong>
       (ช่วงเวลา → หน่วยงาน → สถานะ) · ปุ่มของหน้าอยู่ขวาบนเสมอ ห้ามลงมาปนแถบ filter ·
-      ช่องค้นหาอิสระเป็นของตาราง ไม่ทำซ้ำที่แถบ filter</p>
+      ช่องค้นหาอิสระเป็นของตาราง ไม่ทำซ้ำที่แถบ filter · <strong>การ์ดใบนี้ <code>DataTable</code> วาดเอง</strong> — หน้าไม่ต้องห่อ <code>Card</code> ซ้อนอีกชั้น (ใน dialog/sheet ส่ง <code>card={false}</code>)</p>
 
     <div class="specimen">
       <div class="specimen-bar">
@@ -674,7 +678,7 @@
         <thead><tr><th>ข้อมูล</th><th>โหมด</th></tr></thead>
         <tbody>
           <tr><td>bounded ดึงมาทั้งชุด (master data)</td><td><strong>client</strong> — sort/filter/paginate ในหน่วยความจำ</td></tr>
-          <tr><td>โตไม่จำกัด / query paginate ฝั่ง server</td><td><strong>server</strong> — sort + filter + paginate ผ่าน URL state <strong>ทั้งหมด</strong></td></tr>
+          <tr><td>โตไม่จำกัด / query paginate ฝั่ง server</td><td><strong>server</strong> — ค้นหา + sort + filter + paginate ผ่าน URL state <strong>ทั้งหมด</strong> (ช่องค้นหาก็เป็นของ DataTable เหมือนกัน หน้าห้ามทำเอง)</td></tr>
         </tbody>
       </table>
       <table class="doc">
@@ -803,7 +807,8 @@
         <tbody>
           <tr><td>label</td><td>อยู่<strong>บน</strong>ช่อง</td></tr>
           <tr><td>required</td><td><span style="color:var(--bad)">*</span> แดงท้าย label</td></tr>
-          <tr><td>error</td><td>ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form)</td></tr>
+          <tr><td>error ของช่อง</td><td>ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form ผ่าน <code>zodResolver</code>)</td></tr>
+          <tr><td>error ของทั้งฟอร์ม</td><td><code>Callout tone="danger"</code> ค้างอยู่ในฟอร์ม <strong>ไม่ใช่ toast</strong><br><span style="color:var(--ink-faint)">toast หายไปเอง คนอ่านไม่ทันแล้วไม่รู้ว่าทำไมกดไม่ผ่าน</span></td></tr>
           <tr><td>จังหวะ validate</td><td>ตอน submit แล้ว re-validate ต่อ field</td></tr>
         </tbody>
       </table>
@@ -871,6 +876,35 @@
         <p class="muted" style="font-size:12px">URL: <code>/leave?tab=pending</code></p>
       </div>
     </div>
+    <div class="specimen">
+      <div class="specimen-bar">
+        <span>Rich text — <code>ui/tiptap-editor</code> (ติดตั้งเฉพาะโปรเจคที่มีเนื้อหายาว)</span>
+        <span class="toggle" role="group" aria-label="สลับธีม">
+          <button type="button" data-theme="light" aria-pressed="true">Light</button>
+          <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+        </span>
+      </div>
+      <div class="cmp ui" data-ui>
+        <div style="border:1px solid var(--border-c);border-radius:var(--r-ctl);overflow:hidden;max-width:520px">
+          <div style="display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--border-c);flex-wrap:wrap">
+            <button class="btn btn-icon btn-ghost" type="button" aria-label="ตัวหนา"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-bold"/></svg></button>
+            <button class="btn btn-icon btn-ghost" type="button" aria-label="ตัวเอียง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-italic"/></svg></button>
+            <span style="width:1px;height:16px;background:var(--border-c);margin:0 4px"></span>
+            <button class="btn btn-icon btn-ghost" type="button" aria-label="รายการหัวข้อ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-list"/></svg></button>
+            <button class="btn btn-icon btn-ghost" type="button" aria-label="ลิงก์"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-link"/></svg></button>
+          </div>
+          <div style="padding:10px 12px;font-size:12.5px;line-height:1.7;min-height:64px">
+            เนื้อหาที่แก้ไขได้ — หัวเรื่อง ตัวหนา รายการ และลิงก์
+          </div>
+        </div>
+        <p class="muted" style="font-size:11.5px;margin-top:10px">
+          ปุ่มทุกตัวเป็น <code>IconAction</code> (<code>size="icon"</code> ของ preset = 28px อยู่แล้ว
+          ไม่ต้อง override) · สถานะเปิด/ปิดบอกด้วย <code>aria-pressed</code> ไม่ใช่แค่สีพื้น ·
+          คำอธิบายปุ่มมาจาก tooltip ของ kit <strong>ไม่ใช่ native <code>title=</code></strong>
+          ซึ่งไม่ theme ช้าเป็นวินาที และมือถือไม่เห็นเลย
+        </p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -932,7 +966,7 @@
             <b style="font-size:15px">ลบใบลา LV-0241?</b>
             <p class="muted" style="font-size:12.5px;line-height:1.6">รายการนี้จะถูกทำเครื่องหมายว่าลบแล้ว
               ประวัติยังอยู่ในระบบและกู้คืนได้ภายหลัง</p>
-            <div style="display:flex;justify-content:space-between;gap:8px">
+            <div style="display:flex;justify-content:flex-end;gap:8px">
               <button class="btn btn-outline" type="button">ยกเลิก</button>
               <button class="btn btn-destructive" type="button">ลบรายการ</button>
             </div>
@@ -958,7 +992,7 @@
                 <div class="drow"><span class="muted">สถานะ</span><span class="sb sb-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-clock"/></svg>รออนุมัติ</span></div>
               </div>
             </div>
-            <div class="dlg-foot" style="justify-content:flex-end">
+            <div class="dlg-foot">
               <button class="btn btn-outline" type="button">ปิด</button>
             </div>
           </div>
@@ -1148,14 +1182,15 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>สร้างใบลา</button>
         </div>
         <div class="card" style="padding:14px;display:grid;gap:9px;align-content:start">
-          <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;border-radius:var(--r-ctl);
-               background:color-mix(in oklab,var(--destructive) 10%,transparent);
-               border:1px solid color-mix(in oklab,var(--destructive) 35%,transparent)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--destructive);flex:none;margin-top:1px"><use href="#i-alert"/></svg>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-card);
+               background:color-mix(in oklab,var(--status-red) 10%,transparent);
+               border:1px solid color-mix(in oklab,var(--status-red) 40%,transparent);color:var(--status-red-fg)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex:none;margin-top:1px"><use href="#i-alert"/></svg>
             <span style="font-size:12.5px;line-height:1.55">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</span>
           </div>
-          <span class="muted" style="font-size:11.5px">Error ระดับหน้า = banner บนสุดของการ์ด ·
-            ระดับช่อง = ใต้ช่องนั้น</span>
+          <span class="muted" style="font-size:11.5px">กล่องนี้คือ <code>Callout tone="danger"</code>
+            ไม่ใช่กล่องที่วาดเอง · Error ระดับหน้า = Callout บนสุดของการ์ด · ระดับฟอร์ม = Callout
+            ในฟอร์ม (ไม่ใช่ toast) · ระดับช่อง = ใต้ช่องนั้นผ่าน <code>ui/field</code></span>
         </div>
         <div style="display:grid;gap:7px">
           <div class="cmp-title">Toast — ความหมายตายตัว</div>
@@ -1200,8 +1235,10 @@
     <span class="kicker">10 · ไอคอนประจำงาน</span>
     <h2>งานเดียวกัน ไอคอนเดียวกัน ทุกหน้า ทุกโปรเจค</h2>
     <p class="lead">ใช้ <strong>lucide เท่านั้น ห้าม emoji ใน UI</strong> · ไอคอนที่มีข้อความกำกับ
-      ตั้ง <code>aria-hidden</code> · ปุ่มไอคอนล้วนต้องผ่าน <code>IconAction</code> ที่บังคับใส่ label
-      (กลายเป็นทั้ง aria-label และ tooltip) · จะเพิ่มไอคอนใหม่ในรายการนี้ต้องเป็นมติ</p>
+      ตั้ง <code>aria-hidden</code> · ปุ่มไอคอนล้วนใช้ <code>size="icon"</code> ได้ทุกที่ตราบใดที่มี
+      <code>aria-label</code> — <strong>แต่ในแถวตารางต้องผ่าน <code>IconAction</code></strong>
+      ที่บังคับใส่ label (กลายเป็นทั้ง aria-label และ tooltip) เพราะที่นั่น tooltip คือสิ่งเดียว
+      ที่บอกว่าไอคอนแต่ละตัวทำอะไร · จะเพิ่มไอคอนใหม่ในรายการนี้ต้องเป็นมติ</p>
     <div class="specimen">
       <div class="specimen-bar">
         <span>Icon mapping (ตายตัว)</span>
@@ -1407,11 +1444,8 @@
                   <span class="field" style="justify-content:space-between">Tester<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><use href="#i-chev-d"/></svg></span></div>
               </div>
               <div class="dlg-foot">
-                <span></span>
-                <span style="display:flex;gap:8px">
-                  <button class="btn btn-outline" type="button">ยกเลิก</button>
-                  <button class="btn btn-primary" type="button">สร้าง</button>
-                </span>
+                <button class="btn btn-outline" type="button">ยกเลิก</button>
+                <button class="btn btn-primary" type="button">สร้าง</button>
               </div>
             </div>
             <div class="mcard muted" style="align-self:start">
@@ -1486,7 +1520,7 @@
                       <span class="lbadge" style="margin-left:6px">ระบบ</span></td>
                     <td class="muted">สิทธิ์ทั้งหมด</td>
                     <td class="num">9</td>
-                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="บทบาทระบบ — แก้ไขไม่ได้" title="บทบาทระบบ — แก้ไขไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="บทบาทระบบ — ลบไม่ได้" title="บทบาทระบบ — ลบไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
+                    <td><span style="display:flex;justify-content:flex-end;gap:6px"><button class="btn btn-icon btn-soft-primary" type="button" aria-label="บทบาทระบบ — แก้ไขไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pencil"/></svg></button><button class="btn btn-icon btn-soft-destructive" type="button" aria-label="บทบาทระบบ — ลบไม่ได้" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-trash"/></svg></button></span></td>
                   </tr>
                   <tr>
                     <td><b style="font-weight:500">หัวหน้างาน</b></td>
@@ -1698,7 +1732,8 @@
       แล้วเขียนข้อตกลงทั้งหมดลง <code>docs/DESIGN.md</code> ของโปรเจค พร้อมกฎที่ทำให้ AI
       <strong>อ่านข้อตกลงเองทุกครั้ง</strong>ก่อนแตะไฟล์หน้าจอ — หน้าที่ทำเดือนหน้าจึงยังหน้าตา
       เหมือนหน้าแรก · มีสคริปต์ตรวจซ้ำสำหรับข้อที่ตรวจด้วยเครื่องได้ (คู่สี contrast,
-      ตารางที่ลืมใส่ <code>id</code>, ช่อง Input ที่ถูกใช้เป็น filter) · และถ้าการตัดสินใจของหน้าใด
+      ตารางที่ลืมใส่ id, ช่อง Input ที่ถูกใช้เป็น filter, <code>components.json</code>
+      ตรงกับ preset ขององค์กร, ไม่มี Radix หลงเหลือในโปรเจค)
       จะกลายเป็นบรรทัดฐานให้หน้าอื่น ต้องบันทึกเป็นมติในข้อตกลง ไม่ใช่ปล่อยไว้ในโค้ด</p>
     <p style="margin-top:14px"><a href="../README.html">← กลับไปหน้าภาพรวมของชุดเครื่องมือ</a></p>
   </div>
