@@ -641,9 +641,36 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 node <skill-dir>/scripts/verify.mjs
 ```
 
-ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง — ยกเว้น `__DIR__`, ครบ 10 stages,
-brace balance หลังลบบล็อก, path ใน `sonar.sources` มีจริง, compose, tooling,
-health) — ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง — ยกเว้น `__DIR__`, ครบ 10 stages +
+`emailext` ×4, brace balance หลังลบบล็อก, บล็อก `[LARAVEL]` ตรงกับ framework,
+`/api/health` อยู่ใต้ docroot ที่เสิร์ฟจริง, `volumes:` ก้อนเดียวต่อ service,
+`mkdir -p` ↔ bind, composer + require-dev 3 ตัว, schema `phpunit.xml` ตรงกับ
+เวอร์ชันที่ composer resolve, path ใน `sonar.sources` มีจริง, compose, tooling,
+health, ไฟล์ที่ §5.1 copy มาครบ) — ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+
+> **ทุก check ที่อ่าน Jenkinsfile / Dockerfile / compose อ่านเฉพาะบรรทัดที่ยัง
+> ทำงานจริง** (ตัดคอมเมนต์ออกก่อน) — ไฟล์ template พก legend, บล็อก `[LARAVEL]`
+> และบล็อก `volumes:` ทั้ง `[VOLUME]`/`[WP]` ไว้เป็นคอมเมนต์ ถ้าอ่านดิบ ๆ ป้าย
+> พวกนี้กับชื่อ volume ตัวอย่างจะทำให้ check ผ่านฟรีทั้งที่ยังไม่ได้เปิดใช้จริง
+
+**ไม่ตรวจโดยตั้งใจ (out of scope ของ script — ต้องตรวจเอง):**
+
+- **พฤติกรรมตอนรันจริงของ `/api/health`** — script พิสูจน์แค่ว่าไฟล์/route มีจริง
+  **และอยู่ใต้ docroot ของ shape นั้น**; ส่วน "เข้าได้โดยไม่ต้อง login" กับ
+  "200 healthy / 503 degraded" ต้องยิงจริงตามหัวข้อ **รันจริง** ท้ายหน้านี้
+- **[subpath]** (`APP_URL`/`ASSET_URL` · `app.baseURL` · `WP_HOME`/`WP_SITEURL`)
+  — ค่าเหล่านี้อยู่ใน `.env` ที่ gitignore ไว้ ตรวจแทนไม่ได้ ต้องเปิดผ่าน URL
+  เต็มหลัง proxy เอง
+- **§5.6 toolchain ในเครื่อง** (`php -l` / `php-cs-fixer` / `phpstan` /
+  `phpunit`) — ต้องมี `vendor/` จริงถึงจะรู้ผล script ไม่รันแทนให้
+- **[WP] โค้ดใน `wp-content` ขึ้น container ทางไหน** (§5.3 ข้อ 1 หรือ 2) — เป็น
+  มติที่ต้องคุยกับผู้ใช้ ไม่ใช่สิ่งที่อ่านจากไฟล์ได้ · script ตรวจแค่ว่า
+  `wp-content` เป็น volume จริงและ `wp-config.php` ปิด auto-update แล้ว
+- **ค่าใน `.env` / `.env.dev`** — เช็คแค่ว่ามีไฟล์และมี `APP_PORT` (เตือน ไม่
+  fail เพราะ clone ใหม่ยังไม่มีทั้งคู่ตามปกติ) · **ไม่อ่านค่า secret ใด ๆ** ·
+  คีย์ที่ framework ต้องใช้ (`APP_KEY`, `WORDPRESS_DB_*`) เป็นของ admin
+- **ฝั่ง server ทั้งหมด** (Jenkins tools/credentials/global env, docker group,
+  SonarQube projects + gate, webhook, `proxy-network` บน host) — อยู่นอก repo
 
 **ไฟล์ในโปรเจค:**
 

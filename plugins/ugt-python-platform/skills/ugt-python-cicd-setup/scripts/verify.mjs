@@ -51,16 +51,34 @@ const jfActive = jfBody
   .filter((l) => !l.trim().startsWith('//'))
   .join('\n');
 
-// Web-shape signal: the active (non-comment) container health-poll loop that
-// only web shape keeps in the Deploy stage — batch shape deletes this block
-// entirely and swaps in the two `[BATCH]` lines instead (SKILL.md §5.3), so
-// a plain string search still works without extra comment-stripping here.
-// More reliable than grepping for the literal "[WEB]" tag, which is also
-// permanently present in the header legend and inside the commented-out
-// [BATCH] alternative that web-shape files keep for reference.
-const isWebShape =
-  jfActive.includes('State.Health.Status') ||
-  (has('Dockerfile') && /HEALTHCHECK|EXPOSE/.test(read('Dockerfile')));
+// Shape is decided in three places at once (SKILL.md §5.3) and all three must
+// agree — each is read from ACTIVE content only, never from the comment
+// legends that document the other shape's alternative:
+//   Dockerfile  web = EXPOSE + HEALTHCHECK · batch = neither (cut, not commented)
+//   Jenkinsfile web = the health-poll loop (`State.Health.Status`) in Deploy ·
+//                     batch = the two `[BATCH]` lines that replace it
+//   compose     web = `ports:` + `healthcheck:` · batch = neither, service `job`
+const dockerfile = has('Dockerfile') ? read('Dockerfile') : '';
+const dockerfileActive = dockerfile
+  .split('\n')
+  .filter((l) => !l.trim().startsWith('#'))
+  .join('\n');
+const dockerShape = /EXPOSE|HEALTHCHECK/.test(dockerfileActive) ? 'web' : 'batch';
+const jenkinsShape = jfActive.includes('State.Health.Status') ? 'web' : 'batch';
+// Dockerfile is the authority (it decides whether the container can ever be
+// polled at all); with no Dockerfile at all fall back to the Jenkinsfile.
+const isWebShape = dockerfile ? dockerShape === 'web' : jenkinsShape === 'web';
+
+// compose helpers — `volumes:`/`ports:` etc. ship commented-out in the
+// template, so every structural test must ignore `#`-led lines.
+const COMPOSE_FILES = ['docker-compose.yml', 'docker-compose.dev.yml'];
+const composeActive = (f) =>
+  has(f)
+    ? read(f)
+        .split('\n')
+        .filter((l) => !l.trim().startsWith('#'))
+        .join('\n')
+    : '';
 
 // ── 1. Required files ──────────────────────────────────────────────────────
 check('CI files present', () => {
@@ -128,10 +146,12 @@ check('No __*__ placeholders left', () => {
 check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () => {
   // ขั้นที่ "ห้ามลืม" ของ §5.3: bind mount ที่ Deploy stage ไม่ได้ mkdir/chown
   // → docker สร้างเป็น root:root แล้วแอปเขียนไม่ได้ตั้งแต่ deploy แรก
+  // composeActive, never read(f): the shipped compose keeps the whole
+  // `[VOLUME]` block commented out with a literal `<name>` placeholder, so
+  // scanning raw text reports a bind that does not exist.
   const names = new Set();
-  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
-    if (!has(f)) continue;
-    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+  for (const f of COMPOSE_FILES) {
+    for (const m of composeActive(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
   }
   if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
   // jfActive, never jf: the shipped Jenkinsfile documents the step in a `//`
@@ -159,7 +179,9 @@ const STAGES = [
 ];
 check('Jenkinsfile has 10 stages in order', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
-  const names = [...jf.matchAll(/stage\s*\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
+  // jfActive, never jf — a stage that was commented out instead of fixed must
+  // not count as present (same rule as every other Jenkinsfile check here).
+  const names = [...jfActive.matchAll(/stage\s*\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
   const missing = STAGES.filter((s) => !names.some((n) => n.toLowerCase().includes(s.toLowerCase())));
   if (missing.length) return { ok: false, msg: `Missing stages: ${missing.join(', ')} (found ${names.length})` };
   // order check
@@ -174,17 +196,22 @@ check('Jenkinsfile has 10 stages in order', () => {
 
 check('Quality Gate actually blocks the pipeline', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
-  if (!/waitForQualityGate/.test(jf)) return { ok: false, msg: 'No waitForQualityGate — the gate blocks nothing' };
-  return /abortPipeline\s*:\s*true/.test(jf)
+  if (!/waitForQualityGate/.test(jfActive)) return { ok: false, msg: 'No waitForQualityGate — the gate blocks nothing' };
+  return /abortPipeline\s*:\s*true/.test(jfActive)
     ? { ok: true }
     : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
 });
 
-check('post block complete (notifications + cleanWs)', () => {
+check('post block complete (emailext ×4 + cleanWs)', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
-  if (!/emailext/.test(jf)) problems.push('no emailext');
-  if (!/cleanWs/.test(jf)) problems.push('no cleanWs (workspace grows every build)');
+  // §7 declares emailext ×4 — one per outcome. A pipeline missing `failure`
+  // is the expensive one: it goes red and nobody is told.
+  const missingOutcome = ['success', 'unstable', 'failure', 'aborted'].filter(
+    (o) => !new RegExp(String.raw`\b${o}\s*\{[\s\S]{0,200}?emailext`).test(jfActive)
+  );
+  if (missingOutcome.length) problems.push(`post block has no emailext for: ${missingOutcome.join(', ')}`);
+  if (!/cleanWs/.test(jfActive)) problems.push('no cleanWs (workspace grows every build)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
@@ -208,8 +235,9 @@ check('Braces balanced in the Jenkinsfile', () => {
 check('No Groovy interpolation of secrets', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   // Strip single-quoted Groovy strings first — inside sh '''…''' a ${VAR} is
-  // correct shell expansion, not Groovy interpolation leaking into the log
-  const groovyInterpolated = jf.replace(/'''[\s\S]*?'''/g, '').replace(/'[^'\n]*'/g, '');
+  // correct shell expansion, not Groovy interpolation leaking into the log.
+  // jfActive: a ${SECRET} shown inside a `//` comment leaks nothing.
+  const groovyInterpolated = jfActive.replace(/'''[\s\S]*?'''/g, '').replace(/'[^'\n]*'/g, '');
   const bad = [...groovyInterpolated.matchAll(/\$\{[^}]*(SECRET|PASSWORD|TOKEN|NVD|DSN)[^}]*\}/gi)].map(
     (m) => m[0]
   );
@@ -272,10 +300,13 @@ check('sonar points at the coverage.xml report', () => {
 });
 
 // ── 6. compose / Dockerfile ────────────────────────────────────────────────
-for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
+for (const f of COMPOSE_FILES) {
   check(`${f} configured correctly`, () => {
     if (!has(f)) return { ok: false, msg: `No ${f}` };
-    const body = read(f);
+    // active content only — the template's header comment names `healthcheck`
+    // and `ports` while describing the OTHER shape, so raw text would demand
+    // a healthcheck from a batch compose that correctly has none
+    const body = composeActive(f);
     const problems = [];
     if (/healthcheck/i.test(body) && !body.includes('127.0.0.1')) {
       problems.push('healthcheck not using 127.0.0.1 (localhost on slim resolves IPv6 and fails)');
@@ -294,14 +325,74 @@ for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
   });
 }
 
-check('Dockerfile has a HEALTHCHECK', () => {
-  if (!has('Dockerfile')) return { ok: false, msg: 'No Dockerfile' };
-  // Batch shape (Dockerfile.batch) has no EXPOSE/HEALTHCHECK by design — no
-  // long-running process to poll (SKILL.md §5.3). Web shape must have one.
-  if (!isWebShape) return { ok: true };
-  return /HEALTHCHECK/.test(read('Dockerfile'))
+check('Dockerfile matches its shape (web = EXPOSE 8000 + HEALTHCHECK · batch = neither)', () => {
+  if (!dockerfile) return { ok: false, msg: 'No Dockerfile' };
+  const problems = [];
+  if (dockerShape === 'web') {
+    if (!/HEALTHCHECK/.test(dockerfileActive)) {
+      problems.push('no HEALTHCHECK — the Deploy stage cannot poll for healthy');
+    }
+    if (!/^EXPOSE\s+8000\b/m.test(dockerfileActive)) {
+      problems.push('no `EXPOSE 8000` — container-internal port is fixed at 8000 (compose/healthcheck both assume it)');
+    }
+  } else if (/EXPOSE|HEALTHCHECK/.test(dockerfile)) {
+    // batch shape must CUT them, not comment them out (SKILL.md §5.3) — a
+    // commented HEALTHCHECK is dead weight that reads as "still web shape"
+    problems.push('batch shape still carries EXPOSE/HEALTHCHECK lines (commented out) — §5.3 says cut them');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('Dockerfile CMD is a JSON array (exec form)', () => {
+  if (!dockerfile) return { ok: false, msg: 'No Dockerfile' };
+  const cmd = [...dockerfileActive.matchAll(/^CMD\s+(.*)$/gm)].map((m) => m[1].trim()).pop();
+  if (!cmd) return { ok: false, msg: 'No CMD — the image has no entry point to run' };
+  return cmd.startsWith('[')
     ? { ok: true }
-    : { ok: false, msg: 'No HEALTHCHECK — the Deploy stage cannot poll for healthy' };
+    : {
+        ok: false,
+        msg: `CMD ${cmd} — must be a JSON array (exec form) per §5.2 __START_CMD_JSON__; shell form makes PID 1 a shell and swallows SIGTERM`,
+      };
+});
+
+check('[WEB]/[BATCH] shape agrees across Dockerfile / Jenkinsfile / compose', () => {
+  if (!dockerfile) return { ok: false, msg: 'No Dockerfile' };
+  const problems = [];
+  if (jf && jenkinsShape !== dockerShape) {
+    problems.push(
+      jenkinsShape === 'web'
+        ? 'Dockerfile is batch shape but the Deploy stage still runs the [WEB] health poll — docker inspect finds no container and the stage always fails'
+        : 'Dockerfile is web shape but the Deploy stage has no [WEB] health poll — a broken container deploys green'
+    );
+  }
+  for (const f of COMPOSE_FILES) {
+    const body = composeActive(f);
+    if (!body) continue;
+    const composeShape = /^\s*ports\s*:/m.test(body) || /^\s*healthcheck\s*:/m.test(body) ? 'web' : 'batch';
+    if (composeShape !== dockerShape) {
+      problems.push(
+        `${f} is ${composeShape} shape but the Dockerfile is ${dockerShape} shape (§5.3: batch cuts ports/healthcheck/networks)`
+      );
+    }
+    if (dockerShape === 'batch' && !/restart\s*:\s*(["']no["']|no\b)/.test(body)) {
+      problems.push(`${f}: batch shape needs restart: "no" — restart: unless-stopped re-runs the job forever`);
+    }
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('[SUBPATH] root_path/SCRIPT_NAME/FORCE_SCRIPT_NAME set in both compose files or neither', () => {
+  // §5.3: the subpath answer must become real config in BOTH compose files.
+  // Setting it in prod only (the common slip) leaves dev 404-ing behind the
+  // proxy with nothing to point at. Projects not behind a subpath set none —
+  // that is a pass, so this never fires on a plain deployment.
+  const SUBPATH_VARS = /\b(ROOT_PATH|SCRIPT_NAME|FORCE_SCRIPT_NAME)\b/;
+  const present = COMPOSE_FILES.filter((f) => has(f)).filter((f) => SUBPATH_VARS.test(composeActive(f)));
+  if (present.length === 0 || present.length === COMPOSE_FILES.filter((f) => has(f)).length) return { ok: true };
+  return {
+    ok: false,
+    msg: `subpath env var set only in ${present.join(', ')} — the other environment will 404 behind the reverse proxy (§5.3)`,
+  };
 });
 
 // ── 7. Python tooling ───────────────────────────────────────────────────────
@@ -312,16 +403,43 @@ check('pyproject.toml has [tool.ruff] and [tool.pytest.ini_options] wired for CI
   const pytestSection = pyproject.match(/\[tool\.pytest\.ini_options\]([\s\S]*?)(\n\[|$)/);
   if (!pytestSection) {
     problems.push('no [tool.pytest.ini_options] section');
-  } else if (!/test-results\/junit\.xml/.test(pytestSection[1])) {
-    problems.push('[tool.pytest.ini_options] does not point at test-results/junit.xml — Unit Tests stage cannot publish JUnit results');
+  } else {
+    if (!/test-results\/junit\.xml/.test(pytestSection[1])) {
+      problems.push('[tool.pytest.ini_options] does not point at test-results/junit.xml — Unit Tests stage cannot publish JUnit results');
+    }
+    // §5.3: pytest must emit coverage.xml too — sonar.python.coverage.reportPaths
+    // reads it, and without it new_coverage is 0% and the gate blocks with no
+    // error saying why.
+    if (!/--cov-report[= ]xml/.test(pytestSection[1])) {
+      problems.push('[tool.pytest.ini_options] has no --cov-report=xml → no coverage.xml → new_coverage = 0% → gate blocks silently');
+    }
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('tests/ has at least one test_*.py file', () => {
+check('tests/ has test_smoke.py plus at least one test_*.py file', () => {
   if (!has('tests')) return { ok: false, msg: 'No tests/ directory — pytest has nothing to run' };
   const files = readdirSync(p('tests')).filter((f) => /^test_.*\.py$/.test(f));
-  return files.length ? { ok: true } : { ok: false, msg: 'tests/ has no test_*.py files — pytest collects 0 tests' };
+  if (!files.length) return { ok: false, msg: 'tests/ has no test_*.py files — pytest collects 0 tests' };
+  // §5.1 copies tests/test_smoke.py into EVERY project — its absence means the
+  // copy step was skipped, so the placeholder scan above had nothing to check.
+  return has('tests/test_smoke.py')
+    ? { ok: true }
+    : { ok: false, msg: 'No tests/test_smoke.py — §5.1 copies it into every project (the __APP_MODULE__ import check)' };
+});
+
+check('.claude/rules/ugt-python-ci.md in place', () => {
+  return has('.claude/rules/ugt-python-ci.md')
+    ? { ok: true }
+    : { ok: false, msg: 'No .claude/rules/ugt-python-ci.md — §5.1 copies it; without it the next session has no CI contract to read' };
+});
+
+check('docs/admin-handoff.md rendered', () => {
+  // Content (leftover __*__) is covered by the placeholder scan above; this is
+  // the existence half of the same §7 line.
+  return has('docs/admin-handoff.md')
+    ? { ok: true }
+    : { ok: 'warn', msg: 'docs/admin-handoff.md missing — §5.7 renders it; the admin gets a chat snippet instead of a file' };
 });
 
 // ── 8. .env / .gitignore / .dockerignore ───────────────────────────────────
@@ -343,6 +461,20 @@ check('.env.example is committed (documents required keys)', () => {
   return has('.env.example')
     ? { ok: true }
     : { ok: false, msg: 'No .env.example — dev/admin have no record of which keys are required' };
+});
+
+check('.env / .env.dev exist locally with APP_PORT set', () => {
+  // §5.5 — warn, not fail: both files are gitignored on purpose, so a fresh
+  // clone legitimately has neither. It still catches the machine that is
+  // about to run `docker compose up` and get the template default port.
+  const problems = [];
+  for (const f of ['.env', '.env.dev']) {
+    if (!has(f)) problems.push(`${f} missing`);
+    else if (!/^\s*APP_PORT\s*=\s*\S/m.test(read(f))) problems.push(`${f} has no APP_PORT value`);
+  }
+  return problems.length
+    ? { ok: 'warn', msg: `${problems.join(' · ')} — compose falls back to the template's default port (§5.5)` }
+    : { ok: true };
 });
 
 check('.dockerignore excludes CI artifacts from the build context', () => {

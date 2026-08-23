@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ugt-python-platform",
   "displayName": "UGT Python Platform",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Org standards for Python projects (deploy-only scope for now): Jenkins + SonarQube + OWASP + Docker deploy for FastAPI / Flask / Django / batch jobs, including the minimal ruff/pytest tooling the org Quality Gate needs. Database/auth/design skills come later — see docs/multi-stack-proposal.md.",
   "author": { "name": "UGT DX Team" },
   "keywords": ["python", "fastapi", "flask", "django", "jenkins", "sonarqube", "org-standard"],

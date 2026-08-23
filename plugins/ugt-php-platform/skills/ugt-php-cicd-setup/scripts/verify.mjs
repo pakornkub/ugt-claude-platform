@@ -58,7 +58,31 @@ const jfActive = jfBody
 // Dockerfile.batch, so HEALTHCHECK / healthcheck / /api/health are never
 // conditional here.
 const dockerfile = has('Dockerfile') ? read('Dockerfile') : '';
-const isWordPress = /^FROM\s+wordpress/im.test(dockerfile);
+// Same rule as jfActive: the `[LARAVEL]`/`[DB]` blocks ship COMMENTED OUT in
+// Dockerfile.web, so "is this configured?" must only ever look at live lines.
+const dockerfileActive = dockerfile
+  .split('\n')
+  .filter((l) => !l.trim().startsWith('#'))
+  .join('\n');
+const isWordPress = /^FROM\s+wordpress/im.test(dockerfileActive);
+
+// compose helpers — `volumes:` and the whole `[WP]` block ship commented out,
+// so every structural test must ignore `#`-led lines (a raw scan reports
+// `<name>` binds and healthchecks that do not exist).
+const COMPOSE_FILES = ['docker-compose.yml', 'docker-compose.dev.yml'];
+const composeActive = (f) =>
+  has(f)
+    ? read(f)
+        .split('\n')
+        .filter((l) => !l.trim().startsWith('#'))
+        .join('\n')
+    : '';
+
+// Framework shape, from files that only that framework has (§3/§5.3).
+// DocumentRoot = public/ is what actually decides where /api/health may live.
+const isLaravel = has('artisan');
+const isCI4 = has('spark') || has('public/index.php');
+const publicDocroot = /sed -ri.*\/var\/www\/html\/public/.test(dockerfileActive);
 
 // ── 1. Required files ──────────────────────────────────────────────────────
 check('CI files present', () => {
@@ -99,6 +123,59 @@ check('/api/health exists (Laravel route or PHP file)', () => {
     : { ok: true };
 });
 
+check('/api/health sits where this shape actually serves it', () => {
+  // §5.3 — "the file exists" is not enough: apache only serves what is under
+  // the active DocumentRoot, and Dockerfile.wordpress COPYs one hardcoded path.
+  if (isWordPress) {
+    return has('api/health/index.php')
+      ? { ok: true }
+      : {
+          ok: false,
+          msg: 'shape = wordpress: Dockerfile.wordpress hardcodes `COPY api/health/index.php` — anywhere else and docker build fails (§5.3)',
+        };
+  }
+  if (publicDocroot) {
+    // DocumentRoot = public/ — a root-level api/health/index.php is never served
+    const servedByRoute =
+      isLaravel &&
+      has('routes') &&
+      readdirSync(p('routes')).some((n) => n.endsWith('.php') && read('routes', n).includes('/api/health'));
+    if (servedByRoute || has('public/api/health/index.php')) return { ok: true };
+    return {
+      ok: false,
+      msg: 'DocumentRoot is public/ ([LARAVEL] block active) but /api/health is only a root-level file — apache never serves it → container never healthy (§5.3: Laravel = route · CI4 = public/api/health/index.php)',
+    };
+  }
+  return has('api/health/index.php')
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: 'DocumentRoot is the repo root (CI3/legacy) — /api/health must be api/health/index.php (§5.3)',
+      };
+});
+
+check('[LARAVEL] DocumentRoot block matches the framework', () => {
+  if (!dockerfile) return { ok: false, msg: 'No Dockerfile' };
+  if (isWordPress) return { ok: true }; // Dockerfile.wordpress has no such block
+  if (isLaravel || isCI4) {
+    return publicDocroot
+      ? { ok: true }
+      : {
+          ok: false,
+          msg: 'Laravel/CI4 project but the [LARAVEL] sed lines are still commented out — apache serves the repo root, so the front controller in public/ is never reached (§5.3)',
+        };
+  }
+  if (publicDocroot && !has('public')) {
+    return {
+      ok: false,
+      msg: '[LARAVEL] sed lines are active but there is no public/ directory — apache starts with a DocumentRoot that does not exist',
+    };
+  }
+  return /\[LARAVEL\]/.test(dockerfile)
+    ? { ok: 'warn', msg: 'shape is not Laravel/CI4 — §5.3 says delete the commented [LARAVEL] block instead of leaving it in the Dockerfile' }
+    : { ok: true };
+});
+
 // ── 3. Leftover placeholders ───────────────────────────────────────────────
 // tests/SmokeTest.php carries its own __ENTRY_FILE__ placeholder and
 // .claude/rules/ugt-php-ci.md carries __PROJECT_NAME__ twice (SKILL.md §5.2) —
@@ -136,10 +213,12 @@ check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () 
   // ขั้นที่ "ห้ามลืม": bind mount ที่ Deploy stage ไม่ได้ mkdir/chown → docker
   // สร้างเป็น root:root — เคส WordPress (`wp-content`) คือข้อมูลหายตั้งแต่
   // deploy แรกถ้าพลาดข้อนี้
+  // composeActive, never read(f): the shipped compose keeps both the [VOLUME]
+  // and the [WP] block commented out with a literal `<name>` placeholder, so
+  // scanning raw text reports binds that do not exist.
   const names = new Set();
-  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
-    if (!has(f)) continue;
-    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+  for (const f of COMPOSE_FILES) {
+    for (const m of composeActive(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
   }
   if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
   // jfActive, never jf: the shipped Jenkinsfile documents the step in a `//`
@@ -167,7 +246,8 @@ const STAGES = [
 ];
 check('Jenkinsfile has 10 stages in order', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
-  const names = [...jf.matchAll(/stage\s*\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
+  // jfActive, never jf — a stage commented out instead of fixed must not count
+  const names = [...jfActive.matchAll(/stage\s*\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
   const missing = STAGES.filter((s) => !names.some((n) => n.toLowerCase().includes(s.toLowerCase())));
   if (missing.length) return { ok: false, msg: `Missing stages: ${missing.join(', ')} (found ${names.length})` };
   let cursor = -1;
@@ -181,17 +261,22 @@ check('Jenkinsfile has 10 stages in order', () => {
 
 check('Quality Gate actually blocks the pipeline', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
-  if (!/waitForQualityGate/.test(jf)) return { ok: false, msg: 'No waitForQualityGate — the gate blocks nothing' };
-  return /abortPipeline\s*:\s*true/.test(jf)
+  if (!/waitForQualityGate/.test(jfActive)) return { ok: false, msg: 'No waitForQualityGate — the gate blocks nothing' };
+  return /abortPipeline\s*:\s*true/.test(jfActive)
     ? { ok: true }
     : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
 });
 
-check('post block complete (notifications + cleanWs)', () => {
+check('post block complete (emailext ×4 + cleanWs)', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
-  if (!/emailext/.test(jf)) problems.push('no emailext');
-  if (!/cleanWs/.test(jf)) problems.push('no cleanWs (workspace grows every build)');
+  // §7 declares emailext ×4 — one per outcome. Missing `failure` is the
+  // expensive one: the pipeline goes red and nobody is told.
+  const missingOutcome = ['success', 'unstable', 'failure', 'aborted'].filter(
+    (o) => !new RegExp(String.raw`\b${o}\s*\{[\s\S]{0,200}?emailext`).test(jfActive)
+  );
+  if (missingOutcome.length) problems.push(`post block has no emailext for: ${missingOutcome.join(', ')}`);
+  if (!/cleanWs/.test(jfActive)) problems.push('no cleanWs (workspace grows every build)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
@@ -213,7 +298,8 @@ check('Braces balanced in the Jenkinsfile', () => {
 
 check('No Groovy interpolation of secrets', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
-  const groovyInterpolated = jf.replace(/'''[\s\S]*?'''/g, '').replace(/'[^'\n]*'/g, '');
+  // jfActive: a ${SECRET} shown inside a `//` comment leaks nothing
+  const groovyInterpolated = jfActive.replace(/'''[\s\S]*?'''/g, '').replace(/'[^'\n]*'/g, '');
   const bad = [...groovyInterpolated.matchAll(/\$\{[^}]*(SECRET|PASSWORD|TOKEN|NVD|DSN)[^}]*\}/gi)].map(
     (m) => m[0]
   );
@@ -282,11 +368,20 @@ check('sonar points at clover.xml + junit.xml reports', () => {
 });
 
 // ── 7. compose / Dockerfile ────────────────────────────────────────────────
-for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
+for (const f of COMPOSE_FILES) {
   check(`${f} configured correctly`, () => {
     if (!has(f)) return { ok: false, msg: `No ${f}` };
-    const body = read(f);
+    // active content only — the template's comments name `healthcheck`/`volumes`
+    // while describing blocks that are still switched off
+    const body = composeActive(f);
     const problems = [];
+    // YAML allows ONE `volumes:` key per service: the template ships a [VOLUME]
+    // block AND a [WP] block, and uncommenting both makes the second silently
+    // overwrite the first (§5.3 — merge them into one list instead).
+    const volumeKeys = (body.match(/^\s{4}volumes\s*:/gm) ?? []).length;
+    if (volumeKeys > 1) {
+      problems.push(`${volumeKeys} × \`volumes:\` keys on one service — YAML keeps only the last one; merge [VOLUME] + [WP] into a single list`);
+    }
     if (/healthcheck/i.test(body) && !body.includes('127.0.0.1')) {
       problems.push('healthcheck not using 127.0.0.1 (localhost on slim resolves IPv6 and fails)');
     }
@@ -336,18 +431,91 @@ check('[WP] wp-content volume present when Dockerfile is FROM wordpress', () => 
     : { ok: true };
 });
 
-// ── 8. PHP tooling ──────────────────────────────────────────────────────────
-check('phpunit.xml has junit outputFile=test-results/junit.xml', () => {
-  if (!has('phpunit.xml')) return { ok: false, msg: 'No phpunit.xml' };
-  return /<junit\s+outputFile\s*=\s*"test-results\/junit\.xml"\s*\/?>/.test(read('phpunit.xml'))
+check('[WP] wp-config.php disables core auto-update', () => {
+  // §5.3: WordPress auto-updating its own core inside a container rewrites
+  // files that the next deploy replaces — the site silently drifts from the
+  // image. wp-config.php often lives on the host, not in the repo.
+  if (!isWordPress) return { ok: true };
+  if (!has('wp-config.php')) {
+    return { ok: 'warn', msg: 'wp-config.php is not in the repo — confirm WP_AUTO_UPDATE_CORE is false in the copy on the host (§5.3)' };
+  }
+  return /define\s*\(\s*['"]WP_AUTO_UPDATE_CORE['"]\s*,\s*false\s*\)/.test(read('wp-config.php'))
     ? { ok: true }
-    : { ok: false, msg: 'No <junit outputFile="test-results/junit.xml"/> — Unit Tests stage cannot publish JUnit results' };
+    : { ok: false, msg: 'wp-config.php has no WP_AUTO_UPDATE_CORE = false — core updates itself inside the container and drifts from the image (§5.3)' };
 });
 
-check('tests/ has at least one *Test.php file', () => {
+// ── 8. PHP tooling ──────────────────────────────────────────────────────────
+check('phpunit.xml emits junit.xml + clover.xml', () => {
+  if (!has('phpunit.xml')) return { ok: false, msg: 'No phpunit.xml' };
+  const body = read('phpunit.xml');
+  const problems = [];
+  if (!/<junit\s+outputFile\s*=\s*"test-results\/junit\.xml"\s*\/?>/.test(body)) {
+    problems.push('No <junit outputFile="test-results/junit.xml"/> — Unit Tests stage cannot publish JUnit results');
+  }
+  // clover comes either from phpunit.xml itself or from the Jenkinsfile's
+  // --coverage-clover flag (the asset uses the flag) — one of the two must be
+  // there, or sonar reads no coverage at all and the gate blocks silently.
+  if (!/clover/i.test(body) && !/--coverage-clover\s+clover\.xml/.test(jfActive)) {
+    problems.push('nothing produces clover.xml (neither phpunit.xml nor `--coverage-clover clover.xml` in the Unit Tests stage) → new_coverage = 0% → gate blocks');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('phpunit.xml schema matches the PHPUnit version composer resolved', () => {
+  // §5.4: PHPUnit 9 cannot read the <source> element of the schema-10 asset →
+  // coverage is never configured, clover.xml comes out empty, new_coverage
+  // reads 0% and the gate blocks with no error pointing at the cause.
+  if (!has('phpunit.xml') || !has('composer.lock')) return { ok: true };
+  const lock = JSON.parse(read('composer.lock'));
+  const pkg = [...(lock.packages ?? []), ...(lock['packages-dev'] ?? [])].find((x) => x.name === 'phpunit/phpunit');
+  if (!pkg) return { ok: false, msg: 'phpunit/phpunit is not in composer.lock — the Unit Tests stage has no vendor/bin/phpunit to run' };
+  const major = Number.parseInt(String(pkg.version).replace(/^v/, ''), 10);
+  const body = read('phpunit.xml');
+  const schema10 = /<source\b/.test(body);
+  if (Number.isNaN(major)) return { ok: true };
+  if (major <= 9 && schema10) {
+    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml uses the schema-10 <source> element — PHPUnit 9 ignores it, clover.xml comes out empty and the gate blocks (§5.4: bump PHPUnit, or convert phpunit.xml to <coverage><include>)` };
+  }
+  if (major >= 10 && !schema10 && /<coverage\b[\s\S]*?<include\b/.test(body)) {
+    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml still uses the schema-9 <coverage><include> shape — PHPUnit 10 removed it (§5.4)` };
+  }
+  return { ok: true };
+});
+
+check('composer.json + composer.lock committed with the 3 dev tools in require-dev', () => {
+  // §5.4 — no exceptions by shape: Install runs `composer install` and Code
+  // Quality/Unit Tests call vendor/bin/* for all four shapes alike.
+  if (!has('composer.json')) {
+    return { ok: false, msg: 'No composer.json — the Install stage dies at `composer install` before anything else runs (§5.4)' };
+  }
+  const problems = [];
+  if (!has('composer.lock')) problems.push('no composer.lock — CI and the image resolve different dependency trees');
+  const json = JSON.parse(read('composer.json'));
+  const dev = json['require-dev'] ?? {};
+  const runtime = json.require ?? {};
+  const TOOLS = ['friendsofphp/php-cs-fixer', 'phpstan/phpstan', 'phpunit/phpunit'];
+  const missing = TOOLS.filter((t) => !dev[t] && !runtime[t]);
+  if (missing.length) problems.push(`missing from require-dev: ${missing.join(', ')} — the pipeline calls vendor/bin for each of them`);
+  const misplaced = TOOLS.filter((t) => runtime[t]);
+  if (misplaced.length) problems.push(`in require (not require-dev): ${misplaced.join(', ')} — dev tooling would ship inside the production image`);
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('tests/ has SmokeTest.php pointing at an entry file that exists', () => {
   if (!has('tests')) return { ok: false, msg: 'No tests/ directory — phpunit has nothing to run' };
   const files = readdirSync(p('tests')).filter((f) => /Test\.php$/.test(f));
-  return files.length ? { ok: true } : { ok: false, msg: 'tests/ has no *Test.php files — phpunit collects 0 tests' };
+  if (!files.length) return { ok: false, msg: 'tests/ has no *Test.php files — phpunit collects 0 tests' };
+  if (!has('tests/SmokeTest.php')) {
+    return { ok: false, msg: 'No tests/SmokeTest.php — §5.1 copies it into every project (the __ENTRY_FILE__ existence check)' };
+  }
+  // The placeholder scan proves __ENTRY_FILE__ was replaced; this proves it was
+  // replaced with a path that is really there (§7: WordPress must point at
+  // api/health/index.php, never the index.php that is not in the repo).
+  const m = read('tests/SmokeTest.php').match(/__DIR__\s*\.\s*['"]\/\.\.\/([^'"]+)['"]/);
+  if (!m) return { ok: 'warn', msg: 'tests/SmokeTest.php no longer uses the __DIR__ . "/../<entry>" form — cannot verify the entry path automatically' };
+  return has(m[1])
+    ? { ok: true }
+    : { ok: false, msg: `tests/SmokeTest.php asserts ${m[1]} exists, but it does not — the smoke test fails on the first run` };
 });
 
 // ── 9. .env / .gitignore / .dockerignore ───────────────────────────────────
@@ -369,6 +537,34 @@ check('.env.example is committed (documents required keys)', () => {
   return has('.env.example')
     ? { ok: true }
     : { ok: false, msg: 'No .env.example — dev/admin have no record of which keys are required' };
+});
+
+check('.env / .env.dev exist locally with APP_PORT set', () => {
+  // §5.5 — warn, not fail: both are gitignored on purpose, so a fresh clone
+  // legitimately has neither. It still catches the machine that is about to
+  // run `docker compose up` and silently get the template's default port.
+  const problems = [];
+  for (const f of ['.env', '.env.dev']) {
+    if (!has(f)) problems.push(`${f} missing`);
+    else if (!/^\s*APP_PORT\s*=\s*\S/m.test(read(f))) problems.push(`${f} has no APP_PORT value`);
+  }
+  return problems.length
+    ? { ok: 'warn', msg: `${problems.join(' · ')} — compose falls back to the template's default port (§5.5)` }
+    : { ok: true };
+});
+
+check('.claude/rules/ugt-php-ci.md in place', () => {
+  return has('.claude/rules/ugt-php-ci.md')
+    ? { ok: true }
+    : { ok: false, msg: 'No .claude/rules/ugt-php-ci.md — §5.1 copies it; without it the next session has no CI contract to read' };
+});
+
+check('docs/admin-handoff.md rendered', () => {
+  // Content (leftover __*__) is covered by the placeholder scan above; this is
+  // the existence half of the same §7 line.
+  return has('docs/admin-handoff.md')
+    ? { ok: true }
+    : { ok: 'warn', msg: 'docs/admin-handoff.md missing — §5.7 renders it; the admin gets a chat snippet instead of a file' };
 });
 
 check('.dockerignore excludes CI artifacts from the build context', () => {
