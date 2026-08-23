@@ -52,16 +52,21 @@ production มาแล้ว ("ปุ่ม logout กดไม่ได้", c
 
 **แหล่งอ้างอิงที่ถือว่าจริง** เรียงตามลำดับ:
 
-1. **shadcn MCP** (plugin ประกาศ server ไว้) — ถ้า session นั้นต่อได้
-2. **registry ตรง ๆ** — แหล่งเดียวกับที่ MCP อ่าน ใช้ได้เสมอถ้ามีเน็ต:
+1. **registry ของ base-mira ตรง ๆ** — คำตอบจริงของ preset นี้:
 
    ```bash
    curl -s https://ui.shadcn.com/r/styles/base-mira/<component>.json
    ```
 
-3. **type ของ Base UI ที่ติดตั้งจริง** — `node_modules/@base-ui/react/<part>/…d.ts`
+   > ⚠️ **shadcn MCP ตอบ style default (Radix) ไม่ใช่ base-mira** — ตรวจแล้ว
+   > 2026-08-21: `get_component("button")` คืนโค้ดที่ `import { Slot } from
+   > "radix-ui"`, มี `asChild`, ขนาด `h-9` และ `destructive` แบบ solid ซึ่ง
+   > **ตรงข้ามกับ preset ของเราทุกข้อ** · ใช้ MCP ได้แค่ไล่ดูว่ามี component
+   > อะไรบ้าง/ดู demo — **ห้ามลอกโค้ดจากมันเข้า kit** เพราะจะพา `asChild`
+   > กลับมาอีกรอบ (บั๊กเดียวกับที่ 4.25.0 ต้องไล่แก้)
+2. **type ของ Base UI ที่ติดตั้งจริง** — `node_modules/@base-ui/react/<part>/…d.ts`
    (คำตอบสุดท้ายเรื่อง prop ของ primitive เช่น `CheckboxRoot.d.ts`)
-4. โปรเจคจริงที่เป็น base-mira (เช่น `gov-boi-smart`) — ระวัง: โปรเจคอาจแก้
+3. โปรเจคจริงที่เป็น base-mira (เช่น `gov-boi-smart`) — ระวัง: โปรเจคอาจแก้
    variant ของตัวเองไว้ จึงยืนยัน "ของ preset" ไม่ได้ 100%
 
 **ตารางความต่างที่กัดบ่อย** (ตรวจกับ registry แล้ว 2026-08-21):

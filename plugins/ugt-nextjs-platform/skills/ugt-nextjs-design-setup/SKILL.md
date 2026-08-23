@@ -186,13 +186,14 @@ different size — is the field bug this step exists to prevent.
    when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
-4. Install the base component set — prefer the **shadcn MCP** (`ToolSearch`
-   for `shadcn` tools; the plugin declares the server) to browse/add, fall
-   back to `npx shadcn@latest add`. **อ่าน API จริงของ component** เมื่อ MCP
-   ต่อไม่ได้: ดึง registry item ตรง ๆ (แหล่งเดียวกับที่ MCP อ่าน) —
+4. Install the base component set with `npx shadcn@latest add` (the CLI
+   resolves `components.json` → base-mira, so it installs the right style).
+   **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
    `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` ·
-   ห้ามตอบคำถาม Base UI vs Radix จากความจำ (ลำดับแหล่งอ้างอิง + ตารางความต่าง
-   อยู่ที่ `references/conventions.md` §ตรวจ API):
+   ⚠️ **shadcn MCP ตอบ style default (Radix) ไม่ใช่ base-mira** (ตรวจ
+   2026-08-21: button ของมันมี `asChild` + `Slot` + `h-9`) — ใช้ไล่ดูรายการ
+   component/demo ได้ แต่ห้ามลอกโค้ดจากมัน · ลำดับแหล่งอ้างอิงเต็ม +
+   ตารางความต่าง Radix↔Base UI อยู่ที่ `references/conventions.md` §ตรวจ API:
    `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea

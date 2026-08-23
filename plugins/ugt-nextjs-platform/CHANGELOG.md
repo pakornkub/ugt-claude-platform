@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.33.0 (2026-08-21)
+
+**มติ 2026-08-21 — ยึด preset สำหรับปุ่ม destructive.** base-mira ships a
+*tinted* destructive (`bg-destructive/10 text-destructive`); the kit adds no
+solid-red variant of its own, so a delete confirmation renders tinted.
+`design-preview.html` now draws it that way (it had a solid red button the
+preset never produced), and the decision is recorded in DESIGN.md §1 and
+`button-variants.md`.
+  - While aligning the preview, its `soft-*` buttons were wrong too: they
+    painted a 12–14% tint at rest, but the kit variants are transparent at
+    rest and tint only on hover. Fixed for all three.
+
+**⚠️ The shadcn MCP is NOT a source of truth for this preset.** With the MCP
+now connected, `get_component("button")` returns the **default shadcn v4**
+style: `import { Slot } from "radix-ui"`, an `asChild` prop, `h-9` sizes and
+a solid destructive — the opposite of base-mira on every point, and exactly
+the code shape that caused the 4.25.0 dead-button bug. It exposes no style or
+preset parameter (`get_component_metadata` has no entry for button either).
+So the guidance added in 4.32.0 is corrected rather than kept:
+
+- `references/conventions.md` §ตรวจ API now ranks the **base-mira registry
+  URL first** and carries an explicit warning that the MCP answers with the
+  Radix default — browse the catalog and demos with it, never copy its code
+  into the kit.
+- design-setup §Step 3.4 drops "prefer the shadcn MCP": install with
+  `npx shadcn@latest add` (the CLI resolves `components.json` → base-mira, so
+  it pulls the right style) and read APIs from the registry URL.
+- `button-variants.md` no longer calls the MCP "the same source" as the
+  registry.
 ## 4.32.0 (2026-08-21)
 
 A full Radix→Base UI sweep, this time verified against the **shadcn registry

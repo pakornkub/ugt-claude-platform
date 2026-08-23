@@ -31,17 +31,17 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
 หมายเหตุ:
 
 - **ตรวจกับ registry ก่อนเชื่อเอกสารนี้เสมอ** — ค่าจริงของ preset อยู่ที่
-  `https://ui.shadcn.com/r/styles/base-mira/button.json` (แหล่งเดียวกับที่
-  shadcn MCP อ่าน) · ตรวจล่าสุด 2026-08-21: registry **ไม่มี** `success` /
-  `soft-*` / `field` จึงยังต้องเพิ่มเองทั้งหมดตามไฟล์นี้
+  `https://ui.shadcn.com/r/styles/base-mira/button.json` · **ไม่ใช่ shadcn MCP**
+  ซึ่งตอบ style default (Radix) · ตรวจล่าสุด 2026-08-21: registry **ไม่มี**
+  `success` / `soft-*` / `field` จึงยังต้องเพิ่มเองทั้งหมดตามไฟล์นี้
 - `success` ใช้ `text-white` เพราะเป็นปุ่มพื้น solid — ไม่ใช้
   `text-status-emerald-foreground` ซึ่งเป็นสีตัวอักษรสำหรับพื้นจาง (badge/tint)
   > เดิมบรรทัดนี้อ้างว่า "ตามแบบแผนเดียวกับ variant `destructive` ของ base-mira"
   > ซึ่ง**ไม่จริงแล้ว**: registry ปัจจุบันให้ `destructive` เป็นพื้นจาง
   > (`bg-destructive/10 text-destructive`) ไม่ใช่ solid + `text-white` ·
   > ผลคือปุ่มยืนยันลบใน `ConfirmActionDialog` จะออกมาเป็นแดงจาง ไม่ใช่แดงทึบ
-  > อย่างที่ `design-preview.html` วาดไว้ — ถ้าองค์กรต้องการแดงทึบต้องเพิ่ม
-  > variant ของตัวเอง แล้วบันทึกเป็นมติ (ดู backlog §5)
+  > **มติ 2026-08-21: ยึด preset** — ไม่เพิ่ม variant แดงทึบของเราเอง
+  > ปุ่มยืนยันลบจึงเป็นแดงพื้นจาง และ `design-preview.html` วาดตามนี้แล้ว
 - ตัวต้นทางมี `focus-visible:ring` เฉพาะสีบน variant `destructive` — ถ้า button.tsx ปลายทาง
   มีแบบแผนนั้น จะเพิ่มให้ `success` ด้วยก็ได้:
   `focus-visible:ring-status-emerald/20 dark:focus-visible:ring-status-emerald/40`

@@ -50,6 +50,10 @@
   **primary** (มติ 2026-08-21 — CTA หลักของหน้า; เดิมเคยเขียนเขียวทึบแต่ของจริง
   ทั้งหมดเป็น primary) · อนุมัติ/ยืนยันเชิงบวก=เขียวทึบ (`success`) ·
   ในตารางใช้ variant `soft-*`
+  > **แดง = แดงพื้นจาง ไม่ใช่แดงทึบ** (มติ 2026-08-21 — ยึด preset): variant
+  > `destructive` ของ base-mira คือ `bg-destructive/10 text-destructive` ·
+  > เราไม่เพิ่ม variant แดงทึบของตัวเอง ปุ่มยืนยันลบจึงเป็นแดงจาง ·
+  > ต่างกับ `soft-destructive` ตรงที่ soft-* พื้นโปร่งใสตอนพัก ขึ้นจางตอน hover
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
   translucent/blur) · highlight แบบ Subtle (พื้นจาง ไม่ใช่แถบ primary เต็ม)
 - **มุมโค้ง = ใช้ของ preset `base-mira` ทั้งชุด ไม่ตั้งทับ** (มติ 2026-08-09):

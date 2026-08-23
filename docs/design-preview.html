@@ -118,11 +118,16 @@
   .ui .btn-outline{background:transparent;color:var(--foreground);border-color:var(--border-c)}
   .ui .btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
   .ui .btn-ghost{background:transparent;color:var(--foreground)}
-  .ui .btn-destructive{background:var(--destructive);color:#fff}
+  /* ตาม preset base-mira: destructive เป็นพื้นจาง ไม่ใช่แดงทึบ (registry: bg-destructive/10) */
+  .ui .btn-destructive{background:color-mix(in oklab,var(--destructive) 10%,transparent);color:var(--destructive)}
   .ui .btn-success{background:var(--status-emerald);color:#fff}
-  .ui .btn-soft-primary{background:color-mix(in oklab,var(--primary) 12%,transparent);color:var(--primary)}
-  .ui .btn-soft-destructive{background:color-mix(in oklab,var(--destructive) 12%,transparent);color:var(--destructive)}
-  .ui .btn-soft-success{background:color-mix(in oklab,var(--status-emerald) 14%,transparent);color:var(--status-emerald-fg)}
+  /* soft-* ของ kit = พื้นโปร่งใสตอนพัก ขึ้นพื้นจางตอน hover (button-variants.md) */
+  .ui .btn-soft-primary{background:transparent;color:var(--primary)}
+  .ui .btn-soft-primary:hover{background:color-mix(in oklab,var(--primary) 10%,transparent)}
+  .ui .btn-soft-destructive{background:transparent;color:var(--destructive)}
+  .ui .btn-soft-destructive:hover{background:color-mix(in oklab,var(--destructive) 10%,transparent)}
+  .ui .btn-soft-success{background:transparent;color:var(--status-emerald)}
+  .ui .btn-soft-success:hover{background:color-mix(in oklab,var(--status-emerald) 10%,transparent)}
   .ui .btn-icon{width:28px;height:28px;padding:0}
   .ui .btn[disabled]{opacity:.5;cursor:not-allowed}
   .ui .field{height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 10px;font-size:13px;
@@ -893,7 +898,8 @@
             </div>
           </div>
           <p class="muted" style="font-size:11.5px;margin-top:8px">ConfirmActionDialog — ปุ่มยืนยันมีข้อความเสมอ
-            ไม่ใช่ไอคอนล้วน</p>
+            ไม่ใช่ไอคอนล้วน · ปุ่มลบใช้ variant <code>destructive</code> ของ preset ซึ่งเป็น<strong>แดงพื้นจาง</strong>
+            (มติ 2026-08-21: ยึด preset ไม่เพิ่ม variant แดงทึบของเราเอง)</p>
         </div>
         <div>
           <div class="dlg">
