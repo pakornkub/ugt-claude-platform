@@ -9,6 +9,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   flexRender,
@@ -169,18 +170,18 @@ interface EmptyStateProps {
 }
 
 function DataTableEmpty({ searchable, title, description }: Readonly<EmptyStateProps>) {
+  const t = useTranslations('kit.dataTable');
   return (
     <Empty className="border-none">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Inbox />
         </EmptyMedia>
-        <EmptyTitle>{title ?? (searchable ? 'ไม่พบข้อมูล' : 'ยังไม่มีรายการ')}</EmptyTitle>
+        <EmptyTitle>{title ?? (searchable ? t('emptyTitleSearchable') : t('emptyTitle'))}</EmptyTitle>
         {/* `description=""` = ตั้งใจไม่มีคำอธิบาย (หัวข้อบอกครบแล้ว) */}
         {description !== '' && (
           <EmptyDescription>
-            {description ??
-              (searchable ? 'ลองปรับ filter หรือค้นหาด้วยคำอื่น' : 'เมื่อมีข้อมูลจะแสดงที่นี่')}
+            {description ?? (searchable ? t('emptyBodySearchable') : t('emptyBody'))}
           </EmptyDescription>
         )}
       </EmptyHeader>
@@ -227,7 +228,7 @@ export function rowIncludesQuery(original: unknown, query: string): boolean {
  */
 export function selectionColumn<TData>({
   rowLabel,
-  allLabel = 'เลือกทุกแถวที่กรองอยู่',
+  allLabel,
 }: Readonly<{
   /** ข้อความ aria ของติ๊กรายแถว — ต้องระบุแถวได้ เช่น `เลือก ${row.code}` */
   rowLabel: (row: TData) => string;
@@ -242,6 +243,7 @@ export function selectionColumn<TData>({
     size: 36,
     header: ({ table }) => {
       // นับเฉพาะแถวที่กรองอยู่ และเฉพาะแถวที่เลือกได้จริง
+      const t = useTranslations('kit.dataTable');
       const rows = table.getFilteredRowModel().rows.filter((r) => r.getCanSelect());
       const picked = rows.filter((r) => r.getIsSelected()).length;
       return (
@@ -250,7 +252,7 @@ export function selectionColumn<TData>({
           indeterminate={picked > 0 && picked < rows.length}
           disabled={rows.length === 0}
           onCheckedChange={(checked) => rows.forEach((r) => r.toggleSelected(!!checked))}
-          aria-label={allLabel}
+          aria-label={allLabel ?? t('selectAllFiltered')}
         />
       );
     },
@@ -355,6 +357,7 @@ function DataTableFilterPopover({
   value,
   onApply,
 }: Readonly<{ label: string; value: string; onApply: (value: string) => void }>) {
+  const t = useTranslations('kit.dataTable');
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState(value);
   const active = value !== '';
@@ -374,7 +377,7 @@ function DataTableFilterPopover({
         render={
           <button
             type="button"
-            aria-label={`กรอง ${label}`}
+            aria-label={t('filterAria', { label })}
             className={cn(
               'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
               active && 'text-primary opacity-100'
@@ -387,7 +390,7 @@ function DataTableFilterPopover({
       <PopoverContent align="start" className="flex w-56 flex-col gap-2 p-3">
         <Input
           value={draft}
-          placeholder="ค่าที่ต้องการกรอง..."
+          placeholder={t('filterValuePlaceholder')}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') apply(draft);
@@ -431,17 +434,18 @@ function DataTableColumnSettings({
   onMove: (from: string, to: string) => void;
   onReset: () => void;
 }>) {
+  const t = useTranslations('kit.dataTable');
   const idBase = React.useId();
   // แยกสถานะลากของเมนูคอลัมน์ออกจากหัวตาราง ไม่งั้นลากในเมนูแล้วหัวตารางกะพริบตาม
   const [dragKey, setDragKey] = React.useState<string | null>(null);
   const [overKey, setOverKey] = React.useState<string | null>(null);
   return (
     <Popover>
-      <PopoverTrigger render={<Button variant="outline" size="icon" aria-label="ตั้งค่าคอลัมน์" />}>
+      <PopoverTrigger render={<Button variant="outline" size="icon" aria-label={t('columnSettings')} />}>
         <Settings2 strokeWidth={2} />
       </PopoverTrigger>
       <PopoverContent align="end" className="flex w-60 flex-col gap-1 p-2">
-        <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">คอลัมน์</p>
+        <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">{t('columns')}</p>
         {entries.map((entry, i) => (
           <div
             key={entry.key}
@@ -471,7 +475,7 @@ function DataTableColumnSettings({
                 ใช้กับคีย์บอร์ดและ screen reader ไม่ได้ */}
             <button
               type="button"
-              aria-label={`ลำดับของ ${entry.label} — ลากเพื่อสลับ หรือกดลูกศรขึ้น/ลง`}
+              aria-label={t('reorderAria', { label: entry.label })}
               className="cursor-grab rounded-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               onKeyDown={(e) => {
                 if (e.key === 'ArrowUp' && i > 0) {
@@ -769,9 +773,10 @@ export function DataTable<TData>({
   card = true,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
+  const t = useTranslations('kit.dataTable');
   const router = useRouter();
   const pathname = usePathname();
-  const placeholder = filterPlaceholder ?? 'กรอกเพื่อกรอง...';
+  const placeholder = filterPlaceholder ?? t('filterPlaceholder');
   const emptyProps = {
     searchable: searchable ?? (!!filterColumn || !!globalSearch || !!serverSearch),
     title: emptyTitle,
@@ -1054,7 +1059,7 @@ export function DataTable<TData>({
                 {value}
                 <button
                   type="button"
-                  aria-label={`ล้างกรอง ${label}`}
+                  aria-label={t('clearFilterAria', { label })}
                   className="rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
                   onClick={() => applyColumnFilter(key, '')}
                 >
@@ -1184,8 +1189,12 @@ export function DataTable<TData>({
               const end = Math.min((pageIndex + 1) * size, total);
               // ตัวเลขทุกตัวผ่าน lib/format (§0.6) — พันขึ้นไปต้องมี comma เช่น "1–20 จาก 1,248"
               return total > 0
-                ? `${formatNumber(start)}–${formatNumber(end)} จาก ${formatNumber(total)}`
-                : '0 รายการ';
+                ? t('rangeSummary', {
+                    start: formatNumber(start),
+                    end: formatNumber(end),
+                    total: formatNumber(total),
+                  })
+                : t('rangeEmpty');
             })()}
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
@@ -1212,7 +1221,10 @@ export function DataTable<TData>({
               </Select>
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
-              {`หน้า ${table.getState().pagination.pageIndex + 1} จาก ${Math.max(1, table.getPageCount())}`}
+              {t('pageSummary', {
+                page: table.getState().pagination.pageIndex + 1,
+                pages: Math.max(1, table.getPageCount()),
+              })}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               {/* ขนาดปุ่มไอคอน = `size="icon"` ตาม density กลาง (มติ 2026-08-09)
@@ -1225,7 +1237,7 @@ export function DataTable<TData>({
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">ไปหน้าแรก</span>
+                <span className="sr-only">{t('firstPage')}</span>
                 <ChevronsLeft strokeWidth={2} />
               </Button>
               <Button
@@ -1234,7 +1246,7 @@ export function DataTable<TData>({
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">ไปหน้าก่อน</span>
+                <span className="sr-only">{t('prevPage')}</span>
                 <ChevronLeft strokeWidth={2} />
               </Button>
               <Button
@@ -1243,7 +1255,7 @@ export function DataTable<TData>({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">ไปหน้าถัดไป</span>
+                <span className="sr-only">{t('nextPage')}</span>
                 <ChevronRight strokeWidth={2} />
               </Button>
               <Button
@@ -1253,7 +1265,7 @@ export function DataTable<TData>({
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">ไปหน้าสุดท้าย</span>
+                <span className="sr-only">{t('lastPage')}</span>
                 <ChevronsRight strokeWidth={2} />
               </Button>
             </div>
