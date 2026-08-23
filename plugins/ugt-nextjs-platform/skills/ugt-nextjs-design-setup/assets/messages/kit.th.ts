@@ -23,6 +23,11 @@ export const kitTh = {
     prevPage: 'ไปหน้าก่อน',
     nextPage: 'ไปหน้าถัดไป',
     lastPage: 'ไปหน้าสุดท้าย',
+    clear: 'ล้าง',
+    apply: 'กรอง',
+    resetColumns: 'คืนค่าเริ่มต้น',
+    clearAllFilters: 'ล้างตัวกรองทั้งหมด',
+    rowsPerPage: 'แถวต่อหน้า',
   },
   confirmDialog: {
     cancel: 'ยกเลิก',

@@ -405,10 +405,10 @@ function DataTableFilterPopover({
               apply('');
             }}
           >
-            ล้าง
+            {t('clear')}
           </Button>
           <Button className="flex-1" onClick={() => apply(draft)}>
-            กรอง
+            {t('apply')}
           </Button>
         </div>
       </PopoverContent>
@@ -502,7 +502,7 @@ function DataTableColumnSettings({
         ))}
         <Button variant="ghost" size="sm" className="mt-1 justify-start gap-2" onClick={onReset}>
           <RotateCcw strokeWidth={2} />
-          คืนค่าเริ่มต้น
+          {t('resetColumns')}
         </Button>
       </PopoverContent>
     </Popover>
@@ -1069,7 +1069,7 @@ export function DataTable<TData>({
             );
           })}
           <Button variant="ghost" size="sm" onClick={clearAllColumnFilters}>
-            ล้างตัวกรองทั้งหมด
+            {t('clearAllFilters')}
           </Button>
         </div>
       )}
@@ -1200,7 +1200,7 @@ export function DataTable<TData>({
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
               <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                แถวต่อหน้า
+                {t('rowsPerPage')}
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}

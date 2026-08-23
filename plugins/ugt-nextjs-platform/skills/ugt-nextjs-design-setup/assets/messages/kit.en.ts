@@ -22,6 +22,11 @@ export const kitEn = {
     prevPage: 'Go to previous page',
     nextPage: 'Go to next page',
     lastPage: 'Go to last page',
+    clear: 'Clear',
+    apply: 'Filter',
+    resetColumns: 'Reset to defaults',
+    clearAllFilters: 'Clear all filters',
+    rowsPerPage: 'Rows per page',
   },
   confirmDialog: {
     cancel: 'Cancel',
