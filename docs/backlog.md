@@ -196,19 +196,22 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
   better-auth changelog/migration guide จริงก่อนตัดสินใจว่าจะ migrate หรือค้าง
   pin `1.6.14` ต่อไป · การ pin ตอนนี้เป็นแค่ทางออกฉุกเฉินให้ install ไม่พัง
   ไม่ใช่คำตอบระยะยาว
-- **ไม่ใช่บั๊กของ auth-setup แต่กระทบการ verify แบบ end-to-end**:
-  `prisma.config.ts` (จาก `ugt-nextjs-database-setup`) เขียนคอมเมนต์ไว้ว่า
-  "schema.prisma must NOT contain a url field — Prisma 7 + driver adapter"
-  แต่ `package.json` ตัวอย่าง pin `prisma: "^6.0.0"` — Prisma 6.19.3 ไม่อ่าน
-  `datasource.url` จาก `prisma.config.ts` โยน `P1012` ทันที บล็อก
-  `prisma generate` และทุกอย่างที่ต่อจากนั้น (`next build` เจอ implicit-any
-  error เพราะ Prisma types ไม่เคย generate) — ของ database-setup skill
-  เจอผ่านการ eval ของ auth-setup ไม่ใช่ตั้งใจทดสอบ ต้องส่งต่อให้เจ้าของ skill
-  นั้นดู
-- **scaffold ของ database-setup ไม่มี Tailwind/`.gitignore` เลย** — ทำให้
+- ~~ไม่ใช่บั๊กของ auth-setup แต่กระทบการ verify แบบ end-to-end: `prisma.config.ts`
+  (จาก `ugt-nextjs-database-setup`) เขียนคอมเมนต์ไว้ว่า "schema.prisma must NOT
+  contain a url field — Prisma 7 + driver adapter" แต่ไม่มีที่ไหน pin เวอร์ชัน
+  prisma เลย ทำให้ install ที่ไม่ pin ลง Prisma 6 ได้ (ตามที่ scaffold ของ eval
+  เจอ) — Prisma 6 ไม่อ่าน `datasource.url` จาก `prisma.config.ts` โยน `P1012`
+  ทันที บล็อก `prisma generate` และทุกอย่างที่ต่อจากนั้น~~ → 4.47.4 pin
+  `prisma@7.9.1` / `@prisma/client@7.9.1` / `@prisma/adapter-mssql@7.9.1` ใน
+  Setup Step 1 (พิสูจน์แล้วว่า `npx prisma generate`/`validate` ผ่านจริงกับ
+  asset เดิมที่เวอร์ชันนี้ — asset เองเขียนถูกอยู่แล้ว ปัญหาคือไม่มีการ pin)
+- ~~scaffold ของ database-setup ไม่มี Tailwind/`.gitignore` เลย — ทำให้
   `npx shadcn@latest init` พังจนกว่าจะติดตั้ง `tailwindcss` เองก่อน และ
   auth-setup's verify.mjs's ".env.local not committed" check FAIL จนกว่าจะสร้าง
-  `.gitignore` เอง — ไม่มีเอกสารที่ไหนบอกว่าเป็นความรับผิดชอบของใคร
+  `.gitignore` เอง — ไม่มีเอกสารที่ไหนบอกว่าเป็นความรับผิดชอบของใคร~~ → 4.47.4
+  (ยิง `.gitignore` เป็น asset ใหม่ของ database-setup copy ใน Setup Step 2 ·
+  design-setup's SKILL.md เพิ่มเช็ค Tailwind ก่อน `shadcn init` ในสาขา
+  existing-project แล้วติดตั้งให้ถ้ายังไม่มี)
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

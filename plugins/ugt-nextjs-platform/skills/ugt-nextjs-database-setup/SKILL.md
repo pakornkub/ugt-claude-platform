@@ -68,9 +68,19 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
 
 ### 1. Install dependencies
 
+**Pin the Prisma packages exactly — do NOT drop the version.** `prisma.config.ts`
+and the schema skeleton below are written for Prisma 7's driver-adapter model
+(`url` lives only in `prisma.config.ts`, never in `schema.prisma`'s
+`datasource` block). Prisma 6 does not read `datasource.url` from
+`prisma.config.ts` at all — an unpinned `npm install prisma` that happens to
+resolve to a 6.x release throws `P1012: Argument "url" is missing` on
+`prisma generate` and blocks everything downstream. `prisma`, `@prisma/client`
+and `@prisma/adapter-mssql` are versioned together (same release train) —
+keep all three on the same version:
+
 ```bash
-npm install @prisma/client @prisma/adapter-mssql @t3-oss/env-nextjs zod
-npm install --save-dev prisma tsx dotenv
+npm install @prisma/client@7.9.1 @prisma/adapter-mssql@7.9.1 @t3-oss/env-nextjs zod
+npm install --save-dev prisma@7.9.1 tsx dotenv
 ```
 
 ### 2. Copy assets and substitute placeholders
@@ -82,6 +92,7 @@ npm install --save-dev prisma tsx dotenv
 | `assets/lib/prisma.ts` | `lib/prisma.ts` |
 | `assets/lib/env.ts` | `lib/env.ts` |
 | `assets/env.example` | `.env.example` (+ copy to `.env.local` and fill real values) |
+| `assets/gitignore` | `.gitignore` — if the project already has one, append any of its lines that are missing rather than overwrite it |
 | `assets/rules/ugt-nextjs-database.md` | `.claude/rules/ugt-nextjs-database.md` (whole-file overwritable on plugin update) |
 
 **Keep the env files distinct**: `.env.example` = generic placeholders only
