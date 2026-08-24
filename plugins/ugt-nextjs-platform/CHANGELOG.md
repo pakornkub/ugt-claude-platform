@@ -1,5 +1,33 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.4 (2026-08-24)
+
+**`ugt-nextjs-database-setup` fixes for the 3 defects the 4.47.2 eval surfaced
+against it (`docs/backlog.md` ข้อ 9) — verified against a real scaffold, not
+reasoned about:**
+
+- **`prisma.config.ts` vs the pinned Prisma major** — the config file and
+  schema skeleton were already written for Prisma 7's driver-adapter model
+  (`url` only in `prisma.config.ts`), but `SKILL.md`'s install step never
+  pinned a version, so an unpinned `npm install prisma` could resolve to 6.x
+  and throw `P1012` on `prisma generate`, blocking `next build` behind it.
+  Pinned `prisma@7.9.1` / `@prisma/client@7.9.1` / `@prisma/adapter-mssql@7.9.1`
+  in the install step — confirmed `npx prisma generate` and `npx prisma
+  validate` both pass against the skill's own unmodified assets at that
+  version.
+- **No Tailwind on the documented database → design → auth path** —
+  `ugt-nextjs-design-setup`'s existing-project `shadcn@latest init` requires
+  Tailwind already configured and does not install it; nothing named whose
+  job that was. `ugt-nextjs-design-setup`'s `SKILL.md` now checks for
+  Tailwind before that init branch and installs it
+  (`tailwindcss` + `@tailwindcss/postcss` + `postcss.config.mjs`) when
+  missing.
+- **No `.gitignore` shipped** — left `.env.local` uncommitted only by luck,
+  and failed `ugt-nextjs-auth-setup`'s "`.env.local` not committed" check on
+  every fresh install. Added `assets/gitignore` (Next.js standard +
+  `.env`/`.env.local`/`.env*.local` excluded, `.env.example` kept) copied to
+  `.gitignore` in Setup Step 2.
+
 ## 4.47.3 (2026-08-24)
 
 **ปิดข้อวิจัยที่ค้างจาก 4.47.2 — migrate จริง ไม่ใช่ค้าง pin**

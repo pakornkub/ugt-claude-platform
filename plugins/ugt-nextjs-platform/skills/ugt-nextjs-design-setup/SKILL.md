@@ -124,6 +124,29 @@ different size — is the field bug this step exists to prevent.
    verified: produces `base-mira` + `lucide` + `rtl:false` +
    menu default/solid/subtle + neutral)**:
 
+   **Existing-project branch only — check for Tailwind first.** `shadcn init`
+   requires Tailwind already configured; it does not install it. The
+   `--template next` branch below gets it for free (create-next-app's
+   default), but a project that arrived here via the documented
+   database → design → auth order has no Tailwind yet — `ugt-nextjs-database-setup`
+   never touches CSS. No `tailwindcss` in `package.json` and no
+   `@import "tailwindcss"` in any CSS file → install it before running init,
+   or `shadcn init` fails outright with "No Tailwind CSS configuration found":
+
+   ```bash
+   npm install -D tailwindcss @tailwindcss/postcss postcss
+   ```
+
+   ```js
+   // postcss.config.mjs
+   export default {
+     plugins: { '@tailwindcss/postcss': {} },
+   };
+   ```
+
+   A bare `app/globals.css` containing just `@import "tailwindcss";` is
+   enough — step 4 below replaces its token blocks anyway.
+
    ```bash
    # โปรเจคใหม่ล้วน — scaffolds the Next app too (no separate create-next-app):
    printf '<project-name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 --template next --pointer --yes
