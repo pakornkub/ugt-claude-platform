@@ -199,6 +199,61 @@ check('converted files carry no Thai outside comments', () => {
 // exist and hold no Thai), and design-setup's verify.mjs passes too (it checks
 // that `messages/` exists, not that it is wired) — this is the fifth
 // load-bearing piece its "four pieces" comment doesn't count.
+// Returns the substring from `src[openBraceIdx]` (a `{`) to its matching `}`,
+// tracking quote and brace-depth state — NOT a naive `indexOf`/`lastIndexOf`
+// pair, which breaks the moment the object holds more than one nested `{}`.
+function extractBalanced(src, openBraceIdx) {
+  let depth = 0;
+  let quote = null;
+  for (let i = openBraceIdx; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      if (c === '\\') { i++; continue; }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) return src.slice(openBraceIdx, i + 1);
+    }
+  }
+  return src.slice(openBraceIdx);
+}
+
+// Keys sitting directly inside an object literal's outer braces — depth 1,
+// never inside a further-nested `{}`. A regex scan of the whole block text
+// would count `someOtherNamespace: { auth: '...' }` as `auth` being
+// registered; this only counts `auth` when it is a property of the object
+// itself, exactly matching how a real `th: { kit: kitTh, auth: authTh }`
+// spread is shaped.
+function topLevelKeys(objLiteral) {
+  const inner = objLiteral.slice(1, -1); // strip the outer { }
+  const keys = [];
+  let depth = 0;
+  let quote = null;
+  let i = 0;
+  while (i < inner.length) {
+    const c = inner[i];
+    if (quote) {
+      if (c === '\\') { i += 2; continue; }
+      if (c === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; i++; continue; }
+    if (c === '{' || c === '[' || c === '(') { depth++; i++; continue; }
+    if (c === '}' || c === ']' || c === ')') { depth--; i++; continue; }
+    if (depth === 0) {
+      const m = /^\s*([A-Za-z_$][\w$]*)\s*:/.exec(inner.slice(i));
+      if (m) { keys.push(m[1]); i += m[0].length; continue; }
+    }
+    i++;
+  }
+  return keys;
+}
+
 check('every catalog in messages/ is registered in i18n/messages.ts', () => {
   const dir = join(ROOT, 'messages');
   // The parity check above already reports a missing/unreadable messages/ dir.
@@ -225,9 +280,29 @@ check('every catalog in messages/ is registered in i18n/messages.ts', () => {
   if (declIdx < 0) {
     return { ok: false, msg: 'i18n/messages.ts has no `export const messages` — next-intl gets no catalog at all' };
   }
-  const objStart = src.indexOf('{', declIdx);
-  const obj = objStart < 0 ? '' : src.slice(objStart, src.lastIndexOf('}') + 1);
-  const missing = onDisk.filter((ns) => !new RegExp(`(^|[{,\\s])${ns}\\s*:`).test(obj));
+  // `export const messages: Record<AppLocale, {...}> = {...}` — the type
+  // annotation carries its own `{` before the real value does, so the first
+  // `{` after the identifier is the WRONG one (it belongs to the generic's
+  // second type param, not the object being registered into). Anchor on the
+  // `=` that starts the assignment instead, then take the first `{` after it.
+  const eqIdx = src.indexOf('=', declIdx);
+  const objStart = eqIdx < 0 ? -1 : src.indexOf('{', eqIdx);
+  if (objStart < 0) {
+    return { ok: false, msg: 'i18n/messages.ts: `messages` has no object literal — next-intl gets no catalog at all' };
+  }
+  // A namespace only counts as registered when it is a direct property of a
+  // locale's own object (`th: { auth: authTh }`), never merely present
+  // somewhere in the file text — a nested, unrelated `{ auth: '...' }` deeper
+  // inside the object must not read as registration.
+  const messagesObj = extractBalanced(src, objStart);
+  const registered = new Set();
+  for (const localeKey of topLevelKeys(messagesObj)) {
+    const localeDecl = new RegExp(`(^|[{,])\\s*${localeKey}\\s*:\\s*\\{`).exec(messagesObj);
+    if (!localeDecl) continue;
+    const localeBraceIdx = localeDecl.index + localeDecl[0].length - 1;
+    for (const ns of topLevelKeys(extractBalanced(messagesObj, localeBraceIdx))) registered.add(ns);
+  }
+  const missing = onDisk.filter((ns) => !registered.has(ns));
   return missing.length
     ? {
         ok: false,
