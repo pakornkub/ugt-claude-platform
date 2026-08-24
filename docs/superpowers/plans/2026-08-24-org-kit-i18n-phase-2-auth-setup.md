@@ -969,7 +969,27 @@ import { PASSWORD_MIN_LENGTH } from '@/lib/password-policy'; // replaces the PAS
 
 Zod schema (line 34): `email: z.string().min(1, 'EMAIL_REQUIRED').email('EMAIL_INVALID')` — codes reused from Task 1, no new catalog keys.
 
-- [ ] **Step 1: Add keys. Step 2: Convert schema to codes + wire `useFieldErrorText()` for the email field + replace JSX literals. Step 3: Verify. Step 4: Commit.**
+**Result handling** — Task 1 changed `forgotPasswordAction`'s return type to `{ ok: true } | { code: string }`. This file's `onSubmit` must switch on that (the plan's earlier draft omitted this — added during task review):
+
+```tsx
+const t = useTranslations('auth.forgotPassword');
+const tErrors = useTranslations('auth.errors');
+const fieldError = useFieldErrorText();
+// ...
+const onSubmit = handleSubmit(async (values) => {
+  const result = await forgotPasswordAction(values);
+  if ('code' in result) {
+    setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
+    return;
+  }
+  setSent(true); // or whatever local state currently flips the dialog into its "sent" view
+});
+// JSX: {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+```
+
+(Read the actual current file first — `forgotPasswordAction`'s only pre-Task-1 failure path was the rate-limit case, so check whether the dialog already renders an `errors.root` Callout for it. If not, add one, following the same pattern as `login-form.tsx`'s `LdapSection`.)
+
+- [ ] **Step 1: Add keys. Step 2: Convert schema to codes + wire `useFieldErrorText()` for the email field + wire the result-handling block above + replace JSX literals. Step 3: Verify. Step 4: Commit.**
 
 ---
 
@@ -996,7 +1016,30 @@ Zod schema (line 34): `email: z.string().min(1, 'EMAIL_REQUIRED').email('EMAIL_I
 
 Zod schema (line 31): `name: z.string().trim().min(1, 'ROLE_NAME_REQUIRED')` — **reuse the code Task 1 defined for `admin-roles.ts`'s server check**, do not invent a new one.
 
-- [ ] **Step 1: Add keys. Step 2: Convert schema + wire `useFieldErrorText()` + replace literals. Step 3: Verify. Step 4: Commit.**
+**Result handling** — Task 1 changed `createRoleAction`/`updateRoleAction`'s return type to `{ success: true } | { success: false; code: string }`. This file's `onSubmit` (shared between create and edit — read the actual file to see which action it calls based on whether `role` prop is set) must switch on `result.code`, not `result.error` (the plan's earlier draft omitted this — added during task review):
+
+```tsx
+const t = useTranslations('auth.roleForm');
+const tErrors = useTranslations('auth.errors');
+const fieldError = useFieldErrorText();
+// ...
+const onSubmit = handleSubmit(async (values) => {
+  const result = role
+    ? await updateRoleAction(role.id, { name: values.name, description: values.description, permissionIds: values.permissionIds })
+    : await createRoleAction({ name: values.name, description: values.description, permissionIds: values.permissionIds });
+  if (!result.success) {
+    setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
+    return;
+  }
+  toast.success(role ? t('editSuccess') : t('createSuccess'));
+  // ...existing close/reset logic...
+});
+// JSX: {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
+```
+
+(Match the actual parameter names/shape `RoleInput` expects in `lib/actions/admin-roles.ts` — read the file, do not assume the field names above are exact. Add the `errors.root` Callout if the file doesn't already render one.)
+
+- [ ] **Step 1: Add keys. Step 2: Convert schema + wire `useFieldErrorText()` + wire the result-handling block above + replace literals. Step 3: Verify. Step 4: Commit.**
 
 ---
 
