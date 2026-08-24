@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/password.ts
-// kit-hash: 37d694a5de20
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/password.ts
+// kit-hash: d4bde9cc0e8d
 'use server';
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only.
@@ -85,7 +85,7 @@ const forgotSchema = z.object({ email: z.email() });
  */
 export async function forgotPasswordAction(values: {
   email: string;
-}): Promise<{ ok: true } | { error: string }> {
+}): Promise<{ ok: true } | { code: string }> {
   const parsed = forgotSchema.safeParse(values);
   // อีเมลผิดรูปแบบก็ตอบเหมือนสำเร็จ — เหตุผลเดียวกับด้านบน
   if (!parsed.success) return { ok: true };
@@ -93,7 +93,7 @@ export async function forgotPasswordAction(values: {
   const { ip, userAgent } = await getRequestMeta();
   // เข้มกว่าหน้า login เพราะทุกครั้งที่สำเร็จคือการยิงอีเมลออกจากระบบ
   if (!checkRateLimit(`forgot:${ip}`, 3, 15 * 60 * 1000)) {
-    return { error: 'ขอลิงก์บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่' };
+    return { code: 'RESET_LINK_RATE_LIMITED' };
   }
 
   const user = await prisma.user
@@ -135,15 +135,15 @@ const resetSchema = z.object({ token: z.string().min(1), password: passwordSchem
 export async function resetPasswordAction(values: {
   token: string;
   password: string;
-}): Promise<{ ok: true } | { error: string }> {
+}): Promise<{ ok: true } | { code: string }> {
   const parsed = resetSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
+    return { code: parsed.error.issues[0]?.message ?? 'INVALID_INPUT' };
   }
 
   const { ip, userAgent } = await getRequestMeta();
   if (!checkRateLimit(`reset:${ip}`, 10, 15 * 60 * 1000)) {
-    return { error: 'ลองบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่' };
+    return { code: 'RATE_LIMITED' };
   }
 
   try {
@@ -152,7 +152,7 @@ export async function resetPasswordAction(values: {
     });
   } catch {
     // แยกไม่ได้ว่าโทเคนหมดอายุหรือถูกใช้ไปแล้ว และไม่ควรแยกให้ผู้ใช้รู้ด้วย
-    return { error: 'ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว กรุณาขอลิงก์ใหม่' };
+    return { code: 'RESET_LINK_INVALID' };
   }
 
   // audit เขียนใน onPasswordReset ของ lib/auth.ts — ที่นั่นได้ user object มาด้วย
@@ -162,7 +162,7 @@ export async function resetPasswordAction(values: {
 // ─── เปลี่ยนรหัสผ่านของตัวเอง ────────────────────────────────────────────────
 
 const changeSchema = z.object({
-  currentPassword: z.string().min(1, 'กรุณากรอกรหัสผ่านปัจจุบัน'),
+  currentPassword: z.string().min(1, 'CURRENT_PASSWORD_REQUIRED'),
   newPassword: passwordSchema,
 });
 
@@ -173,19 +173,19 @@ const changeSchema = z.object({
 export async function changePasswordAction(values: {
   currentPassword: string;
   newPassword: string;
-}): Promise<{ ok: true } | { error: string }> {
+}): Promise<{ ok: true } | { code: string }> {
   const parsed = changeSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
+    return { code: parsed.error.issues[0]?.message ?? 'INVALID_INPUT' };
   }
 
   const requestHeaders = await headers();
   const session = await auth.api.getSession({ headers: requestHeaders });
-  if (!session) return { error: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่' };
+  if (!session) return { code: 'SESSION_EXPIRED' };
 
   const { ip, userAgent } = await getRequestMeta();
   if (!checkRateLimit(`change:${session.user.id}`, 5, 15 * 60 * 1000)) {
-    return { error: 'ลองบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่' };
+    return { code: 'RATE_LIMITED' };
   }
 
   let result: Response;
@@ -200,12 +200,12 @@ export async function changePasswordAction(values: {
       asResponse: true,
     });
   } catch {
-    return { error: 'เปลี่ยนรหัสผ่านไม่สำเร็จ' };
+    return { code: 'CHANGE_PASSWORD_FAILED' };
   }
 
   if (!result.ok) {
     await logAuthEvent('password.change.failed', session.user.id, { ip, userAgent });
-    return { error: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' };
+    return { code: 'WRONG_CURRENT_PASSWORD' };
   }
 
   // revokeOtherSessions ทำให้ Better Auth ออก session token ใหม่ — ถ้าไม่ส่งต่อ

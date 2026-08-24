@@ -1,10 +1,11 @@
 'use client';
-// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
-// kit-hash: f4bb2076121b
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: b9f1d0cdc7a9
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Settings, Loader2 } from 'lucide-react';
 import { initializeAdminAction } from '@/lib/actions/admin-setup';
 import { Button } from '@/components/ui/button';
@@ -12,13 +13,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export function AdminSetupForm() {
   const [isPending, startTransition] = useTransition();
+  const tErrors = useTranslations('auth.errors');
 
   function handleSetup() {
     startTransition(async () => {
       // สำเร็จ = action redirect('/admin/users') เอง — โค้ดหลัง await ไม่ได้รันต่อ
       const result = await initializeAdminAction();
-      if (result?.error) {
-        toast.error('ตั้งค่าไม่สำเร็จ', { description: result.error });
+      if (result?.code) {
+        toast.error('ตั้งค่าไม่สำเร็จ', { description: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       }
     });
   }

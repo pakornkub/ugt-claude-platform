@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: 98eb0654326e
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: 255da516e02b
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -26,18 +26,18 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
 
-type ActionResult = { success: true } | { success: false; error: string };
+type ActionResult = { success: true } | { success: false; code: string; field?: string };
 
 /** Server Action guard pattern (org contract): session -> permission -> action -> audit log. */
 export async function assignUserRoleAction(userId: string, roleId: string | null): Promise<ActionResult> {
   // 1. Session
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
+  if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   // 2. Permission
   const perms = await getUserPermissions(session.user.id);
   if (!perms.includes(PERMISSIONS.USERS_UPDATE)) {
-    return { success: false, error: 'Forbidden' };
+    return { success: false, code: 'FORBIDDEN' };
   }
 
   // 3. Domain checks + action
@@ -45,7 +45,7 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
   // another admin, never by yourself — the same "cannot act on your own
   // privileged record" rule as delete-self elsewhere in this pattern.
   if (userId === session.user.id) {
-    return { success: false, error: 'Cannot change your own role' };
+    return { success: false, code: 'CANNOT_CHANGE_OWN_ROLE' };
   }
   await prisma.user.update({ where: { id: userId }, data: { roleId } });
 
@@ -73,8 +73,8 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
 // กับที่ signInEmail ใช้ตรวจตอน login
 
 const createLocalUserSchema = z.object({
-  name: z.string().min(1, 'กรุณากรอกชื่อ').max(255),
-  email: z.email('อีเมลไม่ถูกต้อง').max(255),
+  name: z.string().min(1, 'USER_NAME_REQUIRED').max(255),
+  email: z.email('EMAIL_INVALID').max(255),
   password: passwordSchema,
   roleId: z.string().nullable(),
 });
@@ -87,21 +87,22 @@ export async function createLocalUserAction(values: {
 }): Promise<ActionResult> {
   // 1. Session
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
+  if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   // 2. Permission
   const perms = await getUserPermissions(session.user.id);
-  if (!perms.includes(PERMISSIONS.USERS_CREATE)) return { success: false, error: 'Forbidden' };
+  if (!perms.includes(PERMISSIONS.USERS_CREATE)) return { success: false, code: 'FORBIDDEN' };
 
   // 3. Domain checks + action
   const parsed = createLocalUserSchema.safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
+    const issue = parsed.error.issues[0];
+    return { success: false, code: issue?.message ?? 'INVALID_INPUT', field: issue?.path[0]?.toString() };
   }
   const { name, email, password, roleId } = parsed.data;
 
   if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) {
-    return { success: false, error: 'มีผู้ใช้อีเมลนี้อยู่แล้ว' };
+    return { success: false, code: 'EMAIL_IN_USE', field: 'email' };
   }
 
   const userId = generateId(24);
@@ -155,16 +156,17 @@ export async function setUserPasswordAction(values: {
   newPassword: string;
 }): Promise<ActionResult> {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
+  if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   const perms = await getUserPermissions(session.user.id);
   if (!perms.includes(PERMISSIONS.USERS_RESET_PASSWORD)) {
-    return { success: false, error: 'Forbidden' };
+    return { success: false, code: 'FORBIDDEN' };
   }
 
   const parsed = setPasswordSchema.safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'ข้อมูลไม่ถูกต้อง' };
+    const issue = parsed.error.issues[0];
+    return { success: false, code: issue?.message ?? 'INVALID_INPUT', field: issue?.path[0]?.toString() };
   }
   const { userId, newPassword } = parsed.data;
 
@@ -172,9 +174,9 @@ export async function setUserPasswordAction(values: {
     where: { id: userId },
     select: { authType: true },
   });
-  if (!target) return { success: false, error: 'ไม่พบผู้ใช้' };
+  if (!target) return { success: false, code: 'USER_NOT_FOUND' };
   if (target.authType !== 'local') {
-    return { success: false, error: 'บัญชีนี้ใช้รหัสผ่านจาก SSO/LDAP เปลี่ยนที่ระบบนั้นแทน' };
+    return { success: false, code: 'SSO_LDAP_NO_RESET' };
   }
 
   const updated = await prisma.account.updateMany({
@@ -182,7 +184,7 @@ export async function setUserPasswordAction(values: {
     data: { password: await hashPassword(newPassword) },
   });
   if (updated.count === 0) {
-    return { success: false, error: 'บัญชีนี้ไม่มีรหัสผ่านในระบบ' };
+    return { success: false, code: 'NO_PASSWORD_SET' };
   }
 
   // เหตุผลเดียวกับตอนผู้ใช้ reset เอง — คนที่ยังค้าง session อยู่ต้องหลุด

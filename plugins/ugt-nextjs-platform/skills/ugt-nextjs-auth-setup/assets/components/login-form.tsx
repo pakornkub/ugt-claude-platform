@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: e409f3e089c3
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 4e6d525f5da1
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -21,6 +21,7 @@ import { useForm } from 'react-hook-form'; // [METHOD: LDAP|LOCAL]
 import { zodResolver } from '@hookform/resolvers/zod'; // [METHOD: LDAP|LOCAL]
 import { z } from 'zod'; // [METHOD: LDAP|LOCAL]
 import { useRouter } from 'next/navigation'; // [METHOD: LDAP|LOCAL]
+import { useTranslations } from 'next-intl'; // [METHOD: LDAP|LOCAL]
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -84,13 +85,14 @@ function SsoSection() {
 // ─── [METHOD: LDAP] AD / LDAP username + password ────────────────────────────
 
 const ldapLoginSchema = z.object({
-  username: z.string().trim().min(1, 'กรอกชื่อผู้ใช้ AD'),
-  password: z.string().min(1, 'กรอกรหัสผ่าน'),
+  username: z.string().trim().min(1, 'AD_USERNAME_REQUIRED'),
+  password: z.string().min(1, 'PASSWORD_REQUIRED'),
 });
 type LdapValues = z.infer<typeof ldapLoginSchema>;
 
 function LdapSection() {
   const router = useRouter();
+  const t = useTranslations('auth.errors');
   const {
     register,
     handleSubmit,
@@ -103,10 +105,10 @@ function LdapSection() {
 
   const onSubmit = handleSubmit(async (values) => {
     const result = await ldapLoginAction(values);
-    if (result?.error) {
+    if (result?.code) {
       // ไม่ชี้ว่าช่องไหนผิด — บอกว่า "username หรือรหัสผ่านไม่ถูกต้อง" ช่องใดช่องหนึ่ง
       // คือการยืนยันให้คนเดาว่ามี username นี้อยู่จริง
-      setError('root', { message: result.error });
+      setError('root', { message: t(result.code as Parameters<typeof t>[0]) });
       return;
     }
     router.push('/'); // Next.js is basePath-aware here
@@ -151,13 +153,14 @@ function LdapSection() {
 // ─── [METHOD: LOCAL] Local email + password ──────────────────────────────────
 
 const localLoginSchema = z.object({
-  email: z.string().trim().min(1, 'กรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
-  password: z.string().min(1, 'กรอกรหัสผ่าน'),
+  email: z.string().trim().min(1, 'EMAIL_REQUIRED').email('EMAIL_INVALID'),
+  password: z.string().min(1, 'PASSWORD_REQUIRED'),
 });
 type LocalValues = z.infer<typeof localLoginSchema>;
 
 function LocalSection() {
   const router = useRouter();
+  const t = useTranslations('auth.errors');
   const [forgotOpen, setForgotOpen] = useState(false); // ต้องมี ugt-nextjs-mail-setup
   const {
     register,
@@ -171,8 +174,8 @@ function LocalSection() {
 
   const onSubmit = handleSubmit(async (values) => {
     const result = await localLoginAction(values);
-    if (result?.error) {
-      setError('root', { message: result.error });
+    if (result?.code) {
+      setError('root', { message: t(result.code as Parameters<typeof t>[0]) });
       return;
     }
     router.push('/'); // Next.js is basePath-aware here

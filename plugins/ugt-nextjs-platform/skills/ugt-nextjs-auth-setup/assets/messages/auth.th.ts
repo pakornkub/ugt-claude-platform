@@ -1,0 +1,45 @@
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 38bc454f9c09
+// Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
+// scripts/check-i18n.mjs fails the build when they drift.
+export const authTh = {
+  errors: {
+    UNAUTHORIZED: 'กรุณาเข้าสู่ระบบ',
+    FORBIDDEN: 'คุณไม่มีสิทธิ์ทำรายการนี้',
+    INVALID_INPUT: 'ข้อมูลไม่ถูกต้อง',
+    ALREADY_INITIALIZED: 'ตั้งค่าผู้ดูแลระบบไปแล้ว',
+    TOO_MANY_ATTEMPTS: 'ลองเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่',
+    INVALID_AD_CREDENTIALS: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+    INVALID_LOCAL_CREDENTIALS: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    CANNOT_CHANGE_OWN_ROLE: 'ไม่สามารถเปลี่ยนบทบาทของตัวเองได้',
+    EMAIL_IN_USE: 'มีผู้ใช้อีเมลนี้อยู่แล้ว',
+    USER_NOT_FOUND: 'ไม่พบผู้ใช้',
+    SSO_LDAP_NO_RESET: 'บัญชีนี้ใช้รหัสผ่านจาก SSO/LDAP เปลี่ยนที่ระบบนั้นแทน',
+    NO_PASSWORD_SET: 'บัญชีนี้ไม่มีรหัสผ่านในระบบ',
+    ROLE_NAME_REQUIRED: 'กรุณากรอกชื่อบทบาท',
+    ROLE_NOT_FOUND: 'ไม่พบบทบาทที่เลือก',
+    SYSTEM_ROLE_EDIT_BLOCKED: 'บทบาทระบบไม่สามารถแก้ไขได้',
+    SYSTEM_ROLE_DELETE_BLOCKED: 'บทบาทระบบไม่สามารถลบได้',
+    RESET_LINK_RATE_LIMITED: 'ขอลิงก์บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่',
+    RATE_LIMITED: 'ลองบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่',
+    RESET_LINK_INVALID: 'ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว กรุณาขอลิงก์ใหม่',
+    SESSION_EXPIRED: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่',
+    CHANGE_PASSWORD_FAILED: 'เปลี่ยนรหัสผ่านไม่สำเร็จ',
+    WRONG_CURRENT_PASSWORD: 'รหัสผ่านปัจจุบันไม่ถูกต้อง',
+    CURRENT_PASSWORD_REQUIRED: 'กรุณากรอกรหัสผ่านปัจจุบัน',
+    PASSWORD_TOO_SHORT: 'รหัสผ่านต้องยาวอย่างน้อย {min} ตัวอักษร',
+    PASSWORD_TOO_LONG: 'รหัสผ่านต้องไม่เกิน {max} ตัวอักษร',
+    PASSWORD_NEED_LOWER: 'ต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว',
+    PASSWORD_NEED_UPPER: 'ต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว',
+    PASSWORD_NEED_DIGIT: 'ต้องมีตัวเลขอย่างน้อย 1 ตัว',
+    PASSWORD_MISMATCH: 'รหัสผ่านทั้งสองช่องไม่ตรงกัน',
+    USER_NAME_REQUIRED: 'กรุณากรอกชื่อ',
+    EMAIL_REQUIRED: 'กรอกอีเมล',
+    EMAIL_INVALID: 'กรุณากรอกอีเมลให้ถูกต้อง',
+    PASSWORD_REQUIRED: 'กรอกรหัสผ่าน',
+    AD_USERNAME_REQUIRED: 'กรอกชื่อผู้ใช้ AD',
+  },
+  passwordPolicy: {
+    hint: 'อย่างน้อย {min} ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข',
+  },
+} as const;

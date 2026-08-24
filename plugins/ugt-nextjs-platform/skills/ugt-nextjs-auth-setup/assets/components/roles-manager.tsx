@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: 8bd83ab1f01a
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: d6be4649d5cd
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -170,9 +170,9 @@ export function RolesManager({
         confirmLabel="ลบบทบาท"
         successMessage="ลบบทบาทแล้ว"
         action={async () => {
-          if (!deleteTarget) return { error: 'ไม่พบบทบาทที่เลือก' };
+          if (!deleteTarget) return { code: 'ROLE_NOT_FOUND' as const };
           const result = await deleteRoleAction(deleteTarget.id);
-          return result.success ? { ok: true } : { error: result.error ?? 'ลบไม่สำเร็จ' };
+          return result.success ? { ok: true } : { code: result.code };
         }}
       />
     </div>

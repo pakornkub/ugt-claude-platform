@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: 519ba0bffede
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: bae994beb84c
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { KeyRound, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { IconAction } from '@/components/ui/icon-action';
 import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -46,8 +47,8 @@ const CREATE_FORM_ID = 'create-local-user-form';
 const SET_PASSWORD_FORM_ID = 'set-user-password-form';
 
 const createUserFormSchema = z.object({
-  name: z.string().trim().min(1, 'กรอกชื่อผู้ใช้'),
-  email: z.string().trim().min(1, 'กรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
+  name: z.string().trim().min(1, 'USER_NAME_REQUIRED'),
+  email: z.string().trim().min(1, 'EMAIL_REQUIRED').email('EMAIL_INVALID'),
   password: passwordSchema,
   roleId: z.string(),
 });
@@ -57,6 +58,7 @@ export function CreateUserDialog({
   roles,
 }: Readonly<{ roles: { id: string; name: string }[] }>) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('auth.errors');
   const {
     register,
     control,
@@ -77,10 +79,13 @@ export function CreateUserDialog({
       roleId: values.roleId === NO_ROLE ? null : values.roleId,
     });
     if (!result.success) {
-      // "อีเมลนี้ถูกใช้แล้ว" เป็นความผิดของช่องอีเมลโดยตรง — ชี้ที่ช่องนั้น
-      // ที่เหลือ (สิทธิ์/ระบบ) ขึ้นเป็นแบนเนอร์
-      if (/อีเมล|email/i.test(result.error)) setError('email', { message: result.error });
-      else setError('root', { message: result.error });
+      // ชี้ที่ช่องจริงจาก field ที่ server ส่งกลับมา (จาก path ของ zod issue) —
+      // ไม่ใช่การเดาจากข้อความที่แปลแล้ว (เคย regex /อีเมล|email/i ใส่ result.error
+      // ซึ่งพังทันทีที่ข้อความเปลี่ยนภาษาหรือเปลี่ยนคำ)
+      const text = t(result.code as Parameters<typeof t>[0]);
+      if (result.field === 'email') setError('email', { message: text });
+      else if (result.field === 'name') setError('name', { message: text });
+      else setError('root', { message: text });
       return;
     }
     // รหัสผ่านตั้งต้นนี้ไม่ถูกเก็บไว้ที่ไหนอีก — แจ้งเจ้าตัวแล้วให้เปลี่ยนทันที
@@ -203,6 +208,7 @@ export function SetPasswordDialog({
   userName,
 }: Readonly<{ userId: string; userName: string }>) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('auth.errors');
   const {
     register,
     handleSubmit,
@@ -217,7 +223,7 @@ export function SetPasswordDialog({
   const onSubmit = handleSubmit(async (values) => {
     const result = await setUserPasswordAction({ userId, newPassword: values.password });
     if (!result.success) {
-      setError('root', { message: result.error });
+      setError('root', { message: t(result.code as Parameters<typeof t>[0]) });
       return;
     }
     toast.success('ตั้งรหัสผ่านใหม่แล้ว — แจ้งเจ้าตัวและให้เปลี่ยนเองทันทีที่เข้าระบบ');
