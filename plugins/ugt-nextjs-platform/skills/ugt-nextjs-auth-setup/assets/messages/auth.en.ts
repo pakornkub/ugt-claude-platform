@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 8c91ac0e3bcf
+// kit-hash: 0757046ccb32
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -184,5 +184,17 @@ export const authEn: AuthCatalog = {
     auditLogs: 'Activity Log',
     fallbackAppName: 'Administration',
     systemGroup: 'System',
+  },
+  userRoleSelect: {
+    changeFailedTitle: 'Could not change role',
+    noRole: 'No role',
+  },
+  adminUsersPage: {
+    title: 'Users',
+    description: 'SSO/AD accounts are created automatically on first sign-in — only local accounts are added manually',
+  },
+  adminAuditLogsPage: {
+    title: 'Activity Log',
+    description: 'A record of every action — there is no edit or delete button anywhere',
   },
 };

@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: f68514be63af
+// kit-hash: c621d63049ec
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -178,5 +178,17 @@ export const authTh = {
     auditLogs: 'บันทึกกิจกรรม',
     fallbackAppName: 'ผู้ดูแลระบบ',
     systemGroup: 'จัดการระบบ',
+  },
+  userRoleSelect: {
+    changeFailedTitle: 'เปลี่ยนบทบาทไม่สำเร็จ',
+    noRole: 'ไม่มีบทบาท',
+  },
+  adminUsersPage: {
+    title: 'ผู้ใช้งาน',
+    description: 'บัญชี SSO/AD เกิดเองตอนเข้าสู่ระบบครั้งแรก — เพิ่มด้วยมือเฉพาะบัญชี local',
+  },
+  adminAuditLogsPage: {
+    title: 'บันทึกกิจกรรม',
+    description: 'บันทึกการกระทำทั้งหมด — ไม่มีปุ่มแก้หรือลบที่ไหนเลย',
   },
 } as const;
