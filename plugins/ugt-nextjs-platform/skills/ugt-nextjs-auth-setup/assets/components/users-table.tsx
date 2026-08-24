@@ -1,10 +1,11 @@
 'use client';
-// kit: ugt-nextjs-platform 4.24.0 · ugt-nextjs-auth-setup/components/users-table.tsx
-// kit-hash: cac31ddd9ab6
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/users-table.tsx
+// kit-hash: be9b9046a7db
 // components/users-table.tsx — client half of /admin/users: column defs ต้องเป็น
 // client code จึงแยกจาก page ที่ทำ guard + fetch · DataTable โหมด client
 // (master data ทั้งชุด — DESIGN.md §4) · ต้องมี org UI kit จาก
 // ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
+import { useTranslations } from 'next-intl';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
@@ -34,19 +35,20 @@ export function UsersTable({
   canUpdate: boolean;
   canResetPassword: boolean;
 }>) {
+  const t = useTranslations('auth');
   const columns: ColumnDef<UserRow>[] = [
-    { accessorKey: 'name', header: 'ชื่อ' },
-    { accessorKey: 'email', header: 'อีเมล' },
+    { accessorKey: 'name', header: t('usersTable.colName') },
+    { accessorKey: 'email', header: t('usersTable.colEmail') },
     {
       accessorKey: 'authType',
-      header: 'วิธีเข้าสู่ระบบ',
+      header: t('usersTable.colAuthMethod'),
       // ป้ายบอกชนิด ไม่ใช่สถานะ — Badge เปล่าไร้สี ไม่ใช่ StatusBadge
       cell: ({ row }) => <Badge variant="outline">{row.original.authType}</Badge>,
     },
     {
       id: 'role',
-      header: 'บทบาท',
-      meta: { mobileLabel: 'บทบาท' },
+      header: t('usersTable.colRole'),
+      meta: { mobileLabel: t('usersTable.colRole') },
       cell: ({ row }) => (
         <UserRoleSelect
           userId={row.original.id}
@@ -63,8 +65,8 @@ export function UsersTable({
       ? [
           {
             id: 'actions',
-            header: 'รหัสผ่าน',
-            meta: { mobileLabel: 'รหัสผ่าน' },
+            header: t('usersTable.colPassword'),
+            meta: { mobileLabel: t('usersTable.colPassword') },
             cell: ({ row }) =>
               // บัญชี SSO/LDAP ตั้งรหัสผ่านที่ directory — ปุ่มนี้ทำอะไรให้ไม่ได้
               row.original.authType === 'local' ? (
@@ -81,7 +83,7 @@ export function UsersTable({
       columns={columns}
       data={users}
       globalSearch
-      filterPlaceholder="ค้นหาชื่อหรืออีเมล..."
+      filterPlaceholder={t('usersTable.searchPlaceholder')}
     />
   );
 }
