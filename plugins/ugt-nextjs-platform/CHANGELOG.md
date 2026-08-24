@@ -1,5 +1,41 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.48.0 (2026-08-24)
+
+**เฟส 3 (สุดท้าย) ของ i18n — mail-setup admin UI + upload-setup ทั้งสกิลอ่านจาก
+catalog แล้ว** (spec: `docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md`
+§6.2, 52 ข้อความ — 36 mail-setup + 16 upload-setup) **ปิดสเปคทั้งฉบับ**
+
+- **catalog ใหม่**: `messages/mail.th.ts`/`mail.en.ts` (namespace `errors` ·
+  `templates` · `page` · `manager`) และ `messages/upload.th.ts`/`upload.en.ts`
+  (namespace `errors` · `fileUpload`)
+- **error-code contract ขยายไปอีกสองสกิล** (มติ 2.6): `admin-mail-templates.ts`
+  เลิกคืน `{ error: 'ข้อความไทย' }` **และ** เลิกคืนอังกฤษดิบที่ฝังไว้เดิม
+  (`'Unauthorized'`/`'Forbidden'`/`'Unknown template'` — ข้อความอังกฤษที่
+  check-i18n.mjs สแกนไม่เห็นเพราะสแกนแต่อักษรไทย พบด้วยการอ่านโค้ด ไม่ใช่ด่าน)
+  · ทั้งสอง route handler ของ upload-setup (`app/api/files/route.ts`,
+  `app/api/files/[id]/route.ts`) เดิมมี `{ code, message }` อยู่แล้ว —
+  ตัด `message` (ไทย) ออก เหลือ `code` ให้ client แปล (`FILE_TOO_LARGE` ส่ง
+  `maxMb` แทนข้อความสำเร็จรูป)
+- **`lib/types/mail-templates.ts`**: `MailTemplateDefinition.menu/label/
+  description` (10 ข้อความ = UI chrome ของหน้าแอดมิน) กลายเป็น
+  `menuKey/labelKey/descriptionKey` แปลที่ Server Component
+  `page.tsx` (`getTranslations('mail.templates')`) — **เนื้ออีเมล 32 ข้อความ
+  ที่เหลือในไฟล์เดียวกัน (GREETING, EMAIL_FOOTER, heading, previewSample,
+  DEFAULT_MAIL_TEMPLATES) ไม่แตะ** (มติ 2.3, รอ locale column บน `user`) —
+  ไฟล์นี้จึงไม่อยู่ใน `check-i18n.mjs`'s `OPTIONAL_CONVERTED_FILES` โดยเจตนา
+  (จะมี Thai เหลืออยู่ถาวรจนกว่าจะทำ mission 2.3)
+- **`check-i18n.mjs`**: `OPTIONAL_CONVERTED_FILES` +6 ไฟล์ (3 mail-setup, 3
+  upload-setup) — พิสูจน์ด้วย fixture จริง: inject ไทยกลับเข้า
+  `file-upload.tsx` แล้วเห็นด่านแดงทันที, ไทยในคอมเมนต์ยังผ่านตามปกติ
+- **`SKILL.md` §i18n wiring**: ทั้ง `ugt-nextjs-mail-setup` และ
+  `ugt-nextjs-upload-setup` ได้ย่อหน้าเดียวกับที่ `ugt-nextjs-auth-setup`
+  §5.2 มี — copy catalog + ลงทะเบียนใน `i18n/messages.ts` ก่อน render
+- **ปิดสเปค `2026-08-24-org-kit-i18n-design.md` ทั้งฉบับ**: เฟส 0-3 ครบ
+  256/256 ข้อความในขอบเขต (289 - 33 เนื้ออีเมลนอกขอบเขต) — เนื้ออีเมล,
+  ปฏิทิน พ.ศ., CLI/test titles, และคอมเมนต์ 845 บรรทัด ยังอยู่นอกขอบเขตตาม
+  §8 เดิม
+
 ## 4.47.5 (2026-08-24)
 
 **ปิดสองข้อจาก `docs/backlog.md` §7 — เจอจากการเทียบกับ HRMS** ทั้งสองข้อ

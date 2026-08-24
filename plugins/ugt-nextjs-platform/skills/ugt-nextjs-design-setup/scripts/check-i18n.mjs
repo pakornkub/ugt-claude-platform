@@ -122,6 +122,18 @@ const OPTIONAL_CONVERTED_FILES = [
   'lib/actions/password.ts',
   'app/(admin)/admin/users/page.tsx',
   'app/(admin)/admin/audit-logs/page.tsx',
+  // ugt-nextjs-mail-setup (phase 3, 2026-08-24) — optional, same reason.
+  // lib/types/mail-templates.ts is intentionally NOT listed here: it holds
+  // email BODY content (GREETING, EMAIL_FOOTER, heading, previewSample,
+  // DEFAULT_MAIL_TEMPLATES) that stays Thai until a `locale` column exists
+  // on `user` (spec มติ 2.3) — adding it would make this gate permanently red.
+  'components/mail-templates-manager.tsx',
+  'app/(admin)/admin/mail-templates/page.tsx',
+  'lib/actions/admin-mail-templates.ts',
+  // ugt-nextjs-upload-setup (phase 3, 2026-08-24) — optional, same reason.
+  'components/file-upload.tsx',
+  'app/api/files/route.ts',
+  'app/api/files/[id]/route.ts',
 ];
 const CONVERTED_FILES = [...REQUIRED_CONVERTED_FILES, ...OPTIONAL_CONVERTED_FILES];
 

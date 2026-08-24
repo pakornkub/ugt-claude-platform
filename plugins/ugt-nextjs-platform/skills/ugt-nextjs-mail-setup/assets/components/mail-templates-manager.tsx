@@ -1,12 +1,13 @@
 'use client';
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-mail-setup/components/mail-templates-manager.tsx
-// kit-hash: fe3ffa859d3a
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/components/mail-templates-manager.tsx
+// kit-hash: 81a3cd4dd66a
 // components/mail-templates-manager.tsx — client editor of /admin/mail-templates:
 // รายการ template ซ้าย (จัดกลุ่มตาม workflow) · ฟอร์มแก้ subject/body ขวา ·
 // preview เปิดเป็น Sheet (panel ค้างดูคู่ฟอร์ม — บันได dialog DESIGN.md §4)
 // render โดย server action ตัวเดียวกับตอนส่งจริง · reset ผ่าน ConfirmActionDialog
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน
 import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Eye, Loader2, RotateCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -40,12 +41,14 @@ export interface MailTemplateItem {
 type Draft = { subject: string; html: string; isOverridden: boolean };
 
 export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateItem[] }>) {
+  const t = useTranslations('mail.manager');
+  const errT = useTranslations('mail.errors');
   const [selectedKey, setSelectedKey] = useState(items[0]?.key ?? '');
   // draft ต่อ template — เริ่มจากค่า active ที่ server ส่งมา แล้วแก้ใน state นี้
   // (reset รู้ค่า default จาก props จึงไม่ต้อง round-trip)
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() =>
     Object.fromEntries(
-      items.map((t) => [t.key, { subject: t.subject, html: t.html, isOverridden: t.isOverridden }])
+      items.map((item) => [item.key, { subject: item.subject, html: item.html, isOverridden: item.isOverridden }])
     )
   );
   const [resetOpen, setResetOpen] = useState(false);
@@ -53,7 +56,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const selected = items.find((t) => t.key === selectedKey);
+  const selected = items.find((item) => item.key === selectedKey);
   const draft = drafts[selectedKey];
   if (!selected || !draft) return null;
 
@@ -67,11 +70,11 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
         html: draft.html,
       });
       if (!result.success) {
-        toast.error('บันทึกไม่สำเร็จ', { description: result.error });
+        toast.error(t('saveFailedTitle'), { description: errT(result.code as Parameters<typeof errT>[0]) });
         return;
       }
       patchDraft({ isOverridden: true });
-      toast.success('บันทึกเทมเพลตแล้ว — อีเมลฉบับถัดไปใช้ข้อความนี้');
+      toast.success(t('saveSuccessMessage'));
     });
   }
 
@@ -82,7 +85,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
         html: draft.html,
       });
       if (!result.success) {
-        toast.error('สร้างตัวอย่างไม่สำเร็จ', { description: result.error });
+        toast.error(t('previewFailedTitle'), { description: errT(result.code as Parameters<typeof errT>[0]) });
         return;
       }
       setPreview({ subject: result.subject, html: result.html });
@@ -100,7 +103,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
 
   return (
     <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-      <nav aria-label="รายการเทมเพลต" className="space-y-4">
+      <nav aria-label={t('navLabel')} className="space-y-4">
         {[...groups.entries()].map(([menu, groupItems]) => (
           <div key={menu}>
             <p className="mb-1 px-3 text-xs font-medium text-muted-foreground">{menu}</p>
@@ -119,7 +122,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
                     {drafts[item.key]?.isOverridden && (
                       // ตัวระบุ "ถูกแก้จากค่าเริ่มต้น" — Badge outline ตามข้อตกลง §4
                       <Badge variant="outline" className="ml-auto shrink-0">
-                        แก้แล้ว
+                        {t('overriddenBadge')}
                       </Badge>
                     )}
                   </Button>
@@ -138,7 +141,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="mail-subject">
-              หัวข้ออีเมล<span className="text-destructive">*</span>
+              {t('subjectLabel')}<span className="text-destructive">*</span>
             </Label>
             <Input
               id="mail-subject"
@@ -149,7 +152,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
           </div>
           <div className="space-y-2">
             <Label htmlFor="mail-html">
-              เนื้อหา (HTML)<span className="text-destructive">*</span>
+              {t('bodyLabel')}<span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="mail-html"
@@ -161,7 +164,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
               spellCheck={false}
             />
             <p className="text-xs text-muted-foreground">
-              ตัวแปรที่ใช้ได้ (แทนค่าตอนส่งจริง · ค่าถูก escape เสมอ):{' '}
+              {t('variablesHint')}{' '}
               {selected.variables.map((v) => (
                 <code key={v} className="mr-1 rounded bg-muted px-1 py-0.5 font-mono">
                   {`{{${v}}}`}
@@ -178,7 +181,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
               onClick={() => setResetOpen(true)}
             >
               <RotateCcw className="mr-2 size-4" strokeWidth={2} />
-              กลับใช้ค่าเริ่มต้น
+              {t('resetButton')}
             </Button>
             <Button type="button" variant="outline" disabled={isPending} onClick={handlePreview}>
               {isPending ? (
@@ -186,10 +189,10 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
               ) : (
                 <Eye className="mr-2 size-4" strokeWidth={2} />
               )}
-              ดูตัวอย่าง
+              {t('previewButton')}
             </Button>
             <Button type="button" disabled={isPending} onClick={handleSave}>
-              บันทึก
+              {t('saveButton')}
             </Button>
           </div>
         </CardContent>
@@ -200,10 +203,10 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
       <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
         <SheetContent className="flex w-full flex-col sm:max-w-2xl">
           <SheetHeader>
-            <SheetTitle className="truncate">{preview?.subject ?? 'ตัวอย่างอีเมล'}</SheetTitle>
+            <SheetTitle className="truncate">{preview?.subject ?? t('previewLabel')}</SheetTitle>
           </SheetHeader>
           <iframe
-            title="ตัวอย่างอีเมล"
+            title={t('previewLabel')}
             sandbox=""
             srcDoc={preview?.html ?? ''}
             className="min-h-0 flex-1 w-full border-t bg-white"
@@ -214,13 +217,13 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
       <ConfirmActionDialog
         open={resetOpen}
         onOpenChange={setResetOpen}
-        title={`กลับใช้ค่าเริ่มต้น — ${selected.label}`}
-        description="ข้อความที่แก้ไว้จะถูกลบ และอีเมลฉบับถัดไปจะใช้ข้อความเริ่มต้นของระบบ"
-        confirmLabel="กลับใช้ค่าเริ่มต้น"
-        successMessage="กลับไปใช้ค่าเริ่มต้นแล้ว"
+        title={t('resetDialogTitle', { label: selected.label })}
+        description={t('resetDialogDescription')}
+        confirmLabel={t('resetButton')}
+        successMessage={t('resetDialogSuccessMessage')}
         action={async () => {
           const result = await resetMailTemplateAction(selectedKey);
-          if (!result.success) return { error: result.error };
+          if (!result.success) return { error: errT(result.code as Parameters<typeof errT>[0]) };
           patchDraft({
             subject: selected.defaultSubject,
             html: selected.defaultHtml,

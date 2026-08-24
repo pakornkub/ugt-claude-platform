@@ -105,6 +105,33 @@ as a starting point that the first real project will sharpen.
 **Placeholders**: `__PROJECT_NAME__` (in the compose snippet — bind-mount
 paths + container names). `verify.mjs` checks nothing is left.
 
+**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
+`components/file-upload.tsx` and both `app/api/files/**/route.ts` handlers
+call `useTranslations()` unconditionally since this phase, so the `upload`
+catalog **must** be registered before the widget renders:
+
+1. Copy `assets/messages/upload.th.ts` and `assets/messages/upload.en.ts` to
+   the project's `messages/` directory.
+2. Edit the project's `i18n/messages.ts`:
+
+   ```ts
+   import { uploadEn } from '@/messages/upload.en';
+   import { uploadTh } from '@/messages/upload.th';
+
+   type UploadCatalog = {
+     [Namespace in keyof typeof uploadTh]: Record<keyof (typeof uploadTh)[Namespace], string>;
+   };
+
+   export const messages: Record<AppLocale, { kit: KitCatalog; upload: UploadCatalog /* + auth, mail if installed */ }> = {
+     th: { kit: kitTh, upload: uploadTh },
+     en: { kit: kitEn, upload: uploadEn },
+   };
+   ```
+
+Skipping step 2 fails silently — `FileUpload` still builds, but every label
+renders its raw key path (`upload.fileUpload.attachButton`). `check-i18n.mjs`
+catches it (`every catalog in messages/ is registered in i18n/messages.ts`).
+
 ### 4.2 Env schema
 
 Add to `lib/env.ts` (server block):
@@ -187,3 +214,6 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] The attachment→record linking pattern is recorded in
       `docs/project-context/decisions.md` (polymorphic / FK / single column),
       not left as "whatever the skeleton did"
+- [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
+      reports 0 failed, and the attach/upload widget plus every upload/download
+      error toast shows English text after switching locale

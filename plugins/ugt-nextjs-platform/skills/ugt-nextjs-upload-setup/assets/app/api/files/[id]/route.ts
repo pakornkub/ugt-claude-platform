@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/app/api/files/[id]/route.ts
-// kit-hash: 0fa1b5f8c873
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/app/api/files/[id]/route.ts
+// kit-hash: 91fcef5d0948
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -21,18 +21,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'ต้องเข้าสู่ระบบก่อน' } },
-      { status: 401 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED' } }, { status: 401 });
   }
 
   const permissions = await getUserPermissions(session.user.id);
   if (!permissions.has(PERMISSIONS.FILES_READ)) {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'ไม่มีสิทธิ์ดาวน์โหลดไฟล์' } },
-      { status: 403 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN_DOWNLOAD' } }, { status: 403 });
   }
 
   const attachment = await prisma.attachment.findFirst({
@@ -51,17 +45,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   // 404 for both "missing" and "not yours" — a different status would confirm
   // that an id exists to someone who may not see it.
   if (!attachment || !(await canReadAttachment(session.user.id, attachment))) {
-    return NextResponse.json(
-      { success: false, error: { code: 'NOT_FOUND', message: 'ไม่พบไฟล์' } },
-      { status: 404 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'NOT_FOUND' } }, { status: 404 });
   }
 
   if (attachment.scanStatus !== 'clean') {
-    return NextResponse.json(
-      { success: false, error: { code: 'FILE_NOT_AVAILABLE', message: 'ไฟล์นี้ไม่พร้อมใช้งาน' } },
-      { status: 409 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'FILE_NOT_AVAILABLE' } }, { status: 409 });
   }
 
   const bytes = await readStoredFile(attachment.storageKey);

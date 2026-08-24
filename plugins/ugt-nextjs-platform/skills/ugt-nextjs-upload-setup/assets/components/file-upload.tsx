@@ -1,9 +1,10 @@
 'use client';
-// kit: ugt-nextjs-platform 4.44.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
-// kit-hash: 818460894311
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
+// kit-hash: 996a3ac3eade
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — ไฟล์นี้ import
 // ui/icon-action กับ lib/format (formatFileSize) ซึ่ง kit เป็นคนติดตั้ง
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Paperclip, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,8 @@ export function FileUpload({
   onChange: (next: AttachmentSummary[]) => void;
   disabled?: boolean;
 }>) {
+  const t = useTranslations('upload.fileUpload');
+  const errT = useTranslations('upload.errors');
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [busy, setBusy] = React.useState(false);
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
@@ -55,15 +58,20 @@ export function FileUpload({
       // otherwise surface as a confusing JSON parse failure.
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
-        toast.error(payload?.error?.message ?? 'อัปโหลดไม่สำเร็จ');
+        const code = payload?.error?.code as Parameters<typeof errT>[0] | undefined;
+        toast.error(
+          code
+            ? errT(code, code === 'FILE_TOO_LARGE' ? { max: payload.error.maxMb } : undefined)
+            : errT('UPLOAD_FAILED')
+        );
         return;
       }
       const payload = await response.json();
       onChange([...items, payload.data as AttachmentSummary]);
-      toast.success('อัปโหลดไฟล์แล้ว');
+      toast.success(t('uploadedSuccess'));
     } catch (error) {
       console.error('upload failed', error);
-      toast.error('อัปโหลดไม่สำเร็จ');
+      toast.error(errT('UPLOAD_FAILED'));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -90,7 +98,7 @@ export function FileUpload({
         onClick={() => inputRef.current?.click()}
       >
         <Upload strokeWidth={2} aria-hidden />
-        {busy ? 'กำลังอัปโหลด…' : 'แนบไฟล์'}
+        {busy ? t('uploading') : t('attachButton')}
       </Button>
 
       {items.length > 0 && (
@@ -110,7 +118,7 @@ export function FileUpload({
               <span className="shrink-0 text-muted-foreground">{formatFileSize(item.fileSize)}</span>
               {!disabled && (
                 <IconAction
-                  label="ลบไฟล์แนบ"
+                  label={t('removeLabel')}
                   tone="danger"
                   onClick={() => onChange(items.filter((x) => x.id !== item.id))}
                 >
