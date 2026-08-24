@@ -181,10 +181,13 @@ own steps (so installing a single skill directly also gets its rule).
 How:
 
 1. **`CLAUDE.md`** — no file → create it from the block · file exists → look for
-   the `<!-- ugt:start -->` marker: found → replace only the span between the
-   markers · not found → **append** the block. Never touch a single line of the
-   project's own content. Substitute `__PROJECT_NAME__` / `__BASE_PATH_PROD__` /
-   `__BASE_PATH_DEV__` from the interview answers.
+   the `<!-- ugt:start` marker (any version suffix): found → replace only the
+   span between the markers · not found → **append** the block. Never touch a
+   single line of the project's own content. Substitute `__PROJECT_NAME__` /
+   `__BASE_PATH_PROD__` / `__BASE_PATH_DEV__` from the interview answers and
+   `__HARNESS_VERSION__` from this plugin's current `plugin.json` version —
+   verify.mjs compares that stamp against the installed plugin and warns when
+   the block has fallen behind (paste-into-file assets have no other sync).
    > **Size check**: if the combined file exceeds ~200 lines, move project
    > content that is path-bound into `.claude/rules/<project>-*.md` instead of
    > letting CLAUDE.md bloat (longer files get followed less).

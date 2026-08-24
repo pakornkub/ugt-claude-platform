@@ -17,5 +17,13 @@ Agent tool, or Agent Teams), pass `model:` by task type:
 | Run tests / verify scripts (mechanical) | haiku |
 | Docs / light edits | haiku |
 
+- **This table wins over model advice inside any skill** — including the
+  "Model Selection" section of `superpowers:subagent-driven-development`:
+  this file enters context through the CLAUDE.md import, and CLAUDE.md-level
+  instructions take precedence over skill text.
+- superpowers role → task type: brainstorming / writing-plans research →
+  Plan · SDD implementer → Write code (or Fix a bug when the root cause is
+  known) · SDD spec reviewer + code reviewer → Review code ·
+  systematic-debugging → Diagnose · running verify/test scripts → mechanical.
 - Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Task type not listed → omit `model:` (the subagent inherits the session model).

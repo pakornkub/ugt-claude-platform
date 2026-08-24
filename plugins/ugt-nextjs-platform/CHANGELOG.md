@@ -1,5 +1,22 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.49.0 (2026-08-25)
+
+**Harness ตกรุ่นต้องมองเห็นได้** — จากเคสจริงใน HRMS: CLAUDE.md block เป็น
+v2.x (ไม่มี sizing section, ไม่มี precedence ของ model-mode, ชื่อ skill เก่า)
+โดยไม่มีด่านไหนบอก เพราะ paste-into-file asset ไม่มีกลไก sync (คู่กับ
+ugt-core 2.8.0 ฝั่ง `ugt-model-mode`)
+
+- **`assets/CLAUDE-block.md` ประทับเวอร์ชันใน marker**:
+  `<!-- ugt:start __HARNESS_VERSION__ …` — full-setup §4.1 สั่ง substitute
+  เป็นเวอร์ชัน plugin ณ ตอน install
+- **full-setup `verify.mjs` check ใหม่** "ugt block is not from an older
+  harness release": marker ไม่มีเวอร์ชัน → warn ว่าเป็น block ก่อน 4.49.0
+  ให้ re-apply · มีเวอร์ชันแต่ major.minor ตามหลัง plugin ที่ติดตั้ง → warn
+  พร้อมทางแก้ (patch ต่างกันไม่เตือน — block ไม่ได้เปลี่ยนทุก patch)
+- **`assets/state/model-mode.md`** ได้ 2 bullet เดียวกับ template ใหม่ของ
+  `ugt-model-mode` 2.8.0 (precedence เหนือ skill + superpowers role mapping)
+
 ## 4.48.1 (2026-08-25)
 
 **Fix release จาก re-score ตามเกณฑ์ skill-creator (สอง reviewer อ่านโค้ดจริง

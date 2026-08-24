@@ -36,6 +36,28 @@ check('CLAUDE.md carries the ugt block', () => {
   return { ok: true };
 });
 
+check('ugt block is not from an older harness release', () => {
+  if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
+  // The block is a paste-into-file asset — nothing syncs it after install, so
+  // the version stamped into the start marker is the only staleness signal.
+  const stamped = claudeMd.match(/<!--\s*ugt:start\s+v?(\d+\.\d+\.\d+)/)?.[1];
+  const pluginJson = join(import.meta.dirname, '..', '..', '..', '.claude-plugin', 'plugin.json');
+  const current = existsSync(pluginJson) ? JSON.parse(readFileSync(pluginJson, 'utf8')).version : null;
+  if (!stamped) {
+    return {
+      ok: 'warn',
+      msg: 'ugt:start marker carries no version — pre-4.49.0 block; re-apply assets/CLAUDE-block.md (full-setup §4.1) to pick up sizing + model-mode precedence sections',
+    };
+  }
+  if (!current) return { ok: 'warn', msg: 'cannot read the plugin version to compare against' };
+  const cmp = stamped.split('.').map(Number);
+  const cur = current.split('.').map(Number);
+  const older = cmp[0] < cur[0] || (cmp[0] === cur[0] && cmp[1] < cur[1]);
+  return older
+    ? { ok: 'warn', msg: `block written by ${stamped}, plugin is ${current} — re-apply assets/CLAUDE-block.md to pick up harness changes` }
+    : { ok: true };
+});
+
 check('CLAUDE.md within 200 lines', () => {
   if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
   const lines = claudeMd.split('\n').length;

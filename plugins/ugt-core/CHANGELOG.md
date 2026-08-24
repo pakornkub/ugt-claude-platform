@@ -1,5 +1,25 @@
 # Changelog — ugt-core
 
+## 2.8.0 (2026-08-25)
+
+**`ugt-model-mode`: บังคับ precedence เหนือ superpowers + migrate layout เก่า** —
+จากเคสจริงใน HRMS ที่ SDD เลือก model เองไม่ตามตาราง mode
+
+- **template ทั้งสอง (fixed + auto) ได้ 2 bullet ใหม่ฝังในตัวไฟล์
+  `model-mode.md` เอง**: (1) ตารางนี้ชนะคำแนะนำ model ใน skill ใดๆ รวม
+  "Model Selection" ของ `superpowers:subagent-driven-development` — เหตุผลที่
+  ย้ายมาไว้ในไฟล์ state แทนที่จะพึ่ง CLAUDE-block: ไฟล์นี้ถูก `@`-import เข้า
+  CLAUDE.md ทุก session อยู่แล้ว ประโยคจึงได้ศักดิ์ระดับ CLAUDE.md ในทุก
+  โปรเจกต์ทันทีที่รัน `/ugt-model-mode` ครั้งถัดไป โดยไม่ต้องรอ migrate
+  CLAUDE.md block (ซึ่งเป็น paste-into-file ที่ไม่มีกลไก sync) ·
+  (2) ตาราง map บทบาท superpowers → task type (implementer → Write code,
+  reviewer → Review code, systematic-debugging → Diagnose ฯลฯ) — เดิมตอน
+  dispatch ไม่มีอะไรบอกว่า role ของ SDD ตรงกับแถวไหน
+- **Legacy detection**: เจอ `.claude/state/mode.md` (ชื่อ v2.x) โดยไม่มี
+  `model-mode.md` → migrate ก่อน (เขียนไฟล์ใหม่จาก template ปัจจุบันโดยคง
+  mode เดิม, ลบไฟล์เก่า, แก้บรรทัด `@` import + `/ugt-mode` ใน CLAUDE.md)
+  แทนที่จะรายงานผิดว่า "ยังไม่ได้ตั้ง mode" — บั๊กจริงที่เจอกับ HRMS
+
 ## 2.7.0 (2026-08-21)
 
 จากผล audit ปูพรม 2026-08-21 (backlog §5 — ฝั่ง ugt-core):

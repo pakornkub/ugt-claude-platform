@@ -122,6 +122,14 @@ Agent tool, or Agent Teams), pass `model:` by task type:
 | Run tests / verify scripts (mechanical) | haiku |
 | Docs / light edits | haiku |
 
+- **This table wins over model advice inside any skill** — including the
+  "Model Selection" section of `superpowers:subagent-driven-development`:
+  this file enters context through the CLAUDE.md import, and CLAUDE.md-level
+  instructions take precedence over skill text.
+- superpowers role → task type: brainstorming / writing-plans research →
+  Plan · SDD implementer → Write code (or Fix a bug when the root cause is
+  known) · SDD spec reviewer + code reviewer → Review code ·
+  systematic-debugging → Diagnose · running verify/test scripts → mechanical.
 - Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Task type not listed → omit `model:` (the subagent inherits the session model).
 ```
@@ -150,6 +158,14 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 | Run tests / verify scripts (mechanical) | haiku |
 | Docs / light edits | haiku |
 
+- **This table wins over model advice inside any skill** — including the
+  "Model Selection" section of `superpowers:subagent-driven-development`:
+  this file enters context through the CLAUDE.md import, and CLAUDE.md-level
+  instructions take precedence over skill text.
+- superpowers role → task type: brainstorming / writing-plans research →
+  Plan · SDD implementer → Write code (or Fix a bug when the root cause is
+  known) · SDD spec reviewer + code reviewer → Review code ·
+  systematic-debugging → Diagnose · running verify/test scripts → mechanical.
 - Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Judge at dispatch time; never rewrite this file per task.
 - Task type not listed → omit `model:` (the subagent inherits the session model).
@@ -159,8 +175,24 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 
 "โหมดตอนนี้คืออะไร" / "/ugt-model-mode" with no argument → read
 `.claude/state/model-mode.md` and report the `Current mode:` line plus its table.
-File missing → say no mode is set (dispatches inherit the session model) and
+File missing → **check for the legacy name first** (below); only when neither
+file exists, say no mode is set (dispatches inherit the session model) and
 offer `/ugt-model-mode default` to create it.
+
+## Legacy v2.x layout (`mode.md`)
+
+If `.claude/state/model-mode.md` is missing but `.claude/state/mode.md`
+exists, that is the v2.x name (the skill was `/ugt-mode` then) — never report
+"no mode set" over it. Migrate before doing anything else:
+
+1. Read the old file's `Current mode:` line.
+2. Write `.claude/state/model-mode.md` wholesale from the current template
+   for that mode (this also delivers the precedence + role-mapping lines the
+   old template lacked), then delete `.claude/state/mode.md`.
+3. In the project's `CLAUDE.md`, change the import `@.claude/state/mode.md`
+   → `@.claude/state/model-mode.md`, and `/ugt-mode` → `/ugt-model-mode`
+   inside the same block if present.
+4. Tell the user what was migrated and that both files are committed.
 
 ## Quick Rules
 

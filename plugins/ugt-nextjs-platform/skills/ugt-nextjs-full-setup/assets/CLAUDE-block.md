@@ -1,5 +1,7 @@
-<!-- ugt:start — this block is owned by `ugt-nextjs-full-setup` and may be rewritten wholesale on /plugin update.
+<!-- ugt:start __HARNESS_VERSION__ — this block is owned by `ugt-nextjs-full-setup` and may be rewritten wholesale on /plugin update.
      Put project-specific content OUTSIDE the markers or it will be lost on update.
+     The version above is the ugt-nextjs-platform release that wrote this block —
+     full-setup's verify.mjs warns when it falls behind the installed plugin.
      (HTML comments are stripped before entering context, so they cost no tokens.) -->
 
 ## Stack
