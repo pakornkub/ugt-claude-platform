@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 31ad5d73f76a
+// kit-hash: ef2482980aee
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -47,6 +47,24 @@ export const authEn: AuthCatalog = {
   },
   passwordPolicy: {
     hint: 'At least {min} characters, including lowercase, uppercase, and a digit.',
+  },
+  changePassword: {
+    success: 'Password changed — other signed-in devices have been signed out',
+    title: 'Change password',
+    description: 'Once changed, all other signed-in devices will be signed out',
+    currentPasswordLabel: 'Current password',
+    newPasswordLabel: 'New password',
+    confirmPasswordLabel: 'Confirm new password',
+    cancel: 'Cancel',
+    submit: 'Change password',
+  },
+  resetPassword: {
+    success: 'Password set — please sign in again',
+    invalidLink: 'This link is invalid or incomplete. Please request a new one from the sign-in page',
+    backToLogin: 'Back to sign-in',
+    newPasswordLabel: 'New password',
+    confirmPasswordLabel: 'Confirm new password',
+    submit: 'Set new password',
   },
   login: {
     ssoConnectFailed: "Couldn't connect to SSO. Please try again.",

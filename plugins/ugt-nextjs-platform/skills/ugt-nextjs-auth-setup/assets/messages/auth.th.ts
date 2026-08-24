@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: a53ea3d05e00
+// kit-hash: 8bb3ae7163cb
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -41,6 +41,24 @@ export const authTh = {
   },
   passwordPolicy: {
     hint: 'อย่างน้อย {min} ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข',
+  },
+  changePassword: {
+    success: 'เปลี่ยนรหัสผ่านเรียบร้อย อุปกรณ์อื่นที่ค้างไว้ถูกออกจากระบบแล้ว',
+    title: 'เปลี่ยนรหัสผ่าน',
+    description: 'หลังเปลี่ยนสำเร็จ อุปกรณ์อื่นที่ยังเข้าระบบค้างไว้จะถูกออกจากระบบทั้งหมด',
+    currentPasswordLabel: 'รหัสผ่านปัจจุบัน',
+    newPasswordLabel: 'รหัสผ่านใหม่',
+    confirmPasswordLabel: 'ยืนยันรหัสผ่านใหม่',
+    cancel: 'ยกเลิก',
+    submit: 'เปลี่ยนรหัสผ่าน',
+  },
+  resetPassword: {
+    success: 'ตั้งรหัสผ่านใหม่เรียบร้อย กรุณาเข้าสู่ระบบอีกครั้ง',
+    invalidLink: 'ลิงก์นี้ไม่ถูกต้องหรือไม่สมบูรณ์ กรุณาขอลิงก์ใหม่จากหน้าเข้าสู่ระบบ',
+    backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',
+    newPasswordLabel: 'รหัสผ่านใหม่',
+    confirmPasswordLabel: 'ยืนยันรหัสผ่านใหม่',
+    submit: 'ตั้งรหัสผ่านใหม่',
   },
   login: {
     ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',
