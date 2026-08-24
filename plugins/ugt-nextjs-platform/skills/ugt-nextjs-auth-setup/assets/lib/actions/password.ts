@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/password.ts
-// kit-hash: d4bde9cc0e8d
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/lib/actions/password.ts
+// kit-hash: a4f786cad072
 'use server';
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only.
@@ -124,7 +124,7 @@ export async function forgotPasswordAction(values: {
 
 // ─── ตั้งรหัสผ่านใหม่จากลิงก์ ────────────────────────────────────────────────
 
-const resetSchema = z.object({ token: z.string().min(1), password: passwordSchema });
+const resetSchema = z.object({ token: z.string().min(1, 'INVALID_INPUT'), password: passwordSchema });
 
 /**
  * ทุก session เดิมของผู้ใช้จะถูกยกเลิกด้วย — ตั้งไว้ที่

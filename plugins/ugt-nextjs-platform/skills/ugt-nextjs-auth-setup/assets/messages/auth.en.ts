@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 0757046ccb32
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: 2200543b996e
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -88,6 +88,7 @@ export const authEn: AuthCatalog = {
     ssoConnectFailed: "Couldn't connect to SSO. Please try again.",
     ssoTitle: 'Sign in with your organization account (Single Sign-On)',
     ssoConnecting: 'Connecting...',
+    ssoSubmit: 'Sign in with SSO',
     submit: 'Sign in',
     passwordLabel: 'Password',
     emailLabel: 'Email',

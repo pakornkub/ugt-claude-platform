@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: 255da516e02b
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: 9b988ca708b1
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -73,8 +73,8 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
 // กับที่ signInEmail ใช้ตรวจตอน login
 
 const createLocalUserSchema = z.object({
-  name: z.string().min(1, 'USER_NAME_REQUIRED').max(255),
-  email: z.email('EMAIL_INVALID').max(255),
+  name: z.string().min(1, 'USER_NAME_REQUIRED').max(255, 'INVALID_INPUT'),
+  email: z.email('EMAIL_INVALID').max(255, 'INVALID_INPUT'),
   password: passwordSchema,
   roleId: z.string().nullable(),
 });
@@ -147,7 +147,7 @@ export async function createLocalUserAction(values: {
 // เปลี่ยนทันทีหลังเข้าระบบ และ audit log บันทึกว่าแอดมินคนไหนตั้งให้ใคร
 
 const setPasswordSchema = z.object({
-  userId: z.string().min(1).max(36),
+  userId: z.string().min(1, 'INVALID_INPUT').max(36, 'INVALID_INPUT'),
   newPassword: passwordSchema,
 });
 

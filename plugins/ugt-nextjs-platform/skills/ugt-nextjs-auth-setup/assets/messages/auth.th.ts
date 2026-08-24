@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: c621d63049ec
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 0593e93f97b3
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -82,6 +82,7 @@ export const authTh = {
     ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',
     ssoTitle: 'เข้าสู่ระบบด้วยบัญชีองค์กร (Single Sign-On)',
     ssoConnecting: 'กำลังเชื่อมต่อ...',
+    ssoSubmit: 'เข้าสู่ระบบด้วย SSO',
     submit: 'เข้าสู่ระบบ',
     passwordLabel: 'รหัสผ่าน',
     emailLabel: 'อีเมล',

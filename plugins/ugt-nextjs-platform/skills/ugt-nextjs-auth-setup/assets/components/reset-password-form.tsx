@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
-// kit-hash: 985604ffd93f
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
+// kit-hash: aaea566a235c
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ปลายทางของลิงก์ในอีเมล: app/(auth)/reset-password/page.tsx ส่ง token จาก
@@ -45,7 +45,12 @@ export function ResetPasswordForm({ token }: Readonly<{ token: string | undefine
     const result = await resetPasswordAction({ token: token!, password: values.password });
     if ('code' in result) {
       // ลิงก์หมดอายุ/ถูกใช้ไปแล้ว = ปัญหาของทั้งฟอร์ม ไม่ใช่ของช่องใดช่องหนึ่ง
-      setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
+      setError('root', {
+        message: tErrors(result.code as Parameters<typeof tErrors>[0], {
+          min: PASSWORD_MIN_LENGTH,
+          max: PASSWORD_MAX_LENGTH,
+        }),
+      });
       return;
     }
     toast.success(t('success'));

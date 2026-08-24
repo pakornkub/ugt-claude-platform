@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 25bff71f3907
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 296d44a46004
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -76,7 +76,7 @@ function SsoSection() {
         ) : (
           <>
             <Building2 className="size-4" />
-            {t('submit')}
+            {t('ssoSubmit')}
           </>
         )}
       </Button>

@@ -80,11 +80,11 @@ project's domain.
 ```ts
 export async function deleteUserAction(userId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
+  if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   const perms = await getUserPermissions(session.user.id);
   if (!hasPermission(perms, PERMISSIONS.USERS_DELETE)) {
-    return { success: false, error: 'Forbidden' };
+    return { success: false, code: 'FORBIDDEN' };
   }
 
   // 1. Primary operation first
@@ -102,6 +102,10 @@ export async function deleteUserAction(userId: string) {
   return { success: true };
 }
 ```
+
+`code` is a SCREAMING_SNAKE_CASE key translated client-side via the
+`auth.errors` message catalog — see `lib/actions/admin-roles.ts` for a
+worked example.
 
 ```ts
 // ❌ reversed order — logs an operation that hasn't happened (or failed)

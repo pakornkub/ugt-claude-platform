@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: 58ad4e20acd5
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: 61ea21224cca
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
@@ -89,7 +89,10 @@ export function CreateUserDialog({
       // ชี้ที่ช่องจริงจาก field ที่ server ส่งกลับมา (จาก path ของ zod issue) —
       // ไม่ใช่การเดาจากข้อความที่แปลแล้ว (เคย regex /อีเมล|email/i ใส่ result.error
       // ซึ่งพังทันทีที่ข้อความเปลี่ยนภาษาหรือเปลี่ยนคำ)
-      const text = t(result.code as Parameters<typeof t>[0]);
+      const text = t(result.code as Parameters<typeof t>[0], {
+        min: PASSWORD_MIN_LENGTH,
+        max: PASSWORD_MAX_LENGTH,
+      });
       if (result.field === 'email') setError('email', { message: text });
       else if (result.field === 'name') setError('name', { message: text });
       else setError('root', { message: text });
@@ -237,7 +240,12 @@ export function SetPasswordDialog({
   const onSubmit = handleSubmit(async (values) => {
     const result = await setUserPasswordAction({ userId, newPassword: values.password });
     if (!result.success) {
-      setError('root', { message: t(result.code as Parameters<typeof t>[0]) });
+      setError('root', {
+        message: t(result.code as Parameters<typeof t>[0], {
+          min: PASSWORD_MIN_LENGTH,
+          max: PASSWORD_MAX_LENGTH,
+        }),
+      });
       return;
     }
     toast.success(tAdmin('setPasswordSuccess'));

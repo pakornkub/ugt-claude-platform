@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/change-password-dialog.tsx
-// kit-hash: 4daaeaad6249
+// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/change-password-dialog.tsx
+// kit-hash: 5a9771efd502
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // เปิดจากเมนูโปรไฟล์ใน NavUser และแสดงเฉพาะบัญชี local เท่านั้น
@@ -68,7 +68,12 @@ export function ChangePasswordDialog({
     if ('code' in result) {
       // server ตอบได้หลายอย่าง (รหัสเดิมผิด / ไม่ใช่บัญชี local / นโยบายรหัสผ่าน)
       // จึงขึ้นเป็นแบนเนอร์รวม ไม่เดาว่าเป็นความผิดของช่องไหน
-      setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
+      setError('root', {
+        message: tErrors(result.code as Parameters<typeof tErrors>[0], {
+          min: PASSWORD_MIN_LENGTH,
+          max: PASSWORD_MAX_LENGTH,
+        }),
+      });
       return;
     }
     toast.success(t('success'));
