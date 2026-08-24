@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: d52d4cbd7d46
+// kit-hash: ad0339cc8337
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -65,6 +65,16 @@ export const authEn: AuthCatalog = {
     newPasswordLabel: 'New password',
     confirmPasswordLabel: 'Confirm new password',
     submit: 'Set new password',
+  },
+  forgotPassword: {
+    title: 'Forgot password',
+    description: "Enter your account email and we'll send a password reset link",
+    sentMessage: "If this email is registered, we've sent a password reset link",
+    sentHint: 'The link is single-use and expires in 60 minutes',
+    close: 'Close',
+    emailLabel: 'Email',
+    cancel: 'Cancel',
+    submit: 'Send link',
   },
   login: {
     ssoConnectFailed: "Couldn't connect to SSO. Please try again.",

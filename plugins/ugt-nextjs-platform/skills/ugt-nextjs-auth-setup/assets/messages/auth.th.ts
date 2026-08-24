@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 0129611df15e
+// kit-hash: 3ac1cd476eb5
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -59,6 +59,16 @@ export const authTh = {
     newPasswordLabel: 'รหัสผ่านใหม่',
     confirmPasswordLabel: 'ยืนยันรหัสผ่านใหม่',
     submit: 'ตั้งรหัสผ่านใหม่',
+  },
+  forgotPassword: {
+    title: 'ลืมรหัสผ่าน',
+    description: 'กรอกอีเมลของบัญชี ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้',
+    sentMessage: 'หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว',
+    sentHint: 'ลิงก์ใช้ได้ครั้งเดียวและหมดอายุใน 60 นาที',
+    close: 'ปิด',
+    emailLabel: 'อีเมล',
+    cancel: 'ยกเลิก',
+    submit: 'ส่งลิงก์',
   },
   login: {
     ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',

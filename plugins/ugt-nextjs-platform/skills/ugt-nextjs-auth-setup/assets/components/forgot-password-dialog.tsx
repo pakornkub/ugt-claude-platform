@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/forgot-password-dialog.tsx
-// kit-hash: 83e24d0d4921
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/forgot-password-dialog.tsx
+// kit-hash: f2de33ee7cb3
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] + ต้องมี ugt-nextjs-mail-setup
 // เป็น dialog ไม่ใช่หน้าใหม่ — flow นี้มีช่องเดียวและจบในตัว ไม่คุ้มกับอีกหนึ่ง route
@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Loader2, MailCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -25,13 +26,15 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Callout } from '@/components/ui/callout';
 import { Input } from '@/components/ui/input';
 import { forgotPasswordAction } from '@/lib/actions/password';
+import { useFieldErrorText } from '@/lib/use-field-error';
 
 const FORM_ID = 'forgot-password-form';
 
 // ช่องเดียว จึงประกาศ schema ไว้ข้างฟอร์ม — กฎรหัสผ่านที่ใช้ร่วมกันหลายหน้าอยู่ที่
-// lib/password-policy.ts ตามเดิม (ที่นี่ไม่มีรหัสผ่านให้ตรวจ)
+// lib/password-policy.ts ตามเดิม (ที่นี่ไม่มีรหัสผ่านให้ตรวจ) · โค้ด EMAIL_REQUIRED/
+// EMAIL_INVALID มาจาก auth.errors ชุดเดียวกับฟอร์ม login — ไม่สร้างคีย์ใหม่
 const forgotPasswordFormSchema = z.object({
-  email: z.string().min(1, 'กรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
+  email: z.string().min(1, 'EMAIL_REQUIRED').email('EMAIL_INVALID'),
 });
 type Values = z.infer<typeof forgotPasswordFormSchema>;
 
@@ -40,6 +43,9 @@ export function ForgotPasswordDialog({
   onOpenChange,
 }: Readonly<{ open: boolean; onOpenChange: (open: boolean) => void }>) {
   const [sent, setSent] = useState(false);
+  const t = useTranslations('auth.forgotPassword');
+  const tErrors = useTranslations('auth.errors');
+  const fieldError = useFieldErrorText();
   const {
     register,
     handleSubmit,
@@ -53,8 +59,8 @@ export function ForgotPasswordDialog({
 
   const onSubmit = handleSubmit(async (values) => {
     const result = await forgotPasswordAction({ email: values.email });
-    if ('error' in result) {
-      setError('root', { message: result.error });
+    if ('code' in result) {
+      setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       return;
     }
     // ข้อความยืนยันไม่บอกว่าอีเมลนี้มีอยู่จริงหรือไม่ — ถ้าบอก หน้านี้จะกลายเป็น
@@ -74,10 +80,8 @@ export function ForgotPasswordDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <FormDialogContent height="auto" className="sm:max-w-md">
         <FormDialogHeader>
-          <DialogTitle>ลืมรหัสผ่าน</DialogTitle>
-          <DialogDescription>
-            กรอกอีเมลของบัญชี ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้
-          </DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </FormDialogHeader>
 
         {sent ? (
@@ -85,12 +89,11 @@ export function ForgotPasswordDialog({
             <FormDialogBody>
               {/* กล่องแจ้งมาตรฐาน = Callout (DESIGN.md §6) — ไม่ทำกล่อง border เอง */}
               <Callout tone="success" icon={MailCheck}>
-                หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว
-                ลิงก์ใช้ได้ครั้งเดียวและหมดอายุใน 60 นาที
+                {t('sentMessage')} {t('sentHint')}
               </Callout>
             </FormDialogBody>
             <FormDialogFooter>
-              <Button onClick={() => handleOpenChange(false)}>ปิด</Button>
+              <Button onClick={() => handleOpenChange(false)}>{t('close')}</Button>
             </FormDialogFooter>
           </>
         ) : (
@@ -100,7 +103,7 @@ export function ForgotPasswordDialog({
                 {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
                 <Field data-invalid={!!errors.email}>
                   <FieldLabel htmlFor="forgot-email">
-                    อีเมล<span className="text-destructive">*</span>
+                    {t('emailLabel')}<span className="text-destructive">*</span>
                   </FieldLabel>
                   <Input
                     id="forgot-email"
@@ -109,17 +112,17 @@ export function ForgotPasswordDialog({
                     aria-invalid={!!errors.email}
                     {...register('email')}
                   />
-                  <FieldError errors={errors.email ? [errors.email] : undefined} />
+                  <FieldError errors={fieldError(errors.email)} />
                 </Field>
               </form>
             </FormDialogBody>
             <FormDialogFooter>
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                ยกเลิก
+                {t('cancel')}
               </Button>
               <Button type="submit" form={FORM_ID} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                ส่งลิงก์
+                {t('submit')}
               </Button>
             </FormDialogFooter>
           </>
