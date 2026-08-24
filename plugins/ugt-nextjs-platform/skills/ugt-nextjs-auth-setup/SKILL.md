@@ -343,11 +343,17 @@ mistake this section prevents.
 **Project already has a sidebar** (the normal case for existing projects):
 
 1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav.tsx`) into the
-   existing nav config — as a "จัดการระบบ" group, or wherever the project's
-   menu structure puts admin items. Keep the per-item permission filter: the
-   items carry their `perm` key, so feed the nav the result of
-   `getUserPermissions()` and hide items the user lacks, exactly as
-   `<AdminNav>` does.
+   existing nav config — as a "จัดการระบบ" (`auth.adminNav.systemGroup`) group,
+   or wherever the project's menu structure puts admin items. Keep the
+   per-item permission filter: the items carry their `perm` key, so feed the
+   nav the result of `getUserPermissions()` and hide items the user lacks,
+   exactly as `<AdminNav>` does.
+
+   Each item carries `labelKey` (e.g. `'users'`), not a resolved `label`
+   string — `t()` from next-intl's `useTranslations` only works inside a
+   component/hook body, so the exported array can't hold pre-translated
+   text. Resolve it yourself in whatever component renders the merged
+   sidebar (it already has hook context): `const t = useTranslations('auth.adminNav'); t(item.labelKey)`.
 2. In `app/(admin)/layout.tsx`, keep the guard (session →
    `syncPermissionsIfNeeded()` → permission check) but delete the shell —
    render plain `{children}` so the pages sit inside the project's own shell
