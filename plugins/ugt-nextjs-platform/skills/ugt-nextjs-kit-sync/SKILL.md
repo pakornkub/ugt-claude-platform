@@ -28,9 +28,11 @@ copy for weeks.
 
 Every **copied `.ts`/`.tsx`** asset ships with two stamp lines (baked at
 release). Paste-into-file assets (`schema-*.prisma`, `globals.tokens.css`,
-compose/Jenkinsfile snippets) are deliberately out of scope — they never exist
-in a project as a whole-file copy, so a whole-file hash means nothing there:
-token drift is design-setup's sync mode, schema drift is the migration history.
+compose/Jenkinsfile snippets, database-setup's `gitignore` — copied to
+`.gitignore` then appended to by the project) are deliberately out of scope —
+they never exist in a project as a pristine whole-file copy, so a whole-file
+hash means nothing there: token drift is design-setup's sync mode, schema
+drift is the migration history.
 
 ```ts
 // kit: ugt-nextjs-platform 4.13.0 · ugt-nextjs-design-setup/ui/data-table.tsx

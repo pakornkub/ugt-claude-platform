@@ -38,7 +38,17 @@ function sourceFiles() {
 }
 
 // ── files ──────────────────────────────────────────────────────────────────
-const REQUIRED = ['lib/email.ts', 'lib/mail-templates.ts', 'lib/types/mail-templates.ts'];
+// messages/ catalogs are REQUIRED, not optional: mail-templates-manager.tsx
+// calls useTranslations('mail') unconditionally — without the catalog the
+// admin page renders raw key paths (and only design-setup's check-i18n.mjs
+// would have caught it, a separate manual step).
+const REQUIRED = [
+  'lib/email.ts',
+  'lib/mail-templates.ts',
+  'lib/types/mail-templates.ts',
+  'messages/mail.th.ts',
+  'messages/mail.en.ts',
+];
 check('Core files present', () => {
   const missing = REQUIRED.filter((f) => !has(f));
   return missing.length ? { ok: false, msg: `Missing: ${missing.join(', ')}` } : { ok: true };

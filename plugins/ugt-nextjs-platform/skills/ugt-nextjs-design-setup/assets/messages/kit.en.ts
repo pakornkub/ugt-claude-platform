@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: eb9f6da17e16
+// kit: ugt-nextjs-platform 4.48.1 · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: a55694edf171
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -44,6 +44,14 @@ export const kitEn = {
   tiptap: {
     removeLink: 'Remove link',
     save: 'Save',
+  },
+  // Series labels for ui/chart-example.tsx (a copy-and-edit example file) —
+  // a project that copies it into a real chart moves the keys into its own
+  // feature catalog and may delete this namespace.
+  chartExample: {
+    succeeded: 'Succeeded',
+    skipped: 'Skipped',
+    failed: 'Failed',
   },
   // Deliberately identical to kit.th.ts — each language is named in its own
   // script so a reader finds their language whichever locale is active.

@@ -12,7 +12,9 @@ description: >
   need, and this skill's job is to find out. It interviews once, routes to
   ugt-nextjs-database-setup → ugt-nextjs-test-lint-setup → ugt-nextjs-design-setup →
   ugt-nextjs-auth-setup → ugt-nextjs-cicd-setup in
-  dependency order, then installs the harness files (CLAUDE.md block,
+  dependency order (plus the optional ugt-nextjs-mail-setup /
+  ugt-nextjs-upload-setup modules when the interview surfaces email or file
+  uploads), then installs the harness files (CLAUDE.md block,
   .claude/rules, .claude/state) so the standards outlive the session.
   Do NOT use when the request names exactly one area: "ต่อ database", "ทำ CI",
   "ใส่ login SSO", "ตั้ง vitest", "ทำข้อตกลง design" go straight to that single

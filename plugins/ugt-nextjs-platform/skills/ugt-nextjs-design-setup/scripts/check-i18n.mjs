@@ -99,6 +99,9 @@ const REQUIRED_CONVERTED_FILES = ['ui/data-table.tsx', 'ui/confirm-action-dialog
 // absence is a valid state, not a failure.
 const OPTIONAL_CONVERTED_FILES = [
   'ui/export-menu.tsx', 'ui/date-picker.tsx', 'ui/tiptap-editor.tsx',
+  // copy-in reference example (chart projects only) — converted in 4.48.1 so
+  // the one kit UI file this gate previously never saw is covered too.
+  'ui/chart-example.tsx',
   // ugt-nextjs-auth-setup (phase 2, 2026-08-24) — optional because a th+en
   // project may not have auth-setup installed at all.
   'components/login-form.tsx',

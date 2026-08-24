@@ -14,6 +14,11 @@ const results = [];
 const p = (...s) => join(ROOT, ...s);
 const has = (...s) => existsSync(p(...s));
 const read = (...s) => readFileSync(p(...s), 'utf8');
+// src/ layouts move app/components/lib/i18n/messages wholesale under src/ —
+// the same support check-i18n.mjs's resolveConverted() gained in 4.47.5.
+// Root-only lookups here would false-fail exactly those projects.
+const hasIn = (...s) => has(...s) || has('src', ...s);
+const readIn = (...s) => (has(...s) ? read(...s) : read('src', ...s));
 
 /** All .tsx under the app's own source dirs (skips build output and deps) */
 function sourceTsx() {
@@ -136,8 +141,8 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
 
 // ── tokens ────────────────────────────────────────────────────────────────
 check('globals.css carries the org token set', () => {
-  if (!has('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
-  const css = read('app', 'globals.css');
+  if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
+  const css = readIn('app', 'globals.css');
   const problems = [];
   if (/__PRIMARY(_DARK)?__/.test(css)) problems.push('__PRIMARY__ placeholder not substituted');
   for (const t of ['amber', 'emerald', 'red', 'coral', 'sky', 'gray']) {
@@ -149,8 +154,8 @@ check('globals.css carries the org token set', () => {
 });
 
 check('layout.tsx wires Inter + Noto Sans Thai via next/font', () => {
-  if (!has('app', 'layout.tsx')) return { ok: false, msg: 'No app/layout.tsx' };
-  const l = read('app', 'layout.tsx');
+  if (!hasIn('app', 'layout.tsx')) return { ok: false, msg: 'No app/layout.tsx' };
+  const l = readIn('app', 'layout.tsx');
   const problems = [];
   if (!/Noto_Sans_Thai/.test(l)) problems.push('Noto_Sans_Thai not imported');
   if (!/Inter/.test(l)) problems.push('Inter not imported');
@@ -160,12 +165,12 @@ check('layout.tsx wires Inter + Noto Sans Thai via next/font', () => {
 // ── kit ───────────────────────────────────────────────────────────────────
 for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-dialog', 'data-table', 'date-picker', 'empty']) {
   check(`components/ui/${f}.tsx installed`, () =>
-    has('components', 'ui', `${f}.tsx`) ? { ok: true } : { ok: false, msg: 'Kit file missing' }
+    hasIn('components', 'ui', `${f}.tsx`) ? { ok: true } : { ok: false, msg: 'Kit file missing' }
   );
 }
 
 check('lib/format.ts installed (the only formatter)', () =>
-  has('lib', 'format.ts') ? { ok: true } : { ok: false, msg: 'Central formatter missing' }
+  hasIn('lib', 'format.ts') ? { ok: true } : { ok: false, msg: 'Central formatter missing' }
 );
 
 // ── cross-page consistency ────────────────────────────────────────────────
@@ -211,8 +216,8 @@ check('--radius survived the token merge', () => {
   // Radius belongs to the preset (มติ 2026-08-09): our token file declares
   // none, so if the merge dropped the preset's `--radius` line while replacing
   // :root, nothing defines it and every card/button silently goes square.
-  if (!has('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
-  const css = read('app', 'globals.css');
+  if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
+  const css = readIn('app', 'globals.css');
   if (!/--radius\s*:/.test(css)) {
     return { ok: false, msg: 'globals.css defines no `--radius` — the preset line was lost when the :root block was replaced; restore it (base-mira ships 0.45rem)' };
   }
@@ -254,8 +259,8 @@ check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () 
 });
 
 check('scroll-thin utility is installed', () => {
-  if (!has('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
-  return /@utility\s+scroll-thin/.test(read('app', 'globals.css'))
+  if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
+  return /@utility\s+scroll-thin/.test(readIn('app', 'globals.css'))
     ? { ok: true }
     : { ok: false, msg: 'globals.css has no `@utility scroll-thin` — scrollable surfaces (sidebar, wide tables) fall back to the OS scrollbar; copy it from assets/globals.tokens.css' };
 });
@@ -355,14 +360,17 @@ check('next-intl wired end to end (plugin · request config · provider · catal
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
   if (!deps['next-intl']) {
     return {
-      ok: 'warn',
-      msg: 'next-intl is not a dependency — since 4.46.0 the whole kit reads its strings through the catalog, so it belongs in every project (มติ 2.2)',
+      // fail, not warn — SKILL/มติ 2.2: since 4.46.0 every kit component calls
+      // useTranslations() unconditionally; without next-intl the app does not
+      // boot. A warn here contradicted the doc's own severity.
+      ok: false,
+      msg: 'next-intl is not a dependency — since 4.46.0 the whole kit reads its strings through the catalog; every t() throws at render (มติ 2.2)',
     };
   }
 
   const problems = [];
 
-  if (!has('i18n', 'request.ts')) problems.push('i18n/request.ts missing — copy assets/i18n/');
+  if (!hasIn('i18n', 'request.ts')) problems.push('i18n/request.ts missing — copy assets/i18n/');
 
   // Registration lives in next.config, in whatever extension the project uses.
   const configFile = ['next.config.ts', 'next.config.mjs', 'next.config.js', 'next.config.cjs'].find((f) => has(f));
@@ -379,15 +387,15 @@ check('next-intl wired end to end (plugin · request config · provider · catal
     }
   }
 
-  if (!has('messages')) {
+  if (!hasIn('messages')) {
     problems.push('messages/ missing — copy assets/messages/ (every project, not just th+en)');
-  } else if (!readdirSync(p('messages')).some((f) => f.endsWith('.th.ts'))) {
+  } else if (!readdirSync(has('messages') ? p('messages') : p('src', 'messages')).some((f) => f.endsWith('.th.ts'))) {
     problems.push('messages/ holds no *.th.ts catalog');
   }
 
-  if (!has('app', 'layout.tsx')) {
+  if (!hasIn('app', 'layout.tsx')) {
     problems.push('No app/layout.tsx');
-  } else if (!/NextIntlClientProvider/.test(read('app', 'layout.tsx'))) {
+  } else if (!/NextIntlClientProvider/.test(readIn('app', 'layout.tsx'))) {
     problems.push('app/layout.tsx has no NextIntlClientProvider — useTranslations throws in every Client Component');
   }
 

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/chart-example.tsx
-// kit-hash: 807003e1dc41
+// kit: ugt-nextjs-platform 4.48.1 · ugt-nextjs-design-setup/ui/chart-example.tsx
+// kit-hash: 301c0d07a38f
 
 // source: ugt-hrms components/ot-auto/run-trend-chart.tsx (ตัดส่วน OT ออก) —
 // installed by ugt-nextjs-design-setup เป็น **ตัวอย่างอ้างอิง** ไม่ใช่ component
@@ -14,6 +14,7 @@
 //   ความหมายเดียวกับ StatusBadge บนตาราง — กราฟกับตารางเล่าเรื่องเดียวกันด้วยสีเดียวกัน
 // - ห้าม hardcode hex ทุกกรณี
 
+import { useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
   ChartContainer,
@@ -32,19 +33,22 @@ export interface TrendPoint {
   failed: number;
 }
 
-// label ใส่ที่ call site (โปรเจค th+en ใส่จาก next-intl) — สีคงที่ตามความหมาย
-const CHART_CONFIG = {
-  succeeded: { label: 'สำเร็จ', color: 'var(--status-emerald)' },
-  skipped: { label: 'ข้าม', color: 'var(--status-amber)' },
-  failed: { label: 'ผิดพลาด', color: 'var(--status-red)' },
-} satisfies ChartConfig;
-
 export function TrendChartExample({ data }: Readonly<{ data: TrendPoint[] }>) {
+  // label มาจาก catalog เสมอ (มติ 2.2) — ตอน copy ไปเป็นกราฟของฟีเจอร์ตัวเอง
+  // เปลี่ยน namespace เป็น catalog ของฟีเจอร์นั้น อย่า hardcode สตริงในไฟล์
+  const t = useTranslations('kit.chartExample');
+  // config ต้องอยู่ในตัว component เพราะเรียก hook — สีคงที่ตามความหมาย
+  const chartConfig = {
+    succeeded: { label: t('succeeded'), color: 'var(--status-emerald)' },
+    skipped: { label: t('skipped'), color: 'var(--status-amber)' },
+    failed: { label: t('failed'), color: 'var(--status-red)' },
+  } satisfies ChartConfig;
+
   if (data.length === 0) return null;
 
   return (
     // aspect-auto + ความสูงตายตัว — ให้การ์ดคุมความกว้าง กราฟคุมแค่ความสูง
-    <ChartContainer config={CHART_CONFIG} className="aspect-auto h-56 w-full">
+    <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full">
       <BarChart data={data} margin={{ left: -20 }}>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="tick" tickLine={false} axisLine={false} fontSize={11} />

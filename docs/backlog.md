@@ -217,6 +217,14 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
   design-setup's SKILL.md เพิ่มเช็ค Tailwind ก่อน `shadcn init` ในสาขา
   existing-project แล้วติดตั้งให้ถ้ายังไม่มี)
 
+### 10. จาก re-score ตามเกณฑ์ skill-creator (2026-08-25, หลังปิด gap หลักใน 4.48.1)
+
+- **auth-setup SKILL.md ยาว 628 บรรทัด** เกินเกณฑ์ ~500 ของ skill-creator —
+  ส่วนที่ควรย้ายคือตาราง DO/DON'T 43 แถวใน §7 ที่ซ้ำเนื้อหากับ §2 และ
+  `references/auth-flows.md` บางส่วน · เป็นงาน restructure ไม่ใช่แก้จุด
+  จึงไม่รวมใน 4.48.1 (fix release) — ทำเป็นรุ่นของตัวเองพร้อม re-run
+  trigger evals เพราะแตะโครงเอกสารที่ trigger อาศัย
+
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |

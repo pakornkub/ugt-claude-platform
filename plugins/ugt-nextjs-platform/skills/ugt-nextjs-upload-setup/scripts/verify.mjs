@@ -5,8 +5,8 @@
 //
 // Anchors at process.cwd(). A file that should exist but can't be found is a
 // FAIL, never a pass.
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
 const results = [];
@@ -24,7 +24,18 @@ function check(name, fn) {
 
 const UPLOAD = 'app/api/files/route.ts';
 const DOWNLOAD = join('app', 'api', 'files', '[id]', 'route.ts');
-const REQUIRED = ['lib/storage.ts', 'lib/virus-scan.ts', 'lib/attachment-access.ts', UPLOAD, DOWNLOAD];
+// messages/ catalogs are REQUIRED, not optional: file-upload.tsx calls
+// useTranslations('upload') unconditionally and translates the codes the
+// route handlers return — without the catalog the widget renders raw key paths.
+const REQUIRED = [
+  'lib/storage.ts',
+  'lib/virus-scan.ts',
+  'lib/attachment-access.ts',
+  'messages/upload.th.ts',
+  'messages/upload.en.ts',
+  UPLOAD,
+  DOWNLOAD,
+];
 
 check('Core files present', () => {
   const missing = REQUIRED.filter((f) => !has(f));
@@ -116,8 +127,27 @@ check('canReadAttachment is implemented, not left denying everything', () => {
 });
 
 check('Upload is a Route Handler, not a Server Action', () => {
-  const actionFiles = ['lib/actions/upload.ts', 'lib/actions/files.ts'].filter((f) => has(f));
-  const offenders = actionFiles.filter((f) => /'use server'/.test(read(f)) && /formData|File\b/.test(read(f)));
+  // Sweep every action file, not a hardcoded pair — a file-accepting Server
+  // Action under any name (or a src/ layout) has the same 1 MB bodySizeLimit
+  // trap. `formData` alone is NOT the signal (ordinary form actions use it
+  // legitimately) — the signal is the File type actually appearing in code.
+  const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const offenders = [];
+  for (const dir of ['lib/actions', 'src/lib/actions'].filter((d) => has(d))) {
+    const walk = (abs) => {
+      for (const entry of readdirSync(abs)) {
+        const full = join(abs, entry);
+        if (statSync(full).isDirectory()) walk(full);
+        else if (/\.tsx?$/.test(entry)) {
+          const body = stripComments(readFileSync(full, 'utf8'));
+          if (/'use server'/.test(body) && /\bFile\b|instanceof\s+File|\.arrayBuffer\s*\(/.test(body)) {
+            offenders.push(relative(ROOT, full).split('\\').join('/'));
+          }
+        }
+      }
+    };
+    walk(p(dir));
+  }
   return offenders.length
     ? { ok: false, msg: `${offenders.join(', ')} takes a file in a Server Action — bodySizeLimit caps it at 1 MB with an opaque error; use the Route Handler` }
     : { ok: true };

@@ -78,6 +78,7 @@ check('First-admin bootstrap page exists', () => {
     'app/(admin-setup)/admin/setup/page.tsx',
     'app/admin/setup/page.tsx',
     'src/app/(admin-setup)/admin/setup/page.tsx',
+    'src/app/admin/setup/page.tsx',
   ];
   return candidates.some((c) => has(c))
     ? { ok: true }
@@ -141,6 +142,12 @@ const PLACEHOLDERS = [
   '__AD_BASE_DN__',
   '__COMPANY_DOMAIN__',
   '__APP_HOST__',
+  // lib/directory.ts + lib/approval-chain.ts (SKILL §6 table) — the mid-file
+  // ones that survive an install that only edited the obvious env values
+  '__LINKED_SERVER__',
+  '__HR_DB__',
+  '__HR_EMPLOYEE_VIEW__',
+  '__HR_AUTHORIZE_VIEW__',
 ];
 check('No __*__ placeholders left', () => {
   const found = [];
@@ -191,8 +198,10 @@ check('[METHOD: …] markers remain only for methods actually kept', () => {
     : { ok: true };
 });
 
-// ── 3. Cookie prefix must match across 3 files ─────────────────────────────
-check('Cookie prefix consistent across all 3 files', () => {
+// ── 3. Cookie prefix env-driven in all 3 files ─────────────────────────────
+// Presence + no-hardcoded-literal only — it does NOT compare the derived
+// values across files (that would need evaluating the expressions).
+check('Cookie prefix env-driven in all 3 files (no hardcoded literal)', () => {
   const targets = ['lib/auth.ts', 'proxy.ts', 'lib/actions/auth.ts'];
   const missing = targets.filter((f) => !has(f));
   if (missing.length) return { ok: false, msg: `Missing files: ${missing.join(', ')}` };
@@ -360,8 +369,12 @@ check('Data scope is enforced where an owner id is accepted', () => {
   const suspects = [];
   for (const file of sourceFiles()) {
     const rel = relative(ROOT, file).split('\\').join('/');
-    if (!/^app\/(api|\()|^lib\/actions\//.test(rel)) continue;
-    if (rel.startsWith('lib/scope')) continue;
+    // src/ layouts and non-group app routes (app/admin/...) accept empCode
+    // exactly the same way — normalize before matching, or the scan silently
+    // checks nothing on those projects.
+    const norm = rel.replace(/^src\//, '');
+    if (!/^app\/|^lib\/actions\//.test(norm)) continue;
+    if (norm.startsWith('lib/scope')) continue;
     const body = stripComments(readFileSync(file, 'utf8'));
     const takesOwnerId = /searchParams[^\n]*empCode|params[^\n]*empCode|body[^\n]*empCode|empCode:\s*z\./.test(body);
     if (!takesOwnerId) continue;

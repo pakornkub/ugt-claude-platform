@@ -397,8 +397,9 @@ node <skill-dir>/scripts/check-contrast.mjs
 - [ ] `npm run build` passes
 - [ ] a page using Button / Input / Table renders with the new tokens, in
       light **and** dark if dark mode was selected
-- [ ] the installed UI matches `docs/design-preview.html` — that page is the
-      promise the org makes to the reader
+- [ ] the installed UI matches the platform repo's `docs/design-preview.html`
+      (open it from the marketplace checkout — the file is **not** copied into
+      the project) — that page is the promise the org makes to the reader
 - [ ] `node <skill-dir>/scripts/check-i18n.mjs` เขียว — catalog `th`/`en` มี key
       ชุดเดียวกัน และไฟล์ที่แปลงแล้วไม่มีสตริงไทยนอกคอมเมนต์
 - [ ] `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.*.ts` copy เข้าโปรเจคแล้ว

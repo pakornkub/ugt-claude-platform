@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.48.1 (2026-08-25)
+
+**Fix release จาก re-score ตามเกณฑ์ skill-creator (สอง reviewer อ่านโค้ดจริง
+ทุกไฟล์)** — ปิดช่อง verify ที่ผ่านโดยไม่เช็ค, ตัด dependency ข้ามสกิลที่ทำให้
+โปรเจค compile ไม่ผ่าน, และรองรับ `src/` layout ให้ครบทั้งชุด · ทุกข้อพิสูจน์
+ด้วย fixture ทั้งฝั่ง fail และฝั่ง pass ก่อน commit
+
+- **auth-setup `verify.mjs`**: `PLACEHOLDERS` เพิ่ม `__LINKED_SERVER__` /
+  `__HR_DB__` / `__HR_EMPLOYEE_VIEW__` / `__HR_AUTHORIZE_VIEW__` (ship อยู่ใน
+  `lib/directory.ts` + `lib/approval-chain.ts` แต่ด่านไม่เคยสแกน — install ที่
+  ลืมแทนค่าเคยผ่านเขียว) · scope-suspect scan normalize `src/` + เลิกจำกัดแค่
+  route group (`app/admin/...` ที่รับ `empCode` โดยไม่เช็ค scope เคยรอดด่าน) ·
+  first-admin candidates เพิ่ม `src/app/admin/setup/page.tsx` · เปลี่ยนชื่อ
+  check cookie-prefix เป็น "env-driven (no hardcoded literal)" ให้ตรงกับที่
+  เช็คจริง (ไม่ได้เทียบค่า derived ข้ามไฟล์)
+- **design-setup `assets/lib/actions-locale.ts` ยืนเองได้แล้ว**: ตัด
+  `import { auth } from '@/lib/auth'` + session guard ออก — action นี้แก้ได้แค่
+  locale cookie ของ browser ตัวเอง ไม่ใช่ privileged action ตามมติ 2.6 และ
+  dependency นี้ทำให้โปรเจค th+en ที่ไม่ติดตั้ง auth-setup compile ไม่ผ่านถาวร
+  (ลำดับติดตั้งเอกสารเองก็ให้ design มาก่อน auth) · แก้ตาราง provenance ใน
+  `references/conventions.md` ให้ตรง
+- **design-setup `verify.mjs` รองรับ `src/` layout** (`hasIn`/`readIn`):
+  globals.css, layout.tsx, kit files, `lib/format.ts`, `i18n/request.ts`,
+  `messages/` — เดิม false-fail ทั้ง layout ที่ `check-i18n.mjs` เพิ่งรองรับใน
+  4.47.5 (ขัดกันเองในสกิลเดียว) · next-intl หายเปลี่ยนจาก `warn` เป็น **fail**
+  ให้ตรง severity ที่ SKILL.md ประกาศเอง ("แอปไม่ขึ้นทั้งแอป")
+- **mail-setup + upload-setup `verify.mjs`**: `messages/*.{th,en}.ts` เข้า
+  REQUIRED — เดิม install ที่ข้าม catalog ผ่าน verify ของสกิลตัวเองเขียวสนิท
+  (จับได้เฉพาะเมื่อไปรัน check-i18n ของ design-setup ซึ่งเป็น manual step) ·
+  upload's "Route Handler, not Server Action" เลิก hardcode 2 path — กวาด
+  `lib/actions/**` + `src/lib/actions/**` หา `'use server'` + การใช้ `File`
+  จริง (ไม่ใช่แค่ `formData` ซึ่ง form action ปกติก็ใช้)
+- **`ui/chart-example.tsx` เข้าระบบ catalog แล้ว** (namespace ใหม่
+  `kit.chartExample` 3 key ทั้ง th/en) — เป็นไฟล์ kit UI ไฟล์เดียวที่ด่าน
+  no-Thai มองไม่เห็น · เพิ่มเข้า `OPTIONAL_CONVERTED_FILES` ของ
+  `check-i18n.mjs`
+- **เอกสารตรงกับโค้ด**: upload-setup SKILL.md เลิกอ้างว่า route handlers เรียก
+  `useTranslations()` (มีแค่ widget ที่เรียก — handlers คืน `code` ตามมติ 2.6
+  ซึ่งถูกแล้ว) · design-setup §6 ระบุชัดว่า `docs/design-preview.html` อยู่ใน
+  platform repo ไม่ได้ copy เข้าโปรเจค · full-setup frontmatter กล่าวถึง
+  mail/upload ในเส้นทาง routing · kit-sync §1 เพิ่ม `gitignore` ของ
+  database-setup เข้ารายการ paste-into-file ที่อยู่นอกขอบเขต stamp
+- **backlog §10 ใหม่**: auth-setup SKILL.md 628 บรรทัด (เกินเกณฑ์ ~500) —
+  งาน restructure §7 แยกเป็นรุ่นของตัวเอง ไม่รวมใน fix release นี้
+
 ## 4.48.0 (2026-08-24)
 
 **เฟส 3 (สุดท้าย) ของ i18n — mail-setup admin UI + upload-setup ทั้งสกิลอ่านจาก

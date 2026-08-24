@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: a501b88f6ff1
+// kit: ugt-nextjs-platform 4.48.1 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: a719a063e3c4
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -45,6 +45,13 @@ export const kitTh = {
   tiptap: {
     removeLink: 'ลบลิงก์',
     save: 'บันทึก',
+  },
+  // ป้าย series ของ ui/chart-example.tsx (ไฟล์ตัวอย่าง copy-ไป-แก้) — โปรเจค
+  // ที่ copy ไปทำกราฟจริงจะย้าย key ไป catalog ของฟีเจอร์ตัวเองแล้วลบชุดนี้ได้
+  chartExample: {
+    succeeded: 'สำเร็จ',
+    skipped: 'ข้าม',
+    failed: 'ผิดพลาด',
   },
   // ค่าสองตัวนี้ "ซ้ำ" กับ kit.en.ts โดยตั้งใจ — ห้ามแปล. ปุ่มสลับภาษาต้องเขียน
   // ชื่อแต่ละภาษาด้วยอักษรของภาษานั้นเอง คนที่อ่านไทยไม่ออกจึงจะหาปุ่มของตัวเอง

@@ -106,9 +106,10 @@ as a starting point that the first real project will sharpen.
 paths + container names). `verify.mjs` checks nothing is left.
 
 **i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
-`components/file-upload.tsx` and both `app/api/files/**/route.ts` handlers
-call `useTranslations()` unconditionally since this phase, so the `upload`
-catalog **must** be registered before the widget renders:
+`components/file-upload.tsx` calls `useTranslations()` unconditionally since
+this phase, and both `app/api/files/**/route.ts` handlers return bare `code`
+values (มติ 2.6) that the widget translates through the same catalog — so the
+`upload` catalog **must** be registered before the widget renders:
 
 1. Copy `assets/messages/upload.th.ts` and `assets/messages/upload.en.ts` to
    the project's `messages/` directory.
