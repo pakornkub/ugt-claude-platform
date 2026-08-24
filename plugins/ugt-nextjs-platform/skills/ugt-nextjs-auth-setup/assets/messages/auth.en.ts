@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: ef2482980aee
+// kit-hash: f47c0eb6eda8
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -103,5 +103,24 @@ export const authEn: AuthCatalog = {
     deleteConfirmDescription: 'Users with this role will become "unassigned" and can only access general pages until given a new role',
     deleteConfirmButton: 'Delete role',
     deleteSuccess: 'Role deleted',
+  },
+  adminUserActions: {
+    createSuccess: 'User created — tell them the initial password and have them change it right away',
+    addLocalUser: 'Add local user',
+    addUserHintSso: "SSO/AD accounts don't need to be added — they're created automatically on first sign-in",
+    addUserHintRole: 'Assign a role from the table afterward',
+    nameLabel: 'Name',
+    emailLabel: 'Email',
+    initialPasswordLabel: 'Initial password',
+    roleLabel: 'Role',
+    noRoleOption: 'Not assigned',
+    cancel: 'Cancel',
+    createSubmit: 'Create',
+    setPasswordSuccess: 'Password set — tell them to change it themselves as soon as they sign in',
+    setPasswordAction: 'Set password',
+    setPasswordTitle: 'Set new password',
+    setPasswordDescription: "{userName} — every device they're signed in on will be signed out immediately",
+    newPasswordLabel: 'New password',
+    setPasswordSubmit: 'Set password',
   },
 };
