@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 37a976eea191
+// kit-hash: 6ce84ef165c5
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -38,6 +38,14 @@ export const authTh = {
     EMAIL_INVALID: 'กรุณากรอกอีเมลให้ถูกต้อง',
     PASSWORD_REQUIRED: 'กรอกรหัสผ่าน',
     AD_USERNAME_REQUIRED: 'กรอกชื่อผู้ใช้ AD',
+  },
+  adminSetup: {
+    setupFailedTitle: 'ตั้งค่าไม่สำเร็จ',
+    title: 'ตั้งค่าผู้ดูแลระบบครั้งแรก',
+    descriptionLine1: 'กดปุ่มด้านล่างเพื่อสร้าง role ผู้ดูแลระบบ (Administrator)',
+    descriptionLine2: 'พร้อมสิทธิ์ทั้งหมด และกำหนดให้บัญชีของคุณเป็นผู้ดูแลระบบคนแรก',
+    loading: 'กำลังตั้งค่า...',
+    submit: 'เริ่มตั้งค่าผู้ดูแลระบบ',
   },
   passwordPolicy: {
     hint: 'อย่างน้อย {min} ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข',

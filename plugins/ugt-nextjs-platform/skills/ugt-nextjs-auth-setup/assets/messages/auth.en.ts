@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 23b9bd9b10a6
+// kit-hash: a055284a17ef
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -44,6 +44,14 @@ export const authEn: AuthCatalog = {
     EMAIL_INVALID: 'Please enter a valid email.',
     PASSWORD_REQUIRED: 'Please enter a password.',
     AD_USERNAME_REQUIRED: 'Please enter your AD username.',
+  },
+  adminSetup: {
+    setupFailedTitle: 'Setup failed',
+    title: 'First-time admin setup',
+    descriptionLine1: 'Click the button below to create the Administrator role',
+    descriptionLine2: 'with every permission, and make your account the first administrator',
+    loading: 'Setting up...',
+    submit: 'Start admin setup',
   },
   passwordPolicy: {
     hint: 'At least {min} characters, including lowercase, uppercase, and a digit.',
