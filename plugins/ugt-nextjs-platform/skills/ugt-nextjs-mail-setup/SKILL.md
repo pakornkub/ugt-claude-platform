@@ -103,6 +103,40 @@ Assets mirror their destination — copy the tree, then substitute:
 Placeholders: `__SMTP_HOST__` · `__SMTP_FROM__` · `__SUPPORT_CONTACT__` ·
 `__EMAIL_HEADER_COLOR__` · `__PROJECT_DISPLAY_NAME__` · `__APP_URL_PROD__`
 
+**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
+every project already has `messages/`, `i18n/request.ts` and
+`i18n/messages.ts` from design-setup. Since this phase, both converted
+mail-setup assets (`mail-templates-manager.tsx`, the `/admin/mail-templates`
+page) call `useTranslations()`/`getTranslations()` unconditionally, so the
+`mail` catalog **must** be registered before either renders:
+
+1. Copy `assets/messages/mail.th.ts` and `assets/messages/mail.en.ts` to the
+   project's `messages/` directory.
+2. Edit the project's `i18n/messages.ts` (owned by `ugt-nextjs-design-setup`
+   — its own header comment says *"A skill that adds its own catalog (auth,
+   mail, upload) registers it here"*):
+
+   ```ts
+   import { mailEn } from '@/messages/mail.en';
+   import { mailTh } from '@/messages/mail.th';
+
+   type MailCatalog = {
+     [Namespace in keyof typeof mailTh]: Record<keyof (typeof mailTh)[Namespace], string>;
+   };
+
+   export const messages: Record<AppLocale, { kit: KitCatalog; mail: MailCatalog /* + auth, upload if installed */ }> = {
+     th: { kit: kitTh, mail: mailTh },
+     en: { kit: kitEn, mail: mailEn },
+   };
+   ```
+
+Skipping step 2 fails silently, exactly as it does for `auth` (see
+`ugt-nextjs-auth-setup/SKILL.md` §5.2): the page still builds, but every
+`t()` renders its raw key path (`mail.page.title`) instead of text.
+`check-i18n.mjs`'s `every catalog in messages/ is registered in
+i18n/messages.ts` check catches this — run design-setup's `verify.mjs`
+before calling an install done.
+
 ### 4.3 Wire the env schema
 
 Add to `lib/env.ts` (server block) — all optional so a build without a relay
@@ -204,6 +238,9 @@ node <skill-dir>/scripts/verify.mjs
       not markup
 - [ ] Editing a template at `/admin/mail-templates` changes the next email;
       deleting the override falls back to the in-code default
+- [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
+      reports 0 failed, and `/admin/mail-templates` (list, editor, preview, reset)
+      shows English text after switching locale
 - [ ] Stopping the SMTP host mid-flow: the approval still succeeds and the
       failure appears in the logs
 - [ ] Links in a received email open the right page through the reverse proxy

@@ -1,11 +1,12 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-mail-setup/app/(admin)/admin/mail-templates/page.tsx
-// kit-hash: 9a1dae78478c
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/app/(admin)/admin/mail-templates/page.tsx
+// kit-hash: 68ea9bf17ed1
 // app/(admin)/admin/mail-templates/page.tsx — server guard + fetch; editor in
 // MailTemplatesManager. อยู่ใน (admin) group ของ ugt-nextjs-auth-setup จึงผ่าน
 // syncPermissionsIfNeeded ของ layout อยู่แล้ว — คีย์ MAIL_TEMPLATES_MANAGE ที่
 // เพิ่มตอนติดตั้ง (SKILL.md §4.5) เข้าฐานข้อมูลเองเมื่อเปิดหน้า admin ครั้งแรก
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -43,14 +44,18 @@ export default async function AdminMailTemplatesPage() {
     })
   );
 
+  // menuKey/labelKey/descriptionKey มาจาก definition ที่อยู่ module scope
+  // (เรียก useTranslations ไม่ได้) — resolve เป็นข้อความจริงที่นี่ ซึ่งเป็น
+  // Server Component เดียวที่มี request context ให้ getTranslations ใช้
+  const t = await getTranslations('mail');
   const items = MAIL_TEMPLATE_DEFINITIONS.map((def) => {
     const override = overrideByKey.get(mailTemplateSettingKey(def.key));
     const fallback = DEFAULT_MAIL_TEMPLATES[def.key];
     return {
       key: def.key,
-      menu: def.menu,
-      label: def.label,
-      description: def.description,
+      menu: t(`templates.${def.menuKey}` as Parameters<typeof t>[0]),
+      label: t(`templates.${def.labelKey}` as Parameters<typeof t>[0]),
+      description: t(`templates.${def.descriptionKey}` as Parameters<typeof t>[0]),
       variables: def.variables,
       subject: (override ?? fallback).subject,
       html: (override ?? fallback).html,
@@ -64,11 +69,8 @@ export default async function AdminMailTemplatesPage() {
     <div className="space-y-4">
       <PageHeader>
         <PageHeaderText>
-          <PageTitle>เทมเพลตอีเมล</PageTitle>
-          <PageDescription>
-            แก้หัวข้อและเนื้อหาอีเมลของระบบได้โดยไม่ต้อง deploy — โครงอีเมล
-            (หัว/ปุ่ม/ท้าย) ล็อกไว้ แก้ได้เฉพาะข้อความ
-          </PageDescription>
+          <PageTitle>{t('page.title')}</PageTitle>
+          <PageDescription>{t('page.description')}</PageDescription>
         </PageHeaderText>
       </PageHeader>
       <MailTemplatesManager items={items} />

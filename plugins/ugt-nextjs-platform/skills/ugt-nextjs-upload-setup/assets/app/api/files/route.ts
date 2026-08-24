@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
-// kit-hash: bb1c5ee11458
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
+// kit-hash: d2c4bfda4e4a
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
@@ -24,18 +24,12 @@ import { scanBuffer } from '@/lib/virus-scan';
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'ต้องเข้าสู่ระบบก่อน' } },
-      { status: 401 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED' } }, { status: 401 });
   }
 
   const permissions = await getUserPermissions(session.user.id);
   if (!permissions.has(PERMISSIONS.FILES_CREATE)) {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'ไม่มีสิทธิ์อัปโหลดไฟล์' } },
-      { status: 403 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN_UPLOAD' } }, { status: 403 });
   }
 
   const form = await request.formData();
@@ -44,22 +38,15 @@ export async function POST(request: Request) {
   const entityId = String(form.get('entityId') ?? '');
 
   if (!(file instanceof File) || !entityType || !entityId) {
-    return NextResponse.json(
-      { success: false, error: { code: 'BAD_REQUEST', message: 'ข้อมูลไม่ครบ' } },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST' } }, { status: 400 });
   }
 
   const maxBytes = Number(env.UPLOAD_MAX_BYTES);
   if (file.size > maxBytes) {
+    // ไม่มี message ที่นี่ — client แปล code + maxMb เอง (มติ 2.6: server คืน
+    // code เสมอ ไม่คืนข้อความสำเร็จรูป)
     return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'FILE_TOO_LARGE',
-          message: `ไฟล์ใหญ่เกิน ${Math.floor(maxBytes / 1024 / 1024)} MB`,
-        },
-      },
+      { success: false, error: { code: 'FILE_TOO_LARGE', maxMb: Math.floor(maxBytes / 1024 / 1024) } },
       { status: 413 }
     );
   }
@@ -75,26 +62,11 @@ export async function POST(request: Request) {
       action: 'file.upload.rejected',
       detail: { entityType, entityId, fileName: file.name, signature: scan.signature },
     });
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: 'FILE_INFECTED', message: 'ไฟล์นี้ตรวจพบไวรัส จึงไม่ถูกอัปโหลด' },
-      },
-      { status: 422 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'FILE_INFECTED' } }, { status: 422 });
   }
   if (scan.status === 'error') {
     console.error('virus scan unavailable', scan.message);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'SCANNER_UNAVAILABLE',
-          message: 'ระบบตรวจไวรัสไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง',
-        },
-      },
-      { status: 503 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'SCANNER_UNAVAILABLE' } }, { status: 503 });
   }
 
   const storageKey = newStorageKey();

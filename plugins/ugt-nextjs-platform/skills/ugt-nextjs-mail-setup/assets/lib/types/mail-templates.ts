@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
-// kit-hash: 4f8966fe05da
+// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
+// kit-hash: ca1ea760d015
 // source: ugt-hrms lib/types/mail-templates.ts — generalized by ugt-nextjs-mail-setup
 // (HR workflows removed; the three keys below are a working approval example —
 // rename them to your domain and add more.)
@@ -38,18 +38,19 @@ export function mailTemplateSettingKey(key: MailTemplateKey): string {
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
 
-/** Errors are CODES, not translated text — the UI translates (the server action
- *  that validates has no i18n context). */
+/** Errors are CODES, not translated text — the UI translates via the
+ *  `mail.errors` catalog namespace (the server action that validates has no
+ *  i18n context). */
 export const mailTemplateSchema = z.object({
-  subject: z.string().min(1, 'subjectRequired').max(300, 'subjectTooLong'),
-  html: z.string().min(1, 'bodyRequired').max(20000, 'bodyTooLong'),
+  subject: z.string().min(1, 'SUBJECT_REQUIRED').max(300, 'SUBJECT_TOO_LONG'),
+  html: z.string().min(1, 'BODY_REQUIRED').max(20000, 'BODY_TOO_LONG'),
 });
 
 export type MailTemplateErrorCode =
-  | 'subjectRequired'
-  | 'subjectTooLong'
-  | 'bodyRequired'
-  | 'bodyTooLong';
+  | 'SUBJECT_REQUIRED'
+  | 'SUBJECT_TOO_LONG'
+  | 'BODY_REQUIRED'
+  | 'BODY_TOO_LONG';
 
 export type MailTemplate = z.infer<typeof mailTemplateSchema>;
 
@@ -71,10 +72,13 @@ export interface MailCtaSpec {
 
 export interface MailTemplateDefinition {
   key: MailTemplateKey;
-  /** Workflow this template belongs to — groups the editor's selector. */
-  menu: string;
-  label: string;
-  description: string;
+  /** Workflow this template belongs to — groups the editor's selector.
+   *  i18n key under `mail.templates` (see messages/mail.th.ts), resolved to
+   *  display text by the Server Component page (`getTranslations`) — this
+   *  array sits at module scope so it cannot call useTranslations itself. */
+  menuKey: string;
+  labelKey: string;
+  descriptionKey: string;
   /** Allowed `{{token}}` names — drives editor hints and the preview. */
   variables: string[];
   /**
@@ -92,23 +96,21 @@ export interface MailTemplateDefinition {
   cta?: MailCtaSpec;
 }
 
-const MENU_REQUEST = 'คำขอ/อนุมัติ';
-
 export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
   {
     key: 'request.submitted',
-    menu: MENU_REQUEST,
-    label: 'แจ้งผู้อนุมัติ: มีคำขอใหม่',
-    description: 'ส่งถึงผู้อนุมัติเมื่อมีคำขอใหม่เข้ามา',
+    menuKey: 'menuRequest',
+    labelKey: 'requestSubmittedLabel',
+    descriptionKey: 'requestSubmittedDescription',
     heading: 'คำขอรออนุมัติ',
     variables: ['appName', 'recipientName', 'requesterName', 'itemName', 'detailUrl'],
     cta: { label: 'ดูรายการรออนุมัติ →', urlToken: 'detailUrl' },
   },
   {
     key: 'request.approved',
-    menu: MENU_REQUEST,
-    label: 'แจ้งผู้ขอ: คำขอได้รับอนุมัติ',
-    description: 'ส่งกลับถึงผู้ยื่นคำขอเมื่อได้รับอนุมัติ',
+    menuKey: 'menuRequest',
+    labelKey: 'requestApprovedLabel',
+    descriptionKey: 'requestApprovedDescription',
     heading: 'ผลการพิจารณาคำขอ',
     variables: ['appName', 'recipientName', 'itemName', 'status', 'detailUrl'],
     previewSample: { status: 'อนุมัติแล้ว' },
@@ -117,9 +119,9 @@ export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
   },
   {
     key: 'request.rejected',
-    menu: MENU_REQUEST,
-    label: 'แจ้งผู้ขอ: คำขอถูกปฏิเสธ',
-    description: 'ส่งกลับถึงผู้ยื่นคำขอเมื่อถูกปฏิเสธ',
+    menuKey: 'menuRequest',
+    labelKey: 'requestRejectedLabel',
+    descriptionKey: 'requestRejectedDescription',
     heading: 'ผลการพิจารณาคำขอ',
     variables: ['appName', 'recipientName', 'itemName', 'status', 'rejectReason', 'detailUrl'],
     previewSample: { status: 'ไม่อนุมัติ', rejectReason: 'ข้อมูลไม่ครบถ้วน' },
@@ -128,17 +130,19 @@ export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
   },
   {
     key: 'auth.password-reset',
-    menu: 'บัญชีผู้ใช้',
-    label: 'ลิงก์ตั้งรหัสผ่านใหม่',
-    description:
-      'ส่งเมื่อผู้ใช้กด "ลืมรหัสผ่าน" · ลิงก์ใช้ได้ครั้งเดียวและหมดอายุตาม resetPasswordTokenExpiresIn ใน lib/auth.ts',
+    menuKey: 'menuAccount',
+    labelKey: 'passwordResetLabel',
+    descriptionKey: 'passwordResetDescription',
     heading: 'ตั้งรหัสผ่านใหม่',
     variables: ['appName', 'recipientName', 'resetUrl', 'expiresInMinutes'],
     previewSample: { resetUrl: '__APP_URL_PROD__/reset-password?token=…', expiresInMinutes: '60' },
     cta: { label: 'ตั้งรหัสผ่านใหม่ →', urlToken: 'resetUrl' },
   },
   // EXTENSION POINT: add this project's templates here, then add the matching
-  // key to MAIL_TEMPLATE_KEYS and a default to DEFAULT_MAIL_TEMPLATES.
+  // key to MAIL_TEMPLATE_KEYS, a default to DEFAULT_MAIL_TEMPLATES, and the
+  // matching menuKey/labelKey/descriptionKey entries to
+  // messages/mail.{th,en}.ts's `templates` namespace (looked up dynamically,
+  // so check-i18n's key-parity check won't catch a missing one for you).
 ];
 
 export const MAIL_TEMPLATE_DEFINITION_BY_KEY: Record<MailTemplateKey, MailTemplateDefinition> =
