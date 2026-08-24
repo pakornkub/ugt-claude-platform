@@ -172,6 +172,44 @@ bump version **ก่อน** task ที่แตะ asset ไม่ใช่�
 ให้ `stamp-kit-assets.mjs --check` เตือนเมื่อพบ asset ที่ `git diff` บอกว่า
 เปลี่ยนใน commit range ของรุ่นนี้ แต่ตรายังเป็นเวอร์ชันก่อนหน้า
 
+### 9. จาก eval รันจริงของ `ugt-nextjs-auth-setup` (2026-08-24) — พบ 4 บั๊กที่มีมาก่อนเฟส i18n
+
+รัน eval 1 (`sso-plus-ldap-drop-local`) จริงผ่าน subagent บน scaffold ที่จำลอง
+output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 3 ข้อ**ปิดแล้ว**
+ในรอบนี้ ข้อ 4 ยังเปิดอยู่โดยตั้งใจ (แก้แบบ stopgap ไปแล้ว รอ research จริง):
+
+- ~~`verify.mjs`'s "[METHOD: …] markers removed" false-positive ทุกการติดตั้ง
+  แบบหลาย method~~ → 4.47.2 (ตรวจสอบ selected methods จาก evidence จริงในไฟล์
+  แทนการนับ marker ดิบ — SKILL.md §5.2 เองก็บอกว่ามาร์กเกอร์ของ method ที่เก็บไว้
+  "อยู่ต่อได้" ไม่ใช่ของค้าง)
+- ~~SKILL.md §6 บอกผิดว่า placeholder checker "อ่านเฉพาะ .ts/.tsx/.prisma"~~ →
+  4.47.2 (`verify.mjs` สแกน `.env.local`/`.env.example`/`.env` ด้วยจริง — พิสูจน์
+  ด้วยการใส่ token กลับเข้า `.env.example` แล้วเห็น FAIL)
+- ~~`better-auth` ไม่ pin version ใน §5.1~~ → 4.47.2 stopgap: pin `1.6.14`
+  (bisect npm package จริงยืนยันแล้วว่า `genericOAuthClient` หายจาก
+  `better-auth/client/plugins` ตั้งแต่ `1.7.0` — **ไม่ใช่ major bump ด้วยซ้ำ**
+  มีอยู่ถึง `1.6.14` หายใน `1.7.0` — `npm i better-auth` แบบไม่ pin ที่ทำมา
+  ตลอดพังปุ่ม SSO ทันทีสำหรับการติดตั้งใหม่ทุกครั้งตั้งแต่วันนี้)
+- **ยังเปิด — ต้อง research จริง ไม่ใช่เดา:** better-auth 1.7.x เอา
+  `genericOAuthClient` ออกแล้วมี API แทนไหม (`oauthPopupClient` ที่ยังอยู่ใน
+  1.7.1 หน้าตาต่างกันมาก — popup-based ไม่ใช่ redirect-based) — ต้องอ่าน
+  better-auth changelog/migration guide จริงก่อนตัดสินใจว่าจะ migrate หรือค้าง
+  pin `1.6.14` ต่อไป · การ pin ตอนนี้เป็นแค่ทางออกฉุกเฉินให้ install ไม่พัง
+  ไม่ใช่คำตอบระยะยาว
+- **ไม่ใช่บั๊กของ auth-setup แต่กระทบการ verify แบบ end-to-end**:
+  `prisma.config.ts` (จาก `ugt-nextjs-database-setup`) เขียนคอมเมนต์ไว้ว่า
+  "schema.prisma must NOT contain a url field — Prisma 7 + driver adapter"
+  แต่ `package.json` ตัวอย่าง pin `prisma: "^6.0.0"` — Prisma 6.19.3 ไม่อ่าน
+  `datasource.url` จาก `prisma.config.ts` โยน `P1012` ทันที บล็อก
+  `prisma generate` และทุกอย่างที่ต่อจากนั้น (`next build` เจอ implicit-any
+  error เพราะ Prisma types ไม่เคย generate) — ของ database-setup skill
+  เจอผ่านการ eval ของ auth-setup ไม่ใช่ตั้งใจทดสอบ ต้องส่งต่อให้เจ้าของ skill
+  นั้นดู
+- **scaffold ของ database-setup ไม่มี Tailwind/`.gitignore` เลย** — ทำให้
+  `npx shadcn@latest init` พังจนกว่าจะติดตั้ง `tailwindcss` เองก่อน และ
+  auth-setup's verify.mjs's ".env.local not committed" check FAIL จนกว่าจะสร้าง
+  `.gitignore` เอง — ไม่มีเอกสารที่ไหนบอกว่าเป็นความรับผิดชอบของใคร
+
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |

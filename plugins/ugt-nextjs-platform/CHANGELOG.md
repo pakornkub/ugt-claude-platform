@@ -1,5 +1,36 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.2 (2026-08-24)
+
+**พบด้วยการรัน eval จริง ไม่ใช่อ่านโค้ด** — รัน `ugt-nextjs-auth-setup`'s
+eval 1 (`sso-plus-ldap-drop-local`) ผ่าน subagent จริงบน scaffold ที่จำลอง
+output ของ `ugt-nextjs-database-setup` เจอ 3 บั๊กที่**มีมาก่อนเฟส i18n** และ
+ไม่เคยถูกจับได้เพราะไม่เคยมีใครรัน install เต็มแล้วเช็คผลจริง
+
+- **`verify.mjs`'s "[METHOD: …] markers removed" ให้ FAIL ทุกการติดตั้งที่เก็บ
+  มากกว่า 1 login method** (เช่น SSO+LDAP ที่ทดสอบ) — เช็คเดิมนับ marker ดิบ
+  ทุกตัวโดยไม่แยกว่าเป็น marker ของ method ที่**เก็บไว้** (ซึ่ง SKILL.md §5.2
+  บอกเองว่าเป็น section header ที่ถูกต้อง ไม่ใช่ของค้าง) กับ method ที่**ถูก
+  ปฏิเสธ** (ของค้างจริง) — แก้ให้ตรวจ evidence จริงในไฟล์ (`lib/ldap.ts` มีไหม,
+  `localLoginAction` มีไหม, `keycloak(` มีไหม) แล้ว flag เฉพาะ marker ของ
+  method ที่ไม่มี evidence ว่าถูกเลือก
+- **SKILL.md §6 เขียนผิดว่า placeholder checker "อ่านเฉพาะ .ts/.tsx/.prisma"**
+  — `verify.mjs` สแกน `.env.local`/`.env.example`/`.env` ด้วยจริง พิสูจน์ด้วย
+  การใส่ `__KEYCLOAK_HOST__` กลับเข้า `.env.example` แล้วเห็น verify FAIL ทันที
+- **`better-auth` ไม่เคย pin version ที่ §5.1 — พังปุ่ม SSO ทันทีตั้งแต่วันนี้
+  สำหรับการติดตั้งใหม่ทุกครั้ง** — bisect npm package จริงยืนยันแล้วว่า
+  `genericOAuthClient` ที่ `lib/auth-client.ts` import เพื่อผูก
+  `authClient.signIn.oauth2(...)` มีอยู่ถึง `better-auth@1.6.14` แล้วหายไปใน
+  `1.7.0` — **ไม่ใช่ major bump ด้วยซ้ำ** unpinned `npm i better-auth` ที่ทำมา
+  ตลอดได้ 1.7.x ทันที · แก้แบบ stopgap: pin `1.6.14` — 1.7.x's ตัวแทนจริง
+  (ถ้ามี) ยังไม่ได้ research ดู `docs/backlog.md` ข้อ 9
+
+**คงค้างจาก eval เดียวกัน แต่ไม่ใช่ของ auth-setup**: `prisma.config.ts` ของ
+`ugt-nextjs-database-setup` ขัดกับ `prisma: "^6.0.0"` ที่ pin ไว้เอง
+(`P1012`, บล็อก `prisma generate` และทุกอย่างต่อจากนั้น) และ scaffold ของ
+skill นั้นไม่มี Tailwind/`.gitignore` เลย — ส่งต่อให้เจ้าของ skill ดู บันทึกไว้ที่
+`docs/backlog.md` ข้อ 9 เช่นกัน
+
 ## 4.47.1 (2026-08-24)
 
 **ปิดช่องที่ทำให้ catalog ถูก copy แล้วไม่ถูกใช้ — เงียบ ๆ** (พบตอน review

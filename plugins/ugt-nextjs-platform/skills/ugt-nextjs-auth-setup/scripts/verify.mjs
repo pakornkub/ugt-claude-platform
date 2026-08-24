@@ -157,15 +157,37 @@ check('No __*__ placeholders left', () => {
   return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
 });
 
-check('All [METHOD: …] markers removed', () => {
+// SKILL.md §5.2 only ever says to delete sections for methods NOT selected —
+// a `[METHOD: SSO]` marker labeling a section that WAS kept is not leftover,
+// it's the section header, and stays forever. So "zero markers anywhere" was
+// never the real invariant; "zero markers for a method nothing else in the
+// project evidences as selected" is. Detect selection from evidence already
+// required elsewhere in this file (LDAP needs lib/ldap.ts, LOCAL needs
+// localLoginAction, SSO needs the keycloak() plugin) rather than from a
+// config file that doesn't exist.
+function selectedMethods() {
+  const selected = new Set();
+  if (has('lib/ldap.ts')) selected.add('LDAP');
+  if (has('lib/actions/auth.ts') && /localLoginAction/.test(read('lib/actions/auth.ts'))) selected.add('LOCAL');
+  if (has('lib/auth.ts') && /\bkeycloak\(/.test(read('lib/auth.ts'))) selected.add('SSO');
+  return selected;
+}
+
+check('[METHOD: …] markers remain only for methods actually kept', () => {
+  const selected = selectedMethods();
   const found = [];
   for (const file of sourceFiles()) {
     const body = readFileSync(file, 'utf8');
-    const hits = [...new Set([...body.matchAll(/\[METHOD:\s*[^\]]+\]/g)].map((m) => m[0]))];
-    if (hits.length) found.push(`${relative(ROOT, file)}: ${hits.join(', ')}`);
+    // A marker can tag more than one method with `|` (e.g. `[METHOD: LDAP|LOCAL]`
+    // on an import both form methods share) — that section is legitimate as
+    // long as AT LEAST ONE tagged method survived, so only flag a marker whose
+    // ENTIRE tag list is unselected.
+    const tags = [...new Set([...body.matchAll(/\[METHOD:\s*([^\]]+)\]/g)].map((m) => m[1]))];
+    const orphaned = tags.filter((tag) => tag.split('|').map((m) => m.trim()).every((m) => !selected.has(m)));
+    if (orphaned.length) found.push(`${relative(ROOT, file)}: ${orphaned.map((o) => `[METHOD: ${o}]`).join(', ')}`);
   }
   return found.length
-    ? { ok: false, msg: `Markers remain (sections for unselected methods were not cut): ${found.join(' · ')}` }
+    ? { ok: false, msg: `Sections for declined methods were not cut: ${found.join(' · ')}` }
     : { ok: true };
 });
 

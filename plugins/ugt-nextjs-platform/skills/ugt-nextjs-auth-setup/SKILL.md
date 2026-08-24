@@ -166,26 +166,55 @@ Ask all of these **in a single message** before doing anything:
 `lib/prisma.ts` singleton + working migrate), because Better Auth stores
 user/session/account in Prisma. If it isn't, stop and do the database first.
 
-**The org UI kit must be installed too** — the three admin pages render with
-the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
+**The org UI kit must be installed too, for two separate reasons — the
+DataTable one is narrow, the i18n one is not.** The three admin pages render
+with the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
 `lib/table-query.ts` and `lib/format.ts`, all installed by
 `ugt-nextjs-design-setup` (the full-setup order design → auth guarantees this).
 Table modes follow DESIGN.md §4 and are fixed per table, not asked in the
 interview: `/admin/users` and `/admin/roles` are **client mode** (bounded
 master data fetched whole), `/admin/audit-logs` is **server mode** (unbounded —
 sort + filter + paginate all through URL state; the page parses searchParams
-and queries Prisma directly, no separate API route). If auth is being installed
-standalone into a project that will not take the design kit: run design-setup
-first (preferred), or downgrade the three admin pages to plain shadcn `Table` —
-say that out loud and record it as a DESIGN.md deviation, because "DataTable
-only for tabular data" is the org default.
+and queries Prisma directly, no separate API route).
+
+Separately — and this covers far more of the skill than the three DataTable
+pages — every converted asset calls `useTranslations()` unconditionally
+(`login-form.tsx`, both password dialogs, `nav-user.tsx`, `admin-nav.tsx`,
+`users-table.tsx`, `roles-manager.tsx`, `role-form.tsx`,
+`admin-setup-form.tsx`, and the rest of §5.2's i18n wiring list), so it needs
+next-intl's provider chain (`i18n/request.ts`, `NextIntlClientProvider`, the
+plugin registered in `next.config.ts`) whether or not a single one of those
+files touches `DataTable`.
+
+If auth is being installed standalone into a project that will not take the
+design kit: **run design-setup first — this is the only path that actually
+works**, because downgrading away from `DataTable` (the narrow escape hatch
+below) does nothing about the i18n dependency; it only silences the DataTable
+half of the problem while every login/admin/password screen still throws or
+renders raw key paths without the provider. Downgrading the three admin pages
+to plain shadcn `Table` is a real, narrower option only for a project that
+also hand-rolls the next-intl scaffolding itself (or genuinely wants no i18n
+at all, which means deleting `useTranslations()`/`getTranslations()` calls
+from every converted file, not just the three table pages) — say whichever
+path was taken out loud and record it as a DESIGN.md deviation, because
+"DataTable only for tabular data" is the org default.
 
 ## 5. Setup steps
 
 ### 5.1 Dependencies
 
 ```bash
-npm i better-auth zod
+# Pin exactly — do NOT drop the version. better-auth 1.7.0 deleted
+# genericOAuthClient from better-auth/client/plugins (confirmed by bisecting
+# real npm packages: present through 1.6.14, gone in 1.7.0 — not even a major
+# bump, so a caret range like ^1.6.0 still floats into the broken 1.7.x line).
+# lib/auth-client.ts imports it to wire authClient.signIn.oauth2(...), which
+# login-form.tsx's SsoSection button calls — an unpinned `npm i better-auth`
+# installs 1.7.x today and the SSO button fails to build, for [METHOD: SSO]
+# which is the org's default login method. Bump this pin only after checking
+# 1.7.x's actual client API for a replacement — that hasn't been researched
+# yet, it's tracked in docs/backlog.md.
+npm i better-auth@1.6.14 zod
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)
@@ -447,8 +476,11 @@ does nothing — always do both ends or neither.
 > คอมเมนต์กับโค้ด มันจะฟ้อง ✘ ใส่ไฟล์ที่ถูกอยู่แล้ว แล้วคนติดตั้งจะไปแก้ของที่
 > ไม่ได้เสีย · คอมเมนต์ที่ต้องยกตัวอย่าง basePath ให้ใช้ค่าจริงสมมติ เช่น
 > `expense-portal` (แก้ไป 3 ไฟล์แล้วใน 4.41.0: `lib/auth-client.ts` ·
-> `lib/auth.ts` · `proxy.ts`) · `env.example` ยังใช้ token ได้ตามเดิม เพราะ
-> ตัวตรวจอ่านเฉพาะ `.ts` / `.tsx` / `.prisma`
+> `lib/auth.ts` · `proxy.ts`) · **`env.example`/`.env.local`/`.env` ต้องแทน
+> token ด้วยค่าจริงเหมือนกัน** — ตัวตรวจ (`scripts/verify.mjs` §"No `__*__`
+> placeholders left") สแกนทั้งสามไฟล์นี้ด้วย ไม่ได้จำกัดแค่ `.ts` / `.tsx` /
+> `.prisma` ตามที่เอกสารรุ่นก่อนเคยเขียนผิดไว้ (พบตอน eval รันจริงแล้ว
+> `.env.example` ที่ยังมี `__KEYCLOAK_HOST__` ทำให้ verify.mjs FAIL)
 
 ## 7. Quick Rules — DO / DON'T
 
