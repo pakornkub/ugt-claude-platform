@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 6ce84ef165c5
+// kit-hash: 23e73c790c74
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -163,5 +163,13 @@ export const authTh = {
     colRole: 'บทบาท',
     colPassword: 'รหัสผ่าน',
     searchPlaceholder: 'ค้นหาชื่อหรืออีเมล...',
+  },
+  navUser: {
+    myAccount: 'บัญชีผู้ใช้',
+    changePassword: 'เปลี่ยนรหัสผ่าน',
+    signOut: 'ออกจากระบบ',
+    myInfoTitle: 'ข้อมูลของฉัน',
+    emailLabel: 'อีเมล',
+    lastLoginMethodLabel: 'วิธี Login ล่าสุด',
   },
 } as const;
