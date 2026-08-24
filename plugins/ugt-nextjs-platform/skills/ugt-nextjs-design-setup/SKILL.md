@@ -259,11 +259,16 @@ different size — is the field bug this step exists to prevent.
    Then the kit's npm deps — **pin majors, the kit is version-coupled**:
    `npm i @tanstack/react-table@^8 @tanstack/react-query@^5
    @tanstack/react-query-devtools@^5 nprogress date-fns@^4 react-hook-form
-   @hookform/resolvers
-   zod lucide-react` (v9 of tanstack-table renames the v8 API the kit uses;
-   `add` doesn't always install lucide-react itself) · `next-themes` when dark
-   mode = มี · `@base-ui/react` (the base-mira primitives package — init installs it, verify it's there; combobox in the
-   registry uses it) · `next-intl` เสมอทุกโปรเจค (มติ 2.2 — kit อ่านสตริงผ่าน
+   @hookform/resolvers zod lucide-react next-intl@^4` (v9 of tanstack-table
+   renames the v8 API the kit uses; `add` doesn't always install lucide-react
+   itself; `next-intl@^4` because the kit calls `getRequestConfig`,
+   `NextIntlClientProvider`, `useTranslations`, `getTranslations` and
+   `createNextIntlPlugin` directly — an unpinned install lets a future major
+   change any of those out from under every project, the same class of break
+   that hit `better-auth` unpinned, ดู `docs/backlog.md` §9) · `next-themes`
+   when dark mode = มี · `@base-ui/react` (the base-mira primitives package —
+   init installs it, verify it's there; combobox in the registry uses it) ·
+   `next-intl@^4` เสมอทุกโปรเจค (มติ 2.2 — kit อ่านสตริงผ่าน
    catalog) · `exceljs` only when
    the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
    skip both files otherwise; route shape and traps in
@@ -285,8 +290,8 @@ different size — is the field bug this step exists to prevent.
    `references/conventions.md` §Kit). `assets/i18n/` → `i18n/` และ
    `assets/messages/` → `messages/` (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en** — kit
    ทั้งชุดอ่านสตริงผ่าน catalog ตั้งแต่ 4.46.0 โปรเจคไทยล้วนได้ catalog
-   ภาษาเดียวและไม่ต้องแปลอะไร มติ 2.2) · ตั้ง `next-intl` เป็น dependency
-   เสมอ ไม่ใช่เฉพาะ th+en. **theme-provider: the preset scaffold
+   ภาษาเดียวและไม่ต้องแปลอะไร มติ 2.2) · ตั้ง `next-intl@^4` เป็น dependency
+   เสมอ ไม่ใช่เฉพาะ th+en (pin เดียวกับ npm i ใน Step 4). **theme-provider: the preset scaffold
    already ships `components/theme-provider.tsx` (a superset of our asset)
    — keep the registry's file; the asset is only a fallback for projects
    that somehow lack it.** Apply `assets/ui/button-variants.md` to the
