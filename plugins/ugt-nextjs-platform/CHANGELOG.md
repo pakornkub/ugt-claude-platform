@@ -1,5 +1,39 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.1 (2026-08-24)
+
+**ปิดช่องที่ทำให้ catalog ถูก copy แล้วไม่ถูกใช้ — เงียบ ๆ** (พบตอน review
+เฟส 2 ด้วย fixture ไม่ใช่การอ่านโค้ด)
+
+- **ด่านใหม่ใน `check-i18n.mjs`: `every catalog in messages/ is registered in
+  i18n/messages.ts`** — เดิมโปรเจคที่ copy `messages/auth.{th,en}.ts` ครบแต่
+  ลืมแก้ `i18n/messages.ts` ได้ `2 passed · 0 failed` exit 0 ทั้ง
+  `check-i18n.mjs` และ `verify.mjs` (ตัวหลังเช็คว่า `messages/` **มีไฟล์**
+  ไม่ได้เช็คว่า **ถูก wire**) แต่ตอน render ทุกหน้าโชว์ `auth.login.submit`
+  ดิบ เพราะ `i18n/request.ts` ไม่ตั้ง `getMessageFallback` → next-intl ใช้ค่า
+  default ที่ **คืน key path** ไม่ throw · เป็น failure class เดียวกับ 4.46.0
+  (ลงทะเบียน plugin ไม่ครบ = รุ่นเป็นโมฆะ) แค่ลึกลงไปอีกชั้น — comment ใน
+  `verify.mjs` เขียนบทเรียนนั้นไว้เองว่า "Four pieces, all load-bearing" แต่
+  ชิ้นที่ห้านี้ไม่มีใครนับ
+  - ด่านอ่าน **เฉพาะ object literal ของ `messages`** ไม่ใช่ทั้งไฟล์ — header
+    comment ที่ ship มาเอ่ยชื่อ `auth, mail, upload` เป็นตัวอย่างอยู่แล้ว
+    grep ทั้งไฟล์จะรายงานว่าลงทะเบียนครบทุก namespace แล้วผ่านบนต้นไม้ที่
+    ด่านนี้มีไว้จับพอดี
+  - `messages/app.*.ts` (namespace ของโปรเจคเอง) ได้รับการยกเว้น ไม่บังคับลงทะเบียน
+  - **ครอบเฟส 3 (mail + upload) ให้ล่วงหน้า** เพราะใช้ pattern registration เดียวกัน
+  - ⚠️ โปรเจคที่ติดตั้ง 4.46.x/4.47.0 ไว้แล้วและไม่เคยลงทะเบียน จะเห็น
+    `verify.mjs` แดงขึ้นมาหลังอัปเดต — นั่นคือด่านทำงานถูก ไม่ใช่ regression
+- **`SKILL.md` §5.2 เขียนพฤติกรรมความพังใหม่ให้ตรงความจริง** — เดิมบอกว่า
+  `t()` *"throws at render time"* ซึ่งทำให้ขั้นตอนนี้อ่านเหมือนมีอะไรบังคับอยู่
+  ของจริงคือ render key path ออกจอเงียบ ๆ error อยู่แค่ใน server console
+- **`login.adUsernameLabel`** — ป้าย `Username (AD)` ใน `login-form.tsx` เป็น
+  อังกฤษฮาร์ดโค้ดมาตลอด นั่งติดกับ `{t('passwordLabel')}` ที่แปลแล้ว โหมดไทย
+  จึงได้ฟอร์มครึ่งอังกฤษครึ่งไทย · ไม่ใช่ regression ของเฟส 2 แต่เผยข้อจำกัด
+  เชิงโครงสร้าง: `check-i18n.mjs` สแกน**อักษรไทย** สตริงที่เป็นอังกฤษอยู่แล้ว
+  จึงมองไม่เห็นโดยธรรมชาติ — และ inventory ของเฟสนี้ก็นับจากอักษรไทย ทำให้
+  หลุดทั้ง inventory → แผน → ด่าน · สแกนสองวิธีแล้วเจอตัวนี้ตัวเดียว
+- CHANGELOG 4.47.0 นับไฟล์ที่แปลงเป็น "19" ทั้งที่รายการจริงคือ 21 — แก้แล้ว
+
 ## 4.47.0 (2026-08-24)
 
 **เฟส 2 ของ i18n — auth-setup ทั้งสกิลอ่านจาก catalog แล้ว** (spec:
@@ -22,7 +56,7 @@
   เปลี่ยน เพราะ regex ผูกกับข้อความที่แปลแล้ว ไม่ใช่ข้อมูลจริง ตอนนี้
   `createLocalUserAction` return `field` มาจาก zod issue's `path` ตรง ๆ
   ฝั่ง client เทียบ `result.field === 'email'` แทนการเดาจากข้อความ
-- **19 ไฟล์แปลงเป็น catalog ครบ** — `components/login-form.tsx` ·
+- **21 ไฟล์แปลงเป็น catalog ครบ** — `components/login-form.tsx` ·
   `roles-manager.tsx` · `admin-user-actions.tsx` · `audit-logs-table.tsx` ·
   `forgot-password-dialog.tsx` · `change-password-dialog.tsx` ·
   `reset-password-form.tsx` · `role-form.tsx` · `users-table.tsx` ·
@@ -30,7 +64,7 @@
   `user-role-select.tsx` · `lib/password-policy.ts` ·
   `lib/actions/{auth,admin-setup,admin-users,admin-roles,password}.ts` ·
   `app/(admin)/admin/{users,audit-logs}/page.tsx`
-- **`check-i18n.mjs`'s `OPTIONAL_CONVERTED_FILES`** เพิ่มทั้ง 19 ไฟล์ข้างบน —
+- **`check-i18n.mjs`'s `OPTIONAL_CONVERTED_FILES`** เพิ่มทั้ง 21 ไฟล์ข้างบน —
   optional เพราะ th+en โปรเจคอาจไม่ได้ติดตั้ง auth-setup เลยก็ได้ (ต่างจาก
   `ui/data-table.tsx` ของ design-setup ที่ติดมาทุกโปรเจค) พิสูจน์ด้วย fixture
   ที่ copy `assets/` ทั้งต้นไม้ไปรันจริง: `26/26 converted file(s) present and

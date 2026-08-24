@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 2200543b996e
+// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: 2ac611dd989d
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -92,6 +92,7 @@ export const authEn: AuthCatalog = {
     submit: 'Sign in',
     passwordLabel: 'Password',
     emailLabel: 'Email',
+    adUsernameLabel: 'Username (AD)',
     forgotPasswordLink: 'Forgot password?',
     sessionExpiredBanner: 'Your session has expired. Please sign in again.',
     ssoErrorUnableToCreateUser: 'Signed in, but the account could not be created. Please contact your administrator. (unable_to_create_user)',

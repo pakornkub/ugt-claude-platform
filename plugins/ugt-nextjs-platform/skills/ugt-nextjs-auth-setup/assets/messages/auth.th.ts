@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 0593e93f97b3
+// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: ce472dbaca01
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -86,6 +86,9 @@ export const authTh = {
     submit: 'เข้าสู่ระบบ',
     passwordLabel: 'รหัสผ่าน',
     emailLabel: 'อีเมล',
+    // คง "(AD)" เป็นอักษรละตินทั้งสองภาษา — เป็นชื่อระบบที่ผู้ใช้เห็นบนป้ายอื่น
+    // ในองค์กรอยู่แล้ว แปลแล้วหาไม่เจอ
+    adUsernameLabel: 'ชื่อผู้ใช้ (AD)',
     forgotPasswordLink: 'ลืมรหัสผ่าน?',
     sessionExpiredBanner: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
     ssoErrorUnableToCreateUser: 'เข้าสู่ระบบสำเร็จ แต่สร้างบัญชีผู้ใช้ไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (unable_to_create_user)',

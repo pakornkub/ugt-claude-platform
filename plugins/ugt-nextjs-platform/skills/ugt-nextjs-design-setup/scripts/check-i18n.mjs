@@ -190,6 +190,56 @@ check('converted files carry no Thai outside comments', () => {
   return { ok: true, msg: `${scanned}/${CONVERTED_FILES.length} converted file(s) present and clean` };
 });
 
+// Copying a catalog into `messages/` is only half an install — until the
+// namespace is spread into `i18n/messages.ts`'s `messages` object, next-intl
+// never sees it. That failure is SILENT: with no `getMessageFallback` in
+// `i18n/request.ts`, next-intl's default renders the key path itself, so every
+// screen the namespace serves shows `auth.login.submit` instead of text while
+// the app still boots. The other two checks here pass in that state (the files
+// exist and hold no Thai), and design-setup's verify.mjs passes too (it checks
+// that `messages/` exists, not that it is wired) — this is the fifth
+// load-bearing piece its "four pieces" comment doesn't count.
+check('every catalog in messages/ is registered in i18n/messages.ts', () => {
+  const dir = join(ROOT, 'messages');
+  // The parity check above already reports a missing/unreadable messages/ dir.
+  if (!existsSync(dir)) return { ok: true };
+  const onDisk = readdirSync(dir)
+    .map((f) => /^(.+)\.th\.ts$/.exec(f)?.[1])
+    .filter(Boolean)
+    // `messages/app.*.ts` is the project's own namespace (มติ: kit files are
+    // overwritten wholesale on update, so project strings live outside them).
+    // It is optional by design — never require it to be registered.
+    .filter((ns) => ns !== 'app');
+  if (onDisk.length === 0) return { ok: true };
+
+  const registry = join(ROOT, 'i18n', 'messages.ts');
+  if (!existsSync(registry)) {
+    return { ok: false, msg: 'i18n/messages.ts missing — copy assets/i18n/ (it is what hands the catalogs to next-intl)' };
+  }
+  const src = readFileSync(registry, 'utf8');
+  // Scope the search to the `messages` object literal, NOT the whole file: the
+  // shipped header comment names "auth, mail, upload" as examples, so a
+  // whole-file grep reports every namespace as registered and this check would
+  // pass on exactly the tree it exists to fail.
+  const declIdx = src.search(/export\s+const\s+messages\b/);
+  if (declIdx < 0) {
+    return { ok: false, msg: 'i18n/messages.ts has no `export const messages` — next-intl gets no catalog at all' };
+  }
+  const objStart = src.indexOf('{', declIdx);
+  const obj = objStart < 0 ? '' : src.slice(objStart, src.lastIndexOf('}') + 1);
+  const missing = onDisk.filter((ns) => !new RegExp(`(^|[{,\\s])${ns}\\s*:`).test(obj));
+  return missing.length
+    ? {
+        ok: false,
+        msg: `${missing
+          .map((ns) => `messages/${ns}.{th,en}.ts`)
+          .join(' · ')} copied but never registered in i18n/messages.ts — add the import + spread (one per namespace); until then every t() in ${
+          missing.length > 1 ? 'those namespaces' : `the \`${missing[0]}\` namespace`
+        } renders its raw key path on screen`,
+      }
+    : { ok: true, msg: `${onDisk.length} namespace(s) registered: ${onDisk.join(', ')}` };
+});
+
 const icon = { true: '✔', false: '✘' };
 let failed = 0;
 for (const r of results) {

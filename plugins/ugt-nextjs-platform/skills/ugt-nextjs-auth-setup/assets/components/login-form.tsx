@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 296d44a46004
+// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: eef1de92344a
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -123,7 +123,7 @@ function LdapSection() {
       {errors.root?.message && <Callout tone="danger">{errors.root.message}</Callout>}
       <Field data-invalid={!!errors.username}>
         <FieldLabel htmlFor="ldap-username">
-          Username (AD)<span className="text-destructive">*</span>
+          {t('adUsernameLabel')}<span className="text-destructive">*</span>
         </FieldLabel>
         <Input
           id="ldap-username"

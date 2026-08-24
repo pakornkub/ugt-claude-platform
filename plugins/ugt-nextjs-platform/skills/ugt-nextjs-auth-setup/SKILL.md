@@ -285,12 +285,20 @@ answered th+en at the design-setup interview:
    `DEFAULT_LOCALE` and everything else in the file is untouched — this is
    purely additive (one import pair + one type + two object keys).
 
-A project that skips this step still builds (the import path exists once the
-catalog files are copied), but every `t()` call inside auth-setup's assets
-throws at render time the moment a user reaches a login/admin/password
-screen — there is no silent fallback to Thai prose, because none of these
-files carry hardcoded Thai anymore (Tasks 1–13 of this phase moved all of it
-into the catalog).
+**Skipping step 2 fails silently — this is the dangerous one.** The project
+still builds and still boots (the import paths exist once the catalog files
+are copied). But `i18n/request.ts` sets no `getMessageFallback`, so next-intl
+falls back to its default: it **renders the key path itself**. Every
+login/admin/password screen then shows `auth.login.submit` and
+`auth.errors.UNAUTHORIZED` where text should be — no exception, no red
+screen, just an app that looks broken to whoever opens it, with the real
+error only in the server console. There is no fallback to Thai prose either,
+because none of these files carry hardcoded Thai anymore (this phase moved
+all of it into the catalog).
+
+`check-i18n.mjs` fails on this (`every catalog in messages/ is registered in
+i18n/messages.ts`) — so run design-setup's `verify.mjs`, which delegates to
+it, before calling an install done.
 
 ### 5.3 Schema + migrate
 
