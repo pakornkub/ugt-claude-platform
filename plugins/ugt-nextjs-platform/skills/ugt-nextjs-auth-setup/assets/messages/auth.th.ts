@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 38bc454f9c09
+// kit-hash: 037f6d5b3474
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -41,5 +41,22 @@ export const authTh = {
   },
   passwordPolicy: {
     hint: 'อย่างน้อย {min} ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข',
+  },
+  login: {
+    ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',
+    ssoTitle: 'เข้าสู่ระบบด้วยบัญชีองค์กร (Single Sign-On)',
+    ssoConnecting: 'กำลังเชื่อมต่อ...',
+    submit: 'เข้าสู่ระบบ',
+    passwordLabel: 'รหัสผ่าน',
+    emailLabel: 'อีเมล',
+    forgotPasswordLink: 'ลืมรหัสผ่าน?',
+    sessionExpiredBanner: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
+    ssoErrorUnableToCreateUser: 'เข้าสู่ระบบสำเร็จ แต่สร้างบัญชีผู้ใช้ไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (unable_to_create_user)',
+    ssoErrorAccountNotLinked: 'บัญชีนี้ยังเชื่อมกับระบบไม่ได้ กรุณาแจ้งผู้ดูแลระบบ (account_not_linked)',
+    ssoErrorGeneric: 'เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ ({code})',
+    subtitle: 'เข้าสู่ระบบเพื่อใช้งาน',
+    orSeparator: 'หรือ',
+    tabAd: 'บัญชี AD',
+    tabEmail: 'อีเมล',
   },
 } as const;

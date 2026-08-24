@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 1ccbe5eb912a
+// kit-hash: 9da3ee51495c
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -47,5 +47,22 @@ export const authEn: AuthCatalog = {
   },
   passwordPolicy: {
     hint: 'At least {min} characters, including lowercase, uppercase, and a digit.',
+  },
+  login: {
+    ssoConnectFailed: "Couldn't connect to SSO. Please try again.",
+    ssoTitle: 'Sign in with your organization account (Single Sign-On)',
+    ssoConnecting: 'Connecting...',
+    submit: 'Sign in',
+    passwordLabel: 'Password',
+    emailLabel: 'Email',
+    forgotPasswordLink: 'Forgot password?',
+    sessionExpiredBanner: 'Your session has expired. Please sign in again.',
+    ssoErrorUnableToCreateUser: 'Signed in, but the account could not be created. Please contact your administrator. (unable_to_create_user)',
+    ssoErrorAccountNotLinked: "This account isn't linked yet. Please contact your administrator. (account_not_linked)",
+    ssoErrorGeneric: 'Sign-in failed. Please contact your administrator. ({code})',
+    subtitle: 'Sign in to continue',
+    orSeparator: 'or',
+    tabAd: 'AD account',
+    tabEmail: 'Email',
   },
 };
