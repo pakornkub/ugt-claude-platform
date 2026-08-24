@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 037f6d5b3474
+// kit-hash: a53ea3d05e00
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -58,5 +58,26 @@ export const authTh = {
     orSeparator: 'หรือ',
     tabAd: 'บัญชี AD',
     tabEmail: 'อีเมล',
+  },
+  rolesManager: {
+    colRole: 'บทบาท',
+    colPermissions: 'สิทธิ์',
+    colActions: 'จัดการ',
+    colDescription: 'คำอธิบาย',
+    systemBadge: 'ระบบ',
+    editSystemBlocked: 'บทบาทระบบ — แก้ไขไม่ได้',
+    edit: 'แก้ไข',
+    deleteSystemBlocked: 'บทบาทระบบ — ลบไม่ได้',
+    delete: 'ลบ',
+    pageTitle: 'บทบาทและสิทธิ์',
+    pageDescription: 'สิทธิ์ทั้งหมดของระบบจับคู่เข้ากับบทบาทที่หน้านี้',
+    create: 'สร้างบทบาท',
+    searchPlaceholder: 'ค้นหาบทบาท...',
+    editTitle: 'แก้ไขบทบาท',
+    createTitle: 'สร้างบทบาท',
+    deleteConfirmTitle: 'ลบบทบาท "{name}"',
+    deleteConfirmDescription: 'ผู้ใช้ที่มีบทบาทนี้จะกลายเป็น "ไม่มีบทบาท" และใช้งานได้เฉพาะหน้าทั่วไปจนกว่าจะได้รับบทบาทใหม่',
+    deleteConfirmButton: 'ลบบทบาท',
+    deleteSuccess: 'ลบบทบาทแล้ว',
   },
 } as const;

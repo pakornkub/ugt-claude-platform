@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 9da3ee51495c
+// kit-hash: 31ad5d73f76a
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -64,5 +64,26 @@ export const authEn: AuthCatalog = {
     orSeparator: 'or',
     tabAd: 'AD account',
     tabEmail: 'Email',
+  },
+  rolesManager: {
+    colRole: 'Role',
+    colPermissions: 'Permissions',
+    colActions: 'Actions',
+    colDescription: 'Description',
+    systemBadge: 'System',
+    editSystemBlocked: 'This is a system role — cannot be edited',
+    edit: 'Edit',
+    deleteSystemBlocked: 'This is a system role — cannot be deleted',
+    delete: 'Delete',
+    pageTitle: 'Roles & Permissions',
+    pageDescription: 'Every permission in the system is mapped to a role here',
+    create: 'Create role',
+    searchPlaceholder: 'Search roles...',
+    editTitle: 'Edit role',
+    createTitle: 'Create role',
+    deleteConfirmTitle: 'Delete role "{name}"',
+    deleteConfirmDescription: 'Users with this role will become "unassigned" and can only access general pages until given a new role',
+    deleteConfirmButton: 'Delete role',
+    deleteSuccess: 'Role deleted',
   },
 };

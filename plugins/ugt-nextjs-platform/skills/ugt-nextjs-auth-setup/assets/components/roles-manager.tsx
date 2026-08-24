@@ -1,6 +1,6 @@
 'use client';
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: d6be4649d5cd
+// kit-hash: 670413468410
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -8,6 +8,7 @@
 // (destructive ห้าม window.confirm) · ปุ่มแถวผ่าน IconAction + variant soft-*
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
@@ -48,6 +49,8 @@ export function RolesManager({
   canUpdate: boolean;
   canDelete: boolean;
 }>) {
+  const t = useTranslations('auth.rolesManager');
+  const tErrors = useTranslations('auth.errors');
   const [openSheet, setOpenSheet] = useState<'create' | string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RoleRow | null>(null);
 
@@ -56,26 +59,26 @@ export function RolesManager({
   const columns: ColumnDef<RoleRow>[] = [
     {
       accessorKey: 'name',
-      header: 'บทบาท',
+      header: t('colRole'),
       cell: ({ row }) => (
         <>
           {row.original.name}
           {/* ตัวระบุ = Badge outline (มติ 2026-08-21 — secondary สงวนให้ chip ตัวกรอง) */}
           {row.original.isSystem && (
             <Badge variant="outline" className="ml-2">
-              ระบบ
+              {t('systemBadge')}
             </Badge>
           )}
         </>
       ),
     },
-    { accessorKey: 'description', header: 'คำอธิบาย' },
+    { accessorKey: 'description', header: t('colDescription') },
     {
       id: 'permissions',
-      header: 'สิทธิ์',
+      header: t('colPermissions'),
       meta: {
         numeric: true,
-        mobileLabel: 'สิทธิ์',
+        mobileLabel: t('colPermissions'),
         headerClassName: 'text-right',
         cellClassName: 'text-right tabular-nums',
       },
@@ -90,12 +93,12 @@ export function RolesManager({
           {
             id: 'actions',
             header: '',
-            meta: { mobileLabel: 'จัดการ' },
+            meta: { mobileLabel: t('colActions') },
             cell: ({ row }) => (
               <div className="flex justify-end gap-1">
                 {canUpdate && (
                   <IconAction
-                    label={row.original.isSystem ? 'บทบาทระบบ — แก้ไขไม่ได้' : 'แก้ไข'}
+                    label={row.original.isSystem ? t('editSystemBlocked') : t('edit')}
                     tone="info"
                     disabled={row.original.isSystem}
                     onClick={() => setOpenSheet(row.original.id)}
@@ -105,7 +108,7 @@ export function RolesManager({
                 )}
                 {canDelete && (
                   <IconAction
-                    label={row.original.isSystem ? 'บทบาทระบบ — ลบไม่ได้' : 'ลบ'}
+                    label={row.original.isSystem ? t('deleteSystemBlocked') : t('delete')}
                     tone="danger"
                     disabled={row.original.isSystem}
                     onClick={() => setDeleteTarget(row.original)}
@@ -126,26 +129,26 @@ export function RolesManager({
           (ไม่ห่อ PageShell — padding ของหน้าเป็นของ shell/layout ที่ครอบอยู่) */}
       <PageHeader>
         <PageHeaderText>
-          <PageTitle>บทบาทและสิทธิ์</PageTitle>
-          <PageDescription>สิทธิ์ทั้งหมดของระบบจับคู่เข้ากับบทบาทที่หน้านี้</PageDescription>
+          <PageTitle>{t('pageTitle')}</PageTitle>
+          <PageDescription>{t('pageDescription')}</PageDescription>
         </PageHeaderText>
         {canCreate && (
           <PageActions>
             <Button onClick={() => setOpenSheet('create')}>
               <Plus className="mr-2 size-4" strokeWidth={2} />
-              สร้างบทบาท
+              {t('create')}
             </Button>
           </PageActions>
         )}
       </PageHeader>
 
-      <DataTable id="admin-roles" columns={columns} data={roles} globalSearch filterPlaceholder="ค้นหาบทบาท..." />
+      <DataTable id="admin-roles" columns={columns} data={roles} globalSearch filterPlaceholder={t('searchPlaceholder')} />
 
       {/* Sheet ตัวเดียวคุมทั้ง create/edit จาก state — checklist สิทธิ์เลื่อนใน body ของ Sheet */}
       <Sheet open={openSheet !== null} onOpenChange={(open) => !open && setOpenSheet(null)}>
         <SheetContent className="flex w-full flex-col sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>{editingRole ? 'แก้ไขบทบาท' : 'สร้างบทบาท'}</SheetTitle>
+            <SheetTitle>{editingRole ? t('editTitle') : t('createTitle')}</SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             {openSheet !== null && (
@@ -165,14 +168,14 @@ export function RolesManager({
       <ConfirmActionDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={`ลบบทบาท "${deleteTarget?.name ?? ''}"`}
-        description={'ผู้ใช้ที่มีบทบาทนี้จะกลายเป็น "ไม่มีบทบาท" และใช้งานได้เฉพาะหน้าทั่วไปจนกว่าจะได้รับบทบาทใหม่'}
-        confirmLabel="ลบบทบาท"
-        successMessage="ลบบทบาทแล้ว"
+        title={t('deleteConfirmTitle', { name: deleteTarget?.name ?? '' })}
+        description={t('deleteConfirmDescription')}
+        confirmLabel={t('deleteConfirmButton')}
+        successMessage={t('deleteSuccess')}
         action={async () => {
           if (!deleteTarget) return { code: 'ROLE_NOT_FOUND' as const };
           const result = await deleteRoleAction(deleteTarget.id);
-          return result.success ? { ok: true } : { code: result.code };
+          return result.success ? { ok: true } : { error: tErrors(result.code as Parameters<typeof tErrors>[0]) };
         }}
       />
     </div>
