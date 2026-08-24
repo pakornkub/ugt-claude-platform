@@ -190,12 +190,18 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
   `better-auth/client/plugins` ตั้งแต่ `1.7.0` — **ไม่ใช่ major bump ด้วยซ้ำ**
   มีอยู่ถึง `1.6.14` หายใน `1.7.0` — `npm i better-auth` แบบไม่ pin ที่ทำมา
   ตลอดพังปุ่ม SSO ทันทีสำหรับการติดตั้งใหม่ทุกครั้งตั้งแต่วันนี้)
-- **ยังเปิด — ต้อง research จริง ไม่ใช่เดา:** better-auth 1.7.x เอา
-  `genericOAuthClient` ออกแล้วมี API แทนไหม (`oauthPopupClient` ที่ยังอยู่ใน
-  1.7.1 หน้าตาต่างกันมาก — popup-based ไม่ใช่ redirect-based) — ต้องอ่าน
-  better-auth changelog/migration guide จริงก่อนตัดสินใจว่าจะ migrate หรือค้าง
-  pin `1.6.14` ต่อไป · การ pin ตอนนี้เป็นแค่ทางออกฉุกเฉินให้ install ไม่พัง
-  ไม่ใช่คำตอบระยะยาว
+- ~~better-auth 1.7.x เอา `genericOAuthClient` ออกแล้วมี API แทนไหม~~ →
+  **migrate แล้ว, 4.47.3** — อ่าน better-auth 1.7 upgrade guide +
+  bisect tarball จริงของ `1.7.0`/`1.7.1` (`dist/plugins/generic-oauth/`)
+  ยืนยันว่าเป็นการรีดีไซน์ตั้งใจ ไม่ใช่ regression: generic OAuth ย้ายเป็น
+  social provider ระดับ core — `signIn.social({ provider: 'keycloak' })`
+  แทน `signIn.oauth2()` ที่ถูกลบ, ไม่ต้องมี client plugin เลย (ไม่ใช่
+  `oauthPopupClient` — ตัวนั้น popup-based คนละแบบตามที่สงสัยไว้), callback
+  route ย้ายจาก `/api/auth/oauth2/callback/:id` เป็น `/api/auth/callback/:id`.
+  ฝั่ง server (`genericOAuth`/`keycloak()` จาก `better-auth/plugins`) ไม่กระทบ
+  — ยืนยันด้วยการอ่าน `plugins/index.d.mts` ของ tarball จริง SKILL.md §5.1
+  เปลี่ยน pin เป็น `better-auth@^1.7.1` พิสูจน์ด้วย `tsc --strict` จริงบน
+  scratch project ที่ติดตั้ง `1.7.1` จริง (ไม่ใช่แค่เปลี่ยน import แล้วเดา)
 - **ไม่ใช่บั๊กของ auth-setup แต่กระทบการ verify แบบ end-to-end**:
   `prisma.config.ts` (จาก `ugt-nextjs-database-setup`) เขียนคอมเมนต์ไว้ว่า
   "schema.prisma must NOT contain a url field — Prisma 7 + driver adapter"

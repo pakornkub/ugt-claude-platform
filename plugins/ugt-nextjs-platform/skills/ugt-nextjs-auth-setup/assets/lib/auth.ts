@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 4e22ba6dc92a
+// kit: ugt-nextjs-platform 4.47.3 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: cfbb5b8307a2
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -148,10 +148,16 @@ export const auth = betterAuth({
                   clientId: env.KEYCLOAK_CLIENT_ID,
                   clientSecret: env.KEYCLOAK_CLIENT_SECRET,
                   issuer: env.KEYCLOAK_ISSUER,
+                  // pkce defaults to true since better-auth 1.7 — kept explicit
+                  // because Keycloak's client config (keycloak-client.md) must
+                  // also have PKCE=S256 set, and this is the line that documents why.
                   pkce: true,
                   // redirectURI must include the basePath — Better Auth alone would
-                  // compute it without the Next.js basePath segment.
-                  redirectURI: `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH}/api/auth/oauth2/callback/keycloak`,
+                  // compute it without the Next.js basePath segment. Path is
+                  // `/api/auth/callback/:id` (not `/api/auth/oauth2/callback/:id`)
+                  // since better-auth 1.7 folded generic OAuth into the core social
+                  // provider callback route — must match keycloak-client.md exactly.
+                  redirectURI: `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH}/api/auth/callback/keycloak`,
                   overrideUserInfo: true, // refresh user fields on every SSO login
                 }),
                 mapProfileToUser: async (profile: Record<string, unknown>) => {

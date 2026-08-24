@@ -20,18 +20,20 @@ separate redirect URIs, separate audit trail).
 
 ## Redirect URI pattern
 
-Better Auth's genericOAuth callback lives under the auth API route, and when the
-app is deployed under a basePath the URI must include it:
+Better Auth's generic OAuth (Keycloak) is a first-class social provider since
+better-auth 1.7, so its callback lives under the core `callback/:id` route
+(not the old `oauth2/callback/:id`). When the app is deployed under a
+basePath the URI must include it:
 
 ```
-<BETTER_AUTH_URL>__BASE_PATH__/api/auth/oauth2/callback/keycloak
+<BETTER_AUTH_URL>__BASE_PATH__/api/auth/callback/keycloak
 ```
 
 Register one entry per environment, e.g.:
 
 ```
-http://localhost:3000/__BASE_PATH__/api/auth/oauth2/callback/keycloak   (dev)
-https://__APP_HOST__/__BASE_PATH__/api/auth/oauth2/callback/keycloak      (prod)
+http://localhost:3000/__BASE_PATH__/api/auth/callback/keycloak   (dev)
+https://__APP_HOST__/__BASE_PATH__/api/auth/callback/keycloak      (prod)
 ```
 
 This exact URI must also be passed as `redirectURI` in `lib/auth.ts` — Keycloak
@@ -72,6 +74,6 @@ only): `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container environment.
 - [ ] Client created in the org realm with Client ID = `__PROJECT_NAME__`
 - [ ] Client authentication ON; secret copied to `KEYCLOAK_CLIENT_SECRET`
 - [ ] PKCE method S256 set
-- [ ] Redirect URI(s) registered exactly as `<BETTER_AUTH_URL>__BASE_PATH__/api/auth/oauth2/callback/keycloak`
+- [ ] Redirect URI(s) registered exactly as `<BETTER_AUTH_URL>__BASE_PATH__/api/auth/callback/keycloak`
 - [ ] `KEYCLOAK_ISSUER` verified via `/.well-known/openid-configuration`
 - [ ] App host can reach the Keycloak host over the network (curl the issuer from the server)

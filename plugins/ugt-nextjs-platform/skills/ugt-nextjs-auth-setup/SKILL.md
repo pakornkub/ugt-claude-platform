@@ -204,17 +204,16 @@ path was taken out loud and record it as a DESIGN.md deviation, because
 ### 5.1 Dependencies
 
 ```bash
-# Pin exactly — do NOT drop the version. better-auth 1.7.0 deleted
-# genericOAuthClient from better-auth/client/plugins (confirmed by bisecting
-# real npm packages: present through 1.6.14, gone in 1.7.0 — not even a major
-# bump, so a caret range like ^1.6.0 still floats into the broken 1.7.x line).
-# lib/auth-client.ts imports it to wire authClient.signIn.oauth2(...), which
-# login-form.tsx's SsoSection button calls — an unpinned `npm i better-auth`
-# installs 1.7.x today and the SSO button fails to build, for [METHOD: SSO]
-# which is the org's default login method. Bump this pin only after checking
-# 1.7.x's actual client API for a replacement — that hasn't been researched
-# yet, it's tracked in docs/backlog.md.
-npm i better-auth@1.6.14 zod
+# better-auth 1.7.0 deleted genericOAuthClient from better-auth/client/plugins
+# in a MINOR bump (present through 1.6.14, gone in 1.7.0 — a caret range like
+# ^1.6.0 floats straight into the broken line). This was a deliberate rewrite,
+# not a regression: generic OAuth (the Keycloak SSO button) is now a
+# first-class social provider — authClient.signIn.social({ provider: 'keycloak' })
+# replaces the removed signIn.oauth2(), no client plugin needed, and the
+# callback route moved from /api/auth/oauth2/callback/:id to
+# /api/auth/callback/:id. lib/auth.ts, lib/auth-client.ts, login-form.tsx and
+# keycloak-client.md are already written for ≥1.7 — do not pin below 1.7.1.
+npm i better-auth@^1.7.1 zod
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)
@@ -490,7 +489,7 @@ does nothing — always do both ends or neither.
 | Compute `SESSION_COOKIE_NAME` from `BETTER_AUTH_URL` (https → `__Secure-` prefix) | Hardcode the cookie name |
 | Log out with `cookieStore.set(name, '', { maxAge: 0, secure })` | `cookieStore.delete()` — omits the `Secure` flag; browsers refuse to delete `__Secure-` cookies |
 | Guard Keycloak plugin registration with `env.KEYCLOAK_* &&` | Call `keycloak()` bare (build crashes under `SKIP_ENV_VALIDATION=1`) |
-| `redirectURI` = `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/oauth2/callback/keycloak` | Let Better Auth guess the redirect URI (no basePath) |
+| `redirectURI` = `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak` | Let Better Auth guess the redirect URI (no basePath) |
 | `auth.api.signInEmail(...)` | `auth.api.signIn.email(...)` (that path doesn't exist) |
 | `auth.api.requestPasswordReset(...)` (1.5.x) | `auth.api.forgetPassword(...)` — removed |
 | Build the reset link from `token` + `NEXT_PUBLIC_BASE_PATH` yourself | Mail the `url` Better Auth passes in (no basePath → 404 in prod only) |
