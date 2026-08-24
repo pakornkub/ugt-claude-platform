@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
-// kit-hash: 339222ee9a89
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
+// kit-hash: ec03fafd3ab8
 'use server';
 
 // lib/actions/admin-setup.ts — first-admin bootstrap Server Action.
@@ -22,13 +22,13 @@ type PermissionIdRow = { id: string };
  * Idempotent: returns an error if a system role already exists.
  */
 export async function initializeAdminAction(): Promise<{
-  error: string;
+  code: string;
 } | void> {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { error: 'Not authenticated' };
+  if (!session) return { code: 'UNAUTHORIZED' };
 
   const alreadyDone = await isAdminInitialized();
-  if (alreadyDone) return { error: 'Admin system already initialized' };
+  if (alreadyDone) return { code: 'ALREADY_INITIALIZED' };
 
   // 1. Seed permissions — upsert เสมอ ห้าม createMany เปล่า: isAdminInitialized
   // เช็คแค่ role ระบบ ไม่ได้เช็คตาราง Permission — bootstrap รอบก่อนที่พังกลางคัน

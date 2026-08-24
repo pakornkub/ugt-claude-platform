@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.36.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 374ac64c9022
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: 437eab908054
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
@@ -8,6 +8,7 @@
 // (ช่วงวันที่ → action เรียงกว้าง→แคบ มติ 2026-08-11) push URL เอง ·
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
@@ -80,6 +81,7 @@ export function AuditLogsTable({
   actionOptions: string[];
   filters: { q: string; from: string; to: string; action: string };
 }>) {
+  const t = useTranslations('auth');
   const router = useRouter();
   const pathname = usePathname();
   const [openDetail, setOpenDetail] = useState<string | null>(null);
@@ -98,16 +100,16 @@ export function AuditLogsTable({
   const columns: ColumnDef<AuditLogRow>[] = [
     {
       accessorKey: 'createdAt',
-      header: 'เวลา',
+      header: t('auditLogsTable.colTime'),
       meta: { cellClassName: 'whitespace-nowrap tabular-nums' },
       // instant จริง → เวลาไทยผ่าน lib/format.ts เท่านั้น (DESIGN.md §5)
       cell: ({ row }) => formatDateTime(row.original.createdAt),
     },
-    { accessorKey: 'userName', header: 'ผู้กระทำ' },
-    { accessorKey: 'action', header: 'การกระทำ', meta: { cellClassName: 'font-mono text-xs' } },
+    { accessorKey: 'userName', header: t('auditLogsTable.colActor') },
+    { accessorKey: 'action', header: t('auditLogsTable.colAction'), meta: { cellClassName: 'font-mono text-xs' } },
     {
       accessorKey: 'detail',
-      header: 'รายละเอียด',
+      header: t('auditLogsTable.colDetail'),
       cell: ({ row }) =>
         row.original.detail ? (
           // JSON ย่อบรรทัดเดียวในตาราง กดเพื่อเปิดฉบับเต็มใน dialog — ห้ามซ่อน
@@ -133,15 +135,15 @@ export function AuditLogsTable({
         id="audit-logs"
         columns={columns}
         data={rows}
-        filterPlaceholder="ค้นหาชื่อผู้ใช้หรืออีเมล..."
+        filterPlaceholder={t('auditLogsTable.searchPlaceholder')}
         serverSearch={{ value: filters.q, onChange: (q) => applyFilters({ q }) }}
         serverPagination={{ pageIndex, pageSize, totalItems }}
         serverQuery={{ query, baseParams, fields }}
         toolbarFilters={
           <>
             <DateRangePicker
-              fromLabel="ตั้งแต่"
-              toLabel="ถึง"
+              fromLabel={t('auditLogsTable.fromLabel')}
+              toLabel={t('auditLogsTable.toLabel')}
               from={parseDateParam(filters.from)}
               to={parseDateParam(filters.to)}
               onFromChange={(d) => applyFilters({ from: d ? toDateParam(d) : '' })}
@@ -152,10 +154,10 @@ export function AuditLogsTable({
               onValueChange={(value) => applyFilters({ action: value === ALL_ACTIONS ? '' : value })}
             >
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="ทุก action" />
+                <SelectValue placeholder={t('auditLogsTable.allActions')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ALL_ACTIONS}>ทุก action</SelectItem>
+                <SelectItem value={ALL_ACTIONS}>{t('auditLogsTable.allActions')}</SelectItem>
                 {actionOptions.map((a) => (
                   <SelectItem key={a} value={a}>
                     {a}
@@ -175,7 +177,7 @@ export function AuditLogsTable({
       >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>รายละเอียด</DialogTitle>
+            <DialogTitle>{t('auditLogsTable.detailDialogTitle')}</DialogTitle>
           </DialogHeader>
           <pre className="max-h-96 overflow-auto rounded-md bg-muted p-3 font-mono text-xs break-all whitespace-pre-wrap">
             {prettyDetail(openDetail)}

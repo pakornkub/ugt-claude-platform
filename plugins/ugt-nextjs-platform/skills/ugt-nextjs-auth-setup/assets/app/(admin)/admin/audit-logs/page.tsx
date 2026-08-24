@@ -1,11 +1,12 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
-// kit-hash: 9aa7c1c252b6
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit-hash: 8a6af796e7da
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
 // ผ่าน URL state ทั้งหมด "never half" · หน้านี้ parse searchParams แล้ว query จริง
 // ฝั่ง server ไม่มี API route แยก — DataTable push page/sort กลับลง URL ให้เอง
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -22,6 +23,7 @@ const AUDIT_FIELDS: TableFields = { sortable: ['createdAt'], filterable: [] };
 export default async function AdminAuditLogsPage({
   searchParams,
 }: Readonly<{ searchParams: Promise<Record<string, string | string[] | undefined>> }>) {
+  const t = await getTranslations('auth.adminAuditLogsPage');
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect('/login');
 
@@ -104,8 +106,8 @@ export default async function AdminAuditLogsPage({
       {/* หัวหน้าเพจตามโครง DESIGN.md §3 — ใช้ page-shell ของ kit ไม่เขียน h1 เอง */}
       <PageHeader>
         <PageHeaderText>
-          <PageTitle>บันทึกกิจกรรม</PageTitle>
-          <PageDescription>บันทึกการกระทำทั้งหมด — ไม่มีปุ่มแก้หรือลบที่ไหนเลย</PageDescription>
+          <PageTitle>{t('title')}</PageTitle>
+          <PageDescription>{t('description')}</PageDescription>
         </PageHeaderText>
       </PageHeader>
       <AuditLogsTable

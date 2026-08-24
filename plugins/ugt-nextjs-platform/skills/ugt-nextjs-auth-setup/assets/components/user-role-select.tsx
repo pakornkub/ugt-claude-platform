@@ -1,10 +1,11 @@
 'use client';
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/components/user-role-select.tsx
-// kit-hash: 0ca05a30f696
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/user-role-select.tsx
+// kit-hash: 87390fd5b6df
 
 // components/user-role-select.tsx — inline role-assign dropdown for one user row.
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { assignUserRoleAction } from '@/lib/actions/admin-users';
 
@@ -22,21 +23,25 @@ export function UserRoleSelect({
   disabled?: boolean;
 }>) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('auth.userRoleSelect');
+  const tErrors = useTranslations('auth.errors');
 
   function handleChange(value: string) {
     startTransition(async () => {
       const result = await assignUserRoleAction(userId, value === NO_ROLE ? null : value);
-      if (!result.success) toast.error('เปลี่ยนบทบาทไม่สำเร็จ', { description: result.error });
+      if (!result.success) {
+        toast.error(t('changeFailedTitle'), { description: tErrors(result.code as Parameters<typeof tErrors>[0]) });
+      }
     });
   }
 
   return (
     <Select value={currentRoleId ?? NO_ROLE} onValueChange={handleChange} disabled={disabled || isPending}>
       <SelectTrigger className="w-48">
-        <SelectValue placeholder="ไม่มีบทบาท" />
+        <SelectValue placeholder={t('noRole')} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={NO_ROLE}>ไม่มีบทบาท</SelectItem>
+        <SelectItem value={NO_ROLE}>{t('noRole')}</SelectItem>
         {roles.map((role) => (
           <SelectItem key={role.id} value={role.id}>
             {role.name}

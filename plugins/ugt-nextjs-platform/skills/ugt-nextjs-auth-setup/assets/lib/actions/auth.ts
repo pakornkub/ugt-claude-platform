@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
-// kit-hash: 85578aa6049d
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/auth.ts
+// kit-hash: 815ef84429fd
 'use server';
 
 import { cookies, headers } from 'next/headers';
@@ -18,14 +18,14 @@ import { env } from '@/lib/env';
 
 // [METHOD: LDAP]
 const ldapSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  username: z.string().min(1, 'AD_USERNAME_REQUIRED'),
+  password: z.string().min(1, 'PASSWORD_REQUIRED'),
 });
 
 // [METHOD: LOCAL]
 const localSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1, 'Password is required'),
+  email: z.email('EMAIL_INVALID'),
+  password: z.string().min(1, 'PASSWORD_REQUIRED'),
 });
 
 // ─── Cookie naming ───────────────────────────────────────────────────────────
@@ -121,10 +121,10 @@ async function logAuthEvent(
 export async function ldapLoginAction(values: {
   username: string;
   password: string;
-}): Promise<{ error: string } | void> {
+}): Promise<{ code: string } | void> {
   const parsed = ldapSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: 'Invalid input' };
+    return { code: parsed.error.issues[0]?.message ?? 'INVALID_INPUT' };
   }
 
   const { username, password } = parsed.data;
@@ -132,7 +132,7 @@ export async function ldapLoginAction(values: {
   // Security: rate-limit by IP — max 10 attempts per 15 minutes (brute-force prevention)
   const { ip, userAgent } = await getRequestMeta();
   if (!checkRateLimit(`ldap:${ip}`, 10, 15 * 60 * 1000)) {
-    return { error: 'Too many login attempts. Please try again later.' };
+    return { code: 'TOO_MANY_ATTEMPTS' };
   }
 
   // 1. Validate credentials via LDAP bind
@@ -141,7 +141,7 @@ export async function ldapLoginAction(values: {
     ldapUser = await ldapBind(username, password);
   } catch {
     await logAuthEvent('login.failed', 'anonymous', { authType: 'ldap', username, ip, userAgent });
-    return { error: 'Invalid username or password' };
+    return { code: 'INVALID_AD_CREDENTIALS' };
   }
 
   // 2. Upsert user in DB, enriched from the central employee directory.
@@ -205,16 +205,16 @@ export async function ldapLoginAction(values: {
 export async function localLoginAction(values: {
   email: string;
   password: string;
-}): Promise<{ error: string } | void> {
+}): Promise<{ code: string } | void> {
   const parsed = localSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: 'Invalid input' };
+    return { code: parsed.error.issues[0]?.message ?? 'INVALID_INPUT' };
   }
 
   // Security: rate-limit by IP — max 10 attempts per 15 minutes (brute-force prevention)
   const { ip, userAgent } = await getRequestMeta();
   if (!checkRateLimit(`local:${ip}`, 10, 15 * 60 * 1000)) {
-    return { error: 'Too many login attempts. Please try again later.' };
+    return { code: 'TOO_MANY_ATTEMPTS' };
   }
 
   // NOTE: the method is auth.api.signInEmail(...) — auth.api.signIn.email(...) does NOT exist.
@@ -230,7 +230,7 @@ export async function localLoginAction(values: {
       ip,
       userAgent,
     });
-    return { error: 'Invalid email or password' };
+    return { code: 'INVALID_LOCAL_CREDENTIALS' };
   }
 
   // Forward Set-Cookie from the Better Auth response to the browser.

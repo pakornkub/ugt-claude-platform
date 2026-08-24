@@ -246,6 +246,52 @@ that already has its own sidebar merges the admin menu into it instead of
 shipping a second sidebar — §5.6, and skipping that step is the single most
 common install mistake.
 
+**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
+every project — th-only or th+en — already has `messages/`, `i18n/request.ts`
+and `i18n/messages.ts` from design-setup (มติ 2.2: next-intl is a dependency
+of every project, not just th+en, so th-only projects don't skip the
+machinery, they just never exercise a second locale). Since this phase, every
+converted auth-setup asset (`login-form.tsx`, the `/admin/users` ·
+`/admin/roles` · `/admin/audit-logs` pages, both password dialogs, etc.) calls
+`useTranslations()` unconditionally — so the `auth` catalog **must** be
+registered before any of these render, in every project, not only ones that
+answered th+en at the design-setup interview:
+
+1. Copy `assets/messages/auth.th.ts` and `assets/messages/auth.en.ts` to the
+   project's `messages/` directory (same copy step as the kit's own
+   `messages/kit.{th,en}.ts`).
+2. Edit the project's `i18n/messages.ts` — this file is **owned by
+   `ugt-nextjs-design-setup`**, and its own header comment already says the
+   quiet part out loud: *"A skill that adds its own catalog (auth, mail,
+   upload) registers it here — one import + one spread."* This is that
+   registration, not an auth-setup-specific quirk:
+
+   ```ts
+   // added imports
+   import { authEn } from '@/messages/auth.en';
+   import { authTh } from '@/messages/auth.th';
+
+   // KitCatalog type stays; add a sibling AuthCatalog type the same way
+   type AuthCatalog = {
+     [Namespace in keyof typeof authTh]: Record<keyof (typeof authTh)[Namespace], string>;
+   };
+
+   export const messages: Record<AppLocale, { kit: KitCatalog; auth: AuthCatalog }> = {
+     th: { kit: kitTh, auth: authTh },
+     en: { kit: kitEn, auth: authEn },
+   };
+   ```
+
+   `DEFAULT_LOCALE` and everything else in the file is untouched — this is
+   purely additive (one import pair + one type + two object keys).
+
+A project that skips this step still builds (the import path exists once the
+catalog files are copied), but every `t()` call inside auth-setup's assets
+throws at render time the moment a user reaches a login/admin/password
+screen — there is no silent fallback to Thai prose, because none of these
+files carry hardcoded Thai anymore (Tasks 1–13 of this phase moved all of it
+into the catalog).
+
 ### 5.3 Schema + migrate
 
 1. Paste `assets/prisma/schema-auth.prisma` into `prisma/schema.prisma`
@@ -343,11 +389,17 @@ mistake this section prevents.
 **Project already has a sidebar** (the normal case for existing projects):
 
 1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav.tsx`) into the
-   existing nav config — as a "จัดการระบบ" group, or wherever the project's
-   menu structure puts admin items. Keep the per-item permission filter: the
-   items carry their `perm` key, so feed the nav the result of
-   `getUserPermissions()` and hide items the user lacks, exactly as
-   `<AdminNav>` does.
+   existing nav config — as a "จัดการระบบ" (`auth.adminNav.systemGroup`) group,
+   or wherever the project's menu structure puts admin items. Keep the
+   per-item permission filter: the items carry their `perm` key, so feed the
+   nav the result of `getUserPermissions()` and hide items the user lacks,
+   exactly as `<AdminNav>` does.
+
+   Each item carries `labelKey` (e.g. `'users'`), not a resolved `label`
+   string — `t()` from next-intl's `useTranslations` only works inside a
+   component/hook body, so the exported array can't hold pre-translated
+   text. Resolve it yourself in whatever component renders the merged
+   sidebar (it already has hook context): `const t = useTranslations('auth.adminNav'); t(item.labelKey)`.
 2. In `app/(admin)/layout.tsx`, keep the guard (session →
    `syncPermissionsIfNeeded()` → permission check) but delete the shell —
    render plain `{children}` so the pages sit inside the project's own shell
@@ -531,3 +583,7 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       https it must carry neither `includeSubDomains` nor `preload` until the
       domain owner says so
 - [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)
+- [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
+      (cwd = project root) reports `0 failed`, and every auth screen (login,
+      `/admin/users`, `/admin/roles`, `/admin/audit-logs`, change/reset/forgot
+      password) shows English text after switching locale

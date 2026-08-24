@@ -1,10 +1,11 @@
 'use client';
-// kit: ugt-nextjs-platform 4.35.0 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
-// kit-hash: f4bb2076121b
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/admin-setup-form.tsx
+// kit-hash: 44b61c85f709
 
 // components/admin-setup-form.tsx — one-click first-admin bootstrap.
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Settings, Loader2 } from 'lucide-react';
 import { initializeAdminAction } from '@/lib/actions/admin-setup';
 import { Button } from '@/components/ui/button';
@@ -12,13 +13,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export function AdminSetupForm() {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('auth.adminSetup');
+  const tErrors = useTranslations('auth.errors');
 
   function handleSetup() {
     startTransition(async () => {
       // สำเร็จ = action redirect('/admin/users') เอง — โค้ดหลัง await ไม่ได้รันต่อ
       const result = await initializeAdminAction();
-      if (result?.error) {
-        toast.error('ตั้งค่าไม่สำเร็จ', { description: result.error });
+      if (result?.code) {
+        toast.error(t('setupFailedTitle'), { description: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       }
     });
   }
@@ -31,10 +34,11 @@ export function AdminSetupForm() {
         <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10">
           <Settings className="size-7 text-primary" strokeWidth={2} />
         </div>
-        <CardTitle>ตั้งค่าผู้ดูแลระบบครั้งแรก</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          กดปุ่มด้านล่างเพื่อสร้าง role ผู้ดูแลระบบ (Administrator)
-          พร้อมสิทธิ์ทั้งหมด และกำหนดให้บัญชีของคุณเป็นผู้ดูแลระบบคนแรก
+          {t('descriptionLine1')}
+          <br />
+          {t('descriptionLine2')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -42,10 +46,10 @@ export function AdminSetupForm() {
           {isPending ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" strokeWidth={2} />
-              กำลังตั้งค่า...
+              {t('loading')}
             </>
           ) : (
-            'เริ่มตั้งค่าผู้ดูแลระบบ'
+            t('submit')
           )}
         </Button>
       </CardContent>

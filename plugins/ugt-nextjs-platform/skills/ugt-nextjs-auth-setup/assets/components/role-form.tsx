@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/role-form.tsx
-// kit-hash: dd8741dd3ab7
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/role-form.tsx
+// kit-hash: dd8d9fb19060
 
 // components/role-form.tsx — create/edit a role, with the permission checklist
 // in the HRMS shape (มติ 13.3): bordered groups, a tri-state select-all on each
@@ -12,6 +12,7 @@
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -23,12 +24,13 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Callout } from '@/components/ui/callout';
 import { cn } from '@/lib/utils';
 import { groupState, toggleGroup } from '@/lib/permission-group-select';
+import { useFieldErrorText } from '@/lib/use-field-error';
 import { createRoleAction, updateRoleAction } from '@/lib/actions/admin-roles';
 
 type PermissionOption = { id: string; key: string; label: string; group: string };
 
 const roleFormSchema = z.object({
-  name: z.string().trim().min(1, 'กรอกชื่อบทบาท'),
+  name: z.string().trim().min(1, 'ROLE_NAME_REQUIRED'),
   description: z.string().trim(),
   permissionIds: z.array(z.string()),
 });
@@ -45,6 +47,9 @@ export function RoleForm({
   onSaved: () => void;
   onCancel: () => void;
 }>) {
+  const t = useTranslations('auth.roleForm');
+  const tErrors = useTranslations('auth.errors');
+  const fieldError = useFieldErrorText();
   const {
     register,
     control,
@@ -77,10 +82,10 @@ export function RoleForm({
     };
     const result = role ? await updateRoleAction(role.id, input) : await createRoleAction(input);
     if (!result.success) {
-      setError('root', { message: result.error });
+      setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       return;
     }
-    toast.success(role ? 'แก้ไขบทบาทแล้ว' : 'สร้างบทบาทแล้ว');
+    toast.success(role ? t('editSuccess') : t('createSuccess'));
     onSaved();
   });
 
@@ -90,7 +95,7 @@ export function RoleForm({
 
       <Field data-invalid={!!errors.name}>
         <FieldLabel htmlFor="role-name">
-          ชื่อบทบาท<span className="text-destructive">*</span>
+          {t('nameLabel')}<span className="text-destructive">*</span>
         </FieldLabel>
         <Input
           id="role-name"
@@ -98,11 +103,11 @@ export function RoleForm({
           disabled={isSubmitting}
           {...register('name')}
         />
-        <FieldError errors={errors.name ? [errors.name] : undefined} />
+        <FieldError errors={fieldError(errors.name)} />
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="role-description">คำอธิบาย</FieldLabel>
+        <FieldLabel htmlFor="role-description">{t('descriptionLabel')}</FieldLabel>
         <Input id="role-description" disabled={isSubmitting} {...register('description')} />
       </Field>
 
@@ -120,7 +125,7 @@ export function RoleForm({
           return (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <Label>สิทธิ์การใช้งาน</Label>
+                <Label>{t('permissionsLabel')}</Label>
                 {/* ตัวเลขนับ = Badge + tabular-nums (DESIGN.md §4) ไม่ทำ pill เอง */}
                 <Badge className="tabular-nums">
                   {selected.size} / {allPermissions.length}
@@ -144,7 +149,7 @@ export function RoleForm({
                           checked={state === 'all'}
                           indeterminate={state === 'some'}
                           onCheckedChange={() => field.onChange(toggleGroup(groupIds, [...selected]))}
-                          aria-label={`เลือกทั้งกลุ่ม ${group}`}
+                          aria-label={t('selectGroupAria', { group })}
                           disabled={isSubmitting}
                         />
                         <Label
@@ -191,11 +196,11 @@ export function RoleForm({
       {/* footer ตามข้อตกลง §4: ยกเลิก (outline) ซ้าย · primary ขวาสุด ปุ่มเดียว */}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          ยกเลิก
+          {t('cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" strokeWidth={2} /> : null}
-          บันทึก
+          {t('save')}
         </Button>
       </div>
     </form>

@@ -1,5 +1,52 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.0 (2026-08-24)
+
+**เฟส 2 ของ i18n — auth-setup ทั้งสกิลอ่านจาก catalog แล้ว** (spec:
+`docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md` §6.2, 166 ข้อความ)
+
+- **catalog ใหม่**: `assets/messages/auth.th.ts` / `auth.en.ts` — namespace
+  `errors` (34 error code ใช้ร่วมกันทั้งสกิล) บวก `adminSetup` ·
+  `passwordPolicy` · `changePassword` · `resetPassword` · `forgotPassword` ·
+  `login` · `rolesManager` · `roleForm` · `adminUserActions` ·
+  `auditLogsTable` · `usersTable` · `navUser` · `adminNav` ·
+  `userRoleSelect` · `adminUsersPage` · `adminAuditLogsPage`
+- **error-code contract**: ทุก Server Action ในสกิล (`lib/actions/auth.ts` ·
+  `admin-setup.ts` · `admin-users.ts` · `admin-roles.ts` · `password.ts`)
+  ตอนนี้ return `{ code: 'SOME_CODE' }` แทน `{ error: '<ข้อความไทย/อังกฤษ>' }`
+  — ฝั่ง client แปล code เป็นข้อความตอน render ด้วย `useTranslations('auth.errors')`
+  (หรือ `useFieldErrorText()` ตัวใหม่ใน `lib/use-field-error.ts` สำหรับ field
+  error ของ react-hook-form)
+- **ปิดกับดัก `admin-user-actions.tsx:82`**: โค้ดเดิมเดา field ที่ error ด้วย
+  `/อีเมล|email/i.test(result.error)` — พังทันทีที่ข้อความเปลี่ยนภาษาหรือคำ
+  เปลี่ยน เพราะ regex ผูกกับข้อความที่แปลแล้ว ไม่ใช่ข้อมูลจริง ตอนนี้
+  `createLocalUserAction` return `field` มาจาก zod issue's `path` ตรง ๆ
+  ฝั่ง client เทียบ `result.field === 'email'` แทนการเดาจากข้อความ
+- **19 ไฟล์แปลงเป็น catalog ครบ** — `components/login-form.tsx` ·
+  `roles-manager.tsx` · `admin-user-actions.tsx` · `audit-logs-table.tsx` ·
+  `forgot-password-dialog.tsx` · `change-password-dialog.tsx` ·
+  `reset-password-form.tsx` · `role-form.tsx` · `users-table.tsx` ·
+  `admin-setup-form.tsx` · `nav-user.tsx` · `admin-nav.tsx` ·
+  `user-role-select.tsx` · `lib/password-policy.ts` ·
+  `lib/actions/{auth,admin-setup,admin-users,admin-roles,password}.ts` ·
+  `app/(admin)/admin/{users,audit-logs}/page.tsx`
+- **`check-i18n.mjs`'s `OPTIONAL_CONVERTED_FILES`** เพิ่มทั้ง 19 ไฟล์ข้างบน —
+  optional เพราะ th+en โปรเจคอาจไม่ได้ติดตั้ง auth-setup เลยก็ได้ (ต่างจาก
+  `ui/data-table.tsx` ของ design-setup ที่ติดมาทุกโปรเจค) พิสูจน์ด้วย fixture
+  ที่ copy `assets/` ทั้งต้นไม้ไปรันจริง: `26/26 converted file(s) present and
+  clean` แล้วลองใส่อักษรไทยกลับเข้าไปไฟล์เดียวก็จับได้ทันที ระบุชื่อไฟล์และ
+  จำนวนบรรทัด
+- **`SKILL.md` §5.2** เพิ่มขั้นตอน copy `auth.th.ts`/`auth.en.ts` เข้า
+  `messages/` แล้วลงทะเบียนใน `i18n/messages.ts` ของโปรเจค (import +
+  `AuthCatalog` type + เพิ่ม key `auth` ในอ็อบเจ็กต์ `messages`) — ขั้นตอนนี้
+  เดิมไม่มีที่ไหนพูดถึงเลย ทั้งที่ทุกไฟล์ที่แปลงแล้วเรียก `useTranslations()`
+  ตรง ๆ ไม่มี fallback เป็นไทย ข้ามขั้นตอนนี้ = หน้าจอ error/admin/password
+  ทุกหน้าจะ throw ตอน render · §8 เพิ่มบรรทัดตรวจ `check-i18n.mjs` สำหรับ
+  th+en
+
+**ยังไม่ครบ** — เฟส 3: mail admin UI (36) + upload-setup (16) รวม 52 ข้อความ
+ดู spec §6.2
+
 ## 4.46.1 (2026-08-24)
 
 **สามข้อที่เจอตอนเทียบกับ HRMS ซึ่งใช้ i18n เต็ม (1,819 key × 2 locale จริงใน

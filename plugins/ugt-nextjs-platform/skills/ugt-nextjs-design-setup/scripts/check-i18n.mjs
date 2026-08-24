@@ -91,10 +91,38 @@ check('catalog key parity across locales', () => {
 // install (SKILL §Step 6), so missing = the kit was never copied and the gate
 // must say so instead of passing an empty project.
 const REQUIRED_CONVERTED_FILES = ['ui/data-table.tsx', 'ui/confirm-action-dialog.tsx'];
-// …while these ship only when the project needs them (export-menu needs Excel
-// export, tiptap-editor needs rich text, date-picker when dates are picked),
-// so absence is a valid state, not a failure.
-const OPTIONAL_CONVERTED_FILES = ['ui/export-menu.tsx', 'ui/date-picker.tsx', 'ui/tiptap-editor.tsx'];
+// …while these ship only when the project needs them — for two different
+// reasons, both valid: (1) a design-setup feature wasn't selected (export-menu
+// needs Excel export, tiptap-editor needs rich text, date-picker when dates are
+// picked), or (2) the whole skill that owns the file isn't installed at all
+// (a th+en project may not have ugt-nextjs-auth-setup installed). Either way,
+// absence is a valid state, not a failure.
+const OPTIONAL_CONVERTED_FILES = [
+  'ui/export-menu.tsx', 'ui/date-picker.tsx', 'ui/tiptap-editor.tsx',
+  // ugt-nextjs-auth-setup (phase 2, 2026-08-24) — optional because a th+en
+  // project may not have auth-setup installed at all.
+  'components/login-form.tsx',
+  'components/roles-manager.tsx',
+  'components/admin-user-actions.tsx',
+  'components/audit-logs-table.tsx',
+  'components/forgot-password-dialog.tsx',
+  'components/change-password-dialog.tsx',
+  'components/reset-password-form.tsx',
+  'components/role-form.tsx',
+  'components/users-table.tsx',
+  'components/admin-setup-form.tsx',
+  'components/nav-user.tsx',
+  'components/admin-nav.tsx',
+  'components/user-role-select.tsx',
+  'lib/password-policy.ts',
+  'lib/actions/auth.ts',
+  'lib/actions/admin-setup.ts',
+  'lib/actions/admin-users.ts',
+  'lib/actions/admin-roles.ts',
+  'lib/actions/password.ts',
+  'app/(admin)/admin/users/page.tsx',
+  'app/(admin)/admin/audit-logs/page.tsx',
+];
 const CONVERTED_FILES = [...REQUIRED_CONVERTED_FILES, ...OPTIONAL_CONVERTED_FILES];
 
 // A regex that cuts at the first `//` is wrong here: the kit uses backtick

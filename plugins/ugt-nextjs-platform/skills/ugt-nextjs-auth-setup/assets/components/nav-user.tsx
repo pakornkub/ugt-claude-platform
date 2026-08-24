@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: b56501151c0a
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: 65d874f05ae4
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -8,6 +8,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { KeyRound, Loader2, LogOut, Mail, MoreVertical, UserCircle2, type LucideIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -102,6 +103,7 @@ export function NavUser({
   extraRows = [],
 }: Readonly<NavUserProps>) {
   const { isMobile } = useSidebar();
+  const t = useTranslations('auth.navUser');
   const [profileOpen, setProfileOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false); // [METHOD: LOCAL]
   const [isPending, startTransition] = useTransition();
@@ -154,14 +156,14 @@ export function NavUser({
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => setProfileOpen(true)}>
                   <UserCircle2 strokeWidth={2} aria-hidden />
-                  บัญชีผู้ใช้
+                  {t('myAccount')}
                 </DropdownMenuItem>
                 {/* [METHOD: LOCAL] เฉพาะบัญชีที่รหัสผ่านอยู่ในระบบนี้ — บัญชี
                     SSO/LDAP เปลี่ยนที่ directory ขององค์กร */}
                 {authType === 'local' && (
                   <DropdownMenuItem onClick={() => setPasswordOpen(true)}>
                     <KeyRound strokeWidth={2} aria-hidden />
-                    เปลี่ยนรหัสผ่าน
+                    {t('changePassword')}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuGroup>
@@ -180,7 +182,7 @@ export function NavUser({
                 ) : (
                   <LogOut strokeWidth={2} aria-hidden />
                 )}
-                ออกจากระบบ
+                {t('signOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -194,7 +196,7 @@ export function NavUser({
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
           <DialogHeader className="sr-only">
-            <DialogTitle>ข้อมูลของฉัน</DialogTitle>
+            <DialogTitle>{t('myInfoTitle')}</DialogTitle>
             <DialogDescription>{name}</DialogDescription>
           </DialogHeader>
 
@@ -216,7 +218,7 @@ export function NavUser({
 
           <div className="px-6 pt-5 pb-6">
             <dl className="divide-y rounded-lg border bg-card text-sm">
-              <InfoRow icon={Mail} label="อีเมล">
+              <InfoRow icon={Mail} label={t('emailLabel')}>
                 {email}
               </InfoRow>
               {extraRows.map((row) => (
@@ -224,7 +226,7 @@ export function NavUser({
                   {row.value}
                 </InfoRow>
               ))}
-              <InfoRow icon={KeyRound} label="วิธี Login ล่าสุด">
+              <InfoRow icon={KeyRound} label={t('lastLoginMethodLabel')}>
                 {AUTH_TYPE_LABEL[authType] ?? authType}
               </InfoRow>
             </dl>

@@ -15,7 +15,7 @@ Models live in `assets/prisma/schema-auth.prisma`. Key points:
   role has zero permissions.
 - `role.isSystem Boolean` — system roles (the bootstrap Administrator) cannot be
   deleted via any code path. Check before delete:
-  `if (role?.isSystem) return { success: false, error: 'System roles cannot be deleted' };`
+  `if (role?.isSystem) return { success: false, code: 'SYSTEM_ROLE_DELETE_BLOCKED' };`
 - `permission.key` is unique — e.g. `users:read`. Column mapped to `PermKey`
   because `KEY` is T-SQL reserved (`GROUP` likewise → `GroupName`).
 - `rolePermission` M:N join with `@@id([roleId, permissionId])` and cascade
@@ -66,17 +66,17 @@ Every privileged Server Action: **session → permission → action → audit lo
 export async function deleteUserAction(userId: string): Promise<ActionResult> {
   // 1. Session
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { success: false, error: 'Unauthorized' };
+  if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   // 2. Permission
   const perms = await getUserPermissions(session.user.id);
   if (!hasPermission(perms, PERMISSIONS.USERS_DELETE)) {
-    return { success: false, error: 'Forbidden' };
+    return { success: false, code: 'FORBIDDEN' };
   }
 
   // 3. Domain checks + action
   if (userId === session.user.id) {
-    return { success: false, error: 'Cannot delete your own account' };
+    return { success: false, code: 'CANNOT_DELETE_OWN_ACCOUNT' };
   }
   await prisma.user.delete({ where: { id: userId } });
 
@@ -89,6 +89,11 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
   return { success: true };
 }
 ```
+
+The `code` is a SCREAMING_SNAKE_CASE key looked up client-side in the
+`auth.errors` message catalog and translated for display — see
+`lib/use-field-error.ts` or the guard pattern in `lib/actions/admin-roles.ts`
+for a worked example.
 
 Same shape for Server Component page guards (`redirect('/login')` /
 `redirect('/')`) and API route handlers (401/403 JSON).

@@ -1,10 +1,11 @@
-// kit: ugt-nextjs-platform 4.27.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: ee9e82532290
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: 141305083ac2
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the table lives in UsersTable.
 // DataTable โหมด client (DESIGN.md §4): master data ดึงทั้งชุดแล้ว sort/filter/paginate
 // ในหน่วยความจำ — ponytail: ผู้ใช้หลักพันคนขึ้นไปค่อยย้ายเป็นโหมด server แบบ audit-logs
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -22,6 +23,7 @@ import { UsersTable } from '@/components/users-table';
 import { CreateUserDialog } from '@/components/admin-user-actions';
 
 export default async function AdminUsersPage() {
+  const t = await getTranslations('auth.adminUsersPage');
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect('/login');
 
@@ -45,10 +47,8 @@ export default async function AdminUsersPage() {
       {/* หัวหน้าเพจตามโครง DESIGN.md §3: title + subtitle ซ้าย · action ขวา */}
       <PageHeader>
         <PageHeaderText>
-          <PageTitle>ผู้ใช้งาน</PageTitle>
-          <PageDescription>
-            บัญชี SSO/AD เกิดเองตอนเข้าสู่ระบบครั้งแรก — เพิ่มด้วยมือเฉพาะบัญชี local
-          </PageDescription>
+          <PageTitle>{t('title')}</PageTitle>
+          <PageDescription>{t('description')}</PageDescription>
         </PageHeaderText>
         {canCreate && (
           <PageActions>

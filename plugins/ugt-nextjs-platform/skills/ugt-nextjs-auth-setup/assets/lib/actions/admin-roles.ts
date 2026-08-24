@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
-// kit-hash: a1c1f4b83643
+// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
+// kit-hash: adfc92e58cb4
 'use server';
 
 // lib/actions/admin-roles.ts — role CRUD for the (admin)/admin/roles page.
@@ -11,7 +11,7 @@ import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 
-type ActionResult = { success: true } | { success: false; error: string };
+type ActionResult = { success: true } | { success: false; code: string };
 
 // permissionIds = id ของแถวในตาราง Permission (ไม่ใช่คีย์ 'users:read') —
 // เคยชื่อ permissionKeys แล้วหลอกคนต่อ caller ให้ส่งคีย์จน connect ไม่เจอแถว
@@ -19,9 +19,9 @@ type RoleInput = { name: string; description: string; permissionIds: string[] };
 
 async function requirePermission(key: string) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { ok: false as const, error: 'Unauthorized' };
+  if (!session) return { ok: false as const, code: 'UNAUTHORIZED' };
   const perms = await getUserPermissions(session.user.id);
-  if (!perms.includes(key)) return { ok: false as const, error: 'Forbidden' };
+  if (!perms.includes(key)) return { ok: false as const, code: 'FORBIDDEN' };
   return { ok: true as const, session };
 }
 
@@ -31,9 +31,9 @@ async function auditLog(userId: string, action: string, detail: unknown) {
 
 export async function createRoleAction(input: RoleInput): Promise<ActionResult> {
   const gate = await requirePermission(PERMISSIONS.ROLES_CREATE);
-  if (!gate.ok) return { success: false, error: gate.error };
+  if (!gate.ok) return { success: false, code: gate.code };
 
-  if (!input.name.trim()) return { success: false, error: 'Role name is required' };
+  if (!input.name.trim()) return { success: false, code: 'ROLE_NAME_REQUIRED' };
 
   const role = await prisma.role.create({
     data: {
@@ -54,16 +54,16 @@ export async function createRoleAction(input: RoleInput): Promise<ActionResult> 
 
 export async function updateRoleAction(roleId: string, input: RoleInput): Promise<ActionResult> {
   const gate = await requirePermission(PERMISSIONS.ROLES_UPDATE);
-  if (!gate.ok) return { success: false, error: gate.error };
+  if (!gate.ok) return { success: false, code: gate.code };
 
   const role = await prisma.role.findUnique({ where: { id: roleId }, select: { isSystem: true } });
-  if (!role) return { success: false, error: 'Role not found' };
+  if (!role) return { success: false, code: 'ROLE_NOT_FOUND' };
   // System roles (the bootstrap Administrator) are frozen — editing them here
   // risks stripping the only role that can undo the mistake. Rename/re-scope
   // by creating a new role instead.
-  if (role.isSystem) return { success: false, error: 'System roles cannot be edited' };
+  if (role.isSystem) return { success: false, code: 'SYSTEM_ROLE_EDIT_BLOCKED' };
 
-  if (!input.name.trim()) return { success: false, error: 'Role name is required' };
+  if (!input.name.trim()) return { success: false, code: 'ROLE_NAME_REQUIRED' };
 
   await prisma.$transaction([
     prisma.role.update({
@@ -83,11 +83,11 @@ export async function updateRoleAction(roleId: string, input: RoleInput): Promis
 
 export async function deleteRoleAction(roleId: string): Promise<ActionResult> {
   const gate = await requirePermission(PERMISSIONS.ROLES_DELETE);
-  if (!gate.ok) return { success: false, error: gate.error };
+  if (!gate.ok) return { success: false, code: gate.code };
 
   const role = await prisma.role.findUnique({ where: { id: roleId }, select: { isSystem: true, name: true } });
-  if (!role) return { success: false, error: 'Role not found' };
-  if (role.isSystem) return { success: false, error: 'System roles cannot be deleted' };
+  if (!role) return { success: false, code: 'ROLE_NOT_FOUND' };
+  if (role.isSystem) return { success: false, code: 'SYSTEM_ROLE_DELETE_BLOCKED' };
 
   // Users holding this role fall back to "no role" (roleId is nullable) rather
   // than the delete being blocked — matches user.roleId's nullable design.
