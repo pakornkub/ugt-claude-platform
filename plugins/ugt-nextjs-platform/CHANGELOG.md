@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.5 (2026-08-24)
+
+**ปิดสองข้อจาก `docs/backlog.md` §7 — เจอจากการเทียบกับ HRMS** ทั้งสองข้อ
+เล็กและเป็นอิสระต่อกัน:
+
+- **`next-intl` pin เป็น `^4`** — เดิมใส่เป็น dependency ลอยไม่มี version
+  constraint ทั้งที่คิตทั้งชุดเรียก `getRequestConfig`, `NextIntlClientProvider`,
+  `useTranslations`, `getTranslations`, `createNextIntlPlugin` ตรง ๆ —
+  breaking change ของ upstream แบบเงียบ ๆ กระทบทุกโปรเจคที่ติดตั้งใหม่ ตัวอย่าง
+  จริงในรุ่นเดียวกันคือ `better-auth` เอา export ออกใน MINOR bump (ดู 4.47.2)
+  — SKILL.md เองก็ประกาศหลักไว้แล้วว่า "pin majors, the kit is
+  version-coupled" สำหรับ dep อื่น next-intl แค่ยังไม่เคยได้ pin — เช็ค npm
+  registry แล้ว latest คือ 4.x (ตรงกับที่ HRMS ใช้จริง `^4.8.3`) จึง pin `^4`
+  ทั้งใน `npm i` ของ Step 4 และ dependency note ของ Step 6 ให้ตรงกัน
+- **`resolveConverted()` ใน `check-i18n.mjs` probe `src/` แล้ว** — เดิมลอง
+  แค่ `<ROOT>/<rel>` กับ `<ROOT>/components/<rel>` โปรเจคที่ใช้ Next.js
+  scaffold แบบ `src/` (บาง version default ให้) จะได้ FALSE FAILURE บนด่าน
+  "converted files carry no Thai outside comments" — ไฟล์ติดตั้งถูกแล้วแต่ด่าน
+  หาไม่เจอเพราะลึกไปอีกชั้น เพิ่ม `<ROOT>/src/<rel>` และ
+  `<ROOT>/src/components/<rel>` เข้า candidate list เดียวกัน · พิสูจน์ด้วย
+  fixture 4 เคส (src+clean ผ่าน, flat+clean ผ่านเหมือนเดิม, required file
+  หายไปจริง FAIL ชี้ชื่อไฟล์, src+Thai ย้อนกลับเข้าไฟล์ FAIL ชี้ชื่อไฟล์)
+  ไม่ใช่แค่อ่านโค้ด — กันไม่ให้ซ้ำรอยด่านนี้เคยพลาดมาสองรอบ (parity ผ่านบน
+  catalog ว่างเปล่า, registration match decoy comment)
+
 ## 4.47.2 (2026-08-24)
 
 **พบด้วยการรัน eval จริง ไม่ใช่อ่านโค้ด** — รัน `ugt-nextjs-auth-setup`'s

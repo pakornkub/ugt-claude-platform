@@ -137,14 +137,12 @@ HRMS (`D:\Project_2026\ugt-hrms`) เป็น production reference ของ i1
 เป้าหมาย "สลับ ENG แล้วครอบคลุมทุกหน้าทุกเมนู" ทำได้จริง สามข้อที่เจอและปิดแล้ว
 บันทึกไว้ที่ CHANGELOG 4.46.1 ที่เหลือยังไม่ปิด:
 
-- **`next-intl` ไม่ pin major** — `ugt-nextjs-design-setup` ใส่เป็น dependency
-  ลอย (HRMS เองก็ใช้ `^4.8.3` ลอยเหมือนกัน จึงยังไม่มีเคสจริงมายืนยันว่า
-  breaking change ของ upstream เคยกระทบ) — ยังคุ้มพินเพราะทั้ง marketplace อิง
-  `getRequestConfig`/`NextIntlClientProvider` ตรง ๆ
-- **`resolveConverted()` ใน `check-i18n.mjs` ไม่ probe `src/`** — โปรเจคที่ใช้
-  layout `src/components/ui/` (Next.js scaffold บางเวอร์ชัน default ให้) ด่าน
-  จะหาไฟล์ไม่เจอ = FAIL ปลอมทั้งที่ติดตั้งถูก — ต้องเพิ่ม
-  `join(ROOT, 'src', 'components', rel)` เข้า candidate list เดียวกับที่มีอยู่
+- ~~`next-intl` ไม่ pin major~~ → 4.47.5 (pin `^4` ทั้ง `npm i` ของ Step 4
+  และ dependency note ของ Step 6 — เช็ค npm registry แล้ว latest เป็น 4.x
+  ตรงกับที่ HRMS ใช้จริง `^4.8.3`)
+- ~~`resolveConverted()` ใน `check-i18n.mjs` ไม่ probe `src/`~~ → 4.47.5
+  (เพิ่ม `join(ROOT, 'src', rel)` และ `join(ROOT, 'src', 'components', rel)`
+  เข้า candidate list เดียวกับที่มีอยู่ — พิสูจน์ด้วย fixture 4 เคสแล้ว)
 - **`use-action-error.ts` แบบ HRMS เป็นภาพของปัญหาที่เฟส 2 (auth-setup) ต้อง
   เลี่ยง** — HRMS map error ด้วย**ข้อความอังกฤษ lowercase** 40 บรรทัดมือล้วน
   (`'you cannot delete your own account': 'errorCannotDeleteSelf'`), unknown

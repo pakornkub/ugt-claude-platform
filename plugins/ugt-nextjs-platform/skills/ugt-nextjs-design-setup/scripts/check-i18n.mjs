@@ -160,11 +160,21 @@ function stripComments(src) {
 }
 
 // `assets/ui/` is copied to `components/ui/` in a consuming project (SKILL §Step 6),
-// while a dev-time run against `assets/` sees it at `ui/`. Resolve either shape.
-// A file present at neither is not installed — which is a failure for the
+// while a dev-time run against `assets/` sees it at `ui/`. Resolve either shape,
+// plus the same two shapes again under `src/` — some Next.js scaffolds default
+// to a `src/` directory (`src/components/...`, `src/lib/...`, `src/app/...`),
+// and a correctly-installed project on that layout must not read as "not
+// installed" just because the gate never looked one directory deeper.
+// A file present at none of these is not installed — which is a failure for the
 // required set and a valid state for the optional one (see the split above).
 function resolveConverted(rel) {
-  for (const candidate of [join(ROOT, rel), join(ROOT, 'components', rel)]) {
+  const candidates = [
+    join(ROOT, rel),
+    join(ROOT, 'components', rel),
+    join(ROOT, 'src', rel),
+    join(ROOT, 'src', 'components', rel),
+  ];
+  for (const candidate of candidates) {
     if (existsSync(candidate)) return candidate;
   }
   return null;
