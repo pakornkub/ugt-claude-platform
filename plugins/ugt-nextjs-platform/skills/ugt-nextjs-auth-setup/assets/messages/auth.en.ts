@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: f47c0eb6eda8
+// kit-hash: d52d4cbd7d46
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -122,5 +122,16 @@ export const authEn: AuthCatalog = {
     setPasswordDescription: "{userName} — every device they're signed in on will be signed out immediately",
     newPasswordLabel: 'New password',
     setPasswordSubmit: 'Set password',
+  },
+  auditLogsTable: {
+    colTime: 'Time',
+    colActor: 'Actor',
+    colAction: 'Action',
+    colDetail: 'Detail',
+    searchPlaceholder: 'Search by name or email...',
+    fromLabel: 'From',
+    toLabel: 'To',
+    allActions: 'All actions',
+    detailDialogTitle: 'Detail',
   },
 };
