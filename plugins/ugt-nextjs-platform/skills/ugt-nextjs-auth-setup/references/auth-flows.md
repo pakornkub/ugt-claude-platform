@@ -74,9 +74,11 @@ Historical failure modes this prevents:
 
 ## SSO login flow (Keycloak)
 
-1. Client: `authClient.signIn.oauth2({ providerId: 'keycloak', callbackURL: `${basePath}/` })`
+1. Client: `authClient.signIn.social({ provider: 'keycloak', callbackURL: `${basePath}/` })`
+   (better-auth ≥1.7 — generic OAuth is a first-class social provider now, no
+   client plugin and no `signIn.oauth2()`)
 2. Better Auth redirects the browser to Keycloak (OIDC Authorization Code + PKCE)
-3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/oauth2/callback/keycloak`
+3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak`
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
 4. `mapProfileToUser` maps `preferred_username` → `ldapUsername`, sets `authType: 'sso'`
 5. `accountLinking: { enabled: true, trustedProviders: ['keycloak'] }` links the SSO

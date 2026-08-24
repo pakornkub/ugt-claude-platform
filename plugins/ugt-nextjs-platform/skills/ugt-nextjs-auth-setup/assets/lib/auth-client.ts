@@ -1,7 +1,6 @@
-// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/lib/auth-client.ts
-// kit-hash: 3da810e534f2
+// kit: ugt-nextjs-platform 4.47.3 · ugt-nextjs-auth-setup/lib/auth-client.ts
+// kit-hash: c578e5e6d9a1
 import { createAuthClient } from 'better-auth/react';
-import { genericOAuthClient } from 'better-auth/client/plugins'; // [METHOD: SSO] — remove if SSO not enabled
 
 // Do NOT pass baseURL here. Better Auth's withPath() checks whether the URL already has
 // a non-root pathname. If it does it returns the URL unchanged and never appends basePath.
@@ -20,7 +19,9 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export const authClient = createAuthClient({
   basePath: `${BASE_PATH}/api/auth`,
-  plugins: [genericOAuthClient()], // [METHOD: SSO] — remove if SSO not enabled
+  // [METHOD: SSO] — no client plugin needed. better-auth 1.7 rewired generic
+  // OAuth (Keycloak) as a first-class social provider: the SSO button below
+  // calls the base client's signIn.social({ provider: 'keycloak' }) directly.
   fetchOptions: {
     onError(ctx) {
       // Broadcast session expiry so any listener (e.g. a session-expiry banner)

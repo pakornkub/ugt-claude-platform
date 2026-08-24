@@ -1,5 +1,38 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.47.3 (2026-08-24)
+
+**ปิดข้อวิจัยที่ค้างจาก 4.47.2 — migrate จริง ไม่ใช่ค้าง pin**
+
+ตรวจ better-auth 1.7.x จริง (npm pack tarball ของ `1.6.14`/`1.6.11`/`1.6.13`/
+`1.7.0`/`1.7.1` + อ่าน source ที่ compile จริงใน `dist/plugins/generic-oauth/`,
+ไม่ใช่แค่ changelog) แล้วยืนยันว่าการถอด `genericOAuthClient` เป็นการรีดีไซน์
+ตั้งใจ ไม่ใช่ regression: generic OAuth (ปุ่ม SSO/Keycloak) ย้ายไปเป็น social
+provider ระดับ core ตั้งแต่ 1.7.0 — `authClient.signIn.social({ provider:
+'keycloak' })` แทน `signIn.oauth2({ providerId })` ที่ถูกลบ ไม่ต้องมี client
+plugin เลย และ callback route ย้ายจาก `/api/auth/oauth2/callback/:id` เป็น
+`/api/auth/callback/:id`. ฝั่ง server `genericOAuth`/`keycloak()` จาก
+`better-auth/plugins` ยังอยู่เหมือนเดิม (ยืนยันด้วยการอ่าน `plugins/index.d.mts`
+จริง) — เปลี่ยนแค่ `redirectURI` กับคอมเมนต์ `pkce` (default เป็น `true` แล้ว
+ตั้งแต่ 1.7 แต่ยังใส่ explicit ไว้เพื่อจับคู่กับ Keycloak client config)
+
+- `lib/auth-client.ts` — ลบ `import { genericOAuthClient }` และ
+  `plugins: [genericOAuthClient()]` ทิ้งทั้งคู่ (ไม่มี client plugin ให้ใส่แทน)
+- `lib/auth.ts` — `redirectURI` เปลี่ยน path เป็น `/api/auth/callback/keycloak`
+- `components/login-form.tsx` — `SsoSection` เปลี่ยนเป็น
+  `authClient.signIn.social({ provider: 'keycloak', callbackURL })`
+- `references/auth-flows.md` และ `references/keycloak-client.md` — ปรับ flow
+  description + Keycloak client's Valid Redirect URI ให้ตรง path ใหม่
+- `SKILL.md` §5.1 — เปลี่ยน pin จาก `better-auth@1.6.14` (stopgap ฉุกเฉินของ
+  4.47.2) เป็น `better-auth@^1.7.1` พร้อมคอมเมนต์อธิบายเหตุผลใหม่
+- **พิสูจน์ด้วยการ typecheck จริง** ไม่ใช่แค่เปลี่ยน import แล้วเดา: สร้าง
+  scratch project ติดตั้ง `better-auth@1.7.1` จริง คัดลอกโค้ด SSO block ของ
+  `lib/auth.ts`/`lib/auth-client.ts` มา `tsc --strict` ผ่านสะอาด และยืนยันแยก
+  ต่างหากด้วย `@ts-expect-error` ว่า `signIn.oauth2` หายไปจริงจาก type ของ
+  1.7.1 (ไม่ใช่แค่เอกสารบอก)
+- `docs/backlog.md` ข้อ 9 บรรทัด "ยังเปิด — ต้อง research จริง" → ปิดแล้ว
+  ชี้มาที่รุ่นนี้
+
 ## 4.47.2 (2026-08-24)
 
 **พบด้วยการรัน eval จริง ไม่ใช่อ่านโค้ด** — รัน `ugt-nextjs-auth-setup`'s

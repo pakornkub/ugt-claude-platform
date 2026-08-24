@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: eef1de92344a
+// kit: ugt-nextjs-platform 4.47.3 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 722483a703d5
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -48,8 +48,11 @@ function SsoSection() {
     setIsLoading(true);
     try {
       const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
-      const { error } = await authClient.signIn.oauth2({
-        providerId: 'keycloak',
+      // better-auth 1.7 folded generic OAuth into the core social sign-in path —
+      // signIn.social({ provider: 'keycloak' }) replaces the removed
+      // signIn.oauth2({ providerId: 'keycloak' }).
+      const { error } = await authClient.signIn.social({
+        provider: 'keycloak',
         callbackURL: `${basePath}/`,
       });
       if (error) throw error;
