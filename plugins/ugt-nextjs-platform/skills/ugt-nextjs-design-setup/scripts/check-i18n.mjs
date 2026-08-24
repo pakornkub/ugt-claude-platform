@@ -49,13 +49,25 @@ check('catalog key parity across locales', () => {
   if (!existsSync(dir)) {
     return { ok: false, msg: 'no messages/ — copy assets/messages/ into the project (required in every project since 4.46.0)' };
   }
+  const files = readdirSync(dir);
   const byNamespace = new Map();
-  for (const f of readdirSync(dir)) {
+  for (const f of files) {
     const m = /^(.+)\.(th|en)\.ts$/.exec(f);
     if (!m) continue;
     const [, ns, locale] = m;
     if (!byNamespace.has(ns)) byNamespace.set(ns, {});
     byNamespace.get(ns)[locale] = keyPaths(loadCatalog(join(dir, f)));
+  }
+  // An empty match set is not "nothing to compare" — it means messages/ holds
+  // something the gate can't read (e.g. a project ported from th.json/en.json
+  // instead of converting to the kit's <namespace>.(th|en).ts shape), which is
+  // exactly the drift this gate exists to catch. Silently passing an empty
+  // loop here previously gave a green check on a catalog with 0 real keys.
+  if (byNamespace.size === 0) {
+    return {
+      ok: false,
+      msg: `messages/ has ${files.length} file(s) but none match <namespace>.(th|en).ts — kit catalogs must be .ts, not .json (found: ${files.join(', ') || '(empty dir)'})`,
+    };
   }
   const problems = [];
   for (const [ns, locales] of byNamespace) {

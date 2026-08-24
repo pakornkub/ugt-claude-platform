@@ -1,0 +1,14 @@
+# Normalize all text files to LF in the repo, regardless of each
+# contributor's local `core.autocrlf` — prevents whole-tree CRLF/LF
+# false-modified noise, and keeps stamp-kit-assets.mjs's content hash
+# (computed over file bytes) stable across Windows/Linux checkouts.
+* text=auto eol=lf
+
+# Binary — never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

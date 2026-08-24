@@ -298,8 +298,7 @@ design-questions.template.md · globals.tokens.css) พร้อมที่ม�
 | `__DARK_MODE__` | ข้อ 3 |
 | `__SHELL__` | ข้อ 5 (sidebar/topbar/ทั้งคู่) |
 | `__LANDING__` | ข้อ 6 |
-| `__LANG__` | ข้อ 7 (th / th+en) |
-| `__ERA__` | ข้อ 8 (พ.ศ. / ค.ศ.) |
+| `__LANG__` | ข้อ 4 (th / th+en) |
 | `__CONTROL_SCALE__` | ข้อ 9 (ค่า kit = mira · โปรเจคเดิม = ค่าที่วัดจริงจาก §Scale scan) |
 | `__DEVIATIONS__` | ผล scan โปรเจคเดิม (Step 1) — โปรเจคใหม่ = "-" |
 | `__ANSWERS_SUMMARY__` / `__ANSWERED_BY__` | สรุปคำตอบ + ผู้ตอบ ลงมติแถวแรกของ §10 |

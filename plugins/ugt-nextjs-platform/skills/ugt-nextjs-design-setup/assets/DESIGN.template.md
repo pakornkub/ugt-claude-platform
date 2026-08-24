@@ -264,7 +264,8 @@
 
 ## 5. Format การแสดงผล (ทุกตัวผ่าน `lib/format.ts`)
 
-- จอ: `DD/MM/YYYY` **__ERA__** · มีเวลา = เติม `HH:MM` · wall-clock date
+- จอ: `DD/MM/YYYY` **ค.ศ. เสมอ** (iron rule — `lib/format.ts` บังคับ
+  `-u-ca-gregory`, ไม่มีทางเลือก พ.ศ.) · มีเวลา = เติม `HH:MM` · wall-clock date
   อ่าน UTC parts (กันเลื่อนวัน) · instant จริงแสดงเวลาไทย Asia/Bangkok
 - **ไฟล์ export (Excel/CSV): ISO `yyyy-MM-dd` เสมอ** — คนละมาตรฐานกับจอ
   โดยตั้งใจ (DD/MM ทำ Excel สลับวัน-เดือนตาม locale ผู้รับ)

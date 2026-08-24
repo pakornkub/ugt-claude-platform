@@ -1,7 +1,7 @@
 # Platform Backlog — งานที่รู้แล้วว่าต้องทำ แต่ยังไม่ได้ทำ
 
 > **Status:** Living · **Date:** 2026-08-12 · **Applies-to:** ทั้ง marketplace
-> **Last-reviewed:** 2026-08-23 (เพิ่มข้อ 6 — php pilot feedback ที่เหลือหลัง blocker 5 ข้อปิดใน 0.4.0 + hardening spec ที่พักไว้) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
+> **Last-reviewed:** 2026-08-24 (เพิ่มข้อ 7 — i18n leftover จากการเทียบกับ HRMS หลังปิด gate bug + `.gitattributes` + era ใน nextjs 4.46.1) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
 
 กติกา: ข้อที่ปิดแล้ว**ขีดทิ้งพร้อมชี้รุ่น** ไม่ลบ (ประวัติว่าเคยเป็น backlog มีค่า) ·
 งานที่เป็นของโปรเจคใดโปรเจคหนึ่งไม่อยู่ที่นี่ (ไปที่ project-notes/decisions ของโปรเจคนั้น
@@ -129,6 +129,28 @@ spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-co
   ตั้งชื่อ stageไว้กว้างอยู่แล้ว ไม่ต้องแก้ contract
 - `.dockerignore` บังคับแค่ 4 บรรทัด (CI artifact) ไม่ครอบไฟล์ secret
   (`db_config.php`, `.env`) ที่ `COPY . .` จะพาเข้า image ได้ถ้าไม่กันเอง
+
+### 7. i18n leftover ที่เจอตอนเทียบกับ HRMS (2026-08-24, หลังปิด gate bug + `.gitattributes` + era ใน 4.46.1)
+
+HRMS (`D:\Project_2026\ugt-hrms`) เป็น production reference ของ i18n เต็ม —
+1,819 key × 2 locale, parity ตรง 0 ตกหล่น, เมนู/sidebar แปลครบ — ใช้ยืนยันว่า
+เป้าหมาย "สลับ ENG แล้วครอบคลุมทุกหน้าทุกเมนู" ทำได้จริง สามข้อที่เจอและปิดแล้ว
+บันทึกไว้ที่ CHANGELOG 4.46.1 ที่เหลือยังไม่ปิด:
+
+- **`next-intl` ไม่ pin major** — `ugt-nextjs-design-setup` ใส่เป็น dependency
+  ลอย (HRMS เองก็ใช้ `^4.8.3` ลอยเหมือนกัน จึงยังไม่มีเคสจริงมายืนยันว่า
+  breaking change ของ upstream เคยกระทบ) — ยังคุ้มพินเพราะทั้ง marketplace อิง
+  `getRequestConfig`/`NextIntlClientProvider` ตรง ๆ
+- **`resolveConverted()` ใน `check-i18n.mjs` ไม่ probe `src/`** — โปรเจคที่ใช้
+  layout `src/components/ui/` (Next.js scaffold บางเวอร์ชัน default ให้) ด่าน
+  จะหาไฟล์ไม่เจอ = FAIL ปลอมทั้งที่ติดตั้งถูก — ต้องเพิ่ม
+  `join(ROOT, 'src', 'components', rel)` เข้า candidate list เดียวกับที่มีอยู่
+- **`use-action-error.ts` แบบ HRMS เป็นภาพของปัญหาที่เฟส 2 (auth-setup) ต้อง
+  เลี่ยง** — HRMS map error ด้วย**ข้อความอังกฤษ lowercase** 40 บรรทัดมือล้วน
+  (`'you cannot delete your own account': 'errorCannotDeleteSelf'`), unknown
+  value หลุดเป็นอังกฤษเงียบ ๆ — ยืนยันมติเดิมว่าเฟส 2 ต้องเปิดด้วย
+  error-code contract (code-based ไม่ใช่ prose-based) ก่อนแตะสตริงสักตัว ดู
+  `docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md` §7
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

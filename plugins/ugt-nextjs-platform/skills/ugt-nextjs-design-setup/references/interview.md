@@ -11,7 +11,11 @@ every value into DESIGN.md — a default answered is still an agreement.
 **What is deliberately NOT asked** (iron rules / org defaults with converged
 evidence — the user deviates only via "อื่นๆ", which forces a มติ): fonts ·
 density/sizes · radius · the semantic-6 status set · date/number formats ·
-toast semantics · motion rules · icon library · accessibility floor.
+toast semantics · motion rules · icon library · accessibility floor. **ปีบนจอ
+เป็น ค.ศ. เสมอ ไม่ใช่แค่ default แต่ไม่มีทางเลือกให้ deviate เลย** —
+`lib/format.ts` บังคับ `-u-ca-gregory` ที่ formatter เดียว ไม่มีโค้ดแปลง พ.ศ.
+เส้นทางไหนก็ตาม ถามแล้วให้ตอบ "พ.ศ." คือสร้างมติที่โค้ดทำตามไม่ได้ — เคยเป็น
+คำถามข้อ 7 มาก่อน ตัดออกเมื่อพบว่าขัดกับตัวมันเอง (2026-08-24)
 **One exception**: an existing project whose measured control scale differs
 from the kit gets ข้อ 9 — silently applying the org density there produces a
 two-scale UI (a 48px legacy input next to a 28px kit button in the same form).
@@ -47,7 +51,6 @@ failing pair, never silently darken the dark primary below the light one.
 | --- | --- | --- | --- |
 | 5 | App shell? | Sidebar (collapse ได้) / Topbar / Sidebar + Topbar | **Sidebar** |
 | 6 | Landing page? | ไม่มี — login เข้าแอปเลย / มี (เลือก block ตอน implement) | **ไม่มี** (แอปภายใน) |
-| 7 | ปีบนจอ ค.ศ. ใช่ไหม? (ยืนยันครั้งเดียว) | ค.ศ. / พ.ศ. (ต้องมีเหตุผลธุรกิจ → มติ) | **ค.ศ.** — มติร่วม 2 โปรเจค |
 
 ## ชุด 3 — เฉพาะโปรเจคเดิมที่ scan เจอ conflict
 
@@ -85,7 +88,7 @@ Read these before drafting; the draft agreement states what the code
 | `app/layout.tsx` | ฟ้อนต์จริง (`next/font`), `lang` | font conflict |
 | `app/**/layout.tsx` + `components/` | shell จริง (sidebar? topbar?), nav pattern | ข้อ 5 |
 | `components/ui/` | ตัวไหนตรง kit กลาง ตัวไหน custom / ตัวไหนแก้ variant เพิ่ม | kit overlap → diff-and-ask |
-| `lib/` | formatter วันที่/ตัวเลขมีไหม อยู่ไฟล์ไหน ใช้ ค.ศ./พ.ศ. | ข้อ 7 · format.ts merge plan |
+| `lib/` | formatter วันที่/ตัวเลขมีไหม อยู่ไฟล์ไหน ใช้ ค.ศ./พ.ศ. | พ.ศ. ที่เจอ = migrate เป็น ค.ศ. เสมอ (iron rule ไม่ใช่มติ) · format.ts merge plan |
 | `messages/` หรือ `i18n/` | มี i18n อยู่แล้วไหม | ข้อ 4 (มีแล้ว = th+en โดยพฤตินัย) |
 | grep `#[0-9a-fA-F]{6}` ใน `app/ components/` (`*.tsx`) | สี hardcode นอก token | Deviations |
 | grep `<table` ใน `app/ components/` | ตาราง hand-rolled | Deviations |

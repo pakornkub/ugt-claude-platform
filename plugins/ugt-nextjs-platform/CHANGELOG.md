@@ -1,5 +1,33 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.46.1 (2026-08-24)
+
+**สามข้อที่เจอตอนเทียบกับ HRMS ซึ่งใช้ i18n เต็ม (1,819 key × 2 locale จริงใน
+production) เป็นเคสอ้างอิง**
+
+- **`check-i18n.mjs` ผ่านทั้งที่ catalog ว่างเปล่า** — ด่าน parity match แค่
+  ไฟล์รูปแบบ `<namespace>.(th|en).ts`; โปรเจคที่มี `messages/` แต่เป็นไฟล์คนละ
+  รูปแบบ (เช่น `th.json`/`en.json` แบบที่ HRMS เคยใช้ก่อนย้ายมาที่คิต) ทำให้ลูป
+  ไม่เจอไฟล์ไหนเลยแล้ว "ผ่านเพราะไม่มีอะไรให้เทียบ" — พิสูจน์ด้วย fixture ที่
+  `th.json` มี key, `en.json` ว่าง ก็ยังขึ้น "2 passed · 0 failed" ตอนนี้ตรวจ
+  แล้ว: `messages/` มีไฟล์แต่ไม่ match รูปแบบที่คิตต้องการ = FAIL พร้อมบอกชื่อ
+  ไฟล์ที่เจอ
+- **`.gitattributes`** เพิ่มที่ root ของ repo นี้ (`* text=auto eol=lf`) — HRMS
+  มีอยู่แล้วและตรงกับปัญหาที่เจอตอนทำ i18n เฟส 0+1: worktree ที่ checkout เป็น
+  CRLF ล้วนทำ `stamp-kit-assets.mjs` พังทั้ง 91 ไฟล์เพราะ hash คำนวณจาก byte
+  ของไฟล์ ไม่ได้ ship เป็น asset ให้โปรเจคลูกในรอบนี้ — renormalize ทั้งต้นไม้
+  ของโปรเจคที่มีอยู่แล้วเป็นการตัดสินใจแยกที่เสี่ยงกว่า (`docs/backlog.md` §7)
+- **คำถามข้อ 7 (พ.ศ./ค.ศ.) ตัดออกจาก interview** — ให้ตัวเลือก "พ.ศ. (ต้องมี
+  เหตุผลธุรกิจ → มติ)" ทั้งที่ `lib/format.ts` บังคับ `-u-ca-gregory` ที่ตัว
+  formatter เดียวไม่มีทางเลือกเลย มติแบบนั้นจึงเป็นมติที่โค้ดทำตามไม่ได้ — ขัด
+  กับ "date/number formats" ที่ประกาศเป็น iron rule (ไม่ถาม) อยู่แล้วในหัวข้อ
+  เดียวกัน `DESIGN.template.md` เขียน "ค.ศ. เสมอ" ตรง ๆ แทน `__ERA__`
+  placeholder ที่ไม่ต้องมีคำตอบให้แทนแล้ว
+
+**คงค้างจากการเทียบ HRMS** (`docs/backlog.md` §7): pin `next-intl` เป็น major
+เดียว (HRMS ใช้ `^4.8.3` ลอยเหมือนกัน) · `resolveConverted` ใน `check-i18n.mjs`
+ไม่ probe layout `src/components/`
+
 ## 4.46.0 (2026-08-24)
 
 **เฟส 0+1 ของ i18n — ปุ่มสลับภาษาเปลี่ยนภาษาได้จริงแล้ว** (spec:
