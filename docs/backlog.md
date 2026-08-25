@@ -1,7 +1,7 @@
 # Platform Backlog — งานที่รู้แล้วว่าต้องทำ แต่ยังไม่ได้ทำ
 
 > **Status:** Living · **Date:** 2026-08-12 · **Applies-to:** ทั้ง marketplace
-> **Last-reviewed:** 2026-08-24 (เพิ่มข้อ 8 — จาก review เฟส 2 หลังปิดช่อง registration ใน nextjs 4.47.1) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
+> **Last-reviewed:** 2026-08-25 (ขีด 3 ข้อแรกของ §6 ที่ 4.45.0/0.5.0 ปิดไปแล้วแต่ยังไม่ได้ขีด + doc drift ฝั่ง python ปิดใน 0.5.1) — ที่เดียวของ backlog ระดับ platform; ปิดข้อไหนให้ขีดพร้อมชี้รุ่นใน CHANGELOG (แบบเดียวกับ Addendum ของ app-patterns-audit ที่ปิดครบแล้ว)
 
 กติกา: ข้อที่ปิดแล้ว**ขีดทิ้งพร้อมชี้รุ่น** ไม่ลบ (ประวัติว่าเคยเป็น backlog มีค่า) ·
 งานที่เป็นของโปรเจคใดโปรเจคหนึ่งไม่อยู่ที่นี่ (ไปที่ project-notes/decisions ของโปรเจคนั้น
@@ -95,15 +95,15 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 ### 6. php pilot feedback ที่ยังไม่ได้แก้ — จาก `ugt-mscpl-ana` (2026-08-23, หลัง blocker 5 ข้อปิดใน 0.4.0)
 
 **ยังกัด "deploy ได้" อยู่จริง (คุ้มก่อน hardening):**
-- `Jenkinsfile` Deploy stage ยังเรียก `docker-compose` (v1, EOL 2023) เป็นค่า
-  default ทั้งที่ SKILL §5.5 เขียนตัวอย่างเป็น `docker compose` (v2) —
-  ทุกโปรเจคต้องแก้บรรทัดเดียวกันซ้ำ · เทียบกับ nextjs ที่ตัดสินใจแล้วว่าใช้ v2
-- `[VOLUME]` guard (`if [ ! -d /srv/appdata/<project> ]`) เช็คแค่ dir บนสุด —
-  volume ที่เพิ่มหลัง release แรกไม่ถูก mkdir/chown ให้ (เหมือนกันทั้ง php/python)
-- ไม่มีที่ไหนพูดถึง DNS resolution ของ container network — SQL Server ที่ตั้ง
-  host แบบ short name (ไม่ใช่ FQDN/IP) resolve ไม่ได้ในเน็ตเวิร์ก container แม้
-  resolve ได้จาก host ปกติ (`Login timeout expired`) — ควรมีย่อหน้าเตือนไว้ใน
-  references + คำถามใน admin-handoff
+- ~~`Jenkinsfile` Deploy stage ยังเรียก `docker-compose` (v1, EOL 2023) เป็นค่า
+  default~~ → v2 เป็นค่าตั้งต้นทั้ง 3 stack, nextjs 4.45.0 / php+python 0.5.0
+- ~~`[VOLUME]` guard (`if [ ! -d /srv/appdata/<project> ]`) เช็คแค่ dir บนสุด —
+  volume ที่เพิ่มหลัง release แรกไม่ถูก mkdir/chown ให้~~ → ลูป per-subdir
+  ทั้ง 3 stack + แก้ verify.mjs คู่กัน, nextjs 4.45.0 / php+python 0.5.0 ·
+  doc ฝั่ง python ที่ยังสอนบล็อกเก่า (`docker-deploy.md` §C/§D) ตามปิดใน 0.5.1
+- ~~ไม่มีที่ไหนพูดถึง DNS resolution ของ container network~~ → php+python 0.5.0
+  (`docker-deploy.md` §G + คำถามยืนยัน connectivity จากคอนเทนเนอร์ใน
+  admin-handoff)
 - subpath ของ CI3/legacy ทิ้งไว้ที่ "`base_url` ใน config ของโปรเจคเอง" — ไม่มี
   สูตรสำหรับแอปที่ใช้ relative path (ต้อง inline redirect เติม/ตัด trailing
   slash ใน `<head>` ไม่งั้น asset พังหลัง proxy)

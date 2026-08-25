@@ -61,12 +61,13 @@ Jenkins deploy image เสร็จแล้ว**จบหน้าที่** 
   ของแต่ละ job แล้วบันทึกไว้ใน admin handoff เพื่อให้ทีมอื่นเห็นว่ามี cron
   แอบรันอยู่
 
-**ใช้ `docker compose` (v2 plugin syntax) ในบรรทัด cron แม้ Jenkinsfile ใช้
-`docker-compose` (v1 binary, hyphen)** — เพราะ cron รันบน host เดียวกันแต่คนละ
+**ใช้ `docker compose` (v2 plugin syntax) ในบรรทัด cron — ตัวเดียวกับที่
+Jenkinsfile ใช้เป็นค่าตั้งต้นตั้งแต่ 0.5.0** — cron รันบน host เดียวกันแต่คนละ
 context จาก Jenkins agent; เช็ค binary ที่มีจริงบน host ก่อนตั้ง cron
-(`which docker-compose`, `docker compose version`) แล้วใช้ตัวที่มีให้ตรงกับที่
-Jenkins ใช้ — สอง binary ไม่ compatible กัน 100% ในทุกกรณี (env-var
-interpolation ต่างกันเล็กน้อย).
+(`docker compose version`) แล้วใช้ตัวเดียวกับที่ Jenkinsfile ใช้จริง (host เก่า
+ที่มีแต่ v1 และแก้ Jenkinsfile กลับไป `docker-compose` ก็ต้องใช้ v1 ใน cron
+ด้วย) — สอง binary ไม่ compatible กัน 100% ในทุกกรณี (env-var interpolation
+ต่างกันเล็กน้อย).
 
 ## D. Volume — ownership เป็นเรื่องคนละเรื่องกับ path
 
@@ -85,35 +86,34 @@ Persistent data) คือ:
 `app` เขียนไฟล์ไม่ได้ (`PermissionError: [Errno 13]`) แม้ compose ขึ้น healthy
 ปกติทุกอย่าง (เพราะ error โผล่ตอนโค้ด **เขียน** volume จริง ไม่ใช่ตอน start).
 
-### กลไกหลัก — Jenkinsfile chown ให้อัตโนมัติครั้งแรก
+### กลไกหลัก — Jenkinsfile mkdir+chown ให้อัตโนมัติทีละ subdir
 
-บล็อก `[VOLUME]` ในสเตจ Deploy ของ Jenkinsfile ทำเรื่องนี้ให้เองแล้ว โดยรันแค่
-**ครั้งแรกที่ path ยังไม่มี** (idempotent — deploy รอบถัดไปเจอ path มีอยู่แล้ว
-ก็ข้าม ไม่ chown ซ้ำทุกรอบ):
-
-```sh
-if [ ! -d /srv/appdata/${containerName} ]; then
-  mkdir -p /srv/appdata/${containerName}   # << เติม /<name> ของแต่ละ volume ต่อท้ายบรรทัดนี้
-  APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
-  docker run --rm -v /srv/appdata/${containerName}:/d alpine chown -R "$APP_UID" /d
-fi
-```
-
-**`mkdir` ต้องไล่ถึงตัว subdir ที่ compose bind จริง ไม่ใช่แค่ระดับโปรเจค** —
-compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ `/srv/appdata/<project>`
-เฉย ๆ ถ้า `<name>` ยังไม่มีตอน `up -d` **dockerd จะสร้างให้เองเป็น
-`root:root`** (พฤติกรรมมาตรฐานของ bind mount ที่ path ปลายทางหาย) ซึ่งเกิด
-*หลัง* บล็อกนี้รันไปแล้ว → `chown -R` ข้างบนไม่ทัน และ user `app` เขียนไม่ได้
-ทั้งที่ container ขึ้น `healthy` ปกติทุกอย่าง. ตอนกรอกรายชื่อ volume จาก
-interview ข้อ 6 จึงต้องเติมทุก `<name>` เข้าไปในบรรทัด `mkdir` ด้วย เช่น:
+บล็อก `[VOLUME]` ในสเตจ Deploy ของ Jenkinsfile ทำเรื่องนี้ให้เองแล้ว โดยวนเช็ค
+**ทีละ subdir ที่ compose bind จริง** และทำเฉพาะตัวที่ยังไม่มี (idempotent —
+subdir ที่มีอยู่แล้วถูกข้าม ไม่ chown ซ้ำทุกรอบ deploy):
 
 ```sh
-mkdir -p /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports
+APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
+for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+  if [ ! -d "$p" ]; then
+    mkdir -p "$p"
+    docker run --rm -v "$p":/d alpine chown -R "$APP_UID" /d
+  fi
+done
 ```
 
-`chown -R` บรรทัดถัดมาครอบ `/srv/appdata/<project>` ทั้งก้อนอยู่แล้ว จึงคลุม
-subdir ที่เพิ่ง `mkdir` ให้เองโดยไม่ต้องแก้เพิ่ม — ขอแค่ subdir **มีอยู่ก่อน**
-`chown` รัน
+ตอนกรอกรายชื่อ volume จาก interview ข้อ 6 ให้แทน `uploads`/`reports` ในบรรทัด
+`for p in …` ด้วยชื่อ subdir จริง**ทุกตัวที่ compose bind** — ไม่ใช่แค่ระดับ
+โปรเจค: compose bind ที่ `/srv/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มี
+ตอน `up -d` **dockerd จะสร้างให้เองเป็น `root:root`** (พฤติกรรมมาตรฐานของ
+bind mount ที่ path ปลายทางหาย) แล้ว user `app` เขียนไม่ได้ทั้งที่ container
+ขึ้น `healthy` ปกติทุกอย่าง.
+
+**ห้ามย้อนกลับไปครอบทั้งบล็อกด้วย guard ระดับโปรเจค**
+(`if [ ! -d /srv/appdata/<project> ]` — รูปแบบก่อน 0.5.0): guard แบบนั้น
+กลายเป็น no-op ถาวรทันทีที่ deploy แรกสร้างโฟลเดอร์โปรเจคขึ้นมา — volume ที่
+เพิ่มในรุ่นถัดไปจะไม่มีวันถูก mkdir/chown และไปโผล่เป็น `PermissionError`
+ตอนแอปเขียนไฟล์จริง
 
 จุดสำคัญที่ทำให้กลไกนี้ทำงานได้แม้ Jenkins agent เองไม่ใช่ root:
 
@@ -127,8 +127,9 @@ subdir ที่เพิ่ง `mkdir` ให้เองโดยไม่ต�
   `docker run` ได้; รันเป็น container `alpine` แยกที่ mount `/srv/appdata/<project>`
   bind เข้ามาที่ `/d` แล้ว `chown -R` ข้างในนั้น — container นี้เองรันเป็น
   root โดย default จึง chown ได้ แม้ Jenkins agent ข้างนอกจะไม่ใช่ root
-- ครอบด้วย `if [ ! -d ... ]` เพื่อไม่ต้องรัน `docker run` สองรอบ (หา UID +
-  chown) ทุก deploy โดยไม่จำเป็น — เกิดขึ้นแค่ตอน path ยังไม่เคยมี
+- guard `if [ ! -d "$p" ]` **ต่อ subdir** ทำให้ container chown รันเฉพาะตอนมี
+  subdir ใหม่ ไม่ chown ซ้ำทุก deploy (ส่วนการหา UID รันทุกรอบโดยตั้งใจ —
+  ถูกมาก และกัน base image ที่ bump แล้ว UID ของ `adduser --system` เลื่อน)
 
 ### ทางเลือกสำรอง — chown มือ (path ที่มีอยู่ก่อนกลไกนี้ หรือ debug)
 

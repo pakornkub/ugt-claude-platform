@@ -1,6 +1,17 @@
 # Changelog — ugt-python-platform
 
-## 0.5.0 (2026-08-24)
+## 0.5.1 (2026-08-25)
+
+**Doc-only: `references/docker-deploy.md` ยังสอนบล็อก `[VOLUME]` แบบเก่า**
+— 0.5.0 แก้ asset Jenkinsfile เป็นลูป per-subdir แล้ว แต่ §D "กลไกหลัก" ยังโชว์
+guard ระดับโปรเจค (`if [ ! -d /srv/appdata/<project> ]`) พร้อมคำสั่ง "เติม
+`<name>` ต่อท้ายบรรทัด mkdir" — session ที่อ่าน reference ตอน customize จะพา
+รูปแบบเก่ากลับเข้าโปรเจค · เขียน §D ใหม่ให้ตรง asset (ลูป `for p in …` + ห้าม
+ย้อนกลับไป guard ระดับโปรเจค พร้อมเหตุผล) และแก้ bullet ที่อธิบายว่า guard
+ประหยัด `docker run` สองรอบ (ตอนนี้หา UID ทุกรอบโดยตั้งใจ guard คุมแค่ chown) ·
+§C cron แก้ประโยค "แม้ Jenkinsfile ใช้ `docker-compose` (v1)" ที่ค้างจากก่อน
+0.5.0 — ตอนนี้สองฝั่งใช้ v2 ตรงกันแล้ว · ฝั่ง php ตรวจแล้วไม่มี drift นี้
+(reference ไม่มี code block ของบล็อกเก่า) · ยังไม่ tag — รอ pilot ตามมติเดิม
 
 สามข้อจาก pilot ฝั่ง PHP ที่กลไกเหมือนกันทุกภาษา — ทำพร้อมกันทั้ง 3 stack
 (nextjs 4.45.0, php 0.5.0) · ยังไม่ tag — **ฝั่ง python ยังไม่มี pilot ของตัวเอง**
