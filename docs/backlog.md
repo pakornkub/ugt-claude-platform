@@ -104,9 +104,9 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้�
 - ~~ไม่มีที่ไหนพูดถึง DNS resolution ของ container network~~ → php+python 0.5.0
   (`docker-deploy.md` §G + คำถามยืนยัน connectivity จากคอนเทนเนอร์ใน
   admin-handoff)
-- subpath ของ CI3/legacy ทิ้งไว้ที่ "`base_url` ใน config ของโปรเจคเอง" — ไม่มี
-  สูตรสำหรับแอปที่ใช้ relative path (ต้อง inline redirect เติม/ตัด trailing
-  slash ใน `<head>` ไม่งั้น asset พังหลัง proxy)
+- ~~subpath ของ CI3/legacy ทิ้งไว้ที่ "`base_url` ใน config ของโปรเจคเอง" — ไม่มี
+  สูตรสำหรับแอปที่ใช้ relative path~~ → php 0.5.2 (`docker-deploy.md` §G —
+  inline redirect เติม trailing slash สกัดจากตัวแก้จริงใน pilot `ugt-mscpl-ana`)
 
 **Container hardening — ออกแบบไว้แล้ว พักเป็น backlog ตามที่คุยกัน 2026-08-23:**
 spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-container-hardening-design.md`

@@ -357,3 +357,35 @@ cache invalidation เมื่อ deploy ซ้ำโดยไม่ rebuild im
 | `logging` json-file 10m×3 | log โตไม่จำกัดจะเต็มดิสก์ host ได้ในระยะยาว |
 | `proxy-network` (`external: true`) | ทุกแอป [WEB] แชร์ network เดียวกับ reverse proxy ที่สร้างไว้ครั้งเดียวบน host |
 | `DATABASE_URL: ${DATABASE_URL}` ทำเครื่องหมาย `[DB]` | ลบทิ้งได้ถ้าโปรเจคไม่มี database (legacy/static content ล้วน) |
+
+## G. Subpath หลัง reverse proxy — แอปที่อ้าง asset แบบ relative (CI3/legacy)
+
+Framework ที่มี config กลางแก้ตาม SKILL §5.3 (Laravel `APP_URL`, CI4
+`app.baseURL`, WordPress `WP_HOME`/`WP_SITEURL`, CI3 `base_url`) — หัวข้อนี้
+สำหรับแอป legacy ที่อ้าง asset แบบ **relative** (`href="style.css"`,
+`src="assets/x.png"`) ซึ่งไม่มี config ให้แก้
+
+**อาการ**: เปิดผ่าน proxy ที่ `https://host/app` (ไม่มี `/` ท้าย) แล้ว
+CSS/JS/รูป 404 ทั้งหน้า แต่เปิด `https://host/app/` (มี `/`) ปกติ — browser
+resolve URL relative จาก path โดยตัด segment สุดท้ายทิ้ง: ที่ `/app` ตัด `app`
+ได้ `/style.css` (หลุด subpath) · ที่ `/app/` ได้ `/app/style.css` ถูกต้อง
+
+**ทำไมแก้ฝั่ง server ไม่ได้**: หลัง proxy ที่ strip prefix คอนเทนเนอร์เห็น path
+เป็น `/` ไปแล้ว — redirect ฝั่ง Apache (DirectorySlash) ชี้ไปยัง path ที่ตัวเอง
+เห็น จึงพา browser หลุด prefix ไปเลย · ฝ่ายเดียวที่เห็น URL เต็มจริงคือ browser
+
+**สูตร (พิสูจน์กับ pilot `ugt-mscpl-ana` แล้ว)** — inline script บรรทัดเดียว
+วางเป็น**สิ่งแรกใน `<head>` ก่อน `<link>`/`<script>` ทุกตัว** ของ entry/header
+ที่ทุกหน้า include ร่วมกัน:
+
+```html
+<script>var p=location.pathname;if(!p.endsWith("/")&&p.split("/").pop().indexOf(".")<0)location.replace(p+"/"+location.search+location.hash)</script>
+```
+
+- เติม `/` เฉพาะเมื่อ segment สุดท้าย**ไม่มีนามสกุลไฟล์** — URL อย่าง
+  `…/page.php` ไม่โดนแตะ (relative ของมัน resolve ถูกอยู่แล้ว เพราะ browser
+  ตัดแค่ชื่อไฟล์)
+- ต้องอยู่ก่อน asset ทุกตัว เพื่อ redirect ก่อนเสีย request ไปโหลดของผิด path
+- `<base href>` ใช้แทนได้แต่ต้อง hardcode prefix ซึ่งต่างกันระหว่าง dev
+  (ไม่มี proxy) กับ prod — สูตร script ไม่ผูกกับ prefix จึงใช้ไฟล์เดียวกันได้
+  ทุก environment

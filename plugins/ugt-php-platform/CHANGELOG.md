@@ -1,5 +1,18 @@
 # Changelog — ugt-php-platform
 
+## 0.5.2 (2026-08-25)
+
+**สูตร subpath สำหรับแอป relative path (ข้อสุดท้ายของ pilot feedback ที่ยังกัด
+"deploy ได้")** — §5.3 เดิมทิ้ง CI3/legacy ไว้ที่ "`base_url` ใน config ของ
+โปรเจคเอง" ซึ่งช่วยไม่ได้กับแอป legacy ที่อ้าง asset แบบ relative
+(`href="style.css"`) — เปิดผ่าน proxy ที่ `…/app` ไม่มี `/` ท้าย browser จะ
+resolve หลุด subpath 404 ทั้งหน้า และแก้ฝั่ง server ไม่ได้เพราะหลัง proxy ที่
+strip prefix คอนเทนเนอร์ไม่เห็น URL จริง · เพิ่ม `references/docker-deploy.md`
+§G: inline redirect เติม trailing slash บนสุดของ `<head>` — **สกัดจากตัวแก้
+ที่รันจริงใน pilot `ugt-mscpl-ana`** (`public/index.html`) ไม่ใช่สูตรคิดใหม่ ·
+เงื่อนไข (เติมเฉพาะ segment ท้ายที่ไม่มีนามสกุลไฟล์) พิสูจน์ด้วย 6 เคสก่อน
+commit · SKILL §5.3 ชี้ไป §G จาก bullet CI3/legacy · ยังไม่ tag — รอ pilot
+
 ## 0.5.1 (2026-08-25)
 
 **กวาด cosmetic ค้างจาก pilot checklist** (backlog §6) — ยังไม่ tag รอ pilot:

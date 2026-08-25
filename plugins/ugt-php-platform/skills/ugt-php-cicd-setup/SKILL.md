@@ -456,7 +456,11 @@ render เอกสารส่ง admin (§5.7):
     proxy ตัด path)
   - **CodeIgniter 4**: `app.baseURL=<URL เต็มรวม path>/`
   - **WordPress**: `WP_HOME` + `WP_SITEURL` = URL เต็มรวม path
-  - CI3/legacy: `base_url` ใน config ของโปรเจคเอง
+  - CI3/legacy: `base_url` ใน config ของโปรเจคเอง · แอป legacy ที่อ้าง asset
+    แบบ **relative** (ไม่มี config กลางให้แก้) → วาง inline redirect เติม
+    trailing slash เป็นสิ่งแรกใน `<head>` ของ entry/header ร่วม — สูตรพิสูจน์
+    แล้วใน `references/docker-deploy.md` §G (เปิดผ่าน `…/app` ไม่มี `/` ท้าย
+    แล้ว asset relative หลุด subpath 404 ทั้งหน้า)
   แล้วเช็คของจริงตาม checklist: เปิดแอป**ผ่าน URL เต็มหลัง proxy** ไม่ใช่
   `localhost:port` (อย่างหลังผ่านเสมอแม้ config ผิด)
 - **host มีแต่ `docker-compose` v1 (ข้อ 7)** → เปลี่ยน `docker compose -f ... up`
