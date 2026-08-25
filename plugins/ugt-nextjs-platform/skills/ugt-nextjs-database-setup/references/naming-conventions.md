@@ -8,17 +8,20 @@ illustrate the reference implementation.
 **Real DB: PascalCase plural — Prisma model: camelCase singular + `@@map()` always**
 
 ```prisma
-model rolePermission {
+model holidayList {
   // ...
-  @@map("RolePermissions")   // ✅ PascalCase plural
+  @@map("HolidayLists")   // ✅ PascalCase plural
 }
 ```
 
 | ✅ | ❌ |
 | --- | --- |
-| `@@map("Users")` | `@@map("user")` |
-| `@@map("RolePermissions")` | `@@map("rolePermission")` |
-| `@@map("HolidayItems")` | `@@map("holiday_items")` |
+| `@@map("HolidayLists")` | `@@map("holidayList")` |
+| `@@map("LeaveRequests")` | `@@map("leave_requests")` |
+| `@@map("Items")` | `@@map("item")` |
+
+(The examples deliberately use app-owned tables. `Users` / `RolePermissions`
+would be wrong here — those names are in the singular-exempt auth set below.)
 
 > **ข้อยกเว้นเดียว — ตาราง auth ของ Better Auth** (ติดตั้งโดย
 > ugt-nextjs-auth-setup): `User` / `Session` / `Account` / `Verification` /
@@ -48,12 +51,12 @@ always insert a new one; at read time a central resolver picks the latest
 **Real DB: PascalCase — Prisma field: camelCase + `@map()` on every field**
 
 ```prisma
-model user {
+model holidayList {
   id        String   @id @default(cuid()) @map("Id")
   empCode   String?                       @map("EmpCode")
   createdAt DateTime @default(now())      @map("CreatedAt")
   updatedAt DateTime @updatedAt           @map("UpdatedAt")
-  @@map("Users")
+  @@map("HolidayLists")
 }
 ```
 
@@ -75,6 +78,13 @@ Key/value or log tables whose semantics don't cover the full set (e.g. settings
 that only ever get edited) may trim to the meaningful subset
 (`UpdatedAt`/`UpdatedBy`) — but never rename the columns.
 
+**Every trim is recorded, not just decided.** `contracts/database.md` allows the
+exemption only when the project writes a `⚠ deviation` line for that table in
+`docs/project-context/architecture.md` (which table, which columns were dropped,
+why) — otherwise the next person reads it as a table that simply forgot its audit
+columns. Append-only log tables (`ActivityLogs`) are exempt by nature and need no
+line.
+
 ### T-SQL reserved words — never as column names
 
 Fix by **adding a qualifier**, not by hiding behind `[brackets]`. Frequent
@@ -88,7 +98,7 @@ offenders:
 | `count` | `RequestCount`, `ItemCount` | `COUNT` is an aggregate function |
 | `order` | `SortOrder` | `ORDER` (ORDER BY) |
 | `day`, `month`, `year` (careful) | `DayOfMonth`, `MonthName` | `DAY()`/`MONTH()`/`YEAR()` are built-in functions — bare `Year` is fine, but qualify when paired with another function name |
-| `user`, `session` (table names) | Fine when quoted via Prisma, but plurals (`Users`, `Sessions`) avoid the clash altogether | |
+| `user`, `session` (table names) | Fine when quoted via Prisma; a plural table name avoids the clash altogether — but **not** for the auth set, which stays singular by the exception in §1 | |
 
 In the schema, annotate every reserved-word workaround:
 

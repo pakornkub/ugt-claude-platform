@@ -176,8 +176,13 @@ employee view over a linked server — `lib/directory.ts`.
 - Must bypass `/_next/` (else static assets get an HTML redirect →
   `Unexpected token '<'`) and `/api/health` (else the healthcheck bounces to
   `/login` → container never healthy)
-- At the edge use `getSessionCookie()` (presence check only) —
-  `auth.api.getSession()` needs the DB and is not edge-safe
+- In `proxy.ts` use `getSessionCookie()` (presence check only) — never
+  `auth.api.getSession()`. Not because of the runtime (since Next.js 16 this
+  file runs on Node.js), but because it runs on **every** request: a DB
+  round-trip there is latency on every navigation and turns a DB hiccup into a
+  full outage. The real session check belongs in the layout/Server Action
+- `export const config` is the only export name Next.js reads for the matcher —
+  renaming it silently disables route protection
 
 ## Privileged Server Actions — fixed order
 

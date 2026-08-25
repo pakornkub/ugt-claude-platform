@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/auth.ts
-// kit-hash: 815ef84429fd
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
+// kit-hash: a14271bec1e8
 'use server';
 
 import { cookies, headers } from 'next/headers';
@@ -12,6 +12,7 @@ import { ldapBind } from '@/lib/ldap'; // [METHOD: LDAP] — remove if LDAP not 
 // [METHOD: LDAP] — remove with the enrichment below when the project has no
 // central employee directory to read from
 import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
+import { AUDIT_ACTIONS, type AuditAction } from '@/lib/audit-actions';
 import { env } from '@/lib/env';
 
 // ─── Schemas ── [METHOD: LDAP|LOCAL] ─────────────────────────────────────────
@@ -105,8 +106,10 @@ async function getRequestMeta(): Promise<{ ip: string; userAgent: string }> {
 }
 
 // Non-blocking — never throw; audit failure must not interrupt auth flow.
+// `action` is typed AuditAction, not string — the constant is the only way in
+// (references/audit-logging.md: never a raw string at a call site).
 async function logAuthEvent(
-  action: string,
+  action: AuditAction,
   userId: string,
   detail: Record<string, unknown>
 ): Promise<void> {
@@ -140,7 +143,7 @@ export async function ldapLoginAction(values: {
   try {
     ldapUser = await ldapBind(username, password);
   } catch {
-    await logAuthEvent('login.failed', 'anonymous', { authType: 'ldap', username, ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.LOGIN_FAILED, 'anonymous', { authType: 'ldap', username, ip, userAgent });
     return { code: 'INVALID_AD_CREDENTIALS' };
   }
 
@@ -196,7 +199,7 @@ export async function ldapLoginAction(values: {
   });
 
   // 5. Audit log — login success (OWASP A09)
-  await logAuthEvent('login.success', user.id, { authType: 'ldap', ip, userAgent });
+  await logAuthEvent(AUDIT_ACTIONS.LOGIN_SUCCESS, user.id, { authType: 'ldap', ip, userAgent });
 }
 
 // ─── Local Login ─────────────────────────────────────────────────────────────
@@ -224,7 +227,7 @@ export async function localLoginAction(values: {
   });
 
   if (!result.ok) {
-    await logAuthEvent('login.failed', 'anonymous', {
+    await logAuthEvent(AUDIT_ACTIONS.LOGIN_FAILED, 'anonymous', {
       authType: 'local',
       email: parsed.data.email,
       ip,
@@ -263,7 +266,7 @@ export async function localLoginAction(values: {
     await prisma.user
       .update({ where: { id: userRecord.id }, data: { authType: 'local' } })
       .catch(() => {});
-    await logAuthEvent('login.success', userRecord.id, { authType: 'local', ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.LOGIN_SUCCESS, userRecord.id, { authType: 'local', ip, userAgent });
   }
 }
 
@@ -319,7 +322,7 @@ export async function logoutAction(): Promise<void> {
   const userId = await deleteDbSession();
   if (userId) {
     const { ip, userAgent } = await getRequestMeta();
-    await logAuthEvent('logout', userId, { ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.LOGOUT, userId, { ip, userAgent });
   }
 
   await clearSessionCookies();
@@ -336,7 +339,7 @@ export async function ssoLogoutAction(): Promise<void> {
   const userId = await deleteDbSession();
   if (userId) {
     const { ip, userAgent } = await getRequestMeta();
-    await logAuthEvent('logout.sso', userId, { ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.LOGOUT_SSO, userId, { ip, userAgent });
   }
 
   // Backchannel logout: POST directly to Keycloak — no browser redirect.

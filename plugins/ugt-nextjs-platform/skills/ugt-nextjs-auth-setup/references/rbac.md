@@ -48,8 +48,14 @@ Rules:
 
 ```ts
 const perms = await getUserPermissions(session.user.id); // string[] via role chain
-if (!hasPermission(perms, PERMISSIONS.USERS_DELETE)) { /* forbidden */ }
+if (!hasPermission(perms, PERMISSIONS.ROLES_DELETE)) { /* forbidden */ }
 ```
+
+**Only check keys that exist in `lib/permissions.ts`.** There is no
+`users:delete` key on purpose (nothing in the kit deletes users — SSO/AD rows
+appear on first login, มติ 2026-08-11). `PERMISSIONS.USERS_DELETE` compiles to
+`undefined`, and `hasPermission(perms, undefined)` is `false` for everybody —
+a permanent 403 with no error message anywhere.
 
 `getUserPermissions` returns `[]` for users without a role → `hasPermission`
 returns `false` for everything. Load permissions **server-side only**; pass them
@@ -63,29 +69,34 @@ Every privileged Server Action: **session → permission → action → audit lo
 ```ts
 'use server';
 
-export async function deleteUserAction(userId: string): Promise<ActionResult> {
+export async function deleteRoleAction(roleId: string): Promise<ActionResult> {
   // 1. Session
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
-  // 2. Permission
+  // 2. Permission — a key that really exists in lib/permissions.ts
   const perms = await getUserPermissions(session.user.id);
-  if (!hasPermission(perms, PERMISSIONS.USERS_DELETE)) {
+  if (!hasPermission(perms, PERMISSIONS.ROLES_DELETE)) {
     return { success: false, code: 'FORBIDDEN' };
   }
 
   // 3. Domain checks + action
-  if (userId === session.user.id) {
-    return { success: false, code: 'CANNOT_DELETE_OWN_ACCOUNT' };
-  }
-  await prisma.user.delete({ where: { id: userId } });
+  const role = await prisma.role.findUnique({ where: { id: roleId }, select: { isSystem: true } });
+  if (!role) return { success: false, code: 'ROLE_NOT_FOUND' };
+  if (role.isSystem) return { success: false, code: 'SYSTEM_ROLE_DELETE_BLOCKED' };
+  // Holders fall back to "no role" (user.roleId is nullable) — the delete is
+  // never blocked by them.
+  await prisma.$transaction([
+    prisma.user.updateMany({ where: { roleId }, data: { roleId: null } }),
+    prisma.role.delete({ where: { id: roleId } }),
+  ]);
 
-  // 4. Audit log (non-blocking — .catch(() => {}))
+  // 4. Audit log (non-blocking — .catch(() => {})), action from the constants
   await prisma.activityLog.create({
-    data: { userId: session.user.id, action: 'users.delete', detail: JSON.stringify({ targetId: userId }) },
+    data: { userId: session.user.id, action: AUDIT_ACTIONS.ROLES_DELETE, detail: JSON.stringify({ targetId: roleId }) },
   }).catch(() => {});
 
-  revalidatePath('/admin/users');
+  revalidatePath('/admin/roles');
   return { success: true };
 }
 ```

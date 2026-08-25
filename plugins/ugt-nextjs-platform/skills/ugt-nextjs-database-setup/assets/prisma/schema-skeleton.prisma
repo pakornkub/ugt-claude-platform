@@ -1,11 +1,12 @@
 // ─── Naming Convention ───────────────────────────────────────────────────────
 // All table names MUST use PascalCase plural and be set via @@map().
 // MS SQL Server standard: PascalCase, plural, no reserved words.
-//   ✅  @@map("Users")          ✅  @@map("RolePermissions")
-//   ❌  @@map("user")           ❌  @@map("rolePermission")
-// EXCEPTION: the Better Auth tables pasted in by ugt-nextjs-auth-setup map
-// SINGULAR (@@map("User"), @@map("Session"), …) per that library's own
-// convention — do not pluralize them.
+//   ✅  @@map("Items")          ✅  @@map("HolidayLists")
+//   ❌  @@map("item")           ❌  @@map("holiday_lists")
+// EXCEPTION: the auth/RBAC tables pasted in by ugt-nextjs-auth-setup map
+// SINGULAR as a set — User, Session, Account, Verification, RateLimit, Role,
+// Permission, RolePermission — per Better Auth's own convention; do not
+// pluralize them (ActivityLogs is the one plural in that set).
 // Column names in the DB are PascalCase via @map(); Prisma fields and
 // relation names stay camelCase (Prisma convention).
 // Tables populated by external jobs (read-only to the app) use a distinct
@@ -13,7 +14,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
-  provider = "prisma-client-js" // MUST be prisma-client-js — "prisma-client" has no MSSQL driver adapter
+  // Org choice, not a Prisma limitation: "prisma-client" is upstream's
+  // recommended default (and works with the MSSQL adapter too), but every kit
+  // asset imports from "@prisma/client", which only this generator emits.
+  // "prisma-client-js" is deprecated upstream — a coordinated migration for the
+  // whole kit is planned; do not switch one project on its own.
+  provider = "prisma-client-js"
 }
 
 datasource db {

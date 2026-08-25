@@ -1,5 +1,70 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.51.0 (2026-08-25)
+
+**Audit ปูพรม 7 มิติ 2026-08-25 — แก้ verified-wrong + ความขัดแย้งทั้งชุดฝั่ง
+Next.js** ทุกข้อตรวจกับเอกสารทางการ/ซอร์สจริงของ package ก่อนแก้ (Better Auth
+1.7.1 แตก tarball อ่านตรง, SonarJS rule metadata, Next.js 16 docs):
+
+ของที่พังจริง/เงียบ (auth-setup):
+- `assets/proxy.ts`: `export const proxyConfig` → **`export const config`**
+  (Next อ่านชื่อนี้ชื่อเดียว — matcher เดิมเป็น dead code proxy รันทุก request)
+  + เช็คเวอร์ชัน Next ก่อน copy: <16 ต้องใช้ชื่อ `middleware.ts` (เดิมโปรเจค
+  Next 15 ได้ไฟล์ที่ไม่มี route protection แบบเงียบ)
+- `assets/lib/auth.ts`: คีย์ `rateLimit.customRules` ตัด basePath —
+  `'/api/auth/sign-in/email'` ไม่เคย match (library ตัด `/api/auth` ก่อนเทียบ)
+  → `'/sign-in/email'` / `'/request-password-reset'` — brute-force protection
+  กลับมาทำงานจริง
+- `assets/lib/audit-actions.ts` **ไฟล์ใหม่**: ค่าคงที่ audit action ที่
+  `references/audit-logging.md` บังคับแต่ไม่เคย ship — refactor call site
+  ทุกตัวเลิกใช้ raw string, verify.mjs สแกนกันถอยหลัง
+- ตัวอย่าง guard ใน `rbac.md`/`audit-logging.md` เลิกใช้
+  `PERMISSIONS.USERS_DELETE` ที่ kit จงใจไม่ประกาศ (copy แล้ว
+  `hasPermission(perms, undefined)` = 403 เงียบถาวร) → เขียนรอบ `ROLES_DELETE`
+- `BETTER_AUTH_URL` optional → **required** (ไม่ตั้งใน production =
+  `__Secure-` prefix mismatch = redirect loop ที่ skill นี้กันเอง)
+- Keycloak redirect URI slash ใน `keycloak-client.md` ตรงกันทุกจุดแล้ว
+  (`<BETTER_AUTH_URL>/__BASE_PATH__/...`) + โน้ตว่า backchannel logout แบบ
+  POST เป็น legacy endpoint เก็บไว้โดยตั้งใจ
+
+database-setup:
+- เหตุผล generator เขียนใหม่ตามจริง: org คง `prisma-client-js` เพราะ asset
+  import `@prisma/client` (ไม่ใช่ "prisma-client ไม่มี MSSQL adapter" ซึ่ง
+  กลับด้านกับความจริง — ตัวใหม่คือ default ที่ Prisma แนะนำ ตัวเดิม deprecated)
+- `migrations.md`: `--to-schema-datamodel` (ถูกถอดใน Prisma 7) → `--to-schema`
+  · เพิ่ม §shadow database (สิทธิ์ CREATE DATABASE บน SQL Server องค์กร +
+  `SHADOW_DATABASE_URL`) — gap ที่จะเจอทุกโปรเจคที่รัน `migrate dev` ครั้งแรก
+- `naming-conventions.md`: ตัวอย่าง ✅ เลิกใช้ชื่อตารางชุดยกเว้น
+  (`Users`/`RolePermissions` → `HolidayLists`/`Items`) + กฎตัด audit column
+  ต้องบันทึก `⚠ deviation` ตาม contract
+
+ความขัดแย้ง prose ที่แก้ให้ตรงฝั่งที่ enforce จริง:
+- auth-setup: ข้อยกเว้น singular 5 → **8 ตาราง** ตรง verify.mjs ทั้งสองฝั่ง ·
+  §3 Q7 mail↔auth เลิกวนลูป — ใช้ two-pass ตาม full-setup (auth → mail →
+  กลับ §5.5) · ข้อยกเว้น audit columns + hard delete ของตาราง auth ประกาศ
+  ชัด + สั่งบันทึก `⚠ deviation` ใน architecture.md · เหตุผล "Edge" ที่ตาย
+  แล้ว (proxy รัน Node.js ตั้งแต่ Next 16) → เหตุผล latency จริง ·
+  SKILL.md 506 → 465 บรรทัด (checklist ย้ายไป `references/verification.md`)
+- pitfalls: `hardening.md` เลิกสอน catalog `.json` (ชนกับ gate `check-i18n.mjs`
+  ที่บังคับ `.ts`) · `dates-timezones.md` §4 เขียนใหม่ตามมติ 2026-08-24 —
+  ค.ศ. เสมอ ไม่มีเส้นทาง ±543 (เดิมสอน "display BE" พร้อม helper ที่ contract
+  ประกาศว่าต้องไม่มีอยู่) · verify.mjs จับ ±543 ทุกที่ ไม่มี exempt
+- clean-code: Sonar rule ID ผิด 3 จุดแก้ตาม SonarJS metadata จริง (S7764 ไม่จับ
+  `typeof window` · `a ? a : b` = S6644 · S7718 ignore `e`/`err` โดย default)
+  + verify.mjs เลิก false-positive `catch (e|err)` · กลไก NOSONAR อธิบายถูก
+  (ติดที่บรรทัด ไม่ใช่ชนิด comment) + caveat ว่า NOSONAR ไม่รับ rule key
+- cicd-setup: health payload `'ok'` → **`'healthy'`** ตรง contract + อีก 2
+  stack · `sonar-project.properties` แก้ sources/tests ทับซ้อน (เสี่ยง
+  "indexed twice") ให้ตรง convention co-located ของ test-lint-setup ·
+  stage summary `format` → `format:check` · Jenkins custom image จบ
+  `USER jenkins` ไม่ใช่ root · แก้ข้ออ้าง HEALTHCHECK env / `--network host`
+- test-lint-setup: frontmatter ครบสี่ script · "three in parallel" → สอง ·
+  กลไก globalIgnores สะสมไม่ใช่ทับ · kit-sync `ROOT_FILES` เพิ่ม
+  `vitest.setup.ts` (เดิมมองไม่เห็นตลอดกาล) · design-setup `check-contrast.mjs`
+  รองรับ `src/` layout (เดิม gate ปิดงานพังบน src/ โปรเจค) · `size="icon"`
+  ตามมติ 2026-08-21 (ทุกที่ + aria-label) · smoke checklist ที่ซ้ำ §6
+  ยุบเหลือ pointer (design-setup + full-setup)
+
 ## 4.50.0 (2026-08-25)
 
 **`ugt-nextjs-auth-setup` SKILL.md restructure** (backlog §10 — the piece

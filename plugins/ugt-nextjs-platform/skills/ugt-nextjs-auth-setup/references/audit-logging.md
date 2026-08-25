@@ -27,7 +27,7 @@ covers the write, read, and retention rules.
 model activityLog {
   id        Int      @id @default(autoincrement()) @map("Id")
   userId    String   @map("UserId")   // no FK — users can be deleted; history must survive
-  action    String   @map("Action")   // dot-namespaced: "users.delete", "export.excel"
+  action    String   @map("Action")   // dot-namespaced: "roles.delete", "export.excel"
   detail    String?  @db.NVarChar(Max) @map("Detail")  // JSON string, nullable
   createdAt DateTime @default(now()) @map("CreatedAt")
 
@@ -45,8 +45,11 @@ model activityLog {
 
 ## Action naming
 
+The constants ship as an asset — copy `assets/lib/audit-actions.ts` to
+`lib/audit-actions.ts` and import from it; do not retype the list:
+
 ```ts
-// lib/audit-actions.ts
+// lib/audit-actions.ts (excerpt — the asset is the full, authoritative list)
 export const AUDIT_ACTIONS = {
   LOGIN_SUCCESS: 'login.success',
   LOGIN_FAILED: 'login.failed',
@@ -54,58 +57,80 @@ export const AUDIT_ACTIONS = {
   LOGOUT_SSO: 'logout.sso',
   USERS_CREATE: 'users.create',
   USERS_ROLE_ASSIGN: 'users.role-assign',
-  USERS_DELETE: 'users.delete',
-  USERS_RESET_PASSWORD: 'users.resetPassword',
+  USERS_PASSWORD_SET: 'users.password-set',
+  ROLES_CREATE: 'roles.create',
   ROLES_UPDATE: 'roles.update',
-  EXPORT_EXCEL: 'export.excel',
-  SETTINGS_UPDATE: 'settings.update',
+  ROLES_DELETE: 'roles.delete',
+  // …password.* for local accounts, then the project's own domain actions
 } as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
 ```
 
 **Org-mandated set** (contract §2 item 4 — the assets already write all of
 these): `login.success` · `login.failed` · `logout` · `logout.sso` ·
-`users.create` · `users.role-assign`, plus for local accounts
-`password.reset.requested` · `password.reset` · `password.reset.refused` ·
-`password.change` · `password.change.failed` · `users.password-set`.
+`users.create` · `users.role-assign` · `roles.create` · `roles.update` ·
+`roles.delete`, plus for local accounts `password.reset.requested` ·
+`password.reset` · `password.reset.refused` · `password.change` ·
+`password.change.failed` · `users.password-set`.
 Add the rest per the project's domain.
 
-```ts
-// ✅ dot-namespaced, precise
-'users.delete'  ·  'export.excel'  ·  'settings.update'
+Every helper that writes a log takes `action: AuditAction`, never `string` — that
+is what makes "no raw strings" enforceable instead of merely requested.
 
-// ❌ vague / un-namespaced
-'export'  ·  'update'  ·  'changed settings'
+```ts
+// ✅ dot-namespaced, precise, all lowercase (kebab inside a segment)
+'roles.delete'  ·  'users.password-set'  ·  'export.excel'
+
+// ❌ vague / un-namespaced / camelCase inside a segment
+'export'  ·  'update'  ·  'changed settings'  ·  'users.resetPassword'
 ```
+
+There is **no `users.delete`** in the kit: nothing deletes users (SSO/AD rows
+appear on first login — มติ 2026-08-11). Add the constant only alongside a real
+action that writes it.
 
 ## Write pattern
 
 ### Sequential (default) — log after the primary operation succeeds
 
 ```ts
-export async function deleteUserAction(userId: string) {
+export async function deleteRoleAction(roleId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return { success: false, code: 'UNAUTHORIZED' };
 
   const perms = await getUserPermissions(session.user.id);
-  if (!hasPermission(perms, PERMISSIONS.USERS_DELETE)) {
+  if (!hasPermission(perms, PERMISSIONS.ROLES_DELETE)) {
     return { success: false, code: 'FORBIDDEN' };
   }
 
+  const role = await prisma.role.findUnique({ where: { id: roleId }, select: { isSystem: true } });
+  if (!role) return { success: false, code: 'ROLE_NOT_FOUND' };
+  if (role.isSystem) return { success: false, code: 'SYSTEM_ROLE_DELETE_BLOCKED' };
+
   // 1. Primary operation first
-  await prisma.user.delete({ where: { id: userId } });
+  await prisma.$transaction([
+    prisma.user.updateMany({ where: { roleId }, data: { roleId: null } }),
+    prisma.role.delete({ where: { id: roleId } }),
+  ]);
 
   // 2. Audit log after success
   await prisma.activityLog.create({
     data: {
       userId: session.user.id,
-      action: AUDIT_ACTIONS.USERS_DELETE,
-      detail: JSON.stringify({ targetUserId: userId }),
+      action: AUDIT_ACTIONS.ROLES_DELETE,
+      detail: JSON.stringify({ targetRoleId: roleId }),
     },
   });
 
   return { success: true };
 }
 ```
+
+> The permission in the example is `ROLES_DELETE` on purpose: `lib/permissions.ts`
+> deliberately ships **no `users:delete` key**, so an example built on
+> `PERMISSIONS.USERS_DELETE` would compile to `hasPermission(perms, undefined)`
+> — a permanent, silent 403 for everyone. Only check keys that exist.
 
 `code` is a SCREAMING_SNAKE_CASE key translated client-side via the
 `auth.errors` message catalog — see `lib/actions/admin-roles.ts` for a
@@ -114,7 +139,7 @@ worked example.
 ```ts
 // ❌ reversed order — logs an operation that hasn't happened (or failed)
 await prisma.activityLog.create({ ... });
-await prisma.user.delete({ ... });
+await prisma.role.delete({ ... });
 ```
 
 ### Non-blocking — paths where audit must never block the user

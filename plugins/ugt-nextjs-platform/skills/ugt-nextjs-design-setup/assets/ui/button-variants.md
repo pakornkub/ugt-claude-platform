@@ -2,7 +2,9 @@
 
 <!-- source: extracted from gov-boi-smart components/ui/button.tsx (base-mira) — installed by ugt-nextjs-design-setup -->
 
-เพิ่ม variant 4 ตัวลงใน `components/ui/button.tsx` (base-mira) ของโปรเจกต์ —
+เพิ่ม variant **5 ตัว** ลงใน `components/ui/button.tsx` (base-mira) ของโปรเจกต์ —
+`success` · `soft-primary` · `soft-destructive` · `soft-success` (สี่ตัวแรกอยู่ใน
+หัวข้อถัดไป) และ `field` (หัวข้อท้ายไฟล์ — **จำเป็น** เพราะ `ui/date-picker` ใช้) ·
 แก้เฉพาะ object `variants.variant` ภายใน `cva(...)` ไม่ต้องแตะส่วนอื่นของไฟล์
 
 สีถูกแปลงจาก token ของโปรเจกต์ต้นทาง (`--success`) มาเป็น token ขององค์กรแล้ว:

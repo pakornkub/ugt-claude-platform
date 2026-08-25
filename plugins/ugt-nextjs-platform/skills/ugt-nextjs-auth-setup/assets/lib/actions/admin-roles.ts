@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
-// kit-hash: adfc92e58cb4
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/admin-roles.ts
+// kit-hash: 9a9eb90e7a5c
 'use server';
 
 // lib/actions/admin-roles.ts — role CRUD for the (admin)/admin/roles page.
@@ -10,6 +10,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
+import { AUDIT_ACTIONS, type AuditAction } from '@/lib/audit-actions';
 
 type ActionResult = { success: true } | { success: false; code: string };
 
@@ -25,7 +26,9 @@ async function requirePermission(key: string) {
   return { ok: true as const, session };
 }
 
-async function auditLog(userId: string, action: string, detail: unknown) {
+// `action` is typed AuditAction, not string — the constant is the only way in
+// (references/audit-logging.md: never a raw string at a call site).
+async function auditLog(userId: string, action: AuditAction, detail: unknown) {
   await prisma.activityLog.create({ data: { userId, action, detail: JSON.stringify(detail) } }).catch(() => {});
 }
 
@@ -47,7 +50,7 @@ export async function createRoleAction(input: RoleInput): Promise<ActionResult> 
     },
   });
 
-  await auditLog(gate.session.user.id, 'roles.create', { roleId: role.id, name: role.name });
+  await auditLog(gate.session.user.id, AUDIT_ACTIONS.ROLES_CREATE, { roleId: role.id, name: role.name });
   revalidatePath('/admin/roles');
   return { success: true };
 }
@@ -76,7 +79,7 @@ export async function updateRoleAction(roleId: string, input: RoleInput): Promis
     }),
   ]);
 
-  await auditLog(gate.session.user.id, 'roles.update', { roleId, name: input.name });
+  await auditLog(gate.session.user.id, AUDIT_ACTIONS.ROLES_UPDATE, { roleId, name: input.name });
   revalidatePath('/admin/roles');
   return { success: true };
 }
@@ -96,7 +99,7 @@ export async function deleteRoleAction(roleId: string): Promise<ActionResult> {
     prisma.role.delete({ where: { id: roleId } }),
   ]);
 
-  await auditLog(gate.session.user.id, 'roles.delete', { roleId, name: role.name });
+  await auditLog(gate.session.user.id, AUDIT_ACTIONS.ROLES_DELETE, { roleId, name: role.name });
   revalidatePath('/admin/roles');
   revalidatePath('/admin/users');
   return { success: true };

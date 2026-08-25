@@ -1,10 +1,11 @@
-// kit: ugt-nextjs-platform 4.47.3 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: cfbb5b8307a2
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: 27c52b1c773f
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
+import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 import { sendTemplatedMail } from '@/lib/email'; // [METHOD: LOCAL] — needs ugt-nextjs-mail-setup; remove with sendResetPassword
 // [METHOD: SSO] — remove with the enrichment in the session hook below when the
 // project has no central employee directory to read from
@@ -96,7 +97,7 @@ export const auth = betterAuth({
         .create({
           data: {
             userId: user.id,
-            action: 'password.reset',
+            action: AUDIT_ACTIONS.PASSWORD_RESET,
             detail: JSON.stringify({ authType: 'local' }),
           },
         })
@@ -105,13 +106,17 @@ export const auth = betterAuth({
   },
   rateLimit: {
     storage: 'database', // requires the rateLimit model (see schema-auth.prisma)
+    // Keys are the endpoint path RELATIVE to Better Auth's own basePath — the
+    // library strips `/api/auth` (its basePath) from the request path before
+    // matching, so a key written as '/api/auth/sign-in/email' never matches and
+    // the rule silently does nothing (the default limit applies instead).
     customRules: {
       // [METHOD: LOCAL] — stricter window for email sign-in: 5 attempts per 60 seconds.
       // Remove this rule when Local login is not selected (emailAndPassword.enabled: false).
-      '/api/auth/sign-in/email': { window: 60, max: 5 },
+      '/sign-in/email': { window: 60, max: 5 },
       // [METHOD: LOCAL] — each success sends a real email; 3 per 15 minutes.
       // The Server Action limits by IP too, but this also covers direct API calls.
-      '/api/auth/request-password-reset': { window: 15 * 60, max: 3 },
+      '/request-password-reset': { window: 15 * 60, max: 3 },
     },
   },
   session: {
@@ -248,7 +253,7 @@ export const auth = betterAuth({
               .create({
                 data: {
                   userId: session.userId,
-                  action: 'login.success',
+                  action: AUDIT_ACTIONS.LOGIN_SUCCESS,
                   detail: JSON.stringify({ authType: 'sso' }),
                 },
               })

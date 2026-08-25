@@ -19,6 +19,41 @@ npx prisma migrate deploy
   stale generated client → run `npx prisma generate` before chasing individual
   type errors
 
+### 1.1 The shadow database — read this before the first `migrate dev`
+
+`prisma migrate dev` (only `dev`; `deploy` never does this) needs a **second,
+throwaway database**: it replays every migration there to detect drift and to
+diff the schema. By default it tries to `CREATE DATABASE` / `DROP DATABASE` one
+next to `DATABASE_URL`.
+
+**On the org's shared SQL Server that fails**, and it is the first thing a new
+project hits: the app login is granted rights inside its own database only, not
+`CREATE DATABASE` on the instance. The error names permissions, not the shadow
+DB, so it reads like a wrong password.
+
+Fix — ask the DBA for **one pre-created empty database on the dev server**
+(e.g. `__DB_NAME___shadow`), and point Prisma at it explicitly:
+
+```ts
+// prisma.config.ts
+datasource: {
+  url: process.env['DATABASE_URL'],
+  // Pre-created empty DB, dev only. Prisma wipes it on every migrate dev —
+  // never point this at anything that holds data.
+  shadowDatabaseUrl: process.env['SHADOW_DATABASE_URL'],
+},
+```
+
+```bash
+# .env.local — same server/credentials, different database name
+SHADOW_DATABASE_URL="sqlserver://__DB_HOST__:__DB_PORT__;database=__DB_NAME___shadow;user=__DB_USER__;password=__DB_PASSWORD__;encrypt=true;trustServerCertificate=true"
+```
+
+Alternative when the DBA prefers it: grant the dev login `dbcreator` **on the
+dev server only** and let Prisma manage the shadow DB itself. Either way it is
+a dev/CI concern — production runs `migrate deploy`, which needs no shadow
+database and no extra rights.
+
 ## 2. Hand-written migration SQL — always wrap in a transaction
 
 Hand-written migrations use the same frame Prisma generates:
@@ -124,7 +159,8 @@ messages.
 3. Create a baseline migration and mark it applied:
 
    ```bash
-   npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma \
+   # --to-schema, not --to-schema-datamodel: the old flag was removed in Prisma 7
+   npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma \
      --script > prisma/migrations/0_init/migration.sql
    npx prisma migrate resolve --applied 0_init
    ```

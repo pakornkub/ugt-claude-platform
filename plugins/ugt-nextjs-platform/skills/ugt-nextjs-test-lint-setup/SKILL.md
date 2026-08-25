@@ -5,8 +5,9 @@ description: >
   set up so the org CI pipeline can pass — Vitest (with JUnit output + lcov
   coverage), ESLint, Prettier, husky/lint-staged pre-commit — or when the
   pipeline is already failing at the Code Quality / Unit Tests / Quality Gate
-  stages because `lint`, `format:check`, or `test:coverage` is missing, produces
-  no `test-results/junit.xml`, or reports coverage that SonarQube can't read.
+  stages because `lint`, `format:check`, `test:coverage`, or `build` is
+  missing, produces no `test-results/junit.xml`, or reports coverage that
+  SonarQube can't read.
   Triggers in Thai: "ตั้ง test", "ใส่ vitest", "ยังไม่มี test เลย", "ตั้ง eslint /
   prettier", "pipeline แดงที่ lint", "coverage ไม่ขึ้นใน sonar".
   Use it proactively before ugt-nextjs-cicd-setup: the Jenkins pipeline calls these four
@@ -29,7 +30,7 @@ code lives in `assets/`.
 
 | Rule | Why |
 | --- | --- |
-| npm scripts must be named **`lint`, `format:check`, `test:coverage`, `build`** | The Jenkinsfile calls them literally (the Code Quality stage runs three of them in parallel) — wrong name = instant red stage |
+| npm scripts must be named **`lint`, `format:check`, `test:coverage`, `build`** | The Jenkinsfile calls them literally (Code Quality runs `lint` + `format:check` in parallel — its third branch is `npx tsc --noEmit`, not an npm script; then Unit Tests runs `test:coverage` and Build runs `build`) — wrong name = instant red stage |
 | The test runner must emit **`test-results/junit.xml` when `CI=true`** | The Unit Tests stage's `junit` publisher reads this file; no file = no test results on the build page |
 | Coverage must emit **lcov** | SonarQube reads it via `sonar.javascript.lcov.reportPaths` — without lcov, `new_coverage` reads 0% and the gate (≥ 60%) blocks every build |
 | `coverage.include` must cover **all real source** | Including only dirs that already have tests inflates coverage — the gate passes while the code is untested |
@@ -75,7 +76,8 @@ npm i -D vitest @vitest/coverage-v8 @vitejs/plugin-react jsdom \
 | `assets/husky-pre-commit` | `.husky/pre-commit` |
 
 No placeholders to substitute — but adjust `coverage.include` in
-`vitest.config.ts` to the real layout (interview answer 2).
+`vitest.config.ts` to the layout you detected (§Interview: read it from the
+project, don't ask).
 
 ### 3. Add scripts + lint-staged to `package.json`
 
@@ -139,7 +141,7 @@ CI=true npm run test:coverage && ls test-results/junit.xml coverage/lcov.info
 | `reporters: process.env.CI ? [..., 'junit'] : [...]` | junit always on (report files litter every local run) |
 | `coverage.reporter` includes `lcov` | `text` only (Sonar can't read it → gate sees 0%) |
 | Stub `server-only` with a file in the project | Alias into `node_modules/next` (breaks in worktrees without a full install) |
-| Write `globalIgnores` including all eslint-config-next defaults | Declare only your own ignores (overrides next's set → eslint crawls `.next/`) |
+| Restate the eslint-config-next defaults in `globalIgnores` so the whole ignore surface is readable in one place | Claim it is required — global ignores **accumulate**, they never replace next's set |
 | pre-commit = `npx lint-staged` | pre-commit = `npm test` (slow → `--no-verify` → pointless) |
 | `SKIP_ENV_VALIDATION: '1'` in `test.env` | Tests requiring a real `.env` |
 

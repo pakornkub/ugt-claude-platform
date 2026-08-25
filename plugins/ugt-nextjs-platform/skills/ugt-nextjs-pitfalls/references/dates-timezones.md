@@ -1,4 +1,4 @@
-# Dates & Timezones — MSSQL binding, anchors, Buddhist-era display
+# Dates & Timezones — MSSQL binding, anchors, Gregorian-only years
 
 The single principle behind every rule here: **know which anchor your `Date`
 object carries (UTC-midnight, local-midnight, or a real instant) — and make
@@ -76,18 +76,29 @@ so it reads back identically through UTC getters. Prefer `<input type="time">`
 plus a separate date field over `datetime-local` — `new Date(localString)`
 stores an offset value.
 
-## 4. Buddhist-era years — store CE, display BE
+## 4. Years are Gregorian (ค.ศ.) everywhere — there is no BE code path
 
-- **Every stored/queried year is Gregorian (ค.ศ.)** — same convention as every
-  other year column. Never store or `WHERE year = …` a BE (พ.ศ.) value.
-- Convert **only at the UI edge**, through two central helpers
-  (`displayYear(yearCE, locale)` / `inputToCEYear(shown, locale)`) with
-  `BE_OFFSET = 543` defined once. **No inline `+543`/`−543` anywhere else** —
-  verify with `grep -rn "543"` after touching year logic.
+**Org contract (มติ 2026-08-24, ugt-core `contracts/design.md` §Dates):
+store CE, display CE.** No conversion layer exists and none may be added —
+พ.ศ. was explicitly abolished, so a `+543` anywhere in the tree is a bug, not
+a display helper.
+
+- **Stored, queried, and rendered years are all Gregorian.** Never store,
+  never `WHERE year = …`, and never *show* a BE (พ.ศ.) value.
+- **No `±543` anywhere — no exceptions, not even "just in the central
+  helper".** There is no `displayYear`/`inputToCEYear` in the kit to put it
+  in. `scripts/verify.mjs` (rule `BE-YEAR`) fails on any `+543`/`−543`.
+- The reason a Thai locale needs no conversion is the formatter, not a
+  helper: `lib/format.ts` pins `th-TH-u-ca-gregory` (plain `th-TH` would
+  render พ.ศ. through `Intl`) and `en-GB` for DD/MM/YYYY. **Every year on
+  screen goes through that module** — a hand-rolled `${d.getFullYear()}`
+  string is how a stray BE year got back in.
+- Symptom → cause: Thai text showing a year ~543 off means either an inline
+  `+543` survived somewhere, or an `Intl` call built with a bare `th-TH`
+  locale (or `toLocaleDateString('th-TH')`) instead of `lib/format.ts`. The
+  fix is always to route through the formatter, never to add a conversion.
 - Holiday/day-type matching: match by **date** (`holidayDate`), never by year
   column — year-keyed lookups are what broke when the conventions were mixed.
-- Forms in Thai locale accept BE input → convert with `inputToCEYear` on
-  submit, render with `displayYear`.
 
 ## 5. Small but expensive
 

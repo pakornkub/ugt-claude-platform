@@ -47,7 +47,7 @@ The shared contract **every project follows identically**:
 ### 2.1 Stages (all 10, in order)
 
 ```
-Checkout → Install → Code Quality (parallel: lint / format / typecheck)
+Checkout → Install → Code Quality (parallel: lint / format:check / typecheck)
   → Unit Tests (JUnit + coverage publish) → Build
   → OWASP Dependency Check (90-min timeout + suppression file)
   → SonarQube Analysis → Quality Gate (waitForQualityGate abortPipeline: true)
@@ -185,8 +185,8 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 - No DB → delete every block commented `[DB]` (prisma generate in Install +
   Dockerfile, builder image build, migrate step in Deploy, `DATABASE_URL` in
   compose, **and the `[DB]` block in `app/api/health/route.ts`** — after
-  removal health still correctly returns `ok`, because `every()` on an empty
-  check set is `true`)
+  removal health still correctly returns `healthy`, because `every()` on an
+  empty check set is `true`)
 - No Sentry → delete everything marked `[SENTRY]`: Jenkinsfile (comment block +
   the opening `withCredentials` sentry-dsn line + the closing brace marked
   `[SENTRY] end withCredentials` + both DSN build-args — **keep the docker
@@ -303,8 +303,10 @@ server side still needs admin confirmation.
       healthy / 503 when the DB is down · no version/commit in the response
 - [ ] sonar-project.properties: sources/tests/exclusions match the real layout ·
       **every path in `sonar.sources`/`sonar.tests` exists in the repo**
-      (sonar-scanner fails instantly otherwise) · CPD/multicriteria start empty
-      (examples in comments only)
+      (sonar-scanner fails instantly otherwise) · `sonar.test.inclusions` and
+      the test globs in `sonar.exclusions` are mirror images (co-located tests →
+      main/test sets must stay disjoint, else "can't be indexed twice") ·
+      CPD/multicriteria start empty (examples in comments only)
 - [ ] owasp-suppressions.xml (empty skeleton) at the root
 - [ ] Both compose files: `pull_policy: never` · `APP_PORT` overridable ·
       healthcheck uses `127.0.0.1` + the right basePath per env

@@ -82,10 +82,13 @@ const RULES = [
   {
     id: 'BE-YEAR',
     severity: 'error',
-    name: 'inline ±543 Buddhist-era math — allowed only inside the central displayYear/inputToCEYear helper',
+    name: '±543 Buddhist-era math — the org rule is ค.ศ. always (มติ 2026-08-24), so no BE code path exists anywhere',
+    // No helper exemption on purpose: there is no sanctioned conversion
+    // helper to exempt. The old rule waved this through inside
+    // /format-date|utils/ — a path that never matched the kit's real
+    // formatter (lib/format.ts) anyway, so it only ever hid violations.
     test: (l) => /[+-]\s*543\b/.test(l),
-    fix: 'store CE, convert at the UI edge via displayYear()/inputToCEYear() (BE_OFFSET defined once)',
-    exempt: (rel) => /format-date|utils/.test(rel),
+    fix: 'store CE, display CE — delete the conversion; render years through lib/format.ts (th-TH-u-ca-gregory)',
   },
   {
     id: 'DATE-ANCHOR',

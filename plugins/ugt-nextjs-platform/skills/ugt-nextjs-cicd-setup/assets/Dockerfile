@@ -75,7 +75,10 @@ ENV PORT=3000 \
 
 # Health check on the app's health endpoint.
 # - Use 127.0.0.1, NOT localhost (Alpine resolves localhost to ::1/IPv6 only)
-# - Path must be hardcoded — env var substitution does not work in HEALTHCHECK
+# - Path is hardcoded on purpose. Shell-form CMD does run through /bin/sh, so a
+#   runtime `$VAR` would expand — but the basePath is a BUILD-time value here and
+#   nothing sets it in the runner's environment, so a variable would just resolve
+#   to empty and silently probe the wrong URL.
 # - docker-compose healthcheck (per environment) overrides this one; keep both
 #   in sync. Dev image's compose file uses the dev basePath.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

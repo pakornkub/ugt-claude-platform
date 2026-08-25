@@ -56,8 +56,11 @@ What lands in the project:
    CSS / CSS-in-JS / inline styles except truly dynamic values.
 2. **lucide only, never emoji** — and the fixed icon mapping (see
    `references/conventions.md`): same action = same icon on every page.
-3. **Sizes = `default`** everywhere; sanctioned exceptions (`icon` in table
-   rows, `sm` in dense toolbars) are listed in DESIGN.md, nowhere else.
+3. **Sizes = `default`** everywhere; sanctioned exceptions are listed in
+   DESIGN.md, nowhere else: `size="icon"` for an icon-only button **anywhere**
+   as long as it carries an `aria-label` (มติ 2026-08-21 — theme toggle,
+   SidebarTrigger, column settings, pagination), **but inside a table row it
+   must go through `IconAction`**; `sm` in dense toolbars.
 4. **DataTable only** for tabular data; server-paginated data must sort and
    filter server-side through URL state — never client-sort a partial page.
    Every instance passes a **unique `id`** (prefs persist), and page-level
@@ -340,15 +343,7 @@ design-questions.template.md · globals.tokens.css) พร้อมที่ม�
    ✘ — never report done with exit code 1 outstanding.
 2. Summarize: every file added/changed, the answers recorded in DESIGN.md,
    and any deviations grandfathered.
-3. Smoke checklist:
-   - [ ] every `<DataTable>` has a unique `id` (verify.mjs checks) · page
-     filters sit in the table's card, left-aligned (by eye — verify.mjs only
-     warns on a bare `<Input>` used as search/filter; it cannot see placement)
-   - [ ] `npm run build` passes
-   - [ ] a page using Button/Input/Table renders with the new tokens (both
-     light and dark if dark mode was selected)
-   - [ ] `check-contrast.mjs` exits 0
-   - [ ] `docs/DESIGN.md` มติ table has today's entry
+3. Walk the Verification Checklist (§6).
 
 ### Sync mode ("sync ข้อตกลง design")
 
@@ -382,7 +377,7 @@ contain project มติ that deliberately deviate.
 
 ## 6. Verification Checklist
 
-Run first, then walk what a script cannot see (details in Step 4 — Close out):
+Run first, then walk what a script cannot see:
 
 ```bash
 node <skill-dir>/scripts/verify.mjs      # cwd = project root
@@ -399,7 +394,7 @@ node <skill-dir>/scripts/check-contrast.mjs
 - [ ] `npm run build` passes
 - [ ] a page using Button / Input / Table renders with the new tokens, in
       light **and** dark if dark mode was selected
-- [ ] the installed UI matches the platform repo's `docs/design-preview.html`
+- [ ] the installed UI matches the platform repo's `docs/web/design-preview.html`
       (open it from the marketplace checkout — the file is **not** copied into
       the project) — that page is the promise the org makes to the reader
 - [ ] `node <skill-dir>/scripts/check-i18n.mjs` เขียว — catalog `th`/`en` มี key

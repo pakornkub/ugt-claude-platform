@@ -63,6 +63,8 @@ project. Deep detail lives in `references/`:
 - `references/i18n-wiring.md` — registering the `auth` message catalog in
   `i18n/messages.ts` (§5.2) and why skipping it fails silently
 - `references/placeholders.md` — the full placeholder table + substitution rules (§6)
+- `references/verification.md` — the by-hand half of the verification checklist
+  (§8 runs the script; this is everything the script cannot see)
 
 ## 2. Org Standards
 
@@ -144,11 +146,16 @@ Ask all of these **in a single message** before doing anything:
    - **มี workflow อนุมัติไหม?** → installs `lib/approval-chain.ts` and needs the
      **approval-chain view**, which is a different object from the employee one
 7. **[If Local] Is `ugt-nextjs-mail-setup` installed?**
-   - yes → password reset by email is installed (forgot dialog + `/reset-password`)
-   - no → say plainly that **"ลืมรหัสผ่าน" cannot exist without it**, so the only
-     recovery is an admin using "ตั้งรหัสผ่าน" on `/admin/users`. Offer to run
-     mail-setup first. Never install the button without the mail behind it —
-     Better Auth answers `RESET_PASSWORD_DISABLED` and the user gets a dead form.
+   - yes → password reset by email is installed now (forgot dialog + `/reset-password`)
+   - no → **do NOT run mail-setup first** — mail-setup needs auth (session actor
+     + the `dev-mode:enable` permission), so that order is a deadlock. Use the
+     two-pass order full-setup §3 defines: **install auth now without the reset
+     pieces** (no `sendResetPassword` in `lib/auth.ts`, no forgot dialog, no
+     `/reset-password` page) → run `ugt-nextjs-mail-setup` → **come back to
+     §5.5 and add the reset pieces**. Say out loud that until pass two lands,
+     the only recovery is an admin using "ตั้งรหัสผ่าน" on `/admin/users`.
+     Never install the button without the mail behind it — Better Auth answers
+     `RESET_PASSWORD_DISABLED` and the user gets a dead form.
    - Self-service **change password** and admin **set password** work either way.
 8. **[Existing project with menus] เมนูเดิมตัวไหนบ้างที่ต้องคุมสิทธิ์?** — before
    asking, check whether the project already has an app shell/sidebar (that
@@ -223,12 +230,21 @@ project root** (`assets/lib/auth.ts` → `lib/auth.ts`, `assets/app/(admin)/…`
 `proxy.ts`; Next.js 16 uses `proxy.ts`, not `middleware.ts`), then handle the
 exceptions:
 
+> **Check the project's Next.js version before copying `proxy.ts`** (read
+> `next` in `package.json`). `proxy.ts` is a **Next.js ≥16** filename: on 15 or
+> older Next never loads it, so there is **no route protection at all** and
+> nothing warns you — the app just serves protected pages to anyone. On <16,
+> copy the identical content to `middleware.ts` instead (rename the exported
+> `proxy` function to `middleware`; `export const config` stays as-is), or
+> upgrade Next first.
+
 | Asset | Destination | Note |
 | --- | --- | --- |
 | `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see §5.3 |
 | `assets/env.example` | merge into `.env.example` + `.env.local` | drop vars for unselected methods |
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
 | `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
+| `assets/lib/audit-actions.ts` | `lib/audit-actions.ts` | every project — the only place an `ActivityLogs.action` string may be written; every shipped action imports `AUDIT_ACTIONS` from here (`references/audit-logging.md`) |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 | `assets/lib/directory.ts` | `lib/directory.ts` | only when a central employee view exists — substitute the four-part view name + column map; skipping it means deleting the directory columns from the schema too (§3 Q6) |
 | `assets/lib/scope.ts` + `assets/lib/scope.test.ts` | `lib/…` | row-level data scope (read-all → own → team). Needs `lib/directory.ts` for the management chain |
@@ -267,22 +283,44 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
 
 1. Paste `assets/prisma/schema-auth.prisma` into `prisma/schema.prisma`
    (adjust `@db.NVarChar(Max)` if not MSSQL)
-   > **Naming-rule exception**: Better Auth core tables (`User`, `Session`,
-   > `Account`, `Verification`, `RateLimit`) map to **singular** names per the
-   > library's own convention — an explicit exception to the org's
-   > PascalCase-**plural** rule. Do not pluralize them.
+   > **Naming-rule exception — 8 tables, not 5**: `User`, `Session`, `Account`,
+   > `Verification`, `RateLimit`, `Role`, `Permission`, `RolePermission` map to
+   > **singular** names (Better Auth's own convention for the first five; the
+   > last three share the form because they live in the same file and are read
+   > together) — an explicit exception to the org's PascalCase-**plural** rule.
+   > Do not pluralize them. `ActivityLogs` is the one plural in the set, and
+   > both `verify.mjs` scripts enforce exactly this list.
+   > **The same exception covers the audit columns and hard delete**: these
+   > tables carry no `CreatedBy`/`UpdatedBy`/`IsActive`/`IsDeleted`, and the
+   > shipped actions really do call `prisma.role.delete` / `prisma.user.delete`
+   > instead of `IsDeleted = 1` — Better Auth owns these rows (it writes and
+   > deletes them itself and never reads our columns), and `Session`/`Account`
+   > cascade from `User`, so a soft-deleted user would keep working sessions.
+   > **Record it during install** as a `⚠ deviation` line in
+   > `docs/project-context/architecture.md` — `contracts/database.md` requires
+   > that line for every audit-column / soft-delete exemption, e.g.
+   > *⚠ deviation: ตาราง auth ทั้ง 8 ไม่มี audit columns และใช้ hard delete —
+   > Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)*
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
 3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately
 
 ### 5.4 Env schema (`lib/env.ts` or equivalent)
 
 - `BETTER_AUTH_SECRET` → `z.string().min(32)` (required)
-- `BETTER_AUTH_URL`, `BETTER_AUTH_TRUSTED_ORIGINS` → optional string
+- `BETTER_AUTH_URL` → **required** (`z.url()`), not optional: Better Auth decides
+  the `__Secure-` cookie prefix from `baseURL`'s scheme and falls back to
+  `NODE_ENV` when it is empty — unset in production means the name it sets and
+  the name `lib/actions/auth.ts` looks for disagree → redirect loop
+- `BETTER_AUTH_TRUSTED_ORIGINS` → optional string
 - `KEYCLOAK_ISSUER/CLIENT_ID/CLIENT_SECRET` → required only when SSO is on
   (the code in `lib/auth.ts` already guards `undefined` to survive `SKIP_ENV_VALIDATION=1`)
 - `LDAP_URL/LDAP_BASE_DN/LDAP_DOMAIN` → required only when LDAP is on
 - `NEXT_PUBLIC_BASE_PATH` → `z.string().default('')` — **must** live in the
-  t3-env `client` block **and** be listed in `runtimeEnv` (otherwise undefined at runtime)
+  t3-env `client` block **and** be listed in `runtimeEnv` (otherwise undefined at
+  runtime). That declaration is what **server** files import from `@/lib/env`;
+  **client** components read `process.env.NEXT_PUBLIC_BASE_PATH` directly instead,
+  because a `createEnv()` wrapper comes back empty in the client bundle under
+  Turbopack (gotcha table in `references/auth-flows.md`)
 - `NEXT_PUBLIC_APP_NAME` → optional string (login-form.tsx displays it) — also
   in the `client` block + `runtimeEnv`
 
@@ -417,90 +455,11 @@ node <skill-dir>/scripts/verify.mjs
 ```
 
 It checks leftover placeholders (including the one hidden in `login-form.tsx`),
-unremoved `[METHOD: …]` markers, the cookie prefix across all 3 files, the
-schema, and the commonly mis-called APIs — the rest must be exercised by hand:
+unremoved `[METHOD: …]` markers, the guard file name + its `config` export, the
+cookie prefix across all 3 files, audit actions coming from constants, the
+schema, and the commonly mis-called APIs.
 
-- [ ] `npm run build` passes (and passes with `SKIP_ENV_VALIDATION=1` if SSO is on)
-- [ ] Login works with every selected method, then protected pages are reachable
-- [ ] Unselected methods are fully removed (login-form sections, actions, imports, env vars)
-- [ ] Logout clears the cookie + the DB session + returns to `/login` (test on https too if possible)
-- [ ] [SSO] after logout, clicking login again → must see the Keycloak page again (backchannel logout works)
-- [ ] Visiting `/login` while logged in → bounces to the dashboard; a protected page without login → bounces to `/login`; API routes without a session → 401 JSON
-- [ ] [Local + mail] "ลืมรหัสผ่าน?" with a **real** email and with a made-up one →
-      **the same message both times**, and the email arrives for the real one
-- [ ] The mailed link opens the reset page **on the deployed basePath**, not a 404
-- [ ] Using the same link twice → the second time says expired/already used
-- [ ] After a reset, a session open on another browser is logged out
-- [ ] [Local] Change password from the profile menu: wrong current password is
-      refused; a password that breaks the policy is refused with the same message
-      the reset page gives; after success this browser stays logged in
-- [ ] The change-password item does **not** appear for an SSO/LDAP account
-- [ ] [Local] `POST /api/auth/sign-up/email` from curl → refused
-      (`EMAIL_PASSWORD_SIGN_UP_DISABLED`), while "เพิ่มผู้ใช้" on `/admin/users`
-      still works
-- [ ] [Local] The new user can log in with the initial password, and the audit
-      log has a `users.create` row with **no password in `detail`**
-- [ ] [Local] Admin "ตั้งรหัสผ่าน" on a row → that user's open sessions die and
-      the new password works; the button is absent on SSO/LDAP rows
-- [ ] [LDAP/SSO] A brand-new AD user logs in for the first time → their row
-      appears with directory fields filled; assign the role from `/admin/users`
-      and it sticks on the next login
-- [ ] [Directory] Log in and check the `User` row: employee code, department,
-      position, supervisor are filled — and by **both** SSO and LDAP, not one
-- [ ] [Directory] Change someone's department in the HR view, log in again →
-      the app row follows
-- [ ] [Directory] Point the view name at something unreachable → login still
-      works, the fields just stay as they were (this is the check that matters)
-- [ ] [Scope] As a user **without** `:read-all`, edit `?empCode=` to a colleague's
-      → 404, and the list shows only your own + your team's rows
-- [ ] [Scope] `npm test` passes `lib/scope.test.ts` (cycles, unlinked account,
-      empty-list-means-no-rows)
-- [ ] [Approval] Point `__HR_AUTHORIZE_VIEW__` at something unreachable →
-      submitting a request **fails visibly**; it must never save with no approver
-- [ ] [Approval] An employee with no chain configured gets "ติดต่อฝ่ายบุคคล",
-      not the same message as a system error
-- [ ] Static assets load (no `Unexpected token '<'` in the console)
-- [ ] Fresh database: log in as anyone → the app layout redirects to
-      `/admin/setup` (no blank permission-less page); after bootstrap the
-      redirect stops for everyone
-- [ ] `/admin/setup` works: one click grants Administrator and redirects to
-      `/admin/users`; revisiting `/admin/setup` redirects away
-- [ ] NavUser (bottom of the sidebar): opening the menu and clicking
-      "บัญชีผู้ใช้" really opens the profile card, and "ออกจากระบบ" really logs
-      out — this catches a leftover Radix `onSelect`/`asChild` (§7)
-- [ ] Admin pages follow DESIGN.md §3/§4 (§7's UI rows): `page-shell`
-      title+subtitle on all three pages · delete via `ConfirmActionDialog` ·
-      row buttons `IconAction` soft colours with tooltips · role Sheet's
-      permission checklist scrolls all the way
-- [ ] `/admin/users`: the Administrator (or any user with `USERS_READ`) sees
-      every user, and can reassign another user's role — but not their own
-      (the dropdown is disabled on their own row)
-- [ ] `/admin/roles`: create a role, check some permission boxes, save →
-      appears in the list with the right permission count; edit and delete
-      work on it; the `Administrator` (system) row has no edit/delete button
-- [ ] A user assigned the new role can reach only what its permissions allow
-      (both UI — the nav item is hidden — and the Server Action, which must
-      still reject a direct call with the wrong permission)
-- [ ] `/admin/audit-logs` shows the `roles.create` / `users.role-assign` rows
-      from the steps above
-- [ ] `/admin/audit-logs` filters run server-side: filtering by user / date
-      range / action changes the URL (`q`/`from`/`to`/`action`), and paging
-      keeps the filter, and a refresh or a shared link shows the same result
-- [ ] ActivityLogs has `login.success` / `logout` rows after testing
-- [ ] Cookie prefix matches across `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` (grep `cookiePrefix\|APP_COOKIE_PREFIX`)
-- [ ] With a basePath: the cookie name in DevTools starts with your basePath (e.g. `expense-portal.`, or `__Secure-expense-portal.` on https)
-- [ ] Security headers reach **every** response, not just HTML pages —
-      `curl -sI http://localhost:3000/login` and
-      `curl -sI http://localhost:3000/api/health` must both show
-      `content-security-policy`, `x-frame-options: DENY`,
-      `x-content-type-options: nosniff`, `referrer-policy` and
-      `permissions-policy` (every `return` in `proxy.ts` must go through
-      `applySecurityHeaders()` — why each header exists is in that file's own
-      comments, read those before changing it)
-- [ ] `http://localhost` has **no** `strict-transport-security` header; https
-      has it without `includeSubDomains`/`preload` (reasons in `proxy.ts`)
-- [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)
-- [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
-      (cwd = project root) reports `0 failed`, and every auth screen (login,
-      `/admin/users`, `/admin/roles`, `/admin/audit-logs`, change/reset/forgot
-      password) shows English text after switching locale
+Everything the script cannot see — login through every selected method, logout,
+the reset-link flows, scope/approval behaviour, the admin pages, security
+headers, i18n — is the by-hand list in **`references/verification.md`**. Walk it
+before calling an install done.

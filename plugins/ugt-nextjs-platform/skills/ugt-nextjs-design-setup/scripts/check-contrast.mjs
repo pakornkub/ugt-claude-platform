@@ -5,10 +5,25 @@
 //
 // Run after generating tokens and after ANY color edit (contract rule).
 // Checks both :root and .dark. Exit 1 on any pair < 4.5:1.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const css = readFileSync(join(process.cwd(), 'app', 'globals.css'), 'utf8');
+// src/ layouts move app/ wholesale under src/ — the same support verify.mjs
+// and check-i18n.mjs have. Root-only lookup here threw ENOENT on exactly those
+// projects, so the close-out gate could never pass on a src/ project.
+const ROOT = process.cwd();
+const CSS_FILE = [join(ROOT, 'app', 'globals.css'), join(ROOT, 'src', 'app', 'globals.css')].find((f) =>
+  existsSync(f),
+);
+if (!CSS_FILE) {
+  console.error(
+    '✘ globals.css not found at app/globals.css or src/app/globals.css\n' +
+      `      cwd must be the project root (currently: ${ROOT})\n` +
+      '      if the file is missing entirely, install the tokens first (assets/globals.tokens.css)',
+  );
+  process.exit(1);
+}
+const css = readFileSync(CSS_FILE, 'utf8');
 
 // ── parse token blocks ─────────────────────────────────────────────────────
 function block(selector) {

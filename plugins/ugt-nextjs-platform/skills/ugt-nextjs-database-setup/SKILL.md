@@ -122,7 +122,14 @@ the placeholder table below go into `.env.local` only.
 - **`url` lives in `prisma.config.ts` only** — never put `url` in the
   `datasource` block of `schema.prisma` (Prisma 7 + driver adapter fails)
 - The generator must be **`provider = "prisma-client-js"`** — not
-  `"prisma-client"` (the latter has no MSSQL driver adapter)
+  `"prisma-client"`. This is an **org choice, not a Prisma limitation**: both
+  generators support the MSSQL driver adapter, and `prisma-client` is upstream's
+  recommended default now, but every kit asset (and the auth-setup assets on top
+  of it) imports from `@prisma/client`, which only `prisma-client-js` produces.
+  Switching one project alone breaks those imports. `prisma-client-js` is
+  deprecated upstream, so a coordinated migration to `prisma-client` — assets
+  and skills together, in one platform release — is planned; until it lands,
+  stay on `prisma-client-js`
 - **`import type sql from 'mssql'`** only — a value import breaks TypeScript
   (only the `sql.config` type is needed)
 - Never touch `process.env` directly in app code — always import from
@@ -136,6 +143,10 @@ the placeholder table below go into `.env.local` only.
    `@@map("PascalCasePlural")`, field camelCase → `@map("PascalCase")`, full
    audit columns)
 2. `npx prisma migrate dev --name init`
+   > **First `migrate dev` on the shared org server fails without a shadow
+   > database** — the app login has no `CREATE DATABASE` right and the error
+   > talks about permissions, not the shadow DB. Set `shadowDatabaseUrl` to a
+   > pre-created empty dev database → `references/migrations.md` §1.1
 3. `npx prisma generate`
 4. Check for reserved words before every migrate → `references/naming-conventions.md`
 
@@ -154,7 +165,7 @@ Mandatory pattern: **sanitize before parameterize, always**; call SPs with
 | DO ✅ | DON'T ❌ |
 | --- | --- |
 | `url` in `prisma.config.ts` only | `url` in the `schema.prisma` datasource |
-| `provider = "prisma-client-js"` | `provider = "prisma-client"` |
+| `provider = "prisma-client-js"` (kit assets import `@prisma/client`) | `provider = "prisma-client"` — correct upstream, wrong for this kit until the coordinated migration |
 | `import type sql from 'mssql'` | `import sql from 'mssql'` (value import) |
 | `import { env } from '@/lib/env'` | raw `process.env.*` in app code |
 | `@@map("PascalCasePlural")` on every model | camelCase table names leaking from models |

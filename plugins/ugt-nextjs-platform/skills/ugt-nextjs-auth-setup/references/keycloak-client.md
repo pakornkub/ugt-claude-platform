@@ -26,8 +26,12 @@ better-auth 1.7, so its callback lives under the core `callback/:id` route
 basePath the URI must include it:
 
 ```
-<BETTER_AUTH_URL>__BASE_PATH__/api/auth/callback/keycloak
+<BETTER_AUTH_URL>/__BASE_PATH__/api/auth/callback/keycloak
 ```
+
+⚠️ Copy the slashes exactly as written — Keycloak compares the redirect URI as a
+literal string, so one missing or extra `/` (or a trailing one) is rejected the
+same way a wrong host would be.
 
 Register one entry per environment, e.g.:
 
@@ -61,6 +65,18 @@ performs a **backchannel logout POST** to
 `assets/lib/actions/auth.ts`). The browser is never redirected through
 Keycloak, so *Valid post logout redirect URIs* can stay empty.
 
+> **Note (2026-08-25): this is Keycloak's legacy logout format, kept on
+> purpose.** Keycloak's own docs describe the `POST … /logout` with
+> `client_id + client_secret + refresh_token` as a non-standard legacy
+> endpoint; the standards-track path is the OIDC RP-initiated
+> `end_session_endpoint`. It still works and is what the shipped
+> `ssoLogoutAction` does — **do not redesign the flow as part of an install**.
+> For a future migration, better-auth ≥1.7 exposes `endSessionEndpoint` (and
+> `disableProviderLogout` to turn its own call off) on the provider config, so
+> the switch is a config change plus registering *Valid post logout redirect
+> URIs* in the client — one coordinated change across all projects, not a
+> per-project decision.
+
 ## TLS gotcha (internal CA)
 
 If the shared Keycloak uses a certificate from the org's internal CA, Node.js
@@ -79,6 +95,6 @@ Jenkins Secret File credential).
 - [ ] Client created in the org realm with Client ID = `__PROJECT_NAME__`
 - [ ] Client authentication ON; secret copied to `KEYCLOAK_CLIENT_SECRET`
 - [ ] PKCE method S256 set
-- [ ] Redirect URI(s) registered exactly as `<BETTER_AUTH_URL>__BASE_PATH__/api/auth/callback/keycloak`
+- [ ] Redirect URI(s) registered exactly as `<BETTER_AUTH_URL>/__BASE_PATH__/api/auth/callback/keycloak` (slashes included)
 - [ ] `KEYCLOAK_ISSUER` verified via `/.well-known/openid-configuration`
 - [ ] App host can reach the Keycloak host over the network (curl the issuer from the server)

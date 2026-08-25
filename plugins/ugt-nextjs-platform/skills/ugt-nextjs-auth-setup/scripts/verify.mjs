@@ -6,7 +6,7 @@
 // Anchors at process.cwd() as the project root — a file that should exist but
 // can't be found is a FAIL, never a pass.
 // Real flow testing (login via every method, logout clearing the cookie,
-// /admin/setup) cannot be machine-checked — walk §8 of SKILL.md by hand.
+// /admin/setup) cannot be machine-checked — walk references/verification.md by hand.
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -68,19 +68,48 @@ const AUTH_FILES = [
 const pkg = has('package.json') ? JSON.parse(read('package.json')) : null;
 const schema = has('prisma/schema.prisma') ? read('prisma/schema.prisma') : '';
 
+// The route-guard file is `proxy.ts` on Next.js >= 16 and `middleware.ts`
+// before that (SKILL.md §5.2) — identical content, different filename. Every
+// check below reads whichever one the project actually has.
+const nextRange = String(pkg?.dependencies?.next ?? pkg?.devDependencies?.next ?? '');
+const nextMajor = Number(/(\d+)/.exec(nextRange)?.[1] ?? NaN);
+const GUARD_FILE = has('proxy.ts') || !has('middleware.ts') ? 'proxy.ts' : 'middleware.ts';
+
 // ── 1. Required files ──────────────────────────────────────────────────────
 check('Core auth files present', () => {
-  const missing = AUTH_FILES.filter((f) => !has(f));
+  // proxy.ts counts as present when the project is on Next < 16 and named it
+  // middleware.ts instead — same file, the version decides the name.
+  const missing = AUTH_FILES.filter((f) => !has(f) && !(f === 'proxy.ts' && has('middleware.ts')));
   return missing.length
     ? { ok: false, msg: `Missing: ${missing.join(', ')} — run ugt-nextjs-auth-setup first` }
     : { ok: true };
 });
 
-check('proxy.ts, not middleware.ts', () => {
-  if (has('middleware.ts') && !has('proxy.ts')) {
-    return { ok: false, msg: 'Found middleware.ts — Next.js 16 uses proxy.ts; the guard will never run' };
+check('Guard file name matches the Next.js major (>=16 proxy.ts, else middleware.ts)', () => {
+  // Both mistakes are silent: Next never loads the wrong filename, so the app
+  // serves every protected page to anyone and nothing logs a word.
+  const wantsProxy = Number.isNaN(nextMajor) || nextMajor >= 16;
+  if (wantsProxy) {
+    return has('middleware.ts') && !has('proxy.ts')
+      ? { ok: false, msg: 'Found middleware.ts — Next.js 16 uses proxy.ts; the guard will never run' }
+      : { ok: true };
   }
-  return { ok: true };
+  return has('proxy.ts') && !has('middleware.ts')
+    ? {
+        ok: false,
+        msg: `next@${nextRange} is below 16 and never loads proxy.ts — no route protection at all; copy the same content to middleware.ts (export the function as \`middleware\`)`,
+      }
+    : { ok: true };
+});
+
+check('Guard file exports `config` (the matcher actually applies)', () => {
+  if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
+  return /export\s+const\s+config\b/.test(read(GUARD_FILE))
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: `${GUARD_FILE} has no \`export const config\` — Next.js reads only that exact name, so a renamed export (e.g. proxyConfig) means the matcher is ignored`,
+      };
 });
 
 check('First-admin bootstrap page exists', () => {
@@ -212,7 +241,7 @@ check('[METHOD: …] markers remain only for methods actually kept', () => {
 // Presence + no-hardcoded-literal only — it does NOT compare the derived
 // values across files (that would need evaluating the expressions).
 check('Cookie prefix env-driven in all 3 files (no hardcoded literal)', () => {
-  const targets = ['lib/auth.ts', 'proxy.ts', 'lib/actions/auth.ts'];
+  const targets = ['lib/auth.ts', GUARD_FILE, 'lib/actions/auth.ts'];
   const missing = targets.filter((f) => !has(f));
   if (missing.length) return { ok: false, msg: `Missing files: ${missing.join(', ')}` };
   // stripComments first — a cross-reference comment mentioning cookiePrefix
@@ -235,8 +264,8 @@ check('Cookie prefix env-driven in all 3 files (no hardcoded literal)', () => {
 });
 
 check('proxy redirects are app-relative', () => {
-  if (!has('proxy.ts')) return { ok: false, msg: 'No proxy.ts' };
-  const body = stripComments(read('proxy.ts'));
+  if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
+  const body = stripComments(read(GUARD_FILE));
   // Flag only *assignments* to url.pathname that mention basePath on the same line
   const bad = body
     .split('\n')
@@ -248,8 +277,8 @@ check('proxy redirects are app-relative', () => {
 });
 
 check('proxy bypasses /_next/ and /api/health', () => {
-  if (!has('proxy.ts')) return { ok: false, msg: 'No proxy.ts' };
-  const body = read('proxy.ts');
+  if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
+  const body = read(GUARD_FILE);
   const problems = [];
   if (!body.includes('_next')) problems.push("no /_next/ bypass → static assets get an HTML redirect (Unexpected token '<')");
   if (!body.includes('/api/health')) problems.push('no /api/health bypass → healthchecks bounce to /login');
@@ -304,8 +333,8 @@ check('Password reset wired correctly', () => {
   if (!has('lib/password-policy.ts')) {
     problems.push('lib/password-policy.ts missing — each form will grow its own rules and the loosest one wins');
   }
-  if (has('proxy.ts') && !/reset-password/.test(read('proxy.ts'))) {
-    problems.push('/reset-password is not public in proxy.ts — the mailed link bounces to /login');
+  if (has(GUARD_FILE) && !/reset-password/.test(read(GUARD_FILE))) {
+    problems.push(`/reset-password is not public in ${GUARD_FILE} — the mailed link bounces to /login`);
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
@@ -457,6 +486,44 @@ check('Auth/RBAC tables map singular per convention', () => {
   return wrong.length ? { ok: false, msg: wrong.join(' · ') } : { ok: true };
 });
 
+check('Audit actions come from lib/audit-actions.ts, not raw strings', () => {
+  if (!has('lib/audit-actions.ts')) {
+    return {
+      ok: false,
+      msg: 'lib/audit-actions.ts missing — audit-logging.md mandates every ActivityLogs.action string come from a constant there (copy the asset)',
+    };
+  }
+  const bad = [];
+  for (const file of sourceFiles()) {
+    if (file === p('lib/audit-actions.ts')) continue;
+    const body = stripComments(readFileSync(file, 'utf8'));
+    // `action: 'users.create'` / `logAuthEvent('login.success', …)` — a dotted
+    // lowercase literal where a constant belongs.
+    const hits = [
+      ...body.matchAll(/action:\s*'([a-z][a-z0-9.-]*\.[a-z0-9.-]+)'/g),
+      ...body.matchAll(/logAuthEvent\(\s*'([a-z][a-z0-9.-]*)'/g),
+    ].map((m) => m[1]);
+    if (hits.length) bad.push(`${relative(ROOT, file)}: ${[...new Set(hits)].join(', ')}`);
+  }
+  return bad.length
+    ? { ok: false, msg: `raw audit action string(s) — import AUDIT_ACTIONS instead: ${bad.slice(0, 5).join(' · ')}` }
+    : { ok: true };
+});
+
+check('rateLimit.customRules keys omit the /api/auth basePath', () => {
+  if (!has('lib/auth.ts')) return { ok: true };
+  const body = stripComments(read('lib/auth.ts'));
+  const rules = /customRules\s*:\s*\{([\s\S]*?)\n\s*\}/.exec(body)?.[1];
+  if (!rules) return { ok: true, msg: 'no customRules configured' };
+  const bad = [...rules.matchAll(/'(\/api\/auth\/[^']+)'\s*:/g)].map((m) => m[1]);
+  return bad.length
+    ? {
+        ok: false,
+        msg: `${bad.join(', ')} — Better Auth strips its own /api/auth basePath before matching, so these rules never fire and the default limit silently applies; use '/sign-in/email' etc.`,
+      }
+    : { ok: true };
+});
+
 check('ActivityLogs never UPDATEd/DELETEd from app code', () => {
   const bad = [];
   for (const file of sourceFiles()) {
@@ -479,6 +546,25 @@ check('BETTER_AUTH_SECRET enforces length >= 32', () => {
   return /BETTER_AUTH_SECRET\s*:[^\n]*min\(\s*32\s*[,)]/.test(body)
     ? { ok: true }
     : { ok: 'warn', msg: 'No .min(32) found — a short secret weakens the HMAC' };
+});
+
+check('BETTER_AUTH_URL is required, not optional', () => {
+  if (!has('lib/env.ts')) return { ok: false, msg: 'No lib/env.ts' };
+  const line = read('lib/env.ts')
+    .split('\n')
+    .find((l) => /BETTER_AUTH_URL\s*:/.test(l));
+  if (!line) {
+    return {
+      ok: false,
+      msg: 'lib/env.ts has no BETTER_AUTH_URL — Better Auth then derives the __Secure- cookie prefix from NODE_ENV instead of the real scheme',
+    };
+  }
+  return /\.optional\(\)/.test(line)
+    ? {
+        ok: false,
+        msg: 'BETTER_AUTH_URL is optional — unset in production means the cookie Better Auth sets and the name lib/actions/auth.ts looks for disagree (redirect loop). Make it required (SKILL.md §5.4)',
+      }
+    : { ok: true };
 });
 
 check('NEXT_PUBLIC_BASE_PATH in client block + runtimeEnv', () => {

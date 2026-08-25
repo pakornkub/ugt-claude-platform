@@ -8,8 +8,14 @@
 | `__PROJECT_NAME__:latest` + `:<BUILD_NUMBER>` | runner | the real image docker-compose deploys (standalone, small) |
 
 - Always tag with `BUILD_NUMBER` (not bare `latest`) → rollback possible
-- `--network host` is required: Next.js `npm run build` fetches from the
-  internet (e.g. Google Fonts) — no network = build fails
+- `--network host` on the build: **not** a blanket requirement. A build already
+  has network access through the default bridge, so add it only when the build
+  actually reaches out (typically `next/font/google`, which downloads the font
+  files at build time) **and** the bridge path is blocked on that host — e.g. an
+  outbound proxy that only the host's own network namespace can use, or a
+  corporate DNS/firewall the bridge doesn't inherit. Symptom that justifies it:
+  the build fails on a font/network fetch and succeeds with `--network host`.
+  Self-hosting the fonts (`next/font/local`) removes the need entirely
 - Project **without a database** → cut the builder image build + migrate step
 
 ## B. Iron rule: client-side vars = build args only
@@ -88,9 +94,12 @@ HEALTHCHECK (wget from Jenkins can false-positive on network/proxy issues).
 - **`127.0.0.1`, not `localhost`** — Alpine resolves `localhost` to `::1`
   (IPv6) while Node listens on IPv4 → "Connection refused" though the app is fine
 - **Always port 3000** (container-internal) — never the host port
-- **Path is hardcoded** in the Dockerfile `HEALTHCHECK` — env-var substitution
-  doesn't work in that syntax; each env's compose healthcheck overrides the
-  Dockerfile (dev compose uses the dev basePath)
+- **Path is hardcoded** in the Dockerfile `HEALTHCHECK`. Not because shell-form
+  `CMD` can't expand variables — it runs via `/bin/sh`, so `$VAR` *would* expand
+  at check time — but because the basePath is only known at **build** time and
+  nothing puts it in the runner stage's environment, so a variable would expand
+  to empty and probe the wrong URL. Each env's compose healthcheck overrides the
+  Dockerfile anyway (dev compose uses the dev basePath)
 - `start_period: 60s` — give the app time to boot before failures count
 
 ## F. Dockerfile gotchas (never delete)

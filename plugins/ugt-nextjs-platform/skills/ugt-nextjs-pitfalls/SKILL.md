@@ -10,8 +10,9 @@ description: >
   reload), a fetch that 404s only in production, "Maximum update depth
   exceeded" pointing at a UI-primitive component (Base UI now, Radix in
   legacy projects), pagination showing "หน้า 1 จาก 0",
-  a Select crashing on an empty value, Thai text showing the wrong Buddhist
-  year, ticking a table row but a different row gets selected ("ติ๊กแถวนึง
+  a Select crashing on an empty value, a year on screen off by ~543
+  ("ปีเป็น พ.ศ." — the org rule is ค.ศ. always, no BE conversion path),
+  ticking a table row but a different row gets selected ("ติ๊กแถวนึง
   ได้อีกแถว"), a form that passes validation but gets rejected at save
   ("ฟอร์มผ่านแต่บันทึกไม่ได้"), or code edits not showing in the browser while
   the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน" — stale dev cache).

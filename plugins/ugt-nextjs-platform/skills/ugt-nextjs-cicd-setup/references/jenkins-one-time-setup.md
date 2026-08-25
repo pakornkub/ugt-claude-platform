@@ -77,7 +77,10 @@ RUN apt-get update && \
 RUN groupmod -g <host-docker-gid> docker && \
     usermod -aG docker jenkins
 
-USER root
+# Back to the jenkins user — the whole point of the two lines above is to let
+# the UNPRIVILEGED jenkins user reach the socket. Ending on `USER root` would
+# run Jenkins (and every build) as root and make the GID matching pointless.
+USER jenkins
 ```
 
 ```bash

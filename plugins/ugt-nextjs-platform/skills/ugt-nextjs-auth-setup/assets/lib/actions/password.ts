@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/lib/actions/password.ts
-// kit-hash: a4f786cad072
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/password.ts
+// kit-hash: 1fc39d2ca25a
 'use server';
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL] only.
@@ -20,6 +20,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
+import { AUDIT_ACTIONS, type AuditAction } from '@/lib/audit-actions';
 import { passwordSchema } from '@/lib/password-policy';
 
 // ─── Cookie naming ───────────────────────────────────────────────────────────
@@ -62,8 +63,10 @@ async function getRequestMeta(): Promise<{ ip: string; userAgent: string }> {
   return { ip, userAgent: headersList.get('user-agent') ?? 'unknown' };
 }
 
+// `action` is typed AuditAction, not string — the constant is the only way in
+// (references/audit-logging.md: never a raw string at a call site).
 async function logAuthEvent(
-  action: string,
+  action: AuditAction,
   userId: string,
   detail: Record<string, unknown>
 ): Promise<void> {
@@ -103,7 +106,7 @@ export async function forgotPasswordAction(values: {
   // บัญชี SSO/LDAP ไม่มีรหัสผ่านในระบบนี้ — ส่งลิงก์ไปก็ตั้งไม่ได้
   // และการตั้งได้จะกลายเป็นทางลัดข้าม directory ขององค์กร
   if (user && user.authType !== 'local') {
-    await logAuthEvent('password.reset.refused', user.id, {
+    await logAuthEvent(AUDIT_ACTIONS.PASSWORD_RESET_REFUSED, user.id, {
       reason: 'not-a-local-account',
       authType: user.authType,
       ip,
@@ -117,7 +120,7 @@ export async function forgotPasswordAction(values: {
     .catch(() => {});
 
   if (user) {
-    await logAuthEvent('password.reset.requested', user.id, { ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.PASSWORD_RESET_REQUESTED, user.id, { ip, userAgent });
   }
   return { ok: true };
 }
@@ -204,7 +207,7 @@ export async function changePasswordAction(values: {
   }
 
   if (!result.ok) {
-    await logAuthEvent('password.change.failed', session.user.id, { ip, userAgent });
+    await logAuthEvent(AUDIT_ACTIONS.PASSWORD_CHANGE_FAILED, session.user.id, { ip, userAgent });
     return { code: 'WRONG_CURRENT_PASSWORD' };
   }
 
@@ -225,6 +228,6 @@ export async function changePasswordAction(values: {
     });
   }
 
-  await logAuthEvent('password.change', session.user.id, { ip, userAgent });
+  await logAuthEvent(AUDIT_ACTIONS.PASSWORD_CHANGE, session.user.id, { ip, userAgent });
   return { ok: true };
 }

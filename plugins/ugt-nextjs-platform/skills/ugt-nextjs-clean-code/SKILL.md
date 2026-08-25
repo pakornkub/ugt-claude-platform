@@ -45,15 +45,31 @@ Write the **left** column by default — the right one is what SonarQube flags.
 | --- | --- | --- |
 | `str.replaceAll('x', 'y')` | `str.replace(/x/g, 'y')` | S7781 |
 | `Number.parseInt(v, 10)` / `Number.parseFloat(v)` | `parseInt(v, 10)` / `parseFloat(v)` | S7773 |
-| `globalThis.window !== undefined` | `typeof window !== 'undefined'` | S7764 |
+| `globalThis.location` / `globalThis.addEventListener('click', …)` | `window.location` / `self.…` / `global.…` | S7764 |
 | `x === undefined` | `typeof x === 'undefined'` | S7741 |
 | `arr.at(-1)` | `arr[arr.length - 1]` | S7755 |
 | `Math.max(0, x)` | `x > 0 ? x : 0` | S7766 |
-| `a ?? b` | `a !== null ? a : b` / `a ? a : b` | S6606 / S7735 |
+| `a ?? b` | `a !== null ? a : b` | S6606 |
+| `a \|\| b` (or `a ?? b` when `a` may be `0`/`''`) | `a ? a : b` | S6644 |
 | flip the branches → positive condition | `if (!notReady)` in a ternary | S7735 |
-| `catch (error_)` or `catch (error)` | `catch (err)` / `catch (e)` | S7718 |
+| `catch (error)` (nested: `catch (error_)`) | `catch (problem)` / `catch (failure)` — any name outside the allowed set | S7718 |
 | remove the assertion | `value as Foo` where TS already narrows | S4325 |
 | delete the dead expression | `void someExpr;` | S3735 |
+
+**Two rows people over-apply — don't "fix" what the rule already allows:**
+
+- **S7764** (`unicorn/prefer-global-this`) **exempts `typeof` existence
+  checks**: the SSR guard `typeof window !== 'undefined'` is *fine as written*
+  — rewriting it to `globalThis.window !== undefined` buys nothing. S7741
+  doesn't flag it either (`no-typeof-undefined` leaves global variables alone
+  by default). The rule also allows genuinely window-specific APIs
+  (`window.innerWidth`/`innerHeight`, `resize`/`load`/`unload` listeners).
+- **S7718** (`unicorn/catch-error-name`) wants the name `error`, but its
+  default ignore list already permits **`e`, `ex`, anything ending in `err`,
+  anything ending in `exception`, `cause`, `reason`, and any `_`-prefixed
+  name**. So `catch (e)` and `catch (err)` do **not** raise an issue — only a
+  name outside that set does (`catch (problem)`). Write `error` for
+  consistency; never open a PR just to rename `e` → `error`.
 
 **Component / type rules:**
 
@@ -106,8 +122,19 @@ export function Wizard() { // NOSONAR typescript:S3776 — cohesive state machin
 // ❌ next line / JSX block comment → suppresses nothing
 header: () => (
   // NOSONAR …          ← wrong: the issue is on the `() => (` line above
-{/* NOSONAR … */}       ← wrong: SonarQube ignores JSX block comments
+{/* NOSONAR … */}       ← wrong: a JSX block comment sits on its OWN line,
+                           which is never the line the issue is reported on
 ```
+
+Two things NOSONAR does **not** do:
+
+- **It is not per-rule.** `// NOSONAR typescript:S106` suppresses **every**
+  issue on that line — the rule key is just prose for the next reader, Sonar
+  ignores it. If a line carries two findings and you meant to keep one, split
+  the line or use `sonar.issue.ignore` instead.
+- **It is not a block comment problem.** NOSONAR works fine inside `/* … */`;
+  what fails above is *placement* — the marker must land on the same line the
+  issue is reported on, and a `{/* … */}` line in JSX never is.
 
 ### Systematic false positives → `sonar.issue.ignore.multicriteria`
 
@@ -130,7 +157,16 @@ on generic-type variant components · **S6848 / S1082** (a11y) on UI primitives
 delegating ARIA to a parent.
 
 `console.*` in fire-and-forget catch blocks → `// NOSONAR typescript:S106`
-on the same line.
+on the same line (the `typescript:S106` half is a comment for humans — the
+marker still silences the whole line).
+
+**Before suppressing, check the rule is even active.** Not every rule cited
+here ships in the built-in **Sonar way** profile — S106, S4325, S7735 and
+S7764 are the ones to verify — so whether a finding blocks the gate depends on
+the Quality Profile your SonarQube project uses. Look at
+`Project → Quality Profiles` first: a suppression for a rule that never fires
+is dead weight, and a rule you assumed was off may be the thing turning the
+gate red.
 
 ## Verification Checklist
 

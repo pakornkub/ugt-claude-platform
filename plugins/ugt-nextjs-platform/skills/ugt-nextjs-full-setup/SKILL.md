@@ -245,11 +245,8 @@ How:
    `.env.local`. If CI was NOT installed but Auth was, render the same
    template with only the Keycloak section into `docs/admin-handoff.md`
    (SSO needs a client either way).
-3. Attach a **smoke-test checklist** matching what was actually installed, e.g.:
-   - [ ] `npm run build` passes
-   - [ ] login works with every enabled method → protected page reachable → logout clears the cookie
-   - [ ] `/admin/setup` grants Administrator on one click
-   - [ ] push `develop` → pipeline green through all stages
+3. Attach a **smoke-test checklist** — the Verification Checklist below,
+   trimmed to what was actually installed.
 
 ## Quick Rules
 
@@ -268,7 +265,8 @@ How:
 ## Verification Checklist
 
 Every installed module has its own `verify.mjs`; this skill has one too, for
-the harness layer. Run them all, then the smoke test (details in §5 Close out):
+the harness layer. Run them all, then walk the rest of this list — the last
+four items are the smoke test §5 Close out hands to the user:
 
 ```bash
 node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module

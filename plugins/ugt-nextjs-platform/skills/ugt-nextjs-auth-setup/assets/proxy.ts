@@ -1,8 +1,17 @@
-// kit: ugt-nextjs-platform 4.40.0 · ugt-nextjs-auth-setup/proxy.ts
-// kit-hash: dddb3b0085d0
-// proxy.ts — Next.js 16 edge route protection (Next.js 16 uses proxy.ts, not middleware.ts).
-// Cookie-presence check only (Edge-safe, no DB call) + CSP nonce injection
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: a3655bb8599a
+// proxy.ts — Next.js 16 route protection (Next.js 16 uses proxy.ts, not middleware.ts;
+// on Next.js 15 or older this same content must be named middleware.ts instead).
+// Cookie-presence check only (no DB call) + CSP nonce injection
 // + the standard security headers on every response (see applySecurityHeaders).
+//
+// Why presence-only, never `auth.api.getSession()`: since Next.js 16 this file
+// runs on the Node.js runtime (a `runtime` config is not even allowed here), so
+// "not Edge-safe" is no longer the reason. The reason is architectural — this
+// function runs on EVERY request that isn't a static asset, so a DB round-trip
+// here adds that latency to every navigation and turns a DB hiccup into a
+// whole-app outage. The real session check belongs in the layout/Server Action
+// that already talks to the DB once.
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 
@@ -15,7 +24,7 @@ const AUTH_ONLY_PATHS = ['/login', '/reset-password'];
 
 /**
  * Generate a cryptographically-random base64 nonce suitable for CSP.
- * Uses Web Crypto (available in Edge runtime — no Node.js Buffer needed).
+ * Uses Web Crypto + btoa (globals in every runtime — no Node.js Buffer needed).
  */
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
@@ -120,7 +129,8 @@ export function proxy(request: NextRequest) {
   }
 
   // Derive the same cookie prefix used by lib/auth.ts — must stay in sync.
-  // NEXT_PUBLIC_* vars are statically inlined by Next.js and are available in Edge runtime.
+  // NEXT_PUBLIC_* vars are statically inlined by Next.js, so this needs no
+  // runtime env access at all.
   const sessionCookiePrefix =
     (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/^\//, '') || 'better-auth';
 
@@ -164,7 +174,11 @@ export function proxy(request: NextRequest) {
   return applySecurityHeaders(response, request, nonce);
 }
 
-export const proxyConfig = {
+// MUST be named exactly `config` — Next.js reads `export const config` from this
+// file and ignores any other name, so a renamed export means the matcher below
+// never applies and the proxy runs on every request (or, on a project that also
+// trimmed the internal bypasses, breaks static assets).
+export const config = {
   // Exclude only Next.js internals and static assets — /api/* is included
   // so protected API routes return 401 instead of leaking data to unauthenticated users.
   // The /api/auth/* path is whitelisted inside the proxy() function itself.

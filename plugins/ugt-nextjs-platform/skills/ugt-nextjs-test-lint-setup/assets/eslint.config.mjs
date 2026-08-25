@@ -5,9 +5,13 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Declaring globalIgnores REPLACES eslint-config-next's default ignore set
-  // → the defaults must be restated here, or eslint starts linting .next/ and
-  // slows to a crawl.
+  // Global ignores ACCUMULATE — this block is ADDED to eslint-config-next's
+  // own ignores, it does not replace them (eslint-config-next says as much:
+  // you add more, or negate one with a leading `!`). The defaults are
+  // restated anyway so the project's whole ignore surface is readable in one
+  // place, and so a future `'!.next/…'` negation is written knowing what it
+  // negates. Harmless duplication, on purpose — do not read it as "required
+  // or eslint crawls .next/".
   globalIgnores([
     // eslint-config-next defaults:
     '.next/**',

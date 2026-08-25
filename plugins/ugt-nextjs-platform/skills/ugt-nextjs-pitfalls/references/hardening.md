@@ -95,6 +95,12 @@ Models hardcode UI strings constantly — enforce on every feature:
 - [ ] Every user-visible string goes through `t()` —
       `getTranslations` (server) / `useTranslations` (client); no literal Thai
       or English in JSX
-- [ ] Every new key exists in **both** `messages/en.json` and
-      `messages/th.json`
+- [ ] Catalogs are **TypeScript, not JSON** — kit keys in
+      `messages/kit.th.ts` / `messages/kit.en.ts`, the project's own keys in
+      `messages/app.th.ts` / `messages/app.en.ts`. A `messages/*.json` catalog
+      is a hard **fail** in design-setup's `scripts/check-i18n.mjs` gate
+- [ ] Every new key exists in **both** locales of its namespace (th **and**
+      en) — the same gate diffs the key sets and names each missing leaf
+- [ ] A new namespace is also registered in `i18n/messages.ts` — copied but
+      unregistered means every `t()` in it renders its raw key path on screen
 - [ ] No literal `{`/`}` in any message (see Quick Rules — ICU)

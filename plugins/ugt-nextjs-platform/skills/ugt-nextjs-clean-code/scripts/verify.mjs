@@ -78,10 +78,20 @@ const RULES = [
     fix: "str.replaceAll('x', 'y')",
   },
   {
-    id: 'S7741/S7764',
-    name: "typeof … 'undefined'",
-    test: (l) => /typeof\s+[\w.]+\s*[!=]==?\s*['"]undefined['"]/.test(l),
-    fix: "x === undefined · globalThis.window !== undefined (instead of typeof window !== 'undefined')",
+    // S7764 (prefer-global-this) does NOT belong here: it exempts typeof
+    // existence checks outright. S7741 (no-typeof-undefined) leaves global
+    // variables alone too (checkGlobalVariables is off by default), so an SSR
+    // guard like `typeof window !== 'undefined'` raises nothing — skip those.
+    id: 'S7741',
+    name: "typeof … 'undefined' on a declared variable",
+    test: (l) => {
+      const m = /typeof\s+([\w.]+)\s*[!=]==?\s*['"]undefined['"]/.exec(l);
+      if (!m) return false;
+      const GLOBALS =
+        /^(window|self|global|globalThis|document|navigator|location|process|localStorage|sessionStorage|require|__DEV__)\b/;
+      return !GLOBALS.test(m[1]);
+    },
+    fix: 'x === undefined (a typeof guard on a GLOBAL — window/document/process — is fine, leave it)',
   },
   {
     id: 'S7755',
@@ -89,12 +99,11 @@ const RULES = [
     test: (l) => /(\w+)\s*\[\s*\1\s*\.length\s*-\s*1\s*\]/.test(l),
     fix: 'arr.at(-1)',
   },
-  {
-    id: 'S7718',
-    name: 'catch (e) / catch (err) — must be error or error_',
-    test: (l) => /catch\s*\(\s*(e|err)\s*\)/.test(l),
-    fix: 'catch (error) or catch (error_)',
-  },
+  // No S7718 rule here on purpose: `catch (e)` and `catch (err)` are both in
+  // catch-error-name's DEFAULT ignore list (^(e|ex)$ · [eE][rR][rR]$ · ^_ ·
+  // cause · reason · *exception), so flagging them was a pure false alarm.
+  // What the rule actually rejects — `catch (problem)`, `catch (failure)` —
+  // is an open-ended name set, not worth a grep.
   {
     id: 'S1874',
     name: 'deprecated Zod API — ZodError.flatten() / z.string().datetime()',
@@ -102,7 +111,10 @@ const RULES = [
     fix: 'z.flattenError(error) (or read error.issues) · z.iso.datetime()',
   },
   {
-    id: 'S6606/S7735',
+    // S6606 = prefer-nullish-coalescing (the `a !== null ? a : b` half) ·
+    // S6644 = no-unneeded-ternary (the `a ? a : b` half). S7735 is
+    // no-negated-condition and has nothing to do with either.
+    id: 'S6606/S6644',
     name: 'a !== null/undefined ? a : b (and a ? a : b) — must be ?? / ||',
     test: (l) =>
       /(\w[\w.]*)\s*[!=]==?\s*(null|undefined)\s*\?\s*\1\b/.test(l) ||

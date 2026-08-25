@@ -83,7 +83,10 @@ check('generator provider = "prisma-client-js"', () => {
   const gen = schema.match(/generator\s+\w+\s*\{([\s\S]*?)\}/)?.[1] ?? '';
   if (/provider\s*=\s*"prisma-client-js"/.test(gen)) return { ok: true };
   const found = gen.match(/provider\s*=\s*"([^"]+)"/)?.[1] ?? '(not found)';
-  return { ok: false, msg: `provider = "${found}" — must be "prisma-client-js" (others have no MSSQL driver adapter)` };
+  return {
+    ok: false,
+    msg: `provider = "${found}" — must be "prisma-client-js": every kit asset imports from "@prisma/client", which only that generator emits (org choice, see SKILL.md §3)`,
+  };
 });
 
 // ── 3. process.env ─────────────────────────────────────────────────────────

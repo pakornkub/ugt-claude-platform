@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: 9b988ca708b1
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: bdb3d75afb89
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -24,6 +24,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
+import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
 
 type ActionResult = { success: true } | { success: false; code: string; field?: string };
@@ -54,7 +55,7 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
     .create({
       data: {
         userId: session.user.id,
-        action: 'users.role-assign',
+        action: AUDIT_ACTIONS.USERS_ROLE_ASSIGN,
         detail: JSON.stringify({ targetId: userId, roleId }),
       },
     })
@@ -129,7 +130,7 @@ export async function createLocalUserAction(values: {
     .create({
       data: {
         userId: session.user.id,
-        action: 'users.create',
+        action: AUDIT_ACTIONS.USERS_CREATE,
         detail: JSON.stringify({ targetId: userId, email, roleId, authType: 'local' }),
       },
     })
@@ -194,7 +195,7 @@ export async function setUserPasswordAction(values: {
     .create({
       data: {
         userId: session.user.id,
-        action: 'users.password-set',
+        action: AUDIT_ACTIONS.USERS_PASSWORD_SET,
         detail: JSON.stringify({ targetId: userId }),
       },
     })

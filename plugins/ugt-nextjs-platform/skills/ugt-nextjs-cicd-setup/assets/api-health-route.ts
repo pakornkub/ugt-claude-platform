@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-cicd-setup/api-health-route.ts
-// kit-hash: 5fc08b1725af
+// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-cicd-setup/api-health-route.ts
+// kit-hash: 6eb8a8d23468
 // Health endpoint hit by the Dockerfile HEALTHCHECK and both compose healthchecks.
 // Without this file the container never reports healthy → the Deploy stage
 // fails at the docker-inspect poll every time.
@@ -25,12 +25,14 @@ export async function GET() {
   }
   // [DB] end
 
-  // No checks at all (project without a DB) → every() on an empty array is true → ok
+  // No checks at all (project without a DB) → every() on an empty array is true → healthy
   const ok = Object.values(checks).every((status) => status === 'ok');
 
   return NextResponse.json(
     {
-      status: ok ? 'ok' : 'degraded',
+      // 'healthy' is the org-wide contract literal (same in php/python) — do not
+      // rename it: the rules files and the deploy docs all key off this string.
+      status: ok ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       // Never include version / framework / commit sha — this endpoint is public,
       // and that information tells outsiders which exploits to try.

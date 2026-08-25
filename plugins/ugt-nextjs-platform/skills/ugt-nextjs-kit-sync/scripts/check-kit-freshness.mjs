@@ -78,8 +78,9 @@ for (const skill of readdirSync(skillsDir)) {
 const SKIP = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', 'dist', '.claude']);
 const rows = [];
 // ไฟล์ kit ที่ติดตั้งไว้ที่ root โปรเจคโดยตรง — เดินเฉพาะ dir จะมองไม่เห็นตลอดกาล
-// (proxy.ts ของ auth · vitest.config.ts ของ test-lint · prisma.config.ts ของ database)
-const ROOT_FILES = ['proxy.ts', 'middleware.ts', 'vitest.config.ts', 'prisma.config.ts']
+// (proxy.ts ของ auth · vitest.config.ts + vitest.setup.ts ของ test-lint ·
+//  prisma.config.ts ของ database)
+const ROOT_FILES = ['proxy.ts', 'middleware.ts', 'vitest.config.ts', 'vitest.setup.ts', 'prisma.config.ts']
   .map((f) => join(PROJECT, f))
   .filter((f) => existsSync(f));
 const scanTargets = [ROOT_FILES];
