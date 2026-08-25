@@ -1,7 +1,7 @@
 # App-Patterns Audit — remaining unported knowledge in ugt-hrms
 
-> **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-nextjs-platform 4.x
-> **Last-reviewed:** 2026-08-12 — ส่วน curation เป็นบันทึกที่ไม่แก้ย้อนหลัง · ส่วน Addendum **ปิดครบทุกข้อแล้ว**: react-query 4.12.0 · zustand 4.15.0 · RHF schema/resolver + zod boundary 4.16.0 — backlog ของไฟล์นี้เหลือศูนย์
+> **Status:** Done · **Date:** 2026-07-29 · **Applies-to:** ugt-nextjs-platform 4.x
+> **Last-reviewed:** 2026-08-25 — ส่วน curation เป็นบันทึกที่ไม่แก้ย้อนหลัง · ส่วน Addendum **ปิดครบทุกข้อแล้ว**: react-query 4.12.0 · zustand 4.15.0 · RHF schema/resolver + zod boundary 4.16.0 — backlog ของไฟล์นี้เหลือศูนย์ จึงพลิกจาก Living → Done (audit 2026-08-25) และย้ายเข้า `docs/archive/`
 
 > **สถานะ (2026-08-09): บันทึกการตัดสินใจ + backlog ที่ยังเปิดอยู่ — ไม่ใช่มาตรฐาน**
 >
@@ -330,7 +330,7 @@ is the design plugin's first decision, and a reason to keep it separate from app
 
 ## Addendum 2026-08-04 — gap ที่พบระหว่างร่าง design skill (สำหรับคนทำ Bucket 1)
 
-การสกัดรอบนี้ (ดู `docs/design-skill-draft.md`) พบว่า audit ฉบับนี้ยังไม่ได้เก็บ
+การสกัดรอบนี้ (ดู `docs/archive/design-skill-draft.md`) พบว่า audit ฉบับนี้ยังไม่ได้เก็บ
 convention เรื่อง **form/state libraries** เลย ทั้งที่ 2 โปรเจคใช้จริง:
 
 | Lib | สถานะใน 2 โปรเจค | คำถามที่ Bucket 1 ต้องตอบ |

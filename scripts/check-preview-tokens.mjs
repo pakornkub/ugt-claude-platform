@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Preview drift check — docs/design-preview.html shows people what they get
+// Preview drift check — docs/web/design-preview.html shows people what they get
 // BEFORE they install, so a stale preview is a promise the plugin doesn't keep.
 //
 //   node scripts/check-preview-tokens.mjs
@@ -16,7 +16,7 @@ const SRC = join(
   ROOT,
   'plugins/ugt-nextjs-platform/skills/ugt-nextjs-design-setup/assets/globals.tokens.css'
 );
-const PREVIEW = join(ROOT, 'docs/design-preview.html');
+const PREVIEW = join(ROOT, 'docs/web/design-preview.html');
 
 // The preview is plain CSS, so it renames a few vars that would clash with the
 // page chrome. Left = name in globals.tokens.css, right = name in the preview.
@@ -95,7 +95,7 @@ for (const mode of MODES) {
 }
 
 if (failed > 0) {
-  console.log(`\n${failed} mismatch(es). Update docs/design-preview.html to the current tokens.`);
+  console.log(`\n${failed} mismatch(es). Update docs/web/design-preview.html to the current tokens.`);
   process.exit(1);
 }
 console.log('\nPreview tokens match the installed token set.');

@@ -13,7 +13,7 @@
 >
 > **มาตรฐานปัจจุบันอยู่ที่**: `plugins/ugt-core/contracts/design.md` (ข้อกำหนดกลาง) ·
 > `plugins/ugt-nextjs-platform/skills/ugt-nextjs-design-setup/` (การนำไปใช้จริง) ·
-> `docs/design-preview.html` (ดูหน้าตาที่ได้)
+> `docs/web/design-preview.html` (ดูหน้าตาที่ได้)
 >
 > ชื่อ skill/ไฟล์บางตัวก็เปลี่ยนแล้วใน v3.0 (`ugt-checkpoint`→`ugt-handoff` ·
 > `ugt-mode`→`ugt-model-mode` · `ugt-nextjs-setup`→`ugt-nextjs-full-setup` ·

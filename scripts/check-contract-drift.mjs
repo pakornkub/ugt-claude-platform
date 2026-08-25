@@ -139,7 +139,69 @@ const CHECKS = [
       [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/IsDeleted = 1/i],
     },
   },
+  {
+    // audit 2026-08-25: design.md was the only contract with no drift check at all
+    name: 'Design: primary oklch, DD/MM/YYYY Gregorian, WCAG >= 4.5:1',
+    files: {
+      [`${CORE}/contracts/design.md`]: [/oklch\(0\.488 0\.243 264\.4\)/, /DD\/MM\/YYYY/, /4\.5:1/],
+      [`${NEXT}/ugt-nextjs-design-setup/SKILL.md`]: [/oklch\(0\.488 0\.243 264\.4\)/, /DD\/MM\/YYYY/, /4\.5:1/],
+    },
+  },
+  {
+    // audit 2026-08-25: the Secret rule was verbatim-duplicated across the three
+    // stack skills with nothing pinning the copies to the contract
+    name: 'Secret rule: shell-expanded "$VAR", never Groovy interpolation',
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/"\$VAR"/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/"\$VAR"/, /Groovy/],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/"\$VAR"/, /Groovy/],
+      [`${PHP}/ugt-php-cicd-setup/SKILL.md`]: [/"\$VAR"/, /Groovy/],
+    },
+  },
+  {
+    // audit 2026-08-25: the contract used to say "Dependency Scan" while every
+    // Jenkinsfile said "OWASP Dependency Check" — the stage list IS the contract
+    name: "Stage 6 name: OWASP Dependency Check (contract == Jenkinsfiles)",
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/OWASP Dependency Check/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/Jenkinsfile`]: [/stage\('OWASP Dependency Check'\)/],
+      [`${PY}/ugt-python-cicd-setup/assets/Jenkinsfile`]: [/stage\('OWASP Dependency Check'\)/],
+      [`${PHP}/ugt-php-cicd-setup/assets/Jenkinsfile`]: [/stage\('OWASP Dependency Check'\)/],
+    },
+  },
 ];
+
+// Version sync — audit 2026-08-25: the README "รุ่นล่าสุด" table sat 1–4
+// releases behind plugin.json for months with nothing checking it. Pin the
+// README table and the docs/web/index.html version cards to plugin.json.
+const VERSION_SOURCES = [
+  'ugt-core',
+  'ugt-nextjs-platform',
+  'ugt-nextjs-standard',
+  'ugt-php-platform',
+  'ugt-python-platform',
+];
+const versionCheck = { name: 'Doc versions match plugin.json (README.md + docs/web/index.html)', files: {} };
+try {
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const indexHtml = readFileSync(join(ROOT, 'docs/web/index.html'), 'utf8');
+  const problems = [];
+  for (const name of VERSION_SOURCES) {
+    const { version } = JSON.parse(
+      readFileSync(join(ROOT, `plugins/${name}/.claude-plugin/plugin.json`), 'utf8')
+    );
+    const v = version.replace(/\./g, '\\.');
+    if (!new RegExp(`\\|\\s*\`${name}\`\\s*\\|\\s*${v}(\\s|\\b)`).test(readme)) {
+      problems.push(`  ✘ README.md — plugin table row for ${name} does not say ${version}`);
+    }
+    if (!new RegExp(`class="ver">v${v}[^<]*</span>\\s*<h3>${name}</h3>`).test(indexHtml)) {
+      problems.push(`  ✘ docs/web/index.html — version card for ${name} does not say v${version}`);
+    }
+  }
+  versionCheck.problems = problems;
+} catch (e) {
+  versionCheck.problems = [`  ✘ could not read version sources: ${e.message}`];
+}
 
 let failed = 0;
 for (const check of CHECKS) {
@@ -166,8 +228,16 @@ for (const check of CHECKS) {
   }
 }
 
+if (versionCheck.problems.length === 0) {
+  console.log(`✔ ${versionCheck.name}`);
+} else {
+  failed += 1;
+  console.log(`✘ ${versionCheck.name}`);
+  for (const p of versionCheck.problems) console.log(p);
+}
+
 if (failed > 0) {
   console.log(`\n${failed} check(s) failed — contract and copies disagree. Fix before release.`);
   process.exit(1);
 }
-console.log(`\nAll ${CHECKS.length} checks passed — no contract drift.`);
+console.log(`\nAll ${CHECKS.length + 1} checks passed — no contract drift.`);

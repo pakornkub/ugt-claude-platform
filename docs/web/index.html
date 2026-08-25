@@ -401,13 +401,13 @@
     <p class="stack-note h-anim d2">
       ใช้ได้กับ TypeScript / React / Next.js (App Router) · SQL Server · Keycloak (SSO) ·
       Jenkins + SonarQube + Docker — Python / PHP รองรับ<strong>เฉพาะส่วน deploy</strong>
-      (v0.3.0 ยังไม่ผ่าน pilot) · stack อื่นนอกนั้นยังไม่รองรับ
+      (Python ยังไม่ผ่าน pilot · PHP ผ่าน pilot รอบแรกแล้ว) · stack อื่นนอกนั้นยังไม่รองรับ
     </p>
     <div class="chips h-anim d3">
       <span class="chip"><span class="dot" aria-hidden="true"></span>ติดตั้งครั้งเดียวต่อเครื่อง</span>
       <span class="chip"><span class="dot violet" aria-hidden="true"></span>ตัวช่วย 15 ตัว ครอบ 11 เรื่องหลัก</span>
       <span class="chip"><span class="dot green" aria-hidden="true"></span>ผลทดสอบ setup/auth/cicd 100%</span>
-      <a class="chip" href="docs/design-preview.html" style="text-decoration:none">
+      <a class="chip" href="design-preview.html" style="text-decoration:none">
         <span class="dot violet" aria-hidden="true"></span>ดูตัวอย่างหน้าตา UI ที่จะได้ →</a>
     </div>
     <div class="codebox h-anim d4">
@@ -443,12 +443,12 @@
         <strong>พร้อม plugin official อีก 3 ตัว</strong> (ดูกรอบล่าง) ไม่ต้องเลือกทีละชิ้น</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v4.40.0</span>
+        <span class="ver">v4.51.0</span>
         <h3>ugt-nextjs-platform</h3>
         <p>ตัวช่วย 11 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD, sync kit และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.7.0</span>
+        <span class="ver">v2.9.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -461,13 +461,13 @@
       หรือ <code>ugt-php-platform@ugt</code></p>
     <div class="grid cols-3">
       <article class="card plugin-card reveal">
-        <span class="ver">v0.3.0 — ยังไม่ผ่าน pilot</span>
+        <span class="ver">v0.6.0 — ยังไม่ผ่าน pilot (ยังไม่ tag)</span>
         <h3>ugt-python-platform</h3>
         <p>FastAPI / Flask / Django / batch job — Jenkinsfile 10 stages (toolchain รันใน docker)
         health endpoint และ tooling ขั้นต่ำให้ Quality Gate ผ่าน</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v0.3.0 — ยังไม่ผ่าน pilot</span>
+        <span class="ver">v0.6.0 — pilot รอบแรกจบแล้ว (ยังไม่ tag)</span>
         <h3>ugt-php-platform</h3>
         <p>Laravel / CodeIgniter / PHP legacy / WordPress — CI image (pcov), wp-content volume
         และ tooling ขั้นต่ำให้ Quality Gate ผ่าน</p>
@@ -529,7 +529,7 @@
       <article class="skill reveal">
         <div class="top"><span class="emoji" aria-hidden="true">🎨</span><h3>ugt-nextjs-design-setup</h3></div>
         <p>ข้อตกลงดีไซน์ — ถามไม่กี่ข้อ ได้ธีม สี ฟ้อนต์ไทย เมนู และชุด component สำเร็จรูปเหมือนกันทั้งองค์กร
-          (<a href="docs/design-preview.html">ดูตัวอย่างหน้าตาที่ได้</a>)</p>
+          (<a href="design-preview.html">ดูตัวอย่างหน้าตาที่ได้</a>)</p>
         <span class="tag order">รันก่อนทำ login เสมอ</span>
       </article>
       <article class="skill reveal">
@@ -890,15 +890,15 @@
       <h3>เอกสารเชิงลึก</h3>
       <ul>
         <li><span>มาตรฐานกลาง</span> → <code>plugins/ugt-core/contracts/</code></li>
-        <li><span>ตัวอย่างหน้าตา UI ที่ได้</span> → <a href="docs/design-preview.html"><code>docs/design-preview.html</code></a></li>
+        <li><span>ตัวอย่างหน้าตา UI ที่ได้</span> → <a href="design-preview.html"><code>docs/web/design-preview.html</code></a></li>
         <li><span>ให้ทีม IT ตั้ง hard boundary</span> → <code>plugins/ugt-core/contracts/org-managed-settings.md</code></li>
         <li><span>ขั้นตอนออกรุ่นสำหรับทีมดูแล platform</span> → หัวข้อ "สำหรับทีมดูแล platform" ใน <code>README.md</code></li>
       </ul>
       <h3 style="margin-top:18px">บันทึกย้อนหลัง + งานค้าง <span style="font-weight:400;opacity:.75">— ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม</span></h3>
       <ul>
-        <li><span>ข้อเสนอรองรับ stack อื่น (Python/PHP ส่วน cicd ทำแล้ว — ที่เหลือยัง)</span> → <code>docs/multi-stack-proposal.md</code></li>
-        <li><span>บันทึกการคัดความรู้เข้า pitfalls + backlog ที่ยังเปิด</span> → <code>docs/app-patterns-audit.md</code></li>
-        <li><span>ร่าง design skill ปี 2026-08-03 (เนื้อหาถูก supersede แล้ว)</span> → <code>docs/design-skill-draft.md</code></li>
+        <li><span>ข้อเสนอรองรับ stack อื่น (Python/PHP ส่วน cicd ทำแล้ว — ที่เหลือยัง)</span> → <code>docs/proposals/multi-stack-proposal.md</code></li>
+        <li><span>บันทึกการคัดความรู้เข้า pitfalls + backlog ที่ยังเปิด</span> → <code>docs/archive/app-patterns-audit.md</code></li>
+        <li><span>ร่าง design skill ปี 2026-08-03 (เนื้อหาถูก supersede แล้ว)</span> → <code>docs/archive/design-skill-draft.md</code></li>
       </ul>
     </div>
     <div class="footer-brand">

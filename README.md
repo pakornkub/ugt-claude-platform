@@ -9,7 +9,7 @@ Next.js ที่ทีมสร้าง (รวมถึงโปรเจค�
 Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรับ
 **เฉพาะส่วน deploy** (ยังไม่ผ่าน pilot) · stack อื่นนอกนั้นยังไม่รองรับ
 
-> 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [`docs/design-preview.html`](docs/design-preview.html)
+> 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [`docs/web/design-preview.html`](docs/web/design-preview.html)
 > (เปิดด้วย browser ได้เลย ไม่ต้องติดตั้งอะไร) — สี ปุ่ม ตาราง ฟอร์ม สถานะ light/dark
 > รวมถึงหน้า admin ที่ติดมากับระบบ login (ผู้ใช้/บทบาท-สิทธิ์/audit) —
 > ทุกอย่างเรนเดอร์จากไฟล์ token จริงที่ plugin ติดตั้ง
@@ -19,15 +19,15 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
 | `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
-| `ugt-nextjs-platform` | 4.46.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-python-platform` | 0.5.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-php-platform` | 0.5.0 — pilot รอบแรกจบแล้ว แก้ blocker ครบ **แต่ยังไม่ได้พิสูจน์ซ้ำ (ยังไม่ tag)** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.7.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-nextjs-platform` | 4.51.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-python-platform` | 0.6.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-php-platform` | 0.6.0 — pilot รอบแรกจบแล้ว แก้ blocker ครบ **แต่ยังไม่ได้พิสูจน์ซ้ำ (ยังไม่ tag)** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-core` | 2.9.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 รุ่นจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดแต่ละรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
 
-### ตัวช่วยทั้งหมด (เรียกผ่าน `/ugt` จะเห็นรายการ)
+### ตัวช่วยทั้งหมดของชุด Next.js + ตัวกลาง (เรียกผ่าน `/ugt` จะเห็นรายการ — ฝั่ง Python/PHP มี `ugt-python-cicd-setup` / `ugt-php-cicd-setup` เพิ่มเมื่อติดตั้ง plugin ของ stack นั้น)
 
 | ตัวช่วย | ทำอะไรให้ | เมื่อไหร่ |
 | --- | --- | --- |
@@ -182,7 +182,9 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 
 ## สำหรับทีมดูแล platform
 
-**กติกาเอกสารใน `docs/`** — ทุกไฟล์ `.md` ต้องมีบล็อกนี้ใต้หัวข้อ H1:
+**กติกาเอกสารใน `docs/`** — ทุกไฟล์ `.md` (รวม subfolder — ยกเว้น
+`docs/superpowers/**` ที่เป็น plan/spec ตามวงจรของ superpowers pipeline เอง)
+ต้องมีบล็อกนี้ใต้หัวข้อ H1:
 
 ```markdown
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
@@ -195,13 +197,15 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 
 1. รับ PR → merge เข้า `main`
 2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
-3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
+3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** — รวมตาราง
+   "รุ่นล่าสุด" ใน README.md และการ์ดเวอร์ชันใน `docs/web/index.html` ด้วย
+   (สคริปต์ข้อ 5 ตรวจเลขเวอร์ชันสองไฟล์นี้ให้แล้ว) ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
    ถ้าใช่ ตัดสินตามชนิดเอกสาร (นิยามอยู่ในกล่องด้านบน) — `Living` = แก้ให้ตรง
    แล้วอัปเดต `Last-reviewed` ·
    บันทึกการตัดสินใจ (`Accepted`/`Done`) = **ห้ามแก้เนื้อหา** ให้เปลี่ยนเป็น `Superseded`
    พร้อมชี้ `Superseded-by` ไปที่ของใหม่แทน (แก้ย้อนหลังทำให้บันทึกประวัติเพี้ยน)
 4. **ถ้า release นี้แตะ UI kit** (`components/ui/*`, token, หรือกติกาใน DESIGN template)
-   → เปิด [`docs/design-preview.html`](docs/design-preview.html) เทียบกับของจริงว่ายังตรงไหม
+   → เปิด [`docs/web/design-preview.html`](docs/web/design-preview.html) เทียบกับของจริงว่ายังตรงไหม
    หน้านี้คือสิ่งที่คนเห็น**ก่อน**ตัดสินใจติดตั้ง — preview ที่ล้าสมัยคือคำสัญญาที่ plugin ทำไม่ได้
    จุดที่เคยหลุดมาแล้ว: หัวตาราง (จับลาก/sort/filter), ชุดปุ่ม pagination,
    เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
@@ -219,9 +223,11 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
      ขนาดปุ่มด้วย className และไม่มี native `title=` บนปุ่ม
    - `check-contract-drift` เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วย
      ยังตรงกัน
-   - `check-doc-status` เช็คว่า `.md` **ชั้นบนสุด** ของ `docs/` ประกาศสถานะ
-     ตัวเองครบ (ยังไม่ลง subfolder และไม่อ่านไฟล์ `.html` — `docs/superpowers/**`
-     กับ `design-preview.html` จึงต้องดูด้วยตา)
+   - `check-doc-status` เช็คว่า `.md` ทุกไฟล์ใต้ `docs/` (recurse ลง
+     `proposals/` / `archive/` ด้วย) ประกาศสถานะตัวเองครบ — ยกเว้น
+     `docs/superpowers/**` โดยตั้งใจ และไม่อ่านไฟล์ `.html` (หน้าใน
+     `docs/web/` กับ `docs/training/` จึงต้องดูด้วยตา — สีของ
+     design-preview ตรวจด้วยสคริปต์ถัดไป)
    - `check-preview-tokens` เช็คว่า**สี**ใน design-preview ยังตรงกับ token ที่
      ติดตั้งจริง — โครงหน้าและข้อความยังต้องดูด้วยตาตามข้อ 4
 6. `claude plugin validate ./plugins/<ชื่อ> --strict`
@@ -232,7 +238,10 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
    §รอเงื่อนไข) ถ้าเผลอ tag ไปแล้ว ให้ลบ tag ทั้ง local และ origin
 8. ประกาศให้ทีมรันคำสั่งอัปเดต
 
-กติกา: ทุกตัวช่วยต้องพึ่งตัวเองได้ (ห้ามอ้างไฟล์ข้าม plugin) · เนื้อหาที่โหลดเข้า
+กติกา: ทุกตัวช่วยต้องพึ่งตัวเองได้ — ห้ามอ้างไฟล์ข้าม plugin ยกเว้นข้อยกเว้นที่
+contract ระบุ (เรียก verify/check script หรือ copy skeleton ของตัวช่วยอื่นโดย
+อ้าง**ชื่อตัวช่วย** ภายใน plugin เดียวกันหรือ dependency — ดู
+`contracts/harness.md`) · เนื้อหาที่โหลดเข้า
 context เป็นภาษาอังกฤษ (เว้นประโยค trigger) · มาตรฐานกลางแก้ที่
 `plugins/ugt-core/contracts/` ก่อนเสมอ แล้วค่อยตามแก้ในตัวช่วยของ stack
 
@@ -281,7 +290,11 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 **มาตรฐานปัจจุบัน** (อ้างอิงได้ ใช้ทำงานจริง):
 
 - มาตรฐานกลางขององค์กร → `plugins/ugt-core/contracts/`
-- ตัวอย่างหน้าตา UI ที่ได้ → [`docs/design-preview.html`](docs/design-preview.html)
+- ตัวอย่างหน้าตา UI ที่ได้ → [`docs/web/design-preview.html`](docs/web/design-preview.html)
+- หน้าภาพรวมแบบเปิดใน browser (สำเนาของ README นี้ — sync มือตอน release) →
+  [`docs/web/index.html`](docs/web/index.html)
+- สอนทีม "คุยกับ AI ให้ได้งาน" → [`docs/training/landing.html`](docs/training/landing.html)
+  (ฉบับเต็ม) · [`docs/training/cheatsheet.html`](docs/training/cheatsheet.html) (1 หน้า)
 - ให้ทีม IT ตั้ง hard boundary → `plugins/ugt-core/contracts/org-managed-settings.md`
 - ขั้นตอนออกรุ่น → หัวข้อ "สำหรับทีมดูแล platform" ด้านบน
 
@@ -291,14 +304,14 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 **บันทึกย้อนหลัง** (เก็บไว้ตอบว่า "ทำไมตอนนั้นถึงเลือกแบบนี้" —
 ⚠️ **ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม**):
 
-- [`docs/multi-stack-proposal.md`](docs/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
+- [`docs/proposals/multi-stack-proposal.md`](docs/proposals/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
   (Python / PHP / React SPA) · **ทำแล้วบางส่วน**: ส่วน cicd ของ Python/PHP
-  ทำแล้ว (v0.1.0 ยังไม่ผ่าน pilot ดูตารางด้านบน) ส่วน database/auth/design
+  ทำแล้ว (สถานะ pilot/รุ่นล่าสุดดูตารางด้านบน) ส่วน database/auth/design
   ของสอง stack นี้ และ React SPA ยังไม่มี plugin
-- [`docs/app-patterns-audit.md`](docs/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
+- [`docs/archive/app-patterns-audit.md`](docs/archive/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
   `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · งานค้างของไฟล์นี้ปิดครบแล้ว
   — อ่านก่อนเสนอเพิ่มเนื้อหาเข้า pitfalls
-- [`docs/design-skill-draft.md`](docs/design-skill-draft.md) — ร่างตอนออกแบบ design skill
+- [`docs/archive/design-skill-draft.md`](docs/archive/design-skill-draft.md) — ร่างตอนออกแบบ design skill
   (2026-08-03) · **เนื้อหาถูก supersede แล้ว** (เช่นยังพูดถึง `radix-mira` ทั้งที่มติ
   2026-08-04 เปลี่ยนเป็น `base-mira`) — มาตรฐานดีไซน์ปัจจุบันอยู่ที่
   `plugins/ugt-core/contracts/design.md`

@@ -35,7 +35,18 @@ if (!existsSync(DOCS)) {
   process.exit(0);
 }
 
-const files = readdirSync(DOCS).filter((f) => f.endsWith('.md'));
+// Walk docs/ recursively so proposals/ and archive/ stay covered — but skip
+// docs/superpowers/**: plans/specs there follow the superpowers pipeline's own
+// lifecycle, not this status convention (documented in README §สำหรับทีมดูแล).
+const SKIP_DIRS = new Set(['superpowers']);
+const walk = (dir, prefix = '') =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    if (e.isDirectory()) {
+      return SKIP_DIRS.has(e.name) ? [] : walk(join(dir, e.name), `${prefix}${e.name}/`);
+    }
+    return e.name.endsWith('.md') ? [`${prefix}${e.name}`] : [];
+  });
+const files = walk(DOCS);
 let failed = 0;
 let warned = 0;
 
