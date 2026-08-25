@@ -229,11 +229,21 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
 
 ### 10. จาก re-score ตามเกณฑ์ skill-creator (2026-08-25, หลังปิด gap หลักใน 4.48.1)
 
-- **auth-setup SKILL.md ยาว 628 บรรทัด** เกินเกณฑ์ ~500 ของ skill-creator —
+- ~~auth-setup SKILL.md ยาว 628 บรรทัด เกินเกณฑ์ ~500 ของ skill-creator —
   ส่วนที่ควรย้ายคือตาราง DO/DON'T 43 แถวใน §7 ที่ซ้ำเนื้อหากับ §2 และ
-  `references/auth-flows.md` บางส่วน · เป็นงาน restructure ไม่ใช่แก้จุด
-  จึงไม่รวมใน 4.48.1 (fix release) — ทำเป็นรุ่นของตัวเองพร้อม re-run
-  trigger evals เพราะแตะโครงเอกสารที่ trigger อาศัย
+  `references/auth-flows.md` บางส่วน~~ → **4.50.0** สองรอบ: (1) ไล่ตรวจทั้ง 39
+  แถวของ §7 กับ §2 + ทั้ง 4 reference จริง พบ 34 แถวซ้ำคำต่อคำ เหลือ 5 แถวที่
+  ไม่มีที่ไหนพูดถึง (2) ย้าย (ไม่ใช่ลบ) เนื้อหาที่ไม่ซ้ำแต่ยาวออกไปมีบ้านแยก —
+  §5.2 i18n-catalog walkthrough (53 บรรทัด) → `references/i18n-wiring.md`
+  ใหม่, better-auth 1.7 migration history (§5.1) → `auth-flows.md` SSO
+  section, ตัดจุดซ้ำเพิ่มที่เจอระหว่างทาง (§3 Q5 ซ้ำ §5.5 ขั้น 5, §8
+  HSTS/security-header ซ้ำคอมเมนต์ใน `proxy.ts` เอง) · ไฟล์ 632→604→**547
+  บรรทัด** (ยังไม่ถึง ~500 — ที่เหลือคือ §5/§8 ซึ่งเป็นขั้นตอนติดตั้ง/checklist
+  ไม่ใช่เนื้อซ้ำ ตัดต่อจะเป็นความเสี่ยงคนละแบบ) · re-run trigger evals ตามที่
+  ต้องทำ (3 judges, method เดียวกับ baseline 2026-08-09) — primary 27/27
+  (100%) ไม่เปลี่ยนจาก baseline ทั้งสองรอบ เพราะ trigger ตัดสินจาก frontmatter
+  description ล้วนซึ่งไม่ถูกแตะเลย ผลเต็มอยู่ `evals/trigger-evals.json` key
+  `revalidation_2026-08-25`
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

@@ -60,6 +60,8 @@ project. Deep detail lives in `references/`:
 - `references/data-scope.md` — "may they?" vs "**whose data?**": the row-level
   scope layer, and the approval-chain view (**read before writing any route
   that accepts an empCode from the client**)
+- `references/i18n-wiring.md` — registering the `auth` message catalog in
+  `i18n/messages.ts` (§5.2) and why skipping it fails silently
 
 ## 2. Org Standards
 
@@ -128,14 +130,11 @@ Ask all of these **in a single message** before doing anything:
      (from the cicd-setup template — internal-CA cert vs closed-intranet
      confirmation, see `references/keycloak-client.md`); don't delete it even
      if this interview didn't need the Keycloak client section
-5. ~~Who is the first admin?~~ — **do NOT ask this.** The answer cannot be
-   used: SSO/LDAP rows may not be pre-created (มติ 2026-08-11), so nothing can
-   be seeded from a name given in an interview — asking creates the
-   expectation that it will be. Instead: (a) the protected app layout gates on
-   `isAdminInitialized()` and redirects every login to `/admin/setup` until the
-   first admin exists (§5.5), and (b) the install summary + `docs/admin-handoff.md`
-   must state, in Thai, that **the first person to log in becomes Administrator
-   with one click on `/admin/setup`** — so the team chooses who logs in first.
+5. ~~Who is the first admin?~~ — **do NOT ask this.** SSO/LDAP rows may not be
+   pre-created (มติ 2026-08-11), so nothing can be seeded from a name given in
+   an interview — asking creates an expectation the system can't fulfill. Full
+   mechanism (layout gate + the exact `docs/admin-handoff.md` wording) is in
+   §5.5 step 5.
 6. **Is there a central employee database to read over a linked server?**
    (default: yes for org apps) — SSO/LDAP give only username + email + display
    name. If the app needs employee code, department, position or supervisor,
@@ -191,32 +190,23 @@ plugin registered in `next.config.ts`) whether or not a single one of those
 files touches `DataTable`.
 
 If auth is being installed standalone into a project that will not take the
-design kit: **run design-setup first — this is the only path that actually
-works**, because downgrading away from `DataTable` (the narrow escape hatch
-below) does nothing about the i18n dependency; it only silences the DataTable
-half of the problem while every login/admin/password screen still throws or
-renders raw key paths without the provider. Downgrading the three admin pages
-to plain shadcn `Table` is a real, narrower option only for a project that
-also hand-rolls the next-intl scaffolding itself (or genuinely wants no i18n
-at all, which means deleting `useTranslations()`/`getTranslations()` calls
-from every converted file, not just the three table pages) — say whichever
-path was taken out loud and record it as a DESIGN.md deviation, because
-"DataTable only for tabular data" is the org default.
+design kit: **run design-setup first — this is the only real path**, since
+downgrading away from `DataTable` alone does nothing about the i18n
+dependency (every screen still renders raw key paths without the provider).
+Downgrading the three admin pages to plain shadcn `Table` only works for a
+project that also hand-rolls the next-intl scaffolding itself, or removes
+every `useTranslations()`/`getTranslations()` call — say which path was
+taken and record it as a DESIGN.md deviation ("DataTable only for tabular
+data" is the org default).
 
 ## 5. Setup steps
 
 ### 5.1 Dependencies
 
 ```bash
-# better-auth 1.7.0 deleted genericOAuthClient from better-auth/client/plugins
-# in a MINOR bump (present through 1.6.14, gone in 1.7.0 — a caret range like
-# ^1.6.0 floats straight into the broken line). This was a deliberate rewrite,
-# not a regression: generic OAuth (the Keycloak SSO button) is now a
-# first-class social provider — authClient.signIn.social({ provider: 'keycloak' })
-# replaces the removed signIn.oauth2(), no client plugin needed, and the
-# callback route moved from /api/auth/oauth2/callback/:id to
-# /api/auth/callback/:id. lib/auth.ts, lib/auth-client.ts, login-form.tsx and
-# keycloak-client.md are already written for ≥1.7 — do not pin below 1.7.1.
+# better-auth 1.7.0 removed genericOAuthClient in a MINOR bump — a deliberate
+# rewrite, not a regression (full migration history in references/auth-flows.md
+# SSO login flow). Every asset here is written for ≥1.7 — do not pin below 1.7.1.
 npm i better-auth@^1.7.1 zod
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
@@ -278,59 +268,15 @@ that already has its own sidebar merges the admin menu into it instead of
 shipping a second sidebar — §5.6, and skipping that step is the single most
 common install mistake.
 
-**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
-every project — th-only or th+en — already has `messages/`, `i18n/request.ts`
-and `i18n/messages.ts` from design-setup (มติ 2.2: next-intl is a dependency
-of every project, not just th+en, so th-only projects don't skip the
-machinery, they just never exercise a second locale). Since this phase, every
-converted auth-setup asset (`login-form.tsx`, the `/admin/users` ·
-`/admin/roles` · `/admin/audit-logs` pages, both password dialogs, etc.) calls
-`useTranslations()` unconditionally — so the `auth` catalog **must** be
-registered before any of these render, in every project, not only ones that
-answered th+en at the design-setup interview:
-
-1. Copy `assets/messages/auth.th.ts` and `assets/messages/auth.en.ts` to the
-   project's `messages/` directory (same copy step as the kit's own
-   `messages/kit.{th,en}.ts`).
-2. Edit the project's `i18n/messages.ts` — this file is **owned by
-   `ugt-nextjs-design-setup`**, and its own header comment already says the
-   quiet part out loud: *"A skill that adds its own catalog (auth, mail,
-   upload) registers it here — one import + one spread."* This is that
-   registration, not an auth-setup-specific quirk:
-
-   ```ts
-   // added imports
-   import { authEn } from '@/messages/auth.en';
-   import { authTh } from '@/messages/auth.th';
-
-   // KitCatalog type stays; add a sibling AuthCatalog type the same way
-   type AuthCatalog = {
-     [Namespace in keyof typeof authTh]: Record<keyof (typeof authTh)[Namespace], string>;
-   };
-
-   export const messages: Record<AppLocale, { kit: KitCatalog; auth: AuthCatalog }> = {
-     th: { kit: kitTh, auth: authTh },
-     en: { kit: kitEn, auth: authEn },
-   };
-   ```
-
-   `DEFAULT_LOCALE` and everything else in the file is untouched — this is
-   purely additive (one import pair + one type + two object keys).
-
-**Skipping step 2 fails silently — this is the dangerous one.** The project
-still builds and still boots (the import paths exist once the catalog files
-are copied). But `i18n/request.ts` sets no `getMessageFallback`, so next-intl
-falls back to its default: it **renders the key path itself**. Every
-login/admin/password screen then shows `auth.login.submit` and
-`auth.errors.UNAUTHORIZED` where text should be — no exception, no red
-screen, just an app that looks broken to whoever opens it, with the real
-error only in the server console. There is no fallback to Thai prose either,
-because none of these files carry hardcoded Thai anymore (this phase moved
-all of it into the catalog).
-
-`check-i18n.mjs` fails on this (`every catalog in messages/ is registered in
-i18n/messages.ts`) — so run design-setup's `verify.mjs`, which delegates to
-it, before calling an install done.
+**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):** every
+converted asset calls `useTranslations()` unconditionally, so the `auth`
+catalog must be registered before any of them render — copy
+`assets/messages/auth.{th,en}.ts` to `messages/`, then register in
+`i18n/messages.ts` exactly as `references/i18n-wiring.md` shows.
+**Skipping the registration fails silently**: the app still builds and boots,
+every auth screen just renders raw key paths (`auth.login.submit`) instead of
+text — see that file for why. Run design-setup's `verify.mjs` (delegates to
+`check-i18n.mjs`) before calling an install done.
 
 ### 5.3 Schema + migrate
 
@@ -487,45 +433,17 @@ does nothing — always do both ends or neither.
 
 ## 7. Quick Rules — DO / DON'T
 
+> The facts that used to fill this table each have exactly one home now: §2
+> (org policy), `references/auth-flows.md` (every flow + its gotcha table),
+> `references/rbac.md`, `references/data-scope.md`, or
+> `references/directory-enrichment.md` — §1 already says to read those before
+> touching auth code. What's left below has no other home.
+
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| Derive the cookie prefix from the basePath and keep it **identical in 3 places**: `lib/auth.ts` / `proxy.ts` / `lib/actions/auth.ts` | Leave the default `better-auth.` on a shared domain (→ `ERR_TOO_MANY_REDIRECTS`) |
-| Compute `SESSION_COOKIE_NAME` from `BETTER_AUTH_URL` (https → `__Secure-` prefix) | Hardcode the cookie name |
-| Log out with `cookieStore.set(name, '', { maxAge: 0, secure })` | `cookieStore.delete()` — omits the `Secure` flag; browsers refuse to delete `__Secure-` cookies |
-| Guard Keycloak plugin registration with `env.KEYCLOAK_* &&` | Call `keycloak()` bare (build crashes under `SKIP_ENV_VALIDATION=1`) |
-| `redirectURI` = `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak` | Let Better Auth guess the redirect URI (no basePath) |
-| `auth.api.signInEmail(...)` | `auth.api.signIn.email(...)` (that path doesn't exist) |
-| `auth.api.requestPasswordReset(...)` (1.5.x) | `auth.api.forgetPassword(...)` — removed |
-| Build the reset link from `token` + `NEXT_PUBLIC_BASE_PATH` yourself | Mail the `url` Better Auth passes in (no basePath → 404 in prod only) |
-| Answer "ถ้าอีเมลนี้มีอยู่…" for every input | Say "ไม่พบอีเมลนี้" — that is a user-enumeration oracle |
-| Refuse reset for `authType !== 'local'` | Let an SSO/LDAP user set an app-local password beside the directory one |
-| One `lib/password-policy.ts` for reset · change · admin-create | A different regex per form (the loosest one becomes the real rule) |
-| `revokeSessionsOnPasswordReset: true` + `revokeOtherSessions` on change | Leave old sessions alive after a reset — the intruder simply stays |
 | Require the current password to change one | Trust the session alone (a borrowed unlocked laptop = account taken) |
-| `emailAndPassword.disableSignUp: true` | Leave it off — `enabled: true` publishes `POST /api/auth/sign-up/email` and anyone who can reach the app can self-register |
-| Create accounts from `/admin/users` (guard + audit) | Add a sign-up page |
 | Write the user + `credential` account rows with `hashPassword` (`better-auth/crypto`) | `auth.api.signUpEmail` in an admin action — `disableSignUp` blocks it too, and it mints a session for the new user |
-| SSO/AD users: assign the role from `/admin/users` **after** their first login | Pre-create their row by hand — a typo in `ldapUsername` yields a second user at login and the role sits on the unused row (มติ 2026-08-11: no pre-registration) |
-| Refresh the directory fields on **every** login, from one shared helper | Fill them once at first login (people move team), or write SSO and LDAP separately (the two drift apart unnoticed) |
-| Directory lookups return `null` on failure | Let a linked-server outage throw — everyone's login dies with it |
-| `Prisma.raw` only for the view name + column list, both constants | Anything user-supplied inside `Prisma.raw` |
-| Resolve scope, then `isEmpCodeAllowed` / `scopeWhere` from the **same** scope object | Filter the list one way and check the detail page another (the gap is invisible on screen) |
-| 404 for a record outside scope | 403 — it confirms the id exists |
 | `isSelf` = `session.empCode === record.empCode` | `!viewAll` — a read-all user then loses the buttons on their **own** record |
-| Approval-chain lookups rethrow | Return `[]` on error — the request saves with nobody to approve it and just sits there |
-| Separate "no chain configured" (`[]`) from "lookup failed" (throw) in the message | One message — it sends people to HR when a linked server is merely down |
-| `decodeURIComponent` the cookie value from `Set-Cookie` before `cookieStore.set` | Forward it raw (double-encode → 404) |
-| LDAP: HMAC-sign the token via Web Crypto before setting the cookie | Set the raw token (Better Auth rejects → redirect loop) |
-| LDAP: bind as UPN + escape filters per RFC 4515 | Concatenate filters from raw input (LDAP injection) |
-| Use `ldapts` | `ldapjs` (deprecated, no types) |
-| `NODE_TLS_REJECT_UNAUTHORIZED=0` default in `.env.example` ONLY when the container has no outbound path to the internet (closed intranet) | Leaving it on once the container gains any external access (npm registry, external API, etc.) — it disables TLS verification for the whole process |
-| `rateLimit` model: `id String @id` + nullable `key String?` | `key` as `@id` (Better Auth v1 sends `id` → `Unknown argument 'id'`) |
-| auth-client: no `baseURL`; pass the path via the `basePath` option and read `process.env.NEXT_PUBLIC_BASE_PATH` directly | Pass a URL with a path as `baseURL` / read via `createEnv()` in the client bundle |
-| proxy: `url.pathname = '/login'` (app-relative) | `url.pathname = basePath + '/login'` (duplicates the basePath) |
-| Delete DB sessions by the raw token (strip the signature first) | Delete by the signed token (never matches) |
-| Block edit/delete of `role.isSystem` roles in `admin-roles.ts` | Let the Administrator role's permissions be edited away (locks out everyone) |
-| Block a user changing their own role in `assignUserRoleAction` | Let an admin accidentally demote themselves with no one else to undo it |
-| Call `syncPermissionsIfNeeded()` from `app/(admin)/layout.tsx` | Add to `ALL_PERMISSIONS` and forget the seed reaches the database |
 | UI follows the kit's Base UI (base-mira) API: `render` on triggers, `onClick` on menu items | Radix idioms `asChild` / `onSelect` — they are silently ignored by Base UI and the button just stops working (shipped once: "ปุ่ม logout กดไม่ได้") |
 | Destructive actions confirm via the kit's `ConfirmActionDialog`; row buttons via `IconAction` + `soft-*`; page headers via `page-shell` | `window.confirm`, bare ghost icon buttons, hand-written `<h1>` — DESIGN.md §3/§4 apply to these admin pages too |
 
@@ -617,14 +535,11 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       `curl -sI http://localhost:3000/api/health` must both show
       `content-security-policy`, `x-frame-options: DENY`,
       `x-content-type-options: nosniff`, `referrer-policy` and
-      `permissions-policy`. Every `return` in `proxy.ts` has to go through
-      `applySecurityHeaders()` — copying the file and then writing a bare
-      `return NextResponse.next()` is how they disappear silently
-- [ ] HSTS lands in the right place: on `http://localhost` there must be **no**
-      `strict-transport-security` at all (pinning localhost to https is cached
-      by the browser and there is no https dev server to fall back to), and on
-      https it must carry neither `includeSubDomains` nor `preload` until the
-      domain owner says so
+      `permissions-policy` (every `return` in `proxy.ts` must go through
+      `applySecurityHeaders()` — why each header exists is in that file's own
+      comments, read those before changing it)
+- [ ] `http://localhost` has **no** `strict-transport-security` header; https
+      has it without `includeSubDomains`/`preload` (reasons in `proxy.ts`)
 - [ ] No real secrets / hostnames leaked into git (`.env.local` is gitignored)
 - [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
       (cwd = project root) reports `0 failed`, and every auth screen (login,

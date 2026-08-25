@@ -10,6 +10,13 @@
     "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
     "note": "S-side 27/27, including all six production-symptom queries (redirect loop, cookie not clearing on https, `Unexpected token '<'`, invalid redirect_uri) — the documented-symptom sentences in the description are doing real routing work. N-side 15/15; one secondary variance where 'เขียน test ให้ flow login' was read as no-skill rather than TDD, which does not affect this skill's boundary."
   },
+  "revalidation_2026-08-25": {
+    "reason": "SKILL.md §7 restructured (backlog §10) — 39-row DO/DON'T table cut to 5 rows, the other 34 were near-verbatim duplicates of §2/auth-flows.md/rbac.md/data-scope.md/directory-enrichment.md. Frontmatter description was NOT touched by that edit. Re-ran the trigger check to confirm the boundary held.",
+    "judges": 3,
+    "primary_accuracy": "27/27 (100.0%) — unchanged from baseline",
+    "secondary_accuracy": "13/15 — N1/N3/N4/N5 all correct across all 3 judges; N2 (theme/color query) split 1/3 design-setup vs 2/3 no-skill",
+    "note": "N2's wobble is between design-setup and no-skill, not auth-setup — it does not touch this skill's boundary and is not caused by this edit (neither auth-setup's frontmatter nor design-setup's listing entry changed). Confirms the §7 cut is trigger-neutral, as expected since judges are given only the frontmatter description, never the SKILL.md body."
+  },
   "queries": {
     "S1": {
       "prompt": "ใส่ระบบ login ให้โปรเจคนี้ ใช้ SSO ของบริษัท",

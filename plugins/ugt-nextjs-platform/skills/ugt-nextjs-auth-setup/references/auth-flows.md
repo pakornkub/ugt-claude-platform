@@ -74,6 +74,17 @@ Historical failure modes this prevents:
 
 ## SSO login flow (Keycloak)
 
+**Migration note (why the version is pinned `^1.7.1`):** better-auth 1.7.0
+deleted `genericOAuthClient` from `better-auth/client/plugins` in a MINOR bump
+— present through 1.6.14, gone in 1.7.0, so a caret range like `^1.6.0` floats
+straight into the broken line. This was a deliberate rewrite, not a
+regression: generic OAuth (the Keycloak SSO button) became a first-class
+social provider — `authClient.signIn.social({ provider: 'keycloak' })`
+replaces the removed `signIn.oauth2()`, no client plugin needed, and the
+callback route moved from `/api/auth/oauth2/callback/:id` to
+`/api/auth/callback/:id`. Every asset in this skill is already written for
+≥1.7 — never pin below 1.7.1.
+
 1. Client: `authClient.signIn.social({ provider: 'keycloak', callbackURL: `${basePath}/` })`
    (better-auth ≥1.7 — generic OAuth is a first-class social provider now, no
    client plugin and no `signIn.oauth2()`)

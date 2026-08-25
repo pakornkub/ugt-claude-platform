@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.50.0 (2026-08-25)
+
+**`ugt-nextjs-auth-setup` SKILL.md restructure** (backlog §10 — the piece
+deliberately left out of 4.48.1's fix release because it needed its own
+version + a trigger-eval re-run, not a doc tweak): file was 632 lines vs
+skill-creator's ~500 guideline, and most of the excess was §7's "Quick Rules
+DO/DON'T" table restating facts already documented once, properly, in §2 or
+in `references/{auth-flows,rbac,data-scope,directory-enrichment}.md` — files
+§1 already tells the reader to consult before touching auth code.
+
+Cross-checked all 39 rows against those five sources by reading each file in
+full — 34 rows were near-verbatim duplicates (same API name, same code
+snippet, same cookie mechanic, same RBAC/scope contrast already tabulated
+elsewhere); 5 were genuinely unique to the table (admin-created-local-user
+hashPassword pattern, `isSelf`/`!viewAll` pitfall, the two UI-kit rows) and
+stayed. §7 shrinks from 39 rows to 5. Zero information loss — everything cut
+is still documented, with more context, at its one real home.
+
+**Second pass — found and fixed more, this time by relocating instead of
+deleting** (asked "what else can shrink without losing content" after the §7
+cut): §5.2's i18n-catalog-registration walkthrough (53 lines, self-contained,
+duplicated nowhere) moved wholesale to a new `references/i18n-wiring.md` —
+§5.2 keeps a short pointer + the "skipping this fails silently" warning.
+The better-auth 1.7.0 migration history in §5.1's dependency comment moved
+into `references/auth-flows.md`'s SSO login flow section, where the code it
+explains actually lives. §3 Q5 (first-admin) was duplicating §5.5 step 5
+almost sentence-for-sentence — trimmed to a pointer. §8's HSTS/security-header
+checklist entries were restating explanations `proxy.ts` already carries as
+code comments — trimmed to the check itself with a pointer to the asset.
+§4's DataTable-downgrade paragraph tightened without dropping the decision
+rule. File: 632 → 604 → **547 lines** (still above the ~500 guideline —
+§5/§8's remaining bulk is setup steps and a hand-verification checklist,
+not duplication, so further cuts there would be a different, riskier kind
+of change).
+
+**Trigger-eval re-validation** (required because this touches the file the
+trigger baseline was built against, even though the frontmatter `description`
+itself was not edited by either pass): 3 independent judges, same method as
+the 2026-08-09 baseline (skill listing built from every SKILL.md frontmatter
+in the marketplace + superpowers distractors, judges answer from that text
+only). Result: primary accuracy 27/27 (100%) — unchanged. Full result
+recorded in `evals/trigger-evals.json` under `revalidation_2026-08-25`
+(covers both passes — frontmatter never moved, so a second run would test
+nothing new).
+
 ## 4.49.3 (2026-08-25)
 
 **Internal-CA TLS for SSO/LDAP — real production incident, not theoretical**
