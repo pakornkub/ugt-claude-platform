@@ -289,7 +289,14 @@ check('Every compose /srv/appdata bind has its mkdir -p in the Jenkinsfile', () 
   const names = new Set();
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
     if (!has(f)) continue;
-    for (const m of read(f).matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
+    // Comment-stripped, same reason as jfActive: the shipped compose documents
+    // the [VOLUME] block as a `#` example naming /uploads — scanning the raw
+    // file makes a project with no volumes FAIL on a bind that never existed.
+    const composeActive = read(f)
+      .split('\n')
+      .filter((l) => !l.trim().startsWith('#'))
+      .join('\n');
+    for (const m of composeActive.matchAll(/\/srv\/appdata\/[^/\s:]+\/([^\s:]+):/g)) names.add(m[1]);
   }
   if (names.size === 0) return { ok: true, msg: 'no /srv/appdata binds in compose — nothing to prepare' };
   // Match the path anywhere in the ACTIVE Jenkinsfile, not on `mkdir -p` lines:

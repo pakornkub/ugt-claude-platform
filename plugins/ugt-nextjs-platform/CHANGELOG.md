@@ -1,5 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.49.2 (2026-08-25)
+
+**Fix เดี่ยว: check "mkdir -p ↔ bind" ของ cicd `verify.mjs` อ่าน compose แบบดิบ**
+— บั๊กคู่แฝดของ jf/jfActive แต่ฝั่ง compose (ฝั่ง python/php ปิดไปแล้วใน 0.3.0
+ด้วย `composeActive` แต่ nextjs ตกหล่น): template compose แจกตัวอย่าง `[VOLUME]`
+เป็นบรรทัดคอมเมนต์ที่มีชื่อ `uploads` อยู่ — โปรเจคที่ไม่ใช้ volume (ลบบล็อก
+[VOLUME] ใน Jenkinsfile ตามคำสั่ง แต่ปล่อยคอมเมนต์ตัวอย่างใน compose ไว้) จึง
+**FAIL ปลอม**โดยอ้าง bind ที่ไม่เคยมีจริง · แก้ให้ตัดบรรทัด `#` ออกก่อน matchAll
+(`composeActive` แบบเดียวกับ `jfActive`) · พิสูจน์ด้วย fixture สองฝั่ง:
+คอมเมนต์ค้างอย่างเดียว → pass, bind จริงที่ Deploy stage ไม่เตรียม → ยัง FAIL
+
 ## 4.49.1 (2026-08-25)
 
 **Fix release จากผล re-score หลัง 4.48.1** — แก้บั๊ก 2 ตัวที่ 4.48.1 พามาเอง,
