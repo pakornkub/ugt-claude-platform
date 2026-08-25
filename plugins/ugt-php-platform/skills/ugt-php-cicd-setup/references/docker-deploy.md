@@ -306,12 +306,25 @@ vendor
 coverage
 dc-report
 test-results
+.env
+.env.*
+!.env.example
 ```
 
 หมายเหตุ: `Dockerfile.web` มี `COPY --from=composer:2` + `composer install`
 ของตัวเองอยู่แล้ว (สร้าง `vendor/` ใหม่ในเลเยอร์ image) การกัน `vendor` ใน
 `.dockerignore` จึงไม่กระทบผลลัพธ์ image — แค่กัน `vendor/` เวอร์ชัน CI (ที่มี
 `--dev` dependencies ติดมาด้วย) ไม่ให้หลุดเข้า build context โดยไม่จำเป็น
+
+**`.env`/`.env.*`/`!.env.example` กันคนละความเสี่ยงจาก 4 บรรทัดบน** — ไม่ใช่
+เรื่องขนาด context แต่เป็นเรื่อง secret รั่ว: `.env` จริงที่อยู่ในเครื่อง dev
+(หรือหลงเหลือใน workspace ของ Jenkins agent จาก build ครั้งก่อน) ถ้าไม่ถูกกัน
+จะถูก `COPY . .` ฝังลง image layer แบบถาวร — `docker history`/`docker save`
+ดึง secret กลับมาได้แม้ไฟล์จะถูกลบใน layer ถัดไป (layer เป็น append-only)
+**โปรเจค CI3/legacy ที่ยังไม่ได้ migrate มาใช้ `.env`** (DB credential ฝังใน
+ไฟล์ config ของ framework เอง เช่น `application/config/database.php`) ต้อง
+เพิ่มชื่อไฟล์นั้นเข้า `.dockerignore` เองแยกต่างหาก — plugin นี้เดาโครงสร้าง
+ของ legacy app แต่ละโปรเจคไม่ได้
 
 ### `php -l` ก่อน `phpstan` เสมอ — เร็วกว่า
 

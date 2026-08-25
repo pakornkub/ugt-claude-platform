@@ -670,6 +670,15 @@ check('.dockerignore excludes CI artifacts from the build context', () => {
     : { ok: true };
 });
 
+check('.dockerignore blocks real .env from the build context', () => {
+  if (!has('.dockerignore')) return { ok: false, msg: 'No .dockerignore — a real .env left in the workspace could get COPYed into an image layer permanently' };
+  const lines = read('.dockerignore').split('\n').map((l) => l.trim());
+  const blocksEnv = lines.some((l) => l === '.env') || lines.some((l) => /^\.env\.?\*$/.test(l));
+  return blocksEnv
+    ? { ok: true }
+    : { ok: false, msg: 'Missing .env / .env.* in .dockerignore — COPY . . can bake real secrets into an image layer (Docker layers are append-only, deleting the file later does not remove it from history)' };
+});
+
 check('owasp-suppressions.xml is readable XML', () => {
   if (!has('owasp-suppressions.xml')) return { ok: false, msg: 'No owasp-suppressions.xml' };
   const body = read('owasp-suppressions.xml');

@@ -243,18 +243,24 @@ admin เตรียม `/srv/appdata` ให้เขียนได้คร�
 | `assets/rules/ugt-python-ci.md` | `.claude/rules/ugt-python-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 
 นอกจากตารางนี้ ต้อง **สร้าง `.dockerignore`** ที่ root ถ้ายังไม่มี (หรือเติม
-บรรทัดที่ขาด) อย่างน้อย 4 บรรทัด:
+บรรทัดที่ขาด) อย่างน้อย 7 บรรทัด:
 
 ```
 .venv
 coverage
 dc-report
 test-results
+.env
+.env.*
+!.env.example
 ```
 
 สเตจ Install สร้าง `.venv` ไว้ใน workspace เดียวกับที่ Docker Build ใช้เป็น
 build context และ Dockerfile ทั้งสอง shape ใช้ `COPY . .` — ไม่กันไว้ `.venv`
 (มักเกิน 100 MB, มีไบนารีเฉพาะ platform ของ Jenkins agent) จะหลุดเข้า image
+— สามบรรทัด `.env`/`.env.*`/`!.env.example` กัน `.env` จริงที่เผลอเหลือใน
+workspace ไม่ให้ `COPY . .` ฝัง secret ลง image layer ถาวร (Docker layer เป็น
+append-only)
 รายละเอียด → `references/docker-deploy.md` §F
 
 > **`/api/health` ไม่ใช่ของเลือกได้** สำหรับ shape web — ทั้ง `HEALTHCHECK` ใน
@@ -479,7 +485,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `ruff format .` ทั้งโปรเจค + commit แยก **ก่อน** push แรก | ปล่อยให้ `ruff format --check` แดงบน Jenkins แล้วค่อยไล่แก้ทีละรอบ |
 | Baseline โค้ดเดิมด้วย `per-file-ignores` ระบุ rule+path+เหตุผล | ตัด rule ออกจาก `select` / `ignore_errors` ยกโฟลเดอร์ |
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
-| `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` | ปล่อย artifact ของ CI หลุดเข้า build context |
+| `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
 | `/api/health` คืนแค่ `healthy`/`degraded` | ใส่ version/commit/hostname ลง response |
 | `sonar.sources`/`sonar.tests` ชี้ path ที่มีอยู่จริง | ปล่อย path ค้าง (sonar-scanner fail ทันที) |
 | ทุก suppression/CPD exclusion มีเหตุผลกำกับ | suppress ล่วงหน้าโดยยังไม่เจอ finding จริง |
@@ -552,7 +558,8 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
 - [ ] `requirements.txt` + `requirements-dev.txt` อยู่ที่ root คนละไฟล์
 - [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `test_*.py` และ `tests/test_smoke.py` import
       `__APP_MODULE__` ตัวจริงได้ (`.venv/bin/pytest` ผ่านในเครื่อง)
-- [ ] `.dockerignore` มี `.venv`, `coverage`, `dc-report`, `test-results`
+- [ ] `.dockerignore` มี `.venv`, `coverage`, `dc-report`, `test-results`,
+      `.env`, `.env.*` (+ `!.env.example`)
 - [ ] `.claude/rules/ugt-python-ci.md` อยู่ในที่ของมัน
 - [ ] `docs/admin-handoff.md` ถูก render แล้ว (ไม่มี `__*__` ค้าง, หัวข้อที่ไม่
       ใช้ถูกลบ)

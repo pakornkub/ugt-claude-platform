@@ -132,8 +132,13 @@ spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-co
   0 package) แต่ threshold บล็อก deploy ได้จากช่องโหว่ที่ไม่เคยขึ้น production —
   ควรมี Trivy (image scan) เป็นส่วนหนึ่งของ "Dependency Scan" ตามที่ contract
   ตั้งชื่อ stageไว้กว้างอยู่แล้ว ไม่ต้องแก้ contract
-- `.dockerignore` บังคับแค่ 4 บรรทัด (CI artifact) ไม่ครอบไฟล์ secret
-  (`db_config.php`, `.env`) ที่ `COPY . .` จะพาเข้า image ได้ถ้าไม่กันเอง
+- ~~`.dockerignore` บังคับแค่ 4 บรรทัด (CI artifact) ไม่ครอบไฟล์ secret
+  (`db_config.php`, `.env`) ที่ `COPY . .` จะพาเข้า image ได้ถ้าไม่กันเอง~~ →
+  php 0.5.3 / python 0.5.3 (เพิ่ม `.env`/`.env.*`/`!.env.example` เข้า
+  mandatory list ทั้ง SKILL.md/docker-deploy.md/`verify.mjs`; CI3/legacy ที่
+  ยังไม่ใช้ `.env` ต้องเพิ่มไฟล์ config DB ของตัวเองเองแยกต่างหาก — plugin
+  เดาโครงสร้าง legacy app แต่ละโปรเจคไม่ได้) — nextjs ไม่มี gap นี้ (asset
+  `dockerignore` กัน `.env`/`.env.*` อยู่แล้วตั้งแต่แรก)
 
 ### 7. i18n leftover ที่เจอตอนเทียบกับ HRMS (2026-08-24, หลังปิด gate bug + `.gitattributes` + era ใน 4.46.1)
 

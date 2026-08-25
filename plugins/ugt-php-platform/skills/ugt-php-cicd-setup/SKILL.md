@@ -275,20 +275,29 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 | `assets/rules/ugt-php-ci.md` | `.claude/rules/ugt-php-ci.md` | เสมอ (overwrite ทั้งไฟล์ได้ตอน plugin update) — **ไฟล์นี้มี `__PROJECT_NAME__` อยู่ 2 จุด** (ชื่อ CI image) ต้องแทนค่าเหมือนไฟล์อื่น ไม่ใช่ copy ดิบ ๆ |
 
 นอกจากตารางนี้ ต้อง **สร้าง `.dockerignore`** ที่ root ถ้ายังไม่มี (หรือเติม
-บรรทัดที่ขาด) อย่างน้อย 4 บรรทัด:
+บรรทัดที่ขาด) อย่างน้อย 7 บรรทัด:
 
 ```
 vendor
 coverage
 dc-report
 test-results
+.env
+.env.*
+!.env.example
 ```
 
 สเตจ Install สร้าง `vendor/` (มี dev dependencies) ไว้ใน workspace เดียวกับที่
 Docker Build ใช้เป็น build context และ `Dockerfile.web` ใช้ `COPY . .` —
 ไม่กันไว้ `vendor/` เวอร์ชัน CI จะหลุดเข้า build context ทั้งก้อน (image เอง
-รัน `composer install --no-dev` สร้าง `vendor/` ของตัวเองอยู่แล้ว)
-รายละเอียด → `references/docker-deploy.md` §E
+รัน `composer install --no-dev` สร้าง `vendor/` ของตัวเองอยู่แล้ว) · สามบรรทัด
+`.env`/`.env.*`/`!.env.example` กัน `.env` จริงที่เผลอเหลือใน workspace (dev
+เครื่องใครเครื่องมันมักมี `.env` ค่าจริงอยู่) ไม่ให้ `COPY . .` ฝัง secret ลง
+image layer ถาวร (Docker layer เป็น append-only — ลบไฟล์ใน layer ถัดไปก็ยัง
+ดึง layer เก่ามาดู secret ได้) **โปรเจค CI3/legacy ที่เก็บ DB credential ใน
+ไฟล์ config เอง ไม่ใช่ `.env`** (เช่น `application/config/database.php`) ต้อง
+เพิ่มชื่อไฟล์นั้นเข้า `.dockerignore` เองด้วย — plugin เดาชื่อไฟล์ของ legacy
+app แต่ละโปรเจคไม่ได้ รายละเอียด → `references/docker-deploy.md` §E
 
 > **`/api/health` ไม่ใช่ของเลือกได้** — ทั้ง `HEALTHCHECK` ใน Dockerfile,
 > healthcheck ในทั้ง 2 compose และ health poll ในสเตจ Deploy ยิง path นี้
@@ -650,7 +659,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `php-cs-fixer fix` ทั้งโปรเจค + commit แยก **ก่อน** push แรก | ปล่อยให้ `--dry-run` แดงบน Jenkins แล้วค่อยไล่แก้ทีละรอบ |
 | Baseline โค้ดเดิมด้วย `phpstan-baseline.neon` / `ignoreErrors` ระบุ path+เหตุผล | `excludePaths` ยกโฟลเดอร์ / `ignoreErrors: ['#.*#']` / ถอด `@PSR12` |
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
-| `.dockerignore` กัน `vendor` `coverage` `dc-report` `test-results` | ปล่อย artifact ของ CI หลุดเข้า build context |
+| `.dockerignore` กัน `vendor` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
 | `/api/health` คืนแค่ `healthy`/`degraded` | ใส่ version/commit/hostname ลง response |
 | `sonar.sources`/`sonar.tests` ชี้ path ที่มีอยู่จริง + exclude `wp-admin`/`wp-includes` | ปล่อย path ค้าง (sonar-scanner fail ทันที) / สแกน WordPress core |
 | ทุก suppression/CPD exclusion มีเหตุผลกำกับ | suppress ล่วงหน้าโดยยังไม่เจอ finding จริง |
@@ -745,7 +754,9 @@ path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟ
       dev tooling ทั้ง 3 ตัวอยู่ใน `require-dev` (ไม่ใช่ `require`)
 - [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `*Test.php` และ `tests/SmokeTest.php` ชี้
       `__ENTRY_FILE__` ที่มีอยู่จริง (`vendor/bin/phpunit` ผ่านในเครื่อง)
-- [ ] `.dockerignore` มี `vendor`, `coverage`, `dc-report`, `test-results`
+- [ ] `.dockerignore` มี `vendor`, `coverage`, `dc-report`, `test-results`,
+      `.env`, `.env.*` (+ `!.env.example`) — CI3/legacy เพิ่มไฟล์ config DB
+      ของโปรเจคเองถ้าไม่ใช้ `.env`
 - [ ] `.claude/rules/ugt-php-ci.md` อยู่ในที่ของมัน **และไม่มี `__PROJECT_NAME__`
       ค้าง** (ชื่อ CI image 2 จุดในไฟล์นั้นต้องถูกแทนค่าแล้ว)
 - [ ] `docs/admin-handoff.md` ถูก render แล้ว (ไม่มี `__*__` ค้าง, หัวข้อที่ไม่

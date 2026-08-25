@@ -1,5 +1,24 @@
 # Changelog — ugt-php-platform
 
+## 0.5.3 (2026-08-25)
+
+**`.dockerignore` mandatory list ไม่กัน `.env`** (backlog §6 "มาตรฐานที่ยังขาด")
+— `references/docker-deploy.md` §E เตือนเรื่อง `.env` จริงหลุดเข้า image layer
+ผ่าน `COPY . .` ไว้เองแล้ว (ทั้งสอง Dockerfile ใช้ `COPY . .` แบบกว้าง) แต่
+mandatory-4-บรรทัดจริงที่ SKILL.md/`verify.mjs` บังคับกลับไม่มี `.env` เลย —
+ยังไม่ tag รอ pilot:
+
+- SKILL.md §5.7 (การสร้าง `.dockerignore`) / §6 Quick Rules / §7 Verification
+  Checklist เพิ่ม `.env`/`.env.*`/`!.env.example` เข้า mandatory list (7 บรรทัด
+  จากเดิม 4) พร้อมโน้ตว่า CI3/legacy ที่ยังไม่ migrate มาใช้ `.env` ต้องเพิ่ม
+  ไฟล์ config DB ของตัวเอง (เช่น `application/config/database.php`) เองแยก
+  ต่างหาก — plugin เดาโครงสร้าง legacy app แต่ละโปรเจคไม่ได้
+- `references/docker-deploy.md` §E เพิ่มสามบรรทัดเดียวกันในตัวอย่าง code block
+  พร้อมอธิบายว่าเป็นความเสี่ยงคนละแบบกับ 4 บรรทัดเดิม (secret รั่วถาวรใน layer
+  ไม่ใช่ context โต — Docker layer เป็น append-only)
+- `scripts/verify.mjs` เพิ่ม check ใหม่แยกจาก artifact-guard check เดิม
+  (`.dockerignore blocks real .env from the build context`)
+
 ## 0.5.2 (2026-08-25)
 
 **สูตร subpath สำหรับแอป relative path (ข้อสุดท้ายของ pilot feedback ที่ยังกัด

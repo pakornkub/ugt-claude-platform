@@ -195,13 +195,21 @@ Dockerfile มี `COPY . .` แบบกว้าง (ทั้งสอง Doc
 coverage
 dc-report
 test-results
+.env
+.env.*
+!.env.example
 ```
 
-สี่รายการนี้ตรงกับ artifact ที่สเตจ Install/Unit Tests/OWASP สร้างไว้ในสเตจ
+สี่รายการแรกตรงกับ artifact ที่สเตจ Install/Unit Tests/OWASP สร้างไว้ในสเตจ
 ก่อน Docker Build ตามลำดับ (`.venv` จาก Install, `coverage`/`test-results` จาก
 Unit Tests — path มาจาก `[tool.pytest.ini_options]` ใน `pyproject.toml`,
 `dc-report` จาก OWASP Dependency Check) — ไม่มีชิ้นไหนควรอยู่ใน production
-image เลย.
+image เลย
+
+สาม `.env` ที่เหลือกันคนละความเสี่ยง: ไม่ใช่ context โต แต่เป็น secret รั่ว —
+`.env` จริงที่อยู่ในเครื่อง dev หรือหลงเหลือใน workspace ของ Jenkins agent
+ถ้าไม่ถูกกัน จะถูก `COPY . .` ฝังลง image layer แบบถาวร (Docker layer เป็น
+append-only — ลบไฟล์ใน layer ถัดไปก็ยังดึง layer เก่ามาดู secret ได้)
 
 ## G. DNS: ชื่อ host สั้นของ DB มัก resolve ไม่ได้จากในคอนเทนเนอร์
 

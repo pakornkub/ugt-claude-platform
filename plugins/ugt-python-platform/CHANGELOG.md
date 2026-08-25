@@ -1,5 +1,21 @@
 # Changelog — ugt-python-platform
 
+## 0.5.3 (2026-08-25)
+
+**`.dockerignore` mandatory list ไม่กัน `.env`** — เจอช่องเดียวกันฝั่ง php
+(backlog §6 platform-level "มาตรฐานที่ยังขาด") ตรวจแล้วฝั่ง python มี gap
+เดียวกัน: `references/docker-deploy.md` §F เตือนเรื่อง `COPY . .` ไว้แล้วแต่
+mandatory list ไม่มี `.env` — ยังไม่ tag รอ pilot:
+
+- SKILL.md (การสร้าง `.dockerignore`) / §6 Quick Rules / §7 Verification
+  Checklist เพิ่ม `.env`/`.env.*`/`!.env.example` เข้า mandatory list (7
+  บรรทัดจากเดิม 4)
+- `references/docker-deploy.md` §F เพิ่มสามบรรทัดเดียวกันในตัวอย่าง code
+  block พร้อมอธิบายว่าเป็นความเสี่ยง secret รั่วถาวรใน layer คนละแบบกับ 4
+  บรรทัดเดิมที่กันแค่ context โต
+- `scripts/verify.mjs` เพิ่ม check ใหม่แยกจาก artifact-guard check เดิม
+  (`.dockerignore blocks real .env from the build context`)
+
 ## 0.5.2 (2026-08-25)
 
 **กวาด cosmetic ค้างจาก pilot checklist** (backlog §6) — ยังไม่ tag รอ pilot:
