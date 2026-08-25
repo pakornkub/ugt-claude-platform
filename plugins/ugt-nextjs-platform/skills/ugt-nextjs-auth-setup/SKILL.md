@@ -62,6 +62,7 @@ project. Deep detail lives in `references/`:
   that accepts an empCode from the client**)
 - `references/i18n-wiring.md` — registering the `auth` message catalog in
   `i18n/messages.ts` (§5.2) and why skipping it fails silently
+- `references/placeholders.md` — the full placeholder table + substitution rules (§6)
 
 ## 2. Org Standards
 
@@ -73,14 +74,11 @@ The org-wide contract:
 2. **OIDC Authorization Code + PKCE (S256)** only — no implicit / direct access grants
 3. **Session: 8-hour lifetime, refresh when 30 minutes remain**
    (`expiresIn: 8h`, `updateAge: 30m`)
-4. **Audit log every time**: `login.success` / `login.failed` / `logout` /
-   `logout.sso` / `users.create` / `users.role-assign` — plus, for local
-   accounts, `password.reset.requested` / `password.reset` /
-   `password.reset.refused` / `password.change` / `password.change.failed` /
-   `users.password-set` — into the ActivityLogs table (non-blocking — must never throw and
-   break login), and every privileged mutation writes an audit log after success
-   — full rules (action naming, forbidden payloads, retention) in
-   `references/audit-logging.md`
+4. **Audit log every time**: every auth event (login/logout, all password
+   events for local accounts) and every privileged mutation writes to the
+   ActivityLogs table after success — non-blocking, must never throw and
+   break login. The mandated action catalog + full rules (naming, forbidden
+   payloads, retention) in `references/audit-logging.md`
 5. **RBAC shape**: `user (1)──(0..1) role (1)──(M:N) permission` — permission
    keys are `resource:action`, roles with `isSystem: true` cannot be deleted,
    every mutation guarded in the order **session → permission → action → audit log**
@@ -118,13 +116,11 @@ Ask all of these **in a single message** before doing anything:
 3. **[If SSO] Does a Keycloak client exist yet?**
    - exists → request `KEYCLOAK_ISSUER` / `CLIENT_ID` / `CLIENT_SECRET`
    - not yet → follow `references/keycloak-client.md` (the redirect URI must
-     be known before requesting) — and **render the request as a project
-     file `docs/admin-handoff.md`** (Thai, real substituted values, the
-     settings table + exact redirect URIs + a fill-in "ค่าที่ต้องส่งกลับ"
-     section for `KEYCLOAK_ISSUER`/`CLIENT_SECRET`) so the user forwards a
-     file to the Keycloak admin, not a chat snippet. If
-     `docs/admin-handoff.md` already exists (e.g. cicd-setup wrote it),
-     update its Keycloak section instead of overwriting the file.
+     be known before requesting) — and **render the request as a project file
+     `docs/admin-handoff.md`** (Thai, real values, settings table + exact
+     redirect URIs + a "ค่าที่ต้องส่งกลับ" section) so the user forwards a
+     file, not a chat snippet. If the file already exists (e.g. cicd-setup
+     wrote it), update its Keycloak section instead of overwriting.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
    — **[If SSO or LDAP]** also keep `docs/admin-handoff.md` §4 "TLS ภายในองค์กร"
      (from the cicd-setup template — internal-CA cert vs closed-intranet
@@ -160,8 +156,8 @@ Ask all of these **in a single message** before doing anything:
    list them and ask which ones need permission control, because merging the
    admin menu in (§5.6) does **not** put existing menus under RBAC — the
    `/admin/roles` checklist only shows keys declared in `ALL_PERMISSIONS`.
-   Menus not chosen stay visible to every logged-in user, which is the right
-   default for general pages — registering everything just bloats role config.
+   Menus not chosen stay visible to every logged-in user (the right default
+   for general pages).
 
 ## 4. Prerequisite
 
@@ -173,31 +169,22 @@ user/session/account in Prisma. If it isn't, stop and do the database first.
 DataTable one is narrow, the i18n one is not.** The three admin pages render
 with the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
 `lib/table-query.ts` and `lib/format.ts`, all installed by
-`ugt-nextjs-design-setup` (the full-setup order design → auth guarantees this).
-Table modes follow DESIGN.md §4 and are fixed per table, not asked in the
-interview: `/admin/users` and `/admin/roles` are **client mode** (bounded
-master data fetched whole), `/admin/audit-logs` is **server mode** (unbounded —
-sort + filter + paginate all through URL state; the page parses searchParams
-and queries Prisma directly, no separate API route).
+`ugt-nextjs-design-setup` (the full-setup order design → auth guarantees
+this). Table modes follow DESIGN.md §4 and are fixed per table, not asked in
+the interview — each table's mode is stated on its row in the §5.2 asset
+table.
 
 Separately — and this covers far more of the skill than the three DataTable
-pages — every converted asset calls `useTranslations()` unconditionally
-(`login-form.tsx`, both password dialogs, `nav-user.tsx`, `admin-nav.tsx`,
-`users-table.tsx`, `roles-manager.tsx`, `role-form.tsx`,
-`admin-setup-form.tsx`, and the rest of §5.2's i18n wiring list), so it needs
-next-intl's provider chain (`i18n/request.ts`, `NextIntlClientProvider`, the
-plugin registered in `next.config.ts`) whether or not a single one of those
-files touches `DataTable`.
+pages — every converted asset calls `useTranslations()` unconditionally, so
+it needs next-intl's provider chain (`i18n/request.ts`,
+`NextIntlClientProvider`, the plugin registered in `next.config.ts`) whether
+or not a single one of those files touches `DataTable`.
 
-If auth is being installed standalone into a project that will not take the
-design kit: **run design-setup first — this is the only real path**, since
-downgrading away from `DataTable` alone does nothing about the i18n
-dependency (every screen still renders raw key paths without the provider).
-Downgrading the three admin pages to plain shadcn `Table` only works for a
-project that also hand-rolls the next-intl scaffolding itself, or removes
-every `useTranslations()`/`getTranslations()` call — say which path was
-taken and record it as a DESIGN.md deviation ("DataTable only for tabular
-data" is the org default).
+Installing auth standalone without the design kit: **run design-setup first
+— this is the only real path**; dropping `DataTable` alone does nothing about
+the i18n dependency. Plain shadcn `Table` works only for a project that also
+hand-rolls the next-intl scaffolding (or strips every `useTranslations()`
+call) — say which path was taken and record it as a DESIGN.md deviation.
 
 ## 5. Setup steps
 
@@ -218,14 +205,12 @@ npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avat
 > installs it) — mira's Tooltip does not self-wrap a provider, and IconAction
 > in the admin tables crashes prerender without it.
 
-> **No shadcn yet?** Never run a plain `npx shadcn@latest init` here — it
-> initializes the default (Radix) style while every kit asset is written for
-> **base-mira (Base UI, `render`/`onClick` API)**; the components would render
-> but menu items silently stop responding. The org preset init belongs to
-> `ugt-nextjs-design-setup` (its §Step 3 has the exact command) — run that
-> skill first, as §4 already requires. With design-setup installed, the `add`
-> lines above are mostly no-ops (its base set covers them) — keep them for
-> projects that trimmed the base set.
+> **No shadcn yet?** Never run a plain `npx shadcn@latest init` — it installs
+> the default (Radix) style while every kit asset targets **base-mira
+> (Base UI)**: components render but menu items silently do nothing. The org
+> preset init lives in design-setup §Step 3 — run that skill first (§4
+> requires it anyway). With it installed, the `add` lines above are mostly
+> no-ops — keep them for projects that trimmed the base set.
 
 Then mount `<Toaster richColors />` (from sonner) in the root layout
 (`app/layout.tsx`) — otherwise `toast.*()` in the login form renders nothing.
@@ -326,10 +311,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    if (!(await isAdminInitialized())) redirect('/admin/setup');
    ```
 
-   (`isAdminInitialized` caches its positive result, so this costs one COUNT
-   query per request only until the bootstrap happens, then nothing. The setup
-   page explains itself and bounces away once an admin exists, so the redirect
-   is safe for every user.)
+   (Safe and near-free for every user — caching details in `references/rbac.md`.)
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
 4. **Identity block in the shell** — render `<NavUser>` in the sidebar footer
@@ -358,7 +340,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    then log in with it and continue with `/admin/setup`. The script refuses to
    run once any user exists — everyone after the first is created through
    `/admin/users`, where the permission guard and the audit log apply.
-5. `app/(admin)/layout.tsx` calls `syncPermissionsIfNeeded()` on every request
+6. `app/(admin)/layout.tsx` calls `syncPermissionsIfNeeded()` on every request
    into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
    it reaches the database the next time anyone opens an admin page, no
    migration step needed (see `references/rbac.md`)
@@ -367,10 +349,9 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
 
 Check FIRST whether the project already has an app shell with a sidebar/nav
 (`app/(app)/layout.tsx`, a design-setup shell, or any layout that renders a
-menu). The admin assets default to a standalone `<AdminNav>` sidebar — that
-default exists **only** for projects with no shell; shipping it into a project
-that has one produces two competing sidebars, which is exactly the install
-mistake this section prevents.
+menu). The standalone `<AdminNav>` default exists **only** for projects with
+no shell — shipping it into one that has a shell produces two competing
+sidebars.
 
 **Project already has a sidebar** (the normal case for existing projects):
 
@@ -400,7 +381,7 @@ later grows its own shell, migrate as above — and remove this fallback so
 there is exactly one sidebar and one NavUser.
 
 **Existing menus under RBAC** (from §3 Q8): for each menu the installer chose,
-declare a `resource:action` key in `ALL_PERMISSIONS` (the sync in step 5
+declare a `resource:action` key in `ALL_PERMISSIONS` (the §5.5 step-6 sync
 seeds it to the database automatically — it then appears in the `/admin/roles`
 checklist), filter that menu item by the key, and guard its page/Server Action
 behind it. Declaring the key without wiring the check gives a checkbox that
@@ -408,36 +389,16 @@ does nothing — always do both ends or neither.
 
 ## 6. Placeholders used across the assets
 
-| Placeholder | Meaning | Example |
-| --- | --- | --- |
-| `__PROJECT_NAME__` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (flagged with a ⚠️ PLACEHOLDER comment — grep for it; line numbers drift); don't miss it** | `expense-portal` |
-| `__BASE_PATH__` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
-| `__KEYCLOAK_HOST__` | the org's central Keycloak host | — |
-| `__REALM__` | the org's central realm | — |
-| `__LDAP_HOST__` | AD server hostname | — |
-| `__AD_BASE_DN__` | full AD base DN (one `DC=` per label) | `DC=example,DC=com` |
-| `__COMPANY_DOMAIN__` | org email/UPN domain | `company.co.th` |
-| `__APP_HOST__` | the host the app actually deploys to | — |
-| `__LINKED_SERVER__` · `__HR_DB__` · `__HR_EMPLOYEE_VIEW__` | the four-part name of the org employee view in `lib/directory.ts` (same `__LINKED_SERVER__` as ugt-nextjs-database-setup) | `thsrv01` · `HRPortal` · `vwEmployee` |
-| `__HR_AUTHORIZE_VIEW__` | the approval-chain view in `lib/approval-chain.ts` — **a different object** from the employee view | `HR_AuthorizeEmployee_ms` |
-
-> **ห้ามเขียน token พวกนี้ลงในคอมเมนต์ของ asset** — ตัวตรวจ placeholder ไม่แยก
-> คอมเมนต์กับโค้ด มันจะฟ้อง ✘ ใส่ไฟล์ที่ถูกอยู่แล้ว แล้วคนติดตั้งจะไปแก้ของที่
-> ไม่ได้เสีย · คอมเมนต์ที่ต้องยกตัวอย่าง basePath ให้ใช้ค่าจริงสมมติ เช่น
-> `expense-portal` (แก้ไป 3 ไฟล์แล้วใน 4.41.0: `lib/auth-client.ts` ·
-> `lib/auth.ts` · `proxy.ts`) · **`env.example`/`.env.local`/`.env` ต้องแทน
-> token ด้วยค่าจริงเหมือนกัน** — ตัวตรวจ (`scripts/verify.mjs` §"No `__*__`
-> placeholders left") สแกนทั้งสามไฟล์นี้ด้วย ไม่ได้จำกัดแค่ `.ts` / `.tsx` /
-> `.prisma` ตามที่เอกสารรุ่นก่อนเคยเขียนผิดไว้ (พบตอน eval รันจริงแล้ว
-> `.env.example` ที่ยังมี `__KEYCLOAK_HOST__` ทำให้ verify.mjs FAIL)
+Full table + substitution rules in `references/placeholders.md`. Two traps
+worth repeating: `__PROJECT_NAME__` also hides in a fallback string in
+`login-form.tsx` (grep for the ⚠️ PLACEHOLDER comment), and
+`env.example`/`.env.local`/`.env` must be substituted too — `verify.mjs`
+scans all three, not just `.ts`/`.tsx`/`.prisma`.
 
 ## 7. Quick Rules — DO / DON'T
 
-> The facts that used to fill this table each have exactly one home now: §2
-> (org policy), `references/auth-flows.md` (every flow + its gotcha table),
-> `references/rbac.md`, `references/data-scope.md`, or
-> `references/directory-enrichment.md` — §1 already says to read those before
-> touching auth code. What's left below has no other home.
+> Only rules with no other home live here — everything else is in §2 or the
+> references listed in §1.
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
@@ -506,13 +467,11 @@ schema, and the commonly mis-called APIs — the rest must be exercised by hand:
       `/admin/users`; revisiting `/admin/setup` redirects away
 - [ ] NavUser (bottom of the sidebar): opening the menu and clicking
       "บัญชีผู้ใช้" really opens the profile card, and "ออกจากระบบ" really logs
-      out — this is the check that catches a leftover Radix `onSelect`/`asChild`,
-      which Base UI ignores in silence: the button looks fine and does nothing
-- [ ] `/admin/roles`: delete opens `ConfirmActionDialog`, never the browser
-      confirm · create/edit opens a Sheet whose permission checklist scrolls
-      all the way · row buttons are `IconAction` in soft colours (edit = blue ·
-      delete = red) and each has a tooltip
-- [ ] All three admin pages get title + subtitle from `page-shell`, not a bare `<h1>`
+      out — this catches a leftover Radix `onSelect`/`asChild` (§7)
+- [ ] Admin pages follow DESIGN.md §3/§4 (§7's UI rows): `page-shell`
+      title+subtitle on all three pages · delete via `ConfirmActionDialog` ·
+      row buttons `IconAction` soft colours with tooltips · role Sheet's
+      permission checklist scrolls all the way
 - [ ] `/admin/users`: the Administrator (or any user with `USERS_READ`) sees
       every user, and can reassign another user's role — but not their own
       (the dropdown is disabled on their own row)

@@ -35,14 +35,33 @@ rule. File: 632 → 604 → **547 lines** (still above the ~500 guideline —
 not duplication, so further cuts there would be a different, riskier kind
 of change).
 
+**Third pass — reaching the guideline** (asked for an assessment of what
+could genuinely be *cut*, found 4 real leftover duplications + relocatable
+lookup content): §4 stated each admin table's DataTable mode in prose that
+§5.2's asset-table rows already carry — cut, §5.2 is the home · §4's
+enumeration of 8 file names calling `useTranslations()` compressed to the
+principle · §5.5 step 2's `isAdminInitialized` caching rationale → pointer
+to `rbac.md` · §2 item 4's 11-name audit-action catalog moved INTO
+`references/audit-logging.md`'s action-naming section (which previously
+listed only 4 of the mandated actions — the move made that file *more*
+correct, not just shorter), §2 keeps the principle · §6's placeholder table
+moved to a new `references/placeholders.md` (§6 heading kept as a pointer —
+section numbers never shift, per the no-renumber rule) · historical
+parentheticals, the §7 preamble, and three verbose passages tightened.
+**Also fixed a real numbering bug found on the way: §5.5 had two steps
+numbered "5"** — the sync step is now 6, and §5.6's "the sync in step 5"
+reference updated to match. File: 632 → 547 → **506 lines**, at the ~500
+guideline with zero content loss (references/ gained `i18n-wiring.md` and
+`placeholders.md`; `audit-logging.md` gained the full mandated catalog).
+
 **Trigger-eval re-validation** (required because this touches the file the
 trigger baseline was built against, even though the frontmatter `description`
-itself was not edited by either pass): 3 independent judges, same method as
+itself was not edited by any pass): 3 independent judges, same method as
 the 2026-08-09 baseline (skill listing built from every SKILL.md frontmatter
 in the marketplace + superpowers distractors, judges answer from that text
 only). Result: primary accuracy 27/27 (100%) — unchanged. Full result
 recorded in `evals/trigger-evals.json` under `revalidation_2026-08-25`
-(covers both passes — frontmatter never moved, so a second run would test
+(covers all passes — the frontmatter never moved, so a re-run would test
 nothing new).
 
 ## 4.49.3 (2026-08-25)

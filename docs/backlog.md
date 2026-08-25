@@ -237,9 +237,11 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
   §5.2 i18n-catalog walkthrough (53 บรรทัด) → `references/i18n-wiring.md`
   ใหม่, better-auth 1.7 migration history (§5.1) → `auth-flows.md` SSO
   section, ตัดจุดซ้ำเพิ่มที่เจอระหว่างทาง (§3 Q5 ซ้ำ §5.5 ขั้น 5, §8
-  HSTS/security-header ซ้ำคอมเมนต์ใน `proxy.ts` เอง) · ไฟล์ 632→604→**547
-  บรรทัด** (ยังไม่ถึง ~500 — ที่เหลือคือ §5/§8 ซึ่งเป็นขั้นตอนติดตั้ง/checklist
-  ไม่ใช่เนื้อซ้ำ ตัดต่อจะเป็นความเสี่ยงคนละแบบ) · re-run trigger evals ตามที่
+  HSTS/security-header ซ้ำคอมเมนต์ใน `proxy.ts` เอง) รอบสามกวาดของซ้ำที่เหลือ
+  (table modes ใน §4 ซ้ำ §5.2, audit-action catalog ย้ายเข้า
+  `audit-logging.md` ให้ครบกว่าเดิม, §6 → `references/placeholders.md`)
+  + แก้บั๊กเลขขั้น 5/5 ใน §5.5 · ไฟล์ 632→547→**506 บรรทัด ถึงเกณฑ์ ~500**
+  โดยไม่เสียเนื้อหา · re-run trigger evals ตามที่
   ต้องทำ (3 judges, method เดียวกับ baseline 2026-08-09) — primary 27/27
   (100%) ไม่เปลี่ยนจาก baseline ทั้งสองรอบ เพราะ trigger ตัดสินจาก frontmatter
   description ล้วนซึ่งไม่ถูกแตะเลย ผลเต็มอยู่ `evals/trigger-evals.json` key

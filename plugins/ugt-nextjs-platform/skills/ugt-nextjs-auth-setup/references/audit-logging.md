@@ -53,6 +53,7 @@ export const AUDIT_ACTIONS = {
   LOGOUT: 'logout',
   LOGOUT_SSO: 'logout.sso',
   USERS_CREATE: 'users.create',
+  USERS_ROLE_ASSIGN: 'users.role-assign',
   USERS_DELETE: 'users.delete',
   USERS_RESET_PASSWORD: 'users.resetPassword',
   ROLES_UPDATE: 'roles.update',
@@ -61,9 +62,12 @@ export const AUDIT_ACTIONS = {
 } as const;
 ```
 
-The first four are **org-mandated** (contract item 4) — `assets/lib/auth.ts`
-and `assets/lib/actions/auth.ts` already write them. Add the rest per the
-project's domain.
+**Org-mandated set** (contract §2 item 4 — the assets already write all of
+these): `login.success` · `login.failed` · `logout` · `logout.sso` ·
+`users.create` · `users.role-assign`, plus for local accounts
+`password.reset.requested` · `password.reset` · `password.reset.refused` ·
+`password.change` · `password.change.failed` · `users.password-set`.
+Add the rest per the project's domain.
 
 ```ts
 // ✅ dot-namespaced, precise
