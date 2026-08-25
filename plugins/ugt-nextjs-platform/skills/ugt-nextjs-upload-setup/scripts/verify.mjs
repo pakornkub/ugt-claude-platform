@@ -31,6 +31,8 @@ const REQUIRED = [
   'lib/storage.ts',
   'lib/virus-scan.ts',
   'lib/attachment-access.ts',
+  // the widget is WHY the catalogs are required — so it is required too
+  'components/file-upload.tsx',
   'messages/upload.th.ts',
   'messages/upload.en.ts',
   UPLOAD,
@@ -121,29 +123,55 @@ check('canReadAttachment is implemented, not left denying everything', () => {
     .split('\n')
     .filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line))
     .join('\n');
-  return /case\s+'/.test(live)
+  // The skeleton's only statement is `return false` — an implementation is any
+  // return of something else (switch/case, if/else, or a one-line boolean
+  // expression all qualify; requiring a `case` literal false-failed valid rules).
+  return /return\s+(?!false\b)\S/.test(live)
     ? { ok: true }
-    : { ok: false, msg: 'still the deny-all skeleton (no case branches) — every download 404s until the project rule is written' };
+    : { ok: false, msg: 'still the deny-all skeleton (every return is `return false`) — every download 404s until the project rule is written' };
 });
 
 check('Upload is a Route Handler, not a Server Action', () => {
   // Sweep every action file, not a hardcoded pair — a file-accepting Server
-  // Action under any name (or a src/ layout) has the same 1 MB bodySizeLimit
-  // trap. `formData` alone is NOT the signal (ordinary form actions use it
-  // legitimately) — the signal is the File type actually appearing in code.
-  const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  // Action under any name (or a src/ layout, or colocated app/**/actions.ts)
+  // has the same 1 MB bodySizeLimit trap. `formData` alone is NOT the signal
+  // (ordinary form actions use it legitimately) — the signal is the File TYPE
+  // appearing in code. Strip comments AND string literals first: an error
+  // message like 'File not found' must never trip a type detector.
+  const stripNoise = (s) =>
+    s
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/[^\n]*/g, '')
+      .replace(/'(?:\\.|[^'\\\n])*'/g, "''")
+      .replace(/"(?:\\.|[^"\\\n])*"/g, '""')
+      .replace(/`(?:\\.|[^`\\])*`/g, '``');
   const offenders = [];
+  const inspect = (full) => {
+    const raw = readFileSync(full, 'utf8');
+    // the directive itself lives in a string — test it on the RAW text, either quote style
+    if (!/['"]use server['"]/.test(raw)) return;
+    const body = stripNoise(raw);
+    if (/\bFile\b|instanceof\s+File|\.arrayBuffer\s*\(/.test(body)) {
+      offenders.push(relative(ROOT, full).split('\\').join('/'));
+    }
+  };
   for (const dir of ['lib/actions', 'src/lib/actions'].filter((d) => has(d))) {
     const walk = (abs) => {
       for (const entry of readdirSync(abs)) {
         const full = join(abs, entry);
         if (statSync(full).isDirectory()) walk(full);
-        else if (/\.tsx?$/.test(entry)) {
-          const body = stripComments(readFileSync(full, 'utf8'));
-          if (/'use server'/.test(body) && /\bFile\b|instanceof\s+File|\.arrayBuffer\s*\(/.test(body)) {
-            offenders.push(relative(ROOT, full).split('\\').join('/'));
-          }
-        }
+        else if (/\.tsx?$/.test(entry)) inspect(full);
+      }
+    };
+    walk(p(dir));
+  }
+  // colocated Server Actions (legal Next.js): app/**/actions.ts(x)
+  for (const dir of ['app', 'src/app'].filter((d) => has(d))) {
+    const walk = (abs) => {
+      for (const entry of readdirSync(abs)) {
+        const full = join(abs, entry);
+        if (statSync(full).isDirectory()) walk(full);
+        else if (/^actions\.tsx?$/.test(entry)) inspect(full);
       }
     };
     walk(p(dir));

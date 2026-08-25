@@ -324,7 +324,7 @@ check('Excel/CSV export goes through lib/export.ts', () => {
   let exports = false;
   for (const file of files) {
     const rel = relative(ROOT, file).split('\\').join('/');
-    if (rel === 'lib/export.ts') continue;
+    if (rel === 'lib/export.ts' || rel === 'src/lib/export.ts') continue;
     const body = readFileSync(file, 'utf8');
     const rolled = /from\s+['"]exceljs['"]/.test(body) || /['"]text\/csv/.test(body);
     if (rolled) offenders.push(rel);
@@ -332,7 +332,7 @@ check('Excel/CSV export goes through lib/export.ts', () => {
   }
 
   if (!exports) return { ok: true, msg: 'no export route in this project — nothing to check' };
-  if (!has('lib', 'export.ts')) {
+  if (!hasIn('lib', 'export.ts')) {
     return { ok: false, msg: `Project exports files but lib/export.ts was never installed: ${offenders.join(' · ')}` };
   }
   return offenders.length

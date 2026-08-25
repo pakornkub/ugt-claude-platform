@@ -216,5 +216,9 @@ Then by hand — these are the ones that catch real breakage:
       `docs/project-context/decisions.md` (polymorphic / FK / single column),
       not left as "whatever the skeleton did"
 - [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
-      reports 0 failed, and the attach/upload widget plus every upload/download
-      error toast shows English text after switching locale
+      reports 0 failed, and the attach/upload widget's labels + **upload** error
+      toasts show English text after switching locale (download errors return a
+      bare `code` from the guarded route — a plain `<a href>` navigation renders
+      that JSON as-is, no toast; the `FORBIDDEN_DOWNLOAD`/`NOT_FOUND`/
+      `FILE_NOT_AVAILABLE` catalog keys are reserved for a project that fetches
+      downloads via JS and surfaces them itself)

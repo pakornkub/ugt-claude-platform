@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-upload-setup/lib/attachment-access.ts
-// kit-hash: ed917fa7412a
+// kit: ugt-nextjs-platform 4.49.1 · ugt-nextjs-upload-setup/lib/attachment-access.ts
+// kit-hash: ec9b7b0064f2
 import 'server-only';
 
 /**
@@ -10,9 +10,10 @@ import 'server-only';
  * project's own domain rules (owner? same department? an approver in the
  * request's chain?).
  *
- * The skeleton denies everything except the uploader, which is the safe
- * starting point — a project that forgets to implement this leaks nothing.
- * Replace it with the real rule before shipping a feature that shares files.
+ * The skeleton denies everything — uploader included — which is the safe
+ * starting point: a project that forgets to implement this leaks nothing
+ * (and notices immediately, because even the uploader's own download 404s).
+ * Replace it with the real rule before shipping any feature that reads files.
  *
  * Never write this as `!canSeeAll` — derive scope from the session identity
  * (contract: auth.md), or a user with a narrow role inherits a broad one.

@@ -41,8 +41,20 @@ function loadCatalog(file) {
   return Function(`return (${raw.slice(start, end + 1)})`)();
 }
 
+// src/ layouts move messages/ + i18n/ wholesale under src/ — same support
+// resolveConverted() has; root-only lookups here false-failed those projects
+// (and let the registration check pass vacuously on them).
+const messagesDir = () => {
+  const root = join(ROOT, 'messages');
+  return existsSync(root) ? root : join(ROOT, 'src', 'messages');
+};
+const registryFile = () => {
+  const root = join(ROOT, 'i18n', 'messages.ts');
+  return existsSync(root) ? root : join(ROOT, 'src', 'i18n', 'messages.ts');
+};
+
 check('catalog key parity across locales', () => {
-  const dir = join(ROOT, 'messages');
+  const dir = messagesDir();
   // ไม่ใช่ "ไม่มีอะไรให้เทียบ" แต่คือยังไม่ได้ติดตั้ง: ตั้งแต่ 4.46.0 คิตทั้งชุด
   // อ่านสตริงผ่าน catalog และ SKILL §Step 6 ให้ copy `messages/` ทุกโปรเจค
   // ไม่ใช่เฉพาะ th+en — ไม่มี dir นี้ = `t()` ทุกตัวโยนตอน render
@@ -192,6 +204,30 @@ function resolveConverted(rel) {
   for (const candidate of candidates) {
     if (existsSync(candidate)) return candidate;
   }
+  // app/ pages may be nested under the project's own route groups
+  // (auth SKILL §5.6: e.g. app/(app)/(admin)/admin/users/page.tsx — groups
+  // don't change the URL). Fixed prefixes can't see those, so fall back to a
+  // suffix match on the group-free tail, same as auth verify.mjs does.
+  if (rel.startsWith('app/')) {
+    const tail = rel
+      .slice('app/'.length)
+      .split('/')
+      .filter((seg) => !/^\(.*\)$/.test(seg))
+      .join('/');
+    for (const base of ['app', join('src', 'app')]) {
+      const dir = join(ROOT, base);
+      if (!existsSync(dir)) continue;
+      const stack = [dir];
+      while (stack.length) {
+        const cur = stack.pop();
+        for (const entry of readdirSync(cur, { withFileTypes: true })) {
+          const full = join(cur, entry.name);
+          if (entry.isDirectory()) stack.push(full);
+          else if (full.split('\\').join('/').endsWith('/' + tail)) return full;
+        }
+      }
+    }
+  }
   return null;
 }
 
@@ -280,7 +316,7 @@ function topLevelKeys(objLiteral) {
 }
 
 check('every catalog in messages/ is registered in i18n/messages.ts', () => {
-  const dir = join(ROOT, 'messages');
+  const dir = messagesDir();
   // The parity check above already reports a missing/unreadable messages/ dir.
   if (!existsSync(dir)) return { ok: true };
   const onDisk = readdirSync(dir)
@@ -292,7 +328,7 @@ check('every catalog in messages/ is registered in i18n/messages.ts', () => {
     .filter((ns) => ns !== 'app');
   if (onDisk.length === 0) return { ok: true };
 
-  const registry = join(ROOT, 'i18n', 'messages.ts');
+  const registry = registryFile();
   if (!existsSync(registry)) {
     return { ok: false, msg: 'i18n/messages.ts missing — copy assets/i18n/ (it is what hands the catalogs to next-intl)' };
   }

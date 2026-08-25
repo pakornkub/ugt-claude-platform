@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/components/file-upload.tsx
-// kit-hash: 996a3ac3eade
+// kit: ugt-nextjs-platform 4.49.1 · ugt-nextjs-upload-setup/components/file-upload.tsx
+// kit-hash: 2536688e320b
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — ไฟล์นี้ import
 // ui/icon-action กับ lib/format (formatFileSize) ซึ่ง kit เป็นคนติดตั้ง
 import * as React from 'react';
@@ -20,8 +20,10 @@ export interface AttachmentSummary {
 
 /**
  * Attachment field for a record. Posts to `/api/files`, which scans before
- * storing — so the failure the user sees ("ตรวจพบไวรัส", "ระบบตรวจไวรัสไม่พร้อม")
- * is the truth from the server, never a guess made here.
+ * storing — the server answers with an error `code` (มติ 2.6) and this widget
+ * translates it via the `upload.errors` catalog, so the failure the user sees
+ * (e.g. `FILE_INFECTED`, `SCANNER_UNAVAILABLE`) is the truth from the
+ * server, never a guess made here.
  *
  * Downloads go through the guarded route, so the link is a plain href to
  * `/api/files/<id>` and the server decides whether it is allowed.

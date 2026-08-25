@@ -1,5 +1,45 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.49.1 (2026-08-25)
+
+**Fix release จากผล re-score หลัง 4.48.1** — แก้บั๊ก 2 ตัวที่ 4.48.1 พามาเอง,
+ทำ src/ layout ให้จบทั้งชุด, ปิดช่อง vacuous ที่เหลือ · ทุกข้อพิสูจน์ด้วย
+fixture ทั้งฝั่ง fail และฝั่ง pass ก่อน commit
+
+- **upload sweep (บั๊กจาก 4.48.1)**: strip string literal ก่อนหา `\bFile\b`
+  (`throw new Error('File not found')` เคย false-fail) · directive จับทั้ง
+  `'use server'` และ `"use server"` (double-quote ของ Prettier default เคยรอด
+  ทั้งที่รับไฟล์จริง) · ขยายไปกวาด colocated `app/**/actions.ts(x)` ด้วย
+- **src/ layout จบทั้งชุด**: auth `verify.mjs` เปลี่ยน helper กลาง `p()` ให้
+  probe `src/` อัตโนมัติ — ทุก check ได้พร้อมกัน (`AUTH_FILES`, cookie, proxy,
+  password/directory/scope/approval/env) ไม่ใช่เฉพาะจุดที่ 4.48.1 แตะ ·
+  `check-i18n.mjs` probe `src/messages/` + `src/i18n/messages.ts` (เดิม parity
+  false-fail และ registration check วนกลับเป็น vacuous บนโปรเจกต์ src/ —
+  ขัดกับ `hasIn` ที่ผู้เรียกเพิ่งได้) · design export check รู้จัก
+  `src/lib/export.ts` (เดิม kit ของตัวเองโดนตีเป็น hand-rolled)
+- **`resolveConverted` ตามหา admin page ที่ย้าย route group** — suffix match
+  แบบเดียวกับ auth verify (auth SKILL §5.6 อนุญาต
+  `app/(app)/(admin)/admin/users/page.tsx`) เดิมหน้า relocated หลุดด่าน
+  no-Thai เงียบๆ เพราะเป็น optional file
+- **mail verify**: check ใหม่ "Template admin UI complete" — page + manager +
+  `mail-templates:manage` permission (เดิมเช็คแค่ `dev-mode:enable` หน้าแอดมิน
+  403 ถาวรได้โดยไม่มีด่านจับ) · actor check ประกาศชัดว่า call ที่ส่ง identifier
+  ตรวจไม่ได้ (ข้ามอย่างมีเหตุผล ไม่ผ่านเงียบ)
+- **upload verify**: `components/file-upload.tsx` เข้า REQUIRED (เป็นเหตุผล
+  ที่ catalog ถูกบังคับแต่ตัวเองไม่เคยถูกเช็ค) · `canReadAttachment` check
+  เปลี่ยนเกณฑ์เป็น "มี return ที่ไม่ใช่ `return false`" (เดิมบังคับ `case '`
+  literal ทำให้ if/else หรือ one-line boolean ที่ถูกต้อง false-fail)
+- **auth verify**: cookie-prefix presence เช็คบน comment-stripped source
+  (comment ที่เอ่ยถึง `cookiePrefix` เคยทำให้ check ผ่านทั้งที่โค้ดจริงถูกลบ)
+- **เอกสารตรงโค้ด**: upload SKILL checklist เลิกสัญญา toast ฝั่ง download
+  (route คืน `code` ให้ `<a href>` — key `FORBIDDEN_DOWNLOAD`/`NOT_FOUND`/
+  `FILE_NOT_AVAILABLE` สงวนไว้สำหรับโปรเจกต์ที่ fetch เอง) ·
+  `attachment-access.ts` docblock แก้ "denies everything except the uploader"
+  → deny ทุกคนรวม uploader · `file-upload.tsx` docblock เลิก quote สตริงไทย
+  ยุคก่อน i18n · login-form อ้าง §6 (เดิมชี้ §7 ผิด) · design SKILL เลิกอ้างว่า
+  verify เช็ค placement ของ filter (เช็คแค่ bare `<Input>` แบบ warn) ·
+  full-setup ปิดท้ายรายชื่อ module ครบ mail/upload + จับ `src/lib/storage.ts`
+
 ## 4.49.0 (2026-08-25)
 
 **Harness ตกรุ่นต้องมองเห็นได้** — จากเคสจริงใน HRMS: CLAUDE.md block เป็น

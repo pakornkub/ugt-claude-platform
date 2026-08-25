@@ -12,7 +12,17 @@ import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
 const results = [];
-const p = (...s) => join(ROOT, ...s);
+// src/ layouts move app/lib/components/proxy.ts wholesale under src/ — every
+// lookup probes both roots, so ALL checks (not just the ones that mention it)
+// support that layout consistently. Root-anchored files (package.json,
+// prisma/, docs/, .env*) never exist under src/, so the fallback is inert
+// for them.
+const p = (...s) => {
+  const root = join(ROOT, ...s);
+  if (existsSync(root)) return root;
+  const src = join(ROOT, 'src', ...s);
+  return existsSync(src) ? src : root;
+};
 const has = (...s) => existsSync(p(...s));
 const read = (...s) => readFileSync(p(...s), 'utf8');
 
@@ -205,7 +215,9 @@ check('Cookie prefix env-driven in all 3 files (no hardcoded literal)', () => {
   const targets = ['lib/auth.ts', 'proxy.ts', 'lib/actions/auth.ts'];
   const missing = targets.filter((f) => !has(f));
   if (missing.length) return { ok: false, msg: `Missing files: ${missing.join(', ')}` };
-  const noPrefix = targets.filter((f) => !/cookiePrefix|APP_COOKIE_PREFIX/.test(read(f)));
+  // stripComments first — a cross-reference comment mentioning cookiePrefix
+  // must not satisfy a check about the code
+  const noPrefix = targets.filter((f) => !/cookiePrefix|APP_COOKIE_PREFIX/.test(stripComments(read(f))));
   if (noPrefix.length) {
     return {
       ok: false,

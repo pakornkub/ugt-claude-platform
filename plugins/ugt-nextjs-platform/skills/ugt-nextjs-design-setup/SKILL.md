@@ -341,8 +341,9 @@ design-questions.template.md · globals.tokens.css) พร้อมที่ม�
 2. Summarize: every file added/changed, the answers recorded in DESIGN.md,
    and any deviations grandfathered.
 3. Smoke checklist:
-   - [ ] every `<DataTable>` has a unique `id` · page filters sit in the
-     table's card, left-aligned (verify.mjs checks both)
+   - [ ] every `<DataTable>` has a unique `id` (verify.mjs checks) · page
+     filters sit in the table's card, left-aligned (by eye — verify.mjs only
+     warns on a bare `<Input>` used as search/filter; it cannot see placement)
    - [ ] `npm run build` passes
    - [ ] a page using Button/Input/Table renders with the new tokens (both
      light and dark if dark mode was selected)
@@ -392,8 +393,9 @@ node <skill-dir>/scripts/check-contrast.mjs
 - [ ] `components.json` is the org preset and no Radix reached the project
       (verify.mjs gates both — a plain `shadcn init` fails here)
 - [ ] `docs/DESIGN.md` has no `__...__` left and its มติ table has today's entry
-- [ ] every `<DataTable>` has a unique `id`; page filters sit inside the
-      table's card, left-aligned (verify.mjs checks both)
+- [ ] every `<DataTable>` has a unique `id` (verify.mjs checks); page filters
+      sit inside the table's card, left-aligned (by eye — verify.mjs only
+      warns on a bare `<Input>` used as search/filter)
 - [ ] `npm run build` passes
 - [ ] a page using Button / Input / Table renders with the new tokens, in
       light **and** dark if dark mode was selected

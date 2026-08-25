@@ -107,7 +107,7 @@ check('Rules exist for every installed module', () => {
   if (deps['better-auth']) expected.push('ugt-nextjs-auth.md');
   if (has('Jenkinsfile')) expected.push('ugt-nextjs-ci.md');
   if (deps.nodemailer) expected.push('ugt-nextjs-mail.md');
-  if (has('lib/storage.ts')) expected.push('ugt-nextjs-upload.md');
+  if (has('lib/storage.ts') || has('src/lib/storage.ts')) expected.push('ugt-nextjs-upload.md');
   // docs/DESIGN.md is the design module's own deliverable — no dependency
   // identifies it (the kit installs shadcn/tailwind that a project may already
   // have), so the agreement file is the signal. Without this line the design
@@ -222,6 +222,6 @@ for (const r of results) {
 }
 console.log(
   `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
-    "Also run each installed module's own verify.mjs (database / test-lint / design / auth / cicd)\n"
+    "Also run each installed module's own verify.mjs (database / test-lint / design / auth / cicd, plus mail / upload when installed)\n"
 );
 process.exit(failed > 0 ? 1 : 0);

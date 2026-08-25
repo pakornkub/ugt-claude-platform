@@ -99,12 +99,35 @@ check('dev-mode:enable exists in the permission list', () => {
     : { ok: false, msg: "lib/permissions.ts has no 'dev-mode:enable' — dev mode can never be granted, so testers will mail real recipients" };
 });
 
+// §4.2/§4.4 admin surface — installed only when the project chose the admin
+// UI, so its own action file is the signal; but once it is there, a missing
+// permission means the page 403s for everyone, forever, with no gate noticing.
+check('Template admin UI complete (page · manager · permission)', () => {
+  if (!has('lib/actions/admin-mail-templates.ts')) {
+    return { ok: true, msg: 'no template admin UI in this project — nothing to check' };
+  }
+  const problems = [];
+  if (!has('components/mail-templates-manager.tsx')) problems.push('components/mail-templates-manager.tsx missing');
+  const pageInstalled = sourceFiles().some((f) =>
+    relative(ROOT, f).split('\\').join('/').endsWith('admin/mail-templates/page.tsx')
+  );
+  if (!pageInstalled) problems.push('no admin/mail-templates/page.tsx anywhere');
+  if (has('lib/permissions.ts') && !/mail-templates:manage/.test(read('lib/permissions.ts'))) {
+    problems.push("lib/permissions.ts has no 'mail-templates:manage' — the admin page 403s for every user");
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 check('Every sendTemplatedMail call passes an actor', () => {
   const offenders = [];
   for (const file of sourceFiles()) {
     const body = readFileSync(file, 'utf8');
     const rel = relative(ROOT, file).split('\\').join('/');
-    for (const m of body.matchAll(/sendTemplatedMail\s*\(\s*\{/g)) {
+    for (const m of body.matchAll(/sendTemplatedMail\s*\((\s*\{?)/g)) {
+      // Only an inline object literal can be inspected here; a call passing a
+      // prebuilt identifier (`sendTemplatedMail(args)`) is uncheckable by
+      // grep — skip it rather than pass it vacuously or fail it falsely.
+      if (!m[1].includes('{')) continue;
       // scan the object literal that follows, roughly to its closing brace
       const chunk = body.slice(m.index, m.index + 1200);
       if (!/\bactor\s*:/.test(chunk)) {
