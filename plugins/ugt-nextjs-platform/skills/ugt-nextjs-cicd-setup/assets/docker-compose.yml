@@ -30,6 +30,12 @@ services:
       # NEVER put NEXT_PUBLIC_* / client-side vars here (no effect at runtime).
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # [METHOD: SSO or LDAP] Internal-CA TLS — decide with admin via
+      # docs/admin-handoff.md ("TLS ภายในองค์กร") before uncommenting either
+      # line. This is an infra decision, NOT a secret — set it here directly,
+      # never inside the env-<project>/-dev Jenkins Secret File credential.
+      # NODE_EXTRA_CA_CERTS: /etc/ssl/certs/org-ca.pem   # preferred — mount the cert (see references/keycloak-client.md); needs a matching volumes: bind
+      # NODE_TLS_REJECT_UNAUTHORIZED: '0'                # closed intranet only, admin-confirmed — disables TLS verification for the whole container
       # Add the project's runtime secrets below, e.g.:
       # AUTH_SECRET: ${AUTH_SECRET}
       # SMTP_HOST: ${SMTP_HOST}

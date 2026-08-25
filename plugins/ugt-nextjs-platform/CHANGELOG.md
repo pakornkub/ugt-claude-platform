@@ -1,5 +1,37 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.49.3 (2026-08-25)
+
+**Internal-CA TLS for SSO/LDAP — real production incident, not theoretical**
+(`fetch failed` → `UNABLE_TO_VERIFY_LEAF_SIGNATURE` on login SSO in a deployed
+project) exposed two gaps between `ugt-nextjs-auth-setup` and
+`ugt-nextjs-cicd-setup` that neither skill's docs reconciled:
+
+- `auth-setup`'s `env.example` ships `NODE_TLS_REJECT_UNAUTHORIZED=0` **on by
+  default** for SSO/LDAP (closed-intranet assumption), but `cicd-setup`'s
+  SKILL.md said this value must **never** reach the prod/dev Jenkins Secret
+  File credential — correct rule, but nothing told anyone what to do
+  instead, so the variable silently never reached the deployed container at
+  all
+- `docker-compose.yml`/`docker-compose.dev.yml` had no placeholder for it or
+  for `NODE_EXTRA_CA_CERTS` — even someone who knew the fix had nowhere
+  asset-provided to put it
+
+Fixed: `docker-compose.yml`/`.dev.yml` now carry a `[METHOD: SSO or LDAP]`
+commented placeholder for both variables in `environment:`, with a note that
+this is an infra decision made directly in the compose file, not a secret ·
+`admin-handoff.template.md` gets a new §4 "TLS ภายในองค์กร" — the admin picks
+CA-cert-file (preferred) or closed-intranet confirmation and sends it back,
+same pattern as the existing Keycloak/`APP_PORT` rows · cicd-setup SKILL.md's
+DO/DON'T table row rewritten — the DON'T was never "don't use this in prod",
+it was "don't put it in the Secret File" · `keycloak-client.md` and
+`auth-flows.md`'s troubleshooting table cross-reference the new admin-handoff
+section and name the exact error signature seen in production
+(`UNABLE_TO_VERIFY_LEAF_SIGNATURE`) · auth-setup SKILL.md's interview step 4
+tells the installer to keep this admin-handoff section even when the
+Keycloak-client sub-step wasn't needed (LDAP-only projects still need the
+TLS decision)
+
 ## 4.49.2 (2026-08-25)
 
 **Fix เดี่ยว: check "mkdir -p ↔ bind" ของ cicd `verify.mjs` อ่าน compose แบบดิบ**

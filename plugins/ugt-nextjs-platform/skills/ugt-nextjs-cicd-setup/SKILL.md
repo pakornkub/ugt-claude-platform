@@ -278,7 +278,7 @@ Checklist §6
 | Healthcheck on `127.0.0.1` + poll `docker inspect` | `localhost` (Alpine → IPv6) / wget from Jenkins |
 | `SKIP_ENV_VALIDATION=1` for CI/build only | Setting it in the production container |
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
-| `NODE_TLS_REJECT_UNAUTHORIZED=0` in local `.env.local`/`.env.dev` only, if at all | Ever in `env-<project>` / `env-<project>-dev` (the prod/dev Jenkins credentials) |
+| `NODE_TLS_REJECT_UNAUTHORIZED=0`/`NODE_EXTRA_CA_CERTS` hardcoded directly in compose `environment:` (an infra decision, admin-confirmed via `docs/admin-handoff.md` §4) — or local `.env.local`/`.env.dev` for dev | Ever in `env-<project>` / `env-<project>-dev` (the prod/dev Jenkins Secret File credentials) — it's not a secret, it's an infra decision |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 

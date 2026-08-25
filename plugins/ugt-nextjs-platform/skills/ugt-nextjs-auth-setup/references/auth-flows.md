@@ -265,7 +265,7 @@ never `auth.api.getSession()` (needs DB, not Edge-safe).
 | Logout doesn't delete DB session | Deleting by signed token; DB stores raw token | Strip signature via `lastIndexOf('.')` |
 | Build crashes with `SKIP_ENV_VALIDATION=1` | `keycloak()` helper runs `.replace()` on undefined issuer | Conditional plugin registration guard |
 | `Unknown argument 'id'` from Better Auth rate limit | `rateLimit` model used `key` as `@id` | `id String @id` + nullable `key` (see schema template) |
-| SSO shows "Invalid OAuth configuration" | Node can't verify internal CA cert on Keycloak host | Trust the CA in the runtime (`NODE_EXTRA_CA_CERTS`); last resort `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container |
+| SSO shows "Invalid OAuth configuration", or server log has `fetch failed` / `UNABLE_TO_VERIFY_LEAF_SIGNATURE` | Node can't verify internal CA cert on Keycloak host | Trust the CA in the runtime (`NODE_EXTRA_CA_CERTS`); last resort `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container — decision is the admin's, see `docs/admin-handoff.md` §4 |
 | authClient hits `…/__BASE_PATH__/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
 | `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
 | SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email (e.g. `@company.com` in AD vs `@company.co.th` in the row) → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins — **shipped in `lib/auth.ts` since 4.21.0** |

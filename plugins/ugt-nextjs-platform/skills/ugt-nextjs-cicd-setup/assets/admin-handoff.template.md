@@ -100,6 +100,28 @@ __APP_URL_PROD__/api/auth/oauth2/callback/keycloak
 
 <!-- [AUTH] — ลบ section นี้เมื่อโปรเจคไม่ได้ติดตั้ง ugt-nextjs-auth-setup -->
 
+<!-- [AUTH: SSO or LDAP] — ลบ section นี้เมื่อโปรเจคเป็น local-only (ไม่ได้
+     เลือก SSO หรือ LDAP ตอน interview) -->
+## 4. TLS ภายในองค์กร (เฉพาะ SSO/LDAP)
+
+ถ้า Keycloak หรือ LDAP server ขององค์กรใช้ certificate ที่เซ็นโดย **internal
+CA** (ไม่ใช่ public CA อย่าง Let's Encrypt) container ของแอปจะ verify
+certificate นี้ไม่ผ่านเอง (SSO ขึ้น "Invalid OAuth configuration" หรือ LDAP
+bind ล้มเหลว) — Node.js มี CA store ของตัวเอง ไม่ได้ใช้ของเครื่อง host
+
+**เลือกทางใดทางหนึ่ง แล้วแจ้งกลับทีมพัฒนา (หัวข้อ "ค่าที่ต้องส่งกลับ" ด้านล่าง):**
+
+| ทาง | เมื่อไหร่ควรใช้ | Admin ต้องทำอะไร |
+| --- | --- | --- |
+| **แนบไฟล์ CA cert** (แนะนำ) | ทุกกรณี โดยเฉพาะถ้า server มีทางออกอินเทอร์เน็ตบ้าง | ส่งไฟล์ certificate ของ internal CA (`.pem`/`.crt`) ให้ทีมพัฒนา |
+| **ยืนยัน closed intranet** | เฉพาะ server ที่**ไม่มีทางออกอินเทอร์เน็ตเลย** (ตัดขาดจริง ไม่ใช่แค่ผ่าน proxy) | ยืนยันเป็นลายลักษณ์อักษรว่า server นี้เป็น closed intranet |
+
+⚠️ ทางที่สองปิด TLS verification ของ container **ทั้งตัว** ไม่ใช่แค่ต่อ
+Keycloak/LDAP — ถ้า server มีทางออกอินเทอร์เน็ตแม้แต่ทางเดียว (เช่น Windows
+Update, npm registry) ห้ามใช้ทางนี้ ทีมพัฒนาจะตั้งค่าที่เลือกไว้ตรงใน
+`docker-compose.yml` ของ server นี้เอง (ไม่ใช่ Jenkins Secret File — เป็นการ
+ตัดสินใจของ infra ไม่ใช่ secret)
+
 ## ผู้ดูแลระบบคนแรก
 
 ระบบ**ไม่มีบัญชี admin ที่ seed ไว้ล่วงหน้า** (บัญชี SSO/AD เกิดเองตอน login
@@ -118,6 +140,7 @@ __APP_URL_PROD__/api/auth/oauth2/callback/keycloak
 | **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `3001` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
 | `KEYCLOAK_ISSUER` | `https://<keycloak-host>/realms/<realm>` (ตรวจว่าเปิด `<issuer>/.well-known/openid-configuration` ได้) | |
 | `KEYCLOAK_CLIENT_SECRET` | Keycloak → client `__PROJECT_NAME__` → Credentials | **ส่งช่องทางปลอดภัย อย่ากรอกในไฟล์นี้** |
+| TLS ภายในองค์กร (ดูหัวข้อ 4) | ไฟล์ CA cert หรือคำยืนยัน closed intranet | **จำเป็นถ้าใช้ SSO/LDAP — เลือกทางใดทางหนึ่ง** |
 | ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
 | ยืนยัน SonarQube projects + webhook แล้ว | ลิงก์ project | |
 
@@ -128,6 +151,7 @@ __APP_URL_PROD__/api/auth/oauth2/callback/keycloak
 - [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
 - [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
 - [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `3000`/`3001`
+- [ ] TLS ภายในองค์กร (SSO/LDAP): ส่งไฟล์ CA cert แล้ว หรือยืนยัน closed intranet แล้ว
 
 ---
 

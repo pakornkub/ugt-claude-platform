@@ -65,9 +65,14 @@ Keycloak, so *Valid post logout redirect URIs* can stay empty.
 
 If the shared Keycloak uses a certificate from the org's internal CA, Node.js
 inside the app container cannot verify it and the SSO button fails with
-"Invalid OAuth configuration". Preferred fix: mount the CA cert and set
+"Invalid OAuth configuration" (or a `fetch failed` / `UNABLE_TO_VERIFY_LEAF_SIGNATURE`
+server log — same root cause). Preferred fix: mount the CA cert and set
 `NODE_EXTRA_CA_CERTS=/path/to/org-ca.pem`. Last resort (internal networks
-only): `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container environment.
+only): `NODE_TLS_REJECT_UNAUTHORIZED=0` in the container environment. This is
+an admin/infra decision, not something a project defaults silently — cicd-setup's
+`docs/admin-handoff.md` §4 ("TLS ภายในองค์กร") is where the admin confirms
+which one and the deploy compose is where it actually gets set (never in the
+Jenkins Secret File credential).
 
 ## Checklist before wiring the app
 

@@ -124,6 +124,10 @@ Ask all of these **in a single message** before doing anything:
      `docs/admin-handoff.md` already exists (e.g. cicd-setup wrote it),
      update its Keycloak section instead of overwriting the file.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
+   — **[If SSO or LDAP]** also keep `docs/admin-handoff.md` §4 "TLS ภายในองค์กร"
+     (from the cicd-setup template — internal-CA cert vs closed-intranet
+     confirmation, see `references/keycloak-client.md`); don't delete it even
+     if this interview didn't need the Keycloak client section
 5. ~~Who is the first admin?~~ — **do NOT ask this.** The answer cannot be
    used: SSO/LDAP rows may not be pre-created (มติ 2026-08-11), so nothing can
    be seeded from a name given in an interview — asking creates the

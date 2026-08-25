@@ -27,6 +27,11 @@ services:
       #   DATABASE_URL  → separate dev DB (never point dev at prod data)
       #   auth secret   → never share secrets between environments
       DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # [METHOD: SSO or LDAP] Internal-CA TLS — same admin decision as prod
+      # compose (docs/admin-handoff.md "TLS ภายในองค์กร"); dev may use a
+      # different Keycloak/LDAP endpoint, confirm separately if so.
+      # NODE_EXTRA_CA_CERTS: /etc/ssl/certs/org-ca.pem
+      # NODE_TLS_REJECT_UNAUTHORIZED: '0'
       # Add the project's runtime secrets below (same keys as prod compose):
       # AUTH_SECRET: ${AUTH_SECRET}
       # SENTRY_DSN: ${SENTRY_DSN:-}
