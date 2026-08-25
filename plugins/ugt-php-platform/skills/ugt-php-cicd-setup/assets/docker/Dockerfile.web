@@ -1,9 +1,13 @@
 # Org-standard PHP web Dockerfile — Laravel / CodeIgniter / plain PHP (apache)
 #
 # pin codename เสมอ ห้ามใช้ `php:8.3-apache` เปล่า — tag นั้นเลื่อนไป Debian
-# trixie (13) แล้ว ซึ่งพัง Microsoft ODBC apt repo ที่บล็อก [DB] ข้างล่างต้องใช้
-# สองชั้น: codename `debian/12` ไม่ตรงอีกต่อไป และ apt ของ trixie ไม่รับ key แบบ
-# ASCII-armored ใน trusted.gpg.d (ยืนยันจาก build ที่ fail จริง — โปรเจค pilot 2026-08)
+# trixie (13) แล้ว ซึ่งพัง Microsoft ODBC apt repo ที่บล็อก [DB] ข้างล่างต้องใช้:
+# codename `debian/12` ใน URL ของ repo ไม่ตรงกับ base image อีกต่อไป → apt-get
+# update 404 เงียบ ๆ แล้วไปตายตอน apt-get install (ยืนยันจาก build ที่ fail จริง
+# — โปรเจค pilot 2026-08) · เรื่อง key ใช้ `gpg --dearmor` + `signed-by` เสมอ
+# (apt รับ ASCII-armored ได้ตั้งแต่ 1.4 ถ้าตั้งนามสกุล `.asc` — สิ่งที่ trixie
+# ถอดออกคือคำสั่ง `apt-key` ไม่ใช่รูปแบบ key; `signed-by` ยังดีกว่าเพราะจำกัด
+# ความไว้ใจของ key ไว้กับ repo เดียว — ดู references §C)
 # หมายเหตุ: SQL Server ต้องการ PHP >= 8.3 เป็นเพดานแข็ง — PECL sqlsrv/pdo_sqlsrv
 # รุ่นปัจจุบันตัดการรองรับ 8.2 ไปแล้ว ("pecl/sqlsrv requires PHP >= 8.3.0")
 FROM php:8.3-apache-bookworm
@@ -13,13 +17,15 @@ WORKDIR /var/www/html
 # RUN docker-php-ext-install pdo_mysql
 # RUN pecl install sqlsrv pdo_sqlsrv && docker-php-ext-enable sqlsrv pdo_sqlsrv   # SQL Server (ต้องมี msodbcsql — ดู references/docker-deploy.md)
 
-# curl ใช้โดย HEALTHCHECK ท้ายไฟล์ — base image ไม่มีมาให้ ต้องลงเองและ **ห้าม purge**
-# (เดิมใช้ `php -r file_get_contents` เพื่อเลี่ยงการลง package แต่วิธีนั้นพังเงียบ
-# เมื่อโปรเจคตั้ง `allow_url_fopen = Off` ตาม OWASP — ดู references §D)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && a2enmod rewrite
+# HEALTHCHECK ท้ายไฟล์ใช้ `curl` ซึ่ง **ติดมากับ base image อยู่แล้ว** (image
+# ทางการฝั่ง Debian ลง `$PHPIZE_DEPS ca-certificates curl xz-utils` เป็น
+# persistent dep) จึงไม่ต้อง apt-get install เพิ่ม — แต่ **ห้าม purge ทิ้ง**
+# ถ้ามีบล็อกที่ลง package อื่นแล้ว purge ปิดท้าย (เช่นบล็อก [DB]) ต้องไม่กวาด
+# curl ไปด้วย ไม่งั้น healthcheck ตายด้วย `curl: not found`
+# (`wget` ไม่มีมาให้จริง — อย่าเปลี่ยนไปใช้ · เดิมเคยใช้
+# `php -r file_get_contents` ซึ่งพังเงียบเมื่อตั้ง `allow_url_fopen = Off`
+# ตาม OWASP — ดู references §D)
+RUN a2enmod rewrite
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock* ./

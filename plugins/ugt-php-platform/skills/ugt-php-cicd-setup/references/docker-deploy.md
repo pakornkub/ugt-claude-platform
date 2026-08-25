@@ -114,7 +114,7 @@ define('WP_AUTO_UPDATE_CORE', false);
   SonarQube / Quality Gate) — ไม่มี record ว่า core เวอร์ชันที่รันจริงคือ
   เวอร์ชันไหน ต่างจากที่ Jenkins build ไว้
 
-### Health file รอดจาก wp-content mount
+### Health file: รอดจาก wp-content mount — แต่ติดกับดัก anonymous volume ของ webroot
 
 `api/health/index.php` ถูกวางไว้ที่ `/var/www/html/api/health/index.php` —
 path นี้อยู่**นอก** `/var/www/html/wp-content` จึงไม่ถูก bind mount ของ
@@ -122,6 +122,47 @@ path นี้อยู่**นอก** `/var/www/html/wp-content` จึงไ�
 `/var/www/html`) endpoint นี้จึงตอบได้ปกติแม้ `wp-content` เป็น volume ว่าง
 ตอน container แรกสุด — HEALTHCHECK ของ image ก็ยิงเข้าไฟล์นี้เหมือน
 `Dockerfile.web` ทุกประการ (ดู §D)
+
+**แต่มีอีกชั้นที่ต้องรู้**: `Dockerfile` ของ image ทางการ `wordpress:*` ประกาศ
+`VOLUME /var/www/html` ไว้เอง แปลว่า **ทั้ง webroot** เป็น anonymous volume
+เสมอ ไม่ใช่ไฟล์ใน image layer และ `docker compose up -d` ตอน deploy รอบถัดไป
+**ยกของเดิมจากคอนเทนเนอร์ก่อนหน้ามาใช้ต่อ** (พฤติกรรมมาตรฐานของ compose กับ
+anonymous volume — `-V` / `--renew-anon-volumes` คือ flag ที่สั่งไม่ให้ทำแบบนั้น)
+ผลสองข้อ:
+
+1. **ไฟล์ที่เปลี่ยนใน image ใหม่ไม่ขึ้นถึงคอนเทนเนอร์** — รวมถึง
+   `/var/www/html/api/health/index.php` ที่ `Dockerfile.wordpress` เป็นคน `COPY`
+   เข้ามา: deploy รอบแรกได้ไฟล์จาก image (volume ถูก initialize จาก image ตอน
+   สร้างครั้งแรก) แต่รอบที่ 2 เป็นต้นไปได้ไฟล์ **เวอร์ชันเดิมจาก volume เก่า**
+   แก้ health แล้ว push ไปกี่รอบก็ไม่มีผล
+2. **anonymous volume กองสะสม** — ทุกครั้งที่มีการสร้าง volume ใหม่ ของเก่าค้าง
+   อยู่บน host โดยไม่มีชื่อให้ตามเก็บ (`docker volume prune` เท่านั้นที่เก็บได้)
+
+> **ทำไม core อัปเดตได้ทั้งที่มีข้อ 1** — ไม่ใช่เพราะ volume ถูกรีเฟรช แต่เพราะ
+> `docker-entrypoint.sh` ของ image **แตก core จาก `/usr/src/wordpress` ทับ
+> `/var/www/html` ให้ใหม่ทุกครั้งที่ container start** (มันเทียบเวอร์ชันแล้ว
+> copy ทับ) — กลไกนี้ครอบเฉพาะไฟล์ของ WordPress core ไม่ครอบ `api/health/` ที่
+> เป็นของเราเอง
+
+**ทางแก้ที่ชุดนี้เลือก — `--renew-anon-volumes` เฉพาะ shape = wordpress**:
+
+```groovy
+// [WP] shape = wordpress เท่านั้น — webroot ของ image นี้เป็น anonymous volume
+sh "docker compose -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
+```
+
+- ปลอดภัยกับข้อมูลผู้ใช้: flag นี้แตะเฉพาะ **anonymous** volume — `wp-content`
+  เป็น **bind mount** ที่ประกาศชื่อไว้ในทั้ง 2 compose (`/srv/appdata/...`)
+  จึงไม่โดนแตะเลย ซึ่งเป็นเหตุผลอีกข้อที่ `wp-content` เป็น volume **บังคับ**:
+  ทุกอย่างที่ต้องรอดต้องอยู่ในนั้น ไม่ใช่ที่อื่นใน webroot
+- ราคาที่จ่าย: container start ช้าขึ้นเล็กน้อยเพราะ entrypoint แตก core ใหม่
+  ทุก deploy (หลักสิบวินาที — `start_period: 60s` ครอบอยู่แล้ว)
+- ทางเลือกที่ **ไม่** เลือก: bind-mount ไฟล์ health จากโฮสต์ทับเข้าไป — ได้ผล
+  เหมือนกันแต่ต้องมีขั้น copy ไฟล์ลง `/srv/appdata` ก่อน `up -d` เพิ่มอีกจุดที่
+  ลืมได้ และทำให้ image ไม่ใช่แหล่งความจริงเดียวของ endpoint นี้อีกต่อไป
+- `Dockerfile.web` (Laravel/CI/legacy) **ไม่มีปัญหานี้** — `php:*-apache` ไม่ได้
+  ประกาศ `VOLUME` ไว้ ทุกไฟล์อยู่ใน image layer ตรง ๆ จึงใช้
+  `up -d --no-build` เปล่า ๆ ตามปกติ
 
 ### ถ้าโปรเจคมีทั้ง `[VOLUME]` custom และ `[WP]` — ต้อง merge บล็อกเอง
 
@@ -158,30 +199,48 @@ RUN apt-get update && apt-get upgrade -y && \
       > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 && \
-    apt-get install -y --no-install-recommends $PHPIZE_DEPS && \
     pecl install sqlsrv pdo_sqlsrv && \
     docker-php-ext-enable sqlsrv pdo_sqlsrv && \
-    apt-get purge -y --auto-remove gnupg2 apt-transport-https $PHPIZE_DEPS && \
+    apt-get purge -y --auto-remove gnupg2 apt-transport-https && \
     rm -rf /var/lib/apt/lists/*
 ```
 
 จุดที่พลาดบ่อย:
 
-- **`$PHPIZE_DEPS` ต้องมาก่อน `pecl install`** — `pecl` คอมไพล์จาก source จริง
-  ต้องมี toolchain (`autoconf` `gcc` `make` ฯลฯ) ซึ่ง `php:*` image ไม่ได้ลงมาให้
-  ตัวแปร `$PHPIZE_DEPS` มีติดมากับ image อยู่แล้ว ใช้ได้เลย · ติดตั้งกับ purge
-  ใน `RUN` เดียวกันเพื่อไม่ให้ toolchain ค้างอยู่ใน layer สุดท้าย
+- **ไม่ต้องลง `$PHPIZE_DEPS` เอง และ ⚠️ ห้าม purge ทิ้ง** — `pecl` คอมไพล์จาก
+  source จริงจึงต้องมี toolchain (`autoconf` `gcc` `make` `re2c` ฯลฯ) แต่ image
+  ทางการฝั่ง **Debian** (`php:8.3-apache-bookworm` และทุก variant ที่ไม่ใช่
+  alpine) **ลง `$PHPIZE_DEPS` มาให้แล้วเป็น persistent dep** ตั้งแต่ layer แรก
+  ของ base image (ดู `Dockerfile-debian.template` ของ docker-library/php:
+  `apt-get install -y --no-install-recommends $PHPIZE_DEPS ca-certificates curl
+  xz-utils`) — ตัวแปร `$PHPIZE_DEPS` จึงไม่ได้เป็นแค่ชื่อรายการ แต่ของจริงติด
+  มาด้วย. สูตรเดิมที่ปิดท้ายด้วย `apt-get purge -y --auto-remove … $PHPIZE_DEPS`
+  จึง**ถอนเครื่องมือของ base image ทิ้ง** ทำให้ `pecl install` /
+  `docker-php-ext-install` ที่เพิ่มทีหลัง (หรือใน Dockerfile ของโปรเจคเอง)
+  fail ตามมาโดยไม่มีใครโยงเหตุถูก — ตัดคำว่า `$PHPIZE_DEPS` ออกจากทั้งบรรทัด
+  install และบรรทัด purge (purge เฉพาะสิ่งที่ **สูตรนี้เป็นคนลง** คือ `gnupg2`
+  / `apt-transport-https`)
+  · หมายเหตุ: **alpine variant ไม่เหมือนกัน** — `php:*-alpine` ประกาศ
+  `$PHPIZE_DEPS` ไว้เป็น ENV แต่ไม่ได้ลงให้ ต้อง `apk add --virtual` เอง
+  (ชุดนี้ไม่ได้ใช้ alpine ฝั่ง PHP)
 - **`unixodbc-dev` ต้องมาก่อน `pecl install`** — `pecl` ต้องการ ODBC header
   files ไม่ใช่แค่ตัว runtime driver ขาดบรรทัดนี้ `pecl install sqlsrv` จะ fail
   ตอน `configure` ด้วย error หา `sql.h`/`sqlext.h` ไม่เจอ
-- **`ACCEPT_EULA=Y` ต้องเป็น env ของบรรทัด `apt-get install` เดียวกัน**
-  (ไม่ใช่ `ENV ACCEPT_EULA=Y` แยกบรรทัดก่อนหน้า) — `msodbcsql18` เป็น
-  interactive postinst script ที่เช็ค EULA acceptance จาก env ตอนรันจริง
-  ไม่ใช่ตอน build-arg resolve
-- **`gpg --dearmor` ไม่ใช่ `tee` ลง `trusted.gpg.d`** — apt รุ่นใหม่ (trixie
-  ขึ้นไป) ไม่รับ key แบบ ASCII-armored ใน `trusted.gpg.d` อีกแล้ว ต้อง dearmor
-  ลง `/usr/share/keyrings/` · วิธีเดิมยังพอทำงานบน bookworm แต่จะพังทันทีที่ใคร
-  ขยับ base image ขึ้น — ใช้แบบใหม่ไปเลยทั้งสองกรณี
+- **`ACCEPT_EULA=Y` เขียนนำหน้า `apt-get install` บรรทัดเดียวกัน** —
+  `msodbcsql18` มี postinst script ที่อ่าน EULA acceptance จาก environment
+  ตอน `apt-get install` รันจริง. `ENV ACCEPT_EULA=Y` แยกบรรทัดก่อนหน้า
+  **ก็ทำงานได้เหมือนกัน** (ENV มีผลกับทุก `RUN` ที่ตามมา ไม่ใช่แค่บรรทัดถัดไป
+  — ต่างจาก `ARG` ที่หมดอายุตาม build stage) แต่ที่นี่เลือกแบบ inline เพราะ
+  `ENV` **ติดค้างไปถึง environment ของคอนเทนเนอร์ตอนรันจริงด้วย** ซึ่งไม่มี
+  เหตุผลให้ค้าง — inline จำกัดขอบเขตไว้แค่คำสั่งที่ต้องใช้จริง
+- **dearmor ลง `/usr/share/keyrings/` + `signed-by` คือแบบที่ควรใช้** —
+  ไม่ใช่ `tee` ลง `trusted.gpg.d`. เหตุผล**ไม่ใช่**ว่า apt ไม่รับ key แบบ
+  ASCII-armored (รับมาตั้งแต่ apt 1.4 ขอแค่ตั้งนามสกุลให้ตรง: armored = `.asc`,
+  binary = `.gpg` — ตั้งผิดนามสกุลต่างหากที่ทำให้ key ถูกเมิน) สิ่งที่หายไปจริง
+  ใน trixie คือคำสั่ง **`apt-key`** ที่ถูกถอดออกจาก package แล้ว. เหตุผลที่ใช้
+  `signed-by` คือ **ขอบเขตความไว้ใจ**: key ที่วางใน `trusted.gpg.d` เซ็นรับรอง
+  ได้ **ทุก** repo ในเครื่อง (repo ของ Microsoft เซ็นแทน debian.org ได้) ส่วน
+  `signed-by` ผูก key กับ repo เดียวที่ประกาศไว้เท่านั้น
 - **codename ของ apt repo (`debian/12`) ต้องตรงกับ base image จริง** —
   ⚠️ `php:8.3-apache` **เปล่า ๆ ตอนนี้ resolve เป็น trixie (13) แล้ว** ไม่ใช่
   bookworm อีกต่อไป (ยืนยันจาก build ที่ fail จริง โปรเจค pilot 2026-08) จึงต้อง
@@ -194,9 +253,22 @@ RUN apt-get update && apt-get upgrade -y && \
 - **`apt-get upgrade -y` ไม่ใช่ของฟุ่มเฟือย** — base image ถูก rebuild ห่างกว่า
   รอบออก security patch ของ Debian ถ้าโปรเจคเปิดสแกน image (Trivy) จะโดนบล็อก
   ด้วย CVE ที่ **แก้ได้แล้ว** ใน apt แต่ image ยังไม่ได้รับ
-- **`Dockerfile.wordpress` ไม่มีบล็อก `[DB]` นี้** — WordPress ใช้ `mysqli`/
-  `pdo_mysql` ที่มากับ base image `wordpress:*` อยู่แล้ว SQL Server ไม่ใช่
-  ทางเลือกมาตรฐานของ WordPress ในชุดนี้
+- **`Dockerfile.wordpress` ไม่มีบล็อก `[DB]` นี้** — WordPress ใช้ **`mysqli`**
+  ที่มากับ base image `wordpress:*` อยู่แล้ว (image รัน `docker-php-ext-install
+  … mysqli …` ให้) SQL Server ไม่ใช่ทางเลือกมาตรฐานของ WordPress ในชุดนี้
+  · ⚠️ **`pdo_mysql` ไม่ได้ติดมากับ `wordpress:*`** (คนละ extension กับ
+  `mysqli` — WordPress core ใช้ `mysqli` ล้วน) ดังนั้นถ้าจะเปิดใช้บล็อก `[DB]`
+  ใน `api/health/index.php` ของ shape นี้ ต้องเลือกทางใดทางหนึ่ง:
+  1. **ใช้ `mysqli` ในไฟล์ health แทน PDO** (ทางที่แนะนำ — ไม่เพิ่ม layer,
+     ใช้ของที่ image มีอยู่แล้ว) — snippet อยู่ในคอมเมนต์ของไฟล์ health
+  2. หรือเติมบรรทัดนี้ใน `Dockerfile.wordpress` ก่อน `COPY api/health/...`:
+     ```dockerfile
+     # [DB] เปิด pdo_mysql — base image wordpress:* ให้มาแต่ mysqli
+     RUN docker-php-ext-install pdo_mysql
+     ```
+  ถ้าไม่ทำทั้งสองทางแล้วปลด comment บล็อก PDO ทิ้งไว้ ไฟล์ health จะ fatal
+  (`Class "PDO" not found` / driver ไม่มี) = 500 ไม่ใช่ 503 → container ไม่มีวัน
+  ขึ้น `healthy`
 
 ### DNS: ชื่อ host สั้นของ DB มัก resolve ไม่ได้จากในคอนเทนเนอร์
 
@@ -227,23 +299,27 @@ docker exec <container> getent hosts <ชื่อที่ตั้งใน DB
 
 ไม่มีผลลัพธ์ = ปัญหา DNS ไม่ใช่รหัสผ่าน
 
-## D. Healthcheck — `curl -fsS -L` (ต้องลง curl เอง)
+## D. Healthcheck — `curl -fsS -L`
 
-`php:8.3-apache` และ `wordpress:php8.3-apache` ไม่มี `curl`/`wget` ติดมาให้ —
-ทั้งสอง Dockerfile จึง **ลง `curl` เองและไม่ purge ทิ้ง** เพราะ healthcheck
-ต้องใช้:
+`php:8.3-apache` (และ `wordpress:php8.3-apache` ที่สืบทอดมา) **มี `curl` ติดมา
+ให้อยู่แล้ว** — image ทางการฝั่ง Debian ลง `$PHPIZE_DEPS ca-certificates curl
+xz-utils` เป็น *persistent* dep ตั้งแต่ layer แรก (และ Dockerfile ของ
+`wordpress:*` ก็ไม่ได้ purge ทิ้ง มันใช้ curl ดึง core tarball เองด้วยซ้ำ)
+ทั้งสอง Dockerfile ของชุดนี้จึง **ไม่มี layer `apt-get install curl`** —
+สิ่งที่ต้องระวังคือ **ห้าม purge `curl` ทิ้ง** ในบล็อกที่เพิ่มมาทีหลัง
+· `wget` ต่างหากที่ **ไม่มีจริง** — อย่าเปลี่ยน healthcheck ไปใช้ตัวนั้น:
 
 ```sh
 curl -fsS -L http://127.0.0.1:80/api/health || exit 1
 ```
 
-**ทำไมไม่ใช้ `php -r 'file_get_contents(...)'` เหมือนเดิม** — วิธีนั้นไม่ต้องลง
-package จริง แต่ `file_get_contents("http://…")` **คืน `false` เสมอ**เมื่อ
+**ทำไมไม่ใช้ `php -r 'file_get_contents(...)'` เหมือนเดิม** —
+`file_get_contents("http://…")` **คืน `false` เสมอ**เมื่อ
 `allow_url_fopen = Off` ซึ่งเป็นค่า hardening มาตรฐานของ OWASP (กัน RFI) ที่
 โปรเจคตั้งกันเป็นปกติ ผลคือ container **ไม่มีวันขึ้น healthy** และสเตจ Deploy
 ตายที่ poll โดยไม่มี error บอกสาเหตุสักบรรทัด (ยืนยันจากโปรเจค pilot 2026-08)
-ราคาที่จ่ายคือ apt layer เพิ่มหนึ่งชั้น — ถูกกว่าการดีบั๊ก healthcheck ที่ไม่
-เคยเขียวมาก
+ตอนตัดสินใจครั้งแรกคิดว่าต้องแลกด้วย apt layer เพิ่มหนึ่งชั้น — ปรากฏว่า
+ไม่ต้องแลกอะไรเลย เพราะ curl มากับ image อยู่แล้ว
 
 **`-L` ห้ามตัดทิ้งเด็ดขาด** — `/api/health` โดน 301 ได้**สองทิศตรงข้ามกัน**
 แล้วแต่ shape:
@@ -267,13 +343,15 @@ status **สุดท้าย** — ได้ semantics เดียวกั�
 
 จุดที่พลาดบ่อย:
 
-- **`127.0.0.1` เท่านั้น ห้าม `localhost`** — resolver บางระบบ resolve
-  `localhost` เป็น IPv6 `::1` ก่อนเสมอ ถ้า apache ในคอนเทนเนอร์ไม่ได้ฟังฝั่ง
-  IPv6 ไว้ (ทั่วไปสำหรับ container ที่ไม่ตั้งค่าเพิ่มเติม) healthcheck จะ fail
-  ด้วย "Connection refused" ทั้งที่แอปรันปกติทุกอย่าง — ระบุ IP ตรง ๆ ตัดปัญหา
-  resolver ทิ้งไปเลย ไม่ต้องเดาว่า container ฟัง stack ไหน (พฤติกรรมกลุ่ม
-  เดียวกับที่ทำให้ต้องใช้ `127.0.0.1` ในฝั่ง python — ดู `ugt-python-cicd-setup`
-  references)
+- **`127.0.0.1` เท่านั้น ไม่ใช้ `localhost`** — ข้อนี้เป็น**กติกาเชิงป้องกัน
+  ไม่ใช่บั๊กที่ยืนยันแล้วกับ image ชุดนี้**: `localhost` ต้องผ่าน resolver ซึ่ง
+  ปกติคืนทั้ง `127.0.0.1` และ `::1` แล้ว client ที่ทำ Happy Eyeballs (curl ทำ)
+  จะไล่ลองทีละ address จนติด ส่วน apache ของ `php:*-apache` ก็ผูก dual-stack
+  ตาม default อยู่แล้ว — สองอย่างนี้รวมกันแปลว่า `localhost` **มักใช้ได้** ไม่
+  ควรบอกว่ามันพังแน่นอน. เหตุผลที่ยังบังคับ `127.0.0.1` คือมัน **deterministic**:
+  ไม่ขึ้นกับ `/etc/hosts` ของ base image, resolver order, หรือ stack ที่แอปผูก
+  ซึ่งทั้งสามอย่างเปลี่ยนได้เงียบ ๆ เมื่อ bump image — ราคาของกติกานี้เป็นศูนย์
+  จึงไม่มีเหตุผลให้เสี่ยง (ฝั่ง python ใช้กติกาเดียวกันด้วยเหตุผลเดียวกัน)
 - **Port ในสตริงต้องเป็น 80 (container-internal) เสมอ** — ไม่ใช่ host port
   จาก `${APP_PORT:-__PORT_PROD__}` ที่แค่ map เข้ามา healthcheck รันข้างใน
   container จึงเห็นแต่ port ภายใน (apache ฟัง 80 เสมอในทั้งสอง Dockerfile)
@@ -285,10 +363,11 @@ status **สุดท้าย** — ได้ semantics เดียวกั�
   รกใน `docker inspect` health log · `-S` ดึง error message กลับมาเมื่อ `-s`
   ปิดเสียงไปแล้ว (ไม่มีตัวนี้เวลา fail จะไม่รู้เลยว่าเพราะอะไร) · ตัว exit code
   คือสิ่งที่ Docker ใช้ตัดสิน ไม่ใช่ output
-- **ห้าม purge `curl` ทิ้งท้าย Dockerfile** — โปรเจคที่ลง curl ไว้แค่ตอน build
-  (เช่นเพื่อดึง key ของ Microsoft repo ในบล็อก `[DB]`) แล้ว `apt-get purge`
-  ปิดท้ายเพื่อลดขนาด image จะทำให้ healthcheck ตายทุกครั้งด้วย `curl: not found`
-  ซึ่งใน health log อ่านเหมือนแอปพังมากกว่า tool หาย
+- **ห้าม purge `curl` ทิ้งท้าย Dockerfile** — curl มากับ base image ไม่ต้องลง
+  เอง แต่บล็อกที่ลง package อื่นแล้ว `apt-get purge --auto-remove` ปิดท้ายเพื่อ
+  ลดขนาด image (เช่นบล็อก `[DB]` ที่ดึง key ของ Microsoft repo) ต้องระบุชื่อ
+  package ที่ตัวเองลงเท่านั้น อย่ากวาด `curl` ไปด้วย — healthcheck จะตายทุกครั้ง
+  ด้วย `curl: not found` ซึ่งใน health log อ่านเหมือนแอปพังมากกว่า tool หาย
 
 ## E. Gotchas เร็ว ๆ — build & lint
 
@@ -402,3 +481,93 @@ resolve URL relative จาก path โดยตัด segment สุดท้�
 - `<base href>` ใช้แทนได้แต่ต้อง hardcode prefix ซึ่งต่างกันระหว่าง dev
   (ไม่มี proxy) กับ prod — สูตร script ไม่ผูกกับ prefix จึงใช้ไฟล์เดียวกันได้
   ทุก environment
+
+## H. Volume — ownership เป็นเรื่องคนละเรื่องกับ path
+
+Path ของ persistent data ตาม contract กลาง (`ugt-core/contracts/cicd.md` §
+Persistent data) คือ:
+
+```
+/srv/appdata/<project>/<name>        # prod
+/srv/appdata/<project>-dev/<name>    # dev
+```
+
+แต่ path ถูกต้องไม่ได้แปลว่า container **เขียนได้**. bind mount ที่ owner บน
+host เป็นคนละ UID กับ user ที่เขียนไฟล์จริงในคอนเทนเนอร์ ทำให้แอปเขียนไม่ได้
+(`permission denied` / `failed to open stream`) ทั้งที่ compose ขึ้น `healthy`
+ปกติทุกอย่าง — เพราะ error โผล่ตอนโค้ด **เขียน** volume จริง ไม่ใช่ตอน start
+
+### ใครคือ user ที่ต้อง chown ให้ — `www-data` ไม่ใช่ root
+
+จุดที่ PHP ต่างจากฝั่ง python ชัดที่สุด: `Dockerfile.web` และ
+`Dockerfile.wordpress` **ไม่มี `USER` directive** — apache ยัง start เป็น root
+เพื่อ bind port 80 แล้ว **drop privilege เองตอน fork worker** ไปเป็น `www-data`
+(`APACHE_RUN_USER` ใน `envvars` ของ base image) กระบวนการที่เขียนไฟล์จริงจึงเป็น
+`www-data` เสมอ ไม่ใช่ root
+
+ผลตามมาที่เป็นกับดัก: `docker run --rm <image> id -u` เปล่า ๆ (สูตรที่ฝั่ง
+python ใช้ได้เพราะ image ฝั่งนั้นมี `USER app`) **คืน `0` สำหรับ image ของ PHP**
+→ chown volume ให้ root → `www-data` เขียนไม่ได้ ซึ่งคือความพังที่บล็อก
+`[VOLUME]` มีไว้กันพอดี. ต้องถาม UID ของ `www-data` เจาะจง:
+
+```sh
+docker run --rm <image> id -u www-data      # ปกติ 33 บน Debian — แต่อย่า hardcode
+```
+
+### กลไกหลัก — Jenkinsfile mkdir+chown ให้อัตโนมัติทีละ subdir
+
+บล็อก `[VOLUME]` ในสเตจ Deploy ทำเรื่องนี้ให้เองแล้ว โดยวนเช็ค **ทีละ subdir ที่
+compose bind จริง** และทำเฉพาะตัวที่ยังไม่มี (idempotent — subdir ที่มีอยู่แล้ว
+ถูกข้าม ไม่ chown ซ้ำทุกรอบ deploy):
+
+```sh
+APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u www-data)
+for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+  if [ ! -d "$p" ]; then
+    mkdir -p "$p"
+    docker run --rm -v "$p":/d alpine chown -R "$APP_UID" /d
+  fi
+done
+```
+
+ตอนกรอกรายชื่อ volume จาก interview ข้อ 6 ให้แทน `uploads`/`reports` ด้วยชื่อ
+subdir จริง **ทุกตัวที่ compose bind** — ไม่ใช่แค่ระดับโปรเจค: compose bind ที่
+`/srv/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มีตอน `up -d` **dockerd จะ
+สร้างให้เองเป็น `root:root`** (พฤติกรรมมาตรฐานของ bind mount ที่ path ปลายทางหาย)
+แล้ว `www-data` เขียนไม่ได้
+
+**ห้ามย้อนกลับไปครอบทั้งบล็อกด้วย guard ระดับโปรเจค**
+(`if [ ! -d /srv/appdata/<project> ]`): guard แบบนั้นกลายเป็น no-op ถาวรทันทีที่
+deploy แรกสร้างโฟลเดอร์โปรเจคขึ้นมา — volume ที่เพิ่มในรุ่นถัดไปจะไม่มีวันถูก
+mkdir/chown
+
+จุดสำคัญที่ทำให้กลไกนี้ทำงานได้แม้ Jenkins agent เองไม่ใช่ root:
+
+- **หา UID จริงจาก image ที่เพิ่ง build ทุกครั้ง ไม่ hardcode `33`** — เลข UID
+  ของ `www-data` ตรงกันแทบทุก Debian base ก็จริง แต่โปรเจคที่เปลี่ยน
+  `APACHE_RUN_USER` หรือเพิ่ม user เองใน Dockerfile จะเลื่อน อ่านจาก image
+  ถูกเสมอและไม่แพงกว่า
+- **`chown` เองไม่ได้เพราะ Jenkins user ไม่ใช่ root บนโฮสต์** — แต่อยู่ใน
+  `docker` group (มติ M8 / เช็คลิสต์ admin handoff) จึงสั่ง `docker run` ได้:
+  รัน container `alpine` แยกที่ bind `/srv/appdata/<project>/<name>` เข้ามาที่
+  `/d` แล้ว `chown -R` ข้างในนั้น — container นั้นรันเป็น root โดย default
+- guard `if [ ! -d "$p" ]` **ต่อ subdir** ทำให้ container chown รันเฉพาะตอนมี
+  subdir ใหม่ (ส่วนการหา UID รันทุกรอบโดยตั้งใจ — ถูกมาก)
+
+### `[WP]` `wp-content` ใช้กลไกเดียวกัน
+
+`wp-content` เป็น volume บังคับ (§B) จึงต้องอยู่ในบรรทัด `for p in …` เหมือน
+volume อื่นทุกประการ — WordPress เขียน `wp-content/uploads/` ในนามของ `www-data`
+ตอนอัปโหลดผ่าน wp-admin ถ้า subdir นี้เป็น `root:root` ผู้ใช้จะเจอ "ไม่สามารถ
+สร้างไดเรกทอรีได้" ในหน้า Media ทั้งที่เว็บขึ้นปกติ
+
+### ทางเลือกสำรอง — chown มือ (path ที่มีอยู่ก่อนกลไกนี้ หรือ debug)
+
+```sh
+docker run --rm __PROJECT_NAME__:latest id -u www-data
+# หรือระบุ group ด้วย:
+chown -R $(docker run --rm __PROJECT_NAME__:latest id -u www-data):$(docker run --rm __PROJECT_NAME__:latest id -g www-data) /srv/appdata/__PROJECT_NAME__/<name>
+```
+
+ตรรกะเดียวกับกลไกอัตโนมัติ — ต่างกันแค่ไว้แก้กรณีพิเศษที่ deploy รอบใหม่ไม่ครอบ
+(path เก่า, หรือ mount เพิ่มทีหลังโดยไม่ได้ deploy ใหม่)

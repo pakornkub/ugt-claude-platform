@@ -1,5 +1,37 @@
 # Changelog — ugt-php-platform
 
+## 0.6.0 (2026-08-25)
+
+**Audit ปูพรม 7 มิติ 2026-08-25 — แก้บั๊กกลไก volume + ข้อเท็จจริง Docker
+ที่ตรวจกับ official image จริง** — ยังไม่ tag รอ pilot:
+
+- **บั๊กจริง — chown อ่าน UID ผิดตัว**: `Jenkinsfile` `[VOLUME]` block ใช้
+  `docker run … id -u` แต่ Dockerfile ฝั่ง PHP ไม่มี `USER` directive →
+  ได้ 0 (root) แล้ว chown bind mount ทั้งก้อนเป็น root — `www-data` เขียน
+  ไม่ได้ คือความพังที่ block นี้มีไว้กันพอดี → `id -u www-data` (คอมเมนต์
+  "user `app`" ที่ก๊อบจาก python ตามแก้ด้วย) + `references/docker-deploy.md`
+  ได้ **§H Volume ownership** ที่ SKILL ชี้ถึงแต่ไม่เคยมีอยู่จริง
+- **WordPress anonymous volume**: `wordpress:*` ประกาศ `VOLUME /var/www/html`
+  → webroot เป็น anonymous volume ที่ `compose up` สืบทอดจาก container เดิม
+  ไฟล์ใหม่ใน image (รวม health endpoint) ไม่มีวันถึง — §B อธิบายกลไกจริง
+  (core อัปเดตได้เพราะ entrypoint แตกไฟล์ ไม่ใช่เพราะ volume ถูกแทน) +
+  `[WP]` ใช้ `--force-recreate --renew-anon-volumes` · health snippet เปลี่ยน
+  เป็น `mysqli` (image มี mysqli ไม่มี pdo_mysql — บล็อก PDO เดิม fatal)
+- ข้อเท็จจริง Docker ที่ตรวจแล้วผิด: php Debian image **มี curl** เป็น
+  persistent dep (ตัด layer `apt-get install curl` ทิ้งทั้งสอง Dockerfile —
+  ที่ไม่มีคือ wget) · `$PHPIZE_DEPS` ติดมากับ image อยู่แล้ว และ recipe เดิม
+  `apt-get purge $PHPIZE_DEPS` **ถอน toolchain ของ base image ทิ้ง** ทำ
+  pecl ที่ตามมาพัง — เอา purge ออก · `ENV ACCEPT_EULA=Y` แยกบรรทัดใช้ได้
+  (เดิมสับสนกับ ARG) · apt รับ armored `.asc` ได้ตั้งแต่ 1.4 (ที่ trixie ถอด
+  คือ `apt-key`)
+- ความสอดคล้อง: host port placeholder ตรงกันแล้วทุกจุด **8081/8082**
+  (เดิม 3 ที่ 3 ค่า — handoff เคยบอก 80 ซึ่งชน privileged) · ship
+  `assets/env.example` + แถว copy ใน §5.1 (เดิม `verify.mjs` hard-fail หา
+  ไฟล์ที่ setup ไม่เคยสร้างสำหรับ CI3/legacy/WP) · rule file ตัด `/health`
+  ที่ไม่มีอยู่จริง · claim `localhost`→`::1` ลดระดับเป็น precautionary
+  (curl ทำ Happy Eyeballs) · PHPUnit 9 `<source>` → "ตรวจในเครื่องก่อน" ·
+  §5.1 เลิก restate กฎ health ซ้ำ §2.8
+
 ## 0.5.3 (2026-08-25)
 
 **`.dockerignore` mandatory list ไม่กัน `.env`** (backlog §6 "มาตรฐานที่ยังขาด")

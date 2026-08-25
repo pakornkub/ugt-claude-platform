@@ -161,10 +161,14 @@ python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http
 
 จุดที่พลาดบ่อย:
 
-- **`127.0.0.1` เท่านั้น ห้าม `localhost`** — `python:3.12-slim` (base จาก
-  Debian) มักมี `/etc/hosts`/resolver ที่ resolve `localhost` เป็น IPv6 `::1`
-  ก่อน ขณะที่ uvicorn/gunicorn ผูก IPv4 เท่านั้น (`--host 0.0.0.0`) → healthcheck
-  fail ด้วย "Connection refused" ทั้งที่แอปรันปกติทุกอย่าง
+- **`127.0.0.1` เท่านั้น ไม่ใช้ `localhost`** — ข้อนี้เป็น **กติกาเชิงป้องกัน
+  ไม่ใช่บั๊กที่ยืนยันแล้ว**: `localhost` ต้องผ่าน resolver ซึ่งปกติคืนทั้ง
+  `127.0.0.1` และ `::1` — client ที่ไล่ลองทีละ address จะติดที่ IPv4 อยู่ดี
+  แม้ uvicorn/gunicorn จะผูก IPv4 เท่านั้น (`--host 0.0.0.0`) แต่
+  `urllib.request` ของ stdlib ที่ healthcheck ใช้ **ไม่ได้การันตีว่าจะ fallback
+  ทุกกรณี** และผลยังขึ้นกับ `/etc/hosts`/resolver order ของ base image ซึ่ง
+  เปลี่ยนได้เงียบ ๆ ตอน bump. ระบุ IP ตรง ๆ ทำให้ผลลัพธ์ **deterministic**
+  โดยไม่ต้องแลกอะไรเลย จึงเป็นกติกาตายตัวของทุก stack ในองค์กร
 - **Port ในสตริงต้องเป็น 8000 (container-internal) เสมอ** — ไม่ใช่ host port
   จาก `${APP_PORT:-__PORT_PROD__}` ที่แค่ map เข้ามา healthcheck รันข้างใน
   container จึงเห็นแต่ port ภายใน
@@ -252,3 +256,63 @@ docker exec <container> getent hosts <ชื่อ host ของ DB>
 | resource limits (`deploy.resources`) | container เดียวไม่ควร starve ทรัพยากร host ที่มีหลายโปรเจครันร่วมกัน |
 | `logging` json-file 10m×3 | log โตไม่จำกัดจะเต็มดิสก์ host ได้ในระยะยาว โดยเฉพาะ batch job ที่รันทุกวัน |
 | `proxy-network` (`external: true`) | ทุกแอป [WEB] แชร์ network เดียวกับ reverse proxy ที่สร้างไว้ครั้งเดียวบน host — `[BATCH]` ไม่ต้องมี network นี้เพราะไม่มีใครยิง request เข้าหา job โดยตรง |
+
+## I. [DJANGO] static files — `collectstatic` + WhiteNoise
+
+**อาการ**: deploy ผ่าน · container `healthy` · `/api/health` คืน 200 · แต่หน้า
+`/admin` และทุกหน้าของแอปมาแบบไม่มี CSS/JS เลย และ **ไม่มี error ใน log** สัก
+บรรทัด (Django ตอบ 404 เฉพาะ request ของไฟล์ static ซึ่ง browser ไม่ได้ทำให้
+หน้าพัง แค่ไม่สวย) — pipeline ไม่มีทางจับข้อนี้ได้เพราะทุกด่านเขียวหมด
+
+**สาเหตุ**: `DEBUG=False` (ค่าที่ production ต้องเป็น) ทำให้ Django **หยุด
+เสิร์ฟไฟล์ static เอง** โดยตั้งใจ — เอกสาร Django บอกให้เอา web server จริงมา
+เสิร์ฟแทน แต่ในสถาปัตยกรรมนี้ container ไม่มี nginx อยู่ข้างใน (reverse proxy
+อยู่ระดับ host และเป็นของทีม admin คนละทีม การขอให้เขาเพิ่ม alias ต่อโปรเจค
+ทำให้ deploy ไม่ self-contained อีกต่อไป)
+
+**ทางที่ชุดนี้เลือก: WhiteNoise** — เสิร์ฟ static จากใน WSGI app เอง ไม่ต้องแตะ
+proxy ไม่ต้องเพิ่ม container:
+
+1. `requirements.txt` เพิ่ม `whitenoise`
+
+2. `settings.py` — middleware ต้องอยู่ **ถัดจาก `SecurityMiddleware` ทันที**
+   (สูงกว่านั้น = ข้าม security header, ต่ำกว่านั้น = request ของ static ไป
+   เสียเวลากับ session/auth middleware ก่อนโดยเปล่าประโยชน์):
+
+   ```python
+   MIDDLEWARE = [
+       "django.middleware.security.SecurityMiddleware",
+       "whitenoise.middleware.WhiteNoiseMiddleware",   # ต้องอยู่ตรงนี้เป๊ะ
+       # ... ที่เหลือตามเดิม
+   ]
+
+   STATIC_URL = "static/"          # [SUBPATH] ขึ้นต้นด้วย path เดียวกับ FORCE_SCRIPT_NAME
+   STATIC_ROOT = BASE_DIR / "staticfiles"
+   ```
+
+3. `Dockerfile.web` — เพิ่มบรรทัดนี้ **หลัง `COPY . .` และก่อน `USER app`**:
+
+   ```dockerfile
+   # [DJANGO] รวม static เข้า image — DEBUG=False ไม่เสิร์ฟ static ให้อีกต่อไป
+   RUN python manage.py collectstatic --noinput
+   ```
+
+   ตำแหน่งสำคัญทั้งสองด้าน: ต้องอยู่**หลัง** `COPY . .` (ยังไม่มีโค้ดแอปก็ยังไม่มี
+   static ให้เก็บ) และ**ก่อน** `USER app` (ตอนนั้นยังเป็น root จึงเขียน
+   `staticfiles/` ได้ แล้ว `RUN chown -R app:app /app` บรรทัดถัดไปครอบให้เอง —
+   สลับลำดับแล้วจะได้ `PermissionError` ตอน build)
+
+**กับดักตอน build**: `collectstatic` โหลด `settings.py` ทั้งไฟล์ แต่ `.env`
+ตัวจริงยังไม่มีตอน `docker build` (Jenkins วางให้ตอน Deploy stage เท่านั้น) —
+settings ที่บังคับ `SECRET_KEY`/`DATABASE_URL` จะ `ImproperlyConfigured` แล้ว
+build พังทั้ง stage. แก้ด้วยการใส่ค่า dummy ให้เฉพาะช่วง build:
+
+```dockerfile
+ENV SECRET_KEY=build-only-not-a-real-secret \
+    DATABASE_URL=sqlite:///build.db
+RUN python manage.py collectstatic --noinput
+```
+
+runtime `.env` ทับค่าพวกนี้ทั้งหมดอยู่แล้ว (`--env-file` ชนะ `ENV` ของ image) —
+**อย่าไปผ่อน `settings.py` ให้ค่าพวกนี้ optional แทน** เพราะนั่นทำให้ production
+บูตขึ้นได้ทั้งที่ไม่มี secret จริง ซึ่งอันตรายกว่าปัญหาที่กำลังแก้มาก

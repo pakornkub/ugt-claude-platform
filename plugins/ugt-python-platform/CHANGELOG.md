@@ -1,5 +1,31 @@
 # Changelog — ugt-python-platform
 
+## 0.6.0 (2026-08-25)
+
+**Audit ปูพรม 7 มิติ 2026-08-25 — อุดรู runtime ที่ verify ไม่เคยจับ** —
+ยังไม่ tag รอ pilot:
+
+- **gunicorn ไม่การันตีว่ามีใน image**: `Dockerfile.web` CMD รัน gunicorn
+  แต่ §5.4 เช็คแค่ `requirements.txt` มีอยู่ → build ผ่าน container ตาย
+  `exec: "gunicorn": not found` — §5.4 บังคับ server อยู่ใน requirements
+  (gunicorn/uvicorn ตาม framework) + `verify.mjs` check ใหม่อ่าน CMD เทียบ
+  requirements
+- **Django static gap**: ไม่มี `collectstatic`/WhiteNoise ที่ไหนเลย —
+  `DEBUG=False` แล้ว admin/static 404 ทั้งที่ `FORCE_SCRIPT_NAME` เขียนถูก
+  → `references/docker-deploy.md` **§I** (WhiteNoise + ตำแหน่ง collectstatic
+  ใน Dockerfile + กับดัก settings ต้องบูตได้ตอน build) + ขั้นสั้นใน SKILL
+- เงื่อนไข server "ข้อเดียว" จริง ๆ มี **2 ข้อ**: docker group + **Docker
+  Pipeline plugin** (`docker-workflow`) — ไฟล์เดียวกันยอมรับเองที่ §ท้าย
+  และฝั่ง php เขียนถูกอยู่แล้ว ปรับให้ตรงกัน
+- Flask caveat: gunicorn อ่าน `SCRIPT_NAME` แต่ **werkzeug/`flask run`
+  ไม่อ่าน** — dev เห็นพฤติกรรมต่างจาก production
+- ซ่อม CHANGELOG: หัวข้อ `## 0.5.0 (2026-08-24)` ที่หายตอน prepend 0.5.1
+  ใส่คืน (เนื้อหา 0.5.0 เดิมลอยอยู่ใต้ 0.5.1 ทั้งที่ 4 แหล่งอ้างถึง release นี้)
+- plugin.json description เติม **mypy** ที่ pipeline รันจริง (เดิมเขียนแค่
+  ruff/pytest) · placeholder table เติมแถว `env.example` ที่มี `__PORT_*__`
+  · claim `localhost`→`::1` ลดระดับเป็น precautionary · §5.1 เลิก restate
+  กฎ health ซ้ำ §2.8
+
 ## 0.5.3 (2026-08-25)
 
 **`.dockerignore` mandatory list ไม่กัน `.env`** — เจอช่องเดียวกันฝั่ง php
@@ -42,6 +68,8 @@ guard ระดับโปรเจค (`if [ ! -d /srv/appdata/<project> ]`) �
 §C cron แก้ประโยค "แม้ Jenkinsfile ใช้ `docker-compose` (v1)" ที่ค้างจากก่อน
 0.5.0 — ตอนนี้สองฝั่งใช้ v2 ตรงกันแล้ว · ฝั่ง php ตรวจแล้วไม่มี drift นี้
 (reference ไม่มี code block ของบล็อกเก่า) · ยังไม่ tag — รอ pilot ตามมติเดิม
+
+## 0.5.0 (2026-08-24)
 
 สามข้อจาก pilot ฝั่ง PHP ที่กลไกเหมือนกันทุกภาษา — ทำพร้อมกันทั้ง 3 stack
 (nextjs 4.45.0, php 0.5.0) · ยังไม่ tag — **ฝั่ง python ยังไม่มี pilot ของตัวเอง**

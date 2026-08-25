@@ -357,6 +357,35 @@ check('Dockerfile CMD is a JSON array (exec form)', () => {
       };
 });
 
+check('the server in Dockerfile CMD is listed in requirements.txt', () => {
+  // §5.4 — the Dockerfile only pip-installs requirements.txt, so a CMD that
+  // starts gunicorn/uvicorn while the package is missing produces
+  // `exec: "gunicorn": not found` at RUNTIME: the image builds, the Docker
+  // Build stage is green, and it only shows up as a container that never
+  // reaches healthy. Most Flask/Django projects never had gunicorn as a
+  // dependency because `flask run` / `runserver` is what they used locally.
+  if (!isWebShape || !dockerfileActive) return { ok: true };
+  const cmd = [...dockerfileActive.matchAll(/^CMD\s+(.*)$/gm)].map((m) => m[1].trim()).pop();
+  if (!cmd) return { ok: true }; // covered by the CMD check above
+  const server = ['gunicorn', 'uvicorn', 'hypercorn', 'waitress'].find((s) =>
+    new RegExp(`["'\\s\\[]${s}\\b`).test(cmd)
+  );
+  if (!server) return { ok: true };
+  if (!has('requirements.txt')) return { ok: true }; // covered by the check above
+  // requirements lines look like `gunicorn==22.0.0` / `uvicorn[standard]>=0.30`
+  const listed = read('requirements.txt')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .some((l) => new RegExp(`^${server}\\b`, 'i').test(l));
+  return listed
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: `Dockerfile CMD runs ${server} but requirements.txt does not list it — the image builds fine and then dies at runtime with 'exec: "${server}": not found', so the container never reports healthy (§5.4)`,
+      };
+});
+
 check('[WEB]/[BATCH] shape agrees across Dockerfile / Jenkinsfile / compose', () => {
   if (!dockerfile) return { ok: false, msg: 'No Dockerfile' };
   const problems = [];

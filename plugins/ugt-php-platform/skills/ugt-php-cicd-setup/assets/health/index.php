@@ -20,6 +20,16 @@ $ok = true;
 //         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 //     ]);
 //     $pdo->query('SELECT 1');
+//
+//     // [WP] WordPress: base image `wordpress:*` มี **mysqli** แต่ **ไม่มี pdo_mysql**
+//     // → ปลด comment บล็อก PDO ข้างบนแล้วจะ fatal (500 ไม่ใช่ 503) container ไม่ขึ้น healthy
+//     // ใช้บล็อกนี้แทนสำหรับ shape = wordpress (หรือเติม `RUN docker-php-ext-install pdo_mysql`
+//     // ใน Dockerfile.wordpress ถ้าอยากใช้ PDO จริง ๆ — ดู references §C):
+//     // $db = @new mysqli(getenv('WORDPRESS_DB_HOST'), getenv('WORDPRESS_DB_USER'),
+//     //                   getenv('WORDPRESS_DB_PASSWORD'), getenv('WORDPRESS_DB_NAME'));
+//     // if ($db->connect_errno) { throw new RuntimeException('db'); }
+//     // $db->query('SELECT 1');
+//     // $db->close();
 // } catch (Throwable $e) {
 //     // ห้าม echo $e->getMessage() — endpoint นี้เปิดสาธารณะ ข้อความ error ของ
 //     // driver มีทั้งชื่อ server ชื่อ database และบางครั้ง username ติดมาด้วย

@@ -66,8 +66,8 @@
 
 | ค่า | มาจากไหน | กรอกตรงนี้ |
 | --- | --- | --- |
-| **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `80` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
-| **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `8081` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** (เลี่ยง `8080` ที่ชนกับ Jenkins เองบน host) |
+| **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `8081` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** (เลี่ยง `8080` ที่ชนกับ Jenkins เองบน host) |
+| **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `8082` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** (ต้องคนละพอร์ตกับ prod — สอง container อยู่บน host เดียวกันได้) |
 | ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
 | ยืนยัน SonarQube projects + webhook แล้ว | ลิงก์ project | |
 
@@ -76,7 +76,7 @@
 - [ ] ชื่อทุกตัวตรงกับตารางเป๊ะ (โดยเฉพาะ credential ID)
 - [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
 - [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
-- [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `80`/`8081`
+- [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `8081`/`8082`
 - [ ] `/srv/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
 - [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
 - [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** — คนละเรื่องกับ `docker` group ข้างบน ถ้าขาดตัวนี้ pipeline ตายตั้งแต่ stage แรก (ดูภาคผนวก)

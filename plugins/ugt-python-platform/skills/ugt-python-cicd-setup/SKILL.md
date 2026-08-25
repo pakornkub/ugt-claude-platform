@@ -85,9 +85,16 @@ post: emailext (success/unstable/failure/aborted) + cleanWs
 — Jenkins server ไม่ต้องติดตั้ง Python เพิ่มเลย. `.venv` ถูกสร้างในสเตจ
 `Install` แล้วอยู่ใน **workspace** (ไม่ใช่ในตัว container ที่ถูกทิ้งเมื่อ stage
 จบ) จึงรอดข้ามไปสเตจถัดไปได้ เพราะ `docker.image().inside` mount workspace เดิม
-ทุกครั้ง. เงื่อนไขฝั่ง server ข้อเดียว: **Jenkins user ต้องอยู่ใน `docker`
-group** ไม่งั้นทุก stage fail ด้วย permission denied ต่อ `/var/run/docker.sock`
-(อยู่ในเช็คลิสต์ admin handoff แล้ว)
+ทุกครั้ง. เงื่อนไขฝั่ง server **สองข้อ** (อยู่ในเช็คลิสต์ + ภาคผนวกของ admin
+handoff แล้วทั้งคู่):
+
+1. **ปลั๊กอิน Docker Pipeline (`docker-workflow`)** — เป็นตัวที่ให้ global
+   variable `docker` ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
+   `groovy.lang.MissingPropertyException: No such property: docker` ซึ่งอ่านไม่
+   ออกว่าหมายถึงปลั๊กอินหาย · **คนละเรื่องกับการมี Docker CLI** — `sh 'docker …'`
+   ไม่ต้องใช้ปลั๊กอินนี้ แต่ `docker.image().inside{}` ต้องใช้
+2. **Jenkins user อยู่ใน `docker` group** ไม่งั้นทุก stage fail ด้วย permission
+   denied ต่อ `/var/run/docker.sock`
 
 ### 2.3 Branch model
 
@@ -148,8 +155,11 @@ stack นี้ **ไม่มี** `sentry-dsn-<project>` (ไม่มี clie
 
 `/api/health` — ไม่ต้อง login · 200 `healthy` / 503 `degraded` · **ห้ามใส่
 version หรือ commit hash ใน response**. Container healthcheck ยิง `127.0.0.1`
-เท่านั้น (ห้าม `localhost` — slim/Debian resolve เป็น IPv6 `::1` ขณะที่
-uvicorn/gunicorn ผูก IPv4) และยิง **port 8000 ภายใน container** เสมอ ไม่ใช่
+เท่านั้น **ไม่ใช้ `localhost`** — เป็นกติกาเชิงป้องกัน ไม่ใช่บั๊กที่ยืนยันแล้ว:
+`localhost` ต้องผ่าน resolver ซึ่งอาจให้ `::1` มาก่อน ขณะที่ uvicorn/gunicorn
+ผูก IPv4 (`--host 0.0.0.0`) — ระบุ IP ตรง ๆ ตัดตัวแปรนั้นทิ้ง ไม่ต้องลุ้น
+`/etc/hosts`/resolver order ของ base image ที่เปลี่ยนได้เงียบ ๆ ตอน bump.
+ยิง **port 8000 ภายใน container** เสมอ ไม่ใช่
 host port. `python:3.12-slim` ไม่มี `wget`/`curl` → healthcheck ใช้
 `python -c "import urllib.request,sys; ..."` (stdlib ล้วน) ทั้งใน Dockerfile และ
 compose. Shape `[BATCH]` ไม่มี health endpoint เลย (ไม่มี long-running process
@@ -263,11 +273,8 @@ workspace ไม่ให้ `COPY . .` ฝัง secret ลง image layer ถ�
 append-only)
 รายละเอียด → `references/docker-deploy.md` §F
 
-> **`/api/health` ไม่ใช่ของเลือกได้** สำหรับ shape web — ทั้ง `HEALTHCHECK` ใน
-> Dockerfile, healthcheck ในทั้ง 2 compose และ health poll ในสเตจ Deploy ยิง
-> path นี้ ถ้าไม่มี route จริง container ไม่มีวันขึ้น `healthy` และ Deploy fail
-> ที่ `docker inspect` ทุกครั้ง. โปรเจคที่มี route นี้อยู่แล้ว → ไม่ copy ทับ
-> แค่ตรวจว่าเข้าถึงได้โดยไม่ต้อง login และไม่คืน version/commit
+> **`/api/health` ไม่ใช่ของเลือกได้สำหรับ shape web — กติกาทั้งหมดอยู่ที่ §2.8**
+> (โปรเจคที่มี route นี้อยู่แล้ว → ไม่ copy ทับ แค่ตรวจให้ตรง §2.8)
 
 ### 5.2 แทน placeholder (นี่คือรายการครบ)
 
@@ -275,8 +282,8 @@ append-only)
 | --- | --- | --- | --- |
 | `__PROJECT_NAME__` | kebab-case id — image/container/sonar key/credential suffix | `Jenkinsfile`, `sonar-project.properties`, `docker-compose.yml`, `docker-compose.dev.yml`, `admin-handoff.template.md` | `stock-sync` |
 | `__PROJECT_DISPLAY_NAME__` | ชื่อที่คนอ่าน (sonar `projectName`, หัวเอกสาร handoff) | `Jenkinsfile`, `sonar-project.properties`, `admin-handoff.template.md` | `Stock Sync` |
-| `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 8000 เสมอ) | `docker-compose.yml` | `8000` |
-| `__PORT_DEV__` | host port ของ dev | `docker-compose.dev.yml` | `8001` |
+| `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 8000 เสมอ) | `docker-compose.yml`, `env.example` (คอมเมนต์บรรทัด `APP_PORT`) | `8000` |
+| `__PORT_DEV__` | host port ของ dev | `docker-compose.dev.yml`, `env.example` (คอมเมนต์บรรทัด `APP_PORT`) | `8001` |
 | `__APP_MODULE__` | โมดูลหลักที่ import ได้ — ใช้เป็น smoke check ทั้งใน CI และใน image | **ทุก shape**: `tooling/test_smoke.py` (เสมอ — ไฟล์นี้ copy ทุกโปรเจค) · shape = batch เพิ่ม `Jenkinsfile` (บล็อก `[BATCH]`) และ `docker/Dockerfile.batch` | `app` |
 | `__START_CMD_JSON__` | คำสั่ง start เป็น **JSON array** (exec form) เติมจาก entry point จริงที่อ่านเจอใน §3 | `docker/Dockerfile.web` | `["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]` |
 
@@ -357,11 +364,17 @@ sonar keys = `<project>`, `<project>-dev`
   รองรับ — แอป 404 หลัง proxy โดยไม่มีอะไรจับ):
   - **FastAPI**: `FastAPI(root_path=os.environ.get("ROOT_PATH", ""))` +
     เพิ่ม `ROOT_PATH` ลง compose ทั้ง 2 ไฟล์ (prod = path prod, dev = path dev)
-  - **Flask**: ตั้ง `SCRIPT_NAME` env ใน compose ทั้ง 2 ไฟล์ (gunicorn/werkzeug
-    อ่านเอง) หรือใช้ `ProxyFix` + ให้ proxy ส่ง `X-Forwarded-Prefix`
+  - **Flask**: ตั้ง `SCRIPT_NAME` env ใน compose ทั้ง 2 ไฟล์ หรือใช้ `ProxyFix`
+    + ให้ proxy ส่ง `X-Forwarded-Prefix`.
+    ⚠️ **`SCRIPT_NAME` อ่านโดย gunicorn เท่านั้น** (มันเซ็ตค่าลง WSGI environ ให้)
+    — **dev server ของ werkzeug ไม่อ่าน**: `flask run` เมินตัวแปรนี้ทั้งตัว
+    แปลว่าเทสต์ในเครื่องจะไม่เห็นผลของ subpath เลย ต้องทดสอบผ่าน container
+    (ซึ่งรัน gunicorn) หรือผ่าน proxy จริงเท่านั้น อย่าสรุปว่า "ตั้งแล้วไม่ทำงาน"
+    จากการลองด้วย `flask run`
   - **Django**: `FORCE_SCRIPT_NAME = os.environ.get("FORCE_SCRIPT_NAME")` ใน
     settings + ปรับ `STATIC_URL`/`MEDIA_URL` ให้ขึ้นต้นด้วย path เดียวกัน +
-    ตัวแปรลง compose ทั้ง 2 ไฟล์
+    ตัวแปรลง compose ทั้ง 2 ไฟล์ (ตัว static เองต้องมี WhiteNoise +
+    `collectstatic` ตาม §5.4 ก่อน ไม่งั้นตั้ง URL ถูกก็ยังไม่มีไฟล์ให้เสิร์ฟ)
   - แล้วเช็คของจริงตาม checklist: เปิดแอป **ผ่าน URL เต็มหลัง proxy** ไม่ใช่
     `localhost:port` ตรง ๆ (อย่างหลังผ่านเสมอแม้ config ผิด)
 - **host มีแต่ `docker-compose` v1 (ข้อ 7)** → เปลี่ยน `docker compose -f ... up`
@@ -381,6 +394,21 @@ sonar keys = `<project>`, `<project>-dev`
   ให้ตรงกัน — แก้ที่เดียวไม่พอ)
 - `requirements-dev.txt` (ruff/mypy/pytest/pytest-cov) ต้องแยกจาก
   `requirements.txt` — Dockerfile ไม่ติดตั้ง dev deps เข้า production image
+- **ตัว server ที่ `CMD` เรียก ต้องอยู่ใน `requirements.txt` จริง ๆ** —
+  `Dockerfile.web` ติดตั้งแค่ไฟล์นี้ไฟล์เดียว ถ้า `CMD` เรียก `gunicorn`/
+  `uvicorn` ที่ไม่ได้ประกาศไว้ **image build ผ่าน** (สเตจ Docker Build เขียว)
+  แล้วไปตายตอนรันด้วย `exec: "gunicorn": not found` — โผล่เป็นแค่ container ที่
+  ไม่ยอมขึ้น `healthy` ซึ่งไล่สาเหตุยาก. โปรเจค Flask/Django ส่วนใหญ่**ไม่เคยมี**
+  gunicorn เพราะในเครื่องใช้ `flask run`/`runserver` — เติมให้ตรง shape:
+  FastAPI → `uvicorn[standard]` · Flask → `gunicorn` · Django → `gunicorn` +
+  `whitenoise` (ข้อถัดไป). `verify.mjs` เช็คให้แล้ว (อ่าน `CMD` เทียบ requirements)
+- **[DJANGO] static ต้องมีคนเสิร์ฟ** — `DEBUG=False` ทำให้ Django เลิกเสิร์ฟ
+  static เอง หน้า admin/CSS จะโล่งโดย **ไม่มี error ใน log และ health ยังเขียว**
+  (pipeline จับไม่ได้เลย) ทางที่ชุดนี้เลือกคือ **WhiteNoise** 3 จุด:
+  `whitenoise` ใน `requirements.txt` · middleware ถัดจาก `SecurityMiddleware`
+  ทันที + `STATIC_ROOT` ใน `settings.py` · `RUN python manage.py collectstatic
+  --noinput` ใน `Dockerfile.web` หลัง `COPY . .` ก่อน `USER app`
+  (→ `references/docker-deploy.md` §I สำหรับโค้ดเต็มและกับดักตอน build)
 
 ### 5.5 ไฟล์ env ในเครื่อง + `.gitignore`
 
@@ -555,7 +583,13 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
       ไม่ใช่ปิดยกโปรเจค
 - [ ] `pyproject.toml` มี `[tool.ruff]` + `[tool.pytest.ini_options]` ที่ออก
       `test-results/junit.xml` + `coverage.xml`
-- [ ] `requirements.txt` + `requirements-dev.txt` อยู่ที่ root คนละไฟล์
+- [ ] `requirements.txt` + `requirements-dev.txt` อยู่ที่ root คนละไฟล์ ·
+      **server ที่ `CMD` เรียก (`gunicorn`/`uvicorn`) อยู่ใน `requirements.txt`
+      จริง** (ไม่มี = image build ผ่านแล้วตายตอนรัน — §5.4)
+- [ ] shape = django: `whitenoise` อยู่ใน `requirements.txt` · middleware อยู่
+      ถัดจาก `SecurityMiddleware` · `STATIC_ROOT` ตั้งแล้ว · `Dockerfile` มี
+      `collectstatic --noinput` (ไม่มี = `DEBUG=False` แล้วหน้า admin/CSS โล่ง
+      โดยไม่มี error และ health ยังเขียว — §5.4)
 - [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `test_*.py` และ `tests/test_smoke.py` import
       `__APP_MODULE__` ตัวจริงได้ (`.venv/bin/pytest` ผ่านในเครื่อง)
 - [ ] `.dockerignore` มี `.venv`, `coverage`, `dc-report`, `test-results`,

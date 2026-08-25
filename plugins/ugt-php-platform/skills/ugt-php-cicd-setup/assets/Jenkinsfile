@@ -266,13 +266,19 @@ pipeline {
                         // สำคัญ: เช็ค **ทีละ subdir ที่ compose bind จริง** ไม่ใช่เช็คที่ระดับโปรเจค —
                         // guard แบบเดิม (`if [ ! -d <project> ]`) กลายเป็น no-op ถาวรทันทีที่ deploy
                         // แรกสร้างโฟลเดอร์โปรเจคขึ้นมา แล้ว volume ที่เพิ่มทีหลังจะไม่มีวันถูกสร้าง:
-                        // dockerd สร้างให้เองเป็น root:root ตอน `up -d` แล้ว user `app` ในคอนเทนเนอร์
-                        // เขียนไม่ได้ (PermissionError) ทั้งที่ container ขึ้น healthy ปกติ
+                        // dockerd สร้างให้เองเป็น root:root ตอน `up -d` แล้ว `www-data` ในคอนเทนเนอร์
+                        // เขียนไม่ได้ (permission denied) ทั้งที่ container ขึ้น healthy ปกติ
                         // → แทน uploads/reports ด้วยชื่อ volume จริงทุกตัวที่ตอบไว้ในข้อ 6 ของ interview
                         // [WP] WordPress ต้องมี wp-content volume เสมอ (ดู compose [WP] บล็อก)
                         // ไม่มี volume → ลบบล็อกนี้ทั้งหมด
+                        //
+                        // ต้องถาม UID ของ **`www-data`** เจาะจง ห้าม `id -u` เปล่า ๆ:
+                        // ทั้ง Dockerfile.web และ Dockerfile.wordpress ไม่มี `USER` directive
+                        // (apache เป็นตัว drop privilege เองตอน fork worker) `id -u` เปล่าจึง
+                        // คืน 0 = root แล้ว chown ทั้ง volume เป็น root ซึ่งคือความพังที่บล็อก
+                        // นี้มีไว้กันพอดี — `www-data` คือ user ที่เขียนไฟล์จริงตอน runtime
                         sh """
-                          APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
+                          APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u www-data)
                           for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
                             if [ ! -d "\$p" ]; then
                               mkdir -p "\$p"
@@ -286,6 +292,14 @@ pipeline {
                         // `docker-compose` (v1) has been EOL since mid-2023 and ships with
                         // no current Docker Engine; a host that still only has v1 needs
                         // this one line changed back (`docker-compose -f ...`).
+                        //
+                        // [WP] shape = wordpress → ใช้บรรทัดนี้แทน (ลบบรรทัดข้างล่าง):
+                        //   sh "docker compose -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
+                        // image `wordpress:*` ประกาศ `VOLUME /var/www/html` เอง → webroot ทั้งก้อน
+                        // เป็น anonymous volume ที่ compose ยกของเดิมจาก container ก่อนหน้ามาใช้ต่อ
+                        // แปลว่าไฟล์ที่เปลี่ยนใน image ใหม่ (รวม api/health/index.php) ไม่มีวันขึ้นถึง
+                        // container ตั้งแต่ deploy รอบที่ 2 · flag นี้แตะเฉพาะ anonymous volume —
+                        // `wp-content` เป็น bind mount ที่ตั้งชื่อไว้ จึงไม่โดนแตะ (→ references §B)
                         sh "docker compose -f ${composeFile} up -d --no-build"
 
                         // [WEB] Wait until container is healthy (max 4 minutes = 24 × 10s).

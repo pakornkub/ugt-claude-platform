@@ -77,7 +77,7 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 - Volume ที่ต้อง persist ข้าม deploy ต้องอยู่ใต้ `/srv/appdata/<project>/`
   เท่านั้น (dev = `/srv/appdata/<project>-dev/`) — ห้าม named volume, ห้าม
   เก็บ secret ใน volume
-- ห้ามใส่ version หรือ commit hash ใน response ของ `/api/health` หรือ `/health` — endpoint นี้
+- ห้ามใส่ version หรือ commit hash ใน response ของ `/api/health` — endpoint นี้
   ใช้เฉพาะ health status (`healthy`/`degraded`) เท่านั้น
 - Tag image ด้วย `BUILD_NUMBER` เสมอ ห้าม tag แค่ `latest` อย่างเดียว
   (ไม่งั้น rollback ไม่ได้)

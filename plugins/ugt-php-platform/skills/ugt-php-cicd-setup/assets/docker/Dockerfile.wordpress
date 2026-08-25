@@ -1,10 +1,15 @@
 # Org-standard WordPress Dockerfile — wp-content เป็น volume บังคับ (ดู compose)
 FROM wordpress:php8.3-apache
-# curl ใช้โดย HEALTHCHECK ข้างล่าง — ต้องลงเองและ **ห้าม purge** (เดิมใช้
-# `php -r file_get_contents` ซึ่งพังเงียบเมื่อตั้ง `allow_url_fopen = Off` — ดู references §D)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
+# HEALTHCHECK ข้างล่างใช้ `curl` ซึ่ง **ติดมากับ base image อยู่แล้ว**
+# (`wordpress:*` สืบทอดจาก `php:*-apache` ที่ลง curl เป็น persistent dep และไม่ purge ทิ้ง)
+# จึงไม่ต้อง apt-get install เพิ่ม — แต่ห้าม purge ทิ้งเองภายหลัง
+# (`wget` ไม่มีจริง · เดิมใช้ `php -r file_get_contents` ซึ่งพังเงียบเมื่อตั้ง
+# `allow_url_fopen = Off` — ดู references §D)
+#
+# [DB] ไฟล์ health ที่เปิดบล็อกเช็ค DB ต้องใช้ `mysqli` (มากับ image)
+# **ไม่ใช่ PDO** — `wordpress:*` ไม่มี `pdo_mysql` · อยากใช้ PDO ให้ปลดคอมเมนต์:
+# RUN docker-php-ext-install pdo_mysql
+#
 # วาง org health endpoint ลง webroot ของ image (นอก wp-content — รอด volume mount)
 COPY api/health/index.php /var/www/html/api/health/index.php
 RUN chown -R www-data:www-data /var/www/html/api
