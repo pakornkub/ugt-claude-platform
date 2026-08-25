@@ -1,6 +1,6 @@
 # Contract — Harness mechanism (stack-agnostic)
 
-The mechanism every `ugt-<stack>-setup` skill installs into a target project so
+The mechanism every `ugt-<stack>-full-setup` skill installs into a target project so
 org knowledge survives the session that installed it. The *content* is per
 stack; this mechanism is shared.
 
@@ -9,7 +9,9 @@ stack; this mechanism is shared.
 > `ugt-nextjs-full-setup` (installs the harness: CLAUDE-block, state assets,
 > verify.mjs) and `ugt-core`'s own `ugt-model-mode`/`ugt-handoff`/`ugt-context`
 > skills (own the `model-mode.md`/`handoff.md`/`docs/project-context/` rows).
-> Bump the relevant plugin's `plugin.json` version and CHANGELOG when you do.
+> Bump the relevant plugin's `plugin.json` version and CHANGELOG when you do —
+> ugt-core when the contract text changes, the stack platform when its restated
+> copy changes.
 
 ## Files and ownership
 
@@ -27,9 +29,10 @@ stack; this mechanism is shared.
 
 ## Rules
 
-- `CLAUDE.md` stays under ~200 lines; the block imports exactly two
-  always-loaded files — `@.claude/state/handoff.md` (work state) and
-  `@docs/project-context/00-index.md` (knowledge index); every other
+- `CLAUDE.md` stays under ~200 lines; the block imports exactly three
+  always-loaded files — `@.claude/state/handoff.md` (work state),
+  `@docs/project-context/00-index.md` (knowledge index), and
+  `@.claude/state/model-mode.md` (dispatch model preset); every other
   project-context file is read **on demand**; path-bound content goes to
   rules files, not the block
 - `handoff.md` holds work state only, fixed sections (In progress / Next /
@@ -62,6 +65,12 @@ name.
 - Skills are **self-contained**: no `${CLAUDE_PLUGIN_ROOT}` inside SKILL.md,
   no cross-plugin or cross-skill file references; verify scripts anchor at
   `process.cwd()` and fail (never pass) when expected files are missing
+  - **Carve-out**: a skill MAY run another skill's verify/check script or copy
+    its asset skeleton — e.g. `<ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs`,
+    or `ugt-context`'s `assets/board.md` — provided it (a) names the owning
+    skill so the reader resolves the path from the installed skill, never from
+    a plugin-root path, and (b) the owning skill is in the same plugin or a
+    declared dependency plugin. Nothing else crosses a skill boundary
 - Contract text from this directory is deliberately duplicated into stack
   skills, rendered in stack terms — these files are the canonical diff target;
   `scripts/check-contract-drift.mjs` (repo root) greps stack skills for the

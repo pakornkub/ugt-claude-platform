@@ -8,15 +8,16 @@ the stages themselves.
 > `ugt-nextjs-cicd-setup` (primary), `ugt-nextjs-test-lint-setup` (lint/test
 > stages), and `ugt-nextjs-full-setup` (summary); `ugt-python-platform`'s
 > `ugt-python-cicd-setup`; and `ugt-php-platform`'s `ugt-php-cicd-setup` all
-> restate this. Bump the platform's `plugin.json` version and CHANGELOG when
-> you do.
+> restate this. Bump the relevant plugin's `plugin.json` version and CHANGELOG
+> when you do — ugt-core when the contract text changes, the stack platform
+> when its restated copy changes.
 
 ## Stages (all 10, in order)
 
 ```
 Checkout → Install → Code Quality (parallel: lint / format-check / typecheck)
   → Unit Tests (JUnit + coverage publish) → Build
-  → Dependency Scan (OWASP DC, 90-min timeout + suppression file)
+  → OWASP Dependency Check (90-min timeout + suppression file)
   → SonarQube Analysis → Quality Gate (waitForQualityGate abortPipeline: true)
   → Docker Build → Deploy          ← last 2 stages only on main/develop
 post: emailext (success/unstable/failure/aborted) + cleanWs
@@ -66,7 +67,7 @@ SonarQube analysis token is bound once in the Jenkins server config
 - Images tagged with the build number (bare `latest` alone forbids rollback)
 - **Migrate before deploy** — migration failure = no deploy
 - Deploy reuses the built image (`--no-build`); rebuilding at deploy time is forbidden
-- Every service exposes an unauthenticated health endpoint returning 200
+- Every long-running service exposes an unauthenticated health endpoint returning 200
   healthy / 503 degraded, with **no version/commit information**; container
   healthchecks poll `127.0.0.1` (never `localhost`)
 - Compose: `pull_policy: never` for locally-built images, host port

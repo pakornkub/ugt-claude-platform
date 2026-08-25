@@ -12,7 +12,7 @@ description: >
   are missing before building.
   Do NOT use for a quick question about one document (answer directly — no
   files), to design or build a feature (→ superpowers pipeline reading the
-  brief), or to install anything (→ ugt-<stack>-setup skills).
+  brief), or to install anything (→ ugt-<stack>-full-setup skills).
 ---
 
 # UGT Requirements — from a docs folder to a per-feature brief
@@ -67,14 +67,9 @@ more tokens than the single-agent draft. Only if the user opts in — a
 handful of features stays single-agent. (Harness without a `Workflow` tool:
 dispatch the same fan-out via the `Agent`/`Task` tool instead.)
 
-**Pre-crystallization (optional).** If the user wants to settle open
-questions by interview *before* this skill runs (e.g. a `/grill-with-docs`
-session, where that plugin is installed), advise them to end that session by
-dumping every settled decision into `docs/requirements/00-decisions.md`. A
-glossary and sparing ADRs capture only a fraction of the answers — ordinary
-decisions that qualify for neither evaporate with the session unless written
-to a file this skill will read. Never require this step: it is an offer, and
-this skill works the same without it.
+If an interview settled open questions before this skill ran, have those
+decisions written to `docs/requirements/00-decisions.md` so this skill reads
+them as a source — optional, never required.
 
 ## The brief structure
 

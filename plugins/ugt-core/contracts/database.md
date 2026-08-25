@@ -7,8 +7,9 @@ file is what a PR changes first when the standard itself changes.
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
 > `ugt-nextjs-database-setup` (primary), `ugt-nextjs-full-setup` (summary), and
-> `ugt-nextjs-pitfalls` (gotchas). Bump the platform's `plugin.json` version
-> and CHANGELOG when you do.
+> `ugt-nextjs-pitfalls` (gotchas). Bump the relevant plugin's `plugin.json`
+> version and CHANGELOG when you do — ugt-core when the contract text changes,
+> the stack platform when its restated copy changes.
 
 ## Naming
 

@@ -1,5 +1,34 @@
 # Changelog — ugt-core
 
+## 2.9.0 (2026-08-25)
+
+**แก้ contract ตามผล audit ปูพรม 7 มิติ 2026-08-25** — ทุกข้อ verify ทั้งสองฝั่ง
+(prose vs โค้ด/asset จริง) ก่อนแก้ ฝั่งที่ถูกคือฝั่งที่ implementation ใช้จริง:
+
+- `harness.md`: "imports exactly two always-loaded files" → **three** (เพิ่ม
+  `@.claude/state/model-mode.md` ที่ CLAUDE-block import จริงตั้งแต่ v2.8.0 และ
+  precedence ของ ugt-model-mode พึ่งอยู่) · placeholder `ugt-<stack>-setup`
+  ตกค้างจาก rename 2026-08-09 → `ugt-<stack>-full-setup` · กฎ self-contained
+  ได้ carve-out ที่แพลตฟอร์มใช้จริง 5 จุด: เรียก verify/check script หรือ copy
+  asset skeleton ของ skill อื่นได้เมื่ออ้างชื่อ skill (ห้าม plugin-root path)
+  ภายใน plugin เดียวกันหรือ dependency
+- `cicd.md`: stage 6 "Dependency Scan" → **"OWASP Dependency Check"** ให้ตรง
+  Jenkinsfile + verify.mjs ทั้ง 3 stack (contract ประกาศเองว่า stage list คือ
+  contract) · health endpoint "every service" → "every **long-running**
+  service" (shape `[BATCH]` ของ python ไม่มีอะไรให้ poll โดยชอบธรรม)
+- `org-managed-settings.md`: เจ้าของ audit hooks `ugt-nextjs-platform` →
+  **`ugt-core`** (hooks/ อยู่ที่ core ที่เดียวและส่งถึงทุก stack ผ่าน
+  dependency — เอกสารนี้ส่งทีม IT การระบุผิดทำให้เข้าใจว่า php/python
+  ไม่มี audit trail)
+- Maintenance note ทั้ง 6 contract ใช้ถ้อยคำเดียวกัน: bump ugt-core เมื่อ
+  contract text เปลี่ยน / bump stack platform เมื่อสำเนา restate เปลี่ยน
+  (เดิม design.md สั่ง bump core, ตัวอื่นสั่ง bump platform — ขัดกันเอง)
+- YAGNI trims: `auth.md` §service-to-service (สถานะ "not yet standardized")
+  เหลือ status + interim rule · `design.md` §Motion/§Feedback ย่อร้อยแก้ว
+  generic โดยคงทุกค่าที่ skill restate (150–250ms, ≤12px, toast semantics)
+- `ugt-handoff` checklist + `ugt-requirements` frontmatter ตามแก้สองข้อแรก ·
+  `ugt-requirements` §Pre-crystallization ยุบเหลือบรรทัดเดียว
+
 ## 2.8.0 (2026-08-25)
 
 **`ugt-model-mode`: บังคับ precedence เหนือ superpowers + migrate layout เก่า** —

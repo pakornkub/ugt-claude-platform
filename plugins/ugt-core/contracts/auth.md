@@ -2,8 +2,10 @@
 
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
-> `ugt-nextjs-auth-setup` (primary) and `ugt-nextjs-full-setup` (summary). Bump the
-> platform's `plugin.json` version and CHANGELOG when you do.
+> `ugt-nextjs-auth-setup` (primary) and `ugt-nextjs-full-setup` (summary). Bump
+> the relevant plugin's `plugin.json` version and CHANGELOG when you do —
+> ugt-core when the contract text changes, the stack platform when its restated
+> copy changes.
 
 ## Keycloak
 
@@ -66,7 +68,6 @@ exists.
 
 ## Service-to-service auth
 
-Not yet standardized (raised by the ML-service case). Until the org decides:
-internal services stay on the internal network, unexposed by the reverse
-proxy, and browsers never call them directly — the app of record enforces the
-guard order and proxies server-to-server.
+Not yet standardized. Interim rule: internal services stay on the internal
+network, unexposed by the reverse proxy and never called by a browser — the app
+of record enforces the guard order and proxies server-to-server.

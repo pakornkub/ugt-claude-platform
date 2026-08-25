@@ -3,7 +3,9 @@
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
 > `ugt-nextjs-design-setup` (primary) and `ugt-nextjs-full-setup` (summary). Bump
-> ugt-core's `plugin.json` version and CHANGELOG when you do. Generated
+> the relevant plugin's `plugin.json` version and CHANGELOG when you do —
+> ugt-core when the contract text changes, the stack platform when its restated
+> copy changes. Generated
 > project `DESIGN.md` files record the ugt-core version they were generated
 > against; the design skill's "sync" mode diffs a project against this file.
 >
@@ -125,21 +127,16 @@
 
 ### Motion
 
-Four rules: (1) if removing the animation loses nothing, don't add it ·
-(2) CSS first; an animation library only for layout/enter-exit animation ·
-(3) 150–250 ms ease-out, travel ≤ 12px · (4) every point silent under
-`prefers-reduced-motion`.
+The component library's built-in motion is the baseline — add a point only when
+removing it would lose something, CSS first, 150–250 ms ease-out, travel
+≤ 12px, silent under `prefers-reduced-motion` (iron rule 6).
 
 ### Feedback
 
-- Toast semantics: success = actually succeeded · error = actually failed ·
-  warning = succeeded with caveats · info = neutral. Never error-styled
-  warnings.
-- Destructive / hard-to-undo actions always confirm through a blocking
-  dialog, with a text button (not icon-only).
-- Loading: skeleton for structure, in-button spinner for actions. Empty
-  states are a designed component (icon + message + CTA when actionable),
-  never a bare blank.
+Use the library's own toast / dialog / skeleton / spinner / empty-state
+components; the only org rule on top is honest semantics — success = actually
+succeeded · error = actually failed · warning = succeeded with caveats · info =
+neutral, and destructive actions confirm through a blocking dialog.
 
 ## Governance
 

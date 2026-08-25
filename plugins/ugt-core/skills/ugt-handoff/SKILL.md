@@ -113,5 +113,5 @@ extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 - [ ] Feature(s) that reached done this chunk have their rules in `business-rules.md`
 - [ ] Every added entry is dated · every pointer names a real file
 - [ ] No secrets / `.env` values in any of these files (they are committed)
-- [ ] `CLAUDE.md` still imports `@.claude/state/handoff.md` and `@docs/project-context/00-index.md`
+- [ ] `CLAUDE.md` still imports all three always-loaded files: `@.claude/state/handoff.md`, `@docs/project-context/00-index.md`, `@.claude/state/model-mode.md`
 - [ ] One commit covers the whole set

@@ -9,7 +9,9 @@
 > **Maintenance:** editing this file? `grep` the stack platforms for restated
 > text and update it too — currently `ugt-nextjs-platform`'s
 > `ugt-nextjs-full-setup` and `ugt-nextjs-auth-setup` reference this boundary.
-> Bump the platform's `plugin.json` version and CHANGELOG when you do.
+> Bump the relevant plugin's `plugin.json` version and CHANGELOG when you do —
+> ugt-core when the contract text changes, the stack platform when its restated
+> copy changes.
 
 ## Why it must be the managed level
 
@@ -82,9 +84,11 @@ What this buys:
 ## What managed settings cannot do yet
 
 **Org-wide audit trail** — `managed-settings.json` has no key for shipping logs
-off the machine. Today `ugt-nextjs-platform` writes audit logs to
+off the machine. Today `ugt-core` writes audit logs to
 `.claude/logs/audit-<date>.jsonl` inside the project (via the `PostToolUse` /
-`PostToolUseFailure` / `InstructionsLoaded` hooks). Centralizing them requires
+`PostToolUseFailure` / `InstructionsLoaded` hooks) — and because every stack
+platform depends on `ugt-core`, every stack (Next.js, PHP, Python) gets the
+same local audit trail. Centralizing them requires
 an additional hook posting `type: "http"` to a collector endpoint — a next-phase
 task that needs someone to own that endpoint.
 
