@@ -116,11 +116,16 @@ spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-co
 โปรเจคที่ต้องการจริง
 
 **Cosmetic ที่เหลือ (ไม่บล็อกอะไร):**
-- `CI = 'true'` คอมเมนต์สไตล์ Next.js/vitest หลงเหลือใน `Jenkinsfile` ทั้ง php
-  และ python (ไม่มีความหมายในบริบท PHPUnit/pytest)
-- php admin-handoff ตัวอย่าง dev port `8080` ชนกับ port default ของ Jenkins เอง
-- python admin-handoff ยังโชว์ port `3000`/`3001` (ของเหลือจาก Next.js) ทั้งที่
-  Dockerfile ใช้ 8000 จริง
+- ~~`CI = 'true'` คอมเมนต์สไตล์ Next.js/vitest หลงเหลือใน `Jenkinsfile` ทั้ง php
+  และ python~~ → เขียนใหม่เป็น generic CI flag, php 0.5.1 / python 0.5.2
+- ~~php admin-handoff ตัวอย่าง dev port `8080` ชนกับ port default ของ Jenkins เอง~~
+  → `8081` (+ SKILL เลิกยกตัวอย่าง 8080 ทุกจุด), php 0.5.1
+- ~~python admin-handoff ยังโชว์ port `3000`/`3001` (ของเหลือจาก Next.js)~~
+  → `8000`/`8001` ตรง Dockerfile จริง, python 0.5.2
+- มติ 2026-08-25: HEALTHCHECK retries 3 (Dockerfile) vs 5 (compose) **ไม่เปลี่ยน**
+  — compose ประกาศ healthcheck เต็มชุด override ตอน deploy จริง ค่า Dockerfile
+  มีผลเฉพาะ bare `docker run` · [WP] deploy `cp` block **คงเป็น instruction ใน
+  reference** จนกว่า WP จะมี pilot จริง (ownership หลัง cp ยังไม่เคยพิสูจน์)
 
 **มาตรฐานที่ยังขาด (แยกจาก hardening):**
 - OWASP Dependency Check สแกน `composer.lock` ที่มักมีแต่ dev tooling (runtime

@@ -33,7 +33,7 @@ pipeline {
     }
 
     environment {
-        CI = 'true'   // activates JUnit reporter + standalone output
+        CI = 'true'   // generic CI flag — tooling ที่ตรวจ env นี้ปิด interactive/progress เอง
         // NOTIFY_EMAIL and SMTP_FROM must be set in
         // Manage Jenkins → System → Global properties → Environment variables
     }

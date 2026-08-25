@@ -1,5 +1,28 @@
 # Changelog — ugt-php-platform
 
+## 0.5.1 (2026-08-25)
+
+**กวาด cosmetic ค้างจาก pilot checklist** (backlog §6) — ยังไม่ tag รอ pilot:
+
+- คอมเมนต์ `CI = 'true'` ใน `Jenkinsfile` เลิกอ้าง "JUnit reporter + standalone
+  output" (คำอธิบายของ vitest/Next.js ที่หลงมาตอนแตก plugin) — เขียนใหม่เป็น
+  generic CI flag ตามความหมายจริงในบริบท PHPUnit/composer
+- ตัวอย่าง host port เลิกใช้ `8080` ทุกจุด (ชนกับ Jenkins เองบน host เดียวกัน
+  — คนตามตัวอย่างจะ deploy ทับพอร์ต Jenkins): admin-handoff placeholder dev →
+  `8081` พร้อมวงเล็บเหตุผล · SKILL §4 ตัวอย่าง prod/dev → `8081/8082` ·
+  ตาราง placeholder `__PORT_PROD__` → `8081`
+
+**มติ 2026-08-25 (บันทึก ไม่แก้โค้ด):**
+
+- **HEALTHCHECK retries 3 (Dockerfile) vs 5 (compose) — ไม่เปลี่ยน**: compose
+  ประกาศ healthcheck เต็มชุดและ override ของ image ตอน deploy จริงเสมอ ค่า 3
+  ใน Dockerfile มีผลเฉพาะ bare `docker run` (fail เร็วกว่า เหมาะกับตอน debug
+  มือ) — สองค่าอยู่คนละ context ไม่ใช่ความขัดแย้ง
+- **[WP] deploy `cp` block คงเป็น instruction ใน reference ไม่ย้ายเป็น
+  commented block ใน Jenkinsfile** — WP ยังไม่เคยผ่าน pilot (ownership หลัง
+  `cp` ยังไม่เคยพิสูจน์ — docker-deploy.md §B บอกไว้เอง) ไม่ scaffold เผื่อ
+  ของที่ยังไม่มีโปรเจคจริง ทบทวนเมื่อ WP pilot เกิดขึ้น
+
 ## 0.5.0 (2026-08-24)
 
 รอบที่สองของ pilot feedback (`ugt-mscpl-ana`) — คราวนี้เป็นของที่ทำให้ **ผลลัพธ์

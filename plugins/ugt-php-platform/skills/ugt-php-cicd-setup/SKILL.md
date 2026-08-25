@@ -225,7 +225,7 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 
 1. **ชื่อโปรเจค** (kebab-case) → กลายเป็นชื่อ image/container/credential/sonar
    key + display name
-2. **Host ports** — prod / dev (เช่น 8080 / 8081) — ถ้ายังไม่ได้จัดสรรจาก admin
+2. **Host ports** — prod / dev (เช่น 8081 / 8082 — เลี่ยง 8080 ที่ชนกับ Jenkins บน host) — ถ้ายังไม่ได้จัดสรรจาก admin
    ใส่ค่า placeholder ไปก่อนแล้วรอค่าจริงกลับมาทาง admin handoff
 3. **อยู่หลัง reverse-proxy subpath ไหม** → ถ้าใช่ ขอ path prod/dev + URL เต็ม
    เพื่อไปตั้งค่าฝั่งแอปเอง (Laravel `APP_URL`/`ASSET_URL` · CI4
@@ -302,7 +302,7 @@ Docker Build ใช้เป็น build context และ `Dockerfile.web` ใ�
 | --- | --- | --- | --- |
 | `__PROJECT_NAME__` | kebab-case id — image/container/sonar key/credential suffix + tag ของ CI image (`<project>-ci`) | `Jenkinsfile`, `sonar-project.properties`, `docker-compose.yml`, `docker-compose.dev.yml`, **`rules/ugt-php-ci.md`** (ชื่อ CI image 2 จุด — ไฟล์นี้ถูก copy ทุกโปรเจค ลืมแทนแล้ว rule จะบอกชื่อ image ผิดให้ session ถัดไป), `admin-handoff.template.md`, `tooling/composer-require-dev.md` (เคสที่ต้อง `composer init` — legacy/WordPress) | `hr-portal` |
 | `__PROJECT_DISPLAY_NAME__` | ชื่อที่คนอ่าน (sonar `projectName`, หัวเอกสาร handoff) | `Jenkinsfile`, `sonar-project.properties`, `admin-handoff.template.md` | `HR Portal` |
-| `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 80 เสมอ — apache) | `docker-compose.yml` | `8080` |
+| `__PORT_PROD__` | host port ของ prod (container-internal คงที่ 80 เสมอ — apache) | `docker-compose.yml` | `8081` |
 | `__PORT_DEV__` | host port ของ dev | `docker-compose.dev.yml` | `8081` |
 | `__ENTRY_FILE__` | path ของ entry point **เทียบจาก root โปรเจค** — ใช้เป็น smoke check ในสเตจ Unit Tests | `tooling/SmokeTest.php` (เสมอ — ไฟล์นี้ copy ทุกโปรเจค) | `public/index.php` |
 

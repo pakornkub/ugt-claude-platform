@@ -1,5 +1,19 @@
 # Changelog — ugt-python-platform
 
+## 0.5.2 (2026-08-25)
+
+**กวาด cosmetic ค้างจาก pilot checklist** (backlog §6) — ยังไม่ tag รอ pilot:
+
+- คอมเมนต์ `CI = 'true'` ใน `Jenkinsfile` เลิกอ้าง "JUnit reporter + standalone
+  output" (คำอธิบายของ vitest/Next.js ที่หลงมาตอนแตก plugin) — เขียนใหม่เป็น
+  generic CI flag ตามความหมายจริงในบริบท pytest/pip
+- admin-handoff placeholder `APP_PORT` เปลี่ยน `3000`/`3001` (ของเหลือจาก
+  Next.js) → `8000`/`8001` ให้ตรง convention พอร์ต 8000 ของ Dockerfile.web
+  จริง (ตาราง + checklist ข้อยืนยัน)
+
+มติ HEALTHCHECK retries 3 vs 5 = ไม่เปลี่ยน — เหตุผลเดียวกับ php 0.5.1
+(compose override ตอน deploy จริง สองค่าอยู่คนละ context)
+
 ## 0.5.1 (2026-08-25)
 
 **Doc-only: `references/docker-deploy.md` ยังสอนบล็อก `[VOLUME]` แบบเก่า**
