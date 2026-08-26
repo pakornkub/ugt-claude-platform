@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.53.0 (2026-08-26)
+
+**auth-setup: return-to-page (`?from=`) — login แล้วกลับหน้าเดิม ไม่ตกหน้าแรก**
+
+- ปิด gap ที่ 4.52.0 ทิ้งไว้: `SessionExpiredDialog` พาไป `/login` เฉย ๆ
+  ผู้ใช้ login ใหม่แล้วตกหน้าแรก งานที่ค้างอยู่หายทั้งหน้า — ตอนนี้ทุกทางเข้า
+  `/login` แนบ `?from=<path>` (basePath-relative เสมอ) แล้ว login ทุกวิธี
+  พากลับ:
+  - `proxy.ts`: redirect ฝั่ง server แนบ `?from=<pathname+search>` +
+    forward header ใหม่ `x-from` ให้ protected layout ใช้ตอน
+    `redirect('/login?reason=session_expired')` (server component มองไม่เห็น
+    URL ตัวเอง — header นี้คือทางเดียว)
+  - `session-expired-dialog.tsx`: แนบ `&from=` จาก `location.pathname+search`
+    (ตัด basePath ก่อน)
+  - `login-form.tsx`: prop ใหม่ `from` — SSO ส่งเป็น
+    `callbackURL: `${basePath}${from}``, LDAP/local `router.push(from)`
+    หลังสำเร็จ
+- **กัน open redirect**: `sanitizeFrom()` ใน login-form รับเฉพาะ same-origin
+  relative path — ต้องขึ้นต้น `/`, ห้าม `//` (protocol-relative) และ `/\`
+  (browser normalize backslash) — ค่าอื่นทิ้งกลับ `'/'` เพราะ `?from=`
+  มาจาก searchParams ที่ใครก็ forge ลิงก์ได้ (OWASP A01)
+- SKILL.md §5.5: login page ส่ง `from` จาก searchParams + layout อ่าน `x-from`
+- `references/auth-flows.md`: section ใหม่ "Return-to-page (`?from=`)
+  convention" + snippet Server Component session check แนบ `from`
+
 ## 4.52.0 (2026-08-26)
 
 **auth-setup: ตัวรับ event `session-expired` ที่ขาดหาย — `SessionExpiredDialog`**

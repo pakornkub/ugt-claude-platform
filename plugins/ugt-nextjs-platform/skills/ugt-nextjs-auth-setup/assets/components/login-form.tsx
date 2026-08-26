@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.49.1 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: df78cc30fd77
+// kit: ugt-nextjs-platform 4.53.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: 8b42518710f9
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -38,9 +38,25 @@ import { ldapLoginAction, localLoginAction } from '@/lib/actions/auth';
 // [METHOD: LOCAL] — ต้องมี ugt-nextjs-mail-setup ด้วย; ลบพร้อมลิงก์ "ลืมรหัสผ่าน?"
 import { ForgotPasswordDialog } from '@/components/forgot-password-dialog';
 
+// ─── Return-to-page (?from=) ─────────────────────────────────────────────────
+
+// กัน open redirect: `from` มาจาก searchParams — ใครก็ส่งลิงก์
+// `/login?from=https://evil.example` มาหลอกได้ จึงรับเฉพาะ path ภายในแอป
+// (basePath-relative) เท่านั้น:
+// - ต้องขึ้นต้น '/' — ตัด scheme URL (`https://…`, `javascript:…`) ทิ้งทั้งหมด
+// - ห้าม '//' — protocol-relative URL (`//evil.example`) ออกนอกโดเมนได้
+// - ห้าม '/\' — บาง browser normalize backslash เป็น '/' แล้วกลายเป็น '//'
+// ไม่ผ่าน = ทิ้งเงียบ ๆ กลับหน้าแรก (ค่าผิดมาจากลิงก์ปลอม ไม่ใช่ความผิดผู้ใช้)
+function sanitizeFrom(from: string | undefined): string {
+  if (!from || !from.startsWith('/') || from.startsWith('//') || from.startsWith('/\\')) {
+    return '/';
+  }
+  return from;
+}
+
 // ─── [METHOD: SSO] SSO (Keycloak) ────────────────────────────────────────────
 
-function SsoSection() {
+function SsoSection({ from }: Readonly<{ from: string }>) {
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations('auth.login');
 
@@ -51,9 +67,11 @@ function SsoSection() {
       // better-auth 1.7 folded generic OAuth into the core social sign-in path —
       // signIn.social({ provider: 'keycloak' }) replaces the removed
       // signIn.oauth2({ providerId: 'keycloak' }).
+      // callbackURL ต้องรวม basePath เอง (Better Auth ไม่รู้จัก basePath) —
+      // `from` เป็น basePath-relative ที่ sanitize แล้ว จึง prepend ได้ตรง ๆ
       const { error } = await authClient.signIn.social({
         provider: 'keycloak',
-        callbackURL: `${basePath}/`,
+        callbackURL: `${basePath}${from}`,
       });
       if (error) throw error;
       // success → browser redirects to Keycloak; keep spinner spinning
@@ -95,7 +113,7 @@ const ldapLoginSchema = z.object({
 });
 type LdapValues = z.infer<typeof ldapLoginSchema>;
 
-function LdapSection() {
+function LdapSection({ from }: Readonly<{ from: string }>) {
   const router = useRouter();
   const t = useTranslations('auth.login');
   const tErrors = useTranslations('auth.errors');
@@ -118,7 +136,7 @@ function LdapSection() {
       setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       return;
     }
-    router.push('/'); // Next.js is basePath-aware here
+    router.push(from); // Next.js is basePath-aware here — `from` เป็น basePath-relative
   });
 
   return (
@@ -165,7 +183,7 @@ const localLoginSchema = z.object({
 });
 type LocalValues = z.infer<typeof localLoginSchema>;
 
-function LocalSection() {
+function LocalSection({ from }: Readonly<{ from: string }>) {
   const router = useRouter();
   const t = useTranslations('auth.login');
   const tErrors = useTranslations('auth.errors');
@@ -187,7 +205,7 @@ function LocalSection() {
       setError('root', { message: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       return;
     }
-    router.push('/'); // Next.js is basePath-aware here
+    router.push(from); // Next.js is basePath-aware here — `from` เป็น basePath-relative
   });
 
   return (
@@ -247,12 +265,23 @@ export function LoginForm({
   className,
   sessionExpired = false,
   ssoError,
-}: Readonly<{ className?: string; sessionExpired?: boolean; ssoError?: string }>) {
+  from,
+}: Readonly<{
+  className?: string;
+  sessionExpired?: boolean;
+  ssoError?: string;
+  // path (basePath-relative) ที่จะพาผู้ใช้กลับหลัง login สำเร็จ — มาจาก
+  // searchParams `?from=` ที่ proxy.ts / SessionExpiredDialog / layout แนบมา
+  from?: string;
+}>) {
   // Direct process.env read is intentional here (same reason as lib/auth-client.ts):
   // t3-env createEnv() returns '' for NEXT_PUBLIC_* in the Turbopack client bundle.
   // ⚠️ PLACEHOLDER: replace '__PROJECT_NAME__' in the fallback below with the real app name (see SKILL.md §6 placeholder table)
   const appName = process.env.NEXT_PUBLIC_APP_NAME ?? '__PROJECT_NAME__';
   const t = useTranslations('auth.login');
+
+  // validate ครั้งเดียวที่นี่ — ทุก section ได้ค่าที่ปลอดภัยแล้ว (กัน open redirect)
+  const returnTo = sanitizeFrom(from);
 
   // แบนเนอร์ค้างไว้แทน toast ที่เด้งตอน mount: ทั้งสองกรณีมาจาก searchParams ฝั่ง
   // server และเป็นเหตุผลว่า "ทำไมถึงมาอยู่หน้านี้" — ผู้ใช้ต้องอ่านทันได้ตลอด
@@ -278,7 +307,7 @@ export function LoginForm({
       {banner && <Callout tone={banner.tone}>{banner.text}</Callout>}
 
       {/* [METHOD: SSO] */}
-      <SsoSection />
+      <SsoSection from={returnTo} />
 
       {/* [METHOD: LDAP|LOCAL] — separator between SSO and form-based login.
           Delete when SSO is the only method, or when SSO is not enabled. */}
@@ -299,10 +328,10 @@ export function LoginForm({
           </TabsTrigger>
         </TabsList>
         <TabsContent value="ldap" className="pt-2">
-          <LdapSection />
+          <LdapSection from={returnTo} />
         </TabsContent>
         <TabsContent value="local" className="pt-2">
-          <LocalSection />
+          <LocalSection from={returnTo} />
         </TabsContent>
       </Tabs>
     </div>

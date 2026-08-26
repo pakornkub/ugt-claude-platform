@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/components/session-expired-dialog.tsx
-// kit-hash: a7962c3ecaa2
+// kit: ugt-nextjs-platform 4.53.0 · ugt-nextjs-auth-setup/components/session-expired-dialog.tsx
+// kit-hash: 232f612213eb
 
 // installed by ugt-nextjs-auth-setup — every project
 // ตัวรับ CustomEvent `session-expired` ที่ query-provider (design kit) และ
@@ -47,7 +47,18 @@ export function SessionExpiredDialog() {
     // full navigation ไม่ใช่ router.push: ล้าง client state + React Query cache
     // ที่ stale ทั้งก้อน แล้วให้หน้า login แสดง banner ผ่าน ?reason=session_expired
     // (convention เดียวกับ redirect ฝั่ง server — references/auth-flows.md)
-    globalThis.location.assign(`${BASE_PATH}/login?reason=session_expired`);
+    //
+    // ?from= = หน้าที่ค้างอยู่ (ตัด basePath — convention ?from= เก็บ path แบบ
+    // basePath-relative เสมอ, references/auth-flows.md §Return-to-page) เพื่อให้
+    // login flow พากลับมาหน้าเดิมหลัง login สำเร็จ แทนตกที่หน้าแรก
+    const { pathname, search } = globalThis.location;
+    const appPath =
+      BASE_PATH && pathname.startsWith(BASE_PATH)
+        ? pathname.slice(BASE_PATH.length) || '/'
+        : pathname;
+    const from =
+      appPath === '/' && !search ? '' : `&from=${encodeURIComponent(appPath + search)}`;
+    globalThis.location.assign(`${BASE_PATH}/login?reason=session_expired${from}`);
   };
 
   return (

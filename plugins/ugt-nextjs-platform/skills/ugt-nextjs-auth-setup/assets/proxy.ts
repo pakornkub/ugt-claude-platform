@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/proxy.ts
-// kit-hash: a3655bb8599a
+// kit: ugt-nextjs-platform 4.53.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: e50d8a460dcd
 // proxy.ts — Next.js 16 route protection (Next.js 16 uses proxy.ts, not middleware.ts;
 // on Next.js 15 or older this same content must be named middleware.ts instead).
 // Cookie-presence check only (no DB call) + CSP nonce injection
@@ -159,7 +159,13 @@ export function proxy(request: NextRequest) {
       );
     }
     const url = request.nextUrl.clone();
+    // ?from= = หน้าที่ผู้ใช้ตั้งใจไป (path แบบตัด basePath แล้ว + query เดิม) —
+    // login flow ใช้พากลับหลัง login สำเร็จ (SKILL.md §5.5). เก็บแบบ
+    // basePath-relative เสมอ: ฝั่งรับ (login-form) validate + เติม basePath เอง.
+    const from = pathname === '/' && !url.search ? '' : pathname + url.search;
     url.pathname = '/login';
+    url.search = '';
+    if (from) url.searchParams.set('from', from);
     return applySecurityHeaders(NextResponse.redirect(url), request, nonce);
   }
 
@@ -167,6 +173,10 @@ export function proxy(request: NextRequest) {
   // layouts can read it with headers() and pass it to <Script nonce={nonce}>.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
+  // Path ปัจจุบัน (ตัด basePath, รวม query) สำหรับ layout ที่เช็ค session จริง:
+  // server component ไม่รู้ URL ตัวเอง — header นี้คือแหล่งเดียวที่ layout ใช้
+  // แนบ ?from= ตอน redirect('/login?reason=session_expired') (SKILL.md §5.5 ข้อ 2)
+  requestHeaders.set('x-from', pathname + request.nextUrl.search);
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },

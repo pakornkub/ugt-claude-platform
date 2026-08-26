@@ -85,9 +85,11 @@ callback route moved from `/api/auth/oauth2/callback/:id` to
 `/api/auth/callback/:id`. Every asset in this skill is already written for
 ≥1.7 — never pin below 1.7.1.
 
-1. Client: `authClient.signIn.social({ provider: 'keycloak', callbackURL: `${basePath}/` })`
+1. Client: `authClient.signIn.social({ provider: 'keycloak', callbackURL: `${basePath}${from}` })`
    (better-auth ≥1.7 — generic OAuth is a first-class social provider now, no
-   client plugin and no `signIn.oauth2()`)
+   client plugin and no `signIn.oauth2()`). `from` is the sanitized
+   return-to-page path, `'/'` when absent (§Return-to-page below) — `callbackURL`
+   must include the basePath explicitly, Better Auth knows nothing about it
 2. Better Auth redirects the browser to Keycloak (OIDC Authorization Code + PKCE)
 3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak`
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
@@ -240,6 +242,34 @@ Non-fatal: if Keycloak is unreachable or the token expired, still clear the
 local session and redirect to `/login`. The browser is never redirected through
 Keycloak.
 
+## Return-to-page (`?from=`) convention
+
+Every path into `/login` carries the page the user was trying to reach, so a
+successful login lands back there instead of on the dashboard:
+
+- **`proxy.ts`** (no cookie → redirect): `?from=<pathname+search>`
+- **Protected layout** (cookie present but session invalid): `?from=` read from
+  the **`x-from` request header** that `proxy.ts` forwards — a server component
+  cannot see its own URL any other way (snippet below)
+- **`SessionExpiredDialog`** (mid-page 401): appends
+  `&from=<encodeURIComponent(pathname+search)>` with the basePath stripped
+
+Three rules keep it consistent and safe:
+
+1. **`from` is always basePath-relative** (`/orders/7`, never
+   `/expense-portal/orders/7`). The producers above strip the basePath; the
+   consumers add it back where needed — `router.push(from)` is basePath-aware
+   already, SSO builds `callbackURL: `${basePath}${from}``.
+2. **`login-form.tsx` validates before every use** (`sanitizeFrom`): must start
+   with `/`, must not start with `//` (protocol-relative URL) or `/\`
+   (browsers normalize backslash to `/`). Anything else falls back to `'/'`.
+   `?from=` arrives via searchParams — an attacker can mail
+   `/login?from=https://evil.example` — so skipping this check is an **open
+   redirect** (OWASP A01). Validation lives at the consumer because the
+   producers aren't the only source of the param.
+3. **All three login methods honor it**: SSO via `callbackURL`, LDAP/local via
+   `router.push(from)` after the action succeeds.
+
 ## Server Component session check
 
 ```ts
@@ -248,7 +278,13 @@ if (!session) {
   // Differentiate: cookie present (server-invalidated) vs. absent (never logged in)
   const cookieStore = await cookies();
   const hasSessionCookie = !!cookieStore.get(SESSION_COOKIE_NAME);
-  redirect(hasSessionCookie ? '/login?reason=session_expired' : '/login');
+  // x-from = current path+search (basePath-relative), forwarded by proxy.ts —
+  // attach it so login returns the user here (§Return-to-page above)
+  const from = (await headers()).get('x-from') ?? '';
+  const q = new URLSearchParams();
+  if (hasSessionCookie) q.set('reason', 'session_expired');
+  if (from && from !== '/') q.set('from', from);
+  redirect(q.size > 0 ? `/login?${q}` : '/login');
 }
 ```
 
