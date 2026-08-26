@@ -1,5 +1,34 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.54.0 (2026-08-26)
+
+**upload-setup: virus scan เป็นคำถาม interview (opt-out ได้แบบมีเงื่อนไข) +
+troubleshooting `SCANNER_UNAVAILABLE` จาก field report**
+
+- §3 Q5 ใหม่: ถามว่าเอา virus scan ไหม (default **เอา** ตามมติ 2026-08-09)
+  พร้อมเงื่อนไข infra ที่ทำให้บางโปรเจคเอาไม่ได้จริง (clamav กิน RAM ~2 GB,
+  boot แรกต้องโหลด signature DB ~1 GB จากเน็ต) — ตอบ "ไม่เอา" ต้องรับ 3 ข้อ:
+  ตัดตาม marker `[SCAN]`, บันทึก `⚠ deviation` ใน architecture.md, เพิ่ม
+  งานค้าง retrofit ใน board.md (ถอด scan = ติดหนี้ ไม่ใช่ปิดเรื่อง)
+- marker `[SCAN]` (แบบเดียวกับ `[METHOD:]` ของ auth-setup) ใน asset ทุกจุด:
+  `lib/virus-scan.ts` (ข้ามทั้งไฟล์), บล็อก scan ใน `app/api/files/route.ts`
+  (scan-off → `scanStatus: 'unscanned'`), ด่านดาวน์โหลด `[id]/route.ts`
+  (scan-off → `=== 'infected'` เพื่อให้แถวเก่า 'unscanned' ยังโหลดได้ตอน
+  retrofit), env `CLAMAV_*`, service clamav + depends_on + clamav-db ใน
+  compose snippet — คอลัมน์ `scanStatus` ในตารางคงไว้เสมอ (retrofit ไม่ต้อง
+  migrate)
+- `scripts/verify.mjs` รู้จักโหมด scan-off: ตรวจว่า opt-out **ครบชุดและตั้งใจ**
+  (ไม่มี virus-scan.ts + 'unscanned' + ด่านดาวน์โหลดแก้แล้ว + มีบรรทัด
+  deviation) — เข้าเงื่อนไขครึ่งเดียว = การติดตั้งพัง ไม่ใช่ opt-out
+- §7 ใหม่ Troubleshooting `SCANNER_UNAVAILABLE` (field report 2026-08-26):
+  สาเหตุจริงอยู่ใน log `virus scan unavailable <สาเหตุ>` ของ container แอป
+  เสมอ · กับดัก "toast ≠ log" และ "clamav healthy ≠ แอปต่อถึง" (healthcheck
+  รันในตัวเอง) · ตาราง 4 สาเหตุ: ENOTFOUND (network/ชื่อ service),
+  ECONNREFUSED (DB ยังโหลด / host ไม่มี outbound internet → freshclam ล้ม
+  เงียบถาวร), timeout, `INSTREAM size limit exceeded` (StreamMaxLength
+  default 25 MB ชนกับ `UPLOAD_MAX_BYTES` ที่ขยับเกิน) + ท่า `docker exec …
+  node -e` พิสูจน์เส้นทาง network เมื่อ image ไม่มี nc
+
 ## 4.53.0 (2026-08-26)
 
 **auth-setup: return-to-page (`?from=`) — login แล้วกลับหน้าเดิม ไม่ตกหน้าแรก**

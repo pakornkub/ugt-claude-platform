@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
-// kit-hash: d2c4bfda4e4a
+// kit: ugt-nextjs-platform 4.54.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
+// kit-hash: 4eede18795be
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
@@ -8,7 +8,7 @@ import { getUserPermissions } from '@/lib/get-user-permissions';
 import { PERMISSIONS } from '@/lib/permissions';
 import { writeAuditLog } from '@/lib/actions/auth';
 import { checksum, newStorageKey, safeDisplayName, writeStoredFile } from '@/lib/storage';
-import { scanBuffer } from '@/lib/virus-scan';
+import { scanBuffer } from '@/lib/virus-scan'; // [SCAN] — ลบเมื่อโปรเจคเลือกไม่ติดตั้ง virus scan (SKILL.md §3 Q5)
 
 /**
  * Upload endpoint. A Route Handler, NOT a Server Action, on purpose: Server
@@ -53,8 +53,11 @@ export async function POST(request: Request) {
 
   const bytes = Buffer.from(await file.arrayBuffer());
 
+  // [SCAN] — ลบทั้งบล็อกนี้เมื่อไม่เอา virus scan (พร้อมแก้ scanStatus ด้านล่าง)
   // FAIL CLOSED: anything other than a definite "clean" refuses the upload.
   // A scanner that is down must block uploads, never wave them through.
+  // เมื่อ upload โดน SCANNER_UNAVAILABLE — สาเหตุจริงอยู่ในบรรทัด log ข้างล่างนี้
+  // เสมอ (ไล่ตามตาราง SKILL.md §7) อย่าเดาจาก docker ps
   const scan = await scanBuffer(bytes);
   if (scan.status === 'infected') {
     await writeAuditLog({
@@ -68,6 +71,7 @@ export async function POST(request: Request) {
     console.error('virus scan unavailable', scan.message);
     return NextResponse.json({ success: false, error: { code: 'SCANNER_UNAVAILABLE' } }, { status: 503 });
   }
+  // [/SCAN]
 
   const storageKey = newStorageKey();
   await writeStoredFile(storageKey, bytes);
@@ -81,6 +85,9 @@ export async function POST(request: Request) {
       contentType: file.type || 'application/octet-stream',
       fileSize: bytes.length,
       checksum: checksum(bytes),
+      // [SCAN] — ไม่เอา scan: เปลี่ยนเป็น scanStatus: 'unscanned' และลบบรรทัด
+      // scannedAt (ห้ามคง 'clean' ไว้ — ข้อมูลจะโกหกว่าเคยสแกน) พร้อมแก้ด่าน
+      // ดาวน์โหลดใน app/api/files/[id]/route.ts ตาม marker [SCAN] ที่นั่น
       scanStatus: 'clean',
       scannedAt: new Date(),
       createdBy: session.user.email ?? session.user.id,

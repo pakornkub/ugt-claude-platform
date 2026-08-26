@@ -30,12 +30,14 @@ services:
       # … existing vars …
       STORAGE_ROOT: /app/storage
       UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}
+      # [SCAN] — สามตัวถัดไปเป็นของ virus scan; ตัดเมื่อไม่เอา (SKILL.md §3 Q5)
       CLAMAV_HOST: clamav
       CLAMAV_PORT: '3310'
       CLAMAV_TIMEOUT_MS: '30000'
     volumes:
       # dev compose: /srv/appdata/__PROJECT_NAME__-dev/storage
       - /srv/appdata/__PROJECT_NAME__/storage:/app/storage
+    # [SCAN] — depends_on ทั้งบล็อก + service clamav ข้างล่าง: ตัดเมื่อไม่เอา scan
     depends_on:
       clamav:
         condition: service_healthy
@@ -68,6 +70,8 @@ with the right owner before the first `docker compose up`:
 ```bash
 mkdir -p /srv/appdata/__PROJECT_NAME__/storage /srv/appdata/__PROJECT_NAME__/clamav-db
 ```
+
+([SCAN] — ไม่เอา scan: ตัด `clamav-db` ออกจากบรรทัดนี้ด้วย)
 
 ## 3. What the admin/DevOps team must know
 

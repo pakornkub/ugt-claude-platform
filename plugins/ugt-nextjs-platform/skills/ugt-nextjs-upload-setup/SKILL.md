@@ -38,7 +38,7 @@ as a starting point that the first real project will sharpen.
 | Decision | Answer |
 | --- | --- |
 | Where files live | **Docker volume** (not the container, not `public/`, not the DB) |
-| Which types | **All types, virus-scanned** |
+| Which types | **All types, virus-scanned** — scan เป็น default; ถอดได้เฉพาะผ่านคำถาม §3 Q5 และต้องบันทึกเป็น deviation |
 | Downloads | **Permission-checked on every request** |
 
 ## 2. Org Standards
@@ -84,6 +84,21 @@ as a starting point that the first real project will sharpen.
    background job รันที่ไหน — `docs/backlog.md` ข้อ 3 ของ platform) — คำตอบนี้
    ถูก**บันทึกไว้ใน `docs/project-context/decisions.md`** เพื่อให้ job ที่จะมา
    ทีหลังใช้ ไม่ใช่ config ที่มีผลวันนี้ อย่าสัญญาว่าไฟล์จะถูกกวาดอัตโนมัติ
+5. **Virus scan — เอาไหม** (default: **เอา** ตามมติองค์กร 2026-08-09) — ถามพร้อม
+   เงื่อนไข infra ที่ทำให้บางโปรเจคเอาไม่ได้จริง: clamav กิน **RAM ~2 GB** และ
+   boot แรกต้อง**ดาวน์โหลด signature DB ~1 GB จากอินเทอร์เน็ต** (host องค์กรที่
+   ไม่มี outbound internet ต้อง preload DB เอง — §7) ตอบ "ไม่เอา" ได้ แต่ต้องรับ
+   เงื่อนไขครบ 3 ข้อ ไม่ใช่แค่ข้ามขั้นตอน:
+   - ตัดโค้ด/ config ตาม marker **`[SCAN]`** ทุกจุด: ไม่ copy `lib/virus-scan.ts`,
+     ลบบล็อก scan ใน `app/api/files/route.ts` (เปลี่ยน `scanStatus` เป็น
+     `'unscanned'` ตาม marker), แก้ด่านดาวน์โหลดใน `[id]/route.ts` เป็น
+     `=== 'infected'`, ตัด env `CLAMAV_*`, ตัด service clamav + `depends_on` +
+     `clamav-db` ใน compose/Jenkinsfile, ข้าม `pingScanner()` ใน §4.6 —
+     **คอลัมน์ `scanStatus` ในตารางคงไว้** (retrofit ทีหลังไม่ต้อง migrate)
+   - บันทึก `⚠ deviation:` ใน `docs/project-context/architecture.md` — *ไฟล์แนบ
+     ไม่ผ่าน virus scan (มติโปรเจค <วันที่>) ต่างจาก org standard* + เหตุผล
+   - เพิ่มงานค้าง "retrofit virus scan" ใน `docs/project-context/board.md`
+     (สถานะ `⏳ — <รออะไร>`) — การถอด scan คือการติดหนี้ ไม่ใช่การปิดเรื่อง
 
 ## 4. Setup steps
 
@@ -92,7 +107,7 @@ as a starting point that the first real project will sharpen.
 | Asset | Destination |
 | --- | --- |
 | `assets/lib/storage.ts` | `lib/storage.ts` |
-| `assets/lib/virus-scan.ts` | `lib/virus-scan.ts` |
+| `assets/lib/virus-scan.ts` | `lib/virus-scan.ts` — **[SCAN]** ข้ามทั้งไฟล์เมื่อไม่เอา scan (§3 Q5) |
 | `assets/lib/attachment-access.ts` | `lib/attachment-access.ts` — **must be implemented**, it denies everything by default |
 | `assets/app/api/files/route.ts` | `app/api/files/route.ts` (upload) |
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
@@ -140,6 +155,7 @@ Add to `lib/env.ts` (server block):
 ```ts
 STORAGE_ROOT: z.string().default('/app/storage'),
 UPLOAD_MAX_BYTES: z.string().default('26214400'),
+// [SCAN] — สามตัวนี้ตัดเมื่อไม่เอา virus scan (§3 Q5)
 CLAMAV_HOST: z.string().default('clamav'),
 CLAMAV_PORT: z.string().default('3310'),
 CLAMAV_TIMEOUT_MS: z.string().default('30000'),
@@ -160,7 +176,8 @@ Apply `assets/compose-and-dockerfile.snippet.md` to the Dockerfile and **both**
 compose files: the mount point owned by `nextjs`, the `/srv/appdata` bind
 mounts (never a named volume — cicd contract §2.8), the clamav service with a
 5-minute `start_period`, the persisted signature DB, and `storage` +
-`clamav-db` added to the Jenkinsfile `[VOLUME]` `mkdir -p` line.
+`clamav-db` added to the Jenkinsfile `[VOLUME]` `mkdir -p` line
+(ส่วนที่มาร์ค `[SCAN]` ในตัว snippet — ตัดเมื่อไม่เอา scan ตาม §3 Q5).
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
 
@@ -174,7 +191,8 @@ fails without it.
 ### 4.6 Health + migrate
 
 Add the scanner to `/api/health` so a dead clamd is visible before users find
-it (`pingScanner()` from `lib/virus-scan.ts`), then:
+it (`pingScanner()` from `lib/virus-scan.ts`) — [SCAN] ข้ามเมื่อไม่เอา scan —
+then:
 
 ```bash
 npx prisma migrate dev --name add-attachments && npx prisma generate
@@ -201,9 +219,11 @@ node <skill-dir>/scripts/verify.mjs
 
 Then by hand — these are the ones that catch real breakage:
 
-- [ ] Upload the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/)
+- [ ] [SCAN] Upload the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/)
       → refused with `FILE_INFECTED`, **no file on the volume**, audit row written
-- [ ] Stop the clamav container → upload is refused with 503, not accepted
+- [ ] [SCAN] Stop the clamav container → upload is refused with 503, not accepted
+- [ ] [SCAN-off only] `docs/project-context/architecture.md` has the
+      `⚠ deviation` line and `board.md` has the retrofit row (§3 Q5)
 - [ ] Upload a file, `docker compose down && up -d`, download it again → still there
 - [ ] Call the download URL while logged out → 401; as a user without access → **404**
 - [ ] Upload an `.svg` containing `<script>` → downloads as a file, never renders
@@ -222,3 +242,34 @@ Then by hand — these are the ones that catch real breakage:
       that JSON as-is, no toast; the `FORBIDDEN_DOWNLOAD`/`NOT_FOUND`/
       `FILE_NOT_AVAILABLE` catalog keys are reserved for a project that fetches
       downloads via JS and surfaces them itself)
+
+## 7. Troubleshooting — upload โดน `SCANNER_UNAVAILABLE` (field report 2026-08-26)
+
+กติกาไล่ปัญหา: **สาเหตุจริงอยู่ใน log ของ container แอปเสมอ** —
+`app/api/files/route.ts` เขียน `virus scan unavailable <สาเหตุ>` ทุกครั้งก่อน
+ตอบ 503 อ่านบรรทัดนั้นก่อน อย่าเดาจาก `docker ps`:
+
+```bash
+docker logs <app-container> 2>&1 | grep "virus scan unavailable"
+```
+
+สองกับดักที่ทำให้คนไล่ผิดทาง (เจอทั้งคู่ใน field report):
+
+- **toast ในหน้าเว็บไม่ใช่ log** — ผู้ใช้เห็นแค่ข้อความแปลของ
+  `SCANNER_UNAVAILABLE` (จงใจไม่บอกรายละเอียด กันข้อมูล infra รั่ว)
+- **clamav "healthy" ≠ แอปต่อถึง** — healthcheck (`clamdscan --ping`) รัน
+  *ภายใน* container ตัวเอง พิสูจน์แค่ clamd มีชีวิต ไม่ได้พิสูจน์เส้นทาง
+  network จากแอป
+
+| ข้อความหลัง `virus scan unavailable` | สาเหตุ | ทางแก้ |
+| --- | --- | --- |
+| `getaddrinfo ENOTFOUND clamav` | แอป resolve ชื่อ service ไม่ได้ — รัน `npm run dev` นอก docker, อยู่คนละ compose network, หรือ key ของ service ไม่ได้ชื่อ `clamav` (DNS ใช้ชื่อ service ไม่ใช่ `container_name`) | dev นอก docker: publish `3310:3310` + `CLAMAV_HOST=localhost` ใน `.env` เครื่องตัวเอง · prod: ให้ app กับ clamav อยู่ network เดียวกัน / แก้ `CLAMAV_HOST` ให้ตรงชื่อ service |
+| `connect ECONNREFUSED` | clamd ยังไม่เปิด port — boot แรกกำลังโหลด signature DB (~1 GB, หลายนาที) หรือ **host ไม่มี outbound internet ทำให้ freshclam โหลด DB ไม่ได้เลย** — container จะ running ค้างแบบไม่มี error แต่ clamd ไม่ listen ถาวร | ดู `docker logs <clamav>`: มี freshclam error → เปิดทางไป `database.clamav.net` หรือ preload ไฟล์ `.cvd` (main/daily/bytecode) ใส่ `/srv/appdata/<project>/clamav-db` แล้ว restart · แค่ยังโหลดอยู่ → รอจน STATUS เป็น `(healthy)` |
+| `clamd timeout` | scan ไม่เสร็จใน `CLAMAV_TIMEOUT_MS` (ไฟล์ใหญ่/host ช้า/clamd กำลัง reload DB) | เพิ่ม `CLAMAV_TIMEOUT_MS` |
+| `INSTREAM size limit exceeded` | ไฟล์ใหญ่กว่า `StreamMaxLength` ของ clamd (**default 25 MB**) — โผล่ทันทีที่โปรเจคขยับ `UPLOAD_MAX_BYTES` เกิน 25 MB | ตั้ง `StreamMaxLength` ใน `clamd.conf` ให้ ≥ `UPLOAD_MAX_BYTES` (mount ไฟล์ conf ทับใน service clamav) แล้ว recreate |
+
+พิสูจน์เส้นทาง network จากในแอปตรง ๆ (image ไม่มี `nc` ก็ใช้ node ได้):
+
+```bash
+docker exec <app-container> node -e "require('net').createConnection({host:process.env.CLAMAV_HOST,port:process.env.CLAMAV_PORT}).on('connect',()=>{console.log('CONNECT OK');process.exit(0)}).on('error',e=>{console.log('FAIL:',e.message);process.exit(1)})"
+```

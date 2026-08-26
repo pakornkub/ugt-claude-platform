@@ -24,12 +24,20 @@ function check(name, fn) {
 
 const UPLOAD = 'app/api/files/route.ts';
 const DOWNLOAD = join('app', 'api', 'files', '[id]', 'route.ts');
+
+// [SCAN] opt-out (SKILL.md §3 Q5): ไม่มี lib/virus-scan.ts + upload route ตั้ง
+// scanStatus 'unscanned' = ตั้งใจถอด scan ครบชุด — ข้ามเช็คฝั่ง scanner แล้ว
+// เช็คความสม่ำเสมอของโหมดแทน. เข้าเงื่อนไขครึ่งเดียว (แค่ไฟล์หาย) ยังนับเป็น
+// การติดตั้งพัง ไม่ใช่ opt-out
+const SCAN_OFF =
+  !has('lib/virus-scan.ts') && has(UPLOAD) && /scanStatus:\s*'unscanned'/.test(read(UPLOAD));
+
 // messages/ catalogs are REQUIRED, not optional: file-upload.tsx calls
 // useTranslations('upload') unconditionally and translates the codes the
 // route handlers return — without the catalog the widget renders raw key paths.
 const REQUIRED = [
   'lib/storage.ts',
-  'lib/virus-scan.ts',
+  ...(SCAN_OFF ? [] : ['lib/virus-scan.ts']),
   'lib/attachment-access.ts',
   // the widget is WHY the catalogs are required — so it is required too
   'components/file-upload.tsx',
@@ -44,26 +52,40 @@ check('Core files present', () => {
   return missing.length ? { ok: false, msg: `Missing: ${missing.join(', ')}` } : { ok: true };
 });
 
-check('Scan happens BEFORE the file is written', () => {
-  if (!has(UPLOAD)) return { ok: false, msg: `No ${UPLOAD}` };
-  const body = read(UPLOAD);
-  const scanAt = body.search(/\bscanBuffer\s*\(/);
-  const writeAt = body.search(/\bwriteStoredFile\s*\(/);
-  if (scanAt < 0) return { ok: false, msg: 'no scanBuffer call — uploads are not scanned at all' };
-  if (writeAt < 0) return { ok: false, msg: 'no writeStoredFile call' };
-  return scanAt < writeAt
-    ? { ok: true }
-    : { ok: false, msg: 'writeStoredFile runs before scanBuffer — an infected file reaches the volume before it is checked' };
-});
+if (SCAN_OFF) {
+  check('[SCAN off] opt-out is consistent, deliberate, and recorded', () => {
+    const problems = [];
+    if (/\bscanBuffer\s*\(/.test(read(UPLOAD)))
+      problems.push('upload route still calls scanBuffer but lib/virus-scan.ts is gone');
+    if (has(DOWNLOAD) && /scanStatus\s*!==\s*'clean'/.test(read(DOWNLOAD)))
+      problems.push("download guard still requires 'clean' — every 'unscanned' row answers 409; use === 'infected' (SKILL.md §3 Q5)");
+    const arch = 'docs/project-context/architecture.md';
+    if (!has(arch) || !/deviation[^\n]*(scan|สแกน)/i.test(read(arch)))
+      problems.push(`no ⚠ deviation line about the missing virus scan in ${arch}`);
+    return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+  });
+} else {
+  check('Scan happens BEFORE the file is written', () => {
+    if (!has(UPLOAD)) return { ok: false, msg: `No ${UPLOAD}` };
+    const body = read(UPLOAD);
+    const scanAt = body.search(/\bscanBuffer\s*\(/);
+    const writeAt = body.search(/\bwriteStoredFile\s*\(/);
+    if (scanAt < 0) return { ok: false, msg: 'no scanBuffer call — uploads are not scanned at all' };
+    if (writeAt < 0) return { ok: false, msg: 'no writeStoredFile call' };
+    return scanAt < writeAt
+      ? { ok: true }
+      : { ok: false, msg: 'writeStoredFile runs before scanBuffer — an infected file reaches the volume before it is checked' };
+  });
 
-check('Scanner failure fails closed', () => {
-  if (!has(UPLOAD)) return { ok: false, msg: `No ${UPLOAD}` };
-  const body = read(UPLOAD);
-  const handlesError = /status\s*===\s*'error'/.test(body) || /scan\.status\s*!==\s*'clean'/.test(body);
-  return handlesError
-    ? { ok: true }
-    : { ok: false, msg: "no branch for scan.status === 'error' — a scanner that is down would let files through unscanned" };
-});
+  check('Scanner failure fails closed', () => {
+    if (!has(UPLOAD)) return { ok: false, msg: `No ${UPLOAD}` };
+    const body = read(UPLOAD);
+    const handlesError = /status\s*===\s*'error'/.test(body) || /scan\.status\s*!==\s*'clean'/.test(body);
+    return handlesError
+      ? { ok: true }
+      : { ok: false, msg: "no branch for scan.status === 'error' — a scanner that is down would let files through unscanned" };
+  });
+}
 
 check('Storage root is not public/', () => {
   const envFiles = ['.env.example', '.env.local'].filter((f) => has(f));
@@ -205,7 +227,7 @@ check('Compose mounts a storage volume and runs the scanner', () => {
   for (const f of files) {
     const body = read(f);
     if (!/\/app\/storage/.test(body)) problems.push(`${f}: no volume mounted at /app/storage — uploads vanish on redeploy`);
-    if (!/clamav/.test(body)) problems.push(`${f}: no clamav service — uploads will fail closed`);
+    if (!SCAN_OFF && !/clamav/.test(body)) problems.push(`${f}: no clamav service — uploads will fail closed`);
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });

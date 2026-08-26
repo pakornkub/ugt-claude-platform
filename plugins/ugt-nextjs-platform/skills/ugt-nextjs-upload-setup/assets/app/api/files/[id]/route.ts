@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-upload-setup/app/api/files/[id]/route.ts
-// kit-hash: 91fcef5d0948
+// kit: ugt-nextjs-platform 4.54.0 · ugt-nextjs-upload-setup/app/api/files/[id]/route.ts
+// kit-hash: 85ce145696b6
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -48,6 +48,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND' } }, { status: 404 });
   }
 
+  // [SCAN] — โปรเจคที่ไม่เอา virus scan: เปลี่ยนเงื่อนไขเป็น
+  // `scanStatus === 'infected'` (แถวจะเป็น 'unscanned' ทั้งหมด — และวันที่
+  // retrofit scan กลับมา แถวเก่า 'unscanned' ต้องยังดาวน์โหลดได้)
   if (attachment.scanStatus !== 'clean') {
     return NextResponse.json({ success: false, error: { code: 'FILE_NOT_AVAILABLE' } }, { status: 409 });
   }

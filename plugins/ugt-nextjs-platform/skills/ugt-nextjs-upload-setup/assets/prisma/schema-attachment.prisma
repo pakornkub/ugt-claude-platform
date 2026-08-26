@@ -30,7 +30,9 @@ model attachment {
   fileSize     Int                                         @map("FileSize")
   checksum     String   @db.NVarChar(64)                   @map("Checksum")
 
-  /** "clean" | "infected" | "error" — only "clean" rows are ever served. */
+  /** "clean" | "infected" | "error" — only "clean" rows are ever served.
+   *  [SCAN] โปรเจคที่ไม่เอา virus scan ใช้ค่า "unscanned" (คอลัมน์คงไว้ —
+   *  วัน retrofit scan กลับมาจะได้ไม่ต้อง migrate) */
   scanStatus   String   @default("clean") @db.NVarChar(20) @map("ScanStatus")
   scanSignature String? @db.NVarChar(200)                  @map("ScanSignature")
   scannedAt    DateTime?                                   @map("ScannedAt")
