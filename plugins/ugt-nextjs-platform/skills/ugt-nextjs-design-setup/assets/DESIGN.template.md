@@ -185,7 +185,9 @@
 - Dialog ladder: ฟอร์ม ≤6 ช่อง = `FormDialog` (compound + height
   `fluid`/`auto`/`fill`) · ยาว = หน้าแยก · panel ค้าง = `Sheet` ·
   read-only = `detail-dialog-shell` · destructive = `ConfirmActionDialog`
-  ปุ่มมีข้อความ
+  ปุ่มมีข้อความ · system alert บังคับ action เดียว (session หมดอายุ) =
+  `AlertDialog` ปิดไม่ได้ ปุ่ม primary เดียว **ไม่มีปุ่มยกเลิก** — ข้อยกเว้น
+  footer ข้อเดียวที่อนุญาต
   > **นิยาม "ยาว" ให้นับเนื้อหาที่โตตามข้อมูลด้วย** — ฟอร์มที่มี
   > list/checklist ซึ่งความยาวขึ้นกับข้อมูลจริง (เช่น checklist สิทธิ์ที่โต
   > ตาม `ALL_PERMISSIONS`) ถือว่า "ยาว" เสมอแม้วันนี้จะสั้น เพราะ Dialog

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.3 · ugt-nextjs-auth-setup/lib/auth-client.ts
-// kit-hash: c578e5e6d9a1
+// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/lib/auth-client.ts
+// kit-hash: 8165069d94b4
 import { createAuthClient } from 'better-auth/react';
 
 // Do NOT pass baseURL here. Better Auth's withPath() checks whether the URL already has
@@ -24,8 +24,10 @@ export const authClient = createAuthClient({
   // calls the base client's signIn.social({ provider: 'keycloak' }) directly.
   fetchOptions: {
     onError(ctx) {
-      // Broadcast session expiry so any listener (e.g. a session-expiry banner)
-      // can react to a 401 from any auth-client call.
+      // Broadcast session expiry — received by SessionExpiredDialog
+      // (components/session-expired-dialog.tsx, mounted in the protected
+      // layout) which forces a re-login. query-provider (design kit)
+      // dispatches the same event for 401s from React Query.
       if (ctx.response?.status === 401 && globalThis.window !== undefined) {
         globalThis.dispatchEvent(new CustomEvent('session-expired'));
       }

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 2ac611dd989d
+// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: d02c5de2505e
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -83,6 +83,12 @@ export const authEn: AuthCatalog = {
     emailLabel: 'Email',
     cancel: 'Cancel',
     submit: 'Send link',
+  },
+  sessionExpiredDialog: {
+    title: 'Session expired',
+    description:
+      "You've been inactive for a while, so we signed you out for security. Sign in again to continue.",
+    loginAgain: 'Sign in again',
   },
   login: {
     ssoConnectFailed: "Couldn't connect to SSO. Please try again.",

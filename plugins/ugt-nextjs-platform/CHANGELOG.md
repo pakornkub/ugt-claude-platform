@@ -1,5 +1,23 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.52.0 (2026-08-26)
+
+**auth-setup: ตัวรับ event `session-expired` ที่ขาดหาย — `SessionExpiredDialog`**
+
+- `assets/components/session-expired-dialog.tsx` ไฟล์ใหม่: `query-provider`
+  (design kit) และ `lib/auth-client.ts` ยิง CustomEvent `session-expired`
+  ตอนเจอ 401 กลางหน้ามานานแล้วแต่ไม่เคยมีตัวรับ — event เงียบหาย ผู้ใช้เห็น
+  ทุกปุ่ม "พังเงียบ" จนกว่าจะ refresh เอง ตอนนี้เป็น `AlertDialog` ปิดไม่ได้
+  (ไม่มีปุ่มยกเลิก — session ตายแล้ว "ยกเลิก" ไม่มีความหมาย) ปุ่มเดียว
+  full-navigate ไป `/login?reason=session_expired` (ใช้ banner หน้า login
+  ที่มีอยู่แล้ว + ล้าง client state/React Query cache ที่ stale ทั้งก้อน)
+- SKILL.md: แถวติดตั้งใน §5.2 + mount ใน protected layout (§5.5 ข้อ 2)
+- `lib/auth-client.ts`: comment ชี้ตัวรับจริง แทน "banner" ที่ไม่เคยถูกสร้าง
+- design-setup `references/conventions.md` + `assets/DESIGN.template.md`:
+  Dialog ladder เพิ่มแถว "system alert บังคับ action เดียว" — ข้อยกเว้น
+  footer ไม่มีปุ่มยกเลิก บันทึกเป็นกติกา ไม่ปล่อยเป็น dialog นอกแบบ
+- messages: namespace ใหม่ `auth.sessionExpiredDialog` (th/en)
+
 ## 4.51.0 (2026-08-25)
 
 **Audit ปูพรม 7 มิติ 2026-08-25 — แก้ verified-wrong + ความขัดแย้งทั้งชุดฝั่ง

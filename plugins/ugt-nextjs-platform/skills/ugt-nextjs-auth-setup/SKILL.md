@@ -251,6 +251,7 @@ exceptions:
 | `assets/lib/approval-chain.ts` | `lib/approval-chain.ts` | only when the app has an approval workflow — substitute `__HR_AUTHORIZE_VIEW__` (a **different** view from the employee one) |
 | `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
 | `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
+| `assets/components/session-expired-dialog.tsx` | `components/…` | every project — receiver for the `session-expired` event (mid-page 401) that `query-provider` and `lib/auth-client.ts` dispatch; undismissable AlertDialog, single button → `/login?reason=session_expired`. Mount in the protected layout — §5.5 step 2 |
 | `assets/components/admin-user-actions.tsx` | `components/…` | Local only — the "เพิ่มผู้ใช้ local" dialog on `/admin/users` + admin set-password; **no sign-up page, and no AD pre-registration** (SSO/AD accounts appear on first login — มติ 2026-08-11) |
 | `assets/components/users-table.tsx` | `components/users-table.tsx` | client half of `/admin/users` — DataTable **client mode**; the password column is `[METHOD: LOCAL]` (delete it with the other local sections) |
 | `assets/components/audit-logs-table.tsx` | `components/audit-logs-table.tsx` | client half of `/admin/audit-logs` — DataTable **server mode**: toolbar filters (ชื่อผู้ใช้ / ช่วงวันที่ / action) push `q`/`from`/`to`/`action` to the URL, DataTable pushes `page`/`pageSize`/`sort`/`dir` itself; needs the design kit (§4) |
@@ -350,6 +351,13 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    ```
 
    (Safe and near-free for every user — caching details in `references/rbac.md`.)
+
+   Also render `<SessionExpiredDialog />` once at the end of this layout's
+   JSX. It receives the `session-expired` event that `query-provider` (design
+   kit) and `lib/auth-client.ts` dispatch on a mid-page 401 — the case
+   `proxy.ts` can't catch because no navigation happens. Without it the event
+   goes nowhere and an expired session looks like every button silently
+   failing until the user refreshes by luck.
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
 4. **Identity block in the shell** — render `<NavUser>` in the sidebar footer

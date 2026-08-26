@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.47.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: ce472dbaca01
+// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 3b9f5f4c5ae9
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -77,6 +77,12 @@ export const authTh = {
     emailLabel: 'อีเมล',
     cancel: 'ยกเลิก',
     submit: 'ส่งลิงก์',
+  },
+  sessionExpiredDialog: {
+    title: 'เซสชันหมดอายุ',
+    description:
+      'คุณไม่ได้ใช้งานเป็นเวลานาน ระบบจึงออกจากระบบให้อัตโนมัติเพื่อความปลอดภัย เข้าสู่ระบบใหม่เพื่อทำงานต่อ',
+    loginAgain: 'เข้าสู่ระบบใหม่',
   },
   login: {
     ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',
