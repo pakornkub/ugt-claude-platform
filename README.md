@@ -20,10 +20,10 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.55.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.56.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.6.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.6.0 — pilot รอบแรกจบแล้ว แก้ blocker ครบ **แต่ยังไม่ได้พิสูจน์ซ้ำ (ยังไม่ tag)** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.9.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.9.2 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -152,16 +152,19 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 
 | คำสั่ง | ใช้ตอนไหน | ได้อะไร |
 | --- | --- | --- |
+| `/setup-matt-pocock-skills` | **ครั้งเดียวต่อโปรเจค ก่อนเริ่มใช้ flow** | ตั้งค่า issue tracker + label ที่ `/to-spec` และ `/to-tickets` ต้องใช้ — ข้ามขั้นนี้แล้ว flow จะสะดุดตั้งแต่ `/to-spec` |
 | `/grill-with-docs` | มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม | AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น `CONTEXT.md`/ADR ในโปรเจค |
 | `/to-spec` | requirement ชัดแล้ว | เปลี่ยนบทสนทนาให้กลายเป็น spec พร้อมทำต่อ |
 | `/to-tickets` | มี spec แล้ว | แตกเป็นงานย่อย พร้อมลำดับก่อน-หลัง |
-| `/implement` | มี ticket แล้ว | ลงมือเขียนโค้ดจริง (ขับ TDD ข้างในให้เอง) |
-| `/code-review` | โค้ดเสร็จ | ตรวจ 2 แกน: ตรง spec ไหม + ผ่านมาตรฐานโค้ด repo ไหม |
+| `/implement` | มี ticket แล้ว | ลงมือเขียนโค้ดจริง (ขับ `/tdd` ข้างในและปิดท้ายด้วย `/code-review` ให้เอง) |
+| `/code-review` | โค้ดเสร็จ (เรียกเดี่ยว ๆ ก็ได้) | ตรวจ 2 แกน: ตรง spec ไหม + ผ่านมาตรฐานโค้ด repo ไหม — ถ้าพิมพ์แล้วได้ตัว review ในตัวของ Claude Code แทน (มีชื่อชนกัน) ให้เรียกแบบเต็ม `/mattpocock-skills:code-review` |
 
-Flow: เคลียร์ requirement → spec → tickets → implement → review — เรียกเอง
-ทีละคำสั่ง ไม่มีขั้นไหนต่อขั้นถัดไปให้อัตโนมัติ (ต่างจาก bundle superpowers
-ที่ auto-chain ให้) แลกมาด้วยการคุมได้ละเอียดกว่าและ token ต่ำกว่า ลำดับเต็ม
-พร้อมทางแยก (prototype/triage/wayfinder) ดูที่ `/ask-matt`
+Flow: setup ครั้งเดียว → เคลียร์ requirement → spec → tickets → implement →
+review — แต่ละขั้นเรียกเอง Claude ไม่เริ่มขั้นถัดไปให้ (ต่างจาก bundle
+superpowers ที่เดินทั้ง pipeline เอง) ยกเว้นข้อเดียว: `/implement` ขับ
+`/tdd` และปิดท้ายด้วย `/code-review` ภายในตัวมันเองตามที่ skill มันออกแบบมา
+แลกมาด้วยการคุมได้ละเอียดกว่าและ token ต่ำกว่า ลำดับเต็มพร้อมทางแยก
+(prototype/triage/wayfinder) ดูที่ `/ask-matt`
 
 `CONTEXT.md` และ `docs/adr/` ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ
 `docs/project-context/` โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง

@@ -21,12 +21,12 @@
     {
       "name": "ugt-nextjs-standard-superpowers",
       "source": "./plugins/ugt-nextjs-standard-superpowers",
-      "description": "The recommended bundle for teams using the superpowers pipeline — one install brings ugt-nextjs-platform + superpowers (the development pipeline: think first → plan → test-first → review) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
+      "description": "The recommended bundle for teams using the superpowers pipeline — one install brings ugt-nextjs-platform + superpowers (the development pipeline: brainstorming → plan → TDD → code review) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
     },
     {
       "name": "ugt-nextjs-standard-mattpocock",
       "source": "./plugins/ugt-nextjs-standard-mattpocock",
-      "description": "The lighter-weight bundle for teams using the mattpocock-skills pipeline (manual, lower token cost) — one install brings ugt-nextjs-platform + mattpocock-skills (grill-with-docs → to-spec → to-tickets → implement → code-review, each step called by hand) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
+      "description": "The lighter-weight bundle for teams using the mattpocock-skills pipeline (user-invoked steps, lower token cost) — one install brings ugt-nextjs-platform + mattpocock-skills (grill-with-docs → to-spec → to-tickets → implement → code-review; each step is invoked by the user, except /implement which drives /tdd and finishes with /code-review on its own) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
     },
     {
       "name": "ugt-python-platform",
