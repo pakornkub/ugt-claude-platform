@@ -1,8 +1,11 @@
 # Multi-Stack Proposal — extending `ugt` beyond Next.js
 
 > **Status:** Living · **Date:** 2026-07-29 · **Applies-to:** ugt-core 2.x
-> **Last-reviewed:** 2026-08-25 — Python/PHP: ส่วน cicd ทำแล้ว (v0.6.0 ทั้งคู่ —
-> PHP ผ่าน pilot รอบแรกแล้ว, Python ยังไม่ผ่าน pilot, ทั้งคู่ยังไม่ tag — ดู spec
+> **Last-reviewed:** 2026-09-01 — อัปเดตชื่อ bundle ที่อ้างถึง:
+> `ugt-nextjs-standard` ถูก split เป็น `-superpowers`/`-mattpocock`
+> (ugt-nextjs-platform 4.55.0) · สถานะ Python/PHP เดิมจาก 2026-08-25:
+> ส่วน cicd ทำแล้ว (v0.6.0 ทั้งคู่ — PHP ผ่าน pilot รอบแรกแล้ว, Python
+> ยังไม่ผ่าน pilot, ทั้งคู่ยังไม่ tag — ดู spec
 > `docs/superpowers/specs/2026-08-11-python-php-deploy-plugins-design.md`);
 > ส่วน database/auth/quality ยังเป็น backlog ตามเดิม; React SPA ยังไม่ทำ
 
@@ -123,7 +126,7 @@ Ordered so that no user ever loses `ugt-checkpoint` or the audit hooks:
    ```json
    "dependencies": ["ugt-core"]
    ```
-   (same-marketplace dependency — the same mechanism `ugt-nextjs-standard`
+   (same-marketplace dependency — the same mechanism `ugt-nextjs-standard-superpowers`
    already uses; no `allowCrossMarketplaceDependenciesOn` change needed).
    Update `ugt-nextjs-setup` SKILL.md step-4 pointer for the IT doc, and the
    CLAUDE-block "Which skill, when" row for `/ugt-checkpoint` — the command name
