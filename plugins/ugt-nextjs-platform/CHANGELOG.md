@@ -1,5 +1,25 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.55.0 (2026-08-31)
+
+**CLAUDE-block.md: route "Build a feature / fix a bug" by which pipeline plugin is
+installed (superpowers vs mattpocock-skills), and cross-reference mattpocock's
+own knowledge files**
+
+- New projects can now install `ugt-nextjs-standard-mattpocock` instead of
+  `ugt-nextjs-standard-superpowers` for a lighter-weight, manually-invoked
+  development pipeline. The generated `CLAUDE-block.md` detects which
+  orchestration plugin is actually installed and routes accordingly — no new
+  state file, no toggle skill (see
+  `docs/superpowers/specs/2026-08-31-pipeline-bundle-choice-design.md`).
+- Added a bullet under "Where new knowledge goes" so `CONTEXT.md`/`docs/adr/`
+  (owned by mattpocock's `grill-with-docs`/`domain-modeling`) and
+  `docs/project-context/` (owned by `ugt-handoff`) are read together but never
+  merged.
+- Existing projects on `ugt-nextjs-standard-superpowers` (or the pre-split
+  `ugt-nextjs-standard`) see no behavior change — the superpowers branch of
+  the routing row is identical to the old unconditional text.
+
 ## 4.54.0 (2026-08-26)
 
 **upload-setup: virus scan เป็นคำถาม interview (opt-out ได้แบบมีเงื่อนไข) +
