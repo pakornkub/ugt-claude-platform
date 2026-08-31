@@ -19,9 +19,14 @@
       "description": "Org standards for Next.js projects: SQL Server via Prisma, SSO/LDAP/Local login + RBAC, test/lint tooling, design agreement + shadcn tokens and the org UI kit, Jenkins + SonarQube + Docker deploy, plus the harness layer (CLAUDE.md, rules, state, audit log)"
     },
     {
-      "name": "ugt-nextjs-standard",
-      "source": "./plugins/ugt-nextjs-standard",
-      "description": "The recommended bundle — one install brings ugt-nextjs-platform + superpowers (the development pipeline) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
+      "name": "ugt-nextjs-standard-superpowers",
+      "source": "./plugins/ugt-nextjs-standard-superpowers",
+      "description": "The recommended bundle for teams using the superpowers pipeline — one install brings ugt-nextjs-platform + superpowers (the development pipeline: think first → plan → test-first → review) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
+    },
+    {
+      "name": "ugt-nextjs-standard-mattpocock",
+      "source": "./plugins/ugt-nextjs-standard-mattpocock",
+      "description": "The lighter-weight bundle for teams using the mattpocock-skills pipeline (manual, lower token cost) — one install brings ugt-nextjs-platform + mattpocock-skills (grill-with-docs → to-spec → to-tickets → implement → code-review, each step called by hand) + frontend-design (UI quality) + skill-creator (build project skills to the same standard)"
     },
     {
       "name": "ugt-python-platform",
