@@ -413,12 +413,15 @@
     <div class="codebox h-anim d4">
       <div class="bar">
         <span>ติดตั้ง — รันใน Claude Code ทีละบรรทัด</span>
-        <button class="copy-btn" type="button" data-copy="/plugin marketplace add pakornkub/ugt-claude-platform&#10;/plugin install ugt-nextjs-standard@ugt&#10;/reload-plugins">คัดลอก</button>
+        <button class="copy-btn" type="button" data-copy="/plugin marketplace add pakornkub/ugt-claude-platform&#10;/plugin install ugt-nextjs-standard-superpowers@ugt&#10;/reload-plugins">คัดลอก</button>
       </div>
       <pre><code>/plugin marketplace add pakornkub/ugt-claude-platform
-/plugin install ugt-nextjs-standard@ugt
+/plugin install ugt-nextjs-standard-superpowers@ugt
 /reload-plugins</code></pre>
     </div>
+    <p class="install-note h-anim d5">
+      ใช้ <code>ugt-nextjs-standard-mattpocock@ugt</code> แทนบรรทัดที่สองถ้าเลือก pipeline mattpocock
+    </p>
     <p class="install-note h-anim d5">
       รีโปนี้เป็น public — ติดตั้งได้เลยไม่ต้องขอสิทธิ์หรือ login GitHub ·
       ตอน install เลือก scope <strong>project</strong> ถ้าอยากให้เพื่อนร่วมทีมที่ clone ได้ด้วย
@@ -432,15 +435,25 @@
   <div class="wrap">
     <span class="kicker reveal">5 Plugins</span>
     <h2 id="plugins-title" class="reveal">มีอะไรในชุดนี้</h2>
-    <p class="lead reveal">สาย Next.js ติดตั้งตัวเดียวคือ <strong>ugt-nextjs-standard</strong> — ที่เหลือมาเองครบ
-    · สาย Python/PHP ติดตั้งแยก (ดูกรอบล่าง)</p>
+    <p class="lead reveal">สาย Next.js ติดตั้งตัวเดียว — เลือก
+    <strong>ugt-nextjs-standard-superpowers</strong> (pipeline auto) หรือ
+    <strong>ugt-nextjs-standard-mattpocock</strong> (pipeline manual, token
+    น้อยกว่า) — ที่เหลือมาเองครบ · สาย Python/PHP ติดตั้งแยก (ดูกรอบล่าง)</p>
     <div class="grid cols-3">
       <article class="card plugin-card featured reveal">
-        <span class="badge">แนะนำ — ติดตัวนี้</span>
-        <span class="ver">v2.1.0</span>
-        <h3>ugt-nextjs-standard</h3>
-        <p>ตัวที่ควรติดตั้ง — ติดตัวเดียวได้ครบทุกอย่างข้างล่างอัตโนมัติ
-        <strong>พร้อม plugin official อีก 3 ตัว</strong> (ดูกรอบล่าง) ไม่ต้องเลือกทีละชิ้น</p>
+        <span class="badge">แนะนำ — pipeline auto</span>
+        <span class="ver">v3.0.0</span>
+        <h3>ugt-nextjs-standard-superpowers</h3>
+        <p>ติดตัวเดียวได้ครบทุกอย่างข้างล่างอัตโนมัติ <strong>พร้อม plugin
+        official อีก 3 ตัว</strong> (ดูกรอบล่าง) — pipeline ทำงานเองทั้งหมด</p>
+      </article>
+      <article class="card plugin-card featured reveal">
+        <span class="badge">ทางเลือก — pipeline manual, token น้อยกว่า</span>
+        <span class="ver">v1.0.0</span>
+        <h3>ugt-nextjs-standard-mattpocock</h3>
+        <p>ตัวเดียวกันแต่สลับ pipeline เป็น <code>mattpocock-skills</code> —
+        เรียกคำสั่งเองทีละขั้น (<code>/grill-with-docs → /to-spec →
+        /to-tickets → /implement → /code-review</code>)</p>
       </article>
       <article class="card plugin-card reveal">
         <span class="ver">v4.54.0</span>
@@ -477,13 +490,23 @@
     <div class="subsec">
     <span class="sub-kicker reveal">พ่วงมากับ bundle</span>
     <h3 class="sub-title reveal">ของแถม: plugin official ที่ติดตั้งมาให้อัตโนมัติ</h3>
-    <p class="sub-lead reveal">ติด <strong>ugt-nextjs-standard</strong> ตัวเดียว จะได้ plugin จากทีม Anthropic/ชุมชน
-      ที่องค์กรคัดไว้แล้วอีก 3 ตัว — ทำงานร่วมกับตัวช่วย ugt เองโดยไม่ต้องตั้งค่าอะไรเพิ่ม</p>
+    <p class="sub-lead reveal">ติด bundle ตัวเดียว จะได้ plugin จากทีม
+      Anthropic/ชุมชนที่องค์กรคัดไว้แล้วอีก 3 ตัว — ทำงานร่วมกับตัวช่วย ugt
+      เองโดยไม่ต้องตั้งค่าอะไรเพิ่ม (ได้ <code>superpowers</code> <strong>หรือ</strong>
+      <code>mattpocock-skills</code> อย่างใดอย่างหนึ่งเท่านั้น ตามที่เลือก
+      ไม่ใช่ทั้งคู่)</p>
     <div class="grid cols-3">
       <article class="card reveal">
-        <h3>superpowers</h3>
+        <h3>superpowers <span style="font-weight:400">(bundle -superpowers)</span></h3>
         <p>กระบวนการพัฒนาที่ดี: <strong>คิดก่อน → วางแผน → เขียนเทสต์ก่อน → เขียนโค้ด → review</strong> —
         งาน feature/bug ทั่วไปเดินตามขั้นนี้เอง ส่วนงานเล็ก ๆ จะถามก่อนว่าจะย่อขั้นตอนไหม</p>
+      </article>
+      <article class="card reveal">
+        <h3>mattpocock-skills <span style="font-weight:400">(bundle -mattpocock)</span></h3>
+        <p><strong>เรียกเองทีละคำสั่ง</strong>:
+        <code>/grill-with-docs → /to-spec → /to-tickets → /implement →
+        /code-review</code> — ไม่มีขั้นไหนต่อขั้นถัดไปให้อัตโนมัติ คุมได้
+        ละเอียดกว่าและ token ต่ำกว่า</p>
       </article>
       <article class="card reveal">
         <h3>frontend-design</h3>
@@ -875,12 +898,15 @@
     <div class="codebox">
       <div class="bar">
         <span>อัปเดต — รันทีละบรรทัด</span>
-        <button class="copy-btn" type="button" data-copy="/plugin marketplace update ugt&#10;/plugin update ugt-nextjs-standard&#10;/reload-plugins">คัดลอก</button>
+        <button class="copy-btn" type="button" data-copy="/plugin marketplace update ugt&#10;/plugin update ugt-nextjs-standard-superpowers&#10;/reload-plugins">คัดลอก</button>
       </div>
       <pre><code>/plugin marketplace update ugt
-/plugin update ugt-nextjs-standard
+/plugin update ugt-nextjs-standard-superpowers
 /reload-plugins</code></pre>
     </div>
+    <p class="after-note">
+      สลับชื่อเป็น <code>ugt-nextjs-standard-mattpocock</code> ถ้านั่นคือ bundle ที่ติดตั้งไว้
+    </p>
     <p class="after-note">
       อัปเดตแล้ว<strong style="color:#e6e9f4">ไม่ต้องแก้อะไรในโปรเจค</strong> —
       ถ้ารุ่นไหนต้องทำอะไรเพิ่มจะเขียนไว้ใน CHANGELOG ชัดเจน ·
