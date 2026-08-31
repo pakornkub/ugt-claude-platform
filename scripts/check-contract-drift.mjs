@@ -177,7 +177,8 @@ const CHECKS = [
 const VERSION_SOURCES = [
   'ugt-core',
   'ugt-nextjs-platform',
-  'ugt-nextjs-standard',
+  'ugt-nextjs-standard-superpowers',
+  'ugt-nextjs-standard-mattpocock',
   'ugt-php-platform',
   'ugt-python-platform',
 ];
