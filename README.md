@@ -18,11 +18,18 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 
 | Plugin | รุ่นล่าสุด | คืออะไร |
 | --- | --- | --- |
-| `ugt-nextjs-standard` | 2.1.0 | **ตัวที่ควรติดตั้ง** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง **พร้อม plugin official อีก 3 ตัว**: `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review), `frontend-design` (คุณภาพงาน UI), `skill-creator` (สร้างตัวช่วยของโปรเจคเอง) |
+| `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
+| `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
 | `ugt-nextjs-platform` | 4.54.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.6.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.6.0 — pilot รอบแรกจบแล้ว แก้ blocker ครบ **แต่ยังไม่ได้พิสูจน์ซ้ำ (ยังไม่ tag)** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.9.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+
+**เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
+ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
+(ต้องเรียกคำสั่งเองตามลำดับ — วิธีใช้อยู่ในหัวข้อ "ถ้าเลือก bundle
+mattpocock" ด้านล่าง) เปลี่ยนใจทีหลังได้ แต่ต้อง uninstall ตัวเดิมแล้ว
+install อีกตัว ไม่มีคำสั่งสลับระหว่างสองอย่าง
 
 รุ่นจริงล่าสุดดูจาก git tags (`<plugin>--v<version>`) · รายละเอียดแต่ละรุ่นอยู่ใน
 `CHANGELOG.md` ของแต่ละ plugin
@@ -55,9 +62,12 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 
 ```
 /plugin marketplace add pakornkub/ugt-claude-platform
-/plugin install ugt-nextjs-standard@ugt
+/plugin install ugt-nextjs-standard-superpowers@ugt
 /reload-plugins
 ```
+
+(ใช้ `ugt-nextjs-standard-mattpocock@ugt` แทนบรรทัดที่สองถ้าเลือก pipeline
+mattpocock)
 
 ตอน install เลือก scope **project** ถ้าอยากให้เพื่อนร่วมทีมที่ clone โปรเจคได้ด้วย ·
 เลือก **user** ถ้าอยากใช้เองทุกโปรเจค · เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็นรายการตัวช่วย
@@ -130,13 +140,32 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 | --- | --- |
 | ถามคำถาม / อ่านโค้ด | ตอบตรง ๆ ไม่มีพิธีรีตอง |
 | แก้งานเล็ก (typo, ค่า config) | ทำตรง ๆ ไม่เสียเวลา |
-| สร้าง feature / แก้บั๊ก | **อ่านความรู้ของโปรเจคก่อน** (ระบบเป็นยังไง กติกาอะไรอยู่) แล้วเข้ากระบวนการเต็ม: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review |
+| สร้าง feature / แก้บั๊ก | **bundle superpowers**: อ่านความรู้ของโปรเจคก่อน แล้วเข้ากระบวนการเต็มอัตโนมัติ: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review · **bundle mattpocock**: เรียกเองทีละคำสั่งตามหัวข้อถัดไป — ไม่มีอะไรทำงานเองให้ |
 | แตะไฟล์โค้ด / ไฟล์ UI / ไฟล์ฐานข้อมูล | กฎที่เกี่ยวโหลดเอง (มาตรฐานโค้ด, ข้อตกลงดีไซน์, กับดัก production) |
 | จบงาน | `/ugt-handoff` แล้ว commit |
 
 **เลือกความแรงของ AI ตามงาน**: `/ugt-model-mode god` (งานสำคัญ อัดเต็มที่) ·
 `/ugt-model-mode easy` (งานทั่วไป ประหยัด) · `/ugt-model-mode auto` (ให้เลือกเอง
 ตามความยากรายงาน) — โหมดถูก commit กับ repo ทั้งทีมได้โหมดเดียวกัน
+
+### ถ้าเลือก bundle mattpocock — สั่งเองทีละขั้น (ไม่ auto เหมือน superpowers)
+
+| คำสั่ง | ใช้ตอนไหน | ได้อะไร |
+| --- | --- | --- |
+| `/grill-with-docs` | มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม | AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น `CONTEXT.md`/ADR ในโปรเจค |
+| `/to-spec` | requirement ชัดแล้ว | เปลี่ยนบทสนทนาให้กลายเป็น spec พร้อมทำต่อ |
+| `/to-tickets` | มี spec แล้ว | แตกเป็นงานย่อย พร้อมลำดับก่อน-หลัง |
+| `/implement` | มี ticket แล้ว | ลงมือเขียนโค้ดจริง (ขับ TDD ข้างในให้เอง) |
+| `/code-review` | โค้ดเสร็จ | ตรวจ 2 แกน: ตรง spec ไหม + ผ่านมาตรฐานโค้ด repo ไหม |
+
+Flow: เคลียร์ requirement → spec → tickets → implement → review — เรียกเอง
+ทีละคำสั่ง ไม่มีขั้นไหนต่อขั้นถัดไปให้อัตโนมัติ (ต่างจาก bundle superpowers
+ที่ auto-chain ให้) แลกมาด้วยการคุมได้ละเอียดกว่าและ token ต่ำกว่า ลำดับเต็ม
+พร้อมทางแยก (prototype/triage/wayfinder) ดูที่ `/ask-matt`
+
+`CONTEXT.md` และ `docs/adr/` ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ
+`docs/project-context/` โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง
+ไม่ต้อง copy เนื้อหาข้ามที่กันเอง
 
 ### ความจำของทีม — โปรเจคจำเองได้ ไม่ต้องเล่าใหม่ทุกครั้ง
 
@@ -159,9 +188,11 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 
 ```
 /plugin marketplace update ugt
-/plugin update ugt-nextjs-standard
+/plugin update ugt-nextjs-standard-superpowers
 /reload-plugins
 ```
+
+(สลับชื่อเป็น `ugt-nextjs-standard-mattpocock` ถ้านั่นคือ bundle ที่ติดตั้งไว้)
 
 แล้วพิมพ์ **"sync kit"** หนึ่งครั้ง — ตัวช่วยจะเช็คว่าไฟล์ที่เคย copy เข้าโปรเจค
 (ตาราง ฟอร์ม หน้า login ฯลฯ) ตกรุ่นไหม แล้วเสนอเป็นรายไฟล์: ไฟล์ที่ไม่เคยแก้
