@@ -66,11 +66,11 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Task | How |
 | --- | --- |
 | Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (the superpowers "1% chance → must invoke" rule does not apply to read-only work) |
-| Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to the superpowers pipeline |
+| Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to your installed pipeline (superpowers, or `/to-spec` on the mattpocock bundle) |
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
 | No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path skips the **entire** superpowers pipeline (brainstorming/plans/TDD): the skill's SKILL.md is the plan, its verify script is the review |
-| Build a feature / fix a bug | **If `superpowers` is installed**: อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline · **If `mattpocock-skills` is installed instead**: fully user-driven — do not auto-invoke anything for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
+| Build a feature / fix a bug | **If `superpowers` is installed**: อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline · **If `mattpocock-skills` is installed instead**: fully user-driven — do not auto-invoke anything for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` · **if both are installed** (not recommended): use the superpowers branch |
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |
 
@@ -102,7 +102,7 @@ nothing ambiguous left to explore.
   scratch for one plan · feature-level status lives only in `board.md` +
   `handoff.md` (committed). Never copy content between the two.
 
-## Where new knowledge goes (4 ทาง)
+## Where new knowledge goes (4 ทาง + 1 ถ้าใช้ mattpocock bundle)
 
 - Work state (ค้างไหน คิวอะไร คำถามค้าง) → `.claude/state/handoff.md`
 - True only for this project → the matching `docs/project-context/` file
