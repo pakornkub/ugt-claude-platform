@@ -68,6 +68,15 @@ only in managed/policy settings).
 `ugt-nextjs-standard-mattpocock@ugt` as the `enabledPlugins` key instead —
 the two bundles are mutually exclusive, pick one.)
 
+> **⚠ Action required if you deployed a template from before 2026-08-31**
+> (ugt-core ≤ 2.9.0): the old key `"ugt-nextjs-standard@ugt"` points at a
+> plugin that no longer exists — machines still carrying it force-enable
+> nothing, and because managed settings override user and project settings,
+> **no user can fix it locally**. Update the key to one of the two names
+> above and **redeploy via your MDM / Group Policy / Ansible channel**; the
+> fix is not effective until the new file lands on each machine. Verify per
+> the checklist below on a sample machine after redeploying.
+
 What this buys:
 
 - **deny** — rules the client enforces itself, outside the model's decisions,

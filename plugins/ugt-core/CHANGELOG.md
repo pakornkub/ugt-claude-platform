@@ -1,5 +1,15 @@
 # Changelog — ugt-core
 
+## 2.9.2 (2026-09-01)
+
+**`org-managed-settings.md`: เพิ่มกล่อง "Action required" สำหรับ IT ที่
+deploy template ก่อน 2026-08-31 ไปแล้ว** — 2.9.1 แก้ชื่อ plugin ใน template
+แต่ไม่ได้บอกว่า fleet ที่ถือไฟล์เก่าอยู่ต้อง **redeploy** ผ่าน MDM/Group
+Policy/Ansible ด้วย (managed settings override ทุกระดับ ผู้ใช้แก้เองไม่ได้ —
+ถ้าไม่ redeploy ทั้งองค์กรจะ force-enable ปลั๊กอินที่ไม่มีอยู่จริงต่อไป
+เครื่องพนักงานใหม่ไม่ได้ bundle อัตโนมัติ) · จากผล code review อิสระหลัง
+release 4.55.0
+
 ## 2.9.1 (2026-08-31)
 
 **`org-managed-settings.md`: แก้ชื่อ plugin ที่อ้างถึง (3 จุด)** — `ugt-nextjs-standard`
