@@ -4,3 +4,5 @@
 .claude/launch.json
 .claude/worktrees/
 node_modules/
+# wayfinder / planning scratch (ไม่ commit — เป็น scratch ของการวางแผน ไม่ใช่ความรู้ของทีม)
+.scratch/
