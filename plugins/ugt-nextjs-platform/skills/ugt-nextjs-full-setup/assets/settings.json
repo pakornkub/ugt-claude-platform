@@ -8,7 +8,7 @@
     }
   },
   "enabledPlugins": {
-    "ugt-nextjs-standard@ugt": true
+    "__BUNDLE_NAME__@ugt": true
   },
   "permissions": {
     "deny": [

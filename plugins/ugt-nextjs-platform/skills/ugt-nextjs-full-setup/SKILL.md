@@ -209,6 +209,12 @@ How:
    `enabledPlugins`, `permissions` (the marketplace repo is already set to
    `pakornkub/ugt-claude-platform`) ·
    if the file already exists, merge — do not overwrite.
+   Substitute `__BUNDLE_NAME__` in `enabledPlugins` by detecting which
+   orchestration plugin is installed in the current session — same check as
+   the "Which skill, when" table row in `CLAUDE-block.md` (`superpowers`
+   skills/commands available → `ugt-nextjs-standard-superpowers` ·
+   `mattpocock-skills` skills/commands available → `ugt-nextjs-standard-mattpocock`)
+   · ambiguous or neither found → default to `ugt-nextjs-standard-superpowers`.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
    installed modules in `handoff.md` · `model-mode.md` ships with the `default`
