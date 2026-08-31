@@ -34,6 +34,8 @@ per-task subagent + reviewer + fix-loop 5 รอบ → final review) ซึ่�
 | 2.7 | **คำอธิบาย flow เต็ม (5 คำสั่ง + ตาราง) อยู่ที่ README.md + docs/web/index.html เท่านั้น** | เป็นเอกสารที่คนอ่านเอง อ่านครั้งเดียวตอนตัดสินใจ/เรียนรู้ ไม่ถูก inject เข้า context ของ Claude |
 | 2.8 | **ไม่แตะ docs/training/{landing,cheatsheet}.html** | grep แล้วสองไฟล์นี้ไม่เคยพูดถึง superpowers/ugt-nextjs-standard เลย — ไม่ใช่ของที่ "sync" อยู่ก่อน การเพิ่มเนื้อหาสอนใหม่ทั้งหมดเป็นงานคนละก้อน ไม่อยู่ในสโคปนี้ |
 | 2.9 | **rename เป็น breaking change มีเอกสารย้าย ไม่ทำ compat shim plugin ปลอม** | ตาม YAGNI — ผู้ใช้เดิมของ `ugt-nextjs-standard` (v2.1.0) ต้อง `/plugin install ugt-nextjs-standard-superpowers@ugt` เอง มี note ชัดใน CHANGELOG + README |
+| 2.10 | **มติเก่าใน `ugt-nextjs-standard` CHANGELOG 1.3.0 ("mattpocock-skills ถูกประเมินแล้วปฏิเสธ") ถือว่าล้าสมัยแล้ว ไม่ใช่ผิด** | เหตุผลตอนนั้น (superpowers+matt ติดตั้งพร้อมกัน ทำให้ description ซ้ำกันทุก session) ไม่จริงอีกต่อไปเพราะดีไซน์นี้แยก bundle ติดตั้งได้ทีละตัว — ข้อกังวลเรื่อง `grilling` เป็น subset ของ `brainstorming` ยังจริงอยู่ (คนละเป้าหมาย: ตอนนั้นหา best-single-pipeline ตอนนี้หา cheaper-alternative-pipeline) ไม่ใช่เหตุผลให้ปฏิเสธ ต้อง note ไว้ใน CHANGELOG ใหม่ไม่ให้งงว่าทำไมกลับคำ |
+| 2.11 | **Cross-reference ที่เก็บความรู้ ไม่รวมเป็นที่เดียว** — `grill-with-docs`/`domain-modeling` เขียน `CONTEXT.md` (root) + `docs/adr/` เอง คนละที่กับ `docs/project-context/` โดยตั้งใจ | มติเก่าข้อ 2 (duplicate knowledge home) ยังจริง แต่แก้ไม่ได้ด้วยการรวมไฟล์ (แก้ skill ของ matt ที่ติดตั้งมาไม่ได้) — แก้ด้วยกฎ **อ่านทั้งคู่ เขียนแค่เจ้าของ** ใน CLAUDE-block.md แทน กันไม่ให้ Claude เผลอ copy เนื้อหาข้ามที่ |
 
 ## 3. โครงสร้าง bundle ใหม่
 
@@ -60,10 +62,10 @@ marketplace `claude-plugins-official`)
 | **ใหม่** `plugins/ugt-nextjs-standard-superpowers/.claude-plugin/plugin.json` | ย้ายเนื้อหาจาก `ugt-nextjs-standard` เดิม เปลี่ยน `name`, bump `version` → 3.0.0 (breaking rename) |
 | **ใหม่** `plugins/ugt-nextjs-standard-superpowers/CHANGELOG.md` | entry 3.0.0: "renamed from ugt-nextjs-standard — no functional change" |
 | **ใหม่** `plugins/ugt-nextjs-standard-mattpocock/.claude-plugin/plugin.json` | เหมือนบนแต่ deps เป็น mattpocock-skills, version 1.0.0 |
-| **ใหม่** `plugins/ugt-nextjs-standard-mattpocock/CHANGELOG.md` | entry 1.0.0 แรกเริ่ม |
+| **ใหม่** `plugins/ugt-nextjs-standard-mattpocock/CHANGELOG.md` | entry 1.0.0 แรกเริ่ม + note สั้นตามมติ 2.10 อ้างว่า `ugt-nextjs-standard` 1.3.0 เคยปฏิเสธ mattpocock-skills มาก่อน และทำไมรอบนี้ต่างออกไป (bundle แยก ไม่ใช่ติดตั้งคู่กัน) |
 | **ลบ** `plugins/ugt-nextjs-standard/` ทั้งโฟลเดอร์ | ย้ายเป็นสองตัวข้างบนแทน |
 | `.claude-plugin/marketplace.json` | ลบ entry `ugt-nextjs-standard` เดิม เพิ่ม 2 entry ใหม่ |
-| `plugins/ugt-nextjs-platform/skills/ugt-nextjs-full-setup/assets/CLAUDE-block.md` | แถว "Build a feature / fix a bug" ในตาราง Which-skill-when แยก 2 บรรทัดสั้น ๆ — ตรวจว่า `superpowers` หรือ `mattpocock-skills` ติดตั้งอยู่จริง แล้วชี้ไปที่ pipeline ของฝั่งนั้น (matt: ชี้ `/ask-matt` เฉย ๆ ไม่อธิบายซ้ำ) |
+| `plugins/ugt-nextjs-platform/skills/ugt-nextjs-full-setup/assets/CLAUDE-block.md` | (a) แถว "Build a feature / fix a bug" ในตาราง Which-skill-when แยก 2 บรรทัดสั้น ๆ — ตรวจว่า `superpowers` หรือ `mattpocock-skills` ติดตั้งอยู่จริง แล้วชี้ไปที่ pipeline ของฝั่งนั้น (matt: ชี้ `/ask-matt` เฉย ๆ ไม่อธิบายซ้ำ) (b) เพิ่ม bullet ใหม่ใน "Where new knowledge goes (4 ทาง)" ตามมติ 2.11 (เนื้อหาอยู่ §5) |
 | `plugins/ugt-nextjs-platform/.claude-plugin/plugin.json` | bump 4.54.0 → 4.55.0 |
 | `plugins/ugt-nextjs-platform/CHANGELOG.md` | entry 4.55.0 อธิบายการแตก branch ของแถว Which-skill-when |
 | `README.md` | (a) ตาราง "มีอะไรในชุดนี้" แยกแถว `ugt-nextjs-standard-superpowers` / `-mattpocock` แทนแถวเดียวเดิม (b) คำสั่ง install/update (บรรทัด 58, 162) เปลี่ยนชื่อ + เพิ่มคำอธิบายเลือกยังไง (c) ตาราง day-to-day แถว "สร้าง feature/แก้บั๊ก" แยกพฤติกรรมตาม bundle (d) subsection ใหม่ "ถ้าเลือก bundle mattpocock — สั่งเองทีละขั้น" พร้อมตาราง 5 คำสั่ง (เนื้อหาอยู่ §5 ด้านล่าง) |
@@ -101,6 +103,18 @@ CLAUDE-block.md (ตาม 2.6) ใส่แค่:
 
 ```markdown
 | Build a feature / fix a bug | **superpowers ติดตั้งอยู่**: (พฤติกรรมเดิมทั้งหมด — sizing gate ครบ) · **mattpocock-skills ติดตั้งอยู่แทน**: user-driven ล้วน — Claude ไม่ auto-invoke ให้ รอผู้ใช้เรียก `/grill-with-docs` เอง อ้างอิงลำดับเต็มที่ `/ask-matt` |
+```
+
+และ (ตาม 2.11) เพิ่ม bullet ใหม่ต่อท้ายลิสต์ในหัวข้อ "Where new knowledge goes (4 ทาง)":
+
+```markdown
+- **โปรเจคที่ใช้ mattpocock bundle**: `grill-with-docs`/`domain-modeling`
+  สร้าง/ดูแล `CONTEXT.md` (root, glossary) และ `docs/adr/`
+  (การตัดสินใจทางเทคนิค) เอง — คนละที่เก็บกับ `docs/project-context/`
+  โดยตั้งใจ **ห้าม copy เนื้อหาข้ามกัน**: เริ่มงานอ่านทั้งคู่
+  (`docs/project-context/00-index.md` + `CONTEXT.md`/`docs/adr/` ถ้ามี)
+  แต่เขียนแค่ที่เจ้าของมันเขียน — `/ugt-handoff` ดูแลเฉพาะ
+  `docs/project-context/` + `handoff.md` เหมือนเดิม ไม่แตะ `CONTEXT.md`/`docs/adr/`
 ```
 
 ## 6. Verification / release checklist
