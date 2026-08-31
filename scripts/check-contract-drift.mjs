@@ -169,6 +169,64 @@ const CHECKS = [
       [`${PHP}/ugt-php-cicd-setup/assets/Jenkinsfile`]: [/stage\('OWASP Dependency Check'\)/],
     },
   },
+  {
+    // review 2026-09-01: the mattpocock walkthrough is duplicated by design
+    // (README ↔ index.html "sync by inspection") — pin the command list +
+    // the required setup step so one side can't silently drift
+    name: 'Mattpocock flow: 5 commands + setup step present in every copy',
+    files: {
+      'README.md': [
+        /setup-matt-pocock-skills/, /grill-with-docs/, /to-spec/, /to-tickets/,
+        /\/implement/, /code-review/,
+      ],
+      'docs/web/index.html': [
+        /setup-matt-pocock-skills/, /grill-with-docs/, /to-spec/, /to-tickets/,
+        /\/implement/, /code-review/,
+      ],
+      '.claude-plugin/marketplace.json': [
+        /grill-with-docs → to-spec → to-tickets → implement → code-review/,
+      ],
+      'plugins/ugt-nextjs-standard-mattpocock/.claude-plugin/plugin.json': [
+        /grill-with-docs → to-spec → to-tickets → implement → code-review/,
+      ],
+    },
+  },
+  {
+    // review 2026-09-01: the CONTEXT.md/docs-adr vs docs/project-context
+    // separation rule lives in three places — pin that each copy names all
+    // three homes (wording may differ; the cross-reference must not vanish)
+    name: 'Knowledge homes: CONTEXT.md + docs/adr/ + docs/project-context/ cross-referenced',
+    files: {
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
+        /CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//,
+      ],
+      'README.md': [/CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//],
+      'docs/web/index.html': [/CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//],
+    },
+  },
+  {
+    // review 2026-09-01: pipeline conditionality is resolved at generation
+    // time via [PIPELINE:*] spans — pin the markers and the SKILL.md step
+    // that consumes them so neither side is edited away alone
+    name: 'Pipeline spans: [PIPELINE:*] markers in CLAUDE-block + SKILL.md consumer',
+    files: {
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
+        /\[PIPELINE:superpowers\]/, /\[PIPELINE:mattpocock\]/,
+      ],
+      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/\[PIPELINE/, /__BUNDLE_NAME__/],
+    },
+  },
+  {
+    // review 2026-09-01: the superpowers pipeline phrase drifted between
+    // marketplace.json and the bundle's own plugin.json on day one
+    name: 'Superpowers pipeline phrase identical in marketplace + bundle manifest',
+    files: {
+      '.claude-plugin/marketplace.json': [/brainstorming → plan → TDD → code review/],
+      'plugins/ugt-nextjs-standard-superpowers/.claude-plugin/plugin.json': [
+        /brainstorming → plan → TDD → code review/,
+      ],
+    },
+  },
 ];
 
 // Version sync — audit 2026-08-25: the README "รุ่นล่าสุด" table sat 1–4
@@ -204,6 +262,27 @@ try {
   versionCheck.problems = [`  ✘ could not read version sources: ${e.message}`];
 }
 
+// Bundle parity — review 2026-09-01: the two pipeline bundles promise
+// "same bundle, different pipeline"; their dependency lists must stay
+// identical except for the one orchestration plugin.
+const bundleCheck = {
+  name: 'Bundle parity: -superpowers / -mattpocock deps identical except pipeline plugin',
+};
+try {
+  const depName = (d) => (typeof d === 'string' ? d : d.name);
+  const load = (name) =>
+    JSON.parse(readFileSync(join(ROOT, `plugins/${name}/.claude-plugin/plugin.json`), 'utf8'))
+      .dependencies.map(depName);
+  const sp = load('ugt-nextjs-standard-superpowers').filter((d) => d !== 'superpowers');
+  const mp = load('ugt-nextjs-standard-mattpocock').filter((d) => d !== 'mattpocock-skills');
+  bundleCheck.problems =
+    JSON.stringify(sp.sort()) === JSON.stringify(mp.sort())
+      ? []
+      : [`  ✘ shared deps differ: superpowers keeps [${sp}] vs mattpocock keeps [${mp}]`];
+} catch (e) {
+  bundleCheck.problems = [`  ✘ could not compare bundle manifests: ${e.message}`];
+}
+
 let failed = 0;
 for (const check of CHECKS) {
   const problems = [];
@@ -229,16 +308,18 @@ for (const check of CHECKS) {
   }
 }
 
-if (versionCheck.problems.length === 0) {
-  console.log(`✔ ${versionCheck.name}`);
-} else {
-  failed += 1;
-  console.log(`✘ ${versionCheck.name}`);
-  for (const p of versionCheck.problems) console.log(p);
+for (const special of [versionCheck, bundleCheck]) {
+  if (special.problems.length === 0) {
+    console.log(`✔ ${special.name}`);
+  } else {
+    failed += 1;
+    console.log(`✘ ${special.name}`);
+    for (const p of special.problems) console.log(p);
+  }
 }
 
 if (failed > 0) {
   console.log(`\n${failed} check(s) failed — contract and copies disagree. Fix before release.`);
   process.exit(1);
 }
-console.log(`\nAll ${CHECKS.length + 1} checks passed — no contract drift.`);
+console.log(`\nAll ${CHECKS.length + 2} checks passed — no contract drift.`);
