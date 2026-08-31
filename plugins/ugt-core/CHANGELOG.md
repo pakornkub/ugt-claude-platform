@@ -1,5 +1,17 @@
 # Changelog — ugt-core
 
+## 2.9.1 (2026-08-31)
+
+**`org-managed-settings.md`: แก้ชื่อ plugin ที่อ้างถึง (3 จุด)** — `ugt-nextjs-standard`
+ถูก rename/split เป็น `ugt-nextjs-standard-superpowers` /
+`ugt-nextjs-standard-mattpocock` ใน `ugt-nextjs-platform` 4.55.0
+(ดูรุ่นนั้นและ `docs/superpowers/plans/2026-08-31-pipeline-bundle-choice.md`)
+แต่เอกสารนี้ — template ที่ IT ใช้ deploy ผ่าน MDM/Group Policy ไปทั้งองค์กร —
+ยังชี้ไปที่ชื่อเดิมที่ไม่มีอยู่แล้ว: JSON template, ข้อความ "what this buys",
+และ checklist ตอนท้าย ทั้งสามจุดแก้เป็น `ugt-nextjs-standard-superpowers`
+(bundle เริ่มต้นที่แนะนำ) พร้อมหมายเหตุสั้น ๆ ให้ IT ที่อยากใช้ pipeline
+mattpocock แทนว่าต้องสลับ key เป็น `ugt-nextjs-standard-mattpocock@ugt`
+
 ## 2.9.0 (2026-08-25)
 
 **แก้ contract ตามผล audit ปูพรม 7 มิติ 2026-08-25** — ทุกข้อ verify ทั้งสองฝั่ง

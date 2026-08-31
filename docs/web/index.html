@@ -433,7 +433,7 @@
 <!-- ================= PLUGINS ================= -->
 <section id="plugins" aria-labelledby="plugins-title">
   <div class="wrap">
-    <span class="kicker reveal">5 Plugins</span>
+    <span class="kicker reveal">6 Plugins</span>
     <h2 id="plugins-title" class="reveal">มีอะไรในชุดนี้</h2>
     <p class="lead reveal">สาย Next.js ติดตั้งตัวเดียว — เลือก
     <strong>ugt-nextjs-standard-superpowers</strong> (pipeline auto) หรือ
@@ -461,7 +461,7 @@
         <p>ตัวช่วย 11 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD, sync kit และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.9.0</span>
+        <span class="ver">v2.9.1</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -679,11 +679,39 @@
         <tbody>
           <tr><td><strong>ถามคำถาม / อ่านโค้ด</strong></td><td>ตอบตรง ๆ ไม่มีพิธีรีตอง</td></tr>
           <tr><td><strong>แก้งานเล็ก</strong> (typo, ค่า config)</td><td>ทำตรง ๆ ไม่เสียเวลา</td></tr>
-          <tr><td><strong>สร้าง feature / แก้บั๊ก</strong></td><td><strong>อ่านความรู้ของโปรเจคก่อน</strong> (ระบบเป็นยังไง กติกาอะไรอยู่) แล้วเข้ากระบวนการเต็ม: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review</td></tr>
+          <tr><td><strong>สร้าง feature / แก้บั๊ก</strong></td><td><strong>bundle superpowers</strong>: อ่านความรู้ของโปรเจคก่อน แล้วเข้ากระบวนการเต็มอัตโนมัติ: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review · <strong>bundle mattpocock</strong>: เรียกเองทีละคำสั่งตามหัวข้อถัดไป — ไม่มีอะไรทำงานเองให้</td></tr>
           <tr><td><strong>แตะไฟล์โค้ด / ไฟล์ UI / ไฟล์ฐานข้อมูล</strong></td><td>กฎที่เกี่ยวโหลดเอง (มาตรฐานโค้ด, ข้อตกลงดีไซน์, กับดัก production)</td></tr>
           <tr><td><strong>จบงาน</strong></td><td><span class="cmd">/ugt-handoff</span> แล้ว commit</td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="subsec">
+    <span class="sub-kicker reveal">bundle mattpocock</span>
+    <h3 class="sub-title reveal">ถ้าเลือก bundle mattpocock — สั่งเองทีละขั้น (ไม่ auto เหมือน superpowers)</h3>
+    <div class="table-scroll reveal">
+      <table>
+        <caption>ตารางคำสั่ง 5 ตัวของ pipeline mattpocock เรียงตามลำดับใช้งาน</caption>
+        <thead>
+          <tr><th scope="col">คำสั่ง</th><th scope="col">ใช้ตอนไหน</th><th scope="col">ได้อะไร</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="cmd">/grill-with-docs</span></td><td>มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม</td><td>AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น <span class="inline-code">CONTEXT.md</span>/ADR ในโปรเจค</td></tr>
+          <tr><td><span class="cmd">/to-spec</span></td><td>requirement ชัดแล้ว</td><td>เปลี่ยนบทสนทนาให้กลายเป็น spec พร้อมทำต่อ</td></tr>
+          <tr><td><span class="cmd">/to-tickets</span></td><td>มี spec แล้ว</td><td>แตกเป็นงานย่อย พร้อมลำดับก่อน-หลัง</td></tr>
+          <tr><td><span class="cmd">/implement</span></td><td>มี ticket แล้ว</td><td>ลงมือเขียนโค้ดจริง (ขับ TDD ข้างในให้เอง)</td></tr>
+          <tr><td><span class="cmd">/code-review</span></td><td>โค้ดเสร็จ</td><td>ตรวจ 2 แกน: ตรง spec ไหม + ผ่านมาตรฐานโค้ด repo ไหม</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note reveal">
+      Flow: เคลียร์ requirement → spec → tickets → implement → review — เรียกเองทีละคำสั่ง
+      ไม่มีขั้นไหนต่อขั้นถัดไปให้อัตโนมัติ (ต่างจาก bundle superpowers ที่ auto-chain ให้)
+      แลกมาด้วยการคุมได้ละเอียดกว่าและ token ต่ำกว่า ลำดับเต็มพร้อมทางแยก
+      (prototype/triage/wayfinder) ดูที่ <span class="inline-code">/ask-matt</span> ·
+      <span class="inline-code">CONTEXT.md</span> และ <span class="inline-code">docs/adr/</span>
+      ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ <span class="inline-code">docs/project-context/</span>
+      โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง ไม่ต้อง copy เนื้อหาข้ามที่กันเอง
+    </p>
     </div>
     <div class="subsec">
     <span class="sub-kicker reveal">โปรเจคจำเองได้</span>

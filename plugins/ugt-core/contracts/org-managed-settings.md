@@ -58,18 +58,22 @@ only in managed/policy settings).
     }
   },
   "enabledPlugins": {
-    "ugt-nextjs-standard@ugt": true
+    "ugt-nextjs-standard-superpowers@ugt": true
   },
   "claudeMd": "Never commit secrets to git under any circumstances. npm run build must pass before every push. Employee data is personal data under PDPA — never send it outside org systems."
 }
 ```
+
+(IT standardizing the org on the lighter manual pipeline instead: use
+`ugt-nextjs-standard-mattpocock@ugt` as the `enabledPlugins` key instead —
+the two bundles are mutually exclusive, pick one.)
 
 What this buys:
 
 - **deny** — rules the client enforces itself, outside the model's decisions,
   and projects cannot switch off
 - **extraKnownMarketplaces + enabledPlugins** — every machine gets
-  `ugt-nextjs-standard` without each person running `/plugin marketplace add`
+  `ugt-nextjs-standard-superpowers` without each person running `/plugin marketplace add`
 - **claudeMd** — text present in every session of every project on the machine,
   which users cannot exclude
 
@@ -98,6 +102,6 @@ task that needs someone to own that endpoint.
 - [ ] Decide on `sandbox.enabled` and `strictKnownMarketplaces`
 - [ ] Write `managed-settings.json` and distribute via MDM / Group Policy / Ansible
 - [ ] Test on a sample machine: run `claude`, confirm a denied action is blocked,
-      and `/plugin` shows `ugt-nextjs-standard` installed
+      and `/plugin` shows `ugt-nextjs-standard-superpowers` installed
 - [ ] Announce the enforced rules to the team — rules nobody knows about get
       reported as bugs

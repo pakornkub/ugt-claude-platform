@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.55.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.6.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.6.0 — pilot รอบแรกจบแล้ว แก้ blocker ครบ **แต่ยังไม่ได้พิสูจน์ซ้ำ (ยังไม่ tag)** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.9.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.9.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -193,6 +193,10 @@ Flow: เคลียร์ requirement → spec → tickets → implement → r
 ```
 
 (สลับชื่อเป็น `ugt-nextjs-standard-mattpocock` ถ้านั่นคือ bundle ที่ติดตั้งไว้)
+
+ยังมี `ugt-nextjs-standard` ตัวเดิม (ไม่มีคำต่อท้าย) ติดตั้งอยู่? `/plugin update
+ugt-nextjs-standard` จะหาไม่เจอแล้ว — ต้องรัน `/plugin install
+ugt-nextjs-standard-superpowers@ugt` เองเพื่อได้พฤติกรรมเดิม (superpowers) กลับมา
 
 แล้วพิมพ์ **"sync kit"** หนึ่งครั้ง — ตัวช่วยจะเช็คว่าไฟล์ที่เคย copy เข้าโปรเจค
 (ตาราง ฟอร์ม หน้า login ฯลฯ) ตกรุ่นไหม แล้วเสนอเป็นรายไฟล์: ไฟล์ที่ไม่เคยแก้
