@@ -1,4 +1,17 @@
-# Changelog — ugt-nextjs-standard
+# Changelog — ugt-nextjs-standard-superpowers
+
+## 3.0.0 (2026-08-31)
+
+- **Renamed from `ugt-nextjs-standard`** (breaking — plugin name changes,
+  existing installs must run `/plugin install ugt-nextjs-standard-superpowers@ugt`
+  themselves; no compat shim). No functional change otherwise: still
+  `ugt-nextjs-platform` + `superpowers` + `skill-creator` + `frontend-design`.
+- Reason for the rename: the bundle now has a sibling,
+  `ugt-nextjs-standard-mattpocock`, for teams who want the lighter-weight
+  mattpocock-skills pipeline instead of superpowers. See that plugin's
+  CHANGELOG and `docs/superpowers/specs/2026-08-31-pipeline-bundle-choice-design.md`
+  for the full design and why a runtime toggle was rejected in favor of
+  separate bundles.
 
 ## 2.1.0 (2026-08-09)
 
@@ -44,6 +57,17 @@
 - The rest of the plugin (~21 skills, all loading their descriptions every
   session) duplicates superpowers on `tdd`, `code-review`, `diagnosing-bugs`
   and `writing-great-skills`.
+
+> **Superseded by 3.0.0 (see above) / `ugt-nextjs-standard-mattpocock` 1.0.0.**
+> The blocking reason (installing both plugins together duplicates every
+> mattpocock skill description alongside superpowers' own, every session)
+> no longer applies once the two pipelines ship as separate, mutually
+> exclusive bundles — a project installs one or the other, never both. The
+> `grilling`-is-a-subset observation still holds; it just stopped being
+> disqualifying once the goal changed from "pick the one best pipeline" to
+> "offer a cheaper alternative pipeline". See
+> `docs/superpowers/specs/2026-08-31-pipeline-bundle-choice-design.md`
+> decision 2.10.
 
 ## 1.2.0 (2026-07-29)
 

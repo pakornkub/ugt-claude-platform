@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-nextjs-standard-superpowers",
+  "displayName": "UGT Next.js Standard (superpowers pipeline)",
+  "version": "3.0.0",
+  "description": "The recommended bundle for dev teams using the superpowers pipeline — one install brings the org's stack knowledge (ugt-nextjs-platform), the development pipeline (superpowers: brainstorming → plan → TDD → code review), UI design quality (frontend-design), and skill-creator for building project skills to the same standard",
+  "author": {
+    "name": "UGT DX Team"
+  },
+  "dependencies": [
+    "ugt-nextjs-platform",
+    {
+      "name": "superpowers",
+      "marketplace": "claude-plugins-official"
+    },
+    {
+      "name": "skill-creator",
+      "marketplace": "claude-plugins-official"
+    },
+    {
+      "name": "frontend-design",
+      "marketplace": "claude-plugins-official"
+    }
+  ]
+}

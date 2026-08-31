@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-nextjs-standard-mattpocock",
+  "displayName": "UGT Next.js Standard (mattpocock pipeline)",
+  "version": "1.0.0",
+  "description": "The lighter-weight bundle for dev teams using the mattpocock-skills pipeline — one install brings the org's stack knowledge (ugt-nextjs-platform), the development pipeline (mattpocock-skills: grill-with-docs → to-spec → to-tickets → implement → code-review), UI design quality (frontend-design), and skill-creator for building project skills to the same standard",
+  "author": {
+    "name": "UGT DX Team"
+  },
+  "dependencies": [
+    "ugt-nextjs-platform",
+    {
+      "name": "mattpocock-skills",
+      "marketplace": "claude-plugins-official"
+    },
+    {
+      "name": "skill-creator",
+      "marketplace": "claude-plugins-official"
+    },
+    {
+      "name": "frontend-design",
+      "marketplace": "claude-plugins-official"
+    }
+  ]
+}
