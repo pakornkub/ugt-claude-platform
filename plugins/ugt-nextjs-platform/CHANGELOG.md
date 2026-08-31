@@ -1,5 +1,43 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.56.0 (2026-09-01)
+
+**Pipeline-aware harness generation + migration fixes จากผล code review อิสระ
+2 รอบหลัง release 4.55.0** (เลข 4.55.1 ถูกข้าม — commit `ba2305f` ใน tag
+4.55.0 ตั้งชื่อ "fix(4.55.1)" ผิดพลาด version นั้นไม่เคยมีจริง ห้ามนำ 4.55.1
+มาใช้ซ้ำในอนาคต)
+
+- **CLAUDE-block.md เปลี่ยนเป็น generate ตาม bundle** ด้วย marker
+  `[PIPELINE:superpowers]` / `[PIPELINE:mattpocock]` (convention เดียวกับ
+  `[METHOD:]` ของ auth-setup): full-setup ตรวจว่า bundle ไหนติดตั้งอยู่แล้ว
+  เก็บเฉพาะ span ของฝั่งนั้น — แก้ 2 ปัญหาพร้อมกัน: (1) โปรเจค mattpocock
+  เคยได้ section "Sizing"/"Layer contract" ของ superpowers ติดไปด้วยทั้งที่
+  ขัดกับแถว routing ของตัวเอง (โดยเฉพาะ "never re-review the code" ซึ่งบน
+  mattpocock ไม่มี review อัตโนมัติมาก่อนเลย — เป็นช่องให้ merge โค้ดไม่ผ่าน
+  review) (2) token ตายเปล่า ~250/session บนโปรเจค superpowers จาก bullet
+  mattpocock ที่ไม่มีวันใช้ · โปรเจค mattpocock ได้ section
+  "Merging a feature branch (mattpocock)" ใหม่: ก่อน merge ต้องยืนยันว่า
+  `/code-review` ถูกรันแล้ว · **เปลี่ยน bundle ภายหลัง → รัน full-setup
+  harness step ใหม่เพื่อ regenerate block**
+- **settings.json merge ลบ key ตาย**: ถ้าไฟล์เดิมมี
+  `"ugt-nextjs-standard@ugt"` (bundle ก่อน split — ไม่มีใน marketplace แล้ว)
+  ให้ลบทิ้งระหว่าง merge · verify.mjs fail พร้อมคำแนะนำ migrate เมื่อเจอ key
+  นี้ — ปิดช่องที่โปรเจคเดิมทุกตัวมี clone-time bootstrap พังเงียบ
+- **fallback ของ `__BUNDLE_NAME__` เลิกเดา**: detect ไม่ได้ (คลุมเครือ/ไม่มี
+  pipeline plugin เลย) → ถามผู้ใช้ 1 คำถาม; ตอบว่าไม่ใช้ bundle →
+  เขียน `"enabledPlugins": {}` แทนการ default เป็น superpowers ให้ทีมที่
+  ไม่ได้เลือก (แก้ finding จาก review: เคสติดตั้ง `ugt-nextjs-platform`
+  เดี่ยว/copy ไฟล์ตรงมีจริงตาม README)
+- หัวข้อ "Where new knowledge goes" ตัดตัวเลขนับทางออกจากหัวข้อ (เดิม
+  "(4 ทาง + 1...)") — จำนวน bullet ต่างกันตาม bundle ที่ generate แล้ว
+
+**Migration สำหรับโปรเจคที่ติดตั้งก่อน split**: แก้ `.claude/settings.json`
+ที่ commit ไว้ — ลบ key `"ugt-nextjs-standard@ugt"` แล้วใส่
+`"ugt-nextjs-standard-superpowers@ugt": true` (พฤติกรรมเดิม) หรือ
+`"ugt-nextjs-standard-mattpocock@ugt": true` แทน แล้ว commit — หรือรัน
+`/ugt-nextjs-full-setup` ใหม่ให้จัดการ (ตั้งแต่รุ่นนี้ merge จะลบ key
+ตายให้เอง) · ฝั่ง IT ที่ deploy managed-settings ดู ugt-core 2.9.2
+
 ## 4.55.0 (2026-08-31)
 
 **CLAUDE-block.md: route "Build a feature / fix a bug" by which pipeline plugin is
@@ -19,6 +57,12 @@ own knowledge files**
 - Existing projects on `ugt-nextjs-standard-superpowers` (or the pre-split
   `ugt-nextjs-standard`) see no behavior change — the superpowers branch of
   the routing row is identical to the old unconditional text.
+- *(บันทึกย้อนหลัง — เพิ่มใน 4.56.0 เพื่อความครบของ audit trail)* tag
+  `ugt-nextjs-platform--v4.55.0` มีอีก 2 commit ที่ตอนแรกไม่ได้บันทึกใน entry
+  นี้: `assets/settings.json` เปลี่ยนเป็น placeholder `__BUNDLE_NAME__@ugt` +
+  SKILL.md step 3 เพิ่มกติกา substitute ตาม bundle ที่ติดตั้ง (commit
+  `ba2305f` — ชื่อ commit อ้าง "4.55.1" ผิดพลาด ไม่มี version นั้นจริง) และ
+  CLAUDE-block.md แก้ minor wording 3 จุด (commit `a55c6b2`)
 
 ## 4.54.0 (2026-08-26)
 

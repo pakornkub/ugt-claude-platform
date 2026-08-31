@@ -188,6 +188,13 @@ How:
    `__HARNESS_VERSION__` from this plugin's current `plugin.json` version —
    verify.mjs compares that stamp against the installed plugin and warns when
    the block has fallen behind (paste-into-file assets have no other sync).
+   **Pipeline spans**: the asset carries `[PIPELINE:superpowers]` /
+   `[PIPELINE:mattpocock]` marker comments (same convention as auth-setup's
+   `[METHOD:]`). Detect the installed pipeline (see step 3's detection rule —
+   one detection, used by both steps), keep only the matching spans, delete
+   the other pipeline's spans and every `[PIPELINE]` marker comment. A
+   project that later switches bundles must re-run this step to regenerate
+   the block — the spans are resolved at generation time, not at runtime.
    > **Size check**: if the combined file exceeds ~200 lines, move project
    > content that is path-bound into `.claude/rules/<project>-*.md` instead of
    > letting CLAUDE.md bloat (longer files get followed less).
@@ -208,13 +215,21 @@ How:
 3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`,
    `enabledPlugins`, `permissions` (the marketplace repo is already set to
    `pakornkub/ugt-claude-platform`) ·
-   if the file already exists, merge — do not overwrite.
-   Substitute `__BUNDLE_NAME__` in `enabledPlugins` by detecting which
-   orchestration plugin is installed in the current session — same check as
-   the "Which skill, when" table row in `CLAUDE-block.md` (`superpowers`
+   if the file already exists, merge — do not overwrite; **while merging,
+   remove a stale `"ugt-nextjs-standard@ugt"` key if present** (the pre-split
+   bundle — that plugin no longer exists in the marketplace, and leaving it
+   makes every clone prompt for a plugin that cannot resolve).
+   Substitute `__BUNDLE_NAME__` in `enabledPlugins` by **detecting which
+   orchestration plugin is installed** in the current session: `superpowers`
    skills/commands available → `ugt-nextjs-standard-superpowers` ·
-   `mattpocock-skills` skills/commands available → `ugt-nextjs-standard-mattpocock`)
-   · ambiguous or neither found → default to `ugt-nextjs-standard-superpowers`.
+   `mattpocock-skills` skills/commands available →
+   `ugt-nextjs-standard-mattpocock` (this same detection also resolves the
+   `[PIPELINE]` spans in step 1). **Ambiguous (both present) or neither
+   found → never guess: ask the user one question** — which bundle this
+   project uses, or none. If the answer is none (they installed
+   `ugt-nextjs-platform` standalone or copied files directly), write
+   `"enabledPlugins": {}` (explicitly empty) — never enable a bundle the
+   team did not choose.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
    installed modules in `handoff.md` · `model-mode.md` ships with the `default`

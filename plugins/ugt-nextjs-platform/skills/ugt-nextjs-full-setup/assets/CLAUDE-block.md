@@ -70,10 +70,19 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
 | No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path skips the **entire** superpowers pipeline (brainstorming/plans/TDD): the skill's SKILL.md is the plan, its verify script is the review |
-| Build a feature / fix a bug | **If `superpowers` is installed**: อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline · **If `mattpocock-skills` is installed instead**: fully user-driven — do not auto-invoke anything for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` · **if both are installed** (not recommended): use the superpowers branch |
+<!-- [PIPELINE:superpowers] — full-setup keeps exactly ONE pipeline's spans when
+     generating this block (same [MARKER] convention as auth-setup's [METHOD:]):
+     detect the installed bundle, keep matching spans, delete the other
+     pipeline's spans AND all [PIPELINE] marker comments. -->
+| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline |
+<!-- [/PIPELINE:superpowers] -->
+<!-- [PIPELINE:mattpocock] -->
+| Build a feature / fix a bug | Fully user-driven — do not auto-invoke any pipeline skill for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
+<!-- [/PIPELINE:mattpocock] -->
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |
 
+<!-- [PIPELINE:superpowers] -->
 ### Sizing a feature/bug before the pipeline
 
 Judge on the same three signals as `/ugt-model-mode`'s `auto` preset — **ambiguity**
@@ -101,8 +110,17 @@ nothing ambiguous left to explore.
 - The pipeline's ledger (`.superpowers/sdd/`, git-ignored) is task-level
   scratch for one plan · feature-level status lives only in `board.md` +
   `handoff.md` (committed). Never copy content between the two.
+<!-- [/PIPELINE:superpowers] -->
+<!-- [PIPELINE:mattpocock] -->
+### Merging a feature branch (mattpocock)
 
-## Where new knowledge goes (4 ทาง + 1 ถ้าใช้ mattpocock bundle)
+Nothing reviews code automatically on this bundle — before merging any
+feature branch, confirm `/code-review` (mattpocock's two-axis review) was
+run on it; if not, run it first, then do the integration check (full
+test/lint suite) and update the board via `/ugt-handoff`.
+<!-- [/PIPELINE:mattpocock] -->
+
+## Where new knowledge goes
 
 - Work state (ค้างไหน คิวอะไร คำถามค้าง) → `.claude/state/handoff.md`
 - True only for this project → the matching `docs/project-context/` file
@@ -114,6 +132,7 @@ nothing ambiguous left to explore.
   deleted on update)
 - Personal preference → auto memory · never create `.claude/skills/ugt-<same-name>/`
   shadowing a platform skill — extend under a new name
+<!-- [PIPELINE:mattpocock] -->
 - **โปรเจคที่ใช้ mattpocock bundle**: `grill-with-docs`/`domain-modeling`
   สร้าง/ดูแล `CONTEXT.md` (root, glossary) และ `docs/adr/`
   (การตัดสินใจทางเทคนิค) เอง — คนละที่เก็บกับ `docs/project-context/`
@@ -121,5 +140,6 @@ nothing ambiguous left to explore.
   (`docs/project-context/00-index.md` + `CONTEXT.md`/`docs/adr/` ถ้ามี)
   แต่เขียนแค่ที่เจ้าของมันเขียน — `/ugt-handoff` ดูแลเฉพาะ
   `docs/project-context/` + `handoff.md` เหมือนเดิม ไม่แตะ `CONTEXT.md`/`docs/adr/`
+<!-- [/PIPELINE:mattpocock] -->
 
 <!-- ugt:end -->

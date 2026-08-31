@@ -192,7 +192,13 @@ check('.claude/settings.json declares marketplace + plugin', () => {
   }
   const problems = [];
   if (!s.extraKnownMarketplaces) problems.push('no extraKnownMarketplaces');
-  if (!s.enabledPlugins) problems.push('no enabledPlugins');
+  if (!s.enabledPlugins) problems.push('no enabledPlugins (an explicitly empty {} is fine for projects that chose no pipeline bundle)');
+  if (s.enabledPlugins && s.enabledPlugins['ugt-nextjs-standard@ugt'] !== undefined) {
+    problems.push(
+      'stale pre-split key "ugt-nextjs-standard@ugt" — that plugin was renamed in platform 4.55.0; ' +
+        'replace with "ugt-nextjs-standard-superpowers@ugt" (same behavior) or "ugt-nextjs-standard-mattpocock@ugt", then commit'
+    );
+  }
   const raw = JSON.stringify(s);
   if (/__[A-Z][A-Z0-9_]*__/.test(raw)) problems.push('unsubstituted __*__ placeholder in settings.json');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
