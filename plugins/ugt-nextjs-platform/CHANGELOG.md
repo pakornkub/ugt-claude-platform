@@ -1,5 +1,55 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.58.0 (2026-09-02)
+
+**ปิดชุดช่องว่าง shell/form จาก field report โปรเจค pilot** (header ว่างเปล่า
+แบบ `sidebar-07` ดิบ ๆ · toggle ถูก copy แต่ไม่เคย render · ฟอร์มแยกหน้า
+ลอยเต็มจอ · Select ยุบตามข้อมูล · โลโก้ demo ของ block หลุดรอด) — คู่กับ
+ugt-core 2.10.0 ที่แตก page pattern เป็น data page / form page
+
+- **asset ใหม่ `components/site-header.tsx`** (design-setup): แกะ header
+  pattern ของ HRMS เข้า kit จริง ๆ เสียที — เดิม layout-shells.md เขียนแค่
+  "`site-header` pattern จาก HRMS" ซึ่งคนติดตั้งไม่มีโค้ดให้ดู และคำตอบ
+  shell = "Sidebar" ไม่ spec header เลย ผลคือทุกโปรเจคใหม่ได้ top bar
+  ว่างเปล่า · ตัว component: `SidebarTrigger` + เส้นคั่นแนวตั้ง +
+  **breadcrumb เส้นทางเต็ม** (`group › หน้า › segment` — derive จาก nav
+  config ชุดเดียวกับ sidebar ด้วย longest-prefix rule เดียวกับ nav
+  highlight, segment ลึกกว่า append จาก URL decoded เช่น `LV-0241`) +
+  slot `actions` ขวาสุด + `border-b` · **บังคับทุก shell ที่มี sidebar**
+  (mount เป็น child แรกของ `SidebarInset`) ไม่ใช่เฉพาะคำตอบ
+  "Sidebar + Topbar" · crumb แรกคือ**หัว group ตามที่ sidebar แสดง** ไม่ใช่
+  label ของเพจอื่น (crumb เขียนมือเคยหลุด "ภาพรวม › ใบลา" ทั้งที่ ภาพรวม
+  เป็นเพจ ไม่ใช่ group) — `deriveCrumbs` export ให้เทสและมาพร้อม
+  `site-header.test.ts` (5 เคส: group-heading · segment decoded ·
+  longest-prefix · href "/" ไม่กลืนทุกเส้นทาง · เมนูไม่มี group) —
+  copy/skip คู่กันเสมอ, รันผ่านกับโค้ดจริงก่อน release
+- **จุด mount ของ toggle เป็น spec แล้ว**: `LanguageSwitcher` (th+en) แล้ว
+  `ThemeToggle` (dark = มี) อยู่ใน `actions` ของ site-header — copy ไฟล์
+  โดยไม่ render คือการติดตั้งที่ไม่ครบ (ครึ่งหลังของบั๊ก header ว่าง)
+- **กฎ breadcrumb ย้ายบ้าน**: อยู่ใน site-header ที่เดียว — แทนกฎเดิม
+  "ลึกเกิน 2 ชั้นวางเหนือ title" (DESIGN.template §3 · layout-shells §Site
+  header · design-preview §3)
+- **กฎความกว้าง control ในฟอร์ม** (DESIGN.template §4): เต็มช่อง grid เสมอ
+  — `SelectTrigger` ของ base-mira default `w-fit` ทำช่องยุบเหลือตามค่าที่
+  เลือก (บั๊กหน้างานจริง; kit เองก็ส่ง `w-44`/`w-20` ทับทุกจุดอยู่แล้ว
+  แต่ไม่เคยเขียนเป็นกฎ) → sanctioned edit: เพิ่ม `w-full` ใน base classes
+  ของ `SelectTrigger` ที่ `components/ui/select.tsx` ต้นทาง · ความกว้าง
+  ที่ต่างกันแสดงผ่าน `col-span` ไม่ใช่ `w-*` รายช่อง
+- **กฎฟอร์มแยกหน้า** (DESIGN.template §4 · conventions §Dialog ladder ·
+  ugt-core contract §Layout): container กึ่งกลาง **ไม่ครอบการ์ด** —
+  มาตรฐาน `max-w-3xl` grid 2 คอลัมน์ · ข้อมูลเยอะ/หลาย section
+  `max-w-5xl` grid 3 คอลัมน์ + หัวข้อ section + เส้นคั่น · ปุ่มท้ายฟอร์ม
+  หลังเส้นคั่น — เดิมบันได Dialog บอกแค่ "ยาว = หน้าแยก" แล้วจบ
+- **layout-shells cleanup ข้อ 2 ระบุโลโก้ demo ตรง ๆ**: ลบ logo placeholder
+  ของ block พร้อม demo files — header ใช้ `ube-logo-short.svg` จาก
+  `public/brand/` เท่านั้น
+- **verify.mjs เพิ่ม 4 checks**: site-header มี+ถูก import เมื่อมี sidebar
+  shell (fail) · toggle ที่ copy แล้วต้องถูก render (fail) ·
+  `SelectTrigger` ต้องมี `w-full` (fail) · ไม่มีไฟล์ไหนอ้าง
+  `public/brand/` ทั้งที่มี shell → warn (มติ deviate ได้)
+- design-preview.html: §3 เพิ่ม site-header เข้า demo shell + §6 เพิ่มแถว
+  ความกว้าง control และฟอร์มแยกหน้า
+
 ## 4.57.0 (2026-09-01)
 
 **ปิดช่อง skill นอก superpowers auto-trigger ระหว่าง full-setup**

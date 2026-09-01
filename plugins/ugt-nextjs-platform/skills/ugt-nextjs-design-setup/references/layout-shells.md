@@ -13,7 +13,7 @@ declared by this plugin — see `conventions.md` §ตรวจ API.)
 
 | คำตอบข้อ 5 | ฐาน | หมายเหตุ |
 | --- | --- | --- |
-| Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) |
+| Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) · **ต้องติด `components/site-header.tsx` ด้วยเสมอ** (§Site header) — คำตอบ "Sidebar" ไม่ใช่ข้อยกเว้น |
 
 **After installing a `sidebar-*` block — mandatory cleanup** (the block ships
 a demo, not an app shell; both eval runs independently needed these steps):
@@ -22,17 +22,54 @@ a demo, not an app shell; both eval runs independently needed these steps):
    demo *page* into `app/(app)/layout.tsx` — the shell wraps the route
    group, not one page.
 2. Delete the demo sample files: `team-switcher`, `nav-projects`,
-   `nav-main`'s sample data, the demo `app/dashboard/page.tsx`.
+   `nav-main`'s sample data, the demo `app/dashboard/page.tsx`. **The demo
+   logo goes with them** — the sidebar header shows `ube-logo-short.svg`
+   from `public/brand/` (DESIGN.md §3), never the block's placeholder icon.
 3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
    `/` — remove/redirect the root one.
 4. Rebuild `app-sidebar.tsx` per the org rules below (Thai menu, app-name
    header, nav-user footer, longest-prefix highlight).
+5. Mount `components/site-header.tsx` (kit) as the first child of
+   `SidebarInset` — §Site header below. A shell whose top bar holds only
+   the trigger is an incomplete install (field bug: every screenshot of it
+   read as "หน้าเปล่า ๆ ไม่เหมือน HRMS").
 | Topbar | no dedicated block — compose from `navigation-menu` + the org rules; the reference implementation is gov-boi-smart's header (blue navbar) | User menu = `DropdownMenu` มุมขวาสุด |
-| Sidebar + Topbar | `sidebar-07` + a slim header (`site-header` pattern จาก HRMS) | Header ใส่ breadcrumb + actions ของหน้า |
+| Sidebar + Topbar | `sidebar-07` + `components/site-header.tsx` (kit) | Header = breadcrumb เส้นทางเต็ม + toggles (§Site header) |
 | Landing page (ข้อ 6 = มี) | pick a marketing block/template from the registry at implement time | Landing ใช้ token ชุดเดียวกัน — ห้ามธีมแยก |
 
 Login/setup pages come themed from `ugt-nextjs-auth-setup` — this skill runs
 first so those pages inherit the tokens; do not build login UI here.
+
+## Site header (ทุก shell ที่มี sidebar — ไม่ใช่ของเสริม)
+
+`components/site-header.tsx` (kit asset, extracted from the HRMS header —
+before 4.58.0 it existed only as words pointing at HRMS code, which is why
+installs shipped empty top bars). Composition, left→right:
+
+1. `SidebarTrigger` — the collapse button.
+2. Vertical `Separator`.
+3. **Breadcrumb = เส้นทางเต็ม** derived from the SAME nav config the sidebar
+   renders (pass the resolved items in — labels identical to the menu, never
+   hardcoded): `group › หน้า` on a nav page ("งานหลัก › ใบลา"), plus any
+   deeper URL segments appended decoded ("งานหลัก › ใบลา › LV-0241").
+   **The first crumb is the item's group HEADING as the sidebar shows it —
+   never a sibling page's label** (hand-built crumbs shipped
+   "ภาพรวม › ใบลา" where ภาพรวม was another page; the `group` field on each
+   nav item must therefore carry the exact heading text). Active item = the
+   same longest-prefix rule as the nav highlight, so header and sidebar can
+   never disagree — `deriveCrumbs` is exported and locked by
+   `site-header.test.ts` (copy/skip the pair together). Last crumb =
+   current page (no link); earlier crumbs link.
+4. Right slot (`actions` prop) — **the mount point for the toggles**:
+   `<LanguageSwitcher />` (เมื่อ ภาษา = th+en) then `<ThemeToggle />`
+   (เมื่อ dark mode = มี). Copying those two components and rendering them
+   nowhere was the other half of the empty-header bug. Page-specific
+   actions do NOT go here — they stay in `PageActions`.
+
+The header carries `border-b` — the line separating it from the page. This
+**replaces** the old rule "breadcrumb above the title when depth > 2": the
+breadcrumb now lives in the site-header only; pages render no breadcrumb of
+their own.
 
 ## Org shell rules (apply to whichever shell)
 
@@ -64,7 +101,9 @@ first so those pages inherit the tokens; do not build login UI here.
   (the right-side group dropping to a second line was a real production fix)
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน
-  + content in a card · breadcrumb above the title only when depth > 2
+  + content in a card — **except form pages** (centered container, no card —
+  DESIGN.md §4 ฟอร์มแยกหน้า) · breadcrumb lives in the site-header only,
+  never above the title
 - **Mobile**: sidebar collapses to the block's built-in sheet/drawer ·
   content transforms are systematic (table→card via DataTable, dialog→bottom
   sheet via the primitive) — never per-page improvisation

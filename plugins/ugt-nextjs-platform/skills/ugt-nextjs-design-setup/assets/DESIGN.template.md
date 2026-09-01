@@ -134,10 +134,20 @@
   > `no-scrollbar` ของ shadcn คือ `scrollbar-width: none` + ซ่อน webkit
   > scrollbar — เลื่อนได้แต่**ไม่มีอะไรบอกผู้ใช้ว่ายังมีเมนูอีก** เราจึงเอาออก
   > หลักเดียวกันทั้งหมด: ถ้าเนื้อหาเกินกรอบ ต้องมีร่องรอยให้เห็น ห้ามตัดทิ้งเงียบ
+- **Site header = `components/site-header.tsx` เสมอ** (ทุก shell ที่มี
+  sidebar — mount เป็น child แรกของ `SidebarInset`): `SidebarTrigger` ·
+  เส้นคั่นแนวตั้ง · breadcrumb เส้นทางเต็ม · ขวาสุด = `LanguageSwitcher`
+  (เมื่อ th+en) แล้ว `ThemeToggle` (เมื่อ dark = มี) · มี `border-b` คั่นกับ
+  เนื้อหา — header ที่มีแต่ trigger เปล่า ๆ คือการติดตั้งที่ไม่ครบ
+- **Breadcrumb อยู่ใน site-header ที่เดียว** (ห้ามวางเหนือ title ในหน้า):
+  `group › หน้า › segment ลึกกว่า` — label มาจาก nav config ชุดเดียวกับ
+  sidebar ห้าม hardcode · ตัวสุดท้าย = หน้าปัจจุบัน ไม่เป็นลิงก์ ·
+  ตัวก่อนหน้าเป็นลิงก์สี muted
 - โครงทุกหน้า = `ui/page-shell` เสมอ:
   `PageShell > PageHeader > PageTitle + PageDescription` แล้ว actions ขวาบน
   เนื้อหาอยู่ในการ์ด — **ทุกหน้าต้องมี subtitle** ไม่ใช่หัวข้อลอย ๆ
-  · breadcrumb เมื่อลึกเกิน 2 ชั้น วางเหนือ title
+  · **ยกเว้นหน้าฟอร์มแยก** ใช้ container กึ่งกลางไม่ครอบการ์ด (ส่วน 4
+  §ฟอร์มแยกหน้า)
 - **แถบ filter ระดับหน้า** (filter ที่อยู่นอกตาราง เช่น ปี/เดือน/หน่วยงาน):
   อยู่ใน**หัวการ์ดเดียวกับตาราง** (ไม่ลอยเหนือการ์ด ไม่แยกการ์ด) · **ชิดซ้าย**
   เรียง**กว้างไปแคบ**: ช่วงเวลา → หน่วยงาน/ขอบเขต → สถานะ · ปุ่ม action ของหน้า
@@ -179,6 +189,19 @@
   · validate ตอน submit แล้ว re-validate ต่อ field
   > **`*` ต้องอยู่บรรทัดเดียวกับข้อความ label เสมอ** — ตัว label เป็น flex row
   > ไม่ใช่ grid item แยก ไม่งั้น `*` ตกลงบรรทัดใหม่ กลายเป็นดาวลอยเหนือช่อง
+- **ความกว้าง control ในฟอร์ม = เต็มช่อง grid เสมอ (`w-full`)** — ห้ามปล่อย
+  ยุบตามข้อมูล: `SelectTrigger` ของ base-mira default เป็น `w-fit` พอเลือก
+  ค่าสั้นช่องจะหดเหลือตามค่า (บั๊กหน้างานจริง) → sanctioned edit: เพิ่ม
+  `w-full` ใน base classes ของ `SelectTrigger` ที่ `components/ui/select.tsx`
+  ต้นทาง (`verify.mjs` ตรวจให้) · ความกว้างที่ต่างกันระหว่างช่องแสดงผ่าน
+  `col-span` ของ grid ไม่ใช่ `w-*` รายช่อง · ข้อยกเว้น: control ใน
+  toolbar/filter ของตารางส่ง `w-*` คงที่ทับได้ (`w-44`, `w-20` ฯลฯ)
+- **ฟอร์มแยกหน้า** (ฟอร์มยาว/หลายขั้นตามบันได Dialog): container กึ่งกลาง —
+  ฟอร์มมาตรฐาน `max-w-3xl mx-auto` grid 2 คอลัมน์ · ฟอร์มข้อมูลเยอะ/หลาย
+  section `max-w-5xl` grid 3 คอลัมน์ แบ่ง section ด้วยหัวข้อ + เส้นคั่น ·
+  **ไม่ครอบการ์ด** — กรอบการ์ดซ้อนกรอบ input อ่านรก (ข้อยกเว้นที่บันทึกจาก
+  page pattern "เนื้อหาอยู่ในการ์ด" ซึ่งออกแบบเพื่อหน้าตาราง) · ปุ่ม
+  submit/cancel ท้ายฟอร์มหลังเส้นคั่น ชิดขวา
 - **แถวคู่ label–ค่า** (detail dialog, สรุป, การ์ดข้อมูล): flex `justify-between`
   + `align-items:center` + ระยะระหว่างคอลัมน์ ≥16px + ความสูงแถวขั้นต่ำ ~24px
   — ค่าที่เป็น `StatusBadge` จะได้ไม่ชนข้อความฝั่งซ้าย (badge สูงกว่าข้อความธรรมดา)

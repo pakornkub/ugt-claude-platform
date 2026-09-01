@@ -1,5 +1,17 @@
 # Changelog — ugt-core
 
+## 2.10.0 (2026-09-02)
+
+**contract design.md §Layout: page pattern แตกเป็นสองแบบที่ sanctioned** —
+เดิมเขียน "One page pattern per app: title + actions + content card" ซึ่ง
+ออกแบบมาเพื่อหน้าตาราง/ข้อมูล พอโปรเจคจริงทำ**หน้าฟอร์มแยก** (บันได Dialog:
+ฟอร์มยาว = หน้าแยก) ตามตัวอักษรจะได้ฟอร์มยืดเต็มจอในการ์ด — กรอบการ์ดซ้อน
+กรอบ input อ่านรก (field report จากโปรเจค pilot 2026-09-02) · ตอนนี้ contract
+ระบุ **data page** (การ์ดตามเดิม) กับ **form page** (container กึ่งกลางขนาด
+ตามฟอร์ม, แบ่ง section ด้วยหัวข้อ + เส้นคั่น, ไม่ครอบการ์ด, ปุ่มท้ายฟอร์ม
+หลังเส้นคั่น) · stack rendering อยู่ที่ `ugt-nextjs-platform` 4.58.0
+(DESIGN.template §4 ฟอร์มแยกหน้า)
+
 ## 2.9.2 (2026-09-01)
 
 **`org-managed-settings.md`: เพิ่มกล่อง "Action required" สำหรับ IT ที่

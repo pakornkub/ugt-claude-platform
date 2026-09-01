@@ -95,7 +95,7 @@ production มาแล้ว ("ปุ่ม logout กดไม่ได้", c
 | งาน | ภาชนะ |
 | --- | --- |
 | ฟอร์มสั้น ≤ ~6 ช่อง | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม |
-| ฟอร์มยาว / หลายขั้น | หน้าแยก |
+| ฟอร์มยาว / หลายขั้น | หน้าแยก — container กึ่งกลาง **ไม่ครอบการ์ด**: มาตรฐาน `max-w-3xl mx-auto` grid 2 คอลัมน์ · ข้อมูลเยอะ/หลาย section `max-w-5xl` grid 3 คอลัมน์ + หัวข้อ section + เส้นคั่น (DESIGN.md §4 ฟอร์มแยกหน้า) |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
 | panel เปิดค้างดูคู่เนื้อหา (filter ชุดใหญ่, preview) | `Sheet` |
 | ดูรายละเอียด read-only | `detail-dialog-shell` + `detail-row`/`detail-section` |
@@ -354,8 +354,10 @@ and CRLF per RFC 4180.
 | `ui/bulk-action-bar.tsx` | HRMS (4 approval pages) | เลือกหลายแถวแล้วสั่งงานรวม; needs `checkbox`; pairs with `DataTable` `onSelectionChange` + `resetSelectionKey` |
 | `ui/export-menu.tsx` | HRMS | ปุ่ม Excel/CSV สำหรับ `toolbarExtra`; ship only when a page exports (needs `dropdown-menu` + `sonner`) |
 | `components/theme-provider.tsx` | standard next-themes wrapper | **fallback only** — the org preset scaffold ships its own (superset: hotkey + disableTransitionOnChange); keep the registry's file when present |
-| `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) |
-| `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) |
+| `components/site-header.tsx` | HRMS header pattern (absorbed as an asset in 4.58.0 — before that it was only a pointer at HRMS code and installs shipped empty top bars) | **every sidebar shell** — SidebarTrigger + เส้นคั่น + breadcrumb เส้นทางเต็มจาก nav config + right slot for the toggles (needs `breadcrumb` + `separator` + the sidebar block) |
+| `components/site-header.test.ts` | kit-native | ships with `site-header.tsx` — copy/skip the pair together (locks `deriveCrumbs`: crumb แรก = หัว group ไม่ใช่เพจอื่น · longest-prefix · decode segment) |
+| `components/theme-toggle.tsx` | HRMS | ship only when dark mode = มี (needs `next-themes`) · **mount = `actions` ของ site-header** ไม่ใช่แค่ copy ไฟล์ |
+| `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) · **mount = `actions` ของ site-header ก่อน ThemeToggle** |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |
 | `lib/format.test.ts` | kit-native | ships with `lib/format.ts` — ล็อก timezone contract (Asia/Bangkok pin + `toDateKey` ของปฏิทินต้องไม่ร่นวัน) |
 | `lib/table-query.ts` · `lib/table-prefs.ts` · `lib/pagination.ts` | BOI | URL-state + column prefs + page params for server-mode tables (`table-query` imports `firstParam` from `pagination`) |

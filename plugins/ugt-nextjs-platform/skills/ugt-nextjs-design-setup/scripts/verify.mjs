@@ -265,6 +265,74 @@ check('scroll-thin utility is installed', () => {
     : { ok: false, msg: 'globals.css has no `@utility scroll-thin` — scrollable surfaces (sidebar, wide tables) fall back to the OS scrollbar; copy it from assets/globals.tokens.css' };
 });
 
+// ── shell header ──────────────────────────────────────────────────────────
+// 4.58.0 field report: installs shipped the sidebar block with an empty top
+// bar (trigger only — no breadcrumb, no toggles, no divider) because the
+// site-header existed only as a pointer at HRMS code. These checks make that
+// install state visible.
+check('Sidebar shell has the site-header (breadcrumb + toggle mount point)', () => {
+  if (!hasIn('components', 'ui', 'sidebar.tsx')) {
+    return { ok: true, msg: 'no sidebar shell in this project — nothing to check' };
+  }
+  if (!hasIn('components', 'site-header.tsx')) {
+    return {
+      ok: false,
+      msg: 'components/site-header.tsx missing — copy assets/components/site-header.tsx and mount it as the first child of SidebarInset (layout-shells.md §Site header); an empty top bar is the install bug this gate exists for',
+    };
+  }
+  const used = sourceTsx().some(
+    (f) => !/[\\/]site-header\.tsx$/.test(f) && /from ['"]@\/components\/site-header['"]/.test(readFileSync(f, 'utf8'))
+  );
+  if (!used) {
+    return { ok: false, msg: 'site-header.tsx is copied but nothing imports it — mount it in app/(app)/layout.tsx inside SidebarInset' };
+  }
+  return hasIn('components', 'site-header.test.ts')
+    ? { ok: true }
+    : { ok: 'warn', msg: 'site-header.test.ts missing — the pair ships together (it locks deriveCrumbs: first crumb = group heading, longest-prefix, decoded segments)' };
+});
+
+check('Copied toggles are actually rendered (theme-toggle / language-switcher)', () => {
+  const orphans = [];
+  for (const [file, name] of [
+    ['theme-toggle', 'ThemeToggle'],
+    ['language-switcher', 'LanguageSwitcher'],
+  ]) {
+    if (!hasIn('components', `${file}.tsx`)) continue;
+    const used = sourceTsx().some(
+      (f) => !f.endsWith(`${file}.tsx`) && new RegExp(`\\b${name}\\b`).test(readFileSync(f, 'utf8'))
+    );
+    if (!used) orphans.push(`${file}.tsx (mount <${name} /> in site-header's actions slot)`);
+  }
+  return orphans.length
+    ? { ok: false, msg: `copied but never rendered: ${orphans.join(' · ')} — the user sees no switcher at all` }
+    : { ok: true };
+});
+
+check('SelectTrigger fills its grid cell (w-full)', () => {
+  if (!hasIn('components', 'ui', 'select.tsx')) {
+    return { ok: true, msg: 'no select.tsx installed yet — nothing to check' };
+  }
+  return /SelectTrigger[\s\S]*?w-full/.test(readIn('components', 'ui', 'select.tsx'))
+    ? { ok: true }
+    : {
+        ok: false,
+        msg: "base-mira's SelectTrigger defaults to w-fit — a form Select shrinks to its chosen value (field bug). Add `w-full` to the trigger's base classes (sanctioned edit, DESIGN.md §4); toolbar callsites keep overriding with w-44/w-20 via cn",
+      };
+});
+
+check('Shell header shows the brand logo, not the block demo icon', () => {
+  if (!hasIn('components', 'ui', 'sidebar.tsx')) {
+    return { ok: true, msg: 'no sidebar shell — nothing to check' };
+  }
+  const referenced = sourceTsx().some((f) => /\/brand\/|ube-logo/.test(readFileSync(f, 'utf8')));
+  return referenced
+    ? { ok: true }
+    : {
+        ok: 'warn',
+        msg: 'nothing references public/brand/ — the sidebar header is likely still the block demo logo; DESIGN.md §3: ube-logo-short.svg in the shell header (a recorded มติ may deviate)',
+      };
+});
+
 check('Only the four agreed radius roles are used', () => {
   // The preset defines 2xl/3xl/4xl too, but the agreement uses four roles:
   // chip (sm) · control (md) · card (lg) · overlay (xl).

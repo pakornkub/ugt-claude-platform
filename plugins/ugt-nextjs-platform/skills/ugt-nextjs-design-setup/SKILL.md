@@ -46,6 +46,7 @@ What lands in the project:
 | shadcn config (style `base-mira`, neutral, lucide) | `components.json` |
 | Org UI kit | `components/ui/*` + `lib/format.ts` — from `assets/ui/` and `assets/lib/` |
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
+| Site header (breadcrumb เส้นทางเต็ม + จุด mount ของ toggles) | `components/site-header.tsx` — from `assets/components/`, mandatory on every sidebar shell (§Site header in layout-shells.md) |
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules/ugt-nextjs-design.md` |
 
@@ -285,12 +286,25 @@ different size — is the field bug this step exists to prevent.
    `button.tsx` — `add <block>` prompts per existing file (even with
    `--yes`; pipe `yes n |` to decline in headless runs) and answering `y`
    would silently wipe just-applied variants. Then prune the block's demo
-   debris per layout-shells.md.
+   debris per layout-shells.md, **and mount `components/site-header.tsx`
+   (copied in Step 6) as the first child of `SidebarInset`** — feed it the
+   same resolved nav items the sidebar renders, and put
+   `<LanguageSwitcher />` (th+en) + `<ThemeToggle />` (dark = มี) in its
+   `actions` slot. A shell whose top bar is just the trigger is the field
+   bug this step closes.
 6. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
-   th+en only; `theme-toggle` (dark mode = มี) and `language-switcher`
+   th+en only; **`site-header` + `site-header.test.ts` คู่กันเสมอ
+   (ทุกโปรเจคที่มี sidebar shell)**,
+   `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
-   `references/conventions.md` §Kit). `assets/i18n/` → `i18n/` และ
+   `references/conventions.md` §Kit; copying the two toggles without
+   mounting them in site-header's `actions` slot is an incomplete install).
+   **Then the select width edit (sanctioned, มติ 4.58.0)**: base-mira's
+   `SelectTrigger` defaults to `w-fit`, so a form Select shrinks to its
+   chosen value — add `w-full` to the trigger's base classes in
+   `components/ui/select.tsx` (toolbar callsites keep overriding with
+   `w-44`/`w-20` etc. via `cn`); `verify.mjs` fails without it. `assets/i18n/` → `i18n/` และ
    `assets/messages/` → `messages/` (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en** — kit
    ทั้งชุดอ่านสตริงผ่าน catalog ตั้งแต่ 4.46.0 โปรเจคไทยล้วนได้ catalog
    ภาษาเดียวและไม่ต้องแปลอะไร มติ 2.2) · ตั้ง `next-intl@^4` เป็น dependency
@@ -392,6 +406,14 @@ node <skill-dir>/scripts/check-contrast.mjs
       sit inside the table's card, left-aligned (by eye — verify.mjs only
       warns on a bare `<Input>` used as search/filter)
 - [ ] `npm run build` passes
+- [ ] sidebar shell → `components/site-header.tsx` mounted as the first
+      child of `SidebarInset`, breadcrumb shows `group › หน้า` from the
+      same nav config as the sidebar, and the toggles that were copied
+      (`LanguageSwitcher`/`ThemeToggle`) actually render in its `actions`
+      slot (verify.mjs checks presence/imports; the rendered breadcrumb is
+      by eye)
+- [ ] `components/ui/select.tsx` `SelectTrigger` carries `w-full`
+      (verify.mjs checks) — a form Select must not shrink to its value
 - [ ] a page using Button / Input / Table renders with the new tokens, in
       light **and** dark if dark mode was selected
 - [ ] the installed UI matches the platform repo's `docs/web/design-preview.html`

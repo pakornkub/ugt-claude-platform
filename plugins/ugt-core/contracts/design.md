@@ -100,9 +100,12 @@
   either way: menu items are icon + label; group when > ~7 items; max depth
   2; permission-hidden (not disabled — server guard is the boundary, per
   `auth.md`); overflow scrolls horizontally, never wraps.
-- One page pattern per app: title + actions + content card — no per-page
-  invention. Mobile adaptation is systematic (table→card, dialog→bottom
-  sheet), not per-page.
+- Two sanctioned page patterns per app — no per-page invention: the **data
+  page** (title + actions + content card) and the **form page** (a centered
+  container sized to the form, sections split by heading + divider, **no
+  wrapping card** — a card around already-bordered inputs reads as
+  frame-in-frame; submit/cancel sit at the end after a divider). Mobile
+  adaptation is systematic (table→card, dialog→bottom sheet), not per-page.
 - **Page-level filters have one fixed home**: inside the same card as the
   data they filter, leading edge, ordered widest scope → narrowest (period →
   org unit → status). Page actions stay with the title; a filter row never
