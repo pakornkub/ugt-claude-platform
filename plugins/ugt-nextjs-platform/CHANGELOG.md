@@ -1,5 +1,44 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.57.0 (2026-09-01)
+
+**ปิดช่อง skill นอก superpowers auto-trigger ระหว่าง full-setup**
+(ผ่าน review อิสระ 1 รอบ — findings ทั้งหมดแก้ในรุ่นนี้เลย)
+
+- **guard ใน full-setup §2.5 ขยายจาก superpowers-only เป็นครอบ
+  pipeline/helper plugin ทุกตัว** (`superpowers`, `mattpocock-skills`,
+  `frontend-design`): เดิมเขียนว่า "never enters the superpowers pipeline"
+  ซึ่งไม่ครอบ skill ฝั่ง `mattpocock-skills` ที่เป็น model-invocable
+  (ลงทะเบียนใน plugin.json 1.2.3 และไม่ได้ตั้ง `disable-model-invocation`
+  — มี 11 ตัว) ซึ่ง trigger ชนขั้นตอนของ setup ได้จริง 5 ตัว:
+  `writing-for-agents` (trigger ตอน harness step แก้ CLAUDE.md), `wizard`
+  (trigger ตอน credential/dashboard handoff ของ auth/cicd),
+  `diagnosing-bugs` (trigger ตอน verify.mjs/migration ล้ม), `tdd` (trigger
+  ตอน test-lint-setup เขียน smoke test), `domain-modeling` (trigger ตอน
+  ugt-context/ตั้งชื่อตารางใน database-setup) — และไม่ครอบ
+  `frontend-design` ที่มากับทั้งสอง bundle ซึ่งชนกับ
+  `ugt-nextjs-design-setup` (ขั้น design agreement เป็นของ design-setup
+  ฝ่ายเดียว) · guard ใหม่ระบุชื่อปลั๊กอิน + skill เสี่ยงตรง ๆ, กันเผื่อ
+  skill ที่รุ่นหน้าอาจลงทะเบียนเพิ่ม (เช่น `setup-pre-commit` — มีไฟล์ใน
+  1.2.3 แต่ยังไม่ลงทะเบียน จะชน husky ของ test-lint-setup ถ้าโหลดได้)
+  และย้ำว่า skill จาก `ugt-nextjs-platform`/`ugt-core` (โมดูลลูก,
+  `ugt-context`) คือตัว setup path เอง ไม่ถูกบล็อก (ตั้งใจใช้ชื่อปลั๊กอิน
+  ไม่ใช้คำว่า "bundle" — bundle มี `ugt-nextjs-platform` เป็น dependency)
+- **CLAUDE-block.md เลิกผูกข้อความ routing กับ superpowers**: แถว
+  "Install/change infrastructure" + แถว "No logic change" + แถว read-only
+  + กติกา model-mode เปลี่ยนเป็นถ้อยคำกลาง (pipeline-neutral, อยู่นอก
+  `[PIPELINE:*]` span) เพื่อให้ block ที่ generate บน bundle mattpocock —
+  หรือโปรเจคที่ไม่ใช้ bundle เลย — ไม่อ้างถึง pipeline ที่ตัวเองไม่มี
+  และแถว routing หลักไม่หายในเคส "none"
+- **harness step 1 เพิ่มกติกาเคสไม่มี pipeline plugin**: detect แล้วเจอ
+  "none" → ลบทุก span เหลือเฉพาะเนื้อหานอก span — block ต้องเป็นตาราง
+  สมบูรณ์เสมอ (เดิมสั่งแค่ keep/delete ต่อฝั่ง ไม่มีคำสั่งเคส none)
+- **verify.mjs เพิ่ม check ใหม่**: CLAUDE.md ที่ติดตั้งแล้วห้ามเหลือ
+  marker `[PIPELINE` ค้าง (= วางบล็อกโดยไม่ resolve span — จะได้แถวสองฝั่ง
+  ที่ขัดกันเองในตารางเดียว) → fail พร้อมคำแนะนำรัน harness step 1 ใหม่
+- โปรเจคที่ generate block จากรุ่น ≤ 4.56.0 ควรรัน full-setup harness
+  step 1 ใหม่เพื่อรับถ้อยคำ guard/routing ชุดนี้
+
 ## 4.56.0 (2026-09-01)
 
 **Pipeline-aware harness generation + migration fixes จากผล code review อิสระ

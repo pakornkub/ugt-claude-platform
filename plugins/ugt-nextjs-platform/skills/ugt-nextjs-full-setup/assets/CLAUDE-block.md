@@ -58,22 +58,23 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 - Follow that table when dispatching subagents or spawning teammates · switch
   preset with `/ugt-model-mode easy|default|god|auto` · main session model stays the
-  user's `/model` · this table **wins over model advice inside superpowers
-  skills** (e.g. SDD's Model Selection section)
+  user's `/model` · this table **wins over model advice inside any pipeline
+  skill** (e.g. superpowers SDD's Model Selection section)
 
 ## Which skill, when
 
 | Task | How |
 | --- | --- |
-| Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (the superpowers "1% chance → must invoke" rule does not apply to read-only work) |
+| Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (aggressive skill-invocation rules like superpowers' "1% chance → must invoke" do not apply to read-only work) |
 | Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to your installed pipeline (superpowers, or `/to-spec` on the mattpocock bundle) |
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
-| No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the superpowers pipeline (auto-loading rules still apply) |
-| Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path skips the **entire** superpowers pipeline (brainstorming/plans/TDD): the skill's SKILL.md is the plan, its verify script is the review |
+| No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the pipeline (auto-loading rules still apply) |
+| Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path never auto-invokes skills from the pipeline/helper plugins (superpowers / mattpocock-skills / frontend-design), however well their triggers match: the skill's SKILL.md is the plan, its verify script is the review |
 <!-- [PIPELINE:superpowers] — full-setup keeps exactly ONE pipeline's spans when
      generating this block (same [MARKER] convention as auth-setup's [METHOD:]):
      detect the installed bundle, keep matching spans, delete the other
-     pipeline's spans AND all [PIPELINE] marker comments. -->
+     pipeline's spans AND all [PIPELINE] marker comments. No pipeline plugin
+     installed at all → delete every span and keep only the unmarked rows. -->
 | Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline |
 <!-- [/PIPELINE:superpowers] -->
 <!-- [PIPELINE:mattpocock] -->

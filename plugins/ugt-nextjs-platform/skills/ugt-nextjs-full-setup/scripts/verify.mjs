@@ -36,6 +36,19 @@ check('CLAUDE.md carries the ugt block', () => {
   return { ok: true };
 });
 
+check('ugt block has no unresolved [PIPELINE] spans', () => {
+  if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
+  // Spans are resolved at generation time (full-setup §4.1) — a leftover
+  // marker means both pipelines' rows shipped, contradicting each other.
+  // Scan only the ugt block: content outside ugt:start/ugt:end is the
+  // project's own and step 1 must never touch it.
+  const block = claudeMd.slice(claudeMd.indexOf('<!-- ugt:start'), claudeMd.indexOf('<!-- ugt:end'));
+  if (block.includes('[PIPELINE')) {
+    return { ok: false, msg: 'raw [PIPELINE:*] marker found inside the ugt block — it was pasted without resolving pipeline spans; re-run full-setup harness step 1 to regenerate it' };
+  }
+  return { ok: true };
+});
+
 check('ugt block is not from an older harness release', () => {
   if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
   // The block is a paste-into-file asset — nothing syncs it after install, so

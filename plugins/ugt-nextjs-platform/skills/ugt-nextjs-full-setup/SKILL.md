@@ -113,11 +113,22 @@ Either split keeps the §3 order: chunks/subagents run **sequentially**, never
 two modules at once — they edit the same `package.json` / `schema.prisma` /
 compose files.
 
-**The setup path never enters the superpowers pipeline** — no brainstorming,
-no plan step, no TDD skill, regardless of how aggressive their triggers are:
-each child SKILL.md already is the plan, and its `verify.mjs` + checklist
-already are the review. This binds subagents too: an installer subagent
-dispatches nothing further.
+**The setup path never invokes any skill from the pipeline/helper plugins —
+`superpowers`, `mattpocock-skills`, or `frontend-design`** — no matter how
+well their triggers match a setup step: no brainstorming / plan / TDD
+(superpowers); no `writing-for-agents`, `wizard`, `diagnosing-bugs`, `tdd`,
+or `domain-modeling` (mattpocock — each trigger collides with a step a child
+skill already owns: the CLAUDE.md block, credential handoff, a failing
+`verify.mjs`, the test-lint smoke test, `docs/project-context/` naming;
+same rule for any skill a future mattpocock version registers, e.g.
+`setup-pre-commit` — unregistered in 1.2.3 but it would collide with the
+husky install); no `frontend-design` (the design-agreement step belongs to
+`ugt-nextjs-design-setup` alone — frontend-design may propose only in later
+feature work, per the DESIGN.md precedence rule). Each child SKILL.md
+already is the plan, and its `verify.mjs` + checklist already are the
+review. This binds subagents too: an installer subagent dispatches nothing
+further. Skills from `ugt-nextjs-platform` / `ugt-core` (the §3 modules,
+`ugt-context`) are the setup path itself — this rule never blocks them.
 
 ### 3. Install in order (never reorder)
 
@@ -192,7 +203,10 @@ How:
    `[PIPELINE:mattpocock]` marker comments (same convention as auth-setup's
    `[METHOD:]`). Detect the installed pipeline (see step 3's detection rule —
    one detection, used by both steps), keep only the matching spans, delete
-   the other pipeline's spans and every `[PIPELINE]` marker comment. A
+   the other pipeline's spans and every `[PIPELINE]` marker comment. **No
+   pipeline plugin installed at all** (step 3's "none" answer) → delete every
+   span and keep only the unmarked content — the block must still render as a
+   complete table either way. A
    project that later switches bundles must re-run this step to regenerate
    the block — the spans are resolved at generation time, not at runtime.
    > **Size check**: if the combined file exceeds ~200 lines, move project
