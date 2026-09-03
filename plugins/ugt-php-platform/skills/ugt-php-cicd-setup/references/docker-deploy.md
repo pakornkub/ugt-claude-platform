@@ -269,6 +269,22 @@ RUN apt-get update && apt-get upgrade -y && \
   ถ้าไม่ทำทั้งสองทางแล้วปลด comment บล็อก PDO ทิ้งไว้ ไฟล์ health จะ fatal
   (`Class "PDO" not found` / driver ไม่มี) = 500 ไม่ใช่ 503 → container ไม่มีวัน
   ขึ้น `healthy`
+- **`new PDO(...)` options array ของ pdo_sqlsrv — ใส่ `PDO::ATTR_TIMEOUT`
+  แล้ว throw ไม่ใช่แค่เมิน** — คนละอาการกับที่ § "จุดที่พลาดบ่อย" อีกข้อพูดถึง
+  (นั่นคือ pdo_sqlsrv *เมินเงียบ ๆ* ตอนเฟส connect ต้องใช้ `LoginTimeout` ใน DSN
+  แทน) แต่บาง build ของ `pdo_sqlsrv` (PECL ไม่ pin เวอร์ชัน — ดูข้อด้านบน) ถือว่า
+  `PDO::ATTR_TIMEOUT` เป็น attribute ที่ไม่รู้จักเลยและ **throw ตรง ๆ** ตอน
+  connect: `SQLSTATE[IMSSP]: An unsupported attribute was designated on the PDO
+  object` (ยืนยันจริง ugt-bd-forecast 2026-09-03 — โปรเจคมี `api/db.php` แยกจาก
+  `health/index.php` ของ template ที่ `forecast.php`/`snapshot.php`/health เรียก
+  ร่วมกัน แล้วใส่ `PDO::ATTR_TIMEOUT => 5` เพิ่มเข้าไปในนั้นเอง ไม่ได้มาจาก
+  scaffold — asset `health/index.php` ของ skill นี้เองใส่แค่ `PDO::ATTR_ERRMODE`
+  ตัวเดียวจึงไม่โดน) ผลคือ health check ที่ควรตอบ 503 (แบบ config ยังไม่ครบ)
+  กลับ fatal error 500 แทน — **กติกา: connection helper ที่ health check พึ่งพา
+  ใส่ได้แค่ `PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION`** ห้ามเติม
+  `PDO::ATTR_TIMEOUT` เด็ดขาดถ้า DSN เป็น `sqlsrv:` (`PDO::ATTR_DEFAULT_FETCH_MODE`
+  ใส่ในตัวเดียวกันได้ปกติ ไม่ชนแบบเดียวกัน — ยืนยันจากโปรเจคเดียวกันหลังตัดแค่
+  `ATTR_TIMEOUT` ออก build ผ่าน)
 
 ### DNS: ชื่อ host สั้นของ DB มัก resolve ไม่ได้จากในคอนเทนเนอร์
 
@@ -571,3 +587,104 @@ chown -R $(docker run --rm __PROJECT_NAME__:latest id -u www-data):$(docker run 
 
 ตรรกะเดียวกับกลไกอัตโนมัติ — ต่างกันแค่ไว้แก้กรณีพิเศษที่ deploy รอบใหม่ไม่ครอบ
 (path เก่า, หรือ mount เพิ่มทีหลังโดยไม่ได้ deploy ใหม่)
+
+## I. Docker-outside-of-Docker (DooD) — bind-mount path ต้องเป็น host path จริงเท่านั้น
+
+**อาการ**: stage ที่เรียก `docker run -v "$PWD/<dir>":/src ...` (เช่น lint
+php files ด้วย container แยกจาก image หลัก) พังบน Jenkins host จริงด้วย:
+
+```
+docker: Error response from daemon: error while creating mount source path
+'/var/jenkins_home/workspace/<job>/<dir>': mkdir /var/jenkins_home:
+read-only file system.
+```
+
+ทั้งที่ path เดียวกันรันผ่านปกติตอนทดสอบบนเครื่อง dev เอง
+
+**สาเหตุ**: Jenkins agent รันอยู่ใน container ของตัวเอง โดย mount
+`docker.sock` มาจาก host (Docker-outside-of-Docker / DooD topology) —
+`$PWD`/`$WORKSPACE` ที่ agent เห็นเป็น path **ข้างในคอนเทนเนอร์ของ agent
+เท่านั้น** ไม่ใช่ path บน host จริง เมื่อสั่ง `docker run -v` คำสั่งนี้ยิงไปหา
+host docker daemon โดยตรง (ผ่าน `docker.sock` — เป็น sibling container ไม่ใช่
+nested) daemon ตัวนั้นไม่รู้จัก path ข้างในของ agent container เลย พยายาม
+`mkdir` path นั้นเองบน host แล้วชน read-only filesystem (ยืนยันจากอินซิเดนต์
+จริงโปรเจค ugt-bd-forecast 2026-09-03)
+
+**ทางแก้ที่ 1 — ต้องคง state ข้าม step ในไฟล์เดียวกัน**: ใช้ Docker Pipeline
+plugin's `docker.image().inside{}` แทน `docker run -v` ตรง ๆ — pattern เดียวกับ
+ทุก stage อื่นในไฟล์ template นี้เอง (Install/Lint/Unit Tests) `.inside{}` ให้
+plugin resolve mount ที่ถูกต้องเองโดย inspect running agent container แทนที่
+จะเดา path เอง:
+
+```groovy
+script {
+    docker.image('php:8.2-cli').inside {
+        sh "find public -name '*.php' -print0 | xargs -0 -n1 php -l"
+    }
+}
+```
+
+**ทางแก้ที่ 2 — one-shot ไฟล์เดียว ไม่ต้องคง state**: เลี่ยง bind-mount ไปเลย
+ใช้ stdin pipe แทน (มีอยู่แล้วจริงใน `ugt-mscpl-ana/Jenkinsfile` stage
+"Lint Dockerfile" ที่ deploy ผ่านจริง):
+
+```sh
+docker run --rm -i hadolint/hadolint < Dockerfile
+```
+
+**ทำไม pattern `[VOLUME]` เดิม (§H) ไม่พังแบบนี้**: บล็อก chown ด้วย
+`alpine` ใน `[VOLUME]` ก็เรียก `docker run -v` เหมือนกัน แต่ path ที่ mount
+(`/home/docker02/appdata/<project>/...`) เป็น **host path จริง** ที่ตั้งไว้
+ในสัญญากลางอยู่แล้ว ไม่ได้มาจาก `$PWD`/`$WORKSPACE`/git checkout — host
+docker daemon จึงรู้จัก path นั้นและ mount ได้ปกติ. กติกาที่ตามมา: bind-mount
+ใน `docker run` จาก Jenkinsfile ใช้ได้ปลอดภัยเฉพาะตอน path เป็น host path
+จริงเท่านั้น (เช่น `/home/docker02/appdata/...`) — path ที่มาจาก
+`$PWD`/`$WORKSPACE`/git checkout ห้าม bind-mount ตรง ๆ เด็ดขาด ให้ใช้
+`.inside{}` หรือ stdin pipe แทนเสมอ
+
+## J. `security_opt: [no-new-privileges:true]` ใน compose — ทำ entrypoint fail บน docker02 จริง
+
+**อาการ**: deploy ผ่านทุก stage (Docker Build เขียว) แต่ Jenkins
+`docker compose up -d --wait` รายงาน `container <name> is unhealthy` ภายใน
+ไม่กี่วินาทีหลัง `Started` — **เร็วกว่า `start_period` ของ healthcheck ที่ตั้ง
+ไว้มาก** (สัญญาณเฉพาะตัวว่า container ตายไปแล้วระหว่างช่วง health ยัง
+"starting" ไม่ใช่ probe ตรวจแล้วไม่ผ่านจริง) `docker logs` ขึ้น:
+
+```
+exec /usr/local/bin/docker-php-entrypoint: operation not permitted
+```
+
+แล้วเข้า restart loop ต่อเนื่องเพราะ `restart: unless-stopped`. ทดสอบบนเครื่อง
+dev เอง (Docker Desktop) ผ่านปกติทุกอย่าง — เจอเฉพาะตอน deploy จริงบน docker02
+เท่านั้น
+
+**สาเหตุ**: `no-new-privileges:true` ปิดความสามารถของ process ในการยก
+privilege ผ่าน setuid/setcap ตอน exec — บน docker02 จริง (Ubuntu 24.04 /
+kernel 6.8 + AppArmor) `docker-php-entrypoint` ของ base image ต้องอาศัยการ
+transition สิทธิ์แบบนั้น (เช่นตอน apache ยัง start เป็น root แล้ว drop ไปเป็น
+`www-data` — §H) เมื่อ transition ไม่ได้ kernel ปฏิเสธด้วย
+`operation not permitted` แล้ว process ตายทันที — Docker Desktop (Linux VM
+คนละ kernel/AppArmor policy) ไม่มีข้อจำกัดเดียวกัน จึงไม่ reproduce ตอนเทส
+local
+
+**ยืนยันจากอินซิเดนต์จริง**: เจอครั้งแรกที่ ugt-mscpl-ana 2026-08-17 (ถอดออก
+แล้ว มีคอมเมนต์อธิบายไว้ใน `docker-compose.yml` ของโปรเจคนั้น) แต่ไม่เคยถูก
+บันทึกไว้ในปลั๊กอินนี้ ทำให้เหยียบซ้ำที่ ugt-bd-forecast 2026-09-03 build #4
+
+**ทางแก้**: **ห้ามใส่ `no-new-privileges:true` ใน `security_opt`** ของ compose
+ทั้งสองไฟล์ (prod/dev) บน host นี้ — hardening ตัวอื่นที่เหลือใช้ได้ปกติและไม่
+ชนกัน: non-root จาก PID 1 (apache drop เป็น `www-data` เอง — §H),
+`cap_drop: [ALL]`, `read_only: true` + `tmpfs` — ตัด `no-new-privileges` ออก
+จากลิสต์อย่างเดียวพอ
+
+**Diagnostic tip**: ถ้า `--wait` รายงาน unhealthy **เร็วกว่า `start_period`**
+ที่ตั้งไว้ — แปลว่า container ตาย ไม่ใช่ health probe fail จริง อย่าเพิ่งไล่
+เรื่อง DB connection / network ก่อน เช็คนี้ก่อนเสมอ:
+
+```bash
+docker inspect --format '{{.State.Status}} {{.RestartCount}}' <container>
+docker logs <container>
+```
+
+`RestartCount` ที่วิ่งขึ้นเรื่อย ๆ พร้อม status `restarting` คือสัญญาณ
+crash-loop ชัดเจน — ไปดู `docker logs` ก่อนเสมอ ไม่ใช่ไล่ credential/DNS

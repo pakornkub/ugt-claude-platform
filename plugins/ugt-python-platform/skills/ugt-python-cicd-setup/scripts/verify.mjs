@@ -248,6 +248,28 @@ check('No Groovy interpolation of secrets', () => {
     : { ok: true };
 });
 
+check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
+  // Docker-outside-of-Docker: Jenkins agent runs in its own container, so
+  // $PWD/$WORKSPACE is a path INSIDE the agent — the host docker daemon that
+  // `docker run -v` talks to over docker.sock has never heard of it and tries
+  // to mkdir it on the host, hitting a read-only filesystem (confirmed
+  // incident: ugt-bd-forecast, 2026-09-03; see docker-deploy.md §J). This is a
+  // plain per-line grep, not a real block-scope parse, so it can false-positive
+  // inside a `.inside{}` block that legitimately builds its own `sh` string —
+  // warn only, never fail the build on it.
+  if (!jf) return { ok: true };
+  const hits = jfActive
+    .split('\n')
+    .map((l, i) => [i + 1, l])
+    .filter(([, l]) => /docker\s+run\b/.test(l) && /-v\b/.test(l) && /\$\{?(PWD|WORKSPACE)\}?/.test(l));
+  return hits.length
+    ? {
+        ok: 'warn',
+        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (docker-deploy.md §J)`,
+      }
+    : { ok: true };
+});
+
 // ── 4. [DB] consistency with reality ───────────────────────────────────────
 check('[DB] consistent with actual alembic/manage.py usage', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };

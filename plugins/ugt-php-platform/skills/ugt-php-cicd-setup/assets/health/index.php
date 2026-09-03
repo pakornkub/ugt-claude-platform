@@ -8,10 +8,15 @@ $ok = true;
 // healthcheck ตัวนี้เป็นด่านสุดท้ายก่อนประกาศว่า deploy สำเร็จ)
 //
 // try {
-//     // SQL Server: LoginTimeout เป็น DSN parameter — **ห้ามใช้ PDO::ATTR_TIMEOUT**
-//     // เพราะ pdo_sqlsrv เมินค่านั้นในเฟส connect แล้วค้างยาวเกิน --timeout=10s ของ
-//     // HEALTHCHECK ทำให้ container ค้างสถานะ "starting" แทนที่จะ fail เร็ว ๆ
-//     // (ยืนยันจากโปรเจค pilot 2026-08 — ยิงใส่ host ที่เข้าไม่ถึง)
+//     // SQL Server: LoginTimeout เป็น DSN parameter — **ห้ามส่ง PDO::ATTR_TIMEOUT
+//     // เลยไม่ว่า pdo_sqlsrv เวอร์ชันไหน**: build เก่าเมินค่านี้เงียบ ๆ ในเฟส
+//     // connect แล้วค้างยาวเกิน --timeout=10s ของ HEALTHCHECK ทำให้ container
+//     // ค้างสถานะ "starting" แทนที่จะ fail เร็ว ๆ (ยืนยันจากโปรเจค pilot 2026-08
+//     // — ยิงใส่ host ที่เข้าไม่ถึง) ส่วน build ปัจจุบัน (PECL ไม่ pin เวอร์ชัน)
+//     // ถือว่าเป็น attribute ที่ไม่รู้จักเลยและ throw ตรง ๆ ตั้งแต่ `new PDO()`:
+//     // `SQLSTATE[IMSSP]: An unsupported attribute was designated on the PDO
+//     // object` (ยืนยัน ugt-bd-forecast 2026-09-03 — ดู references/docker-deploy.md
+//     // §C) — คนละอาการ (เมินเงียบ ๆ vs throw ทันที) แต่ทางแก้เดียวกัน: ห้ามใส่
 //     $dsn = 'sqlsrv:Server=' . getenv('DB_SERVER') . ';Database=' . getenv('DB_DATABASE')
 //          . ';TrustServerCertificate=1;LoginTimeout=5';
 //     // MySQL/MariaDB ใช้ PDO::ATTR_TIMEOUT ได้ตามปกติ:

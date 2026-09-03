@@ -182,6 +182,51 @@ check('[LARAVEL] DocumentRoot block matches the framework', () => {
     : { ok: true };
 });
 
+// recursively list *.php files, skipping vendor/ and CI-artifact dirs (same
+// skip-set shape as the Python skill's listPyFiles — avoids false hits inside
+// third-party code and matches nothing that ships in the repo by design)
+function listPhpFiles(dir, skip = new Set(['vendor', '.git', 'node_modules', 'coverage', 'dc-report', 'test-results'])) {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (skip.has(entry.name)) continue;
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listPhpFiles(full, skip));
+    else if (entry.name.endsWith('.php')) out.push(full);
+  }
+  return out;
+}
+
+check('No PDO::ATTR_TIMEOUT alongside an sqlsrv: DSN (pdo_sqlsrv throws, does not ignore)', () => {
+  // pdo_sqlsrv does not support PDO::ATTR_TIMEOUT as a connection option at all
+  // on some PECL builds (unpinned `pecl install sqlsrv pdo_sqlsrv` — version
+  // drifts build to build) -- it throws `SQLSTATE[IMSSP]: An unsupported
+  // attribute was designated on the PDO object` at connect time instead of
+  // ignoring it, turning a clean 503 into a fatal 500 and the container never
+  // reports healthy (confirmed incident: ugt-bd-forecast 2026-09-03; §C of
+  // docker-deploy.md). LoginTimeout in the DSN already covers the connect-hang
+  // this attribute was meant to guard against — there is no reason to combine
+  // the two, so this is a hard fail, not a warn.
+  // strip `/* */` blocks and whole-line `//` comments first (same convention
+  // as jfActive/dockerfileActive elsewhere in this file) — a file that
+  // explains IN A COMMENT why it does NOT use PDO::ATTR_TIMEOUT (exactly what
+  // db.php says, having just been fixed for this very bug) must not
+  // re-trigger the check it documents.
+  const activePhp = (body) =>
+    body
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('\n')
+      .filter((l) => !l.trim().startsWith('//'))
+      .join('\n');
+  const hits = listPhpFiles(ROOT).filter((f) => {
+    const body = activePhp(readFileSync(f, 'utf8'));
+    return /sqlsrv:/.test(body) && /PDO::ATTR_TIMEOUT/.test(body);
+  });
+  return hits.length
+    ? { ok: false, msg: `${hits.join(', ')}: PDO::ATTR_TIMEOUT next to an sqlsrv: DSN — drop PDO::ATTR_TIMEOUT entirely (docker-deploy.md §C); LoginTimeout in the DSN already covers connect timeout` }
+    : { ok: true };
+});
+
 // §5.4 — `composer install` necessarily runs before `COPY . .` (it must, to keep
 // the dependency layer cacheable), so any composer script firing at that point
 // runs without app code. Laravel's post-autoload-dump hook is
@@ -366,6 +411,28 @@ check('No Groovy interpolation of secrets', () => {
   );
   return bad.length
     ? { ok: false, msg: `Secrets Groovy-interpolated (leak into the build log): ${[...new Set(bad)].join(', ')} — use '$VAR' so the shell expands` }
+    : { ok: true };
+});
+
+check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
+  // Docker-outside-of-Docker: Jenkins agent runs in its own container, so
+  // $PWD/$WORKSPACE is a path INSIDE the agent — the host docker daemon that
+  // `docker run -v` talks to over docker.sock has never heard of it and tries
+  // to mkdir it on the host, hitting a read-only filesystem (confirmed
+  // incident: ugt-bd-forecast, 2026-09-03; see docker-deploy.md §I). This is a
+  // plain per-line grep, not a real block-scope parse, so it can false-positive
+  // inside a `.inside{}` block that legitimately builds its own `sh` string —
+  // warn only, never fail the build on it.
+  if (!jf) return { ok: true };
+  const hits = jfActive
+    .split('\n')
+    .map((l, i) => [i + 1, l])
+    .filter(([, l]) => /docker\s+run\b/.test(l) && /-v\b/.test(l) && /\$\{?(PWD|WORKSPACE)\}?/.test(l));
+  return hits.length
+    ? {
+        ok: 'warn',
+        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (docker-deploy.md §I)`,
+      }
     : { ok: true };
 });
 

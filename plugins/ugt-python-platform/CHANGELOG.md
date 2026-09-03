@@ -1,5 +1,24 @@
 # Changelog — ugt-python-platform
 
+## 0.6.1 (2026-09-03)
+
+**Pitfall เพิ่มจากอินซิเดนต์จริง ugt-bd-forecast 2026-09-03 (deploy รอบแรก) —
+ทั้งสองเจอบน docker02 จริง แม้เทส local ผ่านหมด (ฝั่ง python เจอผ่านโปรเจคที่มี
+stage PHP lint ผสมอยู่ — สองข้อนี้เป็นเรื่องระดับ Jenkins/compose ไม่ผูกภาษา
+จึงเข้าทั้งสองปลั๊กอิน)**:
+
+- **Docker-outside-of-Docker (DooD) — bind-mount `$PWD`/`$WORKSPACE`**:
+  Jenkins agent รันในคอนเทนเนอร์ตัวเอง `docker run -v` ที่ผูก path จาก
+  workspace ไปหา host docker daemon (sibling ผ่าน `docker.sock`) ที่ไม่รู้จัก
+  path นั้น → `mkdir` พังด้วย read-only filesystem → `references/docker-deploy.md`
+  **§J** (`.inside{}` หรือ stdin pipe แทน) + `verify.mjs` check ใหม่ (warn)
+- **`security_opt: no-new-privileges:true` ฆ่า entrypoint บน docker02**:
+  kernel 6.8 + AppArmor ปฏิเสธ privilege transition ตอน entrypoint →
+  `operation not permitted` → crash-loop ที่ `--wait` เห็นเป็น unhealthy
+  เร็วกว่า `start_period` มาก (เจอซ้ำจาก ugt-mscpl-ana 2026-08-17 ที่ไม่เคยถูก
+  บันทึกไว้ในปลั๊กอิน) → §K + diagnostic tip
+  (`docker inspect --format '{{.State.Status}} {{.RestartCount}}'`)
+
 ## 0.6.0 (2026-08-25)
 
 **Audit ปูพรม 7 มิติ 2026-08-25 — อุดรู runtime ที่ verify ไม่เคยจับ** —

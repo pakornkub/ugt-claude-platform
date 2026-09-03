@@ -1,5 +1,27 @@
 # Changelog — ugt-php-platform
 
+## 0.6.1 (2026-09-03)
+
+**Pitfall เพิ่มจากอินซิเดนต์จริง ugt-bd-forecast 2026-09-03 (deploy รอบแรก) —
+ทั้งหมดเจอบน docker02 จริง แม้เทส local ผ่านหมด**:
+
+- **Docker-outside-of-Docker (DooD) — bind-mount `$PWD`/`$WORKSPACE`**:
+  Jenkins agent รันในคอนเทนเนอร์ตัวเอง `docker run -v` ที่ผูก path จาก
+  workspace ไปหา host docker daemon (sibling ผ่าน `docker.sock`) ที่ไม่รู้จัก
+  path นั้น → `mkdir` พังด้วย read-only filesystem → `references/docker-deploy.md`
+  **§I** (`.inside{}` หรือ stdin pipe แทน) + `verify.mjs` check ใหม่ (warn)
+- **`security_opt: no-new-privileges:true` ฆ่า entrypoint บน docker02**:
+  kernel 6.8 + AppArmor ปฏิเสธ privilege transition ของ
+  `docker-php-entrypoint` → `operation not permitted` → crash-loop ที่
+  `--wait` เห็นเป็น unhealthy เร็วกว่า `start_period` มาก (เจอซ้ำจาก
+  ugt-mscpl-ana 2026-08-17 ที่ไม่เคยถูกบันทึกไว้ในปลั๊กอิน) → §J + diagnostic
+  tip (`docker inspect --format '{{.State.Status}} {{.RestartCount}}'`)
+- **`PDO::ATTR_TIMEOUT` คู่กับ DSN `sqlsrv:` — pdo_sqlsrv บาง build throw ไม่
+  ใช่แค่เมิน**: `SQLSTATE[IMSSP]: An unsupported attribute was designated on
+  the PDO object` ตั้งแต่ `new PDO()` (เปลี่ยนจากที่เข้าใจเดิมว่าแค่ "เมินเงียบ ๆ
+  ตอน connect") → §C เพิ่มบูลเล็ต + `verify.mjs` check ใหม่ (hard fail) +
+  แก้คอมเมนต์ `assets/health/index.php` ให้ครอบทั้งสองอาการ
+
 ## 0.6.0 (2026-08-25)
 
 **Audit ปูพรม 7 มิติ 2026-08-25 — แก้บั๊กกลไก volume + ข้อเท็จจริง Docker
