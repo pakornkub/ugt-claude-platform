@@ -80,17 +80,17 @@ SQLite files, `wp-content`, generated reports) uses a **bind mount** under the
 org path, never a named or anonymous Docker volume:
 
 ```
-/srv/appdata/<project>/<name>        # prod
-/srv/appdata/<project>-dev/<name>    # dev
+/home/docker02/appdata/<project>/<name>        # prod
+/home/docker02/appdata/<project>-dev/<name>    # dev
 ```
 
 - Declared in the compose `volumes:` list; the Deploy stage ensures each
   project path exists and is owned by the container's runtime UID before the
-  first `up -d` (idempotent). The server admin creates `/srv/appdata` itself
+  first `up -d` (idempotent). The server admin creates `/home/docker02/appdata` itself
   once, writable by the Jenkins user (see the skill's admin handoff).
 - Never store secrets in a volume · never bind-mount code over the image
   (single declared exception: WordPress `wp-content`)
-- Host file backup covers `/srv/appdata` once for every project
+- Host file backup covers `/home/docker02/appdata` once for every project
 
 ## Server names (must match exactly)
 

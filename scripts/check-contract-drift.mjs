@@ -92,12 +92,12 @@ const CHECKS = [
     },
   },
   {
-    name: 'Persistent data: bind mounts under /srv/appdata/<project>',
+    name: 'Persistent data: bind mounts under /home/docker02/appdata/<project>',
     files: {
-      [`${CORE}/contracts/cicd.md`]: [/\/srv\/appdata\/<project>\//],
-      [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
-      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
-      [`${PHP}/ugt-php-cicd-setup/SKILL.md`]: [/\/srv\/appdata\/<project>\//],
+      [`${CORE}/contracts/cicd.md`]: [/\/home\/docker02\/appdata\/<project>\//],
+      [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
+      [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
+      [`${PHP}/ugt-php-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
     },
   },
   {

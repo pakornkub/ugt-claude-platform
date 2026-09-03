@@ -77,7 +77,7 @@
 - [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
 - [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
 - [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `8081`/`8082`
-- [ ] `/srv/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
+- [ ] `/home/docker02/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
 - [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
 - [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** — คนละเรื่องกับ `docker` group ข้างบน ถ้าขาดตัวนี้ pipeline ตายตั้งแต่ stage แรก (ดูภาคผนวก)
 - [ ] Docker network `proxy-network` สร้างแล้วบน host (compose ทั้งสองไฟล์ประกาศเป็น `external: true`)
@@ -155,10 +155,10 @@ docker network create proxy-network
 compose ทั้ง prod และ dev ประกาศ `proxy-network` เป็น `external: true` —
 ไม่มี network นี้ `docker compose up` จะ fail ทันทีตอน Deploy
 
-### ช. `/srv/appdata` (ข้อมูลถาวร)
+### ช. `/home/docker02/appdata` (ข้อมูลถาวร)
 
 ```bash
-sudo mkdir -p /srv/appdata && sudo chown jenkins:jenkins /srv/appdata
+sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata
 ```
 
 โฟลเดอร์ย่อยรายโปรเจคสร้างเองในสเตจ Deploy

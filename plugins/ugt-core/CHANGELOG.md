@@ -1,5 +1,16 @@
 # Changelog — ugt-core
 
+## 2.10.1 (2026-09-03)
+
+**contract cicd.md § Persistent data: `/srv/appdata/<project>` → `/home/docker02/appdata/<project>`**
+— contract ตกค้าง path เก่าที่ไม่เคยตรงกับ host จริงมาตั้งแต่มติ M5 เดิม ทุก
+downstream (nextjs/php/python skill content, `scripts/check-contract-drift.mjs`)
+เคยแอบใช้ `/home/docker02/appdata` กันเองแบบไม่เป็นทางการ (เห็นได้จาก production
+จริงของ ugt-mscpl-ana/ugt-bd-forecast บน host `docker02`) โดยไม่มีใคร sync
+contract กลับ — รอบนี้แก้ contract ให้ตรงความจริงแล้ว sync ทั้ง 3 platform
+plugin (php/python 0.6.2, nextjs 4.58.1) ในคราวเดียว ยืนยันด้วย
+`node scripts/check-contract-drift.mjs` (21/21 ผ่าน)
+
 ## 2.10.0 (2026-09-02)
 
 **contract design.md §Layout: page pattern แตกเป็นสองแบบที่ sanctioned** —

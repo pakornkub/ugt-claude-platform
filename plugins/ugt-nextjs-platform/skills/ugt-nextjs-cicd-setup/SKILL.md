@@ -109,10 +109,10 @@ the production container**)
 
 ### 2.8 Persistent data
 
-ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/srv/appdata/<project>/<name>`
-(dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
+ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/home/docker02/appdata/<project>/<name>`
+(dev = `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. Deploy stage สร้าง path +
-chown ให้ตรง UID ใน container (idempotent); admin เตรียม `/srv/appdata`
+chown ให้ตรง UID ใน container (idempotent); admin เตรียม `/home/docker02/appdata`
 ให้เขียนได้ครั้งเดียว (ดู admin handoff).
 
 ## 3. Interview — ask first (one batch)

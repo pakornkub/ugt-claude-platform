@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ugt-core",
   "displayName": "UGT Core",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "Stack-agnostic org foundation shared by every UGT stack platform: the ugt-handoff work-state skill, the ugt-context knowledge-base bootstrap (docs/project-context/), the ugt-model-mode model-routing skill, the ugt-requirements per-feature brief skill, the audit-trail hooks, and the normative contracts (database naming, cicd pipeline, auth/RBAC, UI design standard, harness mechanism) that stack platforms render in their own terms. Installed automatically as a dependency of ugt-<stack>-platform plugins — never installed directly.",
   "author": {
     "name": "UGT DX Team"

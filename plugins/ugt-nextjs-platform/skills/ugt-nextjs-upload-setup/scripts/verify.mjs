@@ -232,8 +232,8 @@ check('Compose mounts a storage volume and runs the scanner', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('Storage binds under /srv/appdata (no named volume) + no __*__ left', () => {
-  // cicd contract §2.8: persistent data = bind mounts under /srv/appdata —
+check('Storage binds under /home/docker02/appdata (no named volume) + no __*__ left', () => {
+  // cicd contract §2.8: persistent data = bind mounts under /home/docker02/appdata —
   // named volume มองไม่เห็นจาก host และ backup ขององค์กรกวาดไม่ถึง
   const files = ['docker-compose.yml', 'docker-compose.dev.yml'].filter((f) => has(f));
   if (!files.length) return { ok: 'warn', msg: 'no compose files yet — apply the snippet after cicd-setup' };
@@ -241,7 +241,7 @@ check('Storage binds under /srv/appdata (no named volume) + no __*__ left', () =
   for (const f of files) {
     const body = read(f);
     if (/^\s*-\s*[\w-]+:\/app\/storage/m.test(body)) {
-      problems.push(`${f}: /app/storage mounts a NAMED volume — must be a /srv/appdata bind (cicd §2.8)`);
+      problems.push(`${f}: /app/storage mounts a NAMED volume — must be a /home/docker02/appdata bind (cicd §2.8)`);
     }
     const hits = [...new Set(body.match(/__[A-Z][A-Z0-9_]*__/g) ?? [])];
     if (hits.length) problems.push(`${f}: placeholders left: ${hits.join(', ')}`);

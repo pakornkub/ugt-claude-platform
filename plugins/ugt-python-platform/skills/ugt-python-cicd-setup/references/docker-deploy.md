@@ -44,7 +44,7 @@ Jenkins deploy image เสร็จแล้ว**จบหน้าที่** 
 ที่ชี้กลับมาที่ตัวอย่าง crontab นี้:
 
 ```
-0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /srv/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
 ```
 
 อ่านทีละส่วน:
@@ -55,7 +55,7 @@ Jenkins deploy image เสร็จแล้ว**จบหน้าที่** 
   แล้ว **ลบตัวเองทิ้ง** (`--rm`) ต่างจาก `up -d` ที่ปล่อยค้าง — ตรงกับธรรมชาติ
   ของ batch job ที่ไม่ควรมี container ค้างระหว่างรอบ
 - `>> .../cron.log 2>&1` — log ของ cron เอง (stdout+stderr ของการรัน job)
-  ต้องอยู่ใต้ `/srv/appdata/<project>/` เช่นเดียวกับข้อมูล persist อื่น
+  ต้องอยู่ใต้ `/home/docker02/appdata/<project>/` เช่นเดียวกับข้อมูล persist อื่น
   (ดู §D) เพื่อให้ backup ของ host คลุมถึงและรอดข้าม deploy รอบถัดไป
 - ความถี่ (`0 2 * * *` = ทุกวันตี 2) เป็นตัวอย่าง — ปรับตาม requirement จริง
   ของแต่ละ job แล้วบันทึกไว้ใน admin handoff เพื่อให้ทีมอื่นเห็นว่ามี cron
@@ -75,8 +75,8 @@ Path ของ persistent data ตาม contract กลาง (`ugt-core/contra
 Persistent data) คือ:
 
 ```
-/srv/appdata/<project>/<name>        # prod
-/srv/appdata/<project>-dev/<name>    # dev
+/home/docker02/appdata/<project>/<name>        # prod
+/home/docker02/appdata/<project>-dev/<name>    # dev
 ```
 
 แต่ path ถูกต้องไม่ได้แปลว่า container **เขียนได้**. Dockerfile ทั้งสอง shape
@@ -94,7 +94,7 @@ subdir ที่มีอยู่แล้วถูกข้าม ไม่ ch
 
 ```sh
 APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
-for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
   if [ ! -d "$p" ]; then
     mkdir -p "$p"
     docker run --rm -v "$p":/d alpine chown -R "$APP_UID" /d
@@ -104,13 +104,13 @@ done
 
 ตอนกรอกรายชื่อ volume จาก interview ข้อ 6 ให้แทน `uploads`/`reports` ในบรรทัด
 `for p in …` ด้วยชื่อ subdir จริง**ทุกตัวที่ compose bind** — ไม่ใช่แค่ระดับ
-โปรเจค: compose bind ที่ `/srv/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มี
+โปรเจค: compose bind ที่ `/home/docker02/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มี
 ตอน `up -d` **dockerd จะสร้างให้เองเป็น `root:root`** (พฤติกรรมมาตรฐานของ
 bind mount ที่ path ปลายทางหาย) แล้ว user `app` เขียนไม่ได้ทั้งที่ container
 ขึ้น `healthy` ปกติทุกอย่าง.
 
 **ห้ามย้อนกลับไปครอบทั้งบล็อกด้วย guard ระดับโปรเจค**
-(`if [ ! -d /srv/appdata/<project> ]` — รูปแบบก่อน 0.5.0): guard แบบนั้น
+(`if [ ! -d /home/docker02/appdata/<project> ]` — รูปแบบก่อน 0.5.0): guard แบบนั้น
 กลายเป็น no-op ถาวรทันทีที่ deploy แรกสร้างโฟลเดอร์โปรเจคขึ้นมา — volume ที่
 เพิ่มในรุ่นถัดไปจะไม่มีวันถูก mkdir/chown และไปโผล่เป็น `PermissionError`
 ตอนแอปเขียนไฟล์จริง
@@ -124,7 +124,7 @@ bind mount ที่ path ปลายทางหาย) แล้ว user `app
   ทุกครั้ง ไม่ hardcode
 - **`chown` เองไม่ได้เพราะ Jenkins user ไม่ใช่ root บนโฮสต์** — แต่ Jenkins
   user อยู่ใน `docker` group (ตาม มติ M8 / เช็คลิสต์ admin-handoff) จึงสั่ง
-  `docker run` ได้; รันเป็น container `alpine` แยกที่ mount `/srv/appdata/<project>`
+  `docker run` ได้; รันเป็น container `alpine` แยกที่ mount `/home/docker02/appdata/<project>`
   bind เข้ามาที่ `/d` แล้ว `chown -R` ข้างในนั้น — container นี้เองรันเป็น
   root โดย default จึง chown ได้ แม้ Jenkins agent ข้างนอกจะไม่ใช่ root
 - guard `if [ ! -d "$p" ]` **ต่อ subdir** ทำให้ container chown รันเฉพาะตอนมี
@@ -140,7 +140,7 @@ bind mount ที่ path ปลายทางหาย) แล้ว user `app
 ```sh
 docker run --rm __PROJECT_NAME__:latest id -u
 # หรือระบุ group ด้วย:
-chown -R $(docker run --rm __PROJECT_NAME__:latest id -u):$(docker run --rm __PROJECT_NAME__:latest id -g) /srv/appdata/__PROJECT_NAME__/<name>
+chown -R $(docker run --rm __PROJECT_NAME__:latest id -u):$(docker run --rm __PROJECT_NAME__:latest id -g) /home/docker02/appdata/__PROJECT_NAME__/<name>
 ```
 
 ทั้งสองทางใช้ตรรกะเดียวกัน (อ่าน UID จาก image จริง แล้ว chown path ให้ตรง) —

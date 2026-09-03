@@ -6,7 +6,7 @@ description: >
   "ตั้ง jenkins ให้ python" — producing the 10-stage Jenkinsfile (toolchain in
   docker), sonar-project.properties, Dockerfile (web/batch), both compose files,
   minimal ruff/mypy/pytest tooling + smoke test so the Quality Gate can pass,
-  /api/health per framework, volume bind mounts under /srv/appdata, and the
+  /api/health per framework, volume bind mounts under /home/docker02/appdata, and the
   admin handoff. Covers FastAPI, Flask, Django and batch jobs. Not for Next.js
   (→ ugt-nextjs-cicd-setup) or PHP (→ ugt-php-cicd-setup).
 ---
@@ -167,8 +167,8 @@ compose. Shape `[BATCH]` ไม่มี health endpoint เลย (ไม่ม
 
 ### 2.9 Persistent data
 
-ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/srv/appdata/<project>/<name>`
-(dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
+ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/home/docker02/appdata/<project>/<name>`
+(dev = `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. บล็อก `[VOLUME]` ในสเตจ
 Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app` ใน container ให้เอง โดย
 อ่าน UID จาก image จริง ไม่ hardcode — **มันวนเช็คทีละ subdir** (`for p in …`)
@@ -176,7 +176,7 @@ Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app
 chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน `uploads`/`reports` ในบรรทัด
 `for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่ในลิสต์จะถูก dockerd สร้างเป็น
 `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้ (`verify.mjs` จับข้อนี้ให้).
-admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin handoff).
+admin เตรียม `/home/docker02/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin handoff).
 รายละเอียดกลไก chown → `references/docker-deploy.md` §D
 
 ### 2.10 CI env
@@ -334,19 +334,19 @@ sonar keys = `<project>`, `<project>-dev`
 - **ไม่มี volume (ข้อ 6 = ไม่มี)** → ลบบล็อกคอมเมนต์ `[VOLUME]` ในทั้ง 2 compose
   **และ** บล็อก `[VOLUME]` (mkdir + chown) ในสเตจ Deploy ของ `Jenkinsfile`
 - **มี volume** → uncomment `volumes:` ในทั้ง 2 compose แล้วแทน `<name>` ด้วย
-  ชื่อจริง — path ต้องอยู่ใต้ `/srv/appdata/<project>/` (dev ใช้
-  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
+  ชื่อจริง — path ต้องอยู่ใต้ `/home/docker02/appdata/<project>/` (dev ใช้
+  `/home/docker02/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
   `for p in` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วยชื่อจริงทุกตัว** — งานนี้ลืมไม่ได้:
 
   ```sh
-  for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+  for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
   ```
 
-  compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
+  compose bind ที่ `/home/docker02/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
   `<name>` ที่ยังไม่มีตอน `up -d` **dockerd สร้างให้เองเป็น `root:root`**
   หลังบล็อก `[VOLUME]` รันจบไปแล้ว → `chown -R` ไม่ทัน แล้ว user `app` เขียน
   ไม่ได้ (`PermissionError`) ทั้งที่ container ขึ้น `healthy` ปกติ. `chown -R`
-  บรรทัดถัดมาครอบทั้ง `/srv/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
+  บรรทัดถัดมาครอบทั้ง `/home/docker02/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
   `mkdir` ให้เอง ขอแค่ subdir มีอยู่ก่อน (→ `references/docker-deploy.md` §D)
 - **shape = web (`[WEB]`)** → ใช้ `Dockerfile.web`, คงบล็อก health poll ท้าย
   สเตจ Deploy ไว้, ลบคอมเมนต์ `[BATCH]` 2 บรรทัดท้ายสเตจทิ้ง
@@ -507,7 +507,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Tag image ด้วย `BUILD_NUMBER` | `latest` อย่างเดียว (rollback ไม่ได้) |
 | Healthcheck ยิง `127.0.0.1:8000` + poll `docker inspect` | `localhost` (slim → IPv6) / host port / `wget` จาก Jenkins |
 | Migrate ก่อน `compose up` — fail = ไม่ deploy | deploy ก่อน แล้วค่อย migrate |
-| Volume ใต้ `/srv/appdata/<project>/` (dev = `/srv/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
+| Volume ใต้ `/home/docker02/appdata/<project>/` (dev = `/home/docker02/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
 | `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
 | Django migrate ส่ง `--env-file .env` ทั้งไฟล์ | `-e DATABASE_URL` ตัวเดียว (`settings.py` ต้องการ `SECRET_KEY` ฯลฯ ด้วย) |
 | `ruff format .` ทั้งโปรเจค + commit แยก **ก่อน** push แรก | ปล่อยให้ `ruff format --check` แดงบน Jenkins แล้วค่อยไล่แก้ทีละรอบ |
@@ -572,7 +572,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
       `sonar.python.coverage.reportPaths=coverage.xml`
 - [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
 - [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
-      healthcheck ยิง `127.0.0.1:8000` · volume (ถ้ามี) อยู่ใต้ `/srv/appdata/`
+      healthcheck ยิง `127.0.0.1:8000` · volume (ถ้ามี) อยู่ใต้ `/home/docker02/appdata/`
 - [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `for p in` ของ
       บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
 - [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
@@ -616,7 +616,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
 - [ ] SonarQube projects prod+dev สร้างแล้ว + assign Quality Gate ตาม §2.4
       ให้ทั้งสอง
 - [ ] ปิด Lightweight checkout ใน job config
-- [ ] `/srv/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server)
+- [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server)
 - [ ] [BATCH] เท่านั้น: ตั้ง host cron เรียก `docker compose run --rm job` แล้ว
       + ทดสอบรันมือ 1 รอบผ่าน
 - [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)

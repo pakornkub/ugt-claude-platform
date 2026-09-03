@@ -61,7 +61,7 @@ core ทับ แต่ image เองไม่มี state ของ uploads 
 
 1. **ทางหลัก — `wp-content` คือข้อมูล runtime ไม่ใช่ artifact ของ pipeline**
    theme/plugin/media ติดตั้งผ่าน **wp-admin ครั้งแรกหลัง deploy** แล้วอยู่ยาว
-   ใน `/srv/appdata/<project>/wp-content` ข้าม deploy ถัดไปเอง — pipeline
+   ใน `/home/docker02/appdata/<project>/wp-content` ข้าม deploy ถัดไปเอง — pipeline
    เปลี่ยนเฉพาะสิ่งที่มากับ image (core + health) ไม่เคยแตะ `wp-content` เลย
    นี่คือเหตุผลที่ volume นี้บังคับ และคือสาเหตุที่ deploy รอบสองไม่ทำให้ของหาย
 2. **repo ที่ track theme/plugin ที่เขียนเอง** — โค้ดชุดนั้นต้องถูก copy ฝั่ง
@@ -70,7 +70,7 @@ core ทับ แต่ image เองไม่มี state ของ uploads 
 
    ```groovy
    // [WP] วางหลังบล็อก [VOLUME] (path + chown ต้องมาก่อน) และก่อน docker-compose up
-   sh "cp -r wp-content/. /srv/appdata/${containerName}/wp-content/"
+   sh "cp -r wp-content/. /home/docker02/appdata/${containerName}/wp-content/"
    ```
 
    - `cp -r <dir>/.` (จุดต่อท้าย) คัดลอก *เนื้อใน* ไม่ใช่ตัวโฟลเดอร์ — ลืมจุด
@@ -152,13 +152,13 @@ sh "docker compose -f ${composeFile} up -d --no-build --force-recreate --renew-a
 ```
 
 - ปลอดภัยกับข้อมูลผู้ใช้: flag นี้แตะเฉพาะ **anonymous** volume — `wp-content`
-  เป็น **bind mount** ที่ประกาศชื่อไว้ในทั้ง 2 compose (`/srv/appdata/...`)
+  เป็น **bind mount** ที่ประกาศชื่อไว้ในทั้ง 2 compose (`/home/docker02/appdata/...`)
   จึงไม่โดนแตะเลย ซึ่งเป็นเหตุผลอีกข้อที่ `wp-content` เป็น volume **บังคับ**:
   ทุกอย่างที่ต้องรอดต้องอยู่ในนั้น ไม่ใช่ที่อื่นใน webroot
 - ราคาที่จ่าย: container start ช้าขึ้นเล็กน้อยเพราะ entrypoint แตก core ใหม่
   ทุก deploy (หลักสิบวินาที — `start_period: 60s` ครอบอยู่แล้ว)
 - ทางเลือกที่ **ไม่** เลือก: bind-mount ไฟล์ health จากโฮสต์ทับเข้าไป — ได้ผล
-  เหมือนกันแต่ต้องมีขั้น copy ไฟล์ลง `/srv/appdata` ก่อน `up -d` เพิ่มอีกจุดที่
+  เหมือนกันแต่ต้องมีขั้น copy ไฟล์ลง `/home/docker02/appdata` ก่อน `up -d` เพิ่มอีกจุดที่
   ลืมได้ และทำให้ image ไม่ใช่แหล่งความจริงเดียวของ endpoint นี้อีกต่อไป
 - `Dockerfile.web` (Laravel/CI/legacy) **ไม่มีปัญหานี้** — `php:*-apache` ไม่ได้
   ประกาศ `VOLUME` ไว้ ทุกไฟล์อยู่ใน image layer ตรง ๆ จึงใช้
@@ -504,8 +504,8 @@ Path ของ persistent data ตาม contract กลาง (`ugt-core/contra
 Persistent data) คือ:
 
 ```
-/srv/appdata/<project>/<name>        # prod
-/srv/appdata/<project>-dev/<name>    # dev
+/home/docker02/appdata/<project>/<name>        # prod
+/home/docker02/appdata/<project>-dev/<name>    # dev
 ```
 
 แต่ path ถูกต้องไม่ได้แปลว่า container **เขียนได้**. bind mount ที่ owner บน
@@ -538,7 +538,7 @@ compose bind จริง** และทำเฉพาะตัวที่ย�
 
 ```sh
 APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u www-data)
-for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/reports; do
+for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
   if [ ! -d "$p" ]; then
     mkdir -p "$p"
     docker run --rm -v "$p":/d alpine chown -R "$APP_UID" /d
@@ -548,12 +548,12 @@ done
 
 ตอนกรอกรายชื่อ volume จาก interview ข้อ 6 ให้แทน `uploads`/`reports` ด้วยชื่อ
 subdir จริง **ทุกตัวที่ compose bind** — ไม่ใช่แค่ระดับโปรเจค: compose bind ที่
-`/srv/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มีตอน `up -d` **dockerd จะ
+`/home/docker02/appdata/<project>/<name>` ถ้า `<name>` ยังไม่มีตอน `up -d` **dockerd จะ
 สร้างให้เองเป็น `root:root`** (พฤติกรรมมาตรฐานของ bind mount ที่ path ปลายทางหาย)
 แล้ว `www-data` เขียนไม่ได้
 
 **ห้ามย้อนกลับไปครอบทั้งบล็อกด้วย guard ระดับโปรเจค**
-(`if [ ! -d /srv/appdata/<project> ]`): guard แบบนั้นกลายเป็น no-op ถาวรทันทีที่
+(`if [ ! -d /home/docker02/appdata/<project> ]`): guard แบบนั้นกลายเป็น no-op ถาวรทันทีที่
 deploy แรกสร้างโฟลเดอร์โปรเจคขึ้นมา — volume ที่เพิ่มในรุ่นถัดไปจะไม่มีวันถูก
 mkdir/chown
 
@@ -565,7 +565,7 @@ mkdir/chown
   ถูกเสมอและไม่แพงกว่า
 - **`chown` เองไม่ได้เพราะ Jenkins user ไม่ใช่ root บนโฮสต์** — แต่อยู่ใน
   `docker` group (มติ M8 / เช็คลิสต์ admin handoff) จึงสั่ง `docker run` ได้:
-  รัน container `alpine` แยกที่ bind `/srv/appdata/<project>/<name>` เข้ามาที่
+  รัน container `alpine` แยกที่ bind `/home/docker02/appdata/<project>/<name>` เข้ามาที่
   `/d` แล้ว `chown -R` ข้างในนั้น — container นั้นรันเป็น root โดย default
 - guard `if [ ! -d "$p" ]` **ต่อ subdir** ทำให้ container chown รันเฉพาะตอนมี
   subdir ใหม่ (ส่วนการหา UID รันทุกรอบโดยตั้งใจ — ถูกมาก)
@@ -582,7 +582,7 @@ volume อื่นทุกประการ — WordPress เขียน `wp
 ```sh
 docker run --rm __PROJECT_NAME__:latest id -u www-data
 # หรือระบุ group ด้วย:
-chown -R $(docker run --rm __PROJECT_NAME__:latest id -u www-data):$(docker run --rm __PROJECT_NAME__:latest id -g www-data) /srv/appdata/__PROJECT_NAME__/<name>
+chown -R $(docker run --rm __PROJECT_NAME__:latest id -u www-data):$(docker run --rm __PROJECT_NAME__:latest id -g www-data) /home/docker02/appdata/__PROJECT_NAME__/<name>
 ```
 
 ตรรกะเดียวกับกลไกอัตโนมัติ — ต่างกันแค่ไว้แก้กรณีพิเศษที่ deploy รอบใหม่ไม่ครอบ

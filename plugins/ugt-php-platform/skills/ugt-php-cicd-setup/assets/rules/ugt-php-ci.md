@@ -74,8 +74,8 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 
 ## Docker
 
-- Volume ที่ต้อง persist ข้าม deploy ต้องอยู่ใต้ `/srv/appdata/<project>/`
-  เท่านั้น (dev = `/srv/appdata/<project>-dev/`) — ห้าม named volume, ห้าม
+- Volume ที่ต้อง persist ข้าม deploy ต้องอยู่ใต้ `/home/docker02/appdata/<project>/`
+  เท่านั้น (dev = `/home/docker02/appdata/<project>-dev/`) — ห้าม named volume, ห้าม
   เก็บ secret ใน volume
 - ห้ามใส่ version หรือ commit hash ใน response ของ `/api/health` — endpoint นี้
   ใช้เฉพาะ health status (`healthy`/`degraded`) เท่านั้น

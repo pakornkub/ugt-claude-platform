@@ -173,7 +173,7 @@ FILES_READ:   'files:read',
 ### 4.4 Infrastructure
 
 Apply `assets/compose-and-dockerfile.snippet.md` to the Dockerfile and **both**
-compose files: the mount point owned by `nextjs`, the `/srv/appdata` bind
+compose files: the mount point owned by `nextjs`, the `/home/docker02/appdata` bind
 mounts (never a named volume — cicd contract §2.8), the clamav service with a
 5-minute `start_period`, the persisted signature DB, and `storage` +
 `clamav-db` added to the Jenkinsfile `[VOLUME]` `mkdir -p` line
@@ -264,7 +264,7 @@ docker logs <app-container> 2>&1 | grep "virus scan unavailable"
 | ข้อความหลัง `virus scan unavailable` | สาเหตุ | ทางแก้ |
 | --- | --- | --- |
 | `getaddrinfo ENOTFOUND clamav` | แอป resolve ชื่อ service ไม่ได้ — รัน `npm run dev` นอก docker, อยู่คนละ compose network, หรือ key ของ service ไม่ได้ชื่อ `clamav` (DNS ใช้ชื่อ service ไม่ใช่ `container_name`) | dev นอก docker: publish `3310:3310` + `CLAMAV_HOST=localhost` ใน `.env` เครื่องตัวเอง · prod: ให้ app กับ clamav อยู่ network เดียวกัน / แก้ `CLAMAV_HOST` ให้ตรงชื่อ service |
-| `connect ECONNREFUSED` | clamd ยังไม่เปิด port — boot แรกกำลังโหลด signature DB (~1 GB, หลายนาที) หรือ **host ไม่มี outbound internet ทำให้ freshclam โหลด DB ไม่ได้เลย** — container จะ running ค้างแบบไม่มี error แต่ clamd ไม่ listen ถาวร | ดู `docker logs <clamav>`: มี freshclam error → เปิดทางไป `database.clamav.net` หรือ preload ไฟล์ `.cvd` (main/daily/bytecode) ใส่ `/srv/appdata/<project>/clamav-db` แล้ว restart · แค่ยังโหลดอยู่ → รอจน STATUS เป็น `(healthy)` |
+| `connect ECONNREFUSED` | clamd ยังไม่เปิด port — boot แรกกำลังโหลด signature DB (~1 GB, หลายนาที) หรือ **host ไม่มี outbound internet ทำให้ freshclam โหลด DB ไม่ได้เลย** — container จะ running ค้างแบบไม่มี error แต่ clamd ไม่ listen ถาวร | ดู `docker logs <clamav>`: มี freshclam error → เปิดทางไป `database.clamav.net` หรือ preload ไฟล์ `.cvd` (main/daily/bytecode) ใส่ `/home/docker02/appdata/<project>/clamav-db` แล้ว restart · แค่ยังโหลดอยู่ → รอจน STATUS เป็น `(healthy)` |
 | `clamd timeout` | scan ไม่เสร็จใน `CLAMAV_TIMEOUT_MS` (ไฟล์ใหญ่/host ช้า/clamd กำลัง reload DB) | เพิ่ม `CLAMAV_TIMEOUT_MS` |
 | `INSTREAM size limit exceeded` | ไฟล์ใหญ่กว่า `StreamMaxLength` ของ clamd (**default 25 MB**) — โผล่ทันทีที่โปรเจคขยับ `UPLOAD_MAX_BYTES` เกิน 25 MB | ตั้ง `StreamMaxLength` ใน `clamd.conf` ให้ ≥ `UPLOAD_MAX_BYTES` (mount ไฟล์ conf ทับใน service clamav) แล้ว recreate |
 

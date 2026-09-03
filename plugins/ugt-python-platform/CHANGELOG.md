@@ -1,5 +1,15 @@
 # Changelog — ugt-python-platform
 
+## 0.6.2 (2026-09-03)
+
+**Path มาตรฐาน persistent data sync กับ ugt-core 2.10.1**: `/srv/appdata/<project>`
+→ `/home/docker02/appdata/<project>` ทุกจุด (`SKILL.md`, `references/docker-deploy.md`,
+`scripts/verify.mjs`, `assets/Jenkinsfile`, `assets/admin-handoff.template.md`,
+`assets/rules/ugt-python-ci.md`, `evals/evals.json`) — ตัว host จริง (`docker02`)
+ใช้ path นี้มาตลอด (เห็นจาก production จริงของ ugt-mscpl-ana/ugt-bd-forecast)
+contract เขียนผิดค้างไว้เฉย ๆ ไม่ใช่การเปลี่ยน convention ใหม่ — ยืนยันด้วย
+`node scripts/check-contract-drift.mjs`
+
 ## 0.6.1 (2026-09-03)
 
 **Pitfall เพิ่มจากอินซิเดนต์จริง ugt-bd-forecast 2026-09-03 (deploy รอบแรก) —

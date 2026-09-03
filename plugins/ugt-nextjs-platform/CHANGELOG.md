@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.58.1 (2026-09-03)
+
+**Path มาตรฐาน persistent data sync กับ ugt-core 2.10.1**: `/srv/appdata/<project>`
+→ `/home/docker02/appdata/<project>` ทุกจุด (`SKILL.md`, `verify.mjs`,
+`assets/Jenkinsfile`, `assets/admin-handoff.template.md`,
+`ugt-nextjs-upload-setup`'s compose snippet + verify.mjs + SKILL.md) — ตัว
+host จริง (`docker02`) ใช้ path นี้มาตลอด contract เขียนผิดค้างไว้เฉย ๆ
+ไม่ใช่การเปลี่ยน convention ใหม่
+
 ## 4.58.0 (2026-09-02)
 
 **ปิดชุดช่องว่าง shell/form จาก field report โปรเจค pilot** (header ว่างเปล่า

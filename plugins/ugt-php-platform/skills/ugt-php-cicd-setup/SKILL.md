@@ -7,7 +7,7 @@ description: >
   CI docker image), sonar-project.properties, Dockerfile (web/wordpress),
   both compose files, minimal php-cs-fixer/phpstan/PHPUnit tooling + smoke test
   so the Quality Gate can pass, /api/health per shape, volume bind mounts under
-  /srv/appdata, and the admin handoff. Covers Laravel, CodeIgniter, plain PHP
+  /home/docker02/appdata, and the admin handoff. Covers Laravel, CodeIgniter, plain PHP
   legacy and WordPress. Not for Next.js (→ ugt-nextjs-cicd-setup) or Python
   (→ ugt-python-cicd-setup).
 ---
@@ -185,8 +185,8 @@ Dockerfile และ compose — **`curl` ติดมากับ base image �
 
 ### 2.9 Persistent data
 
-ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/srv/appdata/<project>/<name>`
-(dev = `/srv/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
+ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/home/docker02/appdata/<project>/<name>`
+(dev = `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
 ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image (ข้อยกเว้นเดียวที่ contract
 ประกาศไว้คือ `wp-content` ของ WordPress ซึ่ง **บังคับ** ต้องเป็น volume).
 บล็อก `[VOLUME]` ในสเตจ Deploy สร้าง path + `chown` ให้ตรง UID ของ user ที่
@@ -198,7 +198,7 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 ข้ามตัวที่มีอยู่แล้วโดยไม่ chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน
 `uploads`/`reports` ในบรรทัด `for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่
 ในลิสต์จะถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้
-(`verify.mjs` จับข้อนี้ให้). admin เตรียม `/srv/appdata` ให้เขียนได้ครั้งเดียว
+(`verify.mjs` จับข้อนี้ให้). admin เตรียม `/home/docker02/appdata` ให้เขียนได้ครั้งเดียว
 ต่อ server (ดู admin handoff). รายละเอียดกลไก chown → `references/docker-deploy.md` §H
 
 ### 2.10 CI env
@@ -395,7 +395,7 @@ render เอกสารส่ง admin (§5.7):
   อะไรเติมให้อัตโนมัติ**:
 
   1. **โมเดลหลัก (default) — `wp-content` เป็นข้อมูล runtime** อยู่ที่
-     `/srv/appdata/<project>/wp-content` บนโฮสต์ ไม่ใช่ของที่ pipeline ส่งขึ้นไป:
+     `/home/docker02/appdata/<project>/wp-content` บนโฮสต์ ไม่ใช่ของที่ pipeline ส่งขึ้นไป:
      theme/plugin/media ติดตั้งผ่าน **wp-admin ครั้งแรกหลัง deploy** แล้วอยู่ยาว
      ข้าม deploy ถัดไปเอง (นี่คือเหตุผลที่ volume นี้บังคับ) — deploy รอบถัดไป
      เปลี่ยนแค่ core/health ที่มากับ image ไม่แตะ `wp-content`
@@ -407,7 +407,7 @@ render เอกสารส่ง admin (§5.7):
      ```groovy
      // [WP] เฉพาะโปรเจคที่ track theme/plugin ของตัวเองใน repo —
      // ⚠️ ยังไม่ผ่าน pilot: ต้องพิสูจน์ ownership/permission กับโปรเจคจริงก่อนใช้ยาว
-     sh "cp -r wp-content/. /srv/appdata/${containerName}/wp-content/"
+     sh "cp -r wp-content/. /home/docker02/appdata/${containerName}/wp-content/"
      ```
 
      วางไว้**หลัง**บล็อก `[VOLUME]` (path + chown ต้องมีก่อน) และ **ก่อน**
@@ -441,19 +441,19 @@ render เอกสารส่ง admin (§5.7):
   **และ** บล็อก `[VOLUME]` (mkdir + chown) ในสเตจ Deploy ของ `Jenkinsfile`
   (shape = wordpress ข้ามข้อนี้ — `[WP]` บังคับให้มี volume เสมอ)
 - **มี volume** → uncomment `volumes:` ในทั้ง 2 compose แล้วแทน `<name>` ด้วย
-  ชื่อจริง — path ต้องอยู่ใต้ `/srv/appdata/<project>/` (dev ใช้
-  `/srv/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
+  ชื่อจริง — path ต้องอยู่ใต้ `/home/docker02/appdata/<project>/` (dev ใช้
+  `/home/docker02/appdata/<project>-dev/`) เท่านั้น **แล้วแทนชื่อตัวอย่างในบรรทัด
   `for p in` ของบล็อก `[VOLUME]` ในสเตจ Deploy ด้วยชื่อจริงทุกตัว** — งานนี้ลืมไม่ได้:
 
   ```sh
-  for p in /srv/appdata/${containerName}/uploads /srv/appdata/${containerName}/storage; do
+  for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/storage; do
   ```
 
-  compose bind ที่ `/srv/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
+  compose bind ที่ `/home/docker02/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
   `<name>` ที่ยังไม่มีตอน `up -d` **dockerd สร้างให้เองเป็น `root:root`**
   หลังบล็อก `[VOLUME]` รันจบไปแล้ว → `chown -R` ไม่ทัน แล้ว `www-data` เขียน
   ไม่ได้ (permission denied) ทั้งที่ container ขึ้น `healthy` ปกติ. `chown -R`
-  บรรทัดถัดมาครอบทั้ง `/srv/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
+  บรรทัดถัดมาครอบทั้ง `/home/docker02/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
   `mkdir` ให้เอง ขอแค่ subdir มีอยู่ก่อน (→ `references/docker-deploy.md` §H)
 - **มีทั้ง `[VOLUME]` และ `[WP]` (WordPress ที่มี volume อื่นนอกจาก wp-content)**
   → compose มี **สอง** บล็อกคอมเมนต์ `volumes:` แยกกัน แต่ YAML อนุญาต key
@@ -464,8 +464,8 @@ render เอกสารส่ง admin (§5.7):
 
   ```yaml
   volumes:
-    - /srv/appdata/hr-portal/wp-content:/var/www/html/wp-content
-    - /srv/appdata/hr-portal/uploads:/var/www/html/uploads
+    - /home/docker02/appdata/hr-portal/wp-content:/var/www/html/wp-content
+    - /home/docker02/appdata/hr-portal/uploads:/var/www/html/uploads
   ```
 
 - **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็นค่า
@@ -638,7 +638,7 @@ sonar key, Jenkins host, repo URL, วันที่, ชื่อผู้ข�
 โปรเจคนี้ไม่ใช้ทิ้งทั้งหัวข้อ**:
 
 - ไม่ใช่โปรเจคแรกของ server → ลบภาคผนวกท้ายไฟล์ (server-level setup)
-- ไม่มี volume และไม่ใช่ WordPress → ตัดบรรทัด `/srv/appdata` ในเช็คลิสต์ออก
+- ไม่มี volume และไม่ใช่ WordPress → ตัดบรรทัด `/home/docker02/appdata` ในเช็คลิสต์ออก
 
 บอกผู้ใช้ให้ชัด: "ส่งไฟล์ `docs/admin-handoff.md` ให้ทีม admin ได้เลย
 แล้วรอค่าที่ต้องส่งกลับ (`APP_PORT` prod/dev + ยืนยัน job/webhook)" —
@@ -664,7 +664,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Tag image ด้วย `BUILD_NUMBER` | `latest` อย่างเดียว (rollback ไม่ได้) |
 | Healthcheck ยิง `127.0.0.1:80` ด้วย `curl -fsS -L` (curl มากับ image แล้ว — ห้าม purge) | `localhost` / host port / ตัด `-L` (301 = เขียวหลอก) / `php -r file_get_contents` (พังเมื่อ `allow_url_fopen=Off`) / `wget` (ไม่มีใน image) |
 | Laravel migrate ส่ง `--env-file .env` ทั้งไฟล์ ก่อน `compose up` | `-e DATABASE_URL` ตัวเดียว (`artisan` boot ทั้ง framework ต้องการ `APP_KEY` ด้วย) |
-| Volume ใต้ `/srv/appdata/<project>/` (dev = `/srv/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
+| Volume ใต้ `/home/docker02/appdata/<project>/` (dev = `/home/docker02/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
 | `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
 | WordPress: `wp-content` เป็น volume เสมอ + `WP_AUTO_UPDATE_CORE = false` | ปล่อย WP self-update ในคอนเทนเนอร์ (ข้าม pipeline + หายตอน deploy รอบหน้า) |
 | `[VOLUME]` + `[WP]` รวมเป็น `volumes:` ก้อนเดียวต่อ service | ปล่อยสอง `volumes:` ใน service เดียว (YAML ทับกันเงียบ ๆ) |
@@ -746,7 +746,7 @@ path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟ
       `sonar.php.coverage.reportPaths=clover.xml`
 - [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
 - [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
-      healthcheck ยิง `127.0.0.1:80` · volume (ถ้ามี) อยู่ใต้ `/srv/appdata/` ·
+      healthcheck ยิง `127.0.0.1:80` · volume (ถ้ามี) อยู่ใต้ `/home/docker02/appdata/` ·
       มี `volumes:` **ก้อนเดียว** ต่อ service
 - [ ] shape = wordpress: `wp-content` อยู่ใน `volumes:` ทั้ง 2 ไฟล์ ·
       `wp-config.php` มี `define('WP_AUTO_UPDATE_CORE', false);` ·
@@ -796,7 +796,7 @@ path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟ
 - [ ] SonarQube projects prod+dev สร้างแล้ว + assign Quality Gate ตาม §2.4
       ให้ทั้งสอง
 - [ ] ปิด Lightweight checkout ใน job config
-- [ ] `/srv/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server) —
+- [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server) —
       บังคับสำหรับ WordPress ทุกโปรเจค (wp-content) และทุกโปรเจคที่ตอบข้อ 6
 - [ ] network `proxy-network` มีอยู่บน host (`external: true` ในทั้ง 2 compose)
 - [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)

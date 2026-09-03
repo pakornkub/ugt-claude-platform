@@ -73,14 +73,14 @@ cron ให้** — เป็นงานที่ host admin ทำครั�
 ```sh
 crontab -e
 # เพิ่มบรรทัด (ตัวอย่าง: รันทุกวันตี 2 — ปรับความถี่ตาม requirement จริงของ job):
-0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /srv/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
 ```
 
 รายละเอียดของแต่ละส่วนในบรรทัดนี้ (ทำไมต้อง `--rm`, ทำไม log ต้องอยู่ใต้
-`/srv/appdata`, `docker compose` vs `docker-compose`) ดูที่
+`/home/docker02/appdata`, `docker compose` vs `docker-compose`) ดูที่
 `references/docker-deploy.md` § C — ที่นี่สรุปแค่สิ่งที่ต้องทำจริงบน server:
 
-- [ ] สร้าง path log ก่อน (`mkdir -p /srv/appdata/__PROJECT_NAME__/logs`)
+- [ ] สร้าง path log ก่อน (`mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs`)
 - [ ] เพิ่มบรรทัด crontab ข้างบน (ปรับความถี่ตามที่ทีมพัฒนาแจ้ง)
 - [ ] ทดสอบรันมือหนึ่งรอบก่อนปล่อยให้ cron รันเอง:
       `cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job`
@@ -102,7 +102,7 @@ crontab -e
 - [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
 - [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
 - [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `8000`/`8001`
-- [ ] `/srv/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
+- [ ] `/home/docker02/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
 - [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
 - [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** — คนละเรื่องกับ `docker` group ข้างบน ถ้าขาดตัวนี้ pipeline ตายตั้งแต่ stage แรก (ดูภาคผนวก)
 - [ ] Docker network `proxy-network` สร้างแล้วบน host (compose ทั้งสองไฟล์ประกาศเป็น `external: true`)
@@ -181,10 +181,10 @@ docker network create proxy-network
 compose ทั้ง prod และ dev ประกาศ `proxy-network` เป็น `external: true` —
 ไม่มี network นี้ `docker compose up` จะ fail ทันทีตอน Deploy
 
-### ช. `/srv/appdata` (ข้อมูลถาวร)
+### ช. `/home/docker02/appdata` (ข้อมูลถาวร)
 
 ```bash
-sudo mkdir -p /srv/appdata && sudo chown jenkins:jenkins /srv/appdata
+sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata
 ```
 
 โฟลเดอร์ย่อยรายโปรเจคสร้างเองในสเตจ Deploy
