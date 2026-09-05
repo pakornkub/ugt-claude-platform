@@ -9,6 +9,16 @@
     "secondary_accuracy": "100%",
     "note": "optimizer loop terminated at iteration 0 — nothing to improve at ceiling"
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1260→970 chars (spec limit 1024): child-skill chain collapsed to one line, \"(เดิมชื่อ …)\" → \"Formerly …\". All Thai trigger phrases kept.",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "60/60 (100.0%)",
+    "secondary_accuracy": "28/30",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 30/30 incl. symptom-style asks. N-side 30/30 primary; N9 (write a dashboard) → brainstorming 2/3 which satisfies \"anything except full-setup\"."
+  },
   "queries": {
     "S1": {
       "prompt": "ทำให้โปรเจคนี้ deploy ได้หน่อยครับ",

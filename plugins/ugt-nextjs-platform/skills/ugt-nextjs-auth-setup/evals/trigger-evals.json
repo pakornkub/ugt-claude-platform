@@ -17,6 +17,16 @@
     "secondary_accuracy": "13/15 — N1/N3/N4/N5 all correct across all 3 judges; N2 (theme/color query) split 1/3 design-setup vs 2/3 no-skill",
     "note": "N2's wobble is between design-setup and no-skill, not auth-setup — it does not touch this skill's boundary and is not caused by this edit (neither auth-setup's frontmatter nor design-setup's listing entry changed). Confirms the §7 cut is trigger-neutral, as expected since judges are given only the frontmatter description, never the SKILL.md body."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1413→962 chars (spec limit 1024): the documented-symptom sentence compressed to keywords (ERR_TOO_MANY_REDIRECTS, prod-only login loop, https logout, Unexpected token '<', redirect URI, reset-link 404); the full symptom→cause table moved into SKILL.md \"When to use\". Password-lifecycle and permission triggers kept.",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "42/42 (100.0%)",
+    "secondary_accuracy": "14/15",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 27/27 — all six production-symptom queries still route here after compression, incl. S7 (Unexpected token '<', re-added to the description for exactly this reason). N-side 15/15 primary; secondary 14/15 — N2 (login page colour) 1/3 none, the same wobble recorded at baseline and 2026-08-25."
+  },
   "queries": {
     "S1": {
       "prompt": "ใส่ระบบ login ให้โปรเจคนี้ ใช้ SSO ของบริษัท",
@@ -60,7 +70,7 @@
     },
     "N2": {
       "prompt": "หน้า login สีเพี้ยนไม่ตรงธีมบริษัท ปรับให้หน่อย",
-      "expected": "ugt-nextjs-design-setup"
+      "expected": "none (single-element UI fix — the design harness rule loads by paths) / ugt-nextjs-design-setup"
     },
     "N3": {
       "prompt": "ทำ pipeline ให้ deploy อัตโนมัติตอน push main",

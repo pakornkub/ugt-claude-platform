@@ -2,19 +2,17 @@
 name: ugt-nextjs-test-lint-setup
 description: >
   Use when a Next.js/TypeScript project needs its test and code-quality tooling
-  set up so the org CI pipeline can pass — Vitest (with JUnit output + lcov
-  coverage), ESLint, Prettier, husky/lint-staged pre-commit — or when the
-  pipeline is already failing at the Code Quality / Unit Tests / Quality Gate
-  stages because `lint`, `format:check`, `test:coverage`, or `build` is
-  missing, produces no `test-results/junit.xml`, or reports coverage that
-  SonarQube can't read.
-  Triggers in Thai: "ตั้ง test", "ใส่ vitest", "ยังไม่มี test เลย", "ตั้ง eslint /
-  prettier", "pipeline แดงที่ lint", "coverage ไม่ขึ้นใน sonar".
-  Use it proactively before ugt-nextjs-cicd-setup: the Jenkins pipeline calls these four
-  npm scripts by exact name and goes red immediately if any is absent.
-  Don't use for writing the tests themselves (that's normal dev work) or for
-  Jenkins/SonarQube server config (→ ugt-nextjs-cicd-setup).
-  (เดิมชื่อ ugt-nextjs-quality-setup)
+  so the org CI pipeline can pass — Vitest (JUnit output + lcov coverage),
+  ESLint, Prettier, husky/lint-staged pre-commit — or when the pipeline already
+  fails at the Code Quality / Unit Tests / Quality Gate stages because `lint`,
+  `format:check`, `test:coverage` or `build` is missing, no
+  `test-results/junit.xml` is produced, or coverage isn't readable by SonarQube.
+  Triggers: "ตั้ง test", "ใส่ vitest", "ยังไม่มี test เลย", "ตั้ง eslint /
+  prettier", "pipeline แดงที่ lint", "coverage ไม่ขึ้นใน sonar". Run before
+  ugt-nextjs-cicd-setup — the Jenkins pipeline calls these four npm scripts by
+  exact name and goes red if any is absent. Don't use for writing the tests
+  themselves (normal dev work) or for Jenkins/SonarQube server config (→
+  ugt-nextjs-cicd-setup). Formerly ugt-nextjs-quality-setup.
 ---
 
 # UGT Test-Lint Setup — Vitest / ESLint / Prettier so the pipeline can pass

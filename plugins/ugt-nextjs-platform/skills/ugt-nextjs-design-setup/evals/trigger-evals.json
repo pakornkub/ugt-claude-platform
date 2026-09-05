@@ -10,6 +10,16 @@
     "method_note": "Text-isolated: judges read a compiled listing (11 real skills + 7 distractors: 5 superpowers + frontend-design + impeccable), 14 queries each in a per-judge randomized order, expected answers never shown.",
     "note": "iteration 0: S-side 21/21 routed to ugt-nextjs-design-setup (incl. S6 sync mode and S7 no-keyword phrasing); N-side 21/21 did NOT route to it. The design-word traps held: N6 (landing เท่ ๆ ว้าว ๆ) went to frontend-design (2 judges) / impeccable (1) — never the org installer. The 3 secondary misses are other skills' boundaries, not this one's: N5 (เพิ่มกราฟ dashboard) → brainstorming twice instead of none — defensible, superpowers mandates brainstorming before feature work; N1 (database schema) → none once instead of ugt-nextjs-database-setup. No description change needed; optimizer loop terminated at iteration 0."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1088→1010 chars (spec limit 1024): wording tightened, \"record มติ\" → \"record the decision\". Trigger phrases and the run-before-auth rule kept.",
+    "judges": 3,
+    "judgments": 42,
+    "primary_accuracy": "42/42 (100.0%)",
+    "secondary_accuracy": "18/21",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 21/21. N-side 21/21 primary. Secondary 18/21: N5 (add a chart to a dashboard = feature work) → superpowers:brainstorming 3/3 instead of none — a pipeline distractor, not design-setup, so the boundary holds."
+  },
   "queries": {
     "S1": {
       "prompt": "ทำข้อตกลง design ให้โปรเจคนี้หน่อย",

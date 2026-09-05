@@ -5,12 +5,11 @@ description: >
   (`.claude/state/model-mode.md`) that decides which Claude model
   (fable/opus/sonnet/haiku) each task type gets when work is dispatched to a
   subagent or an Agent Teams teammate. Use when the user says "/ugt-model-mode",
-  "เปลี่ยนโหมด", "โหมดประหยัด", "ประหยัด token", "โหมด god",
-  "อัดคุณภาพเต็มที่", "โหมด auto", "เลือกความแรงตามงาน", asks which mode is
-  active, or complains the setup spends too many (or too few) tokens for the
-  job.
-  Do NOT use to change the main session model — that is `/model`, which only
-  the user can run. (เดิมชื่อ ugt-mode)
+  "เปลี่ยนโหมด", "โหมดประหยัด", "ประหยัด token", "โหมด god", "อัดคุณภาพเต็มที่",
+  "โหมด auto", "เลือกความแรงตามงาน", asks which mode is active, or complains the
+  setup spends too many (or too few) tokens for the job. Do NOT use to change
+  the main session model — that is /model, which only the user can run. Formerly
+  ugt-mode.
 ---
 
 # UGT Model Mode — per-task-type model routing for subagents

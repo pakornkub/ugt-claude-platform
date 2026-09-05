@@ -10,6 +10,16 @@
     "method_note": "Text-isolated: judges read a compiled listing (14 real skills + 9 distractors: superpowers, frontend-design, skill-creator, mattpocock), all 27 mail+upload queries interleaved in a per-judge randomized order, expected answers never shown.",
     "note": "S-side 21/21 → ugt-nextjs-upload-setup; the symptom phrasings carried it even when the word อัปโหลด is absent (S3 files vanishing after deploy, S5 unauthenticated URL access, S7 svg with embedded script). N-side 18/18 stayed away and each landed on its expected owner unanimously. The load-bearing boundary held: N1 (ปุ่ม export Excel) → (no skill) 3/3, never upload-setup — the \"not for generated downloads\" clause in the description is doing its job. N3 (email with an attachment) → mail-setup 3/3. No description change needed."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1092→814 chars (spec limit 1024): symptom causes (container storage, bodySizeLimit, proxy 413, public/, inline svg/html) moved to a SKILL.md \"When to use\" table; symptoms stay as keywords.",
+    "judges": 3,
+    "judgments": 39,
+    "primary_accuracy": "39/39 (100.0%)",
+    "secondary_accuracy": "15/18",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 21/21 incl. all five symptom queries after their causes moved to the body. N-side 18/18 primary (Excel export trap avoided 3/3). Secondary 15/18: N1 → brainstorming 1/3; N6 (attach-button colour) → none 2/3 vs design-setup 1/3 — design-setup/none wobble, not this boundary."
+  },
   "queries": {
     "S1": { "prompt": "อยากให้ผู้ใช้แนบไฟล์เอกสารกับคำขอได้", "expected": "ugt-nextjs-upload-setup" },
     "S2": { "prompt": "ทำระบบอัปโหลดไฟล์ ต้องสแกนไวรัสก่อนเก็บด้วย", "expected": "ugt-nextjs-upload-setup" },
@@ -23,6 +33,6 @@
     "N3": { "prompt": "อยากส่งอีเมลแนบไฟล์ไปกับการแจ้งเตือน", "expected": "ugt-nextjs-mail-setup" },
     "N4": { "prompt": "เพิ่ม permission ใหม่ให้ role", "expected": "ugt-nextjs-auth-setup" },
     "N5": { "prompt": "container ไม่ขึ้น healthy หลัง deploy", "expected": "ugt-nextjs-cicd-setup" },
-    "N6": { "prompt": "ปุ่มแนบไฟล์สีไม่ตรงธีมบริษัท", "expected": "ugt-nextjs-design-setup" }
+    "N6": { "prompt": "ปุ่มแนบไฟล์สีไม่ตรงธีมบริษัท", "expected": "none (single-element UI fix — the design harness rule loads by paths) / ugt-nextjs-design-setup" }
   }
 }

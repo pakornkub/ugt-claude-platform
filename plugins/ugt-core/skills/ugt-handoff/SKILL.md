@@ -1,26 +1,20 @@
 ---
 name: ugt-handoff
 description: >
-  Close out a work chunk by writing every result into its correct home:
-  work state → `.claude/state/handoff.md` (what's in progress / next / open
-  questions / recent done), feature status → `docs/project-context/board.md`,
-  changed knowledge → the affected `docs/project-context/` files
-  (architecture / business-rules / api / troubleshooting), and decisions →
-  `docs/project-context/decisions.md` (append-only). Use at the END of any
-  work chunk before the session ends — even when the same person continues
-  tomorrow — when the user says "บันทึกไว้", "จบงานแล้ว", "save state",
-  "handoff", "checkpoint", when a feature just finished (board + as-built
-  rules must update), or when a bug was just diagnosed and the fix is worth
-  recording so the next session doesn't rediscover it. Also use when starting
-  work and the handoff file looks stale or contradicts the code.
-  These files are committed, so they are the TEAM's memory — separate from
-  Claude's machine-local auto memory. Don't use it to record a DESIGN decision
-  (color, font, layout, component choice — "บันทึกมติ design"): those live in
-  `docs/DESIGN.md` §10 and belong to the stack's design skill, not here.
-  Don't use it to install anything (→ ugt-<stack>-full-setup), to bootstrap
-  `docs/project-context/` the first time (→ ugt-context), or to record a
-  stack-wide gotcha — that belongs in a PR to the platform repo.
-  (เดิมชื่อ ugt-checkpoint)
+  Close out a work chunk by writing every result into its correct home: work
+  state → `.claude/state/handoff.md`, feature status →
+  `docs/project-context/board.md`, changed knowledge → the affected
+  `docs/project-context/` files, decisions → `decisions.md` (append-only). Use
+  at the END of any work chunk before the session ends — even when the same
+  person continues tomorrow — when the user says "บันทึกไว้", "จบงานแล้ว", "save
+  state", "handoff", "checkpoint", when a feature just finished, when a bug was
+  just diagnosed and the fix is worth recording, or when starting work and the
+  handoff file looks stale or contradicts the code. These files are committed:
+  the TEAM's memory, separate from Claude's local auto memory. Don't use for
+  DESIGN decisions ("บันทึกมติ design" → docs/DESIGN.md §10 via the stack's
+  design skill), to install anything (→ ugt-<stack>-full-setup), to bootstrap
+  docs/project-context/ the first time (→ ugt-context), or for a stack-wide
+  gotcha (→ a PR to the platform repo). Formerly ugt-checkpoint.
 ---
 
 # UGT Handoff — close the chunk, file every result where it belongs

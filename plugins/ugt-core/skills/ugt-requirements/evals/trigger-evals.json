@@ -9,6 +9,16 @@
     "secondary_accuracy": "60/60",
     "note": "iteration 0: every keyword trap held — requirements.txt (python), translate-the-requirements, question-about-existing-brief, and dev-time estimation all stayed out; every N routed to its correct destination skill"
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description tightened 932→909 chars, no trigger phrase removed.",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "60/60 (100.0%)",
+    "secondary_accuracy": "27/30",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 30/30. N-side 30/30 primary. Secondary 27/30: N7 (review vs spec) → mattpocock code-review 3/3, the twin of the expected superpowers:requesting-code-review (both pipelines listed as distractors this run)."
+  },
   "queries": {
     "S1": { "prompt": "อ่าน requirement ใน docs/requirements แล้วทำ brief แยกเป็น feature ให้หน่อย", "expected": "ugt-requirements" },
     "S2": { "prompt": "โปรเจคใหม่ มีแต่โฟลเดอร์ docs ยังไม่มีโค้ดสักบรรทัด อยากได้เอกสารสรุปว่าระบบต้องทำอะไรบ้าง แยกเป็นฟีเจอร์", "expected": "ugt-requirements" },
@@ -26,7 +36,7 @@
     "N4": { "prompt": "ช่วยเขียน requirements.txt ให้โปรเจค python นี้หน่อย ใช้ fastapi กับ sqlalchemy", "expected": "(no skill — python dependency file, keyword trap)" },
     "N5": { "prompt": "จบงานแล้ว บันทึก checkpoint ไว้ให้คนต่อไปหน่อย", "expected": "ugt-handoff" },
     "N6": { "prompt": "จาก brief ที่มีใน docs/requirements-brief ตอบหน่อยว่า feature รายงานต้องมีรายงานกี่ตัว", "expected": "(no skill — reading an existing brief is a plain question)" },
-    "N7": { "prompt": "review โค้ดที่เพิ่งแก้ไปหน่อย ว่าตรงกับ spec ที่คุยกันไว้ไหม", "expected": "superpowers:requesting-code-review" },
+    "N7": { "prompt": "review โค้ดที่เพิ่งแก้ไปหน่อย ว่าตรงกับ spec ที่คุยกันไว้ไหม", "expected": "superpowers:requesting-code-review / mattpocock-skills:code-review" },
     "N8": { "prompt": "ช่วยแปลเอกสาร requirement ใน docs จากไทยเป็นอังกฤษ ลูกค้าต่างชาติขอ", "expected": "(no skill — translation, keyword trap)" },
     "N9": { "prompt": "โหมดประหยัดหน่อย งานนี้ไม่รีบ", "expected": "ugt-model-mode" },
     "N10": { "prompt": "ช่วยประเมินหน่อยว่าจาก requirement ทั้งหมดนี้ ต้องใช้เวลา dev ประมาณกี่วัน", "expected": "(no skill — estimation question, reads requirements but the output is not a brief)" }

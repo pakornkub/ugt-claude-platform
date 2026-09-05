@@ -1,7 +1,16 @@
 {
   "purpose": "Trigger-boundary regression set for ugt-nextjs-kit-sync. S* must route here (post-plugin-update file drift, outdated copied kit files, a 'fixed' bug still reproducing locally); N* must NOT — the sharpest boundaries are updating the plugin itself (/plugin update, not a skill) and design-agreement drift (design-setup's sync mode).",
   "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
-  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "baseline_result": {
+    "date": "2026-09-06",
+    "reason": "First baseline (was pending since 4.14.0). Description tightened 860→839 chars in the same edit.",
+    "judges": 3,
+    "judgments": 30,
+    "primary_accuracy": "30/30 (100.0%)",
+    "secondary_accuracy": "12/15",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 15/15 (post-update drift, outdated component, CHANGELOG-fixed bug still reproducing). N-side 15/15 primary — /plugin update and design-token drift both correctly avoided. Secondary 12/15: N3 (DataTable sorts wrong) → debugging skills 3/3 rather than pitfalls; acceptable per the expected label's \"(or normal debugging)\"."
+  },
   "queries": {
     "S1": { "prompt": "เพิ่ง update plugin มา ไฟล์ component ในโปรเจคตามรุ่นใหม่หรือยัง", "expected": "ugt-nextjs-kit-sync" },
     "S2": { "prompt": "sync kit หน่อย", "expected": "ugt-nextjs-kit-sync" },

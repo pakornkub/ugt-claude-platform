@@ -3,18 +3,17 @@ name: ugt-requirements
 description: >
   Read every document under the project's requirements folder and produce a
   committed Thai-language brief — `docs/requirements-brief/00-overview.md`
-  (system purpose, user types, feature list, candidate tables, system-level
-  open questions) plus one file per feature — sized for handing a single
-  feature to the installed pipeline in its own session (on the mattpocock
-  pipeline it runs in thin mode: inventory + board rows only, the gaps go to
-  /wayfinder or /grill-with-docs).
-  Use when starting a project from a requirements folder, or when the user
-  says "อ่าน requirement แล้วสรุป", "ทำ brief จาก docs", "สรุป requirement
-  แยก feature", "เริ่มโปรเจคจากเอกสาร", or asks what the requirement docs
-  are missing before building.
-  Do NOT use for a quick question about one document (answer directly — no
-  files), to design or build a feature (→ the installed pipeline reading the
-  brief), or to install anything (→ ugt-<stack>-full-setup skills).
+  (system purpose, user types, feature list, candidate tables, open questions)
+  plus one file per feature, sized for handing one feature to the installed
+  pipeline in its own session (on the mattpocock pipeline it runs in thin mode:
+  inventory + board rows only, gaps go to /wayfinder or /grill-with-docs). Use
+  when starting a project from a requirements folder, or when the user says
+  "อ่าน requirement แล้วสรุป", "ทำ brief จาก docs", "สรุป requirement แยก
+  feature", "เริ่มโปรเจคจากเอกสาร", or asks what the requirement docs are
+  missing before building. Do NOT use for a quick question about one document
+  (answer directly — no files), to design or build a feature (→ the installed
+  pipeline reading the brief), or to install anything (→ ugt-<stack>-full-setup
+  skills).
 ---
 
 # UGT Requirements — from a docs folder to a per-feature brief

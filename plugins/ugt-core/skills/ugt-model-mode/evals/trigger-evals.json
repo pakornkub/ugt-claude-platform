@@ -32,6 +32,16 @@
       }
     }
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description tightened 606→603 chars, \"(เดิมชื่อ ugt-mode)\" → \"Formerly ugt-mode\".",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "60/60 (100.0%)",
+    "secondary_accuracy": "25/30",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 30/30 incl. both auto-preset queries. N-side 30/30 primary. Secondary 25/30: N3 (slow page) → mattpocock diagnosing-bugs 3/3 — the mattpocock twin of the expected superpowers:systematic-debugging, present because this listing carries BOTH pipelines as distractors; N6 (dropdown validate) → systematic-debugging 2/3 vs pitfalls 1/3. Neither touches this skill."
+  },
   "queries": {
     "S1": {
       "prompt": "งานนี้ต้อง demo ให้ผู้บริหารพรุ่งนี้ อัดคุณภาพเต็มที่เลย ใช้ model แรงสุดทุกขั้นตอน",
@@ -83,7 +93,7 @@
     },
     "N3": {
       "prompt": "หน้า list พนักงานโหลดช้ามาก เกิน 10 วิ ช่วยหาสาเหตุที",
-      "expected": "superpowers:systematic-debugging"
+      "expected": "superpowers:systematic-debugging / mattpocock-skills:diagnosing-bugs"
     },
     "N4": {
       "prompt": "จบงานวันนี้แล้ว บันทึก state ไว้ให้ทีมด้วย",

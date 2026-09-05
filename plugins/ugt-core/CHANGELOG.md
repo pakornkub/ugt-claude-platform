@@ -1,5 +1,20 @@
 # Changelog — ugt-core
 
+## 2.11.1 (2026-09-06)
+
+**description ≤ 1,024 ตัวอักษร + trigger-evals รอบใหม่** (คู่กับ
+ugt-nextjs-platform 4.59.1 — ที่มาอยู่ใน CHANGELOG นั้น)
+
+- **ugt-handoff**: description 1,387 → 1,017 ตัวอักษร (เกิน spec) — รายละเอียด
+  ปลายทางไฟล์ย่อลง, "(เดิมชื่อ ugt-checkpoint)" → "Formerly ugt-checkpoint" ·
+  trigger ไทยและข้อยกเว้น "Don't use for" ครบเหมือนเดิม
+- **ugt-requirements / ugt-model-mode**: ถ้อยคำกระชับลงเล็กน้อย, "(เดิมชื่อ …)"
+  → "Formerly …" · ไม่มี trigger หาย
+- **trigger-evals 2026-09-06**: handoff 48/48 · model-mode 60/60 · requirements
+  60/60 (primary 100% ทุกตัว) — วิธีและ distractor ดู CHANGELOG ของ
+  ugt-nextjs-platform 4.59.1 · label model-mode N3 / requirements N7 รับฝาแฝด
+  mattpocock (diagnosing-bugs / code-review) เพราะ listing รอบนี้มีทั้งสอง pipeline
+
 ## 2.11.0 (2026-09-06)
 
 **ugt-core เป็นกลางเรื่อง pipeline + กฎ "บ้านมติที่เดียว"** (คู่กับ

@@ -1,24 +1,20 @@
 ---
 name: ugt-nextjs-full-setup
 description: >
-  The entry point for turning an existing Next.js project into one that can
-  actually be deployed on the org's infrastructure. Use this whenever someone
-  asks to "ทำให้ deploy ได้", "เอาขึ้น production", "ยังใช้งานจริงไม่ได้",
-  "ทำให้ใช้งานได้จริง", wants to prepare a project they built with AI, or asks
-  for several of database / login / test-lint / CI together. Use it just as
-  readily when they describe the symptom instead of the fix — "โปรเจคยังไม่มี
-  อะไรเลย", "ต้องเตรียมอะไรบ้างก่อนขึ้น server", "ทำตามมาตรฐานบริษัทให้ด้วย" —
-  because that is exactly the case where they don't yet know which pieces they
-  need, and this skill's job is to find out. It interviews once, routes to
-  ugt-nextjs-database-setup → ugt-nextjs-test-lint-setup → ugt-nextjs-design-setup →
-  ugt-nextjs-auth-setup → ugt-nextjs-cicd-setup in
-  dependency order (plus the optional ugt-nextjs-mail-setup /
-  ugt-nextjs-upload-setup modules when the interview surfaces email or file
-  uploads), then installs the harness files (CLAUDE.md block,
-  .claude/rules, .claude/state) so the standards outlive the session.
-  Do NOT use when the request names exactly one area: "ต่อ database", "ทำ CI",
-  "ใส่ login SSO", "ตั้ง vitest", "ทำข้อตกลง design" go straight to that single
-  skill. (เดิมชื่อ ugt-nextjs-setup)
+  Entry point for turning an existing Next.js project into one deployable on the
+  org's infrastructure. Use when someone asks to "ทำให้ deploy ได้", "เอาขึ้น
+  production", "ยังใช้งานจริงไม่ได้", "ทำให้ใช้งานได้จริง",
+  "ทำตามมาตรฐานบริษัทให้ด้วย", wants to prepare a project built with AI, asks
+  for several of database / login / test-lint / CI at once, or describes the
+  symptom instead of the fix ("โปรเจคยังไม่มีอะไรเลย",
+  "ต้องเตรียมอะไรบ้างก่อนขึ้น server") — they don't yet know which pieces they
+  need, and this skill finds out. It interviews once, runs the child setup
+  skills in dependency order (database → test-lint → design → auth → cicd, plus
+  optional mail/upload), then installs the harness files (CLAUDE.md block,
+  .claude/rules, .claude/state) so the standards outlive the session. Do NOT use
+  when the request names exactly one area ("ต่อ database", "ทำ CI", "ใส่ login
+  SSO", "ตั้ง vitest", "ทำข้อตกลง design") — go straight to that skill. Formerly
+  ugt-nextjs-setup.
 ---
 
 # UGT Full Setup — org-standard installer (parent skill)

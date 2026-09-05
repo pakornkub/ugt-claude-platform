@@ -2,22 +2,32 @@
 name: ugt-nextjs-cicd-setup
 description: >
   Use when a project needs the org-standard delivery pipeline — "ทำ CI/CD",
-  "ตั้ง Jenkins", "deploy ด้วย docker", "ต่อ SonarQube", "ยัง deploy มือทุกครั้ง" —
-  producing the Jenkinsfile (10 stages), sonar-project.properties, Dockerfile,
-  both compose files, the OWASP suppression file, and the `/api/health` route the
-  healthcheck depends on. Also use when the pipeline itself misbehaves during
-  setup, because the causes are documented here: Quality Gate that never
-  finishes (missing SonarQube→Jenkins webhook), OWASP stage timing out, container
-  never reaching `healthy`, `COPY .next/standalone` failing, client-side env vars
-  empty in the browser bundle, or a Groovy parse error after removing an optional
-  block.
-  Run ugt-nextjs-test-lint-setup first — this pipeline calls `lint`, `format:check` and
-  `test:coverage` by exact name and goes red on the third stage without them.
-  Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth setup
-  (→ ugt-nextjs-database-setup / ugt-nextjs-auth-setup).
+  "ตั้ง Jenkins", "deploy ด้วย docker", "ต่อ SonarQube", "ยัง deploy
+  มือทุกครั้ง" — producing the 10-stage Jenkinsfile, sonar-project.properties,
+  Dockerfile, both compose files, the OWASP suppression file, and the
+  /api/health route the healthcheck depends on. Also use when the pipeline
+  misbehaves during setup — causes documented here: Quality Gate that never
+  finishes (SonarQube→Jenkins webhook), OWASP stage timing out, container never
+  reaching healthy, `COPY .next/standalone` failing, client-side env vars empty
+  in the browser bundle, Groovy parse error after removing an optional block.
+  Run ugt-nextjs-test-lint-setup first — the pipeline calls `lint`,
+  `format:check` and `test:coverage` by exact name and goes red without them.
+  Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth
+  setup (→ ugt-nextjs-database-setup / ugt-nextjs-auth-setup).
 ---
 
 # UGT CI/CD Setup
+
+## When to use — pipeline symptoms with a documented cause here
+
+| Symptom | Cause | Where |
+| --- | --- | --- |
+| Quality Gate stage never finishes | SonarQube → Jenkins webhook missing | `references/jenkins-one-time-setup.md` |
+| OWASP stage times out | NVD download on first run — 90-min timeout + cached data dir | `references/jenkins-one-time-setup.md` |
+| Container never reaches `healthy` | `/api/health` route missing or healthcheck path lacks the basePath | `references/docker-deploy.md` |
+| `COPY .next/standalone` fails | `output: 'standalone'` not set in next.config | `references/docker-deploy.md` |
+| Client-side env vars empty in the browser | `NEXT_PUBLIC_*` must be build args, not runtime env | `references/docker-deploy.md` |
+| Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview
 

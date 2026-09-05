@@ -4,22 +4,27 @@ description: >
   Use when a project needs to send email — "ส่งอีเมลแจ้งเตือน", "ตั้ง SMTP",
   "แจ้งเตือนหัวหน้าตอนมีคำขอ", "ทำ workflow อนุมัติแล้วต้องมีเมลแจ้ง",
   "อยากให้แก้ข้อความอีเมลได้เองโดยไม่ต้อง deploy" — installing nodemailer over
-  the org SMTP relay, the admin-editable template system (subject + body stored
-  as an `AppSettings` override, in-code defaults so it works before anyone
-  edits anything), the fixed email chrome, and **dev mode**: a tester holding
-  `dev-mode:enable` receives the mail themselves instead of the real
-  recipients, so an approval flow can be exercised end to end without spamming
-  anyone.
-  Reach for it too on these symptoms: mail that silently never arrives (SMTP
-  relay defaulting to localhost:25), a relay rejecting the sender
-  (`SMTP_FROM` not authorised), links in email pointing at a path that 404s
-  (missing basePath), or an approval that fails because the mail step threw.
-  Needs the database (AppSettings) and auth (the actor + permission) already
-  installed. Not for the Jenkins build-result emails (→ ugt-nextjs-cicd-setup,
-  which uses `emailext` and its own `NOTIFY_EMAIL`).
+  the org SMTP relay, admin-editable templates (AppSettings override + in-code
+  defaults), the fixed email chrome, and dev mode (a tester holding
+  `dev-mode:enable` receives the mail instead of the real recipients, so
+  approval flows can be tested end to end). Reach for it too on mail symptoms
+  with documented causes here: mail that silently never arrives, the relay
+  rejecting the sender, email links that 404 under a basePath, an approval
+  failing because the mail step threw. Needs database (AppSettings) and auth
+  (actor + permission) installed first. Not for Jenkins build-result emails (→
+  ugt-nextjs-cicd-setup, which uses emailext and its own NOTIFY_EMAIL).
 ---
 
 # UGT Mail Setup — workflow email over the org SMTP relay
+
+## When to use — symptoms with a documented cause here
+
+| Symptom | Cause |
+| --- | --- |
+| Mail silently never arrives | `SMTP_HOST` unset — nodemailer fell back to localhost:25 (this kit throws instead) |
+| Relay rejects the sender | `SMTP_FROM` is not an address the relay authorises |
+| Links in the email 404 | URL built without the basePath |
+| An approval fails because the mail step threw | send called inside the transaction / outside `try/catch` — mail must never fail the work |
 
 ## 1. Overview
 

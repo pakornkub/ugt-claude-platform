@@ -2,23 +2,18 @@
 name: ugt-nextjs-pitfalls
 description: >
   Use when writing or editing feature code (dates, queries, fetches, forms,
-  tables) on the org's Next.js + Prisma/MSSQL + React Query + next-intl stack,
-  and especially on these symptoms — each one has a documented production root
-  cause here: a date shifting by one day ("วันที่เลื่อน −1", "วันเพี้ยน", off only at
-  night or only on the server), OT/attendance windows reading the wrong day,
-  data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต", stale list until
-  reload), a fetch that 404s only in production, "Maximum update depth
-  exceeded" pointing at a UI-primitive component (Base UI now, Radix in
-  legacy projects), pagination showing "หน้า 1 จาก 0",
-  a Select crashing on an empty value, a year on screen off by ~543
-  ("ปีเป็น พ.ศ." — the org rule is ค.ศ. always, no BE conversion path),
-  ticking a table row but a different row gets selected ("ติ๊กแถวนึง
-  ได้อีกแถว"), a form that passes validation but gets rejected at save
-  ("ฟอร์มผ่านแต่บันทึกไม่ได้"), or code edits not showing in the browser while
-  the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน" — stale dev cache).
-  Loads itself via paths on app/components/lib edits.
-  Don't use for SonarQube/Quality-Gate violations (→ ugt-nextjs-clean-code) or
-  installing infrastructure (→ the ugt-nextjs-*-setup skills).
+  tables) on the org's Next.js + Prisma/MSSQL + React Query + next-intl stack.
+  Every rule traces to a real production incident; read the matching reference
+  BEFORE writing the code. Symptoms with documented root causes here: date off
+  by one day ("วันที่เลื่อน −1", "วันเพี้ยน"), year shown as พ.ศ. (+543), stale
+  UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), fetch 404 only in production,
+  "Maximum update depth exceeded", pagination "หน้า 1 จาก 0", Select crashing on
+  an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form passes
+  validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
+  showing in the browser ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"). Loads itself via paths
+  on app/components/lib edits. Don't use for SonarQube violations (→
+  ugt-nextjs-clean-code) or installing infrastructure (→ the ugt-nextjs-*-setup
+  skills).
 paths:
   - "app/**/*.{ts,tsx}"
   - "components/**/*.{ts,tsx}"
@@ -31,6 +26,21 @@ Every rule in this skill traces to a real incident that shipped and was
 debugged in an org project. The cheapest bug is the one not re-shipped — read
 the matching reference **before** writing the code, not after the symptom
 appears.
+
+## When to use — symptom → root cause → reference
+
+| Symptom | Root cause | Reference |
+| --- | --- | --- |
+| Date shifts by one day ("วันที่เลื่อน −1", "วันเพี้ยน") — off only at night or only on the server; OT/attendance windows read the wrong day | JS Date bound into `$queryRaw`/SP as UTC; server TZ ≠ Bangkok | dates-timezones |
+| Year on screen off by ~543 ("ปีเป็น พ.ศ.") | BE conversion somewhere — org rule is ค.ศ. always, no BE path | dates-timezones |
+| Data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต"), stale list until reload | React Query invalidated with a specific key instead of a prefix | data-fetching |
+| A fetch that 404s only in production | client fetch missing the basePath | data-fetching |
+| "Maximum update depth exceeded" pointing at a UI-primitive component (Base UI now, Radix in legacy projects) | `useEffect` + `setState` reset pattern | data-fetching |
+| Pagination shows "หน้า 1 จาก 0" | `getPageCount()` / `totalPages` rendered raw on empty data | data-fetching |
+| Select crashes on an empty value | `<SelectItem value="">` — empty is the "not selected" sentinel | form-validation |
+| Ticking one table row selects a different one ("ติ๊กแถวนึงได้อีกแถว") | selection riding on row index, no `getRowId` | data-fetching |
+| Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
+| Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | hardening |
 
 ## Which reference, when
 

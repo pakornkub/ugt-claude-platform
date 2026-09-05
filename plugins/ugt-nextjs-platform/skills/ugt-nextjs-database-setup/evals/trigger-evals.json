@@ -10,6 +10,16 @@
     "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
     "note": "S-side 24/24 including the symptom-only queries (reserved-word column, data-preserving rename, `url` in the wrong place). N-side 18/18: auth tables went to auth-setup, the sonar query to clean-code, the date-shift symptom to pitfalls. One secondary variance: the conceptual 'ubiquitous language' query (N6) split between domain-modeling and (no skill) — both acceptable, neither is this skill."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description gained \"a stored-procedure call that times out (mssql 15-second default)\" (904→~970 chars) after the 2026-09-06 full rerun showed pitfalls N10 (\"เรียก stored procedure แล้ว timeout ตลอดเลย\") routing to debugging skills 3/3 — references/raw-sql-and-sp.md §4 already documents the requestTimeout fix, the description just never claimed the symptom. New S9 added for the same intent. Re-ran this skill's full set + pitfalls N10.",
+    "judges": 3,
+    "judgments": 48,
+    "primary_accuracy": "48/48 (100.0%)",
+    "secondary_accuracy": "21/21",
+    "method_note": "Same text-isolated listing as the 2026-09-06 revalidations (17 ugt skills at this commit + superpowers 6.3.0 / mattpocock-skills 1.2.3 / frontend-design distractors, 47 entries); 3 judge subagents, each with its own shuffle of the 16 queries.",
+    "note": "S-side 27/27 incl. new S9 (SP timeout in app but fine in SSMS) 3/3. N-side 18/18 primary and secondary (auth tables, CI migrate, sonar violation, date shift, vitest, domain-modeling all routed away correctly). pitfalls N10 now → ugt-nextjs-database-setup 3/3 (was debugging skills 3/3 before the description change). No regression on the eight original S queries."
+  },
   "queries": {
     "S1": {
       "prompt": "ต่อ database ให้โปรเจคนี้หน่อย ใช้ SQL Server ของบริษัท",
@@ -41,6 +51,10 @@
     },
     "S8": {
       "prompt": "npx prisma generate พังบอก url อยู่ผิดที่",
+      "expected": "ugt-nextjs-database-setup"
+    },
+    "S9": {
+      "prompt": "เรียก usp_ ตัวหนึ่งจากแอปแล้ว timeout ทุกครั้ง ทั้งที่รันใน SSMS ได้ปกติ",
       "expected": "ugt-nextjs-database-setup"
     },
     "N1": {

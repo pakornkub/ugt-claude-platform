@@ -6,7 +6,8 @@ description: >
   column, stored procedure, view, or migration in an org project, because the
   naming convention and audit columns here are mandatory and expensive to change
   after data exists. Also use when writing raw SQL / `EXEC usp_*` calls, reading
-  across a linked server, setting up type-safe env validation, or debugging MSSQL
+  across a linked server, a stored-procedure call that times out (mssql
+  15-second default), setting up type-safe env validation, or debugging MSSQL
   migration problems (column renames that would drop data, filtered unique
   indexes Prisma can't express, `url` in the wrong place breaking generate).
   Load it before touching `prisma/schema.prisma` even for a one-field change —

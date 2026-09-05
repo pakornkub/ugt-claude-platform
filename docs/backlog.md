@@ -252,7 +252,7 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |
 | --- | --- | --- |
 | Behavior evals 3 ชุด (ugt-context / mail / upload) | โปรเจคจริงที่ติดตั้ง | `evals.json` ทั้งสามประกาศ `"date": null` เอง |
-| Trigger baseline ของ `ugt-nextjs-kit-sync` | release gate รอบถัดไป (ผู้ตัดสิน 3 คนตามแบบแผน) | `trigger-evals.json` ประกาศ pending เอง |
+| ~~Trigger baseline ของ `ugt-nextjs-kit-sync`~~ | ทำแล้ว 2026-09-06 — primary 30/30 (100%) ผลอยู่ `trigger-evals.json` key `baseline_result` | — |
 | Behavior evals ของ `ugt-nextjs-kit-sync` (ยังไม่เคยเขียน — เป็นตัวเดียวที่ไม่มี `evals.json`) | โปรเจคจริงที่มีไฟล์ kit ถูกแก้เอง เพื่อวัดการตัดสิน merge vs overwrite | แถวนี้ |
 | Trigger baseline ของ php/python (ประกาศ `date: null` แล้ว 2026-08-23) | pilot จริงของสอง stack นี้ | `evals/trigger-evals.json` ของแต่ละตัว |
 | Pilot `ugt-python-platform` / `ugt-php-platform` 0.6.0 → tag | โปรเจค pilot จริง | README ตาราง plugin |

@@ -9,6 +9,16 @@
     "secondary_accuracy": "100%",
     "note": "iteration 0 scored 54/60 (S-side 24/30, N-side 30/30): all 3 judges routed S9 (wrong row selected) and S10 (stale code after edit) to superpowers:systematic-debugging because those two symptoms were missing from the description. Description updated to include both; iteration 1 re-ran 3 fresh judges → 60/60. Optimizer loop terminated at iteration 1."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1272→916 chars (spec limit 1024): each symptom kept as a short keyword + its Thai user phrase; root-cause detail (night/server-only, OT windows, Base UI vs Radix, BE conversion rule, dev cache) moved into a symptom→cause→reference table in SKILL.md.",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "60/60 (100.0%)",
+    "secondary_accuracy": "24/30",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 30/30 — every symptom phrase still routes here with the causes moved into the body table. N-side 30/30 primary. Secondary 24/30: N5 (\"pipeline แดงที่ stage Quality Gate\") → clean-code 3/3 instead of cicd-setup — defensible, \"Quality Gate แดง\" is a literal clean-code trigger; expected relabelled the same day to \"clean-code / cicd-setup\". N10 (SP timeout) → debugging skills 3/3 instead of database-setup, whose description did not claim runtime timeouts — fixed the same day by adding the SP-timeout symptom to database-setup's description; N10 then routed to database-setup 3/3 (see database-setup revalidation_2026-09-06). Neither involves pitfalls."
+  },
   "queries": {
     "S1": {
       "prompt": "หน้ารายงานแสดงวันที่เลื่อนไป 1 วัน แต่เป็นเฉพาะรายการที่สร้างตอนกลางคืน",
@@ -68,7 +78,7 @@
     },
     "N5": {
       "prompt": "pipeline แดงที่ stage Quality Gate",
-      "expected": "ugt-nextjs-cicd-setup"
+      "expected": "ugt-nextjs-clean-code (gate red from violations) / ugt-nextjs-cicd-setup (gate never finishes)"
     },
     "N6": {
       "prompt": "ต่อ sql server เข้าโปรเจกต์ให้หน่อย",

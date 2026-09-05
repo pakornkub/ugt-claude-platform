@@ -2,28 +2,35 @@
 name: ugt-nextjs-auth-setup
 description: >
   Use when a project needs login — "ใส่ระบบ login", "ต่อ SSO", "login ด้วย AD",
-  "ใช้ Keycloak ของบริษัท", "ยังไม่มีระบบสมาชิก" — covering SSO (Keycloak OIDC),
-  AD/LDAP bind, or local email/password via Better Auth, plus session cookies,
-  protected-route guards in `proxy.ts`, RBAC roles/permissions, audit logging,
-  the first-admin bootstrap page, and the ongoing `/admin/users` /
-  `/admin/roles` / `/admin/audit-logs` management pages. Use it too for
-  anything touching permissions ("ใครเห็นเมนูนี้ได้", "เพิ่ม role",
-  "guard หน้านี้", "หน้าจัดการ user/role") since every privileged Server
-  Action must follow session → permission → action → audit log.
-  Covers the whole local-account lifecycle too — "ลืมรหัสผ่าน", "รีเซ็ตรหัสผ่าน",
-  "เปลี่ยนรหัสผ่านเอง", "ตั้งกฎความยาวรหัสผ่าน" — password-reset links by email,
-  the reset page, self-service change-password, and the one shared password
-  policy (the reset link needs ugt-nextjs-mail-setup installed).
-  Reach for it immediately on these symptoms, which all have documented causes
-  here: `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain, login
-  working locally but looping in production, logout that doesn't stick on https,
-  static assets returning `Unexpected token '<'`, Keycloak rejecting the
-  redirect URI, or a mailed reset link that 404s under a basePath.
-  Requires the database set up first (→ ugt-nextjs-database-setup). Not for CI
-  (→ ugt-nextjs-cicd-setup).
+  "ใช้ Keycloak ของบริษัท", "ยังไม่มีระบบสมาชิก" — SSO (Keycloak OIDC), AD/LDAP
+  bind, or local email/password via Better Auth, plus session cookies, route
+  guards in `proxy.ts`, RBAC, audit logging, the first-admin bootstrap page, and
+  the /admin/users, /admin/roles, /admin/audit-logs pages. Also for anything
+  touching permissions ("ใครเห็นเมนูนี้ได้", "เพิ่ม role", "guard หน้านี้",
+  "หน้าจัดการ user/role") and the local-account lifecycle ("ลืมรหัสผ่าน",
+  "รีเซ็ตรหัสผ่าน", "เปลี่ยนรหัสผ่านเอง", password policy). Reach for it on auth
+  symptoms with documented causes here: ERR_TOO_MANY_REDIRECTS, login loops only
+  in production, logout not sticking on https, static assets returning
+  Unexpected token '<', Keycloak rejecting the redirect URI, a reset link that
+  404s under a basePath (full list in the skill). Requires
+  ugt-nextjs-database-setup first. Not for CI (→ ugt-nextjs-cicd-setup).
 ---
 
 # UGT Auth Setup — SSO / LDAP / Local + RBAC
+
+## When to use — symptoms with a documented cause here
+
+Every row below was debugged in a real org project; the fix is in
+`references/auth-flows.md`. Read it before touching auth code.
+
+| Symptom | Likely cause |
+| --- | --- |
+| `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain | cookie prefix / basePath mismatch between apps on the same host |
+| Login works locally but loops in production | secure-cookie + trusted-origin settings differ from the deployed URL |
+| Logout does not stick on https | cookie cleared with a different name/path than it was set with |
+| Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
+| Keycloak rejects the redirect URI | client's valid redirect URIs missing the basePath-qualified callback |
+| Mailed reset link 404s | link built without the basePath (needs ugt-nextjs-mail-setup) |
 
 ## 1. Overview
 

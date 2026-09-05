@@ -17,6 +17,16 @@
     "result_detail": "N2 and the new X2 (font decision) both routed to ugt-nextjs-design-setup 3/3, while X1 (a non-design decision — React Query vs RSC) still routed to ugt-handoff 3/3. The fix separated the two decision kinds without weakening the skill's own S-side, which held 3/3 on every retested query.",
     "watch": "The risk this exclusion introduces is the opposite error — a plain 'บันทึกมติ' with no design content drifting to design-setup. X1 covers exactly that and is now part of the permanent set."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description cut 1387→1017 chars (spec limit 1024): file-destination detail shortened, \"(เดิมชื่อ ugt-checkpoint)\" → \"Formerly ugt-checkpoint\". All Thai trigger phrases and every \"Don't use for\" exclusion kept.",
+    "judges": 3,
+    "judgments": 48,
+    "primary_accuracy": "48/48 (100.0%)",
+    "secondary_accuracy": "21/21",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 27/27 incl. X1 (\"บันทึกมติ\" tech decision → handoff) and the design-decision trap (N → design-setup 3/3). N-side 21/21 primary and secondary. Boundary unchanged after the cut."
+  },
   "queries": {
     "S1": { "prompt": "จบงานวันนี้แล้ว บันทึก state ไว้ให้ทีมด้วย", "expected": "ugt-handoff" },
     "S2": { "prompt": "บันทึกไว้ก่อน เดี๋ยวพรุ่งนี้มาทำต่อ", "expected": "ugt-handoff" },

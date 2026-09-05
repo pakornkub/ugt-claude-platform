@@ -6,13 +6,12 @@ description: >
   "เอา fix ใหม่ของ data-table เข้าโปรเจค" — to find which copied kit files
   (components/ui, lib, auth pages, …) are behind the plugin's current assets,
   then update or merge each one WITH the user's consent. Every kit file carries
-  a `// kit:` version+hash stamp, so the checker can tell "outdated but never
-  touched" (safe to overwrite) apart from "outdated and the project edited it"
-  (must merge). Also the answer when a bug the CHANGELOG says is fixed still
-  reproduces in a project — the local copy is probably old.
-  Not for updating the plugin itself (→ `/plugin update`), not for design-token
-  or DESIGN.md drift (→ design-setup's "sync ข้อตกลง design"), and useless on a
-  project that never installed the kit.
+  a `// kit:` version+hash stamp, so the checker tells "outdated, never touched"
+  (safe to overwrite) from "outdated, project edited it" (must merge). Also the
+  answer when a bug the CHANGELOG says is fixed still reproduces in a project —
+  the local copy is probably old. Not for updating the plugin itself (→ /plugin
+  update), not for design-token or DESIGN.md drift (→ design-setup's "sync
+  ข้อตกลง design"), and useless on a project that never installed the kit.
 ---
 
 # UGT Kit Sync — bring copied kit files up to the installed plugin version

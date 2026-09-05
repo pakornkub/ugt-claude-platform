@@ -1,22 +1,20 @@
 ---
 name: ugt-nextjs-design-setup
 description: >
-  Use when a project needs its design agreement — "ทำข้อตกลง design",
-  "ตั้ง design system", "กำหนดธีม", "ทำ DESIGN.md", "จัด layout ให้เป็น
-  มาตรฐาน", "สีกับฟ้อนต์ยังมั่วอยู่", "UI แต่ละหน้าไม่เหมือนกัน" — covering
-  the interview → generated `docs/DESIGN.md` (the project's design source of
-  truth), shadcn/ui tokens in `globals.css` (org indigo + semantic-6 status
-  set), Inter + Noto Sans Thai fonts, the app shell (sidebar/topbar via shadcn
-  blocks), the org UI kit (DataTable, FormDialog, StatusBadge, IconAction,
-  date pickers, formatter lib), and the harness rule that makes every later
-  session read the agreement before touching UI. Works on both a fresh
-  project (full interview) and an existing one (scan → draft agreement →
-  recorded deviations). Also handles "sync ข้อตกลง design" after a plugin
-  update (diff the project against the org contract, record มติ).
-  Run BEFORE ugt-nextjs-auth-setup when both are planned — auth generates
-  themed pages (login, admin) that must inherit these tokens.
-  Not for writing feature UIs themselves, and not for Jenkins/DB/auth setup
-  (→ their own skills).
+  Use when a project needs its design agreement — "ทำข้อตกลง design", "ตั้ง
+  design system", "กำหนดธีม", "ทำ DESIGN.md", "จัด layout ให้เป็นมาตรฐาน",
+  "สีกับฟ้อนต์ยังมั่วอยู่", "UI แต่ละหน้าไม่เหมือนกัน" — covering the interview
+  → generated `docs/DESIGN.md` (the design source of truth), shadcn/ui tokens in
+  globals.css (org indigo + semantic-6 status set), Inter + Noto Sans Thai
+  fonts, the app shell (sidebar/topbar via shadcn blocks), the org UI kit
+  (DataTable, FormDialog, StatusBadge, IconAction, date pickers, formatter lib),
+  and the harness rule that makes every later session read the agreement before
+  touching UI. Works on a fresh project (full interview) or an existing one
+  (scan → draft agreement → recorded deviations). Also handles "sync ข้อตกลง
+  design" after a plugin update (diff against the org contract, record the
+  decision). Run BEFORE ugt-nextjs-auth-setup — auth generates themed pages that
+  must inherit these tokens. Not for writing feature UIs, nor Jenkins/DB/auth
+  setup (→ their own skills).
 ---
 
 # UGT Design Setup — design agreement + tokens + org UI kit

@@ -10,6 +10,16 @@
     "method_note": "Judges ran as subagents given the skill listing as TEXT (generated from the repo SKILL.md frontmatter) and instructed to answer only from it — the 2026-08-03 contamination, where judges named their own environment skills, did not recur: every answer came from the supplied listing.",
     "note": "S-side 21/21 after the rename — the new name did not weaken triggering, and pipeline-symptom queries ('pipeline แดงที่ stage lint', 'coverage ไม่ขึ้นใน sonar') still land here rather than on cicd-setup. N-side 15/15: writing an actual test routed away as normal dev work, Quality-Gate violations to clean-code, server/webhook config to cicd-setup."
   },
+  "revalidation_2026-09-06": {
+    "date": "2026-09-06",
+    "reason": "Description tightened 933→870 chars, \"(เดิมชื่อ …)\" → \"Formerly …\"; all four npm-script names and Thai triggers kept.",
+    "judges": 3,
+    "judgments": 36,
+    "primary_accuracy": "36/36 (100.0%)",
+    "secondary_accuracy": "15/15",
+    "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
+    "note": "S-side 21/21. N-side 15/15 primary and secondary. Clean."
+  },
   "queries": {
     "S1": {
       "prompt": "ตั้ง test ให้โปรเจคหน่อย ยังไม่มี test เลย",

@@ -1,5 +1,35 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.59.1 (2026-09-06)
+
+**description ทุก skill ≤ 1,024 ตัวอักษรตาม Agent Skills spec + trigger-evals รอบใหม่**
+(คู่กับ ugt-core 2.11.1) · ที่มา: ประเมิน plugin พบ description 7 ตัวเกินขีดจำกัด
+(auth 1,413 / pitfalls 1,272 / full-setup 1,260 / upload 1,092 / mail 1,090 /
+design 1,088 / handoff 1,387) — ทุกตัวโหลดเข้า context ทุก session แม้ไม่ได้ใช้
+
+- **description 9 skill** ตัดให้ ≤ 1,024: คงวลี trigger ภาษาไทยที่ผู้ใช้พิมพ์จริง
+  ครบ · อาการที่มี root cause บันทึกไว้ยังอยู่เป็น keyword (auth ใส่
+  `Unexpected token '<'` กลับเพราะ trigger-eval S7 ใช้) · รายละเอียดสาเหตุย้ายไป
+  body เป็นหัวข้อใหม่ **"When to use"** ตาราง symptom → cause ใน auth-setup /
+  cicd-setup / mail-setup / upload-setup / pitfalls · "(เดิมชื่อ …)" → "Formerly …",
+  "record มติ" → "record the decision" (ไทยที่ไม่ใช่ trigger แปลงเป็นอังกฤษ)
+- **database-setup**: description เพิ่มอาการ "a stored-procedure call that times
+  out (mssql 15-second default)" — `references/raw-sql-and-sp.md` §4 มีวิธีแก้
+  (`requestTimeout`) อยู่แล้วแต่ description ไม่เคยอ้าง ทำให้ query "เรียก SP
+  แล้ว timeout" วิ่งไป debugging skill · trigger-evals เพิ่ม S9
+- **trigger-evals รอบ 2026-09-06** (judge 3 คน, listing เป็นข้อความจาก frontmatter
+  ปัจจุบัน 17 skill + distractor superpowers 6.3.0 / mattpocock-skills 1.2.3 /
+  frontend-design รวม 47 รายการ): primary **558/558 (100%)** ทั้ง 12 skill ที่แก้
+  description · database-setup รันซ้ำหลังแก้ **48/48** · kit-sync ได้ baseline
+  แรก 30/30 (ค้างมาตั้งแต่ 4.14.0) · ผลอยู่ key `revalidation_2026-09-06` /
+  `baseline_result` ของแต่ละไฟล์
+- **expected label แก้ 6 ข้อ** ให้ตรงความจริง: auth N2 / mail N4 / upload N6 งานแก้
+  UI ชิ้นเดียว = "none (design harness rule) / design-setup" ตาม eval ของ
+  design-setup เอง · pitfalls N5 "Quality Gate แดง" = "clean-code / cicd-setup"
+  (เป็น trigger ตรงตัวของ clean-code) · model-mode N3 / requirements N7 รับฝาแฝด
+  mattpocock ของ skill superpowers ที่คาดไว้
+- ไม่มีการเปลี่ยน asset / logic — SKILL.md body เพิ่มเฉพาะหัวข้อ "When to use"
+
 ## 4.59.0 (2026-09-06)
 
 **ยึด pipeline skill เป็นหลัก — ตัดส่วนที่ซ้ำกับ mattpocock ออกตอน generate**

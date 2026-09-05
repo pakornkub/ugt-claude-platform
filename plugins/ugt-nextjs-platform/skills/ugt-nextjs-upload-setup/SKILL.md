@@ -4,22 +4,27 @@ description: >
   Use when a project needs users to attach files — "อัปโหลดไฟล์", "แนบเอกสาร",
   "แนบใบเสร็จ", "เก็บไฟล์แนบของคำขอ", "ต้องสแกนไวรัสก่อนเก็บ" — installing the
   Docker-volume storage layer, ClamAV scanning that fails closed, the
-  `Attachments` table, an upload Route Handler and a permission-guarded
-  download route, plus the compose/Dockerfile changes the volume needs.
-  Reach for it too on these symptoms: uploaded files vanishing after a deploy
-  (stored inside the container instead of on a volume), uploads failing around
-  1 MB (Server Action `bodySizeLimit`), a 413 that never reaches the app
-  (reverse-proxy body limit), files readable by anyone who knows the URL
-  (served from `public/`), or an uploaded `.svg`/`.html` running as script on
-  your own domain.
-  Needs the database and auth installed first (the table, the permissions and
-  the audit log all come from there), and the org UI kit from
-  ugt-nextjs-design-setup (the upload component imports `ui/icon-action` and
-  `lib/format`). Not for exporting/downloading generated files such as Excel
-  reports — that is ordinary feature work with no storage.
+  `Attachments` table, an upload Route Handler, a permission-guarded download
+  route, and the compose/Dockerfile changes the volume needs. Reach for it too
+  on upload symptoms with documented causes here: files vanishing after a
+  deploy, uploads failing around 1 MB, a 413 that never reaches the app, files
+  readable by anyone who knows the URL, an uploaded .svg/.html running as script
+  on your own domain. Needs database, auth and the org UI kit
+  (ugt-nextjs-design-setup) installed first. Not for exporting/downloading
+  generated files such as Excel reports — ordinary feature work with no storage.
 ---
 
 # UGT Upload Setup — attachments on a volume, scanned, and guarded
+
+## When to use — symptoms with a documented cause here
+
+| Symptom | Cause |
+| --- | --- |
+| Uploaded files vanish after a deploy | stored inside the container instead of on a volume |
+| Uploads fail around 1 MB | Server Action `bodySizeLimit` default — use the Route Handler in this kit |
+| A 413 that never reaches the app | reverse-proxy body limit |
+| Files readable by anyone who knows the URL | served from `public/` — no auth there, ever |
+| An uploaded `.svg`/`.html` runs as script on your domain | served inline with its own MIME type instead of `application/octet-stream` + attachment |
 
 ## 1. Overview
 
