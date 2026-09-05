@@ -5,13 +5,15 @@ description: >
   committed Thai-language brief — `docs/requirements-brief/00-overview.md`
   (system purpose, user types, feature list, candidate tables, system-level
   open questions) plus one file per feature — sized for handing a single
-  feature to the superpowers pipeline in its own session.
+  feature to the installed pipeline in its own session (on the mattpocock
+  pipeline it runs in thin mode: inventory + board rows only, the gaps go to
+  /wayfinder or /grill-with-docs).
   Use when starting a project from a requirements folder, or when the user
   says "อ่าน requirement แล้วสรุป", "ทำ brief จาก docs", "สรุป requirement
   แยก feature", "เริ่มโปรเจคจากเอกสาร", or asks what the requirement docs
   are missing before building.
   Do NOT use for a quick question about one document (answer directly — no
-  files), to design or build a feature (→ superpowers pipeline reading the
+  files), to design or build a feature (→ the installed pipeline reading the
   brief), or to install anything (→ ugt-<stack>-full-setup skills).
 ---
 
@@ -27,7 +29,7 @@ re-read the whole folder to work on one feature.
 
 This skill turns that folder into a **committed brief**: one overview plus one
 file per feature, in Thai (stakeholders read the open questions), each file
-small enough to hand to the superpowers pipeline on its own. The most
+small enough to hand to the installed pipeline on its own. The most
 important output is not the summary — it is the **Open Questions**: what the
 documents do not say but the build needs, surfaced *before* code goes in the
 wrong direction.
@@ -42,12 +44,13 @@ scaffolds, or writes code — the handoff at the end is where its job stops.
    whole repo unprompted.
 2. Read **every** readable file in the folder (recursively): Markdown, text,
    CSV, images and PDFs via the Read tool.
-3. If a root `CONTEXT.md` (domain glossary) or `docs/adr/` exists — output of
-   an earlier crystallization session — always read them as sources too: list
-   them in the overview's **Sources** section like any other file and cite
-   them in the briefs. Treat them as **frozen input**: once the project is
-   running, decisions live in `docs/project-context/decisions.md` — never let
-   the two systems grow in parallel.
+3. If a root `CONTEXT.md` (domain glossary) or `docs/adr/` exists — written
+   by the mattpocock pipeline's `domain-modeling`, and they keep growing
+   with every grill — always read them as sources too: list them in the
+   overview's **Sources** section like any other file and cite them in the
+   briefs. Never write into them, and never restate them: a project that
+   keeps ADRs has `docs/adr/` as its only decision home (no
+   `decisions.md`), and the glossary stays the glossary.
 4. A file that cannot be read (e.g. `.docx`, spreadsheets, corrupt files) is
    listed in the overview's **Sources** section as `unread` — visibly, so
    nobody mistakes the brief for complete coverage. Do not silently skip it,
@@ -117,6 +120,25 @@ Number in dependency order (`01-` first buildable). Sections:
 Anything inferred rather than stated must be marked `(assumption)` inline —
 an unmarked guess is worse than a gap, because nobody knows to question it.
 
+## Thin mode — when the mattpocock pipeline is installed
+
+That pipeline already owns "find what the documents don't say": `/wayfinder`
+(a whole project, decision tickets on the tracker) and `/grill-with-docs`
+(one feature, writing `CONTEXT.md`/ADRs as it goes). Running the full brief
+next to it produces a second, competing set of open questions. So when
+`mattpocock-skills` is installed, this skill writes **only**:
+
+- `00-overview.md` with ระบบทำอะไร · ผู้ใช้ / role · รายการ feature ·
+  ตารางข้อมูล (candidate) · Cross-cutting · **Sources** — and in place of
+  Open Questions a single line: "ช่องว่างปิดด้วย `/wayfinder` (ทั้งโปรเจค) หรือ
+  `/grill-with-docs` (ทีละ feature)"
+- one `☐ todo` row per feature on `docs/project-context/board.md`
+
+No `<NN>-*.md` files. The handoff sentence becomes `/wayfinder` (many
+features, or fog everywhere) or `/grill-with-docs` on one feature → `/to-spec`
+→ `/to-tickets` → `/implement`. Everything else in this skill (sources
+discipline, re-runs, board single-writer) applies unchanged.
+
 ## Open questions discipline
 
 - Questions that **block** a feature's build: tell the user to take them to
@@ -161,8 +183,11 @@ Close out with, in this order:
    สร้าง feature <ชื่อ> ตาม docs/requirements-brief/<file>
    ```
 
-   which enters the normal superpowers pipeline (brainstorming → plan → TDD →
-   review). One feature per session keeps context clean.
+   which enters the installed pipeline — superpowers: brainstorming → plan →
+   TDD → review · mattpocock (thin mode): `/grill-with-docs` on that feature
+   → `/to-spec` → `/to-tickets` → `/implement`, or `/wayfinder` first when
+   the whole project is still foggy. One feature per session keeps context
+   clean.
 4. Remind: commit the brief, then `/ugt-handoff`.
 
 ### Orchestration decision — propose ONE build plan, confirmed once
@@ -179,8 +204,8 @@ message — never a per-feature question, and never dispatch anything silently:
 Rules the plan must state out loud:
 
 - A feature is always dispatched to a **fresh session**, never a subagent —
-  the superpowers pipeline inside it dispatches its own implementer/reviewer
-  subagents, and a subagent cannot dispatch further.
+  the pipeline inside it dispatches its own implementer/reviewer subagents,
+  and a subagent cannot dispatch further.
 - A feature with an unresolved blocking Open Question is not dispatchable —
   resolving it with stakeholders is the plan's first step, not a footnote.
 - Merging a finished feature back = **integration check only**: run the full
@@ -207,7 +232,7 @@ Rules the plan must state out loud:
 
 Before closing out, confirm:
 
-- [ ] `00-overview.md` has all seven sections, none empty
+- [ ] `00-overview.md` has all seven sections, none empty (thin mode: Open Questions is the one-line pointer, and there are no feature files)
 - [ ] Every feature file has an Open Questions section ("ไม่มี" only if truly complete)
 - [ ] Every file in the requirements folder appears in Sources — as read or `unread`
 - [ ] Every conflict found while reading appears as an Open Question

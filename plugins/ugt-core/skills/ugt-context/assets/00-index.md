@@ -9,7 +9,7 @@
 | `architecture.md` | module map · data flow · ตารางหลัก · ⚠ deviations | **ก่อน plan/implement ทุก feature** |
 | `business-rules.md` | กติกา business ตามที่ระบบทำจริง (pointer เข้าโค้ด) | ก่อนแตะ logic ของโดเมนนั้น |
 | `api.md` | ตาราง endpoint ทั้งหมด | ก่อนเพิ่ม/แก้/เรียก API |
-| `decisions.md` | มติทั้งหมด (ยกเว้น design) — ห้าม revisit เงียบ ๆ | **ก่อนเสนอเปลี่ยนแนวทาง/lib/โครงสร้าง** |
+| `decisions.md` | มติทั้งหมด (ยกเว้น design) — ห้าม revisit เงียบ ๆ · <!-- โปรเจคที่เก็บ ADR: เปลี่ยนช่องแรกเป็น `docs/adr/` แล้วไม่มีไฟล์นี้ --> | **ก่อนเสนอเปลี่ยนแนวทาง/lib/โครงสร้าง** |
 | `troubleshooting.md` | อาการ→สาเหตุ→วิธีแก้ ที่เคยเจอในโปรเจคนี้ | เจอ error แปลก — เปิดก่อนเริ่ม debug |
 
 บ้านความรู้อื่น (ไม่อยู่โฟลเดอร์นี้):

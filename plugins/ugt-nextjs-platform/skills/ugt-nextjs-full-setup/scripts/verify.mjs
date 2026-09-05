@@ -160,15 +160,36 @@ check('model-mode.md declares a valid model mode', () => {
     : { ok: false, msg: 'model-mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-model-mode' };
 });
 
+// Bundle detection mirrors SKILL.md §4.3: the committed enabledPlugins key is
+// the one signal that survives the session that installed it.
+const mattpocockBundle = (() => {
+  try {
+    return JSON.parse(read('.claude/settings.json')).enabledPlugins?.['ugt-nextjs-standard-mattpocock@ugt'] === true;
+  } catch {
+    return false;
+  }
+})();
+const keepsAdrs = has('docs/adr') || mattpocockBundle;
+
 check('docs/project-context/ knowledge base exists', () => {
-  const FILES = ['00-index.md', 'board.md', 'architecture.md', 'business-rules.md', 'api.md', 'decisions.md', 'troubleshooting.md'];
+  const FILES = ['00-index.md', 'board.md', 'architecture.md', 'business-rules.md', 'api.md', 'troubleshooting.md'];
+  if (!keepsAdrs) FILES.push('decisions.md');
   if (!has('docs/project-context')) {
     return { ok: false, msg: 'No docs/project-context/ — run ugt-context to bootstrap the knowledge base' };
   }
   const missing = FILES.filter((f) => !has('docs/project-context', f));
-  return missing.length
-    ? { ok: false, msg: `docs/project-context/ missing: ${missing.join(', ')}` }
+  if (missing.length) return { ok: false, msg: `docs/project-context/ missing: ${missing.join(', ')}` };
+  // One decision home: a project that keeps ADRs must not also carry decisions.md.
+  return keepsAdrs && has('docs/project-context', 'decisions.md')
+    ? { ok: false, msg: 'both docs/adr/ and docs/project-context/decisions.md exist — two decision homes; keep ADRs, delete decisions.md and point 00-index.md at docs/adr/' }
     : { ok: true };
+});
+
+check('CODING_STANDARDS.md present on the mattpocock bundle', () => {
+  if (!mattpocockBundle) return { ok: true, msg: 'not the mattpocock bundle — skipped' };
+  return has('CODING_STANDARDS.md')
+    ? { ok: true }
+    : { ok: false, msg: "No CODING_STANDARDS.md — mattpocock's /code-review Standards axis reads only that file, so org rules are invisible to it; copy assets/CODING_STANDARDS.md (full-setup §4.5b)" };
 });
 
 check('CLAUDE.md imports the knowledge index', () => {

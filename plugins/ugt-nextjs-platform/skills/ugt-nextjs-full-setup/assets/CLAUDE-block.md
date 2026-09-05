@@ -47,8 +47,9 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 - **Call `/ugt-handoff` at the end of every work chunk** — it updates the
   handoff file + feature board + affected `docs/project-context/` files; commit
   the whole set together
-- ก่อนเสนอเปลี่ยนแนวทาง/lib/โครงสร้าง → เช็ค `docs/project-context/decisions.md`
-  ก่อนว่าเคยเคาะไปแล้วหรือยัง — ถ้าขัดมติเดิม ให้ยกขึ้นมาคุย ไม่ทำเงียบ ๆ
+- ก่อนเสนอเปลี่ยนแนวทาง/lib/โครงสร้าง → เช็คบ้านมติของโปรเจค (`00-index.md`
+  บอกว่าเป็น `decisions.md` หรือ `docs/adr/`) ก่อนว่าเคยเคาะไปแล้วหรือยัง —
+  ถ้าขัดมติเดิม ให้ยกขึ้นมาคุย ไม่ทำเงียบ ๆ
 - เจอ error แปลก → เปิด `docs/project-context/troubleshooting.md` ก่อนเริ่ม debug
 - Keep `handoff.md` short (~60 lines) — it loads into context every session
 
@@ -65,10 +66,19 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 | Task | How |
 | --- | --- |
+<!-- [PIPELINE:superpowers] — the two "do it directly" rows exist only to stop
+     superpowers' "1% chance → must invoke" auto-trigger; mattpocock skills are
+     all user-invoked, so there is nothing to guard against on that bundle. -->
 | Read-only work: answer a question about code/docs/config — no file edits | Answer **directly** — no pipeline, no brainstorming (aggressive skill-invocation rules like superpowers' "1% chance → must invoke" do not apply to read-only work) |
-| Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time to your installed pipeline (superpowers, or `/to-spec` on the mattpocock bundle) |
+| Start from a requirements folder → produce the committed per-feature brief | `/ugt-requirements` — then feed one feature at a time into brainstorming ("สร้าง feature X ตาม docs/requirements-brief/NN.md") |
+<!-- [/PIPELINE:superpowers] -->
+<!-- [PIPELINE:mattpocock] -->
+| Start from a requirements folder | `/ugt-requirements` in **thin mode** (sources inventory + feature list + board rows — no per-feature brief, no Open Questions) → `/wayfinder` (whole project) or `/grill-with-docs` (one feature) closes the gaps → `/to-spec` |
+<!-- [/PIPELINE:mattpocock] -->
 | First-time knowledge base (`docs/project-context/`) on an existing codebase | `ugt-context` — bootstrap once; afterwards `/ugt-handoff` maintains it |
+<!-- [PIPELINE:superpowers] -->
 | No logic change at all: typo, doc/README edit, config value, one-line fix at a known spot | Do it **directly** — skip the pipeline (auto-loading rules still apply) |
+<!-- [/PIPELINE:superpowers] -->
 | Install/change infrastructure (DB, auth, test/lint, CI, deploy) | Invoke the matching `ugt-*` skill **directly** — it has its own interview; the setup path never auto-invokes skills from the pipeline/helper plugins (superpowers / mattpocock-skills / frontend-design), however well their triggers match: the skill's SKILL.md is the plan, its verify script is the review |
 <!-- [PIPELINE:superpowers] — full-setup keeps exactly ONE pipeline's spans when
      generating this block (same [MARKER] convention as auth-setup's [METHOD:]):
@@ -125,9 +135,16 @@ test/lint suite) and update the board via `/ugt-handoff`.
 
 - Work state (ค้างไหน คิวอะไร คำถามค้าง) → `.claude/state/handoff.md`
 - True only for this project → the matching `docs/project-context/` file
-  (มติ → `decisions.md` · error ที่เคยเจอ → `troubleshooting.md` · กติกา as-built
+  (error ที่เคยเจอ → `troubleshooting.md` · กติกา as-built
   → `business-rules.md` · โครงสร้าง → `architecture.md`) or
   `.claude/rules/<project>-*.md` if path-bound · มติ design → `docs/DESIGN.md` §10
+<!-- [PIPELINE:superpowers] -->
+- มติ (ไม่ใช่ design) → `docs/project-context/decisions.md` (append-only)
+<!-- [/PIPELINE:superpowers] -->
+<!-- [PIPELINE:mattpocock] -->
+- มติ (ไม่ใช่ design) → `docs/adr/` (ADR ที่ `domain-modeling` เขียน) — โปรเจคนี้
+  **ไม่มี `decisions.md`** จะได้ไม่มีบ้านมติสองที่
+<!-- [/PIPELINE:mattpocock] -->
 - True for every project on this stack → **open a PR against the
   `ugt-claude-platform` repo** — never edit installed skill files (plugin cache,
   deleted on update)
@@ -141,6 +158,9 @@ test/lint suite) and update the board via `/ugt-handoff`.
   (`docs/project-context/00-index.md` + `CONTEXT.md`/`docs/adr/` ถ้ามี)
   แต่เขียนแค่ที่เจ้าของมันเขียน — `/ugt-handoff` ดูแลเฉพาะ
   `docs/project-context/` + `handoff.md` เหมือนเดิม ไม่แตะ `CONTEXT.md`/`docs/adr/`
+- `.scratch/<feature>/` (spec + tickets + `Status:` ต่อ ticket) เป็นของ
+  `/to-spec`/`/to-tickets`/`/implement` — ระดับ **ticket** · `board.md` +
+  `handoff.md` เป็นระดับ **feature** — ห้าม copy เนื้อหาข้ามกัน
 <!-- [/PIPELINE:mattpocock] -->
 
 <!-- ugt:end -->

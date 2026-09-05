@@ -183,7 +183,8 @@ where noted.
 | `assets/settings.json` | merged into `.claude/settings.json` | merge our keys only |
 | `assets/state/handoff.md` | `.claude/state/handoff.md` | **create once, never overwrite** |
 | `assets/state/model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
-| (via `ugt-context` skill) | `docs/project-context/` (7 files) | **create once** — afterwards owned by `/ugt-handoff` |
+| (via `ugt-context` skill) | `docs/project-context/` (7 files — 6 on the mattpocock bundle, no `decisions.md`) | **create once** — afterwards owned by `/ugt-handoff` |
+| `assets/CODING_STANDARDS.md` | root `CODING_STANDARDS.md` | **mattpocock bundle only** — create once, never overwrite |
 
 `.claude/rules/ugt-nextjs-*.md` files are NOT installed from here — each child
 skill ships its own rule in its `assets/rules/` and installs it as part of its
@@ -252,7 +253,15 @@ How:
    `project-notes.md`) → stop and migrate first per the v3.0.0 CHANGELOG.
 5. **`docs/project-context/`** — invoke the **`ugt-context`** skill (ugt-core):
    fresh project → skeleton files; existing codebase → its scan path (draft →
-   user review → write). Skip only if the folder already exists.
+   user review → write). Skip only if the folder already exists. Tell it
+   which pipeline step 3 detected — on **mattpocock** it skips `decisions.md`
+   (decisions live in `docs/adr/`, written by `domain-modeling`) and points
+   `00-index.md` at `docs/adr/` instead; one decision home, never two.
+5b. **`CODING_STANDARDS.md`** (mattpocock bundle only) — copy
+   `assets/CODING_STANDARDS.md` to the project root if absent. mattpocock's
+   `/code-review` Standards axis looks only for `CODING_STANDARDS.md` /
+   `CONTRIBUTING.md`; without this pointer it never sees `.claude/rules/` or
+   `ugt-nextjs-clean-code`, and reviews against Fowler smells alone.
 6. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
    **`.claude/state/` and `docs/project-context/` must be committed** — never
    ignore `.claude/` wholesale.
@@ -282,6 +291,11 @@ How:
    (SSO needs a client either way).
 3. Attach a **smoke-test checklist** — the Verification Checklist below,
    trimmed to what was actually installed.
+4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
+   themselves next (it is user-invoked only — this skill cannot run it, and
+   §2.5 forbids trying). It writes `docs/agents/*.md` and its own
+   `## Agent skills` section in `CLAUDE.md` outside our markers, so the two
+   never collide whichever runs first.
 
 ## Quick Rules
 

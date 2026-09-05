@@ -1,5 +1,42 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.59.0 (2026-09-06)
+
+**ยึด pipeline skill เป็นหลัก — ตัดส่วนที่ซ้ำกับ mattpocock ออกตอน generate**
+(คู่กับ ugt-core 2.11.0) · ที่มา: เทียบไฟล์ที่ mattpocock-skills 1.2.3 สร้างจริง
+ในโปรเจค pilot (dx-game: `CONTEXT.md`, `docs/adr/`, `.scratch/<feature>/`,
+`docs/agents/`) กับไฟล์ที่ harness สร้าง — พบบ้านซ้ำ 2 ที่ + ช่องโหว่ 1 ที่
+ฝั่ง superpowers ไม่ตัดอะไร (ไม่มีบ้านความรู้ถาวรให้ซ้ำ)
+
+- **CLAUDE-block** (resolve ตอน generate ผ่าน `[PIPELINE:]` span เหมือนเดิม):
+  - แถว requirements แยกสองฝั่ง — superpowers: brief → brainstorming ·
+    mattpocock: `/ugt-requirements` **thin mode** → `/wayfinder` หรือ
+    `/grill-with-docs` → `/to-spec` (เดิมเขียน "brief → `/to-spec`" ซึ่งข้าม
+    grill — `/to-spec` แค่สังเคราะห์บทสนทนา ไม่สัมภาษณ์ คำถามค้างจะไม่ถูกปิด)
+  - แถว "Read-only ตอบตรง" / "typo ทำตรง ๆ" ย้ายเข้า span superpowers — มีไว้กัน
+    "1% chance → must invoke" เท่านั้น ฝั่ง matt ทุก skill เป็น user-invoked
+    ไม่มีอะไรให้กัน · ผลข้างเคียงที่ยอมรับ: โปรเจคที่**ไม่มี pipeline เลย**
+    (แถว none ของ step 3) จะไม่ได้แถว requirements/read-only/typo ในตาราง —
+    `/ugt-requirements` ยังเรียกตามชื่อได้ตามปกติ
+  - บ้านมติแยกตาม span: superpowers → `decisions.md` · mattpocock →
+    `docs/adr/` (ไม่มี `decisions.md` ในโปรเจค) · บรรทัด "เช็คมติก่อนเสนอเปลี่ยน"
+    เป็นกลาง ชี้ให้ดู `00-index.md` ว่าบ้านมติคือไฟล์ไหน
+  - span mattpocock เพิ่มกฎ `.scratch/<feature>/` = ระดับ ticket ·
+    board/handoff = ระดับ feature ห้าม copy ข้ามกัน (ฝั่ง superpowers มีกฎแบบ
+    เดียวกันกับ `.superpowers/sdd/` อยู่แล้ว)
+- **asset ใหม่ `CODING_STANDARDS.md`** (mattpocock เท่านั้น, harness step 5b):
+  `/code-review` ของ matt แกน Standards อ่านแค่ `CODING_STANDARDS.md` /
+  `CONTRIBUTING.md` — ไม่มีไฟล์นี้ = มองไม่เห็น `.claude/rules/` กับ
+  `ugt-nextjs-clean-code` เลย review ได้แค่ Fowler smells
+- **harness step 5**: บอก `ugt-context` ว่า pipeline ไหน → mattpocock ข้าม
+  `decisions.md` (ugt-core 2.11.0 มีกฎ "บ้านมติที่เดียว")
+- **Close out ข้อ 4**: บอกผู้ใช้รัน `/setup-matt-pocock-skills` เองต่อ (skill นั้น
+  `disable-model-invocation` และ §2.5 ห้ามเรียกอยู่แล้ว) — ลำดับสลับกันได้
+  เพราะ matt แก้ `## Agent skills` in-place นอก marker ของเรา
+- **verify.mjs**: `decisions.md` ไม่บังคับเมื่อมี `docs/adr/` หรือ bundle
+  mattpocock (ตรวจจาก `enabledPlugins`) และ **fail ถ้ามีทั้งคู่** ·
+  check ใหม่ `CODING_STANDARDS.md` บน bundle mattpocock
+
 ## 4.58.1 (2026-09-03)
 
 **Path มาตรฐาน persistent data sync กับ ugt-core 2.10.1**: `/srv/appdata/<project>`

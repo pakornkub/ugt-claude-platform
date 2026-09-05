@@ -33,8 +33,14 @@ re-exploring code; humans read the same files as documentation.
 | `architecture.md` | module map · data flow · main tables · ⚠ deviations | `/ugt-handoff` |
 | `business-rules.md` | as-built business rules, pointers into code | `/ugt-handoff` (on feature done) |
 | `api.md` | endpoint index | `/ugt-handoff` |
-| `decisions.md` | append-only decision log (all except design → DESIGN.md §10) | `/ugt-handoff` |
+| `decisions.md` | append-only decision log (all except design → DESIGN.md §10) — **skipped when the project keeps ADRs** (see below) | `/ugt-handoff` |
 | `troubleshooting.md` | symptom → cause → fix, project-specific | `/ugt-handoff` |
+
+**One decision home.** If `docs/adr/` already exists, or the mattpocock-skills
+pipeline is installed (its `domain-modeling` writes ADRs there), do **not**
+create `decisions.md` — edit the `decisions.md` row in `00-index.md` to point
+at `docs/adr/` instead, and `/ugt-handoff` records decisions as ADRs. Two
+decision logs in one repo is the one thing this folder must never cause.
 
 ## Workflow
 
@@ -112,7 +118,8 @@ project (except to regenerate after a major restructure, on explicit request).
 
 ## Verification Checklist
 
-- [ ] `docs/project-context/` has all 7 files
+- [ ] `docs/project-context/` has all 7 files (6 when the project keeps ADRs —
+      then `00-index.md`'s decisions row points at `docs/adr/`)
 - [ ] `00-index.md` table rows match the files that actually exist
 - [ ] Every architecture/api/business-rules entry points at a real file path
 - [ ] No unmarked assumptions in scanned drafts

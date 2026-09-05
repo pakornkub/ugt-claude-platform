@@ -72,7 +72,7 @@ Entries are **traceable** (file names, function names, PR numbers — not
 | A feature reached `✅ done` | `docs/project-context/business-rules.md` | summarize the **as-built** rules (including what changed from the brief along the way) under its domain, each rule pointing at `path:function`. The feature's brief in `docs/requirements-brief/` is now frozen history |
 | Structure changed (new module, table, flow) | `docs/project-context/architecture.md` | update the affected section — pointers, not prose; deviations get `⚠ deviation:` + reason + date |
 | Endpoint added/changed/removed | `docs/project-context/api.md` | keep the table current |
-| A decision was taken | `docs/project-context/decisions.md` | **append**: `- YYYY-MM-DD <what> — **because** <reason> · rejected: <alternative>`. Never edit old entries — reversing = new entry referencing the old. **Design decisions go to `docs/DESIGN.md` §10 instead**, never here |
+| A decision was taken | `docs/project-context/decisions.md` — **or `docs/adr/`** when the project keeps ADRs (`00-index.md`'s decisions row says which; the mattpocock pipeline always does) | **append**: `- YYYY-MM-DD <what> — **because** <reason> · rejected: <alternative>`; ADR home → one new `docs/adr/NNNN-<slug>.md` in the existing ADR format. Never edit old entries — reversing = new entry referencing the old. **Design decisions go to `docs/DESIGN.md` §10 instead**, never here |
 | A bug that cost real time was diagnosed | `docs/project-context/troubleshooting.md` | `- **<อาการ>** → <สาเหตุ> → <วิธีแก้> (date)` — write while details are fresh |
 | `00-index.md` rows no longer match reality | `docs/project-context/00-index.md` | fix the index |
 
@@ -100,6 +100,7 @@ extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 | Decisions append-only, with reason + rejected alternative | Editing/deleting old decisions, or a bare "decided X" |
 | Design decision → `DESIGN.md` §10 · everything else → `decisions.md` | A third home, or the same decision in two homes |
 | Board: touch only the สถานะ column | Rewrite board rows (they belong to /ugt-requirements) |
+| Board + handoff = feature level | Copy ticket-level state in from the pipeline's own files (`.scratch/<feature>/`, `.superpowers/sdd/`) — or write into them |
 | Feature done → as-built summary into business-rules.md | Leave the knowledge only in the frozen brief |
 | Reference real file/function names | Vague "improved the user page" |
 | Stack-wide gotcha → PR to the platform | Keep it in one project and let others rediscover it |
@@ -109,7 +110,7 @@ extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 
 - [ ] `handoff.md` has exactly the 4 sections, "Last updated" is today, Done ≤ ~10 rows
 - [ ] `docs/project-context/board.md` สถานะ agrees with handoff's In progress/Done
-- [ ] Every decision taken this chunk is in `decisions.md` (or DESIGN.md §10 if design) with reason + rejected alternative
+- [ ] Every decision taken this chunk is in the project's decision home — `decisions.md`, or `docs/adr/` when the project keeps ADRs (or DESIGN.md §10 if design) — with reason + rejected alternative
 - [ ] Feature(s) that reached done this chunk have their rules in `business-rules.md`
 - [ ] Every added entry is dated · every pointer names a real file
 - [ ] No secrets / `.env` values in any of these files (they are committed)

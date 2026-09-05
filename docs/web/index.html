@@ -462,12 +462,12 @@
         session เดียวเป็นหลัก ไม่แตก subagent รายงานย่อย</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v4.58.1</span>
+        <span class="ver">v4.59.0</span>
         <h3>ugt-nextjs-platform</h3>
         <p>ตัวช่วย 11 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD, sync kit และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.10.1</span>
+        <span class="ver">v2.11.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -704,7 +704,8 @@
           <tr><th scope="col">คำสั่ง</th><th scope="col">ใช้ตอนไหน</th><th scope="col">ได้อะไร</th></tr>
         </thead>
         <tbody>
-          <tr><td><span class="cmd">/setup-matt-pocock-skills</span></td><td><strong>ครั้งเดียวต่อโปรเจค ก่อนเริ่มใช้ flow</strong></td><td>ตั้งค่า issue tracker + label ที่ <span class="cmd">/to-spec</span> และ <span class="cmd">/to-tickets</span> ต้องใช้ — ข้ามขั้นนี้แล้ว flow จะสะดุดตั้งแต่ <span class="cmd">/to-spec</span></td></tr>
+          <tr><td><span class="cmd">/setup-matt-pocock-skills</span></td><td><strong>ครั้งเดียวต่อโปรเจค ก่อนเริ่มใช้ flow</strong> (รันหลัง full-setup ก็ได้ — สองตัวแก้ <span class="inline-code">CLAUDE.md</span> คนละส่วน ไม่ทับกัน)</td><td>ตั้งค่า issue tracker + label ที่ <span class="cmd">/to-spec</span> และ <span class="cmd">/to-tickets</span> ต้องใช้ — ข้ามขั้นนี้แล้ว flow จะสะดุดตั้งแต่ <span class="cmd">/to-spec</span></td></tr>
+          <tr><td><span class="cmd">/ugt-requirements</span></td><td>มีโฟลเดอร์เอกสาร requirement</td><td>บน bundle นี้ทำงาน <strong>thin mode</strong>: สรุประบบ + รายชื่อ feature ลง board เท่านั้น — "หาสิ่งที่เอกสารไม่ได้บอก" เป็นงานของ <span class="cmd">/wayfinder</span> (ทั้งโปรเจค) หรือ <span class="cmd">/grill-with-docs</span> (ทีละ feature)</td></tr>
           <tr><td><span class="cmd">/grill-with-docs</span></td><td>มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม</td><td>AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น <span class="inline-code">CONTEXT.md</span>/ADR ในโปรเจค</td></tr>
           <tr><td><span class="cmd">/to-spec</span></td><td>requirement ชัดแล้ว</td><td>เปลี่ยนบทสนทนาให้กลายเป็น spec พร้อมทำต่อ</td></tr>
           <tr><td><span class="cmd">/to-tickets</span></td><td>มี spec แล้ว</td><td>แตกเป็นงานย่อย พร้อมลำดับก่อน-หลัง</td></tr>
@@ -729,7 +730,11 @@
       (prototype/triage/wayfinder) ดูที่ <span class="inline-code">/ask-matt</span> ·
       <span class="inline-code">CONTEXT.md</span> และ <span class="inline-code">docs/adr/</span>
       ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ <span class="inline-code">docs/project-context/</span>
-      โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง ไม่ต้อง copy เนื้อหาข้ามที่กันเอง
+      โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง ไม่ต้อง copy เนื้อหาข้ามที่กันเอง ·
+      บน bundle นี้ <strong>ไม่มี <span class="inline-code">decisions.md</span></strong> (มติอยู่ที่ ADR ที่เดียว)
+      และ full-setup วาง <span class="inline-code">CODING_STANDARDS.md</span> ไว้ให้
+      <span class="cmd">/code-review</span> ของ matt มองเห็นมาตรฐานองค์กร
+      (<span class="inline-code">.claude/rules/</span>, clean-code) — ไม่มีไฟล์นี้ review จะตรวจได้แค่ code smell ทั่วไป
     </p>
     </div>
     <div class="subsec">

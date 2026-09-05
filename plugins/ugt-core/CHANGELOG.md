@@ -1,5 +1,29 @@
 # Changelog — ugt-core
 
+## 2.11.0 (2026-09-06)
+
+**ugt-core เป็นกลางเรื่อง pipeline + กฎ "บ้านมติที่เดียว"** (คู่กับ
+ugt-nextjs-platform 4.59.0 — ที่มาอยู่ใน CHANGELOG นั้น)
+
+- **ugt-context**: ถ้ามี `docs/adr/` อยู่แล้ว หรือติดตั้ง mattpocock-skills
+  (`domain-modeling` เขียน ADR) → **ไม่สร้าง `decisions.md`** แก้แถวใน
+  `00-index.md` ให้ชี้ `docs/adr/` แทน — สอง decision log ใน repo เดียวคือ
+  สิ่งที่โฟลเดอร์นี้ห้ามก่อ · asset `00-index.md` มี comment บอกวิธีแก้แถว
+- **ugt-handoff**: แถว decision → `decisions.md` **หรือ** `docs/adr/` (ADR ใหม่
+  1 ไฟล์ตาม format เดิม) ตามที่ `00-index.md` บอก · DON'T ใหม่: ห้าม copy สถานะ
+  ระดับ ticket จากไฟล์ของ pipeline (`.scratch/`, `.superpowers/sdd/`) เข้า
+  board/handoff หรือเขียนเข้าไปในนั้น
+- **ugt-requirements**: ถ้อยคำเป็นกลาง (เดิมฝัง "superpowers pipeline" 4 จุด) ·
+  ลบข้อความ "CONTEXT.md/adr เป็น frozen input" ที่ผิดกับความจริง (adr โตต่อทุก
+  รอบ grill) · **thin mode** เมื่อติดตั้ง mattpocock-skills: เขียนแค่
+  `00-overview.md` (Open Questions เป็นบรรทัดเดียวชี้ `/wayfinder` /
+  `/grill-with-docs`) + แถว board — ไม่มี `NN-*.md` เพราะ grill/wayfinder
+  เป็นเจ้าของ "หาสิ่งที่เอกสารไม่ได้บอก" อยู่แล้ว ทำซ้ำได้คำถามค้างสองชุดแข่งกัน
+  (เห็นจาก pilot dx-game ที่ปิด fog 10 ใบด้วย wayfinder)
+- **contracts/harness.md**: บ้านมติ = `decisions.md` หรือ `docs/adr/` (ไม่สร้าง
+  `decisions.md` เมื่อเก็บ ADR) · แถวใหม่ `CODING_STANDARDS.md` (mattpocock
+  เท่านั้น — pointer ให้ `/code-review` ของ matt เห็น `.claude/rules/`)
+
 ## 2.10.1 (2026-09-03)
 
 **contract cicd.md § Persistent data: `/srv/appdata/<project>` → `/home/docker02/appdata/<project>`**
