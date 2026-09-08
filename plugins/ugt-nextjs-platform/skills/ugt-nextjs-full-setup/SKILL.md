@@ -32,7 +32,7 @@ child skills in the correct order → summarize + smoke test.
 | `ugt-nextjs-design-setup` | Design agreement (`docs/DESIGN.md`) + shadcn tokens/fonts/shell + org UI kit |
 | `ugt-nextjs-auth-setup` | Login: SSO (Keycloak) / AD-LDAP / Local + RBAC + admin bootstrap |
 | `ugt-nextjs-mail-setup` | Workflow email over the org SMTP relay + admin-editable templates + dev mode (optional — only if the project sends mail) |
-| `ugt-nextjs-upload-setup` | File attachments on a Docker volume + ClamAV scanning + guarded download route (optional — only if users attach files) |
+| `ugt-nextjs-upload-setup` | File attachments on a Docker volume + guarded download route, with opt-in ClamAV scanning (optional — only if users attach files) |
 | `ugt-nextjs-cicd-setup` | Jenkins + SonarQube Quality Gate + OWASP DC + Docker deploy + `/api/health` |
 
 `ugt-nextjs-clean-code` and `ugt-nextjs-pitfalls` are not part of the install
@@ -65,8 +65,9 @@ Ask all of this in a single message (use AskUserQuestion if available):
    - **Mail** — "ระบบนี้ต้องส่งอีเมลแจ้งเตือนไหม (เช่น แจ้งผู้อนุมัติ / แจ้งผลกลับผู้ขอ)"
    - **Upload** — "ผู้ใช้ต้องแนบไฟล์ไหม (เช่น เอกสารประกอบ ใบเสร็จ รูป)"
    Both default to **no**: each adds real infrastructure (an SMTP relay to
-   request from the admin team; a Docker volume plus a ~2 GB ClamAV container
-   that must be backed up separately), so neither should arrive uninvited.
+   request from the admin team; a Docker volume that must be backed up
+   separately, plus an optional ~2 GB ClamAV container if virus scan is turned
+   on), so neither should arrive uninvited.
 3. [If Auth selected] Which login methods? SSO / LDAP / Local (default: SSO only)
 4. [If Mail selected] SMTP host/port, sender address, support contact for the
    email footer — see `ugt-nextjs-mail-setup`'s Interview

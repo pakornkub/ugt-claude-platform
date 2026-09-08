@@ -3,7 +3,7 @@ name: ugt-nextjs-upload-setup
 description: >
   Use when a project needs users to attach files — "อัปโหลดไฟล์", "แนบเอกสาร",
   "แนบใบเสร็จ", "เก็บไฟล์แนบของคำขอ", "ต้องสแกนไวรัสก่อนเก็บ" — installing the
-  Docker-volume storage layer, ClamAV scanning that fails closed, the
+  Docker-volume storage layer, opt-in ClamAV scanning that fails closed, the
   `Attachments` table, an upload Route Handler, a permission-guarded download
   route, and the compose/Dockerfile changes the volume needs. Reach for it too
   on upload symptoms with documented causes here: files vanishing after a
@@ -43,17 +43,17 @@ as a starting point that the first real project will sharpen.
 | Decision | Answer |
 | --- | --- |
 | Where files live | **Docker volume** (not the container, not `public/`, not the DB) |
-| Which types | **All types, virus-scanned** — scan เป็น default; ถอดได้เฉพาะผ่านคำถาม §3 Q5 และต้องบันทึกเป็น deviation |
+| Which types | **All types** — virus scan is **opt-in** (default: off); ถามที่ §3 Q5 |
 | Downloads | **Permission-checked on every request** |
 
 ## 2. Org Standards
 
-1. **Scan before the volume.** Bytes are scanned in memory; an infected file is
-   never written to disk, not even briefly.
-2. **Fail closed.** Scanner unreachable, timing out, or answering anything other
-   than a definite *clean* → the upload is refused (503). A scanner that lets
-   files through when it is broken is worse than no scanner, because everyone
-   believes files are checked.
+1. **If virus scan is on: scan before the volume.** Bytes are scanned in
+   memory; an infected file is never written to disk, not even briefly.
+2. **If virus scan is on: fail closed.** Scanner unreachable, timing out, or
+   answering anything other than a definite *clean* → the upload is refused
+   (503). A scanner that lets files through when it is broken is worse than no
+   scanner, because everyone believes files are checked.
 3. **The database row is the source of truth.** The path is generated
    (`yyyy/mm/<uuid>`, no extension); the user's filename is stored for display
    only and never becomes part of a path.
@@ -89,21 +89,18 @@ as a starting point that the first real project will sharpen.
    background job รันที่ไหน — `docs/backlog.md` ข้อ 3 ของ platform) — คำตอบนี้
    ถูก**บันทึกไว้ใน `docs/project-context/decisions.md`** เพื่อให้ job ที่จะมา
    ทีหลังใช้ ไม่ใช่ config ที่มีผลวันนี้ อย่าสัญญาว่าไฟล์จะถูกกวาดอัตโนมัติ
-5. **Virus scan — เอาไหม** (default: **เอา** ตามมติองค์กร 2026-08-09) — ถามพร้อม
-   เงื่อนไข infra ที่ทำให้บางโปรเจคเอาไม่ได้จริง: clamav กิน **RAM ~2 GB** และ
-   boot แรกต้อง**ดาวน์โหลด signature DB ~1 GB จากอินเทอร์เน็ต** (host องค์กรที่
-   ไม่มี outbound internet ต้อง preload DB เอง — §7) ตอบ "ไม่เอา" ได้ แต่ต้องรับ
-   เงื่อนไขครบ 3 ข้อ ไม่ใช่แค่ข้ามขั้นตอน:
-   - ตัดโค้ด/ config ตาม marker **`[SCAN]`** ทุกจุด: ไม่ copy `lib/virus-scan.ts`,
-     ลบบล็อก scan ใน `app/api/files/route.ts` (เปลี่ยน `scanStatus` เป็น
-     `'unscanned'` ตาม marker), แก้ด่านดาวน์โหลดใน `[id]/route.ts` เป็น
-     `=== 'infected'`, ตัด env `CLAMAV_*`, ตัด service clamav + `depends_on` +
-     `clamav-db` ใน compose/Jenkinsfile, ข้าม `pingScanner()` ใน §4.6 —
-     **คอลัมน์ `scanStatus` ในตารางคงไว้** (retrofit ทีหลังไม่ต้อง migrate)
-   - บันทึก `⚠ deviation:` ใน `docs/project-context/architecture.md` — *ไฟล์แนบ
-     ไม่ผ่าน virus scan (มติโปรเจค <วันที่>) ต่างจาก org standard* + เหตุผล
-   - เพิ่มงานค้าง "retrofit virus scan" ใน `docs/project-context/board.md`
-     (สถานะ `⏳ — <รออะไร>`) — การถอด scan คือการติดหนี้ ไม่ใช่การปิดเรื่อง
+5. **Virus scan — เอาไหม** (default: **ไม่เอา** — opt-in, ไม่ใช่ org mandate อีกต่อไป)
+   — ถามพร้อมเงื่อนไข infra ที่ทำให้การ "เอา" มีต้นทุนจริง ไม่ใช่แค่ติ๊กถูก:
+   clamav กิน **RAM ~2 GB** และ boot แรกต้อง**ดาวน์โหลด signature DB ~1 GB จาก
+   อินเทอร์เน็ต** (host องค์กรที่ไม่มี outbound internet ต้อง preload DB เอง —
+   §7) ตอบ "เอา" ได้ ถ้ารับเงื่อนไข infra ครบ แล้วทำตาม marker **`[SCAN]`** ทุก
+   จุดเพื่อเปิดใช้งาน: copy `lib/virus-scan.ts`, ใส่บล็อก scan กลับใน
+   `app/api/files/route.ts` (เปลี่ยน `scanStatus` เป็น `'clean'` +
+   `scannedAt: new Date()`), แก้ด่านดาวน์โหลดใน `[id]/route.ts` เป็น
+   `!== 'clean'`, เพิ่ม env `CLAMAV_*`, เพิ่ม service clamav +
+   `depends_on` + `clamav-db` ใน compose/Jenkinsfile, เพิ่ม `pingScanner()`
+   ใน §4.6 — บันทึกการเลือก (เอา/ไม่เอา) ไว้ใน `docs/project-context/decisions.md`
+   เผื่อโปรเจคย้อนกลับมาถามทีหลังว่าทำไม
 
 ## 4. Setup steps
 
@@ -112,7 +109,7 @@ as a starting point that the first real project will sharpen.
 | Asset | Destination |
 | --- | --- |
 | `assets/lib/storage.ts` | `lib/storage.ts` |
-| `assets/lib/virus-scan.ts` | `lib/virus-scan.ts` — **[SCAN]** ข้ามทั้งไฟล์เมื่อไม่เอา scan (§3 Q5) |
+| `assets/lib/virus-scan.ts` | `lib/virus-scan.ts` — **[SCAN]** copy เฉพาะเมื่อเลือกเปิด virus scan (§3 Q5, default: ไม่เอา) |
 | `assets/lib/attachment-access.ts` | `lib/attachment-access.ts` — **must be implemented**, it denies everything by default |
 | `assets/app/api/files/route.ts` | `app/api/files/route.ts` (upload) |
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
@@ -160,7 +157,7 @@ Add to `lib/env.ts` (server block):
 ```ts
 STORAGE_ROOT: z.string().default('/app/storage'),
 UPLOAD_MAX_BYTES: z.string().default('26214400'),
-// [SCAN] — สามตัวนี้ตัดเมื่อไม่เอา virus scan (§3 Q5)
+// [SCAN] — เพิ่มสามตัวนี้เมื่อเลือกเปิด virus scan (§3 Q5, default: ไม่เอา)
 CLAMAV_HOST: z.string().default('clamav'),
 CLAMAV_PORT: z.string().default('3310'),
 CLAMAV_TIMEOUT_MS: z.string().default('30000'),
@@ -179,10 +176,10 @@ FILES_READ:   'files:read',
 
 Apply `assets/compose-and-dockerfile.snippet.md` to the Dockerfile and **both**
 compose files: the mount point owned by `nextjs`, the `/home/docker02/appdata` bind
-mounts (never a named volume — cicd contract §2.8), the clamav service with a
-5-minute `start_period`, the persisted signature DB, and `storage` +
-`clamav-db` added to the Jenkinsfile `[VOLUME]` `mkdir -p` line
-(ส่วนที่มาร์ค `[SCAN]` ในตัว snippet — ตัดเมื่อไม่เอา scan ตาม §3 Q5).
+mounts (never a named volume — cicd contract §2.8). ส่วนที่มาร์ค `[SCAN]` ใน
+snippet (clamav service, `start_period` 5 นาที, persisted signature DB,
+`clamav-db` ใน Jenkinsfile `[VOLUME]` `mkdir -p`) — **เพิ่ม**เฉพาะเมื่อเลือก
+เปิด virus scan ตาม §3 Q5 (default: ไม่เอา).
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
 
@@ -195,9 +192,9 @@ fails without it.
 
 ### 4.6 Health + migrate
 
-Add the scanner to `/api/health` so a dead clamd is visible before users find
-it (`pingScanner()` from `lib/virus-scan.ts`) — [SCAN] ข้ามเมื่อไม่เอา scan —
-then:
+[SCAN] เมื่อเปิด virus scan: เพิ่มสแกนเนอร์เข้า `/api/health` ด้วย
+(`pingScanner()` จาก `lib/virus-scan.ts`) ให้เห็นตอน clamd ตายก่อนผู้ใช้เจอเอง —
+default (ไม่เอา scan) ข้ามขั้นนี้ — แล้ว:
 
 ```bash
 npx prisma migrate dev --name add-attachments && npx prisma generate
@@ -224,11 +221,10 @@ node <skill-dir>/scripts/verify.mjs
 
 Then by hand — these are the ones that catch real breakage:
 
-- [ ] [SCAN] Upload the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/)
+- [ ] [SCAN-on only] Upload the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/)
       → refused with `FILE_INFECTED`, **no file on the volume**, audit row written
-- [ ] [SCAN] Stop the clamav container → upload is refused with 503, not accepted
-- [ ] [SCAN-off only] `docs/project-context/architecture.md` has the
-      `⚠ deviation` line and `board.md` has the retrofit row (§3 Q5)
+- [ ] [SCAN-on only] Stop the clamav container → upload is refused with 503, not accepted
+- [ ] The virus-scan choice (§3 Q5) is recorded in `docs/project-context/decisions.md`
 - [ ] Upload a file, `docker compose down && up -d`, download it again → still there
 - [ ] Call the download URL while logged out → 401; as a user without access → **404**
 - [ ] Upload an `.svg` containing `<script>` → downloads as a file, never renders
@@ -249,6 +245,8 @@ Then by hand — these are the ones that catch real breakage:
       downloads via JS and surfaces them itself)
 
 ## 7. Troubleshooting — upload โดน `SCANNER_UNAVAILABLE` (field report 2026-08-26)
+
+*(ใช้เฉพาะโปรเจคที่เลือกเปิด virus scan — §3 Q5)*
 
 กติกาไล่ปัญหา: **สาเหตุจริงอยู่ใน log ของ container แอปเสมอ** —
 `app/api/files/route.ts` เขียน `virus scan unavailable <สาเหตุ>` ทุกครั้งก่อน

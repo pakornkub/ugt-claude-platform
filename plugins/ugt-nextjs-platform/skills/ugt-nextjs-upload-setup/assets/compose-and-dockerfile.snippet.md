@@ -20,7 +20,7 @@ host directory's owner, so the container-side path must exist and the Jenkins
 RUN mkdir -p /app/storage && chown -R nextjs:nodejs /app/storage
 ```
 
-## 2. compose — the storage bind mount and the scanner
+## 2. compose — the storage bind mount
 
 ```yaml
 services:
@@ -30,14 +30,30 @@ services:
       # … existing vars …
       STORAGE_ROOT: /app/storage
       UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}
-      # [SCAN] — สามตัวถัดไปเป็นของ virus scan; ตัดเมื่อไม่เอา (SKILL.md §3 Q5)
-      CLAMAV_HOST: clamav
-      CLAMAV_PORT: '3310'
-      CLAMAV_TIMEOUT_MS: '30000'
     volumes:
       # dev compose: /home/docker02/appdata/__PROJECT_NAME__-dev/storage
       - /home/docker02/appdata/__PROJECT_NAME__/storage:/app/storage
-    # [SCAN] — depends_on ทั้งบล็อก + service clamav ข้างล่าง: ตัดเมื่อไม่เอา scan
+```
+
+**Jenkinsfile** — add `storage` to the `[VOLUME]` `mkdir -p` line in the
+Deploy stage (both prod and dev paths), so the directory exists with the
+right owner before the first `docker compose up`:
+
+```bash
+mkdir -p /home/docker02/appdata/__PROJECT_NAME__/storage
+```
+
+## 2b. [SCAN] Optional — virus scan (opt-in, SKILL.md §3 Q5; default: ไม่เอา)
+
+เพิ่มทั้งหมดข้างล่างนี้เฉพาะโปรเจคที่เลือกเปิด virus scan:
+
+```yaml
+services:
+  app:
+    environment:
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: '3310'
+      CLAMAV_TIMEOUT_MS: '30000'
     depends_on:
       clamav:
         condition: service_healthy
@@ -63,15 +79,11 @@ services:
       retries: 3
 ```
 
-**Jenkinsfile** — add `storage` and `clamav-db` to the `[VOLUME]` `mkdir -p`
-line in the Deploy stage (both prod and dev paths), so the directories exist
-with the right owner before the first `docker compose up`:
+**Jenkinsfile** — add `clamav-db` too:
 
 ```bash
 mkdir -p /home/docker02/appdata/__PROJECT_NAME__/storage /home/docker02/appdata/__PROJECT_NAME__/clamav-db
 ```
-
-([SCAN] — ไม่เอา scan: ตัด `clamav-db` ออกจากบรรทัดนี้ด้วย)
 
 ## 3. What the admin/DevOps team must know
 
@@ -82,8 +94,8 @@ Add these to `docs/admin-handoff.md`:
   covered by the database backup**. It needs its own backup job.
 - Deleting that host directory deletes every attachment — the containers can
   be recreated freely (`down` / `up -d` is safe), the directory cannot.
-- clamav needs roughly **2 GB RAM** and refreshes signatures on its own
-  (`freshclam` runs inside the image).
+- [SCAN, if enabled] clamav needs roughly **2 GB RAM** and refreshes
+  signatures on its own (`freshclam` runs inside the image).
 - If a reverse proxy sits in front, raise its body limit to match
   `UPLOAD_MAX_BYTES` (nginx: `client_max_body_size`), otherwise large uploads
   fail at the proxy with a 413 the app never sees.

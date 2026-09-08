@@ -1,7 +1,7 @@
-// kit: ugt-nextjs-platform 4.54.0 · ugt-nextjs-upload-setup/lib/virus-scan.ts
-// kit-hash: 1a2a00a02d15
-// [SCAN] — ไฟล์ทั้งไฟล์เป็นของ virus scan: โปรเจคที่เลือกไม่เอา scan
-// (SKILL.md §3 Q5) ไม่ต้อง copy ไฟล์นี้เลย
+// kit: ugt-nextjs-platform 4.60.0 · ugt-nextjs-upload-setup/lib/virus-scan.ts
+// kit-hash: 03e6b491da79
+// [SCAN] — virus scan เป็น opt-in (default: ไม่เอา, SKILL.md §3 Q5)
+// copy ไฟล์นี้เฉพาะโปรเจคที่เลือกเปิด scan
 import 'server-only';
 import net from 'node:net';
 import { env } from '@/lib/env';

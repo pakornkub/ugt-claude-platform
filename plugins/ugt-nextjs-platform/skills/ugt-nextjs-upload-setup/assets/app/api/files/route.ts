@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.54.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
-// kit-hash: 4eede18795be
+// kit: ugt-nextjs-platform 4.60.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
+// kit-hash: 480106039b00
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
@@ -8,7 +8,9 @@ import { getUserPermissions } from '@/lib/get-user-permissions';
 import { PERMISSIONS } from '@/lib/permissions';
 import { writeAuditLog } from '@/lib/actions/auth';
 import { checksum, newStorageKey, safeDisplayName, writeStoredFile } from '@/lib/storage';
-import { scanBuffer } from '@/lib/virus-scan'; // [SCAN] — ลบเมื่อโปรเจคเลือกไม่ติดตั้ง virus scan (SKILL.md §3 Q5)
+// [SCAN] — virus scan เป็น opt-in (default: ไม่เอา, SKILL.md §3 Q5). เปิดใช้งาน:
+// import scanBuffer from lib/virus-scan, เรียกมันก่อน newStorageKey ด้านล่าง,
+// fail closed ทุกกรณีที่ไม่ใช่ 'clean' — ตัวอย่างเต็มอยู่ใน SKILL.md §3 Q5
 
 /**
  * Upload endpoint. A Route Handler, NOT a Server Action, on purpose: Server
@@ -17,9 +19,9 @@ import { scanBuffer } from '@/lib/virus-scan'; // [SCAN] — ลบเมื่�
  * once someone uploads a real document.
  *
  * Order is fixed (auth.md guard order, extended for uploads):
- *   session → permission → read bytes → SCAN → write to volume → row → audit log
- * The scan happens before a single byte reaches the volume, so an infected file
- * is never stored, not even briefly.
+ *   session → permission → read bytes → [SCAN, if enabled] → write to volume → row → audit log
+ * When virus scan is enabled, the scan happens before a single byte reaches
+ * the volume, so an infected file is never stored, not even briefly.
  */
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -53,26 +55,6 @@ export async function POST(request: Request) {
 
   const bytes = Buffer.from(await file.arrayBuffer());
 
-  // [SCAN] — ลบทั้งบล็อกนี้เมื่อไม่เอา virus scan (พร้อมแก้ scanStatus ด้านล่าง)
-  // FAIL CLOSED: anything other than a definite "clean" refuses the upload.
-  // A scanner that is down must block uploads, never wave them through.
-  // เมื่อ upload โดน SCANNER_UNAVAILABLE — สาเหตุจริงอยู่ในบรรทัด log ข้างล่างนี้
-  // เสมอ (ไล่ตามตาราง SKILL.md §7) อย่าเดาจาก docker ps
-  const scan = await scanBuffer(bytes);
-  if (scan.status === 'infected') {
-    await writeAuditLog({
-      userId: session.user.id,
-      action: 'file.upload.rejected',
-      detail: { entityType, entityId, fileName: file.name, signature: scan.signature },
-    });
-    return NextResponse.json({ success: false, error: { code: 'FILE_INFECTED' } }, { status: 422 });
-  }
-  if (scan.status === 'error') {
-    console.error('virus scan unavailable', scan.message);
-    return NextResponse.json({ success: false, error: { code: 'SCANNER_UNAVAILABLE' } }, { status: 503 });
-  }
-  // [/SCAN]
-
   const storageKey = newStorageKey();
   await writeStoredFile(storageKey, bytes);
 
@@ -85,11 +67,11 @@ export async function POST(request: Request) {
       contentType: file.type || 'application/octet-stream',
       fileSize: bytes.length,
       checksum: checksum(bytes),
-      // [SCAN] — ไม่เอา scan: เปลี่ยนเป็น scanStatus: 'unscanned' และลบบรรทัด
-      // scannedAt (ห้ามคง 'clean' ไว้ — ข้อมูลจะโกหกว่าเคยสแกน) พร้อมแก้ด่าน
-      // ดาวน์โหลดใน app/api/files/[id]/route.ts ตาม marker [SCAN] ที่นั่น
-      scanStatus: 'clean',
-      scannedAt: new Date(),
+      // [SCAN] — เปิด virus scan แล้วเปลี่ยนเป็น scanStatus: 'clean' +
+      // scannedAt: new Date() (ห้ามคง 'unscanned' ไว้ — ข้อมูลจะโกหกว่าไม่เคย
+      // สแกน) พร้อมแก้ด่านดาวน์โหลดใน app/api/files/[id]/route.ts ตาม marker
+      // [SCAN] ที่นั่น
+      scanStatus: 'unscanned',
       createdBy: session.user.email ?? session.user.id,
     },
     select: { id: true, fileName: true, fileSize: true, contentType: true },

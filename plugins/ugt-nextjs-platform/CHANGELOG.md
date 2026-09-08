@@ -1,5 +1,29 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.60.0 (2026-09-08)
+
+**upload-setup: virus scan (ClamAV) เปลี่ยนจาก default-on เป็น opt-in** · ที่มา:
+ทบทวนมติองค์กร 2026-08-09 ที่บังคับ scan เป็น default พร้อมภาระ deviation
+ceremony (บันทึก `⚠ deviation` + ค้าง "retrofit" ใน board.md) ทุกโปรเจคที่ไม่เอา
+scan — ต้นทุน infra จริง (RAM ~2 GB, signature DB ~1 GB ต้องมี outbound
+internet) ทำให้ "ไม่เอา" เป็นทางเลือกปกติของหลายโปรเจค ไม่ใช่ข้อยกเว้นที่ต้อง
+แบกหนี้เอกสาร
+
+- **SKILL.md §3 Q5**: กลับด้าน — default **ไม่เอา** scan, เปิดเป็น opt-in (ไม่
+  ใช่ opt-out อีกต่อไป) เอกสาร marker `[SCAN]` ทุกจุดพลิกทิศทาง (เดิม "ตัดเมื่อ
+  ไม่เอา" → ใหม่ "เพิ่มเมื่อเลือกเปิด")
+- **asset ที่ default พลิก**: `app/api/files/route.ts` ไม่ import/เรียก
+  `scanBuffer` แล้ว, `scanStatus` ตั้งต้นเป็น `'unscanned'` · `[id]/route.ts`
+  บล็อกเฉพาะ `scanStatus === 'infected'` (เดิม allow เฉพาะ `'clean'`) ·
+  `schema-attachment.prisma` เปลี่ยน `@default("clean")` → `@default("unscanned")`
+  · `env.example` และ compose snippet ย้าย `CLAMAV_*`/service `clamav` ไปเป็น
+  หัวข้อ "2b. Optional" แยกจากบล็อกหลัก
+- **verify.mjs**: ตัดข้อบังคับ `⚠ deviation` line ใน `architecture.md` ออก
+  (SCAN off ไม่ใช่ deviation จาก default อีกต่อไป) เหลือแค่เช็คความสม่ำเสมอของ
+  โหมดที่เลือก
+- **ไม่กระทบโปรเจคที่ scan ไว้อยู่แล้ว** — โค้ดที่ copy ไปแล้วไม่เปลี่ยนเอง;
+  `ugt-nextjs-kit-sync` จะรายงาน asset สามไฟล์นี้ว่า outdated เท่านั้น
+
 ## 4.59.1 (2026-09-06)
 
 **description ทุก skill ≤ 1,024 ตัวอักษรตาม Agent Skills spec + trigger-evals รอบใหม่**

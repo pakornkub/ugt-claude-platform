@@ -25,10 +25,11 @@ function check(name, fn) {
 const UPLOAD = 'app/api/files/route.ts';
 const DOWNLOAD = join('app', 'api', 'files', '[id]', 'route.ts');
 
-// [SCAN] opt-out (SKILL.md §3 Q5): ไม่มี lib/virus-scan.ts + upload route ตั้ง
-// scanStatus 'unscanned' = ตั้งใจถอด scan ครบชุด — ข้ามเช็คฝั่ง scanner แล้ว
-// เช็คความสม่ำเสมอของโหมดแทน. เข้าเงื่อนไขครึ่งเดียว (แค่ไฟล์หาย) ยังนับเป็น
-// การติดตั้งพัง ไม่ใช่ opt-out
+// [SCAN] default (SKILL.md §3 Q5): virus scan เป็น opt-in — ไม่มี
+// lib/virus-scan.ts + upload route ตั้ง scanStatus 'unscanned' = สถานะ default
+// ปกติ ไม่ใช่การถอดอะไรออก ข้ามเช็คฝั่ง scanner แล้วเช็คความสม่ำเสมอของโหมดแทน.
+// เข้าเงื่อนไขครึ่งเดียว (แค่ไฟล์หาย แต่ scanStatus ยังเป็น 'clean') ยังนับเป็น
+// การติดตั้งพัง
 const SCAN_OFF =
   !has('lib/virus-scan.ts') && has(UPLOAD) && /scanStatus:\s*'unscanned'/.test(read(UPLOAD));
 
@@ -53,15 +54,12 @@ check('Core files present', () => {
 });
 
 if (SCAN_OFF) {
-  check('[SCAN off] opt-out is consistent, deliberate, and recorded', () => {
+  check('[SCAN off] default state is internally consistent', () => {
     const problems = [];
     if (/\bscanBuffer\s*\(/.test(read(UPLOAD)))
       problems.push('upload route still calls scanBuffer but lib/virus-scan.ts is gone');
     if (has(DOWNLOAD) && /scanStatus\s*!==\s*'clean'/.test(read(DOWNLOAD)))
       problems.push("download guard still requires 'clean' — every 'unscanned' row answers 409; use === 'infected' (SKILL.md §3 Q5)");
-    const arch = 'docs/project-context/architecture.md';
-    if (!has(arch) || !/deviation[^\n]*(scan|สแกน)/i.test(read(arch)))
-      problems.push(`no ⚠ deviation line about the missing virus scan in ${arch}`);
     return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
   });
 } else {
