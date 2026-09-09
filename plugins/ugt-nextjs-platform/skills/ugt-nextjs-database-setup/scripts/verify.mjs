@@ -258,6 +258,47 @@ check('Build guard: lib/prisma.ts survives SKIP_ENV_VALIDATION', () => {
     : { ok: 'warn', msg: 'No build guard found — `npm run build` without a live DB may fail' };
 });
 
+// ── 9. Prototype store (preserve mode — 2026-09-09 field report) ──────────
+// Prisma + SQL Server installed BESIDE a SQLite/mock store connects nothing the
+// user can see: every screen keeps reading the old store. SKILL §4b migrates
+// it; this check refuses to call the install done while the old store remains.
+check('No prototype data store left beside Prisma/SQL Server (§4b)', () => {
+  const pkg = has('package.json') ? JSON.parse(read('package.json')) : {};
+  const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+  const PROTO_DEPS = ['better-sqlite3', 'sqlite3', 'sql.js', '@libsql/client', 'lowdb', 'drizzle-orm', '@prisma/adapter-libsql', '@prisma/adapter-better-sqlite3'];
+  const problems = PROTO_DEPS.filter((d) => deps[d]).map((d) => `dependency ${d}`);
+  if (/provider\s*=\s*"sqlite"/.test(schema)) problems.push('schema.prisma datasource provider = "sqlite"');
+  for (const dir of ['.', 'prisma', 'data', 'db']) {
+    if (!has(dir)) continue;
+    for (const f of readdirSync(p(dir))) {
+      if (/\.(db|sqlite|sqlite3)$/.test(f)) problems.push(dir === '.' ? f : `${dir}/${f}`);
+    }
+  }
+  if (!problems.length) return { ok: true };
+  const decisions = has('docs/project-context/decisions.md') ? read('docs/project-context/decisions.md') : '';
+  const deferred = /(sqlite|mock|prototype|data layer เดิม|store เดิม)[^\n]*(ทีหลัง|เลื่อน|defer|later|ยังไม่ย้าย)/i.test(decisions);
+  return deferred
+    ? { ok: 'warn', msg: `prototype store still present, deferred per decisions.md: ${problems.join(' · ')} — the app runs on it, not on SQL Server; say so in every handoff` }
+    : {
+        ok: false,
+        msg: `prototype store left beside Prisma — screens keep reading it and "ต่อ SQL Server แล้ว" is false: ${problems.join(' · ')} (migrate per SKILL §4b, or record the deferral in docs/project-context/decisions.md)`,
+      };
+});
+
+check('Feature code actually reads through @/lib/prisma', () => {
+  const users = sourceFiles().filter((f) => {
+    const r = relative(ROOT, f).split('\\').join('/');
+    if (/^(src\/)?lib\/prisma\.ts$/.test(r) || /^(prisma|scripts|e2e)\//.test(r) || /\.(test|spec)\.tsx?$/.test(r)) return false;
+    return /from ['"]@\/lib\/prisma['"]/.test(readFileSync(f, 'utf8'));
+  });
+  return users.length
+    ? { ok: true, msg: `${users.length} file(s) import @/lib/prisma` }
+    : {
+        ok: 'warn',
+        msg: 'nothing outside lib/prisma.ts imports @/lib/prisma — the client is installed but no screen or action uses it yet (fine on a bare project; on an existing app it means the features still run on their old store — §4b)',
+      };
+});
+
 // ── Report ─────────────────────────────────────────────────────────────────
 const icon = { true: '✔', false: '✘', warn: '!' };
 let failed = 0;

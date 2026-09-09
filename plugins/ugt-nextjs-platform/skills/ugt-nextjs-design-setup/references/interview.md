@@ -24,7 +24,7 @@ two-scale UI (a 48px legacy input next to a 28px kit button in the same form).
 
 | # | คำถาม | ตัวเลือก | Default |
 | --- | --- | --- | --- |
-| 1 | มี prototype / ระบบเดิม / brand ที่ต้อง match ไหม? | ไม่มี / มี (ระบุ path หรือ URL) | **ไม่มี** — ใช้ค่ากลางองค์กร |
+| 1 | มี prototype / ระบบเดิม / brand ที่ต้อง match ไหม? | ไม่มี / มี (ระบุ path หรือ URL) | **ไม่มี** — ใช้ค่ากลางองค์กร · **preserve mode (full-setup Q0 = คงของเดิม): pre-filled "มี — โปรเจคนี้เอง"** ไม่ถามซ้ำ |
 | 2 | สี primary? | ค่ากลางองค์กร (indigo) / พิมพ์ค่า brand | **indigo กลาง** `oklch(0.488 0.243 264.4)` |
 | 3 | Dark mode? | มี + toggle / ไม่มี (token เตรียมไว้) | **มี + toggle** |
 | 4 | ภาษา UI? | ไทยล้วน / ไทย+อังกฤษ (i18n เต็ม th/en) | **ไทยล้วน** (i18n เต็มแพงกว่า — เลือกเมื่อมี requirement จริง) |
@@ -49,7 +49,7 @@ failing pair, never silently darken the dark primary below the light one.
 
 | # | คำถาม | ตัวเลือก | Default |
 | --- | --- | --- | --- |
-| 5 | App shell? | Sidebar (collapse ได้) / Topbar / Sidebar + Topbar | **Sidebar** |
+| 5 | App shell? | Sidebar (collapse ได้) / Topbar / Sidebar + Topbar / **เดิม** (preserve mode — layout ที่มีอยู่คือ shell ไม่ลง block ใหม่) | **Sidebar** · preserve mode: **เดิม** ไม่ถาม |
 | 6 | Landing page? | ไม่มี — login เข้าแอปเลย / มี (เลือก block ตอน implement) | **ไม่มี** (แอปภายใน) |
 
 ## ชุด 3 — เฉพาะโปรเจคเดิมที่ scan เจอ conflict
@@ -83,6 +83,7 @@ Read these before drafting; the draft agreement states what the code
 | อ่าน | หาอะไร | ไปตอบคำถาม |
 | --- | --- | --- |
 | `components.json` | style (`base-mira` = ตรงมาตรฐาน · `radix-*` = conflict), baseColor, icon lib | preset conflict → Deviations |
+| `package.json` `tailwindcss` + CSS entry | **v4** (`@import "tailwindcss"`) · **v3** (`tailwind.config.*` + `@tailwind base/components/utilities`) · CDN `<script src="cdn.tailwindcss.com">` | v3/CDN → upgrade to v4 **before** shadcn init (SKILL Step 3.2) — `globals.tokens.css` is v4-only (`@theme inline`, `@custom-variant`, `@utility`); on v3 those blocks are ignored, no token reaches a utility, every kit component renders unstyled/misaligned |
 | `package.json` (เมื่อไม่มี `components.json` — โปรเจคเดิมที่ไม่เคยใช้ shadcn) | UI lib เดิม (MUI, Ant Design, Bootstrap, Chakra, styled-components, ...) และเวอร์ชัน | ข้อ 8 — grandfather (อยู่ร่วมกับ shadcn ช่วงเปลี่ยนผ่าน) หรือ migrate หน้าเดิมมาที่ shadcn |
 | `app/globals.css` | palette จริง (`--primary`, status tokens มีไหม), radius, font vars | ข้อ 1–2 · token gaps |
 | `app/layout.tsx` | ฟ้อนต์จริง (`next/font`), `lang` | font conflict |

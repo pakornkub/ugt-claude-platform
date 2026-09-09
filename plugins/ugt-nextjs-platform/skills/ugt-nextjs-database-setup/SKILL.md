@@ -64,6 +64,14 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
    (affects the raw-SQL patterns — and `requestTimeout`: the copied
    `lib/prisma.ts` ships 5 นาที for long SPs; **no SPs → lower it to the
    mssql default 15s** in that file, a hung query should fail fast)
+4. **[Existing project] มี data layer เดิมไหม — และย้ายตอนนี้ไหม?** Under
+   full-setup, §1 there already inventoried it (SQLite / mock modules / JSON
+   fixtures / localStorage) and §2 Q0b holds the answer — don't re-ask.
+   Standalone: look before asking (grep list in
+   `references/prototype-migration.md`). **ย้าย** (default) → run §4b right
+   after §4. **ทีหลัง** → say plainly that the app still runs on the old
+   store — installing Prisma beside it connects nothing the user can see —
+   and record it in `docs/project-context/decisions.md` + a board.md row.
 
 ## Setup Steps
 
@@ -155,6 +163,31 @@ Advanced migration work (data-preserving column renames via `sp_rename`,
 filtered unique indexes Prisma can't express, deploy flow) →
 `references/migrations.md`
 
+### 4b. Migrate an existing prototype data layer (preserve mode)
+
+Infrastructure installed ≠ features connected. After §4 the app still reads
+whatever it read before — field report 2026-09-09: a Google AI Studio project
+"connected to SQL Server" whose every screen kept running on SQLite. Full
+procedure and traps → `references/prototype-migration.md`; the shape:
+
+1. **Inventory** the store and every read/write path (grep list in the
+   reference) — present it as a table before touching code.
+2. **Map** each prototype entity to a Prisma model per §Org Standards
+   (PascalCase plural, `@map` on every column, audit columns, reserved-word
+   check) — one model per entity, never a generic JSON-blob table.
+3. **Rewrite data access behind the SAME function/action signatures the
+   screens already call.** Workflow logic and pages do not change (preserve
+   mode); only the bodies now go through `@/lib/prisma`.
+4. **Seed data is a decision**: import the prototype's sample rows with a
+   one-off `scripts/seed-from-prototype.ts`, or drop them — record which.
+5. **Delete the old store** — deps (`better-sqlite3`, `sqlite3`, `sql.js`,
+   `@libsql/client`, `lowdb`, `drizzle-orm`), `provider = "sqlite"`, `*.db`
+   files, JSON fixtures, the localStorage keys — and their imports.
+   `scripts/verify.mjs` fails while any of them remain (warns if
+   `decisions.md` records a deferral).
+6. Record the migration (entities, dropped fields, seed decision) in
+   `docs/project-context/decisions.md`.
+
 ### 5. Raw SQL / stored procedures (if the project needs them)
 
 Mandatory pattern: **sanitize before parameterize, always**; call SPs with
@@ -174,6 +207,7 @@ Mandatory pattern: **sanitize before parameterize, always**; call SPs with
 | sanitize regex before interpolating into `$queryRaw` | hand-built SQL strings / skipped sanitize |
 | `` $executeRaw`EXEC usp_X ${a}, ${b}` `` (parameterized) | `$executeRawUnsafe` with user input |
 | soft delete (`IsDeleted = 1`) | hard-deleting data that needs history |
+| existing store found → migrate (§4b) or say plainly the app still runs on it | install Prisma beside SQLite/mock data and report "ต่อ database แล้ว" |
 | `npx prisma generate` after every migrate | leaving the generated client stale |
 
 ## Verification Checklist
@@ -188,6 +222,9 @@ node <skill-dir>/scripts/verify.mjs
 It covers every machine-checkable item below automatically (exit 1 on
 failure) — the rest must be run by hand:
 
+- [ ] existing project: no SQLite/mock/JSON store left beside Prisma, and at
+      least one screen/action imports `@/lib/prisma` (verify.mjs — the
+      "installed but nothing uses it" state is the 2026-09-09 field bug)
 - [ ] `npx prisma validate` passes
 - [ ] `npx prisma generate` passes (and is re-run after every migrate)
 - [ ] `schema.prisma` has no `url` in the datasource; `prisma.config.ts` has it

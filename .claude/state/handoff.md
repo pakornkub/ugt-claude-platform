@@ -3,9 +3,13 @@
 Last updated: 2026-09-09
 
 ## In progress
-- เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs 4.60.0 — รอผู้ใช้รัน
+- เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs **4.61.0** — รอผู้ใช้รัน
   `/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform` +
   `/reload-plugins` เอง (คนละ process จาก commit/push ที่ agent ทำแทนได้)
+- field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
+  ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
+  = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
+  `tailwindcss` ใน package.json + 3 บรรทัดแรก `app/globals.css` จากน้อง
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
@@ -19,6 +23,17 @@ Last updated: 2026-09-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-09 ugt-nextjs-platform **4.61.0** — **preserve mode**: full-setup §2
+  Q0 "ของเดิมที่ใช้งานอยู่ — คงไว้ไหม" (default คงของเดิม) เป็นข้อบังคับที่ส่งลงทุก
+  skill ลูก (ระดับ token + shell, มติ 2026-09-09) + Q0b ย้าย prototype store /
+  Q0c ถอด fake login · design: scan ห้ามข้าม, ห้ามลง shell block ถ้ามี shell
+  เดิม, Tailwind v3→v4 ก่อน init · auth: §5.6 merge mandatory + §5.7 ถอด
+  prototype login · database: §4b migrate prototype data layer +
+  references/prototype-migration.md · verify ใหม่ 6 ข้อ (ทดสอบ fixture ทั้ง
+  บวก/ลบ) · แก้ drift README/index.html ที่หลุดตอน 4.60.0 · ที่มา: field report
+  น้องรัน full-setup บนโปรเจค Google AI Studio "ใช้ design เดิม" → ยังรัน
+  SQLite/mock + admin pages เป็น template แยกบน indigo default · commit + tag
+  (`ugt-nextjs-platform--v4.61.0`) + push แล้ว · **เครื่องนี้ยังไม่ได้ update plugin**
 - 2026-09-09 ugt-nextjs-platform **4.60.0** — upload-setup: virus scan (ClamAV)
   เปลี่ยนจาก default-on (มติองค์กร 2026-08-09) เป็น **opt-in** (default: ไม่เอา)
   — ที่มา: ภาระ deviation ceremony ทุกโปรเจคที่ไม่เอา scan ไม่คุ้มกับต้นทุน infra
@@ -35,4 +50,3 @@ Last updated: 2026-09-09
 - 2026-08-26 ugt-nextjs-platform **4.54.0** — upload-setup: virus scan เป็นคำถาม interview §3 Q5 (opt-out ผ่าน marker `[SCAN]` + deviation + งาน retrofit), verify.mjs รองรับโหมด scan-off, §7 troubleshooting `SCANNER_UNAVAILABLE` จาก field report ugt-customer-request · tag + push แล้ว
 - 2026-08-26 ugt-nextjs-platform **4.53.0** — return-to-page `?from=` ครบทุกทางเข้า login: `proxy.ts` (แนบ ?from= + forward header `x-from`), `session-expired-dialog.tsx`, `login-form.tsx` (`sanitizeFrom()` กัน open redirect), SKILL.md §5.5 + auth-flows.md §Return-to-page · merge main + push + tag แล้ว (รวม tag ย้อน `ugt-nextjs-platform--v4.52.0` ที่ตกหล่น)
 - 2026-08-26 ugt-nextjs-platform **4.52.0** — `SessionExpiredDialog` ตัวรับ CustomEvent `session-expired` (401 กลางหน้า) mount ใน protected layout
-- 2026-08-25 docs reorganize ตามผู้อ่าน (web/training/proposals/archive) + version-sync guard ใน `check-contract-drift.mjs` (README + docs/web/index.html ต้องตรง plugin.json)

@@ -51,10 +51,61 @@ Read `package.json` and the file layout to learn:
 - What already exists: Prisma or another ORM, any auth system, vitest/jest/
   eslint, a Jenkinsfile/Dockerfile — **never overwrite existing setup silently.**
   Report what you found and ask first.
+- **What the prototype already does.** Projects from Google AI Studio, v0,
+  Lovable, Bolt or a hand-built demo arrive with three things the original
+  "no login, no database" assumption misses, and each one changes the
+  install (field report 2026-09-09):
+  - **A real UI** — routes and screens people already use → design-setup's
+    existing-project path, never the fresh-project interview.
+  - **A prototype data layer** — `provider = "sqlite"` in `schema.prisma`,
+    `better-sqlite3` / `sqlite3` / `sql.js` / `@libsql/client` / `lowdb` /
+    `drizzle-orm`, JSON fixtures under `data/`, `services/*.ts` returning
+    hard-coded arrays, domain state in `localStorage`. Installing Prisma +
+    SQL Server *beside* it changes nothing the user can see — every screen
+    keeps reading the old store.
+  - **A fake login** — a mock user context, a hard-coded credential check, a
+    `token` in localStorage. Better Auth installed beside it does nothing;
+    the old gate keeps deciding who gets in.
+  Report all three as findings **before** the interview — they set the
+  defaults of §2 Q0–Q0c.
 
 ### 2. Interview — one combined batch of questions
 
 Ask all of this in a single message (use AskUserQuestion if available):
+
+**Existing project — preserve mode (first, whenever §1 found a real UI, a
+prototype data layer or a fake login; skip on a bare scaffold):**
+
+0. **ของเดิมที่ใช้งานอยู่ — คงไว้ไหม?** (default when §1 found a real UI:
+   **คงของเดิม**). "คง design เดิม", "ใช้ design เดิม", "คงการทำงานเดิม",
+   "อย่าเปลี่ยนหน้าตา" are all this answer. คงของเดิม switches on **preserve
+   mode** — a binding constraint handed to every child skill, never left to
+   each skill's own reading (มติ 2026-09-09, level: **token + shell**):
+   - **Workflow, routes and business logic stay.** The install changes what
+     runs underneath (real DB, real login), not what the user does.
+   - **The look stays; components may become shadcn.** design-setup runs its
+     existing-project scan and rebases the kit tokens (primary / radius /
+     font / control scale) onto the measured values — ข้อ 1 = โปรเจคเดิม,
+     ข้อ 9 = ยึดของเดิม. "คง design เดิม" is **never** "don't touch design":
+     skipping the scan leaves the kit on org indigo/mira defaults, and every
+     kit-built page that follows (login, `/admin/*`) ships as a foreign
+     template — the exact field bug.
+   - **The shell stays.** No new shadcn shell block; auth/admin pages mount
+     inside the project's own layout and menu (auth §5.6 merge branch, never
+     `<AdminNav>`).
+   - **Admin pages keep the kit's DataTable/dialogs.** They blend in through
+     the rebased tokens + the existing shell. Rewriting them against the
+     project's own component set is per-project feature work, not setup.
+0b. **[Prototype data layer found] ย้ายข้อมูล/feature เดิมจาก <store ที่พบ> ไป
+   SQL Server จริงตอนนี้ไหม?** (default: **ย้าย** — "ทำให้ใช้งานได้จริง" means
+   exactly this) → database-setup §4b runs right after its schema step.
+   "ทีหลัง" is allowed but must be said out loud in the close-out summary —
+   *the app still runs on <store>; nothing the user sees touches SQL Server
+   yet* — and recorded in `docs/project-context/decisions.md` + a board.md
+   row. Never report "ต่อ database แล้ว" while the screens read the old store.
+0c. **[Fake login found] ถอด login จำลองเดิม แทนด้วย login จริง?** (default:
+   ถอด) → auth-setup §5.7. Keeping both is not an option — two gates means
+   the mock one still lets people in.
 
 **Module selection:**
 
@@ -160,6 +211,14 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
   Optional: only when users attach files.
 - **CI comes last** — the pipeline needs to know whether a DB exists (migrate
   stage) and the build must pass first.
+- **Preserve mode (§2 Q0) travels with every module explicitly** — the first
+  line of the interview answers passed down, or of the dispatch prompt when
+  §2.5 uses subagents: design → Step 1 preserve path (scan mandatory; ข้อ 1 =
+  โปรเจคเดิม · ข้อ 5 = shell เดิม · ข้อ 9 = ยึดของเดิม) · auth → §5.6 merge branch
+  only + §5.7 remove the prototype login · database → §4b migrate the
+  prototype store (Q0b). A child skill that never received the flag falls
+  back to its own defaults — which is how the 2026-09-09 install shipped org
+  indigo admin pages over an app that still ran on SQLite.
 - Skip unselected modules; the relative order of the rest is unchanged.
 - For each module: invoke the child skill (`ugt-nextjs-database-setup` /
   `ugt-nextjs-test-lint-setup` / `ugt-nextjs-design-setup` / `ugt-nextjs-auth-setup` /
@@ -299,6 +358,8 @@ How:
 | DO ✅ | DON'T ❌ |
 | --- | --- |
 | Inspect existing setup before asking | Overwrite existing Prisma/auth/Jenkinsfile silently |
+| §1 finds a real UI → ask Q0 (default คงของเดิม) and hand preserve mode to every child skill | Read "ใช้ design เดิม" as "skip design" — the kit stays org default and `/admin/*` ships as a second template |
+| Prototype store / fake login found → migrate + remove (Q0b/Q0c), or say plainly the app still runs on them | Install Prisma + Better Auth beside SQLite + a mock login and report "ต่อแล้ว" |
 | One combined interview batch (incl. child-skill questions) | Ask one-by-one / let child skills re-ask |
 | 3+ modules → propose chunked sessions or per-module subagents (§2.5) | Grind through one long session until context compaction degrades the work |
 | Always Database → Quality → Design → Auth → CI | Install auth before a DB exists / before the design kit (its admin pages render with kit DataTable) / CI before test scripts exist |
@@ -325,6 +386,11 @@ node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module
 - [ ] `docs/admin-handoff.md` exists with no `__...__` left, and the user has
       been told to forward it (it is a FILE, not a chat message)
 - [ ] `npm run build` passes
+- [ ] preserve mode (§2 Q0): DESIGN.md §10 records ยึดของเดิม and
+      `globals.css --primary` is the measured value, not org indigo (design
+      verify) · no `<AdminNav>` rendered beside the project's own shell (auth
+      verify) · no SQLite/mock store left beside Prisma and at least one
+      screen imports `@/lib/prisma` (database verify)
 - [ ] login works with every enabled method → protected page reachable →
       logout clears the cookie
 - [ ] `/admin/setup` grants Administrator on one click

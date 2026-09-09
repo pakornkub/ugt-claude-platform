@@ -226,6 +226,63 @@ check('--radius survived the token merge', () => {
     : { ok: 'warn', msg: 'no `--radius-lg` in globals.css — the preset @theme radius scale may have been overwritten' };
 });
 
+// ── preserve mode + Tailwind major ────────────────────────────────────────
+// 2026-09-09 field report: "ใช้ design เดิม" was read as "skip design", the
+// scan/rebase never ran, and the auth admin pages (kit-built) shipped as a
+// second template on org indigo. DESIGN.md records the mode; globals.css shows
+// whether the rebase actually happened.
+const ORG_PRIMARY = 'oklch(0.488 0.243 264.4)';
+check('Preserve mode honored: kit tokens rebased, not left at org defaults', () => {
+  if (!has('docs', 'DESIGN.md') || !hasIn('app', 'globals.css')) return { ok: true, msg: 'nothing to compare yet' };
+  const md = read('docs', 'DESIGN.md');
+  if (!/ยึดของเดิม|คงของเดิม|design เดิม|preserve mode/i.test(md)) return { ok: true, msg: 'not a preserve-mode project' };
+  const css = readIn('app', 'globals.css');
+  const primary = /--primary\s*:\s*([^;]+);/.exec(css)?.[1]?.trim();
+  if (primary === ORG_PRIMARY && !md.includes(ORG_PRIMARY)) {
+    return {
+      ok: false,
+      msg: 'DESIGN.md says ยึดของเดิม but --primary is still the org indigo and DESIGN.md never records indigo as the MEASURED value — the §Scan + §Scale bridge was skipped, so every kit page (auth /admin/*) renders as a second template. Measure the existing primary/radius/scale and substitute them (interview.md §Scan, §Scale bridge)',
+    };
+  }
+  return { ok: true };
+});
+
+function sourceCss() {
+  const skip = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', '.claude', 'public']);
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (skip.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (/\.(css|scss)$/.test(entry)) out.push(full);
+    }
+  };
+  for (const d of ['app', 'styles', 'src']) if (has(d)) walk(p(d));
+  return out;
+}
+
+check('Tailwind is v4 (the kit token file is v4-only)', () => {
+  const problems = [];
+  if (has('package.json')) {
+    const pkg = JSON.parse(read('package.json'));
+    const tw = { ...pkg.dependencies, ...pkg.devDependencies }.tailwindcss;
+    const major = Number(/(\d+)/.exec(String(tw ?? ''))?.[1] ?? NaN);
+    if (tw && major < 4) problems.push(`package.json tailwindcss ${tw}`);
+  }
+  for (const file of sourceCss()) {
+    if (/@tailwind\s+(base|components|utilities)\b/.test(readFileSync(file, 'utf8'))) {
+      problems.push(`${relative(ROOT, file).split('\\').join('/')} uses @tailwind directives (v3)`);
+    }
+  }
+  return problems.length
+    ? {
+        ok: false,
+        msg: `${problems.join(' · ')} — @theme inline / @custom-variant / @utility in globals.css are ignored on v3, so no token reaches a utility and every kit component renders unstyled; run npx @tailwindcss/upgrade first (SKILL Step 3.2)`,
+      }
+    : { ok: true };
+});
+
 check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () => {
   const problems = [];
   for (const file of sourceTsx()) {

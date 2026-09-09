@@ -172,6 +172,15 @@ Ask all of these **in a single message** before doing anything:
    `/admin/roles` checklist only shows keys declared in `ALL_PERMISSIONS`.
    Menus not chosen stay visible to every logged-in user (the right default
    for general pages).
+9. **[Preserve mode — full-setup §2 Q0 = คงของเดิม, or any layout in the project
+   already renders a menu]** — not a question, a constraint (มติ 2026-09-09,
+   level **token + shell**): the admin pages go through §5.6's *merge* branch
+   only — never `<AdminNav>` — sit under the project's protected layout, and
+   inherit the design-setup tokens that were rebased onto the project's look;
+   the kit's DataTable/dialogs stay as they are. A prototype login found by
+   full-setup §1 is removed per §5.7. Shipping `/admin/*` as its own shell on
+   org indigo next to the existing app is the 2026-09-09 field bug this line
+   exists for; `scripts/verify.mjs` fails on it.
 
 ## 4. Prerequisite
 
@@ -413,7 +422,9 @@ menu). The standalone `<AdminNav>` default exists **only** for projects with
 no shell — shipping it into one that has a shell produces two competing
 sidebars.
 
-**Project already has a sidebar** (the normal case for existing projects):
+**Project already has a sidebar** (the normal case for existing projects —
+**mandatory in preserve mode**; `scripts/verify.mjs` fails when a layout
+with a nav exists and `<AdminNav>` is still rendered anywhere):
 
 1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav.tsx`) into the
    existing nav config — as a "จัดการระบบ" (`auth.adminNav.systemGroup`) group,
@@ -433,12 +444,39 @@ sidebars.
    (nest the `(admin)` group under the shell's layout, or move the three admin
    pages under the project's protected route group with the guard preserved).
 
-**No shell yet** (fresh project): copy as-is — the (admin) layout wraps
+**No shell yet** (fresh project only — never a project that already renders
+a menu): copy as-is — the (admin) layout wraps
 `SidebarProvider` + `<AdminNav>` (shadcn Sidebar with `NavUser` in the footer)
 and works out of the box. Requires the `sidebar` + `tooltip` components (§5.1
 installs them) and `TooltipProvider` in the root layout. When the project
 later grows its own shell, migrate as above — and remove this fallback so
 there is exactly one sidebar and one NavUser.
+
+### 5.7 Remove the prototype login (any project that had one)
+
+Prototype projects (AI Studio, v0, hand-built demos) often ship a fake gate: a
+`useAuth` context with a hard-coded user, a login page that compares against a
+constant, a `token`/`user` key in `localStorage`, an `isLoggedIn` flag in a
+store. Better Auth installed **beside** it changes nothing — the old gate still
+decides who gets in, and the real login is a page nobody reaches. Find it:
+
+```bash
+grep -rn "mockUser\|MOCK_USER\|mockSession\|fakeAuth\|DEMO_USER\|isLoggedIn\|localStorage\.\(get\|set\)Item(['\"]\(token\|user\|auth\|session\|currentUser\)" app components lib src 2>/dev/null
+```
+
+Then, keeping the project's routes and redirect targets (preserve mode):
+
+1. Replace every read of the fake user with the real session —
+   `auth.api.getSession({ headers })` server-side, `authClient.useSession()`
+   client-side — and every role/permission check with `getUserPermissions()`.
+2. The login **page**: keep the project's own page if it now submits to the
+   real Server Actions (`lib/actions/auth.ts`), or swap it for the kit page
+   (themed by the rebased tokens). Pick one, record it in DESIGN.md §10.
+   After login the user lands where the prototype sent them.
+3. Delete the fake gate, its provider/context and its storage keys. Two gates
+   is not "extra safety" — the mock one still lets people through.
+
+`scripts/verify.mjs` warns on the grep patterns above until they are gone.
 
 **Existing menus under RBAC** (from §3 Q8): for each menu the installer chose,
 declare a `resource:action` key in `ALL_PERMISSIONS` (the §5.5 step-6 sync

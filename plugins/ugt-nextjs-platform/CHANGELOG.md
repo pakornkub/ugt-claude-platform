@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.61.0 (2026-09-09)
+
+**Preserve mode — "คงของเดิม" เป็นข้อบังคับที่ full-setup ส่งลงทุก skill ลูก + ขั้น
+migrate prototype data layer ที่ไม่เคยมี** · ที่มา: field report 2026-09-09 —
+น้องในทีมรัน full-setup บนโปรเจค Google AI Studio โดยกำกับ "ใช้ design เดิม"
+ผลคือ (1) ลง Prisma + SQL Server + Better Auth แล้วแต่ทุกหน้ายังอ่าน SQLite/mock
+data เดิม (2) หน้า user/role/audit-log ออกมาเป็น template แยกบน design default
+องค์กร (3) template นั้นเองก็ render เพี้ยน — สาเหตุอยู่ที่ตัว skill ทั้งหมด:
+กลไกมีอยู่แล้วเป็นชิ้น ๆ (design ข้อ 1/ข้อ 9 + Scale bridge, auth §5.6) แต่ไม่มี
+คำตอบเดียวที่ผูกทุกตัว และไม่มีขั้น "ย้าย feature เดิมมาใช้ infra ที่ลง" เลย
+ระดับที่เคาะ: **token + shell** (kit component คงเดิม กลมกลืนผ่าน token ที่ rebase
++ shell เดิม — ไม่ rewrite หน้า admin ตาม component เฉพาะโปรเจค)
+
+- **full-setup**: §1 Inspect ตรวจ 3 อย่างที่โปรเจค prototype มักมี (UI จริง ·
+  prototype data layer: sqlite/better-sqlite3/lowdb/drizzle/JSON/localStorage ·
+  fake login) · §2 เพิ่ม **Q0 "ของเดิมที่ใช้งานอยู่ — คงไว้ไหม" (default คงของเดิม
+  เมื่อพบ UI จริง) = preserve mode** ที่นิยามผลต่อทุก skill ลูกไว้ตรงนั้น + Q0b
+  ย้าย store เดิมไป SQL Server (default ย้าย; "ทีหลัง" ต้องพูดออกมาว่าแอปยังรันบน
+  store เดิม + บันทึก decisions/board) + Q0c ถอด fake login · §3 บังคับส่ง flag
+  ลง dispatch prompt/คำตอบ interview ทุก module · Quick Rules + checklist
+- **design-setup**: Step 1 นิยาม preserve mode = existing path ที่ pre-fill ข้อ 1
+  (โปรเจคเดิม) / ข้อ 5 (shell เดิม — Step 3.5 ห้ามลง sidebar block) / ข้อ 9
+  (ยึดของเดิม + rebase) และ **scan ห้ามข้าม** — "ใช้ design เดิม" ≠ "ไม่แตะ design"
+  · Step 3.2 + interview §Scan เพิ่ม **Tailwind v3/CDN → upgrade v4 ก่อน init**
+  (token file เป็น v4-only: `@theme inline`/`@custom-variant`/`@utility` บน v3
+  ถูกมองข้าม → kit ทุกตัว render เพี้ยน — สาเหตุที่เป็นไปได้ของอาการ (3)) ·
+  verify.mjs ใหม่ 2 ข้อ: DESIGN.md บอกยึดของเดิมแต่ `--primary` ยังเป็น indigo
+  องค์กร (และ DESIGN.md ไม่ได้บันทึก indigo เป็นค่าที่วัดได้) = ✘ · tailwindcss
+  major < 4 หรือมี `@tailwind base` = ✘
+- **auth-setup**: §3 Q9 preserve mode = constraint (merge branch เท่านั้น,
+  mount ใต้ layout เดิม, token ที่ rebase) · §5.6 branch "มี sidebar อยู่แล้ว"
+  เป็น mandatory, `<AdminNav>` เฉพาะโปรเจคที่ไม่มี layout ที่ render เมนูเลย ·
+  **§5.7 ใหม่: ถอด prototype login** (grep patterns + 3 ขั้น คง route/redirect
+  เดิม) · verify.mjs ใหม่: มี layout ที่ render nav แต่ยัง render `<AdminNav>`
+  = ✘ · เจอ mockUser/fakeAuth/localStorage token = warn
+- **database-setup**: interview Q4 "มี data layer เดิมไหม — ย้ายตอนนี้ไหม" ·
+  **§4b ใหม่ migrate prototype data layer** (inventory → map เป็น model ตาม
+  convention → เขียน body ใหม่หลัง signature เดิม → seed decision → ลบ store
+  เก่า → บันทึก) + `references/prototype-migration.md` (grep inventory, ตาราง
+  map ชนิดข้อมูล sqlite→MSSQL, traps) · verify.mjs ใหม่: dep/provider/ไฟล์
+  `.db` ของ store เก่ายังอยู่ = ✘ (warn ถ้า decisions.md บันทึกเลื่อน) · ไม่มีไฟล์
+  นอก lib/prisma.ts import `@/lib/prisma` = warn ("ลงแล้วแต่ไม่มีใครใช้")
+- **docs**: README + docs/web/index.html อัปเลขเป็น 4.61.0 (4.60.0 ลืมอัป —
+  drift-check จับได้ แก้ในรอบนี้)
+
 ## 4.60.0 (2026-09-08)
 
 **upload-setup: virus scan (ClamAV) เปลี่ยนจาก default-on เป็น opt-in** · ที่มา:

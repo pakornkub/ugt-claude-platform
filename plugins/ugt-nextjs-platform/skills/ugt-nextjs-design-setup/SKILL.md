@@ -98,6 +98,18 @@ Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables 
 - Not Next.js App Router at all → say so plainly and stop; never adapt
   assets to another stack.
 
+**Preserve mode** (full-setup §2 Q0 = คงของเดิม, or the user says "คง/ใช้ design
+เดิม" when this skill runs standalone) is the existing-project path with three
+answers pre-filled — ข้อ 1 = มี (the reference is this project's own code),
+ข้อ 5 = the shell the project already has, ข้อ 9 = ยึดของเดิม + rebase — and
+the scan is **not skippable**. The wrong reading, seen in the field
+(2026-09-09): "ใช้ design เดิม" taken as "leave design alone" → scan skipped →
+kit installed on org indigo/mira defaults → the auth-setup admin pages, built
+from the kit, shipped as a second template that looked nothing like the app.
+Preserving a design means moving the kit onto it, not leaving the kit at its
+defaults. Level is **token + shell** (มติ 2026-09-09): kit components stay as
+they are and blend in through the rebased tokens and the existing layout.
+
 ### Step 2 — Interview (one batch, defaults on every question)
 
 Open `references/interview.md` and ask with AskUserQuestion. Fast path: the
@@ -148,6 +160,16 @@ different size — is the field bug this step exists to prevent.
 
    A bare `app/globals.css` containing just `@import "tailwindcss";` is
    enough — step 4 below replaces its token blocks anyway.
+
+   **Tailwind v3 present** (`tailwind.config.{js,ts}` + `@tailwind base;` —
+   the usual shape of AI Studio / v0 exports): upgrade to v4 **before** init
+   (`npx @tailwindcss/upgrade`, then check the result). The kit's token file
+   is v4-only — `@theme inline`, `@custom-variant dark`, `@utility
+   scroll-thin` — merged into a v3 project it parses as noise: no color,
+   radius or font ever reaches a utility class and everything the kit
+   renders (including the auth admin pages) comes out unstyled or
+   misaligned. `scripts/verify.mjs` fails on any `@tailwind base` directive
+   or a `tailwindcss` major below 4.
 
    ```bash
    # โปรเจคใหม่ล้วน — scaffolds the Next app too (no separate create-next-app):
@@ -279,7 +301,12 @@ different size — is the field bug this step exists to prevent.
    as the color-rule reference · the `@tiptap/*` ^3 set + `ui/tiptap-editor.tsx`
    only when rich text exists · `motion` + `lib/motion.ts` only when custom
    motion = มี (pairs with `docs/MOTION.md`).
-5. **App shell FIRST, then variants**: install the shadcn block named in
+5. **App shell FIRST, then variants** — **preserve mode: skip the block.**
+   The project's existing layout IS the shell (ข้อ 5 recorded as "เดิม"): do
+   not install `sidebar-*`, do not add a second `SidebarProvider`; later
+   skills mount into the existing menu (auth §5.6). The block path below is
+   only for a project with no layout that renders a nav.
+   Otherwise: install the shadcn block named in
    `references/layout-shells.md` (never hand-composed) **before** touching
    `button.tsx` — `add <block>` prompts per existing file (even with
    `--yes`; pipe `yes n |` to decline in headless runs) and answering `y`
@@ -381,6 +408,8 @@ contain project มติ that deliberately deviate.
 | --- | --- |
 | Run before auth-setup when both are planned | Theme the app after auth already generated pages |
 | Scan an existing project before asking anything | Interview an existing project from zero |
+| Preserve mode: scan → rebase tokens onto the measured values → keep the shell | Read "ใช้ design เดิม" as "skip the design step" — the kit stays org default |
+| Tailwind v3 found → upgrade to v4 before init | Merge the v4 token file into a v3 project (tokens ignored, kit renders broken) |
 | Record every answer (even accepted defaults) as มติ | Treat defaults as "nothing to write down" |
 | shadcn block for the shell | Hand-compose a sidebar/topbar |
 | Diff-and-ask on existing `components/ui/` files | Overwrite the project's components silently |

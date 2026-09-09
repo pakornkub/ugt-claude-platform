@@ -660,6 +660,41 @@ check('First-admin gate: some layout redirects to /admin/setup', () => {
       };
 });
 
+// ── 8. Preserve mode: one shell, no prototype gate (2026-09-09 field report) ─
+check('Admin pages live in the project shell, not a second one (§5.6)', () => {
+  const rel = (f) => relative(ROOT, f).replaceAll('\\', '/');
+  const files = sourceFiles().filter((f) => /\.tsx$/.test(f));
+  const inAuthGroups = (r) => /\((admin|admin-setup|auth)\)\//.test(r) || /components\/admin-nav\.tsx$/.test(r);
+  const shellLayouts = files.filter((f) => {
+    const r = rel(f);
+    if (!/layout\.tsx$/.test(r) || inAuthGroups(r)) return false;
+    return /SidebarProvider|<aside\b|<nav\b|AppSidebar|site-header|Sidebar\b/.test(stripComments(readFileSync(f, 'utf8')));
+  });
+  if (!shellLayouts.length) return { ok: true, msg: 'no project shell found — the standalone <AdminNav> fallback is the right one here' };
+  // Importing ADMIN_NAV_ITEMS to merge is the correct use; RENDERING <AdminNav> is the bug.
+  const renders = files.filter((f) => !/components\/admin-nav\.tsx$/.test(rel(f)) && /<AdminNav\b/.test(stripComments(readFileSync(f, 'utf8'))));
+  return renders.length
+    ? {
+        ok: false,
+        msg: `project has a shell (${shellLayouts.map(rel).join(', ')}) but <AdminNav> is still rendered in ${renders.map(rel).join(', ')} — two competing sidebars / a second template on org tokens; merge ADMIN_NAV_ITEMS into the existing nav and render plain {children} in (admin)/layout.tsx (§5.6, มติ 2026-09-09)`,
+      }
+    : { ok: true };
+});
+
+check('No prototype login gate left beside Better Auth (§5.7)', () => {
+  const hits = [];
+  for (const f of sourceFiles()) {
+    const r = relative(ROOT, f).replaceAll('\\', '/');
+    if (/\.(test|spec)\.tsx?$/.test(r) || /\.prisma$/.test(r) || /^(e2e|scripts)\//.test(r)) continue;
+    const body = stripComments(readFileSync(f, 'utf8'));
+    const m = body.match(/\b(mockUser|MOCK_USER|mockSession|fakeAuth|FAKE_AUTH|DEMO_USERS?|isLoggedIn)\b|localStorage\.(get|set)Item\(\s*['"](token|user|auth|session|currentUser)['"]/);
+    if (m) hits.push(`${r}: ${m[0]}`);
+  }
+  return hits.length
+    ? { ok: 'warn', msg: `prototype auth traces — the old gate may still decide who gets in while Better Auth sits beside it: ${hits.slice(0, 5).join(' · ')}${hits.length > 5 ? ` …+${hits.length - 5}` : ''} (§5.7)` }
+    : { ok: true };
+});
+
 check('.env.local not committed', () => {
   if (!has('.gitignore')) return { ok: false, msg: 'No .gitignore' };
   const ig = read('.gitignore');
