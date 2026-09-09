@@ -3,9 +3,6 @@
 Last updated: 2026-09-09
 
 ## In progress
-- เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs **4.61.0** — รอผู้ใช้รัน
-  `/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform` +
-  `/reload-plugins` เอง (คนละ process จาก commit/push ที่ agent ทำแทนได้)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -33,7 +30,7 @@ Last updated: 2026-09-09
   บวก/ลบ) · แก้ drift README/index.html ที่หลุดตอน 4.60.0 · ที่มา: field report
   น้องรัน full-setup บนโปรเจค Google AI Studio "ใช้ design เดิม" → ยังรัน
   SQLite/mock + admin pages เป็น template แยกบน indigo default · commit + tag
-  (`ugt-nextjs-platform--v4.61.0`) + push แล้ว · **เครื่องนี้ยังไม่ได้ update plugin**
+  (`ugt-nextjs-platform--v4.61.0`) + push แล้ว · เครื่องนี้อัปเดต plugin เป็น nextjs 4.61.0 แล้ว
 - 2026-09-09 ugt-nextjs-platform **4.60.0** — upload-setup: virus scan (ClamAV)
   เปลี่ยนจาก default-on (มติองค์กร 2026-08-09) เป็น **opt-in** (default: ไม่เอา)
   — ที่มา: ภาระ deviation ceremony ทุกโปรเจคที่ไม่เอา scan ไม่คุ้มกับต้นทุน infra
@@ -41,7 +38,7 @@ Last updated: 2026-09-09
   ทุกจุดกลับทิศ (เพิ่มเมื่อเลือกเปิด แทน ตัดเมื่อไม่เอา), asset default พลิก
   (`scanStatus` เริ่มที่ `'unscanned'`, ไม่ import `scanBuffer`), verify.mjs
   ตัดข้อบังคับ `⚠ deviation` ออก · commit 68572af + tag
-  (`ugt-nextjs-platform--v4.60.0`) + push แล้ว · **เครื่องนี้ยังไม่ได้ update plugin**
+  (`ugt-nextjs-platform--v4.60.0`) + push แล้ว · เครื่องนี้ข้ามไป update เป็น 4.61.0 โดยตรง
 - 2026-09-06 ugt-nextjs-platform **4.59.1** + ugt-core **2.11.1** — description ทุก skill ≤ 1,024 ตัวอักษร (7 ตัวเคยเกิน) รายละเอียดอาการย้ายไป body "When to use" · database-setup เพิ่มอาการ SP timeout · trigger-evals รอบใหม่ primary 558/558 + database-setup 48/48, kit-sync baseline แรก 30/30 · label 6 ข้อแก้ให้ตรงจริง (docs/backlog.md แถว kit-sync ปิดแล้ว) · commit + tag (`ugt-core--v2.11.1`, `ugt-nextjs-platform--v4.59.1`) + push แล้ว · เครื่องนี้อัปเดต plugin เป็น core 2.11.1 / nextjs 4.59.1 / php 0.6.2 / python 0.6.2 แล้ว
 - 2026-09-06 ugt-nextjs-platform **4.59.0** + ugt-core **2.11.0** — ยึด pipeline skill เป็นหลัก ตัดของซ้ำฝั่ง mattpocock (ที่มา: เทียบไฟล์จริงจาก pilot dx-game กับ mattpocock-skills 1.2.3): mattpocock ไม่มี `decisions.md` (มติ → `docs/adr/`, ugt-context/handoff/harness.md รู้กฎ "บ้านมติที่เดียว"), `ugt-requirements` thin mode (ช่องว่าง → `/wayfinder`/`/grill-with-docs`), asset ใหม่ `CODING_STANDARDS.md` ให้ `/code-review` ของ matt เห็น `.claude/rules/`, CLAUDE-block แถว requirements แก้เป็น brief → grill → to-spec (เดิมข้าม grill) + แถวกัน auto-invoke ย้ายเข้า span superpowers + กฎ `.scratch/` ระดับ ticket, Close out บอกให้รัน `/setup-matt-pocock-skills` เอง, verify.mjs ตรวจ decision home + CODING_STANDARDS (ทดสอบ 3 เคสผ่าน) · superpowers ไม่ตัดอะไร · drift 21/21, validate ผ่าน · commit 2aa130b + tag + push แล้ว
 - 2026-09-01 ugt-nextjs-platform **4.57.0** — ปิดช่อง skill auto-trigger ระหว่าง full-setup: guard §2.5 ขยายจาก superpowers-only เป็นครอบ `mattpocock-skills` (5 ตัว model-invocable ที่ trigger ชน setup ได้: writing-for-agents/wizard/diagnosing-bugs/tdd/domain-modeling) + `frontend-design` · CLAUDE-block routing rows เปลี่ยนเป็นถ้อยคำ pipeline-neutral นอก span (แถว infra ไม่หายในเคสไม่มี pipeline) · harness step 1 เพิ่มกติกาเคส none · verify.mjs check ใหม่จับ `[PIPELINE` ค้าง · ผ่าน opus review 2 รอบ (7 findings → แก้ครบ) · docs: คำอธิบายส่วนต่าง token สอง bundle (ประมาณการ — รอเลขจริงจาก pilot) + แก้การ์ด mattpocock/โลโก้ footer ใน index.html · **push + tag แล้ว** (`ugt-nextjs-platform--v4.57.0` ครอบชุด 4.56.0 ที่ไม่ได้ tag แยก; `ugt-core--v2.9.2` tag ไว้ก่อนแล้ว)
