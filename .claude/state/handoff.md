@@ -3,6 +3,12 @@
 Last updated: 2026-09-09
 
 ## In progress
+- เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs **4.61.1** — รอผู้ใช้รัน
+  `/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform` +
+  `/reload-plugins` เอง
+- **eval baseline รอบแรกของ 4.61.1** — กำลังรัน full-setup eval 4 + design eval 8
+  บน copy ของ `fixtures/ai-studio-prototype` (subagent ทำตาม SKILL.md, grader แยก)
+  ผลจะบันทึกเป็น `baseline_result_2026-09-09` ใน evals.json ของแต่ละ skill
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -20,6 +26,15 @@ Last updated: 2026-09-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-09 ugt-nextjs-platform **4.61.1** — evals ปิดช่องที่ทำให้ 4.20.0/4.22.0
+  "ผ่าน test แล้วยังหลุด": (1) eval เดิมบอกสถานการณ์ใน prompt (2) design eval 3
+  ไม่มี fixture + assert แค่ record ไม่ใช่ outcome (3) `fixtures/with-shell` ของ
+  benchmark 4.20.0 ไม่เคย commit + sidebar-evals ไม่มี assertions → รันซ้ำไม่ได้ ·
+  เพิ่ม fixture จริง `ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype/`
+  (15 ไฟล์ ใช้ร่วม 4 skill) + full-setup eval 4–5, design eval 8 (+ assertion
+  outcome ใน eval 3), database eval 4, auth sidebar-evals เขียนใหม่พร้อม
+  assertions · JSON/path/drift ผ่าน · commit + tag (`ugt-nextjs-platform--v4.61.1`)
+  + push แล้ว · **ยังไม่ได้รัน eval จริง** (ดู In progress)
 - 2026-09-09 ugt-nextjs-platform **4.61.0** — **preserve mode**: full-setup §2
   Q0 "ของเดิมที่ใช้งานอยู่ — คงไว้ไหม" (default คงของเดิม) เป็นข้อบังคับที่ส่งลงทุก
   skill ลูก (ระดับ token + shell, มติ 2026-09-09) + Q0b ย้าย prototype store /

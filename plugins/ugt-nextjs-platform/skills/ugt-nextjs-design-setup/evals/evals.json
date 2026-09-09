@@ -43,7 +43,8 @@
         "docs/DESIGN.md §9 lists the radix-mira preset, the hardcoded hex, and the raw <table> with a recorded decision each",
         "No existing components/ui/ file was overwritten without an explicit diff-and-ask",
         "The existing pages' code was not mass-reformatted in this run",
-        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 OR every remaining ✘ corresponds to a grandfathered deviation recorded in §9"
+        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 OR every remaining ✘ corresponds to a grandfathered deviation recorded in §9",
+        "OUTCOME, not just the record: if the scan found an existing primary color, app/globals.css --primary reflects it — the kit is not left on org indigo with the difference merely written into §9 (the 2026-09-09 miss)"
       ],
       "files": []
     },
@@ -108,6 +109,26 @@
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0"
       ],
       "files": []
+    },
+    {
+      "id": 8,
+      "name": "preserve-existing-design-means-rebase-not-skip",
+      "prompt": "ทำข้อตกลง design ให้โปรเจคนี้ แต่ใช้ design เดิมนะ ทีมชินกับหน้าตานี้แล้ว",
+      "setup": "Run on a copy of ../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype (shared fixture — see its README): Tailwind v3, teal #0f766e, 12px radius, 44px controls, an <aside> shell in app/layout.tsx, raw <table> + hex status pills. The prompt says 'ใช้ design เดิม' up front. Under test is the 2026-09-09 misreading — 'keep the design' taken as 'skip the design work', leaving the kit on org defaults so every later kit-built page ships as a foreign template.",
+      "expected_output": "Existing-project path with ข้อ 1 / ข้อ 5 / ข้อ 9 pre-filled (reference = this project, shell = เดิม, ยึดของเดิม) and the §Scan + §Scale scan actually run · Tailwind upgraded to v4 BEFORE shadcn init · tokens rebased: --primary from teal, --radius 0.75rem, control scale 44px in ui/input|button|select · no sidebar block installed, app/layout.tsx stays the shell · raw <table> and hex pills land in §9 with a grandfather/migrate decision · verify exits 0 including the preserve-mode and Tailwind checks",
+      "assertions": [
+        "The scan runs and its findings (teal primary, 12px radius, 44px controls, Sarabun font, <aside> shell, raw <table>, hex status colors, Tailwind v3) are presented BEFORE any question — 'ใช้ design เดิม' did not skip the design step",
+        "ข้อ 1, ข้อ 5 and ข้อ 9 are not re-asked: DESIGN.md records reference = this project's own code, shell = เดิม, ข้อ 9 = ยึดของเดิม + rebase, each as a มติ",
+        "package.json tailwindcss is ^4 and app/globals.css starts with @import \"tailwindcss\" with no @tailwind base/components/utilities left — the upgrade happened before shadcn init, not after",
+        "app/globals.css --primary derives from #0f766e (as given or as oklch) and NOT oklch(0.488 0.243 264.4); the dark-mode primary is lighter than light",
+        "app/globals.css --radius is 0.75rem (12px measured), and the preset @theme radius scale is intact",
+        "components/ui/input.tsx, button.tsx (default size) and select.tsx trigger are rebased to h-11 (44px) per §Scale bridge — no per-page h-11 overrides sprinkled into pages",
+        "No sidebar-* block was added and there is no SidebarProvider anywhere; app/layout.tsx's <aside> nav is still the shell wrapping every page",
+        "The raw <table> in app/requests/page.tsx and the hex status colors are listed in DESIGN.md §9 with a recorded grandfather/migrate decision — not silently rewritten in this run",
+        "Sarabun is recorded as the project's font decision (kept, or migrated to Inter + Noto Sans Thai with a มติ) — not silently swapped",
+        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 — including 'Preserve mode honored: kit tokens rebased' and 'Tailwind is v4'"
+      ],
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
     }
   ]
 }

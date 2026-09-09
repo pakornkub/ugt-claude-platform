@@ -1,27 +1,52 @@
 {
   "skill_name": "ugt-nextjs-auth-setup",
-  "note": "Behavior evals for the §5.6 sidebar merge/fallback flow (4.20.0). Trigger evals live in trigger-evals.json.",
+  "note": "Behavior evals for the §5.6 sidebar merge/fallback flow (4.20.0) + §5.7 prototype-login removal (4.61.0). The 4.20.0 benchmark ran against fixtures/with-shell and fixtures/no-shell, which were never committed — so the 'validated 11/11' result could not be re-run when the 2026-09-09 field report reproduced the double-sidebar bug through full-setup. Evals 0 and 2 now run on the committed shared fixture ../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype (see its README); eval 1 runs on a bare scaffold with prisma + lib/prisma.ts + lib/env.ts installed. Assertions were absent in the 4.20.0 file; they are written here so the grader checks OUTCOMES in files, not the recorded intent. Trigger evals live in trigger-evals.json.",
   "evals": [
     {
       "id": 0,
       "name": "merge-existing-sidebar",
-      "prompt": "โปรเจคนี้เป็น Next.js ที่มีระบบเดิมใช้งานอยู่แล้ว — มี sidebar ของตัวเองที่ components/app-sidebar.tsx และ protected layout ที่ app/(app)/layout.tsx ช่วยติดตั้งส่วน RBAC/admin ของ auth skill (หน้า /admin/users /admin/roles /admin/audit-logs พร้อม guard) ให้เข้ากับโปรเจคนี้ เมนูเดิมไม่ต้องคุมสิทธิ์เพิ่ม",
-      "expected_output": "เมนู admin 3 รายการถูก merge เข้า app-sidebar.tsx เดิม (filter ตาม permission), (admin)/layout.tsx เหลือ guard ไม่ render AdminNav เป็น sidebar ที่สอง",
-      "files": ["fixtures/with-shell"]
+      "prompt": "โปรเจคนี้เป็น Next.js ที่มีระบบเดิมใช้งานอยู่แล้ว — มีเมนูของตัวเองใน app/layout.tsx ช่วยติดตั้งส่วน RBAC/admin ของ auth skill (หน้า /admin/users /admin/roles /admin/audit-logs พร้อม guard) ให้เข้ากับโปรเจคนี้ เมนูเดิมไม่ต้องคุมสิทธิ์เพิ่ม ใช้ design เดิม",
+      "setup": "Shared fixture: app/layout.tsx wraps every page in its own <aside> nav (แดชบอร์ด / คำขอ / รายงาน / ตั้งค่า) and header; lib/auth-context.tsx holds a mockUser + localStorage token gate; app/login/page.tsx compares against constants. Assume database-setup and design-setup (preserve mode) already ran on this copy.",
+      "expected_output": "The three admin menu items are merged into app/layout.tsx's existing nav (from ADMIN_NAV_ITEMS, permission-filtered, as a จัดการระบบ group); (admin)/layout.tsx keeps the guard and renders plain {children}; <AdminNav> is rendered nowhere; the prototype login gate is removed per §5.7 while / , /requests and /login keep working",
+      "assertions": [
+        "§5.6's existing-shell check happens first and is stated: the project has a shell (app/layout.tsx <aside>), so the merge branch is taken — the fallback is not copied",
+        "The three admin items appear inside app/layout.tsx's existing nav, sourced from ADMIN_NAV_ITEMS, grouped as จัดการระบบ (auth.adminNav.systemGroup), and hidden per item when the user lacks the item's perm key",
+        "labelKey values are resolved with useTranslations('auth.adminNav') inside a component — no pre-translated strings baked into the exported array",
+        "app/(admin)/layout.tsx (or the nested equivalent) keeps session → syncPermissionsIfNeeded() → permission guard and renders {children} with no SidebarProvider/<AdminNav>",
+        "No file in the project renders <AdminNav>; components/admin-nav.tsx is imported only for ADMIN_NAV_ITEMS",
+        "There is exactly one shell and one NavUser in the app — no second sidebar, no second header",
+        "§5.7: lib/auth-context.tsx's mockUser/localStorage gate is removed and app/login/page.tsx submits to the real Server Actions (or is swapped for the kit login page with the choice recorded in DESIGN.md §10); the routes /, /requests, /login still exist",
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 — including 'Admin pages live in the project shell, not a second one' — and 'No prototype login gate left' is not a warning"
+      ],
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
     },
     {
       "id": 1,
       "name": "fresh-no-shell",
       "prompt": "โปรเจค Next.js ใหม่ ยังไม่มี shell หรือ sidebar อะไรเลย ติดตั้งระบบ auth + หน้า admin ตาม skill ให้หน่อย",
+      "setup": "Bare Next.js scaffold with prisma + lib/prisma.ts + lib/env.ts (database-setup output) and the design kit installed; no layout renders a menu.",
       "expected_output": "ใช้ default ของ skill: (admin)/layout.tsx render AdminNav เป็น sidebar fallback ได้เลย",
-      "files": ["fixtures/no-shell"]
+      "assertions": [
+        "§5.6's shell check is stated and finds no layout that renders a nav, so the fallback branch is taken deliberately",
+        "app/(admin)/layout.tsx wraps SidebarProvider + <AdminNav> with NavUser in the footer, and TooltipProvider is present in the root layout",
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 — 'Admin pages live in the project shell' passes with the 'no project shell found' note, not a fail"
+      ],
+      "files": []
     },
     {
       "id": 2,
       "name": "existing-menu-permission",
-      "prompt": "โปรเจคนี้มี sidebar เดิมที่ components/app-sidebar.tsx ติดตั้งส่วน RBAC/admin ของ auth skill ให้ และเมนู 'รายงานค่าใช้จ่าย' (/reports) ของเดิมต้องคุมสิทธิ์ด้วย — ให้เห็นเฉพาะคนที่ได้รับสิทธิ์ผ่านหน้า /admin/roles",
-      "expected_output": "ประกาศ permission key ของ reports ใน ALL_PERMISSIONS, เมนู reports ถูก filter ตาม key, หน้า/action ของ reports มี guard และเมนู admin ถูก merge เข้า sidebar เดิมเหมือน eval 0",
-      "files": ["fixtures/with-shell"]
+      "prompt": "โปรเจคนี้มีเมนูเดิมอยู่ใน app/layout.tsx ติดตั้งส่วน RBAC/admin ของ auth skill ให้ และเมนู 'รายงาน' (/reports) ของเดิมต้องคุมสิทธิ์ด้วย — ให้เห็นเฉพาะคนที่ได้รับสิทธิ์ผ่านหน้า /admin/roles",
+      "setup": "Same shared fixture as eval 0.",
+      "expected_output": "ประกาศ permission key ของ reports ใน ALL_PERMISSIONS, เมนู reports ถูก filter ตาม key, หน้า/action ของ reports มี guard และเมนู admin ถูก merge เข้า nav เดิมเหมือน eval 0",
+      "assertions": [
+        "§3 Q8 is asked (or the prompt's answer taken): the existing menus are listed and 'รายงาน' is the one put under RBAC; the others stay visible to every logged-in user",
+        "lib/permissions.ts declares a reports:read key in ALL_PERMISSIONS so it appears in the /admin/roles checklist after the sync",
+        "The รายงาน item in app/layout.tsx's nav is hidden when the user lacks reports:read, AND /reports (page or its Server Actions) is guarded by the same key — both ends, not just the menu",
+        "The admin items are merged into the existing nav exactly as in eval 0; no <AdminNav> is rendered anywhere",
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 including 'Admin pages live in the project shell, not a second one'"
+      ],
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
     }
   ]
 }

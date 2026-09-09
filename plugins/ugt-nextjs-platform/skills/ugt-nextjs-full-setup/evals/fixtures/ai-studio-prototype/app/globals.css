@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --surface: #f8fafc;
+  --ink: #0f172a;
+  --radius: 12px;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* controls are 44px tall everywhere in this app */
+.btn {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+.btn:hover {
+  background: var(--brand-dark);
+}
+.input {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  width: 100%;
+}
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+}

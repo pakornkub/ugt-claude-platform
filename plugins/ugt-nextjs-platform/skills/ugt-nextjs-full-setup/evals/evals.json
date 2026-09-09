@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-nextjs-full-setup",
-  "notes": "Evals 1-2 run on a bare Next.js scaffold; eval 3 on an Express scaffold (not Next.js). Part of this skill's output lives in the transcript (child-skill invocation order), not in files — the grader must read the transcript, not only the produced files. Prompts are intentionally kept in Thai: they simulate what org users actually type.",
+  "notes": "Evals 1-2 run on a bare Next.js scaffold; eval 3 on an Express scaffold (not Next.js). Evals 4-5 run on a COPY of fixtures/ai-studio-prototype (strip its README.md from the copy first — it is the answer key) — a real Google-AI-Studio-shaped project (own shell, teal brand, Tailwind v3, better-sqlite3 store, fake login); they exist because the 2026-09-09 field bug was never covered: earlier evals told the model the situation in the prompt and asserted on recorded decisions, never on the outcome (tokens rebased? store migrated? one shell?). Part of this skill's output lives in the transcript (child-skill invocation order, interview questions), not in files — the grader must read the transcript, not only the produced files. Prompts are intentionally kept in Thai: they simulate what org users actually type.",
   "evals": [
     {
       "id": 1,
@@ -45,6 +45,50 @@
         "Installs nothing without stating the limitation first"
       ],
       "files": []
+    },
+    {
+      "id": 4,
+      "name": "ai-studio-prototype-preserve-mode",
+      "prompt": "โปรเจคนี้ทีมสร้างจาก Google AI Studio แล้วใช้งานกันอยู่ ช่วยทำให้ใช้งานได้จริงตามมาตรฐานบริษัทหน่อย ต่อ SQL Server กับ login SSO ของบริษัทให้ด้วย แต่ใช้ design เดิมนะ อย่าเปลี่ยนหน้าตากับการทำงาน",
+      "setup": "Run on a copy of fixtures/ai-studio-prototype (see its README for the traits). The prompt front-loads 'ใช้ design เดิม' on purpose — the failure mode under test is reading that as 'skip the design step'. The grader has to check OUTCOMES in files, not that a decision was written down.",
+      "expected_output": "§1 reports three findings before asking (a real UI with its own shell · a prototype store: better-sqlite3 + data/app.db behind services/requests.ts · a fake login: lib/auth-context.tsx + localStorage token) · asks Q0 with default คงของเดิม (or takes 'ใช้ design เดิม' as that answer) plus Q0b (default ย้าย) and Q0c (default ถอด) in the same batch · hands preserve mode to every child skill · design: scan → Tailwind upgraded to v4 → tokens rebased onto teal/12px/44px → no sidebar block · auth: admin items merged into the existing <aside> nav, no <AdminNav>, prototype login removed, routes kept · database: Requests model per conventions, services/requests.ts keeps its exported names with Prisma bodies, better-sqlite3 + data/ removed · every verify.mjs exits 0 · summary says plainly the app now reads SQL Server",
+      "assertions": [
+        "Before any question, the inspection names all three findings: the existing shell (app/layout.tsx <aside> nav), the prototype store (better-sqlite3, data/app.db, services/requests.ts) and the fake login (lib/auth-context.tsx mockUser, localStorage token)",
+        "Q0 is asked or explicitly defaulted to คงของเดิม, and 'ใช้ design เดิม' is treated as preserve mode — the design module is NOT skipped and its scan runs",
+        "Q0b (migrate the prototype store, default ย้าย) and Q0c (remove the fake login, default ถอด) are in the same combined batch, not asked later",
+        "The preserve-mode flag is visibly passed to each child skill (first line of the answers handed down or of each dispatch prompt)",
+        "app/globals.css now starts with @import \"tailwindcss\" (v4) and has no @tailwind base/components/utilities; package.json tailwindcss is ^4",
+        "docs/DESIGN.md §1 records the reference as this project's own code and §10 records ข้อ 9 = ยึดของเดิม with the measured values (teal #0f766e, radius 12px, control 44px)",
+        "app/globals.css --primary derives from #0f766e (given or as oklch), NOT oklch(0.488 0.243 264.4); --radius is 0.75rem/12px, not the preset default",
+        "components/ui/button.tsx and input.tsx base classes are rebased to the measured 44px control (h-11), per §Scale bridge — no per-page className overrides",
+        "No sidebar-* block was installed and there is exactly one shell: app/layout.tsx's own <aside> nav still wraps every page; no second SidebarProvider anywhere",
+        "The three admin menu items appear inside the existing <aside> nav (merged ADMIN_NAV_ITEMS, permission-filtered); no file renders <AdminNav>; (admin)/layout.tsx keeps the guard and renders plain {children}",
+        "lib/auth-context.tsx's mockUser/localStorage gate is gone; app/login/page.tsx submits to the real Server Actions (or is replaced by the kit login page — the choice is recorded in DESIGN.md §10); routes /, /requests, /login still exist",
+        "prisma/schema.prisma has a Requests model (@@map PascalCase plural, @map on every column, audit columns) and services/requests.ts still exports listRequests / createRequest / updateStatus with the same signatures, now implemented on @/lib/prisma",
+        "better-sqlite3 is removed from package.json, data/app.db and data/seed.json are gone (or seed.json survives only as input to a one-off scripts/seed-from-prototype.ts), and docs/project-context/decisions.md records the entity map + seed decision",
+        "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 — including 'Preserve mode honored' and 'Tailwind is v4'",
+        "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 — including 'Admin pages live in the project shell'; the prototype-login warning is clear",
+        "node scripts/verify.mjs of ugt-nextjs-database-setup exits 0 — 'No prototype data store left' passes and 'Feature code actually reads through @/lib/prisma' is not a warning",
+        "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0",
+        "The closing summary states which store the screens now read (SQL Server via Prisma) and never claims 'ต่อ database แล้ว' for a store that is still SQLite"
+      ],
+      "files": ["fixtures/ai-studio-prototype"]
+    },
+    {
+      "id": 5,
+      "name": "ai-studio-prototype-defer-migration-says-so",
+      "prompt": "โปรเจคนี้มาจาก Google AI Studio ใช้ design เดิม ต่อ SQL Server ไว้ก่อน แต่ข้อมูลเดิมยังไม่ต้องย้าย เดี๋ยวทีมค่อยย้ายเองทีหลัง",
+      "setup": "Same fixture copy as eval 4. The user declines Q0b. Under test: the skill may honor the deferral, but must never let 'installed' read as 'connected'.",
+      "expected_output": "Installs the Prisma/SQL Server infrastructure, leaves services/requests.ts on better-sqlite3 as asked, and says in plain words — in the close-out summary AND in docs/project-context/decisions.md + a board.md row — that every screen still reads SQLite and nothing the user sees touches SQL Server yet; database verify reports the prototype store as a WARN (deferred), not a pass",
+      "assertions": [
+        "Q0b is asked (or the user's 'ยังไม่ต้องย้าย' is taken as its answer) and the deferral is confirmed back to the user, not silently applied",
+        "docs/project-context/decisions.md has a dated line recording that the prototype store (SQLite) is kept for now and migration is deferred (ทีหลัง/เลื่อน)",
+        "docs/project-context/board.md has a row for the pending migration with status ⏳",
+        "The closing summary says explicitly that the app still runs on SQLite and that no screen reads SQL Server yet — it does not report 'ต่อ database แล้ว' as if the features were connected",
+        "node scripts/verify.mjs of ugt-nextjs-database-setup shows 'No prototype data store left' as a WARN (deferred per decisions.md), not a FAIL and not a pass",
+        "Preserve mode still applied on the design side: --primary derives from #0f766e, no sidebar block, Tailwind upgraded to v4"
+      ],
+      "files": ["fixtures/ai-studio-prototype"]
     }
   ]
 }

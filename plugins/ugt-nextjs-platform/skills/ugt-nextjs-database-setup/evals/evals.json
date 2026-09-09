@@ -51,6 +51,25 @@
         "Explains to the user why the columns were renamed rather than changing them silently"
       ],
       "files": []
+    },
+    {
+      "id": 4,
+      "name": "migrate-prototype-sqlite-store-behind-same-signatures",
+      "prompt": "ต่อ SQL Server ให้โปรเจคนี้ด้วยครับ ตอนนี้ข้อมูลอยู่ใน sqlite ที่ ai studio สร้างไว้ ย้ายมาด้วยเลย แต่หน้าเว็บกับการทำงานเดิมห้ามพัง",
+      "setup": "Run on a copy of ../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype (shared fixture — see its README). services/requests.ts opens data/app.db with better-sqlite3, seeds from data/seed.json, and exports listRequests / createRequest / updateStatus that app/page.tsx and app/requests/page.tsx call. Under test is SKILL §4b: the 2026-09-09 field bug was Prisma installed BESIDE the SQLite store with every screen still reading SQLite, and verify passing green.",
+      "expected_output": "Installs Prisma + SQL Server per §1–§4, then §4b: inventory table first (entity Requests · store better-sqlite3/data/app.db · read paths page.tsx + requests/page.tsx · write paths createRequest/updateStatus · seed rows) → Requests model per conventions → the three exported functions keep their names and signatures with bodies on @/lib/prisma → seed decision recorded → better-sqlite3, data/app.db, seed.json removed → decisions.md updated → verify exits 0 with the prototype-store check passing",
+      "assertions": [
+        "An inventory table (entity · where stored · read paths · write paths · sample rows worth keeping) is presented before any schema or code is written",
+        "prisma/schema.prisma has a `request` model with @@map(\"Requests\"), @map on every column, the full audit set (Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted), status as String @db.NVarChar(20) (no DB enum), and no reserved-word column",
+        "services/requests.ts still exports listRequests, createRequest and updateStatus with the same signatures and return shapes; their bodies use @/lib/prisma; app/page.tsx and app/requests/page.tsx were not rewritten to a different API",
+        "listRequests filters isDeleted: false and updateStatus does not hard-delete anything",
+        "The seed decision is explicit: either scripts/seed-from-prototype.ts imports data/seed.json once (idempotent), or the rows are dropped — and the choice is written to docs/project-context/decisions.md",
+        "better-sqlite3 (and @types/better-sqlite3) are removed from package.json; data/app.db is deleted; next.config.ts no longer lists better-sqlite3 in serverExternalPackages; no file imports better-sqlite3",
+        "docs/project-context/decisions.md records the entity map (requests → Requests), any renamed/dropped fields, and the seed decision with today's date",
+        "node scripts/verify.mjs of ugt-nextjs-database-setup exits 0 — 'No prototype data store left beside Prisma/SQL Server' passes and 'Feature code actually reads through @/lib/prisma' reports files, not a warning",
+        "The closing summary says which store the screens now read; it never reports 'ต่อ database แล้ว' while services/requests.ts still opens SQLite"
+      ],
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
     }
   ]
 }

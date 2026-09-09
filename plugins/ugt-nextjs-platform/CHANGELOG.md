@@ -1,5 +1,50 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.61.1 (2026-09-09)
+
+**Evals ปิดช่องที่ทำให้ 4.20.0/4.22.0 "ผ่าน test แล้วยังหลุด"** · ที่มา: คำถามผู้ดูแล
+หลัง 4.61.0 — "เรื่องนี้เคยให้แก้และ review test แล้ว ทำไมยังหลุด" ไล่แล้วพบ 3 ข้อ
+ที่ตัว eval เอง: (1) eval บอกสถานการณ์ใน prompt ("มี sidebar ที่ components/
+app-sidebar.tsx") = ทดสอบว่า merge ถูกไหม*เมื่อรู้แล้ว* ไม่ได้ทดสอบว่าตรวจเจอไหม
+ภายใต้คำสั่งกว้าง "ใช้ design เดิม" (2) design eval #3 มี `files: []` ไม่มี fixture
+และ assertion เช็คแค่ "บันทึก Deviations แล้ว" ไม่เช็ค**ผล** (token ถูก rebase ไหม)
+(3) `fixtures/with-shell` + `fixtures/no-shell` ที่ benchmark 4.20.0 อ้าง **ไม่เคย
+commit** และ sidebar-evals ไม่มี `assertions` — ผล "11/11" รันซ้ำไม่ได้ · ไม่แตะ
+logic/asset ใด ๆ
+
+- **fixture จริง commit ลง repo**: `ugt-nextjs-full-setup/evals/fixtures/
+  ai-studio-prototype/` (15 ไฟล์ รวม `data/app.db` เปล่า) — Next.js App Router รูปทรงเดียวกับที่ Google AI
+  Studio / v0 ส่งออกจริง: shell `<aside>` ของตัวเอง + Sarabun + teal `#0f766e` +
+  radius 12px + control 44px · Tailwind **v3** (`tailwind.config.js` + `@tailwind
+  base`) · `better-sqlite3` เปิด `data/app.db` seed จาก `data/seed.json` หลัง
+  `services/requests.ts` (export listRequests/createRequest/updateStatus) · fake
+  login (constant credentials + localStorage token + `mockUser` context) · raw
+  `<table>` + hex status pill — ทุก trait คือสิ่งที่ skill ต้อง**ตรวจเจอและจัดการ**
+  README ในโฟลเดอร์อธิบายว่าอันไหนทดสอบ skill ไหน · skill อื่นอ้างผ่าน path
+  `../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype` (จาก `evals/` ของ skill นั้น)
+- **full-setup eval 4** "ai-studio-prototype-preserve-mode": prompt พูดนำ "ใช้
+  design เดิม อย่าเปลี่ยนหน้าตากับการทำงาน" 18 assertions เช็ค**ผลในไฟล์**: 3
+  findings ก่อนถาม · Q0/Q0b/Q0c ใน batch เดียว · flag ถูกส่งลง · Tailwind v4 ·
+  `--primary` จาก teal ไม่ใช่ indigo · ui/button|input rebase h-11 · shell เดียว
+  ไม่มี `<AdminNav>` · fake login หาย route คงเดิม · Requests model + signature
+  เดิม body Prisma · better-sqlite3/data หาย · verify ทั้ง 4 ตัว exit 0 · summary
+  บอกว่า screen อ่าน store ไหน · **eval 5** "defer-migration-says-so": ผู้ใช้ตอบ
+  "ยังไม่ต้องย้าย" → ต้องพูดออกมาว่าแอปยังรัน SQLite + decisions/board + database
+  verify เป็น WARN ไม่ใช่ผ่าน
+- **design eval 8** "preserve-existing-design-means-rebase-not-skip" (fixture
+  เดียวกัน) 10 assertions: scan ก่อนถาม, ข้อ 1/5/9 ไม่ถามซ้ำ, Tailwind upgrade
+  ก่อน init, `--primary`/`--radius`/h-11 ตรงค่าที่วัด, ไม่มี sidebar block, raw
+  table/hex ลง §9, Sarabun เป็นมติ · **eval 3** เพิ่ม assertion "OUTCOME ไม่ใช่แค่
+  record — ถ้า scan เจอ primary เดิม `--primary` ต้องสะท้อนค่านั้น"
+- **database eval 4** "migrate-prototype-sqlite-store-behind-same-signatures"
+  (fixture เดียวกัน) 9 assertions: inventory table ก่อน, `Requests` ตาม convention,
+  3 function ชื่อ/signature เดิม body Prisma, isDeleted filter, seed decision
+  บันทึก, better-sqlite3 + `.db` + serverExternalPackages หาย, verify exit 0
+- **auth sidebar-evals เขียนใหม่**: ชี้ fixture ที่มีจริง, ใส่ assertions ครบ 3 eval
+  (เดิมไม่มี), eval 0 รวม §5.7 ถอด fake login, eval 1 ยืนยันว่า fallback ถูกเลือก
+  "โดยตั้งใจ" หลังเช็ค shell — note บันทึกไว้ตรง ๆ ว่า benchmark 4.20.0 รันซ้ำไม่ได้
+  เพราะ fixture ไม่เคย commit
+
 ## 4.61.0 (2026-09-09)
 
 **Preserve mode — "คงของเดิม" เป็นข้อบังคับที่ full-setup ส่งลงทุก skill ลูก + ขั้น
