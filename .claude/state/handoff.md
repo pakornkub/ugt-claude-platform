@@ -3,12 +3,9 @@
 Last updated: 2026-09-09
 
 ## In progress
-- เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs **4.61.1** — รอผู้ใช้รัน
-  `/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform` +
-  `/reload-plugins` เอง
-- **eval baseline รอบแรกของ 4.61.1** — กำลังรัน full-setup eval 4 + design eval 8
-  บน copy ของ `fixtures/ai-studio-prototype` (subagent ทำตาม SKILL.md, grader แยก)
-  ผลจะบันทึกเป็น `baseline_result_2026-09-09` ใน evals.json ของแต่ละ skill
+- **4.61.2 commit + tag แล้ว ยังไม่ push** (รอผู้ดูแลสั่ง) · หลัง push เครื่องนี้ต้อง
+  update plugin (`/plugin marketplace update ugt` + `/plugin update
+  ugt-nextjs-platform` + `/reload-plugins`) — ตอนนี้ยังอยู่ 4.61.0
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า

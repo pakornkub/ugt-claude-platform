@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/user-role-select.tsx
-// kit-hash: 87390fd5b6df
+// kit: ugt-nextjs-platform 4.61.2 · ugt-nextjs-auth-setup/components/user-role-select.tsx
+// kit-hash: a249c14ba0d6
 
 // components/user-role-select.tsx — inline role-assign dropdown for one user row.
 import { useTransition } from 'react';
@@ -26,9 +26,10 @@ export function UserRoleSelect({
   const t = useTranslations('auth.userRoleSelect');
   const tErrors = useTranslations('auth.errors');
 
-  function handleChange(value: string) {
+  // Base UI ≥ 1.8 types onValueChange as (value: string | null) — accept null too
+  function handleChange(value: string | null) {
     startTransition(async () => {
-      const result = await assignUserRoleAction(userId, value === NO_ROLE ? null : value);
+      const result = await assignUserRoleAction(userId, !value || value === NO_ROLE ? null : value);
       if (!result.success) {
         toast.error(t('changeFailedTitle'), { description: tErrors(result.code as Parameters<typeof tErrors>[0]) });
       }

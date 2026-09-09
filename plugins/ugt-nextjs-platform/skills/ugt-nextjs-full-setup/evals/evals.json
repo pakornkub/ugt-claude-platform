@@ -72,7 +72,22 @@
         "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0",
         "The closing summary states which store the screens now read (SQL Server via Prisma) and never claims 'ต่อ database แล้ว' for a store that is still SQLite"
       ],
-      "files": ["fixtures/ai-studio-prototype"]
+      "files": ["fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-09": {
+        "skill_version": "4.61.1",
+        "runner": "unattended executor subagent (skill defaults, fixture README stripped; inline run, no subagent dispatch) → independent grader subagent checking files + re-running all four verify scripts; 72 min, 157 files, all five modules + harness",
+        "pass": 17,
+        "fail": 1,
+        "blocked": 0,
+        "failed": ["#14 design verify exit 1 — 'Sidebar shell has the site-header': the project's only SidebarProvider exists because auth-setup's NavUser calls useSidebar(); no SidebarInset exists to mount a site-header into. Skill gap, not the project: design Step 3.5 said 'no second SidebarProvider' while auth §5.5 requires NavUser. Fixed in 4.61.2 — verify gates on SidebarInset/<Sidebar>, Step 3.5 names the bare-provider exception."],
+        "notes": [
+          "Preserve mode held end to end: Q0/Q0b/Q0c defaulted in one batch from the user's sentence, teal --primary, --radius 0.75rem, h-11 controls at the source, admin items merged into the original <aside> via ADMIN_NAV_ITEMS, no <AdminNav>, fake login removed, Requests model + same service signatures on Prisma, better-sqlite3 + data/ gone, ADR-0001 records the entity map (mattpocock bundle → docs/adr/)",
+          "Latent defect the assertions did not cover: the runner uninstalled the `cn` npm package as stray while 30 components/ui files import from it — build survived only via hoisting through `shadcn`. Fixed in 4.61.2 (design Step 3.2 says keep it).",
+          "/login now renders outside the preserved shell (root layout = fonts+providers only) — defensible post-auth and recorded in DESIGN.md §10, but a visible change under 'อย่าเปลี่ยนหน้าตา'; consider a preserve-mode note that auth-only routes may leave the shell",
+          "Transcript is a post-hoc summary, so #1/#3/#4 are graded on self-report; #4's literal 'first line of the dispatch prompt' is unobservable on an inline run",
+          "Blocked by environment (no SQL Server/Keycloak/Jenkins): prisma migrate dev, seed run, Keycloak client, pipeline push, by-hand login checks — files written, stated as blocked in the summary"
+        ]
+      }
     },
     {
       "id": 5,

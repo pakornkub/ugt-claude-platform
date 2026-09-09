@@ -125,10 +125,23 @@
         "components/ui/input.tsx, button.tsx (default size) and select.tsx trigger are rebased to h-11 (44px) per §Scale bridge — no per-page h-11 overrides sprinkled into pages",
         "No sidebar-* block was added and there is no SidebarProvider anywhere; app/layout.tsx's <aside> nav is still the shell wrapping every page",
         "The raw <table> in app/requests/page.tsx and the hex status colors are listed in DESIGN.md §9 with a recorded grandfather/migrate decision — not silently rewritten in this run",
-        "Sarabun is recorded as the project's font decision (kept, or migrated to Inter + Noto Sans Thai with a มติ) — not silently swapped",
+        "ข้อ 10 is asked (or defaulted to คงฟ้อนต์เดิม) with 'Sarabun' named in the question; on the default, app/layout.tsx still imports Sarabun from next/font (no Inter), --font-sans points at its variable, and DESIGN.md §10 carries the sentence 'ฟ้อนต์: คงของเดิม (Sarabun)' — never silently swapped to Inter + Noto Sans Thai (มติ 2026-09-09)",
         "node scripts/verify.mjs of ugt-nextjs-design-setup exits 0 — including 'Preserve mode honored: kit tokens rebased' and 'Tailwind is v4'"
       ],
-      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-09": {
+        "skill_version": "4.61.1",
+        "runner": "unattended executor subagent (skill defaults, fixture README stripped) → independent grader subagent checking files + re-running verify; 39 min, 77 files",
+        "pass": 10,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "verify.mjs at 4.61.1 returned a false ✘ on 'Every <DataTable> passes a unique id' — the regex matched a JSDoc usage example inside the kit's own components/ui/bulk-action-bar.tsx; fixed in 4.61.2 (skip components/ui/, strip comments). Every project with the full kit hit this.",
+          "Font: the 'deliberately not asked' iron rule migrated Sarabun → Inter + Noto Sans Thai even though the user said ทีมชินกับหน้าตานี้แล้ว; the run recorded it as a มติ + open question (honest), but preserve mode vs the font iron rule is an unresolved policy question — see CHANGELOG 4.61.2",
+          "--primary landed as Tailwind v4 teal-700 oklch (L/H match #0f766e, chroma 0.096 vs 0.086 raw) — 'derives from' holds",
+          "Control radius = 9.6px (preset ×0.8 of --radius 0.75rem), not the measured 12px — the documented cost of 'ห้ามแก้รายชั้น', recorded in DESIGN.md §10"
+        ]
+      }
     }
   ]
 }

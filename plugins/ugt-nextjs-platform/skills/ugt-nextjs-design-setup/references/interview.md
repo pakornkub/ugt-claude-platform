@@ -16,9 +16,12 @@ toast semantics · motion rules · icon library · accessibility floor. **ปี
 `lib/format.ts` บังคับ `-u-ca-gregory` ที่ formatter เดียว ไม่มีโค้ดแปลง พ.ศ.
 เส้นทางไหนก็ตาม ถามแล้วให้ตอบ "พ.ศ." คือสร้างมติที่โค้ดทำตามไม่ได้ — เคยเป็น
 คำถามข้อ 7 มาก่อน ตัดออกเมื่อพบว่าขัดกับตัวมันเอง (2026-08-24)
-**One exception**: an existing project whose measured control scale differs
-from the kit gets ข้อ 9 — silently applying the org density there produces a
-two-scale UI (a 48px legacy input next to a 28px kit button in the same form).
+**Two exceptions**, both for existing projects: (1) a measured control scale
+that differs from the kit gets ข้อ 9 — silently applying the org density there
+produces a two-scale UI (a 48px legacy input next to a 28px kit button in the
+same form); (2) **preserve mode** gets ข้อ 10 on fonts — the iron rule replaced
+a project's Sarabun with Inter + Noto Sans Thai right after the user said
+"ทีมชินกับหน้าตานี้แล้ว" (eval run 2026-09-09, มติ 2026-09-09 = ask, don't assume).
 
 ## ชุด 1 — Visual identity
 
@@ -58,6 +61,16 @@ failing pair, never silently darken the dark primary below the light one.
 | --- | --- | --- | --- |
 | 8 | จุดที่ขัดข้อตกลง (แสดงรายการจาก scan) จะทำอย่างไร? | grandfather ไว้ก่อน + บันทึก / migrate ทันที / เลือกรายจุด | **grandfather + บันทึก** ลง Deviations |
 | 9 | [เฉพาะเมื่อ §Scale scan พบสเกลต่างจาก kit] ฟอร์มเดิม (control **`<ค่าที่วัดได้>`**) กับ component ใหม่จาก shadcn (control 28px `h-7`) จะอยู่ปนกันในแอปเดียว — ยึดสเกลไหน? | ยึดของเดิม — rebase kit ให้เท่า / ยึด kit — migrate ของเดิมลงมา / แยกโซน ห้ามปนใน 1 หน้า | **ยึดของเดิม + rebase kit** |
+| 10 | [เฉพาะ preserve mode และ scan พบฟ้อนต์เดิมที่ไม่ใช่ Inter + Noto Sans Thai] ฟ้อนต์เดิม **`<ฟ้อนต์ที่พบ>`** กับมาตรฐานองค์กร Inter + Noto Sans Thai — ใช้ตัวไหน? | คงฟ้อนต์เดิม / เปลี่ยนเป็น Inter + Noto Sans Thai | **คงฟ้อนต์เดิม** (preserve mode: ฟ้อนต์ก็เป็น token ตัวหนึ่ง) |
+
+ข้อ 10 — ใส่ชื่อฟ้อนต์จริงจาก scan (`app/layout.tsx` `next/font`) ลงในคำถาม ·
+**คงฟ้อนต์เดิม** → เก็บ `next/font` เดิมไว้ใน `layout.tsx`, ชี้ `--font-sans` ใน
+`@theme inline` ไปที่ตัวแปรของฟ้อนต์นั้น (ยังเติม Noto Sans Thai เป็น fallback ไทย
+ถ้าฟ้อนต์เดิมไม่มี glyph ไทย), ไม่ import Inter · **เปลี่ยน** → ทำตาม Step 3.3 ปกติ ·
+ทั้งสองทางเขียนมติส่วน 10 ด้วยประโยคตรงตัว **"ฟ้อนต์: คงของเดิม (<ชื่อ>)"** หรือ
+**"ฟ้อนต์: เปลี่ยนเป็น Inter + Noto Sans Thai"** — `verify.mjs` อ่านประโยคนี้เพื่อ
+เลือกว่าจะเรียกหา Inter/Noto หรือฟ้อนต์เดิม · โปรเจคใหม่และโปรเจคเดิมที่ไม่ใช่
+preserve mode ยังไม่ถาม (iron rule เดิม)
 
 ข้อ 9 — ใส่**ตัวเลขจริงจาก Scale scan ลงในตัวคำถามเสมอ** (เช่น "input เดิม 48px
 vs kit 28px") และบอกราคาของแต่ละทางใน description ของตัวเลือก:

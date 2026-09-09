@@ -92,8 +92,8 @@ location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; proxy_set
 **Valid redirect URIs — ลงทะเบียนให้ตรงทุกตัวอักษร:**
 
 ```
-__APP_URL_DEV__/api/auth/oauth2/callback/keycloak
-__APP_URL_PROD__/api/auth/oauth2/callback/keycloak
+__APP_URL_DEV__/api/auth/callback/keycloak
+__APP_URL_PROD__/api/auth/callback/keycloak
 ```
 
 (ไม่ต้องตั้ง post-logout redirect — ระบบ logout ผ่านหลังบ้าน)

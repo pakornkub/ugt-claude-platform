@@ -1,5 +1,58 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.61.2 (2026-09-09)
+
+**ผล eval baseline รอบแรกของ preserve mode + แก้ 6 finding ที่ eval จับได้** · รัน
+full-setup eval 4 และ design eval 8 จริงบน copy ของ `fixtures/ai-studio-prototype`
+(executor subagent ทำตาม SKILL.md แบบ unattended ใช้ default, README answer-key ถูก
+ลบก่อน, grader subagent อิสระตรวจจากไฟล์ + รัน verify เอง) — ผลอยู่ key
+`baseline_result_2026-09-09` ใน evals.json ของแต่ละ skill
+
+- **design eval 8: 10/10** — "ใช้ design เดิม" ถูกอ่านเป็น preserve mode จริง (scan
+  ก่อนถาม, ข้อ 1/5/9 pre-filled, Tailwind v3→v4 ก่อน init, `--primary` teal,
+  h-11 ที่ต้นทาง, ไม่มี sidebar block, raw table/hex ลง §9) · 39 นาที 77 ไฟล์
+- **full-setup eval 4: 17/18** — ครบ 5 module + harness ใน preserve mode: store
+  เดิมย้ายขึ้น Prisma หลัง signature เดิม, fake login ถูกถอด, เมนู admin merge เข้า
+  `<aside>` เดิม, verify database/auth/full-setup 16/38/17 ผ่านหมด · 72 นาที 157
+  ไฟล์ · ข้อที่ FAIL เป็นช่องว่างของ skill (ข้อ 1 ด้านล่าง)
+- **แก้จาก finding ของ eval** (verify/text/asset — พิสูจน์แต่ละข้อกับ repo ก่อนแก้):
+  1. design `verify.mjs` gate "site-header"/"brand logo" ยึด *มีไฟล์* `ui/sidebar.tsx`
+     → ✘ ปลอมบนโปรเจคที่คง shell เดิม; รอบแรกแก้เป็น "มี `SidebarProvider`" ก็ยัง
+     ผิด เพราะ auth `NavUser` เรียก `useSidebar()` บังคับให้ต้องครอบ provider
+     เปล่าอยู่ดี → ยึด `SidebarInset`/`<Sidebar>` (ตัว block จริง) · Step 3.5
+     ระบุข้อยกเว้น bare provider ให้ตรงกับ auth §5.5 (เดิมสองข้อความขัดกัน)
+  2. design `verify.mjs` gate DataTable-id อ่าน JSDoc → จับ `<DataTable …/>` ใน
+     comment ของ `bulk-action-bar.tsx` ของ kit เอง ✘ ทุกโปรเจคที่ลง kit ครบ →
+     ข้าม `components/ui/` + strip comment ก่อน match
+  3. **package `cn` ไม่ใช่ของแปลก** — `components/ui/*` 30 ไฟล์ import `{ cn }
+     from 'cn'`; executor ถอดทิ้งแล้ว build รอดเพราะ `shadcn` hoist ให้บังเอิญ →
+     design Step 3.2 สั่งห้ามถอด
+  4. cicd `admin-handoff.template.md` ยังใช้ redirect path เก่า
+     `/api/auth/oauth2/callback/keycloak` (ก่อน better-auth 1.7) ขัดกับ
+     `lib/auth.ts` + `keycloak-client.md` → admin ลงทะเบียน URI ผิด = อาการ
+     "Keycloak rejecting the redirect URI" → แก้เป็น `/api/auth/callback/keycloak`
+  5. database install line ขาด `@types/mssql` → `tsc` พังบน fresh install
+  6. auth asset `user-role-select.tsx` + `audit-logs-table.tsx` type-break กับ
+     `@base-ui/react ^1.8` (`onValueChange(value: string | null)`) → รับ `null`
+     ได้, restamp hash, `lint-kit-assets` 106/106
+- **ฟ้อนต์ใน preserve mode — มติ 2026-09-09: ถาม ไม่สมมติ** · eval 8 เผยว่า iron
+  rule "ฟ้อนต์ไม่ถาม" เปลี่ยน Sarabun → Inter+Noto ทันทีหลังผู้ใช้บอก "ทีมชินกับ
+  หน้าตานี้แล้ว" (run บันทึกเป็นมติ + open question อย่างตรงไปตรงมา แต่ก็เปลี่ยนไป
+  แล้ว) → interview **ข้อ 10** เฉพาะ preserve mode: คงฟ้อนต์เดิม (default) /
+  เปลี่ยนเป็น Inter + Noto Sans Thai — ใส่ชื่อฟ้อนต์จริงจาก scan ในคำถาม · Step 3.3
+  บอกวิธี wire ฟ้อนต์เดิม (`--font-sans` ชี้ตัวแปรของมัน, Noto เป็น fallback ไทย) ·
+  DESIGN.md §10 เขียนประโยคตรงตัว `ฟ้อนต์: คงของเดิม (<ชื่อ>)` · `verify.mjs` อ่าน
+  ประโยคนั้นแล้วเปลี่ยนจากเรียกหา Inter/Noto เป็น "มี next/font + `--font-sans`
+  ชี้ตัวแปร" · placeholder `__FONT__` เข้าตาราง · eval 8 assertion 9 อัปเดตให้
+  ตรง · โปรเจคใหม่/ไม่ใช่ preserve mode ยังไม่ถาม (iron rule เดิม)
+- **ค้าง research → `docs/backlog.md` §11**: `hooks/use-mobile.ts` จาก registry
+  ตก `react-hooks/set-state-in-effect` (Lint stage แดง) · `--legacy-peer-deps`
+  prune `vite`/`@testing-library/dom` · `/login` หลุดออกจาก shell เดิมหลังลง
+  auth (สมเหตุสมผลแต่เป็นการเปลี่ยนหน้าตาที่เห็นได้)
+- บทเรียนที่ยืนยันซ้ำ: **eval ที่มี fixture จริง + grader ตรวจผลในไฟล์** จับ bug ของ
+  verify ได้ 2 ตัวและ asset drift 1 ตัว ก่อน field report จะมาถึง — 4.20.0 ที่
+  "11/11" ไม่มีทางเห็นสิ่งเหล่านี้
+
 ## 4.61.1 (2026-09-09)
 
 **Evals ปิดช่องที่ทำให้ 4.20.0/4.22.0 "ผ่าน test แล้วยังหลุด"** · ที่มา: คำถามผู้ดูแล

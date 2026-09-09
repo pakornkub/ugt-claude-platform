@@ -247,6 +247,35 @@ output ของ `ugt-nextjs-database-setup` (ไม่มี design-setup) — 
   description ล้วนซึ่งไม่ถูกแตะเลย ผลเต็มอยู่ `evals/trigger-evals.json` key
   `revalidation_2026-08-25`
 
+### 11. จาก eval รันจริงรอบแรกของ preserve mode (2026-09-09, full-setup eval 4 + design eval 8 บน fixture `ai-studio-prototype`)
+
+executor รายงาน 9 finding — ปิดใน 4.61.2 แล้ว 6 ข้อ (verify DataTable-id อ่าน JSDoc ·
+verify site-header/brand-logo ยึด "มีไฟล์ ui/sidebar.tsx" แทน "mount `SidebarInset`/`<Sidebar>`
+จริง" — และ `SidebarProvider` เปล่าก็ไม่นับ เพราะ auth NavUser บังคับให้มี ·
+admin-handoff.template path `oauth2/callback` เก่า · `@types/mssql` ขาดจาก install line ·
+auth asset 2 ไฟล์ type-break กับ `@base-ui/react ^1.8` `onValueChange(value: string | null)`)
+ที่เหลือรอ research/มติ:
+
+- **shadcn registry `hooks/use-mobile.ts` ตก `react-hooks/set-state-in-effect` ของ
+  eslint-config-next 16** → pipeline stage Lint แดงบน fresh install ทุกครั้ง —
+  ทางเลือก: design Step 4 สั่งเขียนทับด้วย version `useSyncExternalStore` (kit มี
+  pattern นี้ใน `lib/table-prefs.ts` แล้ว) หรือ test-lint ใส่ override rule เฉพาะไฟล์
+  — ต้องเช็คว่า registry ปัจจุบันแก้แล้วหรือยังก่อนเลือก
+- **`npm install --legacy-peer-deps`** (จำเป็นเพราะ t3-env ↔ `@hookform/resolvers`
+  ชน optional peer `valibot`) ทำให้ npm prune `vite` / `@testing-library/dom` ทิ้ง —
+  test-lint ต้องสั่ง install สองตัวนี้ explicit หรือหาทางเลี่ยง legacy-peer-deps
+- ~~preset `shadcn init` เพิ่ม npm package `cn` — ของแปลกหรือของจริง?~~ → grader
+  ยืนยัน (4.61.2): ของจริง — `components/ui/*` 30 ไฟล์ import `{ cn } from 'cn'`,
+  executor ถอดทิ้งแล้วรอดเพราะ `shadcn` hoist ให้บังเอิญ (`npm ci` บน Jenkins จะไม่รอด)
+  · design Step 3.2 บันทึกแล้วว่าห้ามถอด
+- ~~ฟ้อนต์ใน preserve mode — iron rule ชนกับ "ใช้ design เดิม"~~ → **มติ 2026-09-09
+  (4.61.2): ถามเป็นข้อ interview เฉพาะ preserve mode** = ข้อ 10 default คงฟ้อนต์เดิม ·
+  verify อ่านประโยค "ฟ้อนต์: คงของเดิม (<ชื่อ>)" ใน DESIGN.md แล้วเลิกเรียกหา Inter/Noto
+- ไม่ใช่บั๊ก แต่จดไว้: asset CRLF ที่ executor เห็นเป็น artifact ของ working copy บน
+  Windows (`git ls-files --eol` = i/lf ทุกไฟล์, `.gitattributes` บังคับ LF) — plugin
+  ที่ติดตั้งผ่าน marketplace ได้ LF เสมอ; runner ของ eval ควร copy จาก `git archive`
+  ไม่ใช่ working tree
+
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |

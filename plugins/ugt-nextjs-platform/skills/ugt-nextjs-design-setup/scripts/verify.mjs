@@ -140,6 +140,15 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
 });
 
 // ── tokens ────────────────────────────────────────────────────────────────
+// Preserve mode ข้อ 10 (มติ 2026-09-09): DESIGN.md §10 may record
+// "ฟ้อนต์: คงของเดิม (<name>)" — then the project's own font stays and the
+// Inter/Noto demands below are replaced by "some next/font is wired".
+const keptFont = () => {
+  if (!has('docs', 'DESIGN.md')) return null;
+  const m = /ฟ้อนต์\s*:\s*คงของเดิม\s*\(([^)\n]+)\)/.exec(read('docs', 'DESIGN.md'));
+  return m ? m[1].trim() : null;
+};
+
 check('globals.css carries the org token set', () => {
   if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
   const css = readIn('app', 'globals.css');
@@ -148,14 +157,24 @@ check('globals.css carries the org token set', () => {
   for (const t of ['amber', 'emerald', 'red', 'coral', 'sky', 'gray']) {
     if (!css.includes(`--status-${t}:`)) problems.push(`--status-${t} missing`);
   }
-  if (!/--font-sans:.*noto/i.test(css)) problems.push('--font-sans does not include the Thai font variable');
+  if (keptFont()) {
+    if (!/--font-sans:\s*var\(--font-/.test(css)) problems.push('--font-sans does not point at a next/font variable (ข้อ 10 = คงฟ้อนต์เดิม)');
+  } else if (!/--font-sans:.*noto/i.test(css)) {
+    problems.push('--font-sans does not include the Thai font variable');
+  }
   if (!css.includes('.dark')) problems.push('no .dark token block (tokens must exist even without a toggle)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('layout.tsx wires Inter + Noto Sans Thai via next/font', () => {
+check('layout.tsx wires the agreed font via next/font', () => {
   if (!hasIn('app', 'layout.tsx')) return { ok: false, msg: 'No app/layout.tsx' };
   const l = readIn('app', 'layout.tsx');
+  const kept = keptFont();
+  if (kept) {
+    return /from ['"]next\/font\/(google|local)['"]/.test(l)
+      ? { ok: true, msg: `ข้อ 10 = คงฟ้อนต์เดิม (${kept}) — Inter/Noto not required` }
+      : { ok: false, msg: `DESIGN.md keeps the project font (${kept}) but app/layout.tsx imports nothing from next/font` };
+  }
   const problems = [];
   if (!/Noto_Sans_Thai/.test(l)) problems.push('Noto_Sans_Thai not imported');
   if (!/Inter/.test(l)) problems.push('Inter not imported');
@@ -178,11 +197,16 @@ check('lib/format.ts installed (the only formatter)', () =>
 // up: a table without `id` silently forgets column prefs that every other
 // table remembers, and duplicate ids make two tables share one set of prefs.
 check('Every <DataTable> passes a unique id (column prefs persist)', () => {
-  const files = sourceTsx().filter((f) => !/[\\/]components[\\/]ui[\\/]data-table\.tsx$/.test(f));
+  // components/ui/ is the kit itself — its files only MENTION <DataTable> in
+  // JSDoc usage examples (bulk-action-bar.tsx), never mount one. Scanning them
+  // raw produced a false ✘ on every project with the full kit (eval run
+  // 2026-09-09). Skip the kit dir and strip comments before matching.
+  const files = sourceTsx().filter((f) => !/[\\/]components[\\/]ui[\\/]/.test(f));
+  const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
   const missing = [];
   const ids = new Map();
   for (const file of files) {
-    const body = readFileSync(file, 'utf8');
+    const body = stripComments(readFileSync(file, 'utf8'));
     const rel = relative(ROOT, file).split('\\').join('/');
     // each JSX opening tag for DataTable, up to the end of its attribute list
     for (const m of body.matchAll(/<DataTable\b([\s\S]*?)(?:\/>|>)/g)) {
@@ -327,9 +351,27 @@ check('scroll-thin utility is installed', () => {
 // bar (trigger only — no breadcrumb, no toggles, no divider) because the
 // site-header existed only as a pointer at HRMS code. These checks make that
 // install state visible.
+// A shadcn sidebar SHELL is in use only when a layout mounts the block's own
+// pieces — <Sidebar> / <SidebarInset>. Neither the file components/ui/sidebar.tsx
+// nor a bare <SidebarProvider> is that signal: auth-setup's NavUser calls
+// useSidebar(), so preserve-mode projects that keep their own <aside> still wrap
+// it in SidebarProvider (context only, renders nothing) and have no SidebarInset
+// to mount a site-header into. Both weaker gates produced a false ✘ on exactly
+// those projects (eval run 2026-09-09, full-setup #4). Look only at layout.tsx
+// files with comments stripped: the org shell lives in app/(app)/layout.tsx
+// (layout-shells.md step 1), while auth's unrendered <AdminNav> fallback and
+// site-header's own JSDoc both mention <Sidebar>/SidebarInset without mounting
+// anything — scanning every component tripped on exactly those two files.
+const usesSidebarShell = () =>
+  sourceTsx().some((f) => {
+    if (!/layout\.tsx$/.test(f) || /[\\/]components[\\/]ui[\\/]/.test(f)) return false;
+    const code = readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+    return /\bSidebarInset\b|<Sidebar[\s>\/]/.test(code);
+  });
+
 check('Sidebar shell has the site-header (breadcrumb + toggle mount point)', () => {
-  if (!hasIn('components', 'ui', 'sidebar.tsx')) {
-    return { ok: true, msg: 'no sidebar shell in this project — nothing to check' };
+  if (!usesSidebarShell()) {
+    return { ok: true, msg: 'no shadcn sidebar shell mounted in this project — nothing to check' };
   }
   if (!hasIn('components', 'site-header.tsx')) {
     return {
@@ -378,8 +420,8 @@ check('SelectTrigger fills its grid cell (w-full)', () => {
 });
 
 check('Shell header shows the brand logo, not the block demo icon', () => {
-  if (!hasIn('components', 'ui', 'sidebar.tsx')) {
-    return { ok: true, msg: 'no sidebar shell — nothing to check' };
+  if (!usesSidebarShell()) {
+    return { ok: true, msg: 'no shadcn sidebar shell mounted — nothing to check' };
   }
   const referenced = sourceTsx().some((f) => /\/brand\/|ube-logo/.test(readFileSync(f, 'utf8')));
   return referenced

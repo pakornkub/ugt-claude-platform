@@ -89,7 +89,7 @@ keep all three on the same version:
 
 ```bash
 npm install @prisma/client@7.9.1 @prisma/adapter-mssql@7.9.1 @t3-oss/env-nextjs zod
-npm install --save-dev prisma@7.9.1 tsx dotenv
+npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 ```
 
 ### 2. Copy assets and substitute placeholders

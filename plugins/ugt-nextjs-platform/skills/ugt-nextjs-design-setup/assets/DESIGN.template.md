@@ -89,7 +89,7 @@
 
 ## 2. Typography
 
-- **Inter + Noto Sans Thai** ผ่าน `next/font` · mono = Geist Mono ·
+- **__FONT__** ผ่าน `next/font` · mono = Geist Mono ·
   ฐาน html 16px ไม่ override
 - น้ำหนัก 400/500 · 600 เฉพาะ title หน้า ·
   Title: `text-2xl font-semibold tracking-tight` ไม่มีไอคอนนำ

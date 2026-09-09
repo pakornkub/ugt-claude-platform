@@ -86,7 +86,8 @@ prototype data layer or a fake login; skip on a bare scaffold):**
    - **The look stays; components may become shadcn.** design-setup runs its
      existing-project scan and rebases the kit tokens (primary / radius /
      font / control scale) onto the measured values — ข้อ 1 = โปรเจคเดิม,
-     ข้อ 9 = ยึดของเดิม. "คง design เดิม" is **never** "don't touch design":
+     ข้อ 9 = ยึดของเดิม, and the font is asked, not assumed (design ข้อ 10,
+     default คงฟ้อนต์เดิม). "คง design เดิม" is **never** "don't touch design":
      skipping the scan leaves the kit on org indigo/mira defaults, and every
      kit-built page that follows (login, `/admin/*`) ships as a foreign
      template — the exact field bug.

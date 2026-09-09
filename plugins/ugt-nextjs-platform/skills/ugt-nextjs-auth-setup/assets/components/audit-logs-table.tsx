@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 437eab908054
+// kit: ugt-nextjs-platform 4.61.2 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: ce2812fa3a90
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
@@ -151,7 +151,7 @@ export function AuditLogsTable({
             />
             <Select
               value={filters.action || ALL_ACTIONS}
-              onValueChange={(value) => applyFilters({ action: value === ALL_ACTIONS ? '' : value })}
+              onValueChange={(value) => applyFilters({ action: !value || value === ALL_ACTIONS ? '' : value })}
             >
               <SelectTrigger className="w-44">
                 <SelectValue placeholder={t('auditLogsTable.allActions')} />

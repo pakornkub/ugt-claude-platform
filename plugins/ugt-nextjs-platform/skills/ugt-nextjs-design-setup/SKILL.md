@@ -101,8 +101,9 @@ Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables 
 **Preserve mode** (full-setup §2 Q0 = คงของเดิม, or the user says "คง/ใช้ design
 เดิม" when this skill runs standalone) is the existing-project path with three
 answers pre-filled — ข้อ 1 = มี (the reference is this project's own code),
-ข้อ 5 = the shell the project already has, ข้อ 9 = ยึดของเดิม + rebase — and
-the scan is **not skippable**. The wrong reading, seen in the field
+ข้อ 5 = the shell the project already has, ข้อ 9 = ยึดของเดิม + rebase — one
+extra question, ข้อ 10 (keep the project's font or move to Inter + Noto Sans
+Thai; default keep — มติ 2026-09-09), and the scan is **not skippable**. The wrong reading, seen in the field
 (2026-09-09): "ใช้ design เดิม" taken as "leave design alone" → scan skipped →
 kit installed on org indigo/mira defaults → the auth-setup admin pages, built
 from the kit, shipped as a second template that looked nothing like the app.
@@ -187,8 +188,12 @@ different size — is the field bug this step exists to prevent.
    ever stops resolving: `npx shadcn@latest init --preset mira` — there is
    NO `--style base-mira` flag.)
    **After init**: rename `package.json`'s `"name"` (the template writes
-   `next-app`) to the project slug, then **run the gate instead of eyeballing
-   it**: `node <skill-dir>/scripts/verify.mjs` fails on any `components.json`
+   `next-app`) to the project slug. **Keep the `cn` npm package the preset
+   adds** — the registry's `lib/utils.ts` and every `components/ui/*` file
+   import `{ cn } from 'cn'`; it only *looks* stray. An installer removed it
+   as unrelated (eval run 2026-09-09) and the build survived by accident
+   (hoisted through the `shadcn` package) — `npm ci` on Jenkins would not.
+   Then **run the gate instead of eyeballing it**: `node <skill-dir>/scripts/verify.mjs` fails on any `components.json`
    that is not `style: base-mira` · `iconLibrary: lucide` · `rtl: false` ·
    `baseColor: neutral`, and separately fails on any Radix that reached the
    project — a `radix-ui`/`@radix-ui/*` dependency, a missing
@@ -223,7 +228,12 @@ different size — is the field bug this step exists to prevent.
    `scripts/verify.mjs` fails if it is missing.
    · substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers
    (dark ring tokens derive from `__PRIMARY_DARK__` automatically).
-3. Fonts + providers in `app/layout.tsx` — the exact wiring:
+3. Fonts + providers in `app/layout.tsx` — the exact wiring (**preserve mode
+   with ข้อ 10 = คงฟ้อนต์เดิม**: keep the project's existing `next/font` import
+   instead of Inter, point `--font-sans` in `@theme inline` at its variable —
+   keep Noto Sans Thai as the Thai fallback when that font has no Thai glyphs —
+   and write the มติ sentence `ฟ้อนต์: คงของเดิม (<ชื่อ>)` into DESIGN.md §10;
+   `verify.mjs` reads that sentence and stops demanding Inter/Noto):
 
    ```tsx
    import { Geist_Mono, Inter, Noto_Sans_Thai } from 'next/font/google';
@@ -303,9 +313,13 @@ different size — is the field bug this step exists to prevent.
    motion = มี (pairs with `docs/MOTION.md`).
 5. **App shell FIRST, then variants** — **preserve mode: skip the block.**
    The project's existing layout IS the shell (ข้อ 5 recorded as "เดิม"): do
-   not install `sidebar-*`, do not add a second `SidebarProvider`; later
-   skills mount into the existing menu (auth §5.6). The block path below is
-   only for a project with no layout that renders a nav.
+   not install `sidebar-*`, no `<Sidebar>`/`<SidebarInset>`; later skills
+   mount into the existing menu (auth §5.6). One exception is expected, not a
+   violation: auth-setup's `NavUser` calls `useSidebar()`, so the existing
+   shell gets wrapped in a bare `<SidebarProvider>` — context only, renders
+   nothing, and `verify.mjs` does not treat it as a shadcn shell (it looks
+   for `SidebarInset`/`<Sidebar>`). The block path below is only for a
+   project with no layout that renders a nav.
    Otherwise: install the shadcn block named in
    `references/layout-shells.md` (never hand-composed) **before** touching
    `button.tsx` — `add <block>` prompts per existing file (even with
@@ -370,6 +384,7 @@ design-questions.template.md · globals.tokens.css) พร้อมที่ม�
 | `__LANDING__` | ข้อ 6 |
 | `__LANG__` | ข้อ 4 (th / th+en) |
 | `__CONTROL_SCALE__` | ข้อ 9 (ค่า kit = mira · โปรเจคเดิม = ค่าที่วัดจริงจาก §Scale scan) |
+| `__FONT__` | ข้อ 10 (preserve mode เท่านั้น — default คงฟ้อนต์เดิม) · ทุกกรณีอื่น = `Inter + Noto Sans Thai` |
 | `__DEVIATIONS__` | ผล scan โปรเจคเดิม (Step 1) — โปรเจคใหม่ = "-" |
 | `__ANSWERS_SUMMARY__` / `__ANSWERED_BY__` | สรุปคำตอบ + ผู้ตอบ ลงมติแถวแรกของ §10 |
 
