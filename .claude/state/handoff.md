@@ -3,9 +3,12 @@
 Last updated: 2026-09-09
 
 ## In progress
-- **4.61.2 commit + tag แล้ว ยังไม่ push** (รอผู้ดูแลสั่ง) · หลัง push เครื่องนี้ต้อง
-  update plugin (`/plugin marketplace update ugt` + `/plugin update
+- **4.61.2 + 4.61.3 commit + tag แล้ว ยังไม่ push** (รอผู้ดูแลสั่ง) · หลัง push เครื่องนี้
+  ต้อง update plugin (`/plugin marketplace update ugt` + `/plugin update
   ugt-nextjs-platform` + `/reload-plugins`) — ตอนนี้ยังอยู่ 4.61.0
+- baseline preserve mode ครบ 4 ชุดแล้ว (design 10/10 · full-setup 17/18 · database 9/9
+  · auth sidebar 8/8) — ที่ยังไม่รัน: full-setup eval 5 (defer migration), auth
+  sidebar-evals 1–2, database evals 1–3 (ของเดิมไม่เคยมี baseline)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -23,6 +26,21 @@ Last updated: 2026-09-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-10 ugt-nextjs-platform **4.61.3** — baseline ที่เหลือ: database eval 4
+  **9/9** + auth sidebar-eval 0 **8/8** (รันต่อเป็นสาย design → database → auth บน
+  โปรเจคเดียว) · แก้ finding ของ grader: `CreatedBy` ยึด NOT NULL + marker
+  `'prototype-import'`/`'system'` (reference เคยขัดกันเอง), pin `zod@^4`
+  database+auth, `[METHOD: LOCAL]` บน `users:create`/`users:reset-password`,
+  auth §5.1 `--legacy-peer-deps` (better-auth peer vitest ^2–4 vs org ^5), auth
+  verify จับ shell ที่สองที่สร้างมือใน `(admin)`, database verify บอกชื่อไฟล์ที่ใช้
+  prisma · backlog §11 +2 (NavUser บังคับ SidebarProvider · migrations.md ขาด path
+  offline) · commit + tag แล้ว ยังไม่ push
+- 2026-09-09 ugt-nextjs-platform **4.61.2** — eval baseline รอบแรก: design eval 8
+  **10/10**, full-setup eval 4 **17/18** (FAIL เดียวเป็นช่องว่าง skill) · แก้ 6 finding
+  (design verify site-header gate ยึด SidebarInset/<Sidebar> ใน layout · DataTable-id
+  ข้าม JSDoc · `cn` package ห้ามถอด · admin-handoff path เก่า · `@types/mssql` ·
+  auth asset รับ Base UI 1.8 `null`) · **ฟ้อนต์ใน preserve mode = ข้อ 10 default
+  คงเดิม** (มติ (c)) · commit + tag แล้ว
 - 2026-09-09 ugt-nextjs-platform **4.61.1** — evals ปิดช่องที่ทำให้ 4.20.0/4.22.0
   "ผ่าน test แล้วยังหลุด": (1) eval เดิมบอกสถานการณ์ใน prompt (2) design eval 3
   ไม่มี fixture + assert แค่ record ไม่ใช่ outcome (3) `fixtures/with-shell` ของ

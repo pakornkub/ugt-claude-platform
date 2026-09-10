@@ -292,7 +292,7 @@ check('Feature code actually reads through @/lib/prisma', () => {
     return /from ['"]@\/lib\/prisma['"]/.test(readFileSync(f, 'utf8'));
   });
   return users.length
-    ? { ok: true, msg: `${users.length} file(s) import @/lib/prisma` }
+    ? { ok: true, msg: `${users.length} file(s) import @/lib/prisma: ${users.slice(0, 5).map((f) => relative(ROOT, f).split('\\').join('/')).join(', ')}${users.length > 5 ? ' …' : ''}` }
     : {
         ok: 'warn',
         msg: 'nothing outside lib/prisma.ts imports @/lib/prisma — the client is installed but no screen or action uses it yet (fine on a bare project; on an existing app it means the features still run on their old store — §4b)',

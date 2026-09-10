@@ -18,7 +18,22 @@
         "§5.7: lib/auth-context.tsx's mockUser/localStorage gate is removed and app/login/page.tsx submits to the real Server Actions (or is swapped for the kit login page with the choice recorded in DESIGN.md §10); the routes /, /requests, /login still exist",
         "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 — including 'Admin pages live in the project shell, not a second one' — and 'No prototype login gate left' is not a warning"
       ],
-      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-10": {
+        "skill_version": "4.61.2",
+        "runner": "unattended executor subagent (skill defaults, SSO only) → independent grader subagent re-running verify; 33 min, 57 files. Ran on the database-eval-4 result (fixture → design preserve mode → database), i.e. the real full-setup order. The database run's EVAL-TRANSCRIPT.md was still present when the executor started (slow copy) — grader found boilerplate reuse but no substantive leakage; runner rule added to the fixture README",
+        "pass": 8,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Existing-shell check stated first; shell markup moved line-identical into app/(app)/layout.tsx with the session guard; admin items merged via ADMIN_NAV_ITEMS + useTranslations('auth.adminNav') in components/app-nav.tsx; (admin) nested under (app) renders plain {children}; <AdminNav> never rendered; prototype gate deleted, kit /login page chosen and recorded in DESIGN.md §10; auth verify 38/38, design verify 31/31, build 9 routes",
+          "Skill defect fixed in 4.61.3: assets/lib/permissions.ts users:create / users:reset-password had no [METHOD: LOCAL] marker although every consumer is LOCAL-only — a literal runner leaves orphan checkboxes on SSO-only projects",
+          "Skill gap fixed in 4.61.3: better-auth's optional peer vitest ^2–^4 vs the org vitest ^5 → ERESOLVE on every org project; §5.1 install line now carries --legacy-peer-deps + the prune caveat",
+          "Verify gap fixed in 4.61.3: the §5.6 check only failed on <AdminNav>; a hand-built second aside/Sidebar inside (admin)/layout.tsx now fails too",
+          "/login and /admin/setup render outside the preserved shell (recorded in DESIGN.md §10) — same as full-setup eval 4; defensible post-auth",
+          "Kit gap → backlog §11: NavUser calls useSidebar(), forcing a bare SidebarProvider (global Ctrl/Cmd+B listener + sidebar_state cookie) on projects with no shadcn sidebar"
+        ]
+      }
     },
     {
       "id": 1,

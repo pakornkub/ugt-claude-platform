@@ -671,12 +671,22 @@ check('Admin pages live in the project shell, not a second one (§5.6)', () => {
     return /SidebarProvider|<aside\b|<nav\b|AppSidebar|site-header|Sidebar\b/.test(stripComments(readFileSync(f, 'utf8')));
   });
   if (!shellLayouts.length) return { ok: true, msg: 'no project shell found — the standalone <AdminNav> fallback is the right one here' };
-  // Importing ADMIN_NAV_ITEMS to merge is the correct use; RENDERING <AdminNav> is the bug.
+  // Importing ADMIN_NAV_ITEMS to merge is the correct use; RENDERING <AdminNav> is the bug —
+  // and so is a hand-built second shell inside the (admin) group that avoids the name
+  // (grader finding 2026-09-10: the AdminNav-only check let that through).
   const renders = files.filter((f) => !/components\/admin-nav\.tsx$/.test(rel(f)) && /<AdminNav\b/.test(stripComments(readFileSync(f, 'utf8'))));
-  return renders.length
+  const secondShells = files.filter((f) => {
+    const r = rel(f);
+    if (!/\(admin\)\/[^/]*layout\.tsx$/.test(r)) return false;
+    return /\bSidebarInset\b|<Sidebar[\s>\/]|<aside\b/.test(stripComments(readFileSync(f, 'utf8')));
+  });
+  const problems = [];
+  if (renders.length) problems.push(`<AdminNav> is still rendered in ${renders.map(rel).join(', ')}`);
+  if (secondShells.length) problems.push(`(admin) layout builds its own sidebar/aside: ${secondShells.map(rel).join(', ')}`);
+  return problems.length
     ? {
         ok: false,
-        msg: `project has a shell (${shellLayouts.map(rel).join(', ')}) but <AdminNav> is still rendered in ${renders.map(rel).join(', ')} — two competing sidebars / a second template on org tokens; merge ADMIN_NAV_ITEMS into the existing nav and render plain {children} in (admin)/layout.tsx (§5.6, มติ 2026-09-09)`,
+        msg: `project has a shell (${shellLayouts.map(rel).join(', ')}) but ${problems.join(' · ')} — two competing sidebars / a second template on org tokens; merge ADMIN_NAV_ITEMS into the existing nav and render plain {children} in (admin)/layout.tsx (§5.6, มติ 2026-09-09)`,
       }
     : { ok: true };
 });

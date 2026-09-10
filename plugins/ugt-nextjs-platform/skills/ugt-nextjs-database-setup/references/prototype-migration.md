@@ -65,8 +65,15 @@ The rule that makes this "preserve mode" rather than a rewrite:
   Client Component.
 - Soft delete replaces `DELETE`: `isDeleted = true`, and every list query
   filters `isDeleted: false` (contract database.md).
-- Actor columns (`createdBy`/`updatedBy`) come from the real session once
-  auth-setup is in — until then leave them `null`, never a hard-coded name.
+- Actor columns: `createdBy` stays **`String` NOT NULL** as the convention
+  says (`naming-conventions.md` §Standard audit columns) — do **not** make it
+  nullable to dodge the missing session; tightening a nullable column later is
+  a data migration, the exact cost this skill exists to avoid. Until
+  auth-setup provides a session actor, write a fixed marker: imported rows
+  get `'prototype-import'` (the seed script), rows created by code paths that
+  run before auth is installed get `'system'`. auth-setup then swaps these
+  call sites to the session user. (`updatedBy` is `String?` by convention — a
+  new row has never been edited.)
 
 Do the entities one at a time, run the screen after each, then move on.
 
@@ -74,9 +81,10 @@ Do the entities one at a time, run the screen after each, then move on.
 
 Prototype rows are usually demo data. Ask (or read Q0b's answer): keep or
 drop. Keep → `scripts/seed-from-prototype.ts` (tsx, reads the old store or
-the JSON fixtures once, writes through Prisma, idempotent on re-run); it is
-a one-off tool, not part of the app, and is deleted with the old store after
-it has run. Drop → say so in `decisions.md`.
+the JSON fixtures once, writes through Prisma with `createdBy:
+'prototype-import'`, idempotent on re-run); it is a one-off tool, not part
+of the app, and is deleted with the old store after it has run. Drop → say
+so in `decisions.md`.
 
 ## 5. Delete the old store
 

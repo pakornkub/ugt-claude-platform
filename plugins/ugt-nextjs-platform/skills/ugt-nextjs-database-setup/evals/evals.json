@@ -69,7 +69,20 @@
         "node scripts/verify.mjs of ugt-nextjs-database-setup exits 0 — 'No prototype data store left beside Prisma/SQL Server' passes and 'Feature code actually reads through @/lib/prisma' reports files, not a warning",
         "The closing summary says which store the screens now read; it never reports 'ต่อ database แล้ว' while services/requests.ts still opens SQLite"
       ],
-      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-10": {
+        "skill_version": "4.61.2",
+        "runner": "unattended executor subagent (skill defaults) → independent grader subagent re-running verify; 18 min, 18 files. Ran on the design-eval-8 result (fixture + org design in preserve mode) rather than the raw fixture, so the chain design → database → auth mirrors full-setup order",
+        "pass": 9,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Migration behind the same three exported signatures with app/** untouched; better-sqlite3 + data/app.db removed; idempotent scripts/seed-from-prototype.ts; decisions.md entity map dated; verify 16/16, tsc + next build pass; migrate/seed blocked (no server) with the init SQL generated offline via prisma migrate diff",
+          "Skill defect (a): references contradicted each other on CreatedBy — naming-conventions said NOT NULL, schema-skeleton shipped `createdBy String`, prototype-migration §3 said 'leave null until auth-setup'. Run made it String? and recorded a deviation. Fixed in 4.61.3: actor columns are String? until the app has a session actor (the upload kit's Attachments model already ships nullable).",
+          "Skill defect (b): `npm install … zod` unpinned — fresh projects get zod 4, existing ones stay on zod 3, while ugt-nextjs-clean-code mandates zod-4-only APIs. Fixed in 4.61.3: pin zod@^4 in database-setup and auth-setup install lines.",
+          "Nuance: summary opens with 'ต่อ SQL Server ให้แล้วครับ' although no server was reached (P1001) — it immediately lists migrate/seed as blocked; assertion 9 targets the SQLite-still-open case, which did not occur"
+        ]
+      }
     }
   ]
 }

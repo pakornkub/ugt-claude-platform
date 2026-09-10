@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-auth-setup/lib/permissions.ts
-// kit-hash: 11f340a557d1
+// kit: ugt-nextjs-platform 4.61.3 · ugt-nextjs-auth-setup/lib/permissions.ts
+// kit-hash: 9dc27dce8f25
 /**
  * Permission keys — single source of truth for all permission constants.
  * Naming convention: resource:action (standard RBAC pattern)
@@ -21,9 +21,9 @@ export const PERMISSIONS = {
   // (บัญชี SSO/AD เกิดเองตอน login — มติ 2026-08-11); เพิ่มคีย์เมื่อทำ action จริง
   // ห้ามประกาศคีย์ล่วงหน้าโดยไม่มีของ — จะกลายเป็น checkbox ที่ติ๊กแล้วไม่ได้อะไร
   USERS_READ: 'users:read',
-  USERS_CREATE: 'users:create',
+  USERS_CREATE: 'users:create', // [METHOD: LOCAL] — only createLocalUserAction consumes it; SSO/LDAP accounts are created at first login
   USERS_UPDATE: 'users:update',
-  USERS_RESET_PASSWORD: 'users:reset-password', // NOSONAR typescript:S2068 — permission key string, not a password value
+  USERS_RESET_PASSWORD: 'users:reset-password', // [METHOD: LOCAL] NOSONAR typescript:S2068 — permission key string, not a password value
 
   // Role management
   ROLES_READ: 'roles:read',
@@ -56,9 +56,9 @@ export const ALL_PERMISSIONS: Array<{
 }> = [
   // User management
   { key: PERMISSIONS.USERS_READ, label: 'View Users', group: 'users' },
-  { key: PERMISSIONS.USERS_CREATE, label: 'Create Users', group: 'users' },
+  { key: PERMISSIONS.USERS_CREATE, label: 'Create Users', group: 'users' }, // [METHOD: LOCAL]
   { key: PERMISSIONS.USERS_UPDATE, label: 'Edit Users', group: 'users' },
-  { key: PERMISSIONS.USERS_RESET_PASSWORD, label: 'Reset User Passwords', group: 'users' },
+  { key: PERMISSIONS.USERS_RESET_PASSWORD, label: 'Reset User Passwords', group: 'users' }, // [METHOD: LOCAL]
 
   // Role management
   { key: PERMISSIONS.ROLES_READ, label: 'View Roles', group: 'roles' },

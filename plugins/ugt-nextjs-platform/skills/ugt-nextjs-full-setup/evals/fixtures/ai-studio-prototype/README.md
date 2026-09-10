@@ -1,9 +1,13 @@
 # request-tracker (fixture)
 
-> **Runner rule: delete this README from the copy before the skill under test
-> runs.** It names every trait and the skill that must react — leaving it in
+> **Runner rules.** (1) Delete this README from the copy before the skill under
+> test runs — it names every trait and the skill that must react; leaving it in
 > place hands the model the answer key, which is exactly the "prompt tells the
-> situation" flaw these evals exist to remove.
+> situation" flaw these evals exist to remove. (2) When chaining runs on one
+> copy (design → database → auth), delete the previous run's
+> `EVAL-TRANSCRIPT.md` **and commit that deletion before launching the next
+> executor** — on 2026-09-10 a slow copy let the auth run start with the
+> database transcript still present (no substantive leakage, but avoidable).
 
 Eval fixture — a Next.js App Router project in the shape Google AI Studio /
 v0 exports actually arrive in (field report 2026-09-09). Used by

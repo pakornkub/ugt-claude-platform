@@ -271,6 +271,17 @@ auth asset 2 ไฟล์ type-break กับ `@base-ui/react ^1.8` `onValueCha
 - ~~ฟ้อนต์ใน preserve mode — iron rule ชนกับ "ใช้ design เดิม"~~ → **มติ 2026-09-09
   (4.61.2): ถามเป็นข้อ interview เฉพาะ preserve mode** = ข้อ 10 default คงฟ้อนต์เดิม ·
   verify อ่านประโยค "ฟ้อนต์: คงของเดิม (<ชื่อ>)" ใน DESIGN.md แล้วเลิกเรียกหา Inter/Noto
+- **auth `nav-user.tsx` เรียก `useSidebar()` เสมอ** → โปรเจค preserve mode ที่ไม่มี shadcn
+  sidebar ต้องครอบ `SidebarProvider` เปล่าให้ header widget ตัวเดียว ซึ่งติดตั้ง keydown
+  listener Ctrl/Cmd+B ทั้งหน้า + เขียน cookie `sidebar_state` ให้ sidebar ที่ไม่มีอยู่จริง
+  (`ui/sidebar.tsx`) — ควรมี path ไม่ต้องใช้ provider (เช็ค context แบบ optional หรือ
+  variant `NavUser` สำหรับ topbar) แล้ว design Step 3.5 / auth §5.5 เลิกต้องอธิบายข้อยกเว้น
+  (grader auth sidebar-eval 0, 2026-09-10)
+- **`migrations.md` ขาด path "ไม่มี server ตอนติดตั้ง"** — run ของ database eval 4
+  (2026-09-10) สร้าง init SQL แบบ offline ด้วย `prisma migrate diff --from-empty
+  --to-schema-datamodel --script` แล้ววางเป็น `prisma/migrations/<ts>_init/` ให้
+  `migrate deploy` ใช้ทีหลัง — วิธีนี้ถูกและควรเป็นขั้นตอนใน migrations.md §1 สำหรับ
+  โปรเจคที่ DB ยังไม่พร้อม (รอ admin คืน credential) แทนที่จะปล่อยให้แต่ละ run คิดเอง
 - ไม่ใช่บั๊ก แต่จดไว้: asset CRLF ที่ executor เห็นเป็น artifact ของ working copy บน
   Windows (`git ls-files --eol` = i/lf ทุกไฟล์, `.gitattributes` บังคับ LF) — plugin
   ที่ติดตั้งผ่าน marketplace ได้ LF เสมอ; runner ของ eval ควร copy จาก `git archive`

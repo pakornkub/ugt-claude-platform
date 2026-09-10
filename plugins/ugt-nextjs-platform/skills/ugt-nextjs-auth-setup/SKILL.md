@@ -217,7 +217,7 @@ call) — say which path was taken and record it as a DESIGN.md deviation.
 # better-auth 1.7.0 removed genericOAuthClient in a MINOR bump — a deliberate
 # rewrite, not a regression (full migration history in references/auth-flows.md
 # SSO login flow). Every asset here is written for ≥1.7 — do not pin below 1.7.1.
-npm i better-auth@^1.7.1 zod
+npm i better-auth@^1.7.1 zod@^4 --legacy-peer-deps   # zod pinned to 4 (clean-code mandates z.flattenError / z.iso.*) · --legacy-peer-deps: better-auth declares an optional peer vitest ^2–^4 and the org test-lint kit is vitest ^5 → plain install dies with ERESOLVE (eval run 2026-09-10); afterwards re-check that vite / @testing-library/dom are still installed — the flag can prune them (docs/backlog.md §11)
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)

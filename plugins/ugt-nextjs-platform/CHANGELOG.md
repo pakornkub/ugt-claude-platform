@@ -1,5 +1,48 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.61.3 (2026-09-10)
+
+**baseline ที่เหลือของ preserve mode (database eval 4 · auth sidebar-eval 0) + แก้
+2 defect ที่ grader เจอ** · รันต่อเป็นสายจริง design → database → auth บนโปรเจค
+เดียวกัน (ผล design eval 8 เป็นจุดตั้งต้น) ให้ตรงลำดับ full-setup — ผลอยู่ key
+`baseline_result_2026-09-10`
+
+- **database eval 4: 9/9** (18 นาที) — migrate หลัง signature เดิม 3 ตัว `app/**`
+  ไม่ถูกแตะ, better-sqlite3 + `.db` หาย, seed script idempotent, decisions.md
+  มี entity map, verify 16/16, tsc + build ผ่าน; migrate/seed blocked (ไม่มี
+  server) แต่ run สร้าง init SQL แบบ offline ด้วย `prisma migrate diff` เอง
+- **auth sidebar-eval 0: 8/8** (33 นาที) — เช็ค shell เดิมก่อน, ย้าย markup shell
+  แบบบรรทัดต่อบรรทัดเข้า `app/(app)/layout.tsx` พร้อม guard, เมนู admin merge ผ่าน
+  `ADMIN_NAV_ITEMS` + `useTranslations`, `(admin)` ซ้อนใต้ `(app)` render `{children}`
+  เปล่า, `<AdminNav>` ไม่ถูก render, prototype gate ถูกลบ + หน้า login ของ kit
+  (บันทึกใน DESIGN.md §10), auth verify 38/38 · design verify 31/31 · build ผ่าน ·
+  transcript ของรอบ database ยังค้างตอน executor เริ่ม (copy ช้า) — grader ยืนยัน
+  ไม่มีการรั่วเชิงเนื้อหา, เพิ่มกติกา runner ใน README ของ fixture
+- **แก้จาก finding ของ grader**:
+  0. **auth `assets/lib/permissions.ts`**: `users:create` / `users:reset-password` ไม่มี
+     marker `[METHOD: LOCAL]` ทั้งที่ทุก consumer เป็น LOCAL-only → runner ที่ทำตาม
+     ตัวอักษรจะทิ้ง checkbox ค้างในโปรเจค SSO-only และ verify "[METHOD: …] markers"
+     จับไม่ได้ → ใส่ marker · auth §5.1 install เพิ่ม `--legacy-peer-deps` (better-auth
+     ประกาศ optional peer vitest ^2–^4 ชน org vitest ^5 → ERESOLVE ทุกโปรเจค) พร้อม
+     caveat เรื่อง prune · auth verify §5.6 จับ shell ที่สองที่สร้างมือใน
+     `(admin)/layout.tsx` (aside/Sidebar/SidebarInset) ด้วย ไม่ใช่แค่ `<AdminNav>`
+  1. **reference ขัดกันเองเรื่อง `CreatedBy`** — `naming-conventions.md` บอก NOT
+     NULL, `schema-skeleton.prisma` ส่ง `createdBy String`, แต่
+     `prototype-migration.md` §3 (4.61.0) เขียนว่า "ก่อนมี auth ให้ปล่อย null"
+     ซึ่งทำไม่ได้ถ้าไม่ทำคอลัมน์ nullable — run เลือก `String?` แล้วบันทึกเป็น
+     deviation · แก้ให้ §3 ยึด convention: `createdBy` NOT NULL เสมอ, ก่อนมี
+     session actor ให้เขียน marker คงที่ (`'prototype-import'` สำหรับแถวที่ import,
+     `'system'` สำหรับ code path ที่รันก่อน auth) แล้ว auth-setup ค่อยสลับเป็น
+     session user — ไม่ทำคอลัมน์หลวมเพื่อเลี่ยงปัญหาชั่วคราวเพราะการ tighten ทีหลัง
+     คือ data migration ที่ skill นี้มีไว้กัน · SKILL §4b ข้อ 4 ระบุด้วย
+  2. **`zod` ไม่ pin** ใน install line ของ database-setup และ auth-setup —
+     โปรเจคใหม่ได้ zod 4 แต่โปรเจคเดิมค้าง zod 3 ขณะที่ `ugt-nextjs-clean-code`
+     บังคับ API ของ v4 (`z.flattenError`, `z.iso.*`) → pin `zod@^4` ทั้งสองที่
+  3. database verify "Feature code actually reads through @/lib/prisma" บอกชื่อไฟล์
+     ที่ import ด้วย (เดิมบอกแค่จำนวน)
+- หมายเหตุจาก grader: `migrations.md` ยังไม่มี path "สร้าง init SQL แบบ offline
+  เมื่อไม่มี server" ที่ run คิดเอง — ลง backlog §11
+
 ## 4.61.2 (2026-09-09)
 
 **ผล eval baseline รอบแรกของ preserve mode + แก้ 6 finding ที่ eval จับได้** · รัน

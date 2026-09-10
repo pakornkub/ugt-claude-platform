@@ -88,7 +88,7 @@ and `@prisma/adapter-mssql` are versioned together (same release train) —
 keep all three on the same version:
 
 ```bash
-npm install @prisma/client@7.9.1 @prisma/adapter-mssql@7.9.1 @t3-oss/env-nextjs zod
+npm install @prisma/client@7.9.1 @prisma/adapter-mssql@7.9.1 @t3-oss/env-nextjs zod@^4
 npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 ```
 
@@ -179,7 +179,9 @@ procedure and traps → `references/prototype-migration.md`; the shape:
    screens already call.** Workflow logic and pages do not change (preserve
    mode); only the bodies now go through `@/lib/prisma`.
 4. **Seed data is a decision**: import the prototype's sample rows with a
-   one-off `scripts/seed-from-prototype.ts`, or drop them — record which.
+   one-off `scripts/seed-from-prototype.ts` (`createdBy: 'prototype-import'`
+   — `CreatedBy` stays NOT NULL; never loosen the column because auth is not
+   installed yet), or drop them — record which.
 5. **Delete the old store** — deps (`better-sqlite3`, `sqlite3`, `sql.js`,
    `@libsql/client`, `lowdb`, `drizzle-orm`), `provider = "sqlite"`, `*.db`
    files, JSON fixtures, the localStorage keys — and their imports.
