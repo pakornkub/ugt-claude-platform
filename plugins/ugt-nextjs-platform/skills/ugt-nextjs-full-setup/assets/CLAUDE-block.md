@@ -57,10 +57,13 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 @.claude/state/model-mode.md
 
-- Follow that table when dispatching subagents or spawning teammates · switch
-  preset with `/ugt-model-mode easy|default|god|auto` · main session model stays the
-  user's `/model` · this table **wins over model advice inside any pipeline
-  skill** (e.g. superpowers SDD's Model Selection section)
+- Follow that table when dispatching subagents or spawning teammates · **print
+  the dispatch plan first** (Work · Task type · Model · Why — one table per
+  batch, then proceed) so the user sees who gets which model · switch
+  preset with `/ugt-model-mode easy|default|god|auto` (new projects start on
+  `auto`) · main session model stays the user's `/model` · this table **wins
+  over model advice inside any pipeline skill** (e.g. superpowers SDD's Model
+  Selection section)
 
 ## Which skill, when
 

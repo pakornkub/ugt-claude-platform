@@ -1,5 +1,25 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.62.0 (2026-09-10)
+
+**full-setup: `model-mode.md` ติดตั้งเป็น `auto` + CLAUDE-block สั่งโชว์แผน
+dispatch ก่อน spawn** (คู่กับ ugt-core 2.12.0 — ที่มาอยู่ใน CHANGELOG นั้น)
+
+- **`assets/state/model-mode.md`** = auto template ของ `ugt-model-mode` 2.12.0
+  ตรงตัว (เดิม preset `default`): เลือก model รายงานตาม ambiguity / blast
+  radius / risk domain + bullet "Show the dispatch plan before the first spawn"
+  · ไฟล์นี้ยังเป็น create-once — โปรเจคที่มีอยู่แล้วไม่ถูกเขียนทับ
+- **`assets/CLAUDE-block.md`** section "Model mode": เพิ่ม "print the dispatch
+  plan first (Work · Task type · Model · Why — one table per batch, then
+  proceed)" + ระบุว่าโปรเจคใหม่เริ่มที่ `auto` · block เปลี่ยน → verify.mjs
+  จะเตือนโปรเจคเดิมให้ re-apply block (ข้อ "ugt block is not from an older
+  harness release") ตามกลไกเดิม
+- SKILL.md harness step 4 + verify.mjs ข้อความ "run /ugt-model-mode auto to
+  create it" (เดิม default)
+- docs: README + index.html — ส่วน model-mode บอกว่าโปรเจคใหม่เริ่มที่ `auto`,
+  ตารางเทียบโหมดบนเว็บเพิ่มคอลัมน์/chip `auto (ค่าเริ่มต้น)` เป็นตัวที่ active
+  ตอนเปิดหน้า, และอธิบายกติกาโชว์แผนก่อนกระจายงาน · drift 22/22
+
 ## 4.61.1 (2026-09-09)
 
 **Evals ปิดช่องที่ทำให้ 4.20.0/4.22.0 "ผ่าน test แล้วยังหลุด"** · ที่มา: คำถามผู้ดูแล

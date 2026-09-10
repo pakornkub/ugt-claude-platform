@@ -1,8 +1,12 @@
 # Handoff
 
-Last updated: 2026-09-09
+Last updated: 2026-09-10
 
 ## In progress
+- **ugt-core 2.12.0 + ugt-nextjs-platform 4.62.0 ยังไม่ tag** — commit อยู่บน
+  branch `claude/wizardly-dijkstra-ev60pz` รอ merge/tag (`ugt-core--v2.12.0`,
+  `ugt-nextjs-platform--v4.62.0`) · eval 4 ของ ugt-model-mode
+  (`dispatch-plan-before-spawn`) ยังไม่ได้รัน baseline
 - เครื่องนี้ยังไม่ได้ update plugin เป็น nextjs **4.61.1** — รอผู้ใช้รัน
   `/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform` +
   `/reload-plugins` เอง
@@ -26,6 +30,14 @@ Last updated: 2026-09-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-10 ugt-core **2.12.0** + ugt-nextjs-platform **4.62.0** — ตอบคำถาม
+  ผู้ดูแล "spawn sub agent ใช้ model เหมาะไหม / โชว์แผนก่อนไหม": การเลือก model
+  ต่อประเภทงานมีอยู่แล้ว แต่ไม่มีกติกาให้โชว์แผนก่อน และ audit log ไม่เก็บ model
+  → เพิ่ม **dispatch plan** (ตาราง Work · Task type · Model · Why ก่อน spawn ชุดแรก
+  แล้วทำต่อ ไม่หยุดรอ confirm) ใน SKILL.md + template ทุก preset + CLAUDE-block,
+  audit-log เก็บ `model`/`subagent_type`, **ค่าเริ่มต้นโปรเจคใหม่เป็น `auto`**
+  (asset, harness.md, full-setup step 4, verify msg, README, index.html chip
+  auto), eval 4 ใหม่, drift check ข้อใหม่ (22/22 ผ่าน) · **ยังไม่ tag/ยังไม่รัน eval**
 - 2026-09-09 ugt-nextjs-platform **4.61.1** — evals ปิดช่องที่ทำให้ 4.20.0/4.22.0
   "ผ่าน test แล้วยังหลุด": (1) eval เดิมบอกสถานการณ์ใน prompt (2) design eval 3
   ไม่มี fixture + assert แค่ record ไม่ใช่ outcome (3) `fixtures/with-shell` ของ
@@ -60,5 +72,3 @@ Last updated: 2026-09-09
 - 2026-09-01 แก้ครบ 13 findings จาก /code-review อิสระหลัง bundle split — ugt-nextjs-platform **4.56.0** (CLAUDE-block generate ตาม bundle ด้วย marker `[PIPELINE:*]`, merge ลบ key ตาย `ugt-nextjs-standard@ugt`, fallback ถามแทนเดา, verify.mjs จับ stale key), ugt-core **2.9.2** (IT redeploy note), drift-check +5 pins (รวม bundle parity), docs sync (setup step, /code-review namespaced, คำเคลม manual แม่นขึ้น), ลบ worktree ค้าง sharp-jones · **ยังไม่ tag/push**
 - 2026-08-31 **Bundle split**: `ugt-nextjs-standard` → `ugt-nextjs-standard-superpowers` 3.0.0 (เดิม) + `ugt-nextjs-standard-mattpocock` 1.0.0 (ใหม่ — pipeline manual/token ต่ำ เลือกตอน install แทน runtime toggle ที่ถูกปัดตกเพราะเสี่ยง Claude เรียกผิดฝั่ง) · ugt-nextjs-platform 4.55.0, ugt-core 2.9.1 · spec: docs/superpowers/specs/2026-08-31-pipeline-bundle-choice-design.md (มติ 2.1–2.11) · tag + push แล้ว · หมายเหตุ: เลข 4.55.1 เป็น phantom ใน commit title ห้ามใช้ซ้ำ
 - 2026-08-26 ugt-nextjs-platform **4.54.0** — upload-setup: virus scan เป็นคำถาม interview §3 Q5 (opt-out ผ่าน marker `[SCAN]` + deviation + งาน retrofit), verify.mjs รองรับโหมด scan-off, §7 troubleshooting `SCANNER_UNAVAILABLE` จาก field report ugt-customer-request · tag + push แล้ว
-- 2026-08-26 ugt-nextjs-platform **4.53.0** — return-to-page `?from=` ครบทุกทางเข้า login: `proxy.ts` (แนบ ?from= + forward header `x-from`), `session-expired-dialog.tsx`, `login-form.tsx` (`sanitizeFrom()` กัน open redirect), SKILL.md §5.5 + auth-flows.md §Return-to-page · merge main + push + tag แล้ว (รวม tag ย้อน `ugt-nextjs-platform--v4.52.0` ที่ตกหล่น)
-- 2026-08-26 ugt-nextjs-platform **4.52.0** — `SessionExpiredDialog` ตัวรับ CustomEvent `session-expired` (401 กลางหน้า) mount ใน protected layout

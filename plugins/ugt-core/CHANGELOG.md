@@ -1,5 +1,39 @@
 # Changelog — ugt-core
 
+## 2.12.0 (2026-09-10)
+
+**`ugt-model-mode`: โชว์แผน dispatch ก่อน spawn + โปรเจคใหม่เริ่มที่ `auto`**
+(คู่กับ ugt-nextjs-platform 4.62.0) · ที่มา: คำถามผู้ดูแล 2026-09-10 "ถ้ามีการ
+spawn sub agent มันจะใช้ model ที่เหมาะกับงานไหม และจะโชว์แผนให้ดูก่อนไหม" —
+ไล่แล้วพบว่า (1) การเลือก model ต่อประเภทงานมีอยู่แล้วผ่านตาราง
+`model-mode.md` (import เข้า CLAUDE.md) แต่ (2) **ไม่มีข้อไหนสั่งให้บอกผู้ใช้
+ก่อน** ว่าจะกระจายงานอะไร ให้ model ไหน — session เลือกเงียบ ๆ ตอน dispatch และ
+(3) audit log ไม่เก็บ `model` ของ Agent call จึงตรวจย้อนหลังไม่ได้เลยว่าทำตามตารางจริง
+
+- **Dispatch plan** (section ใหม่ใน SKILL.md + bullet ใน template ทั้ง fixed และ
+  auto): ก่อน spawn ชุดแรกของงานแต่ละก้อน session ต้องพิมพ์ตารางสั้น ๆ
+  `Work · Task type · Model · Why` (auto: Why = สัญญาณ ambiguity / blast radius /
+  risk domain ที่ตัดสิน · preset คงที่: Why = `<mode> table`) แล้ว**ทำต่อเลย** —
+  หนึ่งตารางต่อ batch ไม่ใช่ต่อ spawn · ไม่หยุดรอ confirm เว้นแต่ผู้ใช้ท้วง ·
+  ผู้ใช้ override ในตารางได้เฉพาะ batch นั้น (เปลี่ยนถาวรยังต้อง
+  `/ugt-model-mode`) · แผนไม่เคย rewrite `model-mode.md`
+- **ค่าเริ่มต้นเป็น `auto`**: harness.md แถว `model-mode.md` "created once with
+  the `auto` preset" (เดิม `default`) · "Reading mode" เสนอ `/ugt-model-mode auto`
+  เมื่อไม่มีไฟล์ · precedence section ปรับถ้อยคำ (auto คือจุดเริ่มของโปรเจคใหม่)
+  · โปรเจคเดิมที่มี `model-mode.md` อยู่แล้ว**ไม่ถูกแตะ** — อยากได้ bullet
+  dispatch plan ในไฟล์ของโปรเจค ให้รัน `/ugt-model-mode <preset เดิม>` หนึ่งครั้ง
+  (rewrite จาก template ใหม่)
+- **audit-log.mjs** เก็บ `model` + `subagent_type` ของ Agent call เพิ่ม (metadata
+  ไม่ใช่เนื้อหา — กฎห้าม log content คงเดิม) → ตอบได้จาก log ว่า subagent ได้
+  model ตามตารางไหม
+- **evals**: eval 4 `dispatch-plan-before-spawn` (auto preset: review auth code +
+  รันเทส → ตารางแผนต้องโผล่ก่อน Agent call แรก, review → fable เหตุ auth,
+  test → haiku, ไม่หยุดถาม) · note fixture แก้ให้ชัดว่า preset `default` ใน fixture
+  มาจาก `/ugt-model-mode default` (full-setup ส่ง `auto` แล้ว eval 3 จึงต้องมี
+  preset คงที่ให้สลับออก) · **ยังไม่ได้รัน** — baseline รอบหน้า
+- Quick Rules + Verification Checklist เพิ่มข้อ dispatch plan · drift check
+  ใหม่ 1 ข้อ (22 ข้อ) pin ค่า `auto` + ข้อความ dispatch plan ครบ 6 ไฟล์
+
 ## 2.11.1 (2026-09-06)
 
 **description ≤ 1,024 ตัวอักษร + trigger-evals รอบใหม่** (คู่กับ

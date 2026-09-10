@@ -20,7 +20,16 @@ One committed file, `.claude/state/model-mode.md`, tells every session which mod
 pass when dispatching work — a subagent (superpowers pipeline or direct Agent
 call) or an Agent Teams teammate at spawn; the decision point is the same
 either way. Three fixed presets trade cost against quality; a fourth, `auto`,
-judges per task instead.
+judges per task instead. **New projects ship with `auto`** (the full-setup
+skill creates the file that way); the fixed presets are opt-in via this skill.
+
+Two things the file makes every session do, whatever the preset:
+
+1. **Pick the model per task type** from the table (or, in `auto`, from the
+   rules) and pass it as `model:` at dispatch.
+2. **Show the dispatch plan before the first spawn** of a work chunk — one
+   line per subagent/teammate: what it does · task type · model (· in
+   `auto`, the signal that decided). See "Dispatch plan" below.
 
 **Hard limit to state up front:** this affects **dispatched work only**
 (subagents and teammates). The main
@@ -80,8 +89,42 @@ project's committed standard, and CLAUDE.md-level instructions take
 precedence over skill text. SDD's guidance still fills the gaps where this
 table is silent (e.g. turn-count-beats-token-price, fix-loop escalation).
 For heavy feature-building phases, `auto` is the preset whose logic matches
-SDD's per-task judgment best — suggest it when a project on `default` starts
-building features with real risk domains.
+SDD's per-task judgment best — it is what new projects start on; if a team
+switched to a fixed preset and then starts building features with real risk
+domains, suggest going back to `auto`.
+
+## Dispatch plan — show it before spawning
+
+The table decides the model, but the user only sees the decision if the
+session says it out loud. So, in every preset, **before the first dispatch of
+a work chunk** (an SDD plan, a review round, an ad-hoc "go check X"), print a
+short plan and then proceed — do not wait for a confirmation unless the user
+objects or asks to be asked:
+
+```markdown
+Dispatch plan (mode: auto)
+| # | Work | Task type | Model | Why |
+| --- | --- | --- | --- | --- |
+| 1 | Implement task 1 — add `Requests` Prisma model + migration | Write code | sonnet | 2 files, no risk domain |
+| 2 | Implement task 2 — permission check on `updateStatus` action | Write code | opus | risk domain: auth |
+| 3 | Spec review + code review of 1–2 | Review code | fable | never weaker than the coder |
+| 4 | Run `npm run test:coverage` | Mechanical | haiku | — |
+```
+
+Rules:
+
+- **One table per batch, not per spawn** — a multi-task plan gets one table
+  for the whole batch; a single ad-hoc dispatch gets one line in the same
+  shape (`Work · Task type · Model · Why`). Re-print only the rows that
+  changed if the plan changes mid-batch (e.g. a fix-loop escalation).
+- **`Why` names the signal**: in `auto` it is the ambiguity / blast-radius /
+  risk-domain reading that picked the model; in a fixed preset it is just the
+  preset name (`default table`). A row that omits `model:` says `inherit`.
+- **The plan is a preview, not a new decision point** — it never rewrites
+  `model-mode.md`. If the user answers "ใช้ opus แทน" the override applies to
+  that batch only; a lasting change is still `/ugt-model-mode <preset>`.
+- Subagents themselves cannot dispatch further, so the plan is always printed
+  by the main session (or the Agent Teams lead).
 
 ## Switching mode
 
@@ -129,6 +172,10 @@ Agent tool, or Agent Teams), pass `model:` by task type:
   Plan · SDD implementer → Write code (or Fix a bug when the root cause is
   known) · SDD spec reviewer + code reviewer → Review code ·
   systematic-debugging → Diagnose · running verify/test scripts → mechanical.
+- **Show the dispatch plan before the first spawn of a work chunk** — one
+  table for the batch (one line for a single dispatch): `Work · Task type ·
+  Model · Why` (Why = `<mode> table`), then proceed; pause only if the user
+  objects. Overrides the user gives there apply to that batch only.
 - Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Task type not listed → omit `model:` (the subagent inherits the session model).
 ```
@@ -165,6 +212,11 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
   Plan · SDD implementer → Write code (or Fix a bug when the root cause is
   known) · SDD spec reviewer + code reviewer → Review code ·
   systematic-debugging → Diagnose · running verify/test scripts → mechanical.
+- **Show the dispatch plan before the first spawn of a work chunk** — one
+  table for the batch (one line for a single dispatch): `Work · Task type ·
+  Model · Why` (Why = the ambiguity / blast-radius / risk-domain reading that
+  picked the model), then proceed; pause only if the user objects. Overrides
+  the user gives there apply to that batch only.
 - Dispatched work only — the main session model is the user's `/model`; never switch it.
 - Judge at dispatch time; never rewrite this file per task.
 - Task type not listed → omit `model:` (the subagent inherits the session model).
@@ -176,7 +228,7 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 `.claude/state/model-mode.md` and report the `Current mode:` line plus its table.
 File missing → **check for the legacy name first** (below); only when neither
 file exists, say no mode is set (dispatches inherit the session model) and
-offer `/ugt-model-mode default` to create it.
+offer `/ugt-model-mode auto` to create it (the preset new projects ship with).
 
 ## Legacy v2.x layout (`mode.md`)
 
@@ -201,6 +253,7 @@ exists, that is the v2.x name (the skill was `/ugt-mode` then) — never report
 | Point the user to `/model` for the main session | Claim the mode changed the main-loop model |
 | Keep haiku on mechanical rows in every preset | "Upgrade" verify-script runs to an expensive model |
 | Let `auto` judge in-session at dispatch time | Rewrite `model-mode.md` per task or auto-switch presets |
+| Print the dispatch plan (Work · Task type · Model · Why) before the first spawn of a batch | Spawn silently, or stop for a confirmation the user did not ask for |
 | Leave `handoff.md` / `docs/project-context/` alone | Record the switch in `decisions.md` (it's config, not history) |
 
 ## Verification Checklist
@@ -209,4 +262,5 @@ exists, that is the v2.x name (the skill was `/ugt-mode` then) — never report
 - [ ] Fixed preset: the table's non-mechanical rows match that preset's column
       exactly · `auto`: the table matches the auto template's rules verbatim
 - [ ] The two mechanical rows still say `haiku`
+- [ ] The "Show the dispatch plan before the first spawn" bullet is present
 - [ ] No other file was touched

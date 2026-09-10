@@ -462,12 +462,12 @@
         session เดียวเป็นหลัก ไม่แตก subagent รายงานย่อย</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v4.61.1</span>
+        <span class="ver">v4.62.0</span>
         <h3>ugt-nextjs-platform</h3>
         <p>ตัวช่วย 11 เรื่องของงาน Next.js — ฐานข้อมูล คุณภาพ ดีไซน์ login อีเมล ไฟล์แนบ CI/CD, sync kit และอื่น ๆ (ดูรายการถัดไป)</p>
       </article>
       <article class="card plugin-card reveal">
-        <span class="ver">v2.11.1</span>
+        <span class="ver">v2.12.0</span>
         <h3>ugt-core</h3>
         <p>มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, <strong>ดีไซน์</strong>) — มาเองไม่ต้องติดตั้ง</p>
       </article>
@@ -773,33 +773,35 @@
     <h3 class="sub-title reveal">เลือกความแรงของ AI ตามงาน — <span class="inline-code">/ugt-model-mode</span></h3>
     <p class="sub-lead reveal">โหมดถูกเก็บใน <span class="inline-code">.claude/state/model-mode.md</span> (commit กับ repo — ทั้งทีมได้โหมดเดียวกัน)
       ใช้กับ<strong>งานที่ส่งไปตัวช่วยย่อยเท่านั้น</strong> — model หลักของ session ยังเปลี่ยนด้วย <span class="inline-code">/model</span> ตามปกติ
-      · กดปุ่มด้านล่างเพื่อเทียบแต่ละโหมด</p>
+      · โปรเจคใหม่เริ่มที่ <strong>auto</strong> (AI เลือกความแรงเองเป็นรายงาน) · กดปุ่มด้านล่างเพื่อเทียบแต่ละโหมด</p>
     <div class="mode-chips reveal" role="tablist" aria-label="เลือก preset">
+      <button class="mode-chip active" data-col="4" role="tab" aria-selected="true">auto (ค่าเริ่มต้น)</button>
       <button class="mode-chip" data-col="1" role="tab">easy</button>
-      <button class="mode-chip active" data-col="2" role="tab" aria-selected="true">default</button>
+      <button class="mode-chip" data-col="2" role="tab">default</button>
       <button class="mode-chip" data-col="3" role="tab">god</button>
       <button class="mode-chip" data-col="0" role="tab">เทียบทั้งหมด</button>
     </div>
     <div class="table-wrap reveal">
       <table class="mode-table" id="modeTable">
-        <thead><tr><th>ประเภทงาน</th><th>easy</th><th>default</th><th>god</th></tr></thead>
+        <thead><tr><th>ประเภทงาน</th><th>easy</th><th>default</th><th>god</th><th>auto (ค่าเริ่มต้น)</th></tr></thead>
         <tbody>
-          <tr><td>Plan / วิเคราะห์ requirement</td><td>opus</td><td>fable</td><td>fable</td></tr>
-          <tr><td>เขียนโค้ด (feature)</td><td>sonnet</td><td>sonnet</td><td>opus</td></tr>
-          <tr><td>Review โค้ด</td><td>opus</td><td>fable</td><td>fable</td></tr>
-          <tr><td>หาสาเหตุบั๊ก (ยังไม่รู้ root cause)</td><td>opus</td><td>fable</td><td>fable</td></tr>
-          <tr><td>แก้บั๊ก (รู้ root cause แล้ว)</td><td>sonnet</td><td>sonnet</td><td>opus</td></tr>
-          <tr><td>รันเทส / verify script (งาน mechanical)</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
-          <tr><td>Doc / งานเบา</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
+          <tr><td>Plan / วิเคราะห์ requirement</td><td>opus</td><td>fable</td><td>fable</td><td>fable ถ้ากำกวมหรือข้ามหลาย module, ไม่งั้น opus</td></tr>
+          <tr><td>เขียนโค้ด (feature)</td><td>sonnet</td><td>sonnet</td><td>opus</td><td>sonnet · opus ถ้าแตะ auth/เงิน/concurrency หรือ >5 ไฟล์</td></tr>
+          <tr><td>Review โค้ด</td><td>opus</td><td>fable</td><td>fable</td><td>ไม่อ่อนกว่าตัวที่เขียน · fable เมื่อไม่แน่ใจ</td></tr>
+          <tr><td>หาสาเหตุบั๊ก (ยังไม่รู้ root cause)</td><td>opus</td><td>fable</td><td>fable</td><td>fable</td></tr>
+          <tr><td>แก้บั๊ก (รู้ root cause แล้ว)</td><td>sonnet</td><td>sonnet</td><td>opus</td><td>sonnet</td></tr>
+          <tr><td>รันเทส / verify script (งาน mechanical)</td><td>haiku</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
+          <tr><td>Doc / งานเบา</td><td>haiku</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
         </tbody>
       </table>
     </div>
     <p class="foot-note reveal">
+      <span class="inline-code">/ugt-model-mode auto</span> ให้เลือกความแรงเองเป็นรายงานตามความยาก (ค่าเริ่มต้นของโปรเจคใหม่) ·
       <span class="inline-code">/ugt-model-mode god</span> งานสำคัญ อัดเต็มที่ ·
       <span class="inline-code">/ugt-model-mode easy</span> งานทั่วไป ประหยัด ·
-      <span class="inline-code">/ugt-model-mode auto</span> ให้เลือกความแรงเองเป็นรายงานตามความยาก ·
       พิมพ์ประโยคธรรมดา "โหมดประหยัดหน่อย งานนี้ไม่รีบ" ก็ได้ —
-      หลักที่ทุกโหมดยึด: คนตรวจไม่อ่อนกว่าคนเขียน · แยก "หาสาเหตุ" (ใช้ตัวแรง) จาก "แก้ตามแผน" (ตัวถูกกว่า) · งาน mechanical ใช้ haiku เสมอ
+      หลักที่ทุกโหมดยึด: คนตรวจไม่อ่อนกว่าคนเขียน · แยก "หาสาเหตุ" (ใช้ตัวแรง) จาก "แก้ตามแผน" (ตัวถูกกว่า) · งาน mechanical ใช้ haiku เสมอ ·
+      <strong>ทุกโหมดโชว์แผนก่อนกระจายงาน</strong> — ก่อนส่งงานให้ตัวช่วยย่อยชุดแรก AI พิมพ์ตารางสั้น ๆ (งาน · ประเภท · model · เพราะอะไร) แล้วค่อยทำต่อ ท้วงได้ทันที
     </p>
     <script>
       (function(){
@@ -820,7 +822,7 @@
             highlight(Number(chip.dataset.col));
           });
         });
-        highlight(2);
+        highlight(4);
       })();
     </script>
     </div>

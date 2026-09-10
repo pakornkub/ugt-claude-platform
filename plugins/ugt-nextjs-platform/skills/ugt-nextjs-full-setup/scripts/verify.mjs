@@ -153,7 +153,7 @@ check('handoff.md exists with all sections and was actually updated', () => {
 
 check('model-mode.md declares a valid model mode', () => {
   if (!has('.claude/state/model-mode.md')) {
-    return { ok: 'warn', msg: 'No .claude/state/model-mode.md — subagent dispatches inherit the session model; run /ugt-model-mode default to create it' };
+    return { ok: 'warn', msg: 'No .claude/state/model-mode.md — subagent dispatches inherit the session model; run /ugt-model-mode auto to create it' };
   }
   return /Current mode:\s*\*\*(easy|default|god|auto)\*\*/.test(read('.claude/state/model-mode.md'))
     ? { ok: true }

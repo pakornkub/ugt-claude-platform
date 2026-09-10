@@ -303,8 +303,10 @@ How:
    team did not choose.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
-   installed modules in `handoff.md` · `model-mode.md` ships with the `default`
-   preset — changing it is `/ugt-model-mode`'s job, not this skill's.
+   installed modules in `handoff.md` · `model-mode.md` ships with the `auto`
+   preset (model judged per task at dispatch time + the dispatch plan printed
+   before the first spawn) — changing it is `/ugt-model-mode`'s job, not this
+   skill's.
    If legacy v2.x files exist (`checkpoint.md` / `mode.md` /
    `project-notes.md`) → stop and migrate first per the v3.0.0 CHANGELOG.
 5. **`docs/project-context/`** — invoke the **`ugt-context`** skill (ugt-core):
