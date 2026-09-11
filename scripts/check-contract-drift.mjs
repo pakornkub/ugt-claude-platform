@@ -217,6 +217,25 @@ const CHECKS = [
     },
   },
   {
+    // 2026-09-10: new projects ship `auto`, and every preset prints a dispatch
+    // plan before the first spawn — the rule lives in the contract, the skill
+    // that owns model-mode.md, the asset full-setup installs, the CLAUDE-block
+    // that imports it, and full-setup's own step 4. Pin all five.
+    name: 'Model mode: new projects ship auto + dispatch plan printed before spawn',
+    files: {
+      [`${CORE}/contracts/harness.md`]: [/created once\*\* with the `auto` preset/, /dispatch plan/],
+      [`${CORE}/skills/ugt-model-mode/SKILL.md`]: [
+        /New projects ship with `auto`/, /## Dispatch plan/, /Show the dispatch plan before the first spawn/,
+      ],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/state/model-mode.md`]: [
+        /Current mode: \*\*auto\*\*/, /Show the dispatch plan before the first spawn/,
+      ],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/print\s+the dispatch plan first/, /new projects start on\s+`auto`/],
+      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/`model-mode\.md` ships with the `auto`/],
+      [`${NEXT}/ugt-nextjs-full-setup/scripts/verify.mjs`]: [/run \/ugt-model-mode auto to create it/],
+    },
+  },
+  {
     // review 2026-09-01: the superpowers pipeline phrase drifted between
     // marketplace.json and the bundle's own plugin.json on day one
     name: 'Superpowers pipeline phrase identical in marketplace + bundle manifest',

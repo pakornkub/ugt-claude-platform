@@ -37,6 +37,10 @@ function safeSummary(event) {
   if (input.pattern) out.pattern = truncate(String(input.pattern));
   if (input.url) out.url = truncate(String(input.url));
   if (input.description) out.description = truncate(String(input.description));
+  // Agent dispatches: keep the routing decision so "did the subagent get the
+  // model model-mode.md prescribes?" is answerable from the log alone.
+  if (input.model) out.model = truncate(String(input.model));
+  if (input.subagent_type) out.subagent_type = truncate(String(input.subagent_type));
   // Write/Edit: record only the size of the change, never the content
   for (const key of ['content', 'new_string']) {
     if (typeof input[key] === 'string') out.bytes = (out.bytes ?? 0) + input[key].length;

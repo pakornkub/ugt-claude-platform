@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-model-mode",
-  "notes": "Runs on a fixture where .claude/state/model-mode.md already exists with the default preset (the output of ugt-nextjs-full-setup step 4). Prompts stay in Thai: they simulate real user input.",
+  "notes": "Runs on a fixture where .claude/state/model-mode.md already exists with the default preset (written by `/ugt-model-mode default` — full-setup itself now ships `auto`, so eval 3 needs a fixed preset to switch away from). Eval 4 uses the auto preset instead. Prompts stay in Thai: they simulate real user input.",
   "evals": [
     {
       "id": 1,
@@ -40,6 +40,20 @@
         "Run-tests/verify and docs rows remain haiku",
         "Explains judgment happens at dispatch time and model-mode.md is never rewritten per task",
         "handoff.md and docs/project-context/ are not modified"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "dispatch-plan-before-spawn",
+      "prompt": "ช่วย review โค้ดใน lib/auth-guard.ts กับ app/actions/requests.ts ด้วย subagent แล้วรัน npm run test:coverage ต่อให้ด้วย",
+      "expected_output": "With model-mode.md on the auto preset: prints a dispatch plan table (Work · Task type · Model · Why) covering the review dispatch (Review code → fable, risk domain: auth) and the test run (Mechanical → haiku) BEFORE the first Agent call, then dispatches with those model: values without waiting for a confirmation; model-mode.md is not modified",
+      "assertions": [
+        "A dispatch plan with Work / Task type / Model / Why columns appears in the response before the first Agent tool call",
+        "The review row is routed to fable (or at least not weaker than the session model) with the auth risk domain named as the reason",
+        "The test-run row is routed to haiku as mechanical work",
+        "The Agent calls pass model: values matching the printed plan",
+        "Does not stop to ask for confirmation of the plan and does not modify .claude/state/model-mode.md"
       ],
       "files": []
     }

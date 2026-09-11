@@ -3,10 +3,13 @@
 Last updated: 2026-09-11
 
 ## In progress
-- **4.61.2, 4.61.3, 4.61.4 commit + tag แล้ว ทั้งสามรุ่น ยังไม่ push สักตัว** (รอผู้ดูแล
-  สั่ง — push ทีเดียวได้เลย main + tag ทั้งสาม) · หลัง push เครื่องนี้ต้อง update
-  plugin (`/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform`
-  + `/reload-plugins`) — ตอนนี้ยังอยู่ 4.61.0
+- **merge เสร็จ**: branch `claude/wizardly-dijkstra-ev60pz` (ugt-core 2.12.0 +
+  ugt-nextjs-platform 4.62.0 — model-mode dispatch plan) รวมเข้า main แล้ว พร้อม
+  4.61.2/4.61.3/4.61.4 (preserve mode eval baseline) — ทุกอย่าง push แล้ว, tag
+  ครบ (`ugt-core--v2.12.0`, `ugt-nextjs-platform--v4.62.0` + `--v4.61.2/.3/.4`)
+  · เครื่องนี้ยังไม่ได้ update plugin — รอ `/plugin marketplace update ugt` +
+  `/plugin update ugt-nextjs-platform` + `/reload-plugins` (ยังอยู่ 4.61.0)
+- eval 4 ของ `ugt-model-mode` (`dispatch-plan-before-spawn`) ยังไม่ได้รัน baseline
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -24,6 +27,21 @@ Last updated: 2026-09-11
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-11 **merge** `claude/wizardly-dijkstra-ev60pz` เข้า main — ugt-core
+  **2.12.0** + ugt-nextjs-platform **4.62.0** (model-mode dispatch plan, ดูรายละเอียด
+  แถวถัดไป) รวมกับ 4.61.2–4.61.4 (preserve mode baseline) ที่ค้าง push อยู่ก่อนหน้า ·
+  conflict 5 ไฟล์ (plugin.json version, README/index.html version chip,
+  CHANGELOG.md ลำดับรุ่น, handoff.md) แก้แบบ union ไม่ทิ้งเนื้อหาฝั่งไหน · tag ครบ
+  ทั้ง `ugt-core--v2.12.0`, `ugt-nextjs-platform--v4.62.0`, `--v4.61.2/.3/.4` · push แล้ว
+- 2026-09-10 ugt-core **2.12.0** + ugt-nextjs-platform **4.62.0** — ตอบคำถาม
+  ผู้ดูแล "spawn sub agent ใช้ model เหมาะไหม / โชว์แผนก่อนไหม": การเลือก model
+  ต่อประเภทงานมีอยู่แล้ว แต่ไม่มีกติกาให้โชว์แผนก่อน และ audit log ไม่เก็บ model
+  → เพิ่ม **dispatch plan** (ตาราง Work · Task type · Model · Why ก่อน spawn ชุดแรก
+  แล้วทำต่อ ไม่หยุดรอ confirm) ใน SKILL.md + template ทุก preset + CLAUDE-block,
+  audit-log เก็บ `model`/`subagent_type`, **ค่าเริ่มต้นโปรเจคใหม่เป็น `auto`**
+  (asset, harness.md, full-setup step 4, verify msg, README, index.html chip
+  auto), eval 4 ใหม่, drift check ข้อใหม่ (22/22 ผ่าน) · **ยังไม่ tag/ยังไม่รัน eval**
+  (ปิดแล้วในรอบ merge ด้านบน — tag ไปแล้ว)
 - 2026-09-11 ugt-nextjs-platform **4.61.4** — baseline eval ที่เหลือครบ: database
   #1 fresh-DB 10/10, #2 existing+SP+linked-server 7/7, #3 reserved-word 6/6 ·
   auth sidebar #1 fresh-no-shell 3/3, #2 existing-menu RBAC 5/5 · full-setup #5
