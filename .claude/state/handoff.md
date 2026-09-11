@@ -3,13 +3,9 @@
 Last updated: 2026-09-11
 
 ## In progress
-- **merge เสร็จ**: branch `claude/wizardly-dijkstra-ev60pz` (ugt-core 2.12.0 +
-  ugt-nextjs-platform 4.62.0 — model-mode dispatch plan) รวมเข้า main แล้ว พร้อม
-  4.61.2/4.61.3/4.61.4 (preserve mode eval baseline) — ทุกอย่าง push แล้ว, tag
-  ครบ (`ugt-core--v2.12.0`, `ugt-nextjs-platform--v4.62.0` + `--v4.61.2/.3/.4`)
-  · เครื่องนี้ยังไม่ได้ update plugin — รอ `/plugin marketplace update ugt` +
-  `/plugin update ugt-nextjs-platform` + `/reload-plugins` (ยังอยู่ 4.61.0)
-- eval 4 ของ `ugt-model-mode` (`dispatch-plan-before-spawn`) ยังไม่ได้รัน baseline
+- **plugin เครื่องนี้ยังไม่ update** — repo อยู่ที่ nextjs 4.62.2 / core 2.12.1
+  แล้ว แต่เครื่องนี้ยังอยู่ nextjs 4.61.0 — รอ `/plugin marketplace update ugt` +
+  `/plugin update ugt-nextjs-platform` + `/reload-plugins`
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -27,6 +23,13 @@ Last updated: 2026-09-11
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-12 ugt-core **2.12.1** — `ugt-model-mode` eval 4 (dispatch-plan-before-spawn)
+  รัน baseline ครั้งแรก **5/5 PASS** (executor+grader subagent, fixture โปรเจค
+  จริงที่มี model-mode.md โหมด auto): dispatch plan พิมพ์ก่อน spawn จริง,
+  review → fable (auth risk domain), test → haiku, model ที่ dispatch ตรงแผน
+  ทุกแถว, ไม่หยุดรอ confirm, ไม่แก้ model-mode.md — ไม่มี defect ต้องแก้ · เก็บกวาด
+  branch/worktree ค้างทั้งหมดเสร็จ (local branch เหลือแค่ main, remote เหลือแค่
+  main, worktrees ว่าง) · commit + tag แล้ว
 - 2026-09-11 **merge** `claude/wizardly-dijkstra-ev60pz` เข้า main — ugt-core
   **2.12.0** + ugt-nextjs-platform **4.62.0** (model-mode dispatch plan, ดูรายละเอียด
   แถวถัดไป) รวมกับ 4.61.2–4.61.4 (preserve mode baseline) ที่ค้าง push อยู่ก่อนหน้า ·

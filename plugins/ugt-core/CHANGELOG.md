@@ -1,5 +1,16 @@
 # Changelog — ugt-core
 
+## 2.12.1 (2026-09-12)
+
+**`ugt-model-mode` eval 4 (`dispatch-plan-before-spawn`): baseline รันจริงครั้งแรก
+— 5/5 PASS** รันด้วยรูปแบบ executor+grader subagent เดียวกับที่ใช้กับ preserve
+mode (fixture โปรเจคเล็ก, CLAUDE.md import `model-mode.md` โหมด auto, ไฟล์โค้ด
+จริง 2 ไฟล์ให้ review) — พิมพ์ dispatch plan (Work/Task type/Model/Why) ก่อน
+spawn subagent ตัวแรกจริง, review → `fable` ("fable when in doubt" + auth risk
+domain), test run → `haiku` (mechanical), model ที่ dispatch จริงตรงกับแผนทุก
+แถว, ไม่หยุดรอ confirm, ไม่แก้ `model-mode.md` — ไม่มี defect ให้แก้ในรอบนี้
+ผลอยู่ key `baseline_result_2026-09-12` ใน evals.json
+
 ## 2.12.0 (2026-09-10)
 
 **`ugt-model-mode`: โชว์แผน dispatch ก่อน spawn + โปรเจคใหม่เริ่มที่ `auto`**

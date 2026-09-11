@@ -55,7 +55,19 @@
         "The Agent calls pass model: values matching the printed plan",
         "Does not stop to ask for confirmation of the plan and does not modify .claude/state/model-mode.md"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-12": {
+        "skill_version": "2.12.0",
+        "runner": "executor subagent acting as the live session (fixture project with CLAUDE.md importing model-mode.md on auto, two small real files to review, a package.json test:coverage script) → independent grader subagent reading the committed EVAL-TRANSCRIPT.md + git diff; ~2 min for the outer dispatch decision, nested review/test subagents ran in the background afterward",
+        "pass": 5,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Dispatch plan printed before the first Agent call (Work/Task type/Model/Why table) — review row: fable, 'fable when in doubt' + auth risk domain named; test row: haiku, mechanical — both matched the model: values actually passed to the two Agent calls; model-mode.md untouched (git show --stat confirms only EVAL-TRANSCRIPT.md changed); no confirmation pause",
+          "Assertion 4 (model values match) rests on the transcript's first-person account of its own tool calls, since no separate tool-call log exists to cross-check independently in this eval shape — grader judged it trustworthy on specificity/internal consistency rather than generic phrasing; noted as the one assertion without independent corroboration",
+          "No skill or verify defect found — first clean 5/5 run of this eval, nothing to fix in ugt-model-mode"
+        ]
+      }
     }
   ]
 }
