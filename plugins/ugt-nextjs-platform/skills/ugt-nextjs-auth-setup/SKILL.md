@@ -224,6 +224,14 @@ npx shadcn@latest add button input label tabs card sonner field      # login/set
 npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avatar dropdown-menu sidebar tooltip   # admin pages + NavUser (NavUser imports ui/sidebar even in a topbar shell; IconAction/TruncatedText need tooltip)
 ```
 
+> **After `add sidebar`, re-check `components/ui/button.tsx` and `input.tsx`
+> against DESIGN.md §4's control scale.** Twice in a row (eval runs
+> 2026-09-11) the `sidebar` block's own `add` reverted a project's rebased
+> scale (preserve mode's §Scale bridge) back to the registry default —
+> `git diff` those two files immediately after this command and re-apply the
+> rebase if it reverted. This is a shadcn CLI behavior, not something this
+> skill controls, so no flag fixes it — the check is the fix.
+
 > `TooltipProvider` must already wrap the root layout (design-setup step 3
 > installs it) — mira's Tooltip does not self-wrap a provider, and IconAction
 > in the admin tables crashes prerender without it.

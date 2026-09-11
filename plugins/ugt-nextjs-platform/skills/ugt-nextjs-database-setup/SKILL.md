@@ -63,7 +63,12 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
 3. Will it call **stored procedures** or read across a **linked server**?
    (affects the raw-SQL patterns — and `requestTimeout`: the copied
    `lib/prisma.ts` ships 5 นาที for long SPs; **no SPs → lower it to the
-   mssql default 15s** in that file, a hung query should fail fast)
+   mssql default 15s** in that file, a hung query should fail fast).
+   **Linked server = yes → also ask the full four-part name of every object
+   read** (`<server>.<db>.<schema>.<view>`, e.g. `HRLINK.HRDB.dbo.vwEmployee`)
+   and its columns — `raw-sql-and-sp.md` §Linked server needs them verbatim;
+   an installer left to guess invents a DB/view name that fails at runtime
+   (eval run 2026-09-11). SP = yes → the SP's parameter list, for the same reason.
 4. **[Existing project] มี data layer เดิมไหม — และย้ายตอนนี้ไหม?** Under
    full-setup, §1 there already inventoried it (SQLite / mock modules / JSON
    fixtures / localStorage) and §2 Q0b holds the answer — don't re-ask.
@@ -106,7 +111,11 @@ npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 
 **Keep the env files distinct**: `.env.example` = generic placeholders only
 (committable) · `.env.local` = real values (never committed) — the values from
-the placeholder table below go into `.env.local` only.
+the placeholder table below go into `.env.local` only. **SQL login unknown at
+install time** (admin has not returned credentials yet): write
+`CHANGE_ME_DB_USER` / `CHANGE_ME_DB_PASSWORD` in `.env.local`, never an
+invented value — `verify.mjs` recognises `CHANGE_ME` as a placeholder, and the
+closing summary must list them under "env vars needing real values".
 
 **All placeholders to substitute:**
 
@@ -150,8 +159,15 @@ the placeholder table below go into `.env.local` only.
 
 1. Write models per the skeleton's conventions (model camelCase →
    `@@map("PascalCasePlural")`, field camelCase → `@map("PascalCase")`, full
-   audit columns)
-2. `npx prisma migrate dev --name init`
+   audit columns). **The user named no entity** → keep the skeleton's example
+   model as the pattern reference (it is renamed/deleted when the first real
+   table arrives); never invent a domain table the user did not ask for.
+2. **New database** → `npx prisma migrate dev --name init` · **Existing
+   database (interview Q1 = มีอยู่แล้ว)** → skip this step entirely and follow
+   `references/migrations.md` §5 (`db pull` → convention refactor → offline
+   `0_init` baseline → `migrate resolve --applied`); `migrate dev` against a
+   database that already holds data is the one command this skill must never
+   run (eval run 2026-09-11: the main flow used to list it unconditionally)
    > **First `migrate dev` on the shared org server fails without a shadow
    > database** — the app login has no `CREATE DATABASE` right and the error
    > talks about permissions, not the shadow DB. Set `shadowDatabaseUrl` to a

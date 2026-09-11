@@ -1,5 +1,64 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.61.4 (2026-09-11)
+
+**baseline ครบทุก eval ที่มีอยู่ + แก้ defect/ช่องว่างที่ grader เจอ** · รอบนี้รันบน
+scaffold เปล่า (database #1–3) และบนผลของสาย design→database (auth #1–2,
+full-setup #5) — รอบแรกสองครั้งดับกลางทาง (session ดับ / 429 session limit
+เมื่อรัน 6 executor พร้อมกัน) จึงรันใหม่เป็นสองคลื่น ≤ 5 agent — ผลอยู่ key
+`baseline_result_2026-09-11`
+
+- **database #1 fresh-new-DB: 10/10** (8 นาที) · **#2 existing-DB + SP + linked
+  server: 7/7** (7 นาที, introspect blocked → schema เขียนมือ + `0_init` offline) ·
+  **#3 reserved-word columns: 6/6** (7 นาที — key/value/group/order →
+  SettingKey/SettingValue/GroupName/SortOrder พร้อม comment และบอกผู้ใช้)
+- **auth sidebar #1 fresh-no-shell: 3/3** (installer เผลอใส่ `shadcn add --overwrite`
+  เอง ทับ scale-bridge แล้วแก้ตัวเองทัน — ไม่ใช่ skill defect) · **#2 existing-menu
+  RBAC: 5/5** (44 นาที — Q8 ชี้ "รายงาน" ถูกตัว, guard ทั้งเมนูและหน้า/action, ไม่มี
+  `<AdminNav>` หลงเหลือ)
+- **full-setup #5 defer-migration: 6/6** (110 นาที, หลังแก้ defect ข้อ 6 ด้านล่าง —
+  รอบแรก grader เจอ FAIL ปลอมจาก verify) · Q0b เก็บคำตอบ defer กลับมาบอกผู้ใช้
+  ไม่ใช่ทำเงียบ ๆ, ADR + board.md ⏳ ครบ, summary บอกตรงว่ายังรัน SQLite, design
+  preserve mode ยังอยู่ครบ
+- **แก้จาก finding ของ grader (database)**:
+  1. **asset `prisma.config.ts` — dotenv 17 พิมพ์ `◇ injected env …` ลง stdout** →
+     คำสั่งใน `migrations.md` §5 `migrate diff --script > migration.sql` ได้ไฟล์
+     migration พัง (run ต้อง sed ลบเอง) → `config({ quiet: true })` ทั้งสองบรรทัด
+     + restamp · §5 เพิ่ม trap นี้และย้ำว่า baseline SQL มีไว้ให้ `migrate resolve`
+     เท่านั้น **ห้ามรันกับ DB จริง**
+  2. **§4 ขั้น 2 เคยสั่ง `migrate dev` แบบไม่มีเงื่อนไข** ทั้งที่ Q1 = "DB มีอยู่แล้ว"
+     → แยกทาง: existing DB → ข้ามขั้นนี้ ไปทำ migrations.md §5 (run รอบนี้เลือกถูกเอง
+     แต่ run ที่ทำตามตัวอักษรจะพัง)
+  3. **interview Q3 ถามแค่ "อ่านข้าม linked server ไหม"** แต่ `raw-sql-and-sp.md`
+     ต้องใช้ชื่อ 4 ส่วน (`server.db.schema.view`) ตรงตัว → ถามชื่อ/คอลัมน์/
+     parameter ของ SP ด้วย (run ต้องเดา `HRDB.dbo.vwEmployee`)
+  4. **login ไม่ทราบตอนติดตั้ง** → กติกาเดียว `CHANGE_ME_DB_USER` /
+     `CHANGE_ME_DB_PASSWORD` ใน `.env.local` + ต้องอยู่ในรายการ env ที่ต้องใส่ค่าจริง
+     (เดิม runner คิดเอง)
+  5. **ผู้ใช้ไม่บอก entity** → คง example model ของ skeleton ไว้เป็นแบบ ห้ามแต่ง
+     ตาราง domain เอง (run เพิ่มตาราง `Assets` ที่ไม่มีใครขอ)
+  6. **database `verify.mjs` เช็ค deferral เฉพาะ `decisions.md`** — โปรเจค mattpocock
+     bundle (บ้านมติ = `docs/adr/`) ที่บันทึก defer ถูกต้องเจอ FAIL ปลอม (full-setup
+     eval 5) → เพิ่มอ่าน `docs/adr/*.md` — แต่ครั้งแรกยังพลาด: regex เดิมบังคับ
+     คำ "sqlite/prototype…" กับ "defer/ทีหลัง…" ต้องอยู่**บรรทัดเดียวกันตามลำดับ**
+     ซึ่ง ADR ร้อยแก้วที่เขียนถูกต้องสมบูรณ์ก็ยังไม่ผ่าน (grader จับได้แม้ผมแก้ไปแล้ว
+     รอบหนึ่ง) → เปลี่ยนเป็นเช็ค**ต่อไฟล์**ว่ามีทั้งสองกลุ่มคำอยู่ในไฟล์เดียวกันไหม
+     ไม่สนบรรทัด/ลำดับ ยืนยันด้วยการรันจริงกับโปรเจค eval แล้ว (0 failed, 1 warning)
+- **แก้จาก finding ของ grader (auth)**:
+  1. **`shadcn add sidebar` (§5.1) ทำลาย scale-bridge ที่ rebase ไว้ซ้ำ 2 ครั้งติดกัน**
+     (auth eval #1 และ #2 คนละ run เจอเหมือนกันทั้งคู่) — ไม่ใช่ของที่ skill สั่ง
+     แต่เป็นพฤติกรรมของ shadcn CLI เอง → เพิ่มคำเตือนให้ diff `button.tsx`/`input.tsx`
+     ทันทีหลังรันคำสั่งนี้แล้ว re-apply ถ้าเผลอถูกทับ
+  2. **`SESSION_COOKIE_NAME` ต้อง duplicate ทุกไฟล์ที่ใช้ ไม่มีคำอธิบายว่าทำไม** —
+     สาเหตุคือกฎ `'use server'` (export ได้แค่ async action) แต่ `auth-flows.md`
+     ไม่เคยพูดตรง ๆ → run ไปเจอเองผ่าน build พังแล้วแยกไฟล์ใหม่แทนที่จะทำตาม
+     convention เดิม → เพิ่มเหตุผลไว้ในเอกสาร
+- จดไว้ไม่แก้ (ไม่ใช่ defect): settings table ที่ naming-conventions อนุญาตให้ตัด
+  audit columns ยังไม่มี default เมื่อ `docs/project-context/` ยังไม่มี · ขนาด
+  NVarChar / nullability ไม่ระบุ · kit stamp บน `lib/prisma.ts` หลังแก้
+  `requestTimeout` ตามสั่ง — kit-sync จะรายงานว่าแก้เอง ซึ่งคือสัญญาณที่ต้องการ ·
+  NavUser ที่หน้า `(app)` ไม่มี identity block เป็นขอบเขตของ design-setup ไม่ใช่ auth
+
 ## 4.61.3 (2026-09-10)
 
 **baseline ที่เหลือของ preserve mode (database eval 4 · auth sidebar-eval 0) + แก้

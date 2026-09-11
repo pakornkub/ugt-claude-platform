@@ -275,13 +275,29 @@ check('No prototype data store left beside Prisma/SQL Server (§4b)', () => {
     }
   }
   if (!problems.length) return { ok: true };
-  const decisions = has('docs/project-context/decisions.md') ? read('docs/project-context/decisions.md') : '';
-  const deferred = /(sqlite|mock|prototype|data layer เดิม|store เดิม)[^\n]*(ทีหลัง|เลื่อน|defer|later|ยังไม่ย้าย)/i.test(decisions);
+  // Decision home is decisions.md OR docs/adr/*.md (mattpocock bundle — see
+  // ugt-nextjs-full-setup's own harness check for the same duality). Checked
+  // per-file (not one same-line regex) so a prose ADR that discusses the
+  // store and the deferral in different sentences still counts — the
+  // original single-line ordered regex missed a real, well-written deferral
+  // ADR entirely (eval run 2026-09-11).
+  const hasDeferral = (text) =>
+    /(sqlite|mock|prototype|data layer เดิม|store เดิม)/i.test(text) &&
+    /(ทีหลัง|เลื่อน|defer|ยังไม่ย้าย|ไม่ย้าย)/i.test(text);
+  let deferred = has('docs/project-context/decisions.md') && hasDeferral(read('docs/project-context/decisions.md'));
+  if (!deferred && has('docs/adr')) {
+    for (const f of readdirSync(p('docs/adr'))) {
+      if (f.endsWith('.md') && hasDeferral(read('docs/adr', f))) {
+        deferred = true;
+        break;
+      }
+    }
+  }
   return deferred
-    ? { ok: 'warn', msg: `prototype store still present, deferred per decisions.md: ${problems.join(' · ')} — the app runs on it, not on SQL Server; say so in every handoff` }
+    ? { ok: 'warn', msg: `prototype store still present, deferred per decisions.md/docs/adr: ${problems.join(' · ')} — the app runs on it, not on SQL Server; say so in every handoff` }
     : {
         ok: false,
-        msg: `prototype store left beside Prisma — screens keep reading it and "ต่อ SQL Server แล้ว" is false: ${problems.join(' · ')} (migrate per SKILL §4b, or record the deferral in docs/project-context/decisions.md)`,
+        msg: `prototype store left beside Prisma — screens keep reading it and "ต่อ SQL Server แล้ว" is false: ${problems.join(' · ')} (migrate per SKILL §4b, or record the deferral in docs/project-context/decisions.md or docs/adr/)`,
       };
 });
 

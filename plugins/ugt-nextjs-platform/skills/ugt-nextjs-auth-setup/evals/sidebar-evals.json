@@ -46,7 +46,19 @@
         "app/(admin)/layout.tsx wraps SidebarProvider + <AdminNav> with NavUser in the footer, and TooltipProvider is present in the root layout",
         "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 — 'Admin pages live in the project shell' passes with the 'no project shell found' note, not a fail"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent (a first attempt stalled mid-build without committing; it turned out to have finished and committed on its own by the time a resume agent was checked — the resume was stopped once the original commit was found) → independent grader subagent re-running verify; ~40 min",
+        "pass": 3,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Shell check stated first, correctly found no nav anywhere, took the AdminNav fallback deliberately; SidebarProvider + AdminNav + NavUser in the footer + TooltipProvider all present; verify 38/38",
+          "No skill defect: the runner passed --overwrite to a shadcn add on its own initiative (not instructed by SKILL.md), wiped scale-bridge customizations in button.tsx/input.tsx, caught it via git diff and self-corrected — installer mistake, not a skill gap",
+          "Confirmed not a defect: NavUser DOES render inside AdminNav's SidebarFooter, reachable on every /admin/* page. The only real gap is that the (app) group (/,/requests) has no identity block — out of scope for auth-setup (design-setup's job to build a shell), and the run said so explicitly rather than silently leaving it"
+        ]
+      }
     },
     {
       "id": 2,
@@ -61,7 +73,19 @@
         "The admin items are merged into the existing nav exactly as in eval 0; no <AdminNav> is rendered anywhere",
         "node scripts/verify.mjs of ugt-nextjs-auth-setup exits 0 including 'Admin pages live in the project shell, not a second one'"
       ],
-      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"]
+      "files": ["../../ugt-nextjs-full-setup/evals/fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent → independent grader subagent re-running verify; 44 min",
+        "pass": 5,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "§3 Q8 correctly singles out 'รายงาน' from the four existing menus; reports:read declared + seeded, both the nav item and the /reports page/action guarded; admin items merged exactly as in eval 0's baseline pattern, no <AdminNav> rendered; verify 38/38",
+          "Skill defect fixed in 4.61.4: `shadcn add sidebar` (SKILL §5.1) reverted the project's rebased button/input scale back to the registry default — the SECOND independent eval run to hit this (also sidebar-eval 1); the install line now carries a re-check warning right after it",
+          "Documentation gap fixed in 4.61.4: auth-flows.md never explained WHY SESSION_COOKIE_NAME must be duplicated per file rather than shared via one export — the reason is Next.js's 'use server' export-must-be-an-async-action rule; the run rediscovered this via a failed build and improvised a new shared module instead of following the intended duplication convention. Reason is now stated explicitly."
+        ]
+      }
     }
   ]
 }

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-database-setup/prisma.config.ts
-// kit-hash: 9f545a7a895f
+// kit: ugt-nextjs-platform 4.61.4 · ugt-nextjs-database-setup/prisma.config.ts
+// kit-hash: fc30d0c06530
 // Prisma CLI config — the ONLY place the datasource url lives.
 // (schema.prisma must NOT contain a url field — Prisma 7 + driver adapter.)
 // Requires dev deps: prisma, tsx, dotenv.
@@ -9,9 +9,11 @@
 import { config } from 'dotenv';
 import { defineConfig } from 'prisma/config';
 
-// Load .env.local first (overrides .env)
-config({ path: '.env.local' });
-config();
+// Load .env.local first (overrides .env). quiet: dotenv >= 17 otherwise prints
+// "◇ injected env …" to STDOUT, which corrupts anything piped from the Prisma
+// CLI — e.g. `migrate diff --script > migration.sql` (migrations.md §5).
+config({ path: '.env.local', quiet: true });
+config({ quiet: true });
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',

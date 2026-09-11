@@ -165,5 +165,13 @@ messages.
    npx prisma migrate resolve --applied 0_init
    ```
 
+   Two traps (eval run 2026-09-11): **(a)** anything `prisma.config.ts` prints
+   lands in that file — the kit asset loads dotenv with `quiet: true` for this
+   reason; a project whose config still calls `config()` bare gets dotenv 17's
+   `◇ injected env …` lines at the top of `migration.sql` and `migrate deploy`
+   fails on them. Open the file and check it starts with SQL. **(b)** this
+   baseline is bookkeeping for `migrate resolve` only — **never execute it
+   against the existing database**; the tables are already there.
+
 4. To rename existing DB objects into convention → use the `sp_rename`
    technique from section 3

@@ -19,7 +19,19 @@
         "No __DB_HOST__ __DB_PORT__ __DB_NAME__ placeholders left in .env.local",
         "No leftover comments referencing __EXT___ or __LINKED_SERVER__, since this project uses neither"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent on a bare Next.js scaffold → independent grader subagent re-running verify; 8 min",
+        "pass": 10,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Install pinned zod@^4 + @types/mssql; requestTimeout lowered to 15 s (no SPs); createdBy NOT NULL; __EXT___ lines removed; .env.local carries the real host/db with CHANGE_ME_* for the unknown login; migrate blocked (no server)",
+          "Codified in 4.61.4 from grader ambiguities: unknown SQL login at install time → CHANGE_ME_DB_USER / CHANGE_ME_DB_PASSWORD in .env.local (verify's placeholder regex already recognises CHANGE_ME); user named no entity → keep the skeleton's example model as the pattern reference, never invent a domain table (the run added a speculative Assets table)",
+          "Left as-is: lib/prisma.ts keeps its kit stamp after the mandated requestTimeout edit, so kit-sync reports it as locally modified — that is the intended signal for a sanctioned edit"
+        ]
+      }
     },
     {
       "id": 2,
@@ -35,7 +47,19 @@
         "No INSERT/UPDATE/DELETE statements target the linked server",
         "Functions taking user input sanitize with a regex first, then parameterize"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent on a bare Next.js scaffold, no SQL Server reachable (introspection blocked → schema hand-written, 0_init baseline generated offline via migrate diff) → independent grader subagent re-running verify; 7 min",
+        "pass": 7,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "requestTimeout kept at 5 min (SPs in use); SP via $executeRaw tagged template; linked-server reads 4-part name + CAST on every column, SELECT-only, regex-sanitised inputs; existing-DB path (db pull → resolve --applied 0_init) documented three times for the user",
+          "Asset defect fixed in 4.61.4: assets/prisma.config.ts called dotenv 17 config() without quiet — dotenv ≥17 prints '◇ injected env …' to STDOUT, so migrations.md §5's `migrate diff --script > migration.sql` writes a corrupt migration; the run had to sed the lines out. Fixed with quiet: true + a note in §5.",
+          "Skill text fixed in 4.61.4: §4 step 2 was an unconditional `migrate dev` — now forks: existing DB → skip, follow migrations.md §5 (never execute the baseline SQL against a DB that holds data); interview Q3 now asks the linked server's 4-part name (server.db.schema.view) when a linked server is read — the run had to invent HRDB/vwEmployee"
+        ]
+      }
     },
     {
       "id": 3,
@@ -50,7 +74,18 @@
         "The new table has full audit columns and a PascalCase-plural @@map",
         "Explains to the user why the columns were renamed rather than changing them silently"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent on a bare Next.js scaffold (no Prisma; the skill's install steps ran first) → independent grader subagent re-running verify; 7 min",
+        "pass": 6,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "All four requested names mapped to SettingKey/SettingValue/GroupName/SortOrder with inline reserved-word comments; full audit set, CreatedBy NOT NULL; install pinned zod@^4 + @types/mssql per §1; migrate blocked (P1001, no server) and the user told how to resume",
+          "Skill text leaves open (not defects, noted for a future pass): no default when naming-conventions permits trimming audit columns on a settings table and docs/project-context/ does not exist yet; NVarChar sizes and `value` nullability unspecified; the (GroupName, SortOrder) index was inferred from 'สำหรับเรียงลำดับ'"
+        ]
+      }
     },
     {
       "id": 4,

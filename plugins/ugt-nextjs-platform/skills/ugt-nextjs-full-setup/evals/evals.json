@@ -103,7 +103,18 @@
         "node scripts/verify.mjs of ugt-nextjs-database-setup shows 'No prototype data store left' as a WARN (deferred per decisions.md), not a FAIL and not a pass",
         "Preserve mode still applied on the design side: --primary derives from #0f766e, no sidebar block, Tailwind upgraded to v4"
       ],
-      "files": ["fixtures/ai-studio-prototype"]
+      "files": ["fixtures/ai-studio-prototype"],
+      "baseline_result_2026-09-11": {
+        "skill_version": "4.61.3",
+        "runner": "unattended executor subagent (all 5 modules + harness) → independent grader subagent re-running verify; 110 min. First grading pass found assertion 5 FAILing (verify.mjs's docs/adr support existed but its same-line-ordered regex missed a well-written prose ADR); fixed to a per-file, order-independent check and re-confirmed directly (0 failed, 1 warning) before recording this result",
+        "pass": 6,
+        "fail": 0,
+        "blocked": 0,
+        "notes": [
+          "Q0b deferral confirmed back to the user (not silent); docs/adr/0001-defer-sqlite-migration.md + board.md ⏳ row record it; closing summary states plainly the feature still runs on SQLite; design preserve mode intact (teal --primary, no sidebar block, Tailwind v4)",
+          "Platform defect fixed in 4.61.4: database verify's prototype-store check only read docs/project-context/decisions.md; on a mattpocock-bundle project (decision home = docs/adr/) it reported a hard FAIL for a deferral that was correctly recorded, just in the other file. Now checks docs/adr/*.md too, per-file, matching the store-keyword and defer-keyword anywhere in the same file rather than on one ordered line — the original single-line regex missed natural prose."
+        ]
+      }
     }
   ]
 }

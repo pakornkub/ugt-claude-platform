@@ -1,14 +1,12 @@
 # Handoff
 
-Last updated: 2026-09-09
+Last updated: 2026-09-11
 
 ## In progress
-- **4.61.2 + 4.61.3 commit + tag แล้ว ยังไม่ push** (รอผู้ดูแลสั่ง) · หลัง push เครื่องนี้
-  ต้อง update plugin (`/plugin marketplace update ugt` + `/plugin update
-  ugt-nextjs-platform` + `/reload-plugins`) — ตอนนี้ยังอยู่ 4.61.0
-- baseline preserve mode ครบ 4 ชุดแล้ว (design 10/10 · full-setup 17/18 · database 9/9
-  · auth sidebar 8/8) — ที่ยังไม่รัน: full-setup eval 5 (defer migration), auth
-  sidebar-evals 1–2, database evals 1–3 (ของเดิมไม่เคยมี baseline)
+- **4.61.2, 4.61.3, 4.61.4 commit + tag แล้ว ทั้งสามรุ่น ยังไม่ push สักตัว** (รอผู้ดูแล
+  สั่ง — push ทีเดียวได้เลย main + tag ทั้งสาม) · หลัง push เครื่องนี้ต้อง update
+  plugin (`/plugin marketplace update ugt` + `/plugin update ugt-nextjs-platform`
+  + `/reload-plugins`) — ตอนนี้ยังอยู่ 4.61.0
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -26,6 +24,16 @@ Last updated: 2026-09-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-11 ugt-nextjs-platform **4.61.4** — baseline eval ที่เหลือครบ: database
+  #1 fresh-DB 10/10, #2 existing+SP+linked-server 7/7, #3 reserved-word 6/6 ·
+  auth sidebar #1 fresh-no-shell 3/3, #2 existing-menu RBAC 5/5 · full-setup #5
+  defer-migration 6/6 · แก้ 8 finding ของ grader: prisma.config.ts dotenv quiet
+  (migration SQL พัง), migrations.md แยกทาง existing-DB, linked-server ต้องถามชื่อ
+  4 ส่วน, `CHANGE_ME_DB_USER/PASSWORD` เป็นกติกา, ไม่แต่งตาราง domain เอง,
+  database verify รองรับ `docs/adr/` (2 รอบ — รอบแรก regex ยังพลาด ยืนยันแล้วว่า
+  แก้ตรง), `shadcn add sidebar` เตือนเรื่องทับ scale-bridge, `SESSION_COOKIE_NAME`
+  อธิบายเหตุผล 'use server' · executor ดับกลางทาง 2 รอบ (session ดับ + 429 rate
+  limit) ต้อง reset + rerun หลายรอบ · commit + tag แล้ว ยังไม่ push
 - 2026-09-10 ugt-nextjs-platform **4.61.3** — baseline ที่เหลือ: database eval 4
   **9/9** + auth sidebar-eval 0 **8/8** (รันต่อเป็นสาย design → database → auth บน
   โปรเจคเดียว) · แก้ finding ของ grader: `CreatedBy` ยึด NOT NULL + marker
@@ -73,7 +81,3 @@ Last updated: 2026-09-09
 - 2026-09-06 ugt-nextjs-platform **4.59.0** + ugt-core **2.11.0** — ยึด pipeline skill เป็นหลัก ตัดของซ้ำฝั่ง mattpocock (ที่มา: เทียบไฟล์จริงจาก pilot dx-game กับ mattpocock-skills 1.2.3): mattpocock ไม่มี `decisions.md` (มติ → `docs/adr/`, ugt-context/handoff/harness.md รู้กฎ "บ้านมติที่เดียว"), `ugt-requirements` thin mode (ช่องว่าง → `/wayfinder`/`/grill-with-docs`), asset ใหม่ `CODING_STANDARDS.md` ให้ `/code-review` ของ matt เห็น `.claude/rules/`, CLAUDE-block แถว requirements แก้เป็น brief → grill → to-spec (เดิมข้าม grill) + แถวกัน auto-invoke ย้ายเข้า span superpowers + กฎ `.scratch/` ระดับ ticket, Close out บอกให้รัน `/setup-matt-pocock-skills` เอง, verify.mjs ตรวจ decision home + CODING_STANDARDS (ทดสอบ 3 เคสผ่าน) · superpowers ไม่ตัดอะไร · drift 21/21, validate ผ่าน · commit 2aa130b + tag + push แล้ว
 - 2026-09-01 ugt-nextjs-platform **4.57.0** — ปิดช่อง skill auto-trigger ระหว่าง full-setup: guard §2.5 ขยายจาก superpowers-only เป็นครอบ `mattpocock-skills` (5 ตัว model-invocable ที่ trigger ชน setup ได้: writing-for-agents/wizard/diagnosing-bugs/tdd/domain-modeling) + `frontend-design` · CLAUDE-block routing rows เปลี่ยนเป็นถ้อยคำ pipeline-neutral นอก span (แถว infra ไม่หายในเคสไม่มี pipeline) · harness step 1 เพิ่มกติกาเคส none · verify.mjs check ใหม่จับ `[PIPELINE` ค้าง · ผ่าน opus review 2 รอบ (7 findings → แก้ครบ) · docs: คำอธิบายส่วนต่าง token สอง bundle (ประมาณการ — รอเลขจริงจาก pilot) + แก้การ์ด mattpocock/โลโก้ footer ใน index.html · **push + tag แล้ว** (`ugt-nextjs-platform--v4.57.0` ครอบชุด 4.56.0 ที่ไม่ได้ tag แยก; `ugt-core--v2.9.2` tag ไว้ก่อนแล้ว)
 - 2026-09-01 แก้ครบ 13 findings จาก /code-review อิสระหลัง bundle split — ugt-nextjs-platform **4.56.0** (CLAUDE-block generate ตาม bundle ด้วย marker `[PIPELINE:*]`, merge ลบ key ตาย `ugt-nextjs-standard@ugt`, fallback ถามแทนเดา, verify.mjs จับ stale key), ugt-core **2.9.2** (IT redeploy note), drift-check +5 pins (รวม bundle parity), docs sync (setup step, /code-review namespaced, คำเคลม manual แม่นขึ้น), ลบ worktree ค้าง sharp-jones · **ยังไม่ tag/push**
-- 2026-08-31 **Bundle split**: `ugt-nextjs-standard` → `ugt-nextjs-standard-superpowers` 3.0.0 (เดิม) + `ugt-nextjs-standard-mattpocock` 1.0.0 (ใหม่ — pipeline manual/token ต่ำ เลือกตอน install แทน runtime toggle ที่ถูกปัดตกเพราะเสี่ยง Claude เรียกผิดฝั่ง) · ugt-nextjs-platform 4.55.0, ugt-core 2.9.1 · spec: docs/superpowers/specs/2026-08-31-pipeline-bundle-choice-design.md (มติ 2.1–2.11) · tag + push แล้ว · หมายเหตุ: เลข 4.55.1 เป็น phantom ใน commit title ห้ามใช้ซ้ำ
-- 2026-08-26 ugt-nextjs-platform **4.54.0** — upload-setup: virus scan เป็นคำถาม interview §3 Q5 (opt-out ผ่าน marker `[SCAN]` + deviation + งาน retrofit), verify.mjs รองรับโหมด scan-off, §7 troubleshooting `SCANNER_UNAVAILABLE` จาก field report ugt-customer-request · tag + push แล้ว
-- 2026-08-26 ugt-nextjs-platform **4.53.0** — return-to-page `?from=` ครบทุกทางเข้า login: `proxy.ts` (แนบ ?from= + forward header `x-from`), `session-expired-dialog.tsx`, `login-form.tsx` (`sanitizeFrom()` กัน open redirect), SKILL.md §5.5 + auth-flows.md §Return-to-page · merge main + push + tag แล้ว (รวม tag ย้อน `ugt-nextjs-platform--v4.52.0` ที่ตกหล่น)
-- 2026-08-26 ugt-nextjs-platform **4.52.0** — `SessionExpiredDialog` ตัวรับ CustomEvent `session-expired` (401 กลางหน้า) mount ใน protected layout

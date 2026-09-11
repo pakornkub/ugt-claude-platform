@@ -65,6 +65,17 @@ const SESSION_COOKIE_NAME = (env.BETTER_AUTH_URL ?? '').startsWith('https://')
 | `lib/actions/auth.ts` | `SESSION_COOKIE_NAME` for LDAP cookie set + both logout actions |
 | any auth-guard layout that inspects the cookie | same `SESSION_COOKIE_NAME` derivation |
 
+**Why `SESSION_COOKIE_NAME` is a local `const` re-derived in each file, never a
+shared export**: `lib/actions/auth.ts` is a `'use server'` module — Next.js
+enforces that every export from such a file is an async Server Action, so a
+plain `const` (or a sync helper) cannot be exported from it. An installer that
+tries to share the derivation via one export from `lib/actions/auth.ts` gets a
+build failure with no obvious link to this rule (eval run 2026-09-11 rediscovered
+it this way and split it into a new module instead of duplicating the four-line
+derivation as intended). Duplicating the derivation is the correct fix — put it
+in a plain (non-`'use server'`) helper module only if a project wants one shared
+copy.
+
 Historical failure modes this prevents:
 
 - LDAP set `better-auth.session_token` (no `__Secure-`) but `auth.api.getSession()`

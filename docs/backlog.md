@@ -287,6 +287,38 @@ auth asset 2 ไฟล์ type-break กับ `@base-ui/react ^1.8` `onValueCha
   ที่ติดตั้งผ่าน marketplace ได้ LF เสมอ; runner ของ eval ควร copy จาก `git archive`
   ไม่ใช่ working tree
 
+### 12. axe-core / focus-trap / keyboard-operability render gate — ประเมินแล้ว 2026-09-11, ยังไม่เพิ่ม
+
+เทียบ `ugt-nextjs-design-setup` กับ `ux-ui-agent-skills` (plugin87) แล้วสร้าง
+prototype จริง: scaffold Next.js + org shadcn preset นอก repo, ติดตั้ง
+`icon-action.tsx` จริงจากคิต + `dialog` (shadcn registry ตรง ๆ), รัน Playwright
+จริง (axe-core / ไล่ Tab จริง / กด Escape จริง) แทนการเดา — **ไม่ใช่แค่ทฤษฎี**
+
+**ผล:** IconAction (Tab order รวม `aria-disabled`, aria-label/tooltip) และ
+Dialog (focus-trap, Escape+return-focus) ที่เป็นของคิต/Base UI **ผ่านหมด**
+— ความเสี่ยงที่กลัวไว้แต่แรก (org-authored component พัง) ไม่เกิดจริงในรอบนี้
+เจอ finding จริงแค่ 1 จุด (`aria-modal` หายจาก shadcn `dialog.tsx` — ไฟล์ที่มา
+จาก registry ตรง ๆ ไม่ใช่ของคิตเอง) บันทึกไว้แล้วที่
+`ugt-nextjs-design-setup/references/conventions.md` §Dialog ladder
+("Known gap — aria-modal")
+
+**ทำไมยังไม่เพิ่มเป็น gate ถาวรใน `verify.mjs`:**
+- ต้นทุนสูง (Playwright ~300MB devDependency ใหม่ทุกโปรเจค + ต้องมี dev
+  server ตอน CI — ไม่มี static fixture/harness แบบที่ ux-ui-agent-skills มี
+  ให้ชี้ ของเราติดตั้ง component จริงลง Next.js app ไม่ใช่ demo HTML)
+- เขียน assertion เองเสี่ยง false positive สูง — ตอน prototype script ที่
+  พอร์ตมารายงาน "focus รั่ว" ผิดรอบแรก เพราะไม่รู้จัก `FocusGuard` sentinel
+  ของ Base UI ต้อง debug เองถึงเห็นว่าไม่ใช่บั๊กจริง (หลักฐานสดว่าพอร์ตสคริปต์
+  ต้นทางมาตรง ๆ ไม่พอ ต้องเข้าใจกลไก primitive จริง)
+- ความเสี่ยงจริง (focus-trap, keyboard) เป็นหน้าที่ของ Base UI ไปแล้วและทำถูก
+  — เขียน gate มาเฝ้าจุดที่ upstream รับผิดชอบอยู่แล้วคือลงทุนผิดจุด
+- ไม่มี incident จริงในสนามผลักดันเรื่องนี้ (ต่างจาก Radix-leftover ที่มี
+  `lint-kit-assets.mjs` เกิดจากบั๊กจริง)
+
+**เงื่อนไขที่จะกลับมาทำจริง:** มี custom component ของคิตเองที่พบ
+keyboard/focus bug จริงในสนาม หรือมีลูกค้า (เช่นหน่วยงานราชการ) เรียกร้อง
+WCAG compliance เป็นทางการ — ตอนนั้นมีหลักฐาน/ความจำเป็นเจาะจงรองรับการลงทุน
+
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |
@@ -297,6 +329,7 @@ auth asset 2 ไฟล์ type-break กับ `@base-ui/react ^1.8` `onValueCha
 | Trigger baseline ของ php/python (ประกาศ `date: null` แล้ว 2026-08-23) | pilot จริงของสอง stack นี้ | `evals/trigger-evals.json` ของแต่ละตัว |
 | Pilot `ugt-python-platform` / `ugt-php-platform` 0.6.0 → tag | โปรเจค pilot จริง | README ตาราง plugin |
 | Multi-stack ต่อ (React SPA ฯลฯ) | มีโปรเจค stack นั้นจริง | `docs/proposals/multi-stack-proposal.md` |
+| axe-core / focus-trap / keyboard-operability render gate ใน `verify.mjs` | incident จริงในสนาม หรือลูกค้าเรียกร้อง WCAG compliance เป็นทางการ | §12 ข้างบน |
 
 ## ปิดแล้ว (ย้ายมาจากรายการบน — ชี้รุ่นที่ปิด)
 
