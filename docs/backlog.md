@@ -33,11 +33,17 @@ scheduler + emailext + SMTP relay + Docker host + SQL Server ที่มีอ�
 หมายเหตุ: นโยบาย expand-contract migration เป็นเรื่องฝั่งโค้ด — เขียนเป็นกฎได้เลย
 ไม่ต้องรอคำตอบ infra
 
-### 2. E2E test (Playwright) — เลื่อนโดยมติผู้ดูแล 2026-08-10
+### ~~2. E2E test (Playwright)~~ — ตัดสินใจแล้ว 2026-09-12: opt-in module ในอนาคต ไม่ใช่ skill บังคับ
 
-HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` ให้สกัดได้ทันทีเมื่อเปิดงาน
-น่าจะเป็น skill ใหม่หรือส่วนขยายของ `ugt-nextjs-test-lint-setup` (pipeline ต้อง
-เพิ่ม stage ด้วย → แตะ cicd)
+HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` สกัดได้ทันทีถ้าจะเปิดงาน แต่มติคือ
+**ไม่ทำเป็นส่วนขยายบังคับของ `ugt-nextjs-test-lint-setup`/`cicd-setup`** — ต้นทุนสูง
+ทุกโปรเจค (Playwright ~300MB + ต้องมี dev server ตอน CI + selector พังตาม UI ง่าย)
+ในขณะที่โปรเจค CRUD ทั่วไป unit test + manual verification checklist ที่มีอยู่แล้ว
+พอคุ้มครองอยู่ (เหตุผลเดียวกับที่ §12 สรุปไว้เรื่อง axe-core gate)
+
+**ทิศทางถ้าจะทำจริง**: module เสริมแบบเดียวกับ Mail/Upload — ถามตอน `full-setup`
+(default: ไม่เอา) เปิดเฉพาะโปรเจคที่มี flow เสี่ยงสูงและแพงถ้าต้อง manual re-test
+ทุกครั้ง (auth/SSO, approval workflow, payment) → ย้ายไปตารางรอเงื่อนไขด้านล่าง
 
 ### 3. Cron / background job — รอมติองค์กร
 
@@ -331,6 +337,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 | Multi-stack ต่อ (React SPA ฯลฯ) | มีโปรเจค stack นั้นจริง | `docs/proposals/multi-stack-proposal.md` |
 | axe-core / focus-trap / keyboard-operability render gate ใน `verify.mjs` | incident จริงในสนาม หรือลูกค้าเรียกร้อง WCAG compliance เป็นทางการ | §12 ข้างบน |
 | คำถาม interview.md แยก "สี sidebar" ออกจาก primary (ข้อ 2) | โปรเจคที่สองที่ขอ sidebar คนละสีจาก primary จริง (ตอนนี้มีเคสเดียว) — ระหว่างนี้ตอบผ่าน "อื่นๆ" ของข้อ 2 ได้อยู่แล้ว, 2026-09-11 | บทสนทนานี้ (`ugt-nextjs-design-setup` references/interview.md) |
+| `ugt-nextjs-e2e-setup` (Playwright, opt-in module แบบ Mail/Upload — มติ 2026-09-12) | โปรเจคที่มี flow เสี่ยงสูงจริง (auth/SSO, approval, payment) มาขอจริง — ยังไม่มีการร้องขอ | §2 ข้างบน |
 
 ## ปิดแล้ว (ย้ายมาจากรายการบน — ชี้รุ่นที่ปิด)
 
