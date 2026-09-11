@@ -330,6 +330,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 | Pilot `ugt-python-platform` / `ugt-php-platform` 0.6.0 → tag | โปรเจค pilot จริง | README ตาราง plugin |
 | Multi-stack ต่อ (React SPA ฯลฯ) | มีโปรเจค stack นั้นจริง | `docs/proposals/multi-stack-proposal.md` |
 | axe-core / focus-trap / keyboard-operability render gate ใน `verify.mjs` | incident จริงในสนาม หรือลูกค้าเรียกร้อง WCAG compliance เป็นทางการ | §12 ข้างบน |
+| คำถาม interview.md แยก "สี sidebar" ออกจาก primary (ข้อ 2) | โปรเจคที่สองที่ขอ sidebar คนละสีจาก primary จริง (ตอนนี้มีเคสเดียว) — ระหว่างนี้ตอบผ่าน "อื่นๆ" ของข้อ 2 ได้อยู่แล้ว, 2026-09-11 | บทสนทนานี้ (`ugt-nextjs-design-setup` references/interview.md) |
 
 ## ปิดแล้ว (ย้ายมาจากรายการบน — ชี้รุ่นที่ปิด)
 

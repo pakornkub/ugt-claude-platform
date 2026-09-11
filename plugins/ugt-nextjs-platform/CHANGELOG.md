@@ -1,5 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.62.1 (2026-09-11)
+
+**design `check-contrast.mjs`: เพิ่มคู่ตรวจ `sidebar-accent-foreground`/`sidebar-accent`
+ที่ขาดไป** — token ทั้งคู่มีอยู่จริงใน `globals.tokens.css` (light + dark) มาตั้งแต่
+kit มี sidebar แล้ว แต่ `PAIRS` list เดิมมีแค่ `sidebar-foreground`/`sidebar` และ
+`sidebar-primary-foreground`/`sidebar-primary` — คู่ accent ไม่เคยถูกเช็คเลย
+ทั้งที่ hover/active state ของเมนูใช้คู่นี้ตรง ๆ ยืนยันด้วยการรันจริง: 15.19:1
+(light) / 12.68:1 (dark) ผ่าน AA ทั้งคู่ · `docs/backlog.md` §รอเงื่อนไข เพิ่มแถว
+เดียว (สี sidebar แยกจาก primary เป็นคำถาม interview — รอโปรเจคที่สองที่ต้องการ
+จริง ตอนนี้ตอบผ่าน "อื่นๆ" ได้อยู่แล้ว)
+
 ## 4.62.0 (2026-09-10)
 
 **full-setup: `model-mode.md` ติดตั้งเป็น `auto` + CLAUDE-block สั่งโชว์แผน

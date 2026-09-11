@@ -93,6 +93,7 @@ const PAIRS = [
   ['accent-foreground', 'accent'],
   ['sidebar-foreground', 'sidebar'],
   ['sidebar-primary-foreground', 'sidebar-primary'],
+  ['sidebar-accent-foreground', 'sidebar-accent'],
 ];
 const STATUS = ['amber', 'emerald', 'red', 'coral', 'sky', 'gray'];
 const AA = 4.5;
