@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.62.2 (2026-09-11)
+
+**แก้บันทึกที่ผิดของตัวเองใน database eval 4's baseline note** — พบระหว่างเก็บกวาด
+worktree ค้าง: note เดิมบอกว่าทาง 4.61.3 แก้ `CreatedBy` ให้เป็น `String?`
+(nullable) ซึ่ง**ตรงข้าม**กับสิ่งที่ทำจริง (`prototype-migration.md` §3 +
+`SKILL.md` §4b ข้อ 4 ยึด **NOT NULL** + marker `'prototype-import'`/`'system'`
+— ตรวจย้อนแล้วยืนยันโค้ดที่ commit จริงตรงกับ NOT NULL) แก้ข้อความให้ตรงโค้ด
+ไม่มีการเปลี่ยน logic ใด ๆ
+
 ## 4.62.1 (2026-09-11)
 
 **design `check-contrast.mjs`: เพิ่มคู่ตรวจ `sidebar-accent-foreground`/`sidebar-accent`
