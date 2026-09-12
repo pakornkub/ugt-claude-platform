@@ -54,7 +54,7 @@ Read `package.json` and the file layout to learn:
 - **What the prototype already does.** Projects from Google AI Studio, v0,
   Lovable, Bolt or a hand-built demo arrive with three things the original
   "no login, no database" assumption misses, and each one changes the
-  install (field report 2026-09-09):
+  install:
   - **A real UI** — routes and screens people already use → design-setup's
     existing-project path, never the fresh-project interview.
   - **A prototype data layer** — `provider = "sqlite"` in `schema.prisma`,
@@ -154,30 +154,23 @@ Judge the load and propose ONE way to run the install:
 
 | Signal | Proposal |
 | --- | --- |
-| ≤ 2 modules, fresh project | Run straight through in this session (the default) |
-| 3+ modules, or an existing project needing careful merges | Split into chunks of 1–3 modules; end each chunk with `/ugt-handoff` (answers + progress land in `handoff.md`) and continue in a fresh session — §3 order unchanged |
-| Full install but the user wants a single session | Dispatch each module to a subagent: the dispatch prompt = the child skill's SKILL.md path + only the interview answers that module needs; the subagent follows the skill and returns a summary + its `verify.mjs` result — never file dumps |
+| Default, whatever the module count | Run straight through in this session — context is not the constraint; do not split, stop or suggest a new session on account of it |
+| Existing project where the user wants to review each module's merge before the next starts | Split into chunks of 1–3 modules; end each chunk with `/ugt-handoff` (answers + progress land in `handoff.md`) and continue in a fresh session — §3 order unchanged |
+| User asks for isolated modules | Dispatch each module to a subagent: the dispatch prompt = the child skill's SKILL.md path + only the interview answers that module needs + this line: "You are operating autonomously — every answer you need is in this prompt; proceed without asking, and stop only for a destructive action or a question these answers do not cover." The subagent follows the skill and returns a summary + its `verify.mjs` result — never file dumps |
 
 Either split keeps the §3 order: chunks/subagents run **sequentially**, never
 two modules at once — they edit the same `package.json` / `schema.prisma` /
 compose files.
 
-**The setup path never invokes any skill from the pipeline/helper plugins —
-`superpowers`, `mattpocock-skills`, or `frontend-design`** — no matter how
-well their triggers match a setup step: no brainstorming / plan / TDD
-(superpowers); no `writing-for-agents`, `wizard`, `diagnosing-bugs`, `tdd`,
-or `domain-modeling` (mattpocock — each trigger collides with a step a child
-skill already owns: the CLAUDE.md block, credential handoff, a failing
-`verify.mjs`, the test-lint smoke test, `docs/project-context/` naming;
-same rule for any skill a future mattpocock version registers, e.g.
-`setup-pre-commit` — unregistered in 1.2.3 but it would collide with the
-husky install); no `frontend-design` (the design-agreement step belongs to
-`ugt-nextjs-design-setup` alone — frontend-design may propose only in later
-feature work, per the DESIGN.md precedence rule). Each child SKILL.md
-already is the plan, and its `verify.mjs` + checklist already are the
-review. This binds subagents too: an installer subagent dispatches nothing
-further. Skills from `ugt-nextjs-platform` / `ugt-core` (the §3 modules,
-`ugt-context`) are the setup path itself — this rule never blocks them.
+**The setup path never invokes any skill from the pipeline/helper plugins
+(`superpowers`, `mattpocock-skills`, `frontend-design`)**, however well their
+triggers match a setup step: each child SKILL.md already is the plan and its
+`verify.mjs` + checklist already are the review, so a brainstorm / plan / TDD /
+wizard / design pass from those plugins collides with a step a child skill
+owns (`frontend-design` may propose only in later feature work, per the
+DESIGN.md precedence rule). This binds installer subagents too: they dispatch
+nothing further. Skills from `ugt-nextjs-platform` / `ugt-core` are the setup
+path itself — this rule never blocks them.
 
 ### 3. Install in order (never reorder)
 
@@ -197,8 +190,7 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
   recovery path except an admin** — say so out loud rather than leaving it
   silently undone.
 - **Design must come before Auth** — auth generates themed pages (login,
-  `/admin/*`); running design later means re-theming them (the retheme-twice
-  lesson from gov-boi-smart).
+  `/admin/*`); running design later means re-theming them.
 - **Quality must come before CI** — the pipeline calls `lint`/`format:check`/
   `test:coverage` by exact name; without them it goes red at the third stage on
   the very first push.
@@ -218,8 +210,8 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
   โปรเจคเดิม · ข้อ 5 = shell เดิม · ข้อ 9 = ยึดของเดิม) · auth → §5.6 merge branch
   only + §5.7 remove the prototype login · database → §4b migrate the
   prototype store (Q0b). A child skill that never received the flag falls
-  back to its own defaults — which is how the 2026-09-09 install shipped org
-  indigo admin pages over an app that still ran on SQLite.
+  back to its own defaults — org indigo admin pages over an app that still
+  runs on SQLite.
 - Skip unselected modules; the relative order of the rest is unchanged.
 - For each module: invoke the child skill (`ugt-nextjs-database-setup` /
   `ugt-nextjs-test-lint-setup` / `ugt-nextjs-design-setup` / `ugt-nextjs-auth-setup` /
@@ -337,8 +329,10 @@ How:
    which checks the harness layer.** Fix every ✘ before closing — never report
    done with an exit code 1 outstanding. Then walk the remaining checklist
    items in each skill that a machine can't verify.
-2. Summarize for the user: every file added/changed (grouped by module) and
-   env vars that need real values. **Admin handoff is a FILE, not a chat
+2. Summarize for the user: every file added/changed (grouped by module),
+   env vars that need real values, and anything noticed but left alone — a
+   pre-existing bug, lint debt or a gap outside the selected modules is a
+   follow-up in the summary, not a fix in this run. **Admin handoff is a FILE, not a chat
    message**: if CI was installed, `ugt-nextjs-cicd-setup` has already
    written `docs/admin-handoff.md` (from its
    `assets/admin-handoff.template.md` — plain-Thai steps + exact names +
@@ -364,7 +358,7 @@ How:
 | §1 finds a real UI → ask Q0 (default คงของเดิม) and hand preserve mode to every child skill | Read "ใช้ design เดิม" as "skip design" — the kit stays org default and `/admin/*` ships as a second template |
 | Prototype store / fake login found → migrate + remove (Q0b/Q0c), or say plainly the app still runs on them | Install Prisma + Better Auth beside SQLite + a mock login and report "ต่อแล้ว" |
 | One combined interview batch (incl. child-skill questions) | Ask one-by-one / let child skills re-ask |
-| 3+ modules → propose chunked sessions or per-module subagents (§2.5) | Grind through one long session until context compaction degrades the work |
+| Propose one run shape (§2.5) and confirm it once | Split or stop on account of context limits — split only when the user wants to review between modules |
 | Always Database → Quality → Design → Auth → CI | Install auth before a DB exists / before the design kit (its admin pages render with kit DataTable) / CI before test scripts exist |
 | Not Next.js → say it plainly | Adapt the assets to another stack yourself |
 | Summarize files + admin requests at the end | Finish silently with no checklist |

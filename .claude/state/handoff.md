@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 ## In progress
 - **plugin เครื่องนี้ยังไม่ update** — repo อยู่ที่ nextjs 4.62.2 / core 2.12.1
@@ -23,6 +23,11 @@ Last updated: 2026-09-11
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-12 prompt audit รอบแรก (Opus 5 / Fable 5.1) — nextjs **4.62.3** · php/python
+  **0.6.3**: full-setup default รันรวดเดียว (chunk เป็นทางเลือก), autonomy line ใน
+  subagent dispatch, scope line ตอน close-out/§5.6, ตัด Quick Rules ที่ซ้ำ §2 +
+  ย่อหน้า volume ซ้ำ, ตัด incident tag · ยังไม่ได้พิสูจน์ด้วย `claude plugin eval`
+  (ชุด vague-make-it-deployable / *-no-tests-full-setup) — อีก 14 skill ยังไม่ audit
 - 2026-09-12 ugt-core **2.12.1** — `ugt-model-mode` eval 4 (dispatch-plan-before-spawn)
   รัน baseline ครั้งแรก **5/5 PASS** (executor+grader subagent, fixture โปรเจค
   จริงที่มี model-mode.md โหมด auto): dispatch plan พิมพ์ก่อน spawn จริง,

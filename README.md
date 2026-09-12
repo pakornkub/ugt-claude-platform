@@ -20,9 +20,9 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.62.2 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-python-platform` | 0.6.2 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-php-platform` | 0.6.2 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-nextjs-platform` | 4.62.3 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-python-platform` | 0.6.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-php-platform` | 0.6.3 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.12.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -101,8 +101,8 @@ mattpocock)
 
 Claude จะ**ตรวจของเดิมก่อนเสมอ** (มีอะไรอยู่แล้วจะถาม ไม่ทับเงียบ ๆ) → ถามคำถามชุดเดียว
 (ติดตั้งอะไรบ้าง, ชื่อโปรเจค, login แบบไหน, ต้องส่งเมล/แนบไฟล์ไหม ฯลฯ) →
-**เสนอวิธีรันให้เคาะหนึ่งครั้ง** (งานเล็กรันรวดเดียว · งานหลาย module แบ่งเป็นช่วง ๆ
-คั่นด้วย `/ugt-handoff` จะได้ไม่ลากยาวจน session ล้า) → ไล่ติดตั้งตามลำดับ
+**เสนอวิธีรันให้เคาะหนึ่งครั้ง** (ปกติรันรวดเดียวใน session เดียว · โปรเจคเดิมที่อยาก review
+ทีละ module ค่อยแบ่งเป็นช่วง ๆ คั่นด้วย `/ugt-handoff`) → ไล่ติดตั้งตามลำดับ
 **Database → Quality → Design → Auth → [Mail] → [Upload] → CI** → รันสคริปต์ตรวจจนเขียวทุกตัว →
 ได้ **ไฟล์ `docs/admin-handoff.md`** — เอกสารภาษาไทยขั้นตอนชัดเจนพร้อมชื่อที่ต้องตั้งเป๊ะ ๆ
 ส่งต่อทีม admin/DevOps ได้ทันที (มีช่องให้ admin กรอกค่าตอบกลับด้วย) + checklist ทดสอบ

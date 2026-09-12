@@ -1,5 +1,25 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.62.3 (2026-09-12)
+
+**Prompt audit `ugt-nextjs-full-setup/SKILL.md` สำหรับ Opus 5 / Fable 5.1** (ตาม
+`claude-api prompt-audit` — ไม่มี logic เปลี่ยน มีแต่ instruction):
+
+- **§2.5 run shape**: default = รันรวดเดียวใน session เดียวทุกจำนวน module
+  (โมเดล 1M context ไม่ควรแบ่งหรือหยุดเพราะกลัว context เต็ม) · การแบ่ง chunk
+  คั่นด้วย `/ugt-handoff` ยังอยู่ แต่เป็นทางเลือกเมื่อผู้ใช้อยาก review ทีละ module
+  — กฎเดิม "3+ module → แบ่ง" มาจากเคสรัน 4 ชั่วโมงแล้วค้าง (2.5.0) ครั้งเดียว ·
+  README แก้ให้ตรงกัน
+- **§2.5 subagent dispatch**: dispatch prompt เพิ่มประโยค autonomy ("ทำงานอัตโนมัติ
+  คำตอบทุกข้ออยู่ใน prompt หยุดเฉพาะ destructive action") — กัน Fable 5.1 หยุดถาม
+  ทั้งที่คำตอบมีแล้ว
+- **§2.5 กฎห้ามเรียก skill จาก pipeline plugin**: คงกฎและเหตุผล ตัดรายชื่อ skill
+  ราย plugin + version pin `1.2.3` ที่เน่าทุกครั้งที่ mattpocock ออกรุ่น (16 → 9 บรรทัด)
+- **§5 close-out**: สิ่งที่พบแต่ไม่แตะ (bug เดิม, lint debt, งานนอก module ที่เลือก)
+  เป็น follow-up ในสรุป ไม่ใช่ fix ในรอบ setup — กัน scope creep ของ Opus 5
+- ตัด tag เหตุการณ์ (`field report 2026-09-09`, `gov-boi-smart`) คงเหตุผลไว้ ·
+  อ้างอิง `มติ` ไม่แตะ (ชี้ decision record)
+
 ## 4.62.2 (2026-09-11)
 
 **แก้บันทึกที่ผิดของตัวเองใน database eval 4's baseline note** — พบระหว่างเก็บกวาด
