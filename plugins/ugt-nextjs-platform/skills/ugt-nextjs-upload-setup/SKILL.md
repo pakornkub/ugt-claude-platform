@@ -244,7 +244,7 @@ Then by hand — these are the ones that catch real breakage:
       `FILE_NOT_AVAILABLE` catalog keys are reserved for a project that fetches
       downloads via JS and surfaces them itself)
 
-## 7. Troubleshooting — upload โดน `SCANNER_UNAVAILABLE` (field report 2026-08-26)
+## 7. Troubleshooting — upload โดน `SCANNER_UNAVAILABLE`
 
 *(ใช้เฉพาะโปรเจคที่เลือกเปิด virus scan — §3 Q5)*
 
@@ -256,7 +256,7 @@ Then by hand — these are the ones that catch real breakage:
 docker logs <app-container> 2>&1 | grep "virus scan unavailable"
 ```
 
-สองกับดักที่ทำให้คนไล่ผิดทาง (เจอทั้งคู่ใน field report):
+สองกับดักที่ทำให้คนไล่ผิดทาง:
 
 - **toast ในหน้าเว็บไม่ใช่ log** — ผู้ใช้เห็นแค่ข้อความแปลของ
   `SCANNER_UNAVAILABLE` (จงใจไม่บอกรายละเอียด กันข้อมูล infra รั่ว)

@@ -21,9 +21,8 @@ description: >
 Skills **copy** their assets into the project (`components/ui/data-table.tsx`,
 `lib/format.ts`, auth pages, …). That is deliberate — the project owns, builds
 and may edit those files. The cost: `/plugin update` updates the *knowledge*
-but the copies sit still. HRMS shipped the founding example: the plugin fixed
-`scrollX` clipping data, and the project that discovered that bug kept its old
-copy for weeks.
+but the copies sit still — the plugin fixes a bug and the very project that
+reported it keeps running its old copy for weeks.
 
 Every **copied `.ts`/`.tsx`** asset ships with two stamp lines (baked at
 release). Paste-into-file assets (`schema-*.prisma`, `globals.tokens.css`,

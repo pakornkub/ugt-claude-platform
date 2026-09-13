@@ -1,5 +1,30 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.0 (2026-09-13)
+
+**Prompt audit รอบ 2 — 10 skill ที่เหลือ + `CLAUDE-block.md`** (ตาม `claude-api
+prompt-audit` สำหรับ Opus 5 / Fable 5.1; minor bump เพราะ CLAUDE-block เปลี่ยน
+พฤติกรรม sizing ที่ผู้ใช้เห็น):
+
+- **CLAUDE-block §Sizing**: งาน Small (unambiguous · ~1–3 files · ไม่ใช่ risk
+  domain) ใช้ **light version เป็น default** (TDD → review) และบอกหนึ่งบรรทัดก่อน
+  เริ่ม — ผู้ใช้ตอบ "full" ได้ ไม่หยุดถามทุกครั้ง (เดิม 4.18.0 "Ask the user …
+  Never pick silently" = blocking stop ต่อทุก bug fix เล็ก) · งานที่ไม่ Small
+  ยังเข้า full pipeline โดยไม่ถามเหมือนเดิม
+- **CLAUDE-block §Model mode**: เพิ่ม bullet ให้ prompt ของ subagent พกคำตอบ/
+  ไฟล์/definition of done และบอกว่า user ไม่ได้ดูอยู่ — หยุดเฉพาะ destructive
+  action หรือคำถามที่ prompt ไม่ครอบ (คู่กับ full-setup §2.5 ใน 4.62.3)
+- **Quick Rules ที่เป็นสำเนาที่ 3 ของกฎเดียวกัน** (CLAUDE-block "Rules that break
+  the build" + §Org Standards + Quick Rules) ตัดออก: database-setup 6 แถว,
+  cicd-setup 5 แถว, test-lint-setup 4 แถว — คงแถวที่มีอาการเฉพาะ · database
+  §Org Standards ระบุ `IsDeleted = 1` ตรง ๆ (check-contract-drift ต้องการ)
+- **"always read before …" → เงื่อนไข**: auth-setup `auth-flows.md` อ่านเมื่อ
+  เปลี่ยน flow/cookie/guard หรือเจอ symptom · design-setup `interview.md` เป็น
+  ของขั้น interview
+- **ตัด incident tag** (วันที่ / field report / eval run / ชื่อโปรเจค) ใน
+  auth-setup, database-setup, design-setup, kit-sync, upload-setup — คงเหตุผล
+  และ failure mode ทุกจุด · อ้างอิง `มติ` ไม่แตะ
+
 ## 4.62.3 (2026-09-12)
 
 **Prompt audit `ugt-nextjs-full-setup/SKILL.md` สำหรับ Opus 5 / Fable 5.1** (ตาม

@@ -1,5 +1,15 @@
 # Changelog — ugt-core
 
+## 2.12.2 (2026-09-13)
+
+**Prompt audit รอบ 2 — `ugt-requirements`** (ตาม `claude-api prompt-audit`):
+กฎ "one feature per session" อ้างเหตุผลเชิงโครงสร้างของ pipeline (session นั้น
+dispatch subagent เอง, subagent dispatch ต่อไม่ได้) แทน "keeps context clean";
+แถว orchestration ที่สั่งหนี session เพราะ "context was already compacted /
+bloated" เปลี่ยนเป็น "brief เสร็จ → handoff + commit → เริ่ม feature แรกใน
+session ใหม่" — โมเดล 1M context ไม่ควรถูกสั่งให้กลัว context เต็ม ·
+`ugt-context` / `ugt-handoff` / `ugt-model-mode` ตรวจแล้วไม่มีอะไรต้องแก้
+
 ## 2.12.1 (2026-09-12)
 
 **`ugt-model-mode` eval 4 (`dispatch-plan-before-spawn`): baseline รันจริงครั้งแรก

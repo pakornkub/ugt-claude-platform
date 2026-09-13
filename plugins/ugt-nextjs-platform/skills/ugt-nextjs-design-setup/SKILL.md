@@ -21,9 +21,8 @@ description: >
 
 ## 1. Overview
 
-Two production projects (`ugt-hrms`, `gov-boi-smart`) proved the same lesson:
-build UI first and agree on design later, and you retheme the whole app —
-one of them did it **twice**. This skill runs the agreement first: one
+Build UI first and agree on design later, and you retheme the whole app —
+sometimes twice. This skill runs the agreement first: one
 interview → `docs/DESIGN.md` → tokens + fonts + shell + UI kit installed →
 a harness rule so the agreement outlives this session.
 
@@ -103,8 +102,8 @@ Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables 
 answers pre-filled — ข้อ 1 = มี (the reference is this project's own code),
 ข้อ 5 = the shell the project already has, ข้อ 9 = ยึดของเดิม + rebase — one
 extra question, ข้อ 10 (keep the project's font or move to Inter + Noto Sans
-Thai; default keep — มติ 2026-09-09), and the scan is **not skippable**. The wrong reading, seen in the field
-(2026-09-09): "ใช้ design เดิม" taken as "leave design alone" → scan skipped →
+Thai; default keep — มติ 2026-09-09), and the scan is **not skippable**. The wrong reading:
+"ใช้ design เดิม" taken as "leave design alone" → scan skipped →
 kit installed on org indigo/mira defaults → the auth-setup admin pages, built
 from the kit, shipped as a second template that looked nothing like the app.
 Preserving a design means moving the kit onto it, not leaving the kit at its
@@ -191,7 +190,7 @@ different size — is the field bug this step exists to prevent.
    `next-app`) to the project slug. **Keep the `cn` npm package the preset
    adds** — the registry's `lib/utils.ts` and every `components/ui/*` file
    import `{ cn } from 'cn'`; it only *looks* stray. An installer removed it
-   as unrelated (eval run 2026-09-09) and the build survived by accident
+   as unrelated and the build survived by accident
    (hoisted through the `shadcn` package) — `npm ci` on Jenkins would not.
    Then **run the gate instead of eyeballing it**: `node <skill-dir>/scripts/verify.mjs` fails on any `components.json`
    that is not `style: base-mira` · `iconLibrary: lucide` · `rtl: false` ·
@@ -410,7 +409,7 @@ contain project มติ that deliberately deviate.
 ## 4. References
 
 - `references/interview.md` — the question bank + defaults + the
-  existing-project scan checklist (**always read before interviewing**)
+  existing-project scan checklist (the interview step reads it — question bank, defaults, scan checklist)
 - `references/layout-shells.md` — shell answer → shadcn block mapping + nav
   highlight rule + overflow rule
 - `references/conventions.md` — component-usage rules in depth (Dialog

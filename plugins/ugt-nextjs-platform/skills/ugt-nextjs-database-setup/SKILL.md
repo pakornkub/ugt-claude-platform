@@ -43,7 +43,7 @@ Database-level standards every project shares:
 
 **Standard audit columns** — app-owned master/transaction tables must carry:
 `Id`, `CreatedAt`, `UpdatedAt`, `CreatedBy`, `UpdatedBy`, `IsActive`, `IsDeleted`
-(soft delete — never hard-delete data that needs history)
+(soft delete via `IsDeleted = 1` — never hard-delete data that needs history)
 
 **Read-only rule**: tables prefixed `__EXT___` and views/tables on a linked
 server are SELECT-only, always — no INSERT/UPDATE/DELETE from the app; to
@@ -67,8 +67,8 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
    **Linked server = yes → also ask the full four-part name of every object
    read** (`<server>.<db>.<schema>.<view>`, e.g. `HRLINK.HRDB.dbo.vwEmployee`)
    and its columns — `raw-sql-and-sp.md` §Linked server needs them verbatim;
-   an installer left to guess invents a DB/view name that fails at runtime
-   (eval run 2026-09-11). SP = yes → the SP's parameter list, for the same reason.
+   an installer left to guess invents a DB/view name that fails at runtime.
+   SP = yes → the SP's parameter list, for the same reason.
 4. **[Existing project] มี data layer เดิมไหม — และย้ายตอนนี้ไหม?** Under
    full-setup, §1 there already inventoried it (SQLite / mock modules / JSON
    fixtures / localStorage) and §2 Q0b holds the answer — don't re-ask.
@@ -167,7 +167,7 @@ closing summary must list them under "env vars needing real values".
    `references/migrations.md` §5 (`db pull` → convention refactor → offline
    `0_init` baseline → `migrate resolve --applied`); `migrate dev` against a
    database that already holds data is the one command this skill must never
-   run (eval run 2026-09-11: the main flow used to list it unconditionally)
+   run
    > **First `migrate dev` on the shared org server fails without a shadow
    > database** — the app login has no `CREATE DATABASE` right and the error
    > talks about permissions, not the shadow DB. Set `shadowDatabaseUrl` to a
@@ -182,7 +182,7 @@ filtered unique indexes Prisma can't express, deploy flow) →
 ### 4b. Migrate an existing prototype data layer (preserve mode)
 
 Infrastructure installed ≠ features connected. After §4 the app still reads
-whatever it read before — field report 2026-09-09: a Google AI Studio project
+whatever it read before — e.g. a prototype project
 "connected to SQL Server" whose every screen kept running on SQLite. Full
 procedure and traps → `references/prototype-migration.md`; the shape:
 
@@ -216,17 +216,11 @@ Mandatory pattern: **sanitize before parameterize, always**; call SPs with
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| `url` in `prisma.config.ts` only | `url` in the `schema.prisma` datasource |
 | `provider = "prisma-client-js"` (kit assets import `@prisma/client`) | `provider = "prisma-client"` — correct upstream, wrong for this kit until the coordinated migration |
 | `import type sql from 'mssql'` | `import sql from 'mssql'` (value import) |
-| `import { env } from '@/lib/env'` | raw `process.env.*` in app code |
-| `@@map("PascalCasePlural")` on every model | camelCase table names leaking from models |
-| `@map("PascalCase")` on every field | camelCase columns / reserved words (`key`, `group`) |
 | sanitize regex before interpolating into `$queryRaw` | hand-built SQL strings / skipped sanitize |
 | `` $executeRaw`EXEC usp_X ${a}, ${b}` `` (parameterized) | `$executeRawUnsafe` with user input |
-| soft delete (`IsDeleted = 1`) | hard-deleting data that needs history |
 | existing store found → migrate (§4b) or say plainly the app still runs on it | install Prisma beside SQLite/mock data and report "ต่อ database แล้ว" |
-| `npx prisma generate` after every migrate | leaving the generated client stale |
 
 ## Verification Checklist
 
@@ -242,7 +236,7 @@ failure) — the rest must be run by hand:
 
 - [ ] existing project: no SQLite/mock/JSON store left beside Prisma, and at
       least one screen/action imports `@/lib/prisma` (verify.mjs — the
-      "installed but nothing uses it" state is the 2026-09-09 field bug)
+      "installed but nothing uses it" state is the failure this check exists for)
 - [ ] `npx prisma validate` passes
 - [ ] `npx prisma generate` passes (and is re-run after every migrate)
 - [ ] `schema.prisma` has no `url` in the datasource; `prisma.config.ts` has it
