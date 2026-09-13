@@ -21,7 +21,7 @@ description: >
 ## When to use — symptoms with a documented cause here
 
 Every row below was debugged in a real org project; the fix is in
-`references/auth-flows.md`. Read it before touching auth code.
+`references/auth-flows.md` — read it when a symptom appears or before changing a flow.
 
 | Symptom | Likely cause |
 | --- | --- |
@@ -57,7 +57,7 @@ Real code lives in `assets/` — adjust placeholders and copy straight into the
 project. Deep detail lives in `references/`:
 
 - `references/auth-flows.md` — every flow + every gotcha already debugged
-  (**always read before touching auth code**)
+  (read it before changing a login flow, cookie/guard setting, or when a symptom above appears)
 - `references/rbac.md` — data model, guard pattern, bootstrap, adding permissions later
 - `references/audit-logging.md` — action naming, write pattern, payload rules (PDPA), retention, viewer API
 - `references/keycloak-client.md` — requesting/creating a Keycloak client for a new project
@@ -179,7 +179,7 @@ Ask all of these **in a single message** before doing anything:
    inherit the design-setup tokens that were rebased onto the project's look;
    the kit's DataTable/dialogs stay as they are. A prototype login found by
    full-setup §1 is removed per §5.7. Shipping `/admin/*` as its own shell on
-   org indigo next to the existing app is the 2026-09-09 field bug this line
+   org indigo next to the existing app is the failure this line
    exists for; `scripts/verify.mjs` fails on it.
 
 ## 4. Prerequisite
@@ -225,8 +225,8 @@ npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avat
 ```
 
 > **After `add sidebar`, re-check `components/ui/button.tsx` and `input.tsx`
-> against DESIGN.md §4's control scale.** Twice in a row (eval runs
-> 2026-09-11) the `sidebar` block's own `add` reverted a project's rebased
+> against DESIGN.md §4's control scale.** The `sidebar` block's own `add`
+> can revert a project's rebased
 > scale (preserve mode's §Scale bridge) back to the registry default —
 > `git diff` those two files immediately after this command and re-apply the
 > rebase if it reverted. This is a shadcn CLI behavior, not something this
@@ -375,7 +375,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    that `proxy.ts` forwards — a server component cannot see its own URL any
    other way; snippet in `references/auth-flows.md` §Server Component session
    check), **then the first-admin gate** — without it, the first user logs in to a blank permission-less app
-   with no hint that `/admin/setup` exists (field report 2026-08-21):
+   with no hint that `/admin/setup` exists:
 
    ```tsx
    if (!(await isAdminInitialized())) redirect('/admin/setup');

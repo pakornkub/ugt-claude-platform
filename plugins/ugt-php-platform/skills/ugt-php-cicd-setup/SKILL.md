@@ -449,12 +449,8 @@ render เอกสารส่ง admin (§5.7):
   for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/storage; do
   ```
 
-  compose bind ที่ `/home/docker02/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
-  `<name>` ที่ยังไม่มีตอน `up -d` **dockerd สร้างให้เองเป็น `root:root`**
-  หลังบล็อก `[VOLUME]` รันจบไปแล้ว → `chown -R` ไม่ทัน แล้ว `www-data` เขียน
-  ไม่ได้ (permission denied) ทั้งที่ container ขึ้น `healthy` ปกติ. `chown -R`
-  บรรทัดถัดมาครอบทั้ง `/home/docker02/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
-  `mkdir` ให้เอง ขอแค่ subdir มีอยู่ก่อน (→ `references/docker-deploy.md` §H)
+  `<name>` ที่ไม่อยู่ในบรรทัดนี้ถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว
+  `www-data` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม §2.9 / `references/docker-deploy.md` §H
 - **มีทั้ง `[VOLUME]` และ `[WP]` (WordPress ที่มี volume อื่นนอกจาก wp-content)**
   → compose มี **สอง** บล็อกคอมเมนต์ `volumes:` แยกกัน แต่ YAML อนุญาต key
   `volumes:` ได้ **แค่อันเดียวต่อ service** — ต้อง **merge รายการทั้งหมดเข้า
@@ -604,6 +600,9 @@ vendor/bin/phpstan analyse
 vendor/bin/phpunit
 ```
 
+- **ขอบเขตของขั้นนี้คือทำให้ toolchain รันผ่านบนโค้ดเดิม ไม่ใช่ปรับปรุงโค้ดเดิม** —
+  แก้เฉพาะ format (`php-cs-fixer fix`) ที่เหลือ baseline ตามข้อถัดไปแล้ว
+  รายงานเป็น follow-up ในสรุป ไม่ไล่แก้ logic ของโปรเจคในรอบ setup
 - **commit การ reformat เป็น commit แยกของมันเอง** (เช่น
   `style: php-cs-fixer PSR-12 ทั้งโปรเจค (ก่อนเปิด CI)`) — diff จะใหญ่แต่เป็น
   whitespace ล้วน ปนกับ commit setup แล้ว review ไม่ได้เลย
@@ -657,14 +656,9 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `Dockerfile.ci` อยู่ที่ **root** (Jenkinsfile `docker build -f Dockerfile.ci`) | วางไว้ใน `docker/` แล้ว build ไม่เจอ / เอา CI image ไป deploy |
 | `composer install` ครั้งเดียวในสเตจ Install แล้วใช้ `vendor/` ต่อข้าม stage | `composer install` ใหม่ทุก stage |
 | `waitForQualityGate abortPipeline: true` + timeout | ข้าม gate / ใส่ gate โดยไม่มี `abortPipeline` (แดงแต่ pipeline เขียว = มั่นใจหลอก) |
-| Deploy ด้วย `--no-build` (reuse image จากสเตจ Docker Build) | ปล่อย compose build เองตอน deploy (ได้ image คนละตัวกับที่ scan ผ่าน) |
-| Secret File `env-<project>` → `cp` เป็น `.env` | แยก string credential ต่อ var / hardcode ใน Jenkinsfile |
-| Secret ขยายค่าโดย shell (`"$VAR"`) | Groovy interpolation (`"${VAR}"` รั่วลง log) |
 | `dependencyCheckPublisher` นับ CVE | `grep` XML ดิบ (นับ suppressed ด้วย → fail หลอก) |
-| Tag image ด้วย `BUILD_NUMBER` | `latest` อย่างเดียว (rollback ไม่ได้) |
 | Healthcheck ยิง `127.0.0.1:80` ด้วย `curl -fsS -L` (curl มากับ image แล้ว — ห้าม purge) | `localhost` / host port / ตัด `-L` (301 = เขียวหลอก) / `php -r file_get_contents` (พังเมื่อ `allow_url_fopen=Off`) / `wget` (ไม่มีใน image) |
 | Laravel migrate ส่ง `--env-file .env` ทั้งไฟล์ ก่อน `compose up` | `-e DATABASE_URL` ตัวเดียว (`artisan` boot ทั้ง framework ต้องการ `APP_KEY` ด้วย) |
-| Volume ใต้ `/home/docker02/appdata/<project>/` (dev = `/home/docker02/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
 | `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
 | WordPress: `wp-content` เป็น volume เสมอ + `WP_AUTO_UPDATE_CORE = false` | ปล่อย WP self-update ในคอนเทนเนอร์ (ข้าม pipeline + หายตอน deploy รอบหน้า) |
 | `[VOLUME]` + `[WP]` รวมเป็น `volumes:` ก้อนเดียวต่อ service | ปล่อยสอง `volumes:` ใน service เดียว (YAML ทับกันเงียบ ๆ) |
@@ -674,9 +668,6 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Baseline โค้ดเดิมด้วย `phpstan-baseline.neon` / `ignoreErrors` ระบุ path+เหตุผล | `excludePaths` ยกโฟลเดอร์ / `ignoreErrors: ['#.*#']` / ถอด `@PSR12` |
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `vendor` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
-| `/api/health` คืนแค่ `healthy`/`degraded` | ใส่ version/commit/hostname ลง response |
-| `sonar.sources`/`sonar.tests` ชี้ path ที่มีอยู่จริง + exclude `wp-admin`/`wp-includes` | ปล่อย path ค้าง (sonar-scanner fail ทันที) / สแกน WordPress core |
-| ทุก suppression/CPD exclusion มีเหตุผลกำกับ | suppress ล่วงหน้าโดยยังไม่เจอ finding จริง |
 | `pdo_sqlsrv` มาคู่กับ `msodbcsql18` + `unixodbc-dev` (→ references §C) | `pecl install sqlsrv` บรรทัดเดียว (fail ที่ configure หา `sql.h` ไม่เจอ) |
 
 ## 7. Verification Checklist

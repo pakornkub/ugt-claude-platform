@@ -1,5 +1,21 @@
 # Changelog — ugt-python-platform
 
+## 0.6.3 (2026-09-12)
+
+**Prompt audit `ugt-python-cicd-setup/SKILL.md` สำหรับ Opus 5 / Fable 5.1** (ตาม
+`claude-api prompt-audit` — contract ไม่เปลี่ยน มีแต่ instruction):
+
+- **§5.6 ขอบเขต**: เพิ่มบรรทัดระบุว่าขั้นนี้ทำให้ toolchain รันผ่านบนโค้ดเดิม
+  ไม่ใช่ปรับปรุงโค้ดเดิม — แก้เฉพาะ format + `--fix` ที่เหลือ baseline พร้อมเหตุผลแล้ว
+  รายงานเป็น follow-up (เดิม "แก้ให้จบ หรือ baseline" ไม่บอก default เปิดทางให้
+  โมเดลไล่แก้โค้ดเดิมทั้งโปรเจคในรอบ setup)
+- **§5.3 volume**: ย่อหน้าอธิบายกลไก `root:root`/`chown` ที่ซ้ำกับ §2.9 และ
+  `references/docker-deploy.md` เหลือหนึ่งบรรทัดชี้ไปที่นั่น (action "แทนชื่อใน
+  `for p in`" ยังอยู่)
+- **§6 Quick Rules**: ตัดแถวที่ restate §2 Org Standards คำต่อคำ (tag `BUILD_NUMBER`,
+  `--no-build`, secret ผ่าน shell, Secret File, path volume, health response,
+  sonar path, suppression) — คงแถวที่บอกอาการซึ่ง §2 ไม่ได้บอก
+
 ## 0.6.2 (2026-09-03)
 
 **Path มาตรฐาน persistent data sync กับ ugt-core 2.10.1**: `/srv/appdata/<project>`

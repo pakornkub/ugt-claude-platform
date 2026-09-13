@@ -342,12 +342,8 @@ sonar keys = `<project>`, `<project>-dev`
   for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
   ```
 
-  compose bind ที่ `/home/docker02/appdata/<project>/<name>` ไม่ใช่ระดับโปรเจคเปล่า ๆ —
-  `<name>` ที่ยังไม่มีตอน `up -d` **dockerd สร้างให้เองเป็น `root:root`**
-  หลังบล็อก `[VOLUME]` รันจบไปแล้ว → `chown -R` ไม่ทัน แล้ว user `app` เขียน
-  ไม่ได้ (`PermissionError`) ทั้งที่ container ขึ้น `healthy` ปกติ. `chown -R`
-  บรรทัดถัดมาครอบทั้ง `/home/docker02/appdata/<project>` อยู่แล้ว จึงคลุม subdir ที่เพิ่ง
-  `mkdir` ให้เอง ขอแค่ subdir มีอยู่ก่อน (→ `references/docker-deploy.md` §D)
+  `<name>` ที่ไม่อยู่ในบรรทัดนี้ถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว user
+  `app` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม §2.9 / `references/docker-deploy.md` §D
 - **shape = web (`[WEB]`)** → ใช้ `Dockerfile.web`, คงบล็อก health poll ท้าย
   สเตจ Deploy ไว้, ลบคอมเมนต์ `[BATCH]` 2 บรรทัดท้ายสเตจทิ้ง
 - **shape = batch (`[BATCH]`)** → ใช้ `Dockerfile.batch` (ไม่มี `EXPOSE`/
@@ -458,6 +454,9 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
+- **ขอบเขตของขั้นนี้คือทำให้ toolchain รันผ่านบนโค้ดเดิม ไม่ใช่ปรับปรุงโค้ดเดิม** —
+  แก้เฉพาะ format กับสิ่งที่ `--fix` แก้ให้ ที่เหลือ baseline ตามข้อถัดไปแล้ว
+  รายงานเป็น follow-up ในสรุป ไม่ไล่แก้ logic ของโปรเจคในรอบ setup
 - **commit การ reformat เป็น commit แยกของมันเอง** (เช่น
   `style: ruff format ทั้งโปรเจค (ก่อนเปิด CI)`) — diff จะใหญ่แต่เป็น whitespace
   ล้วน ปนกับ commit setup แล้ว review ไม่ได้เลย
@@ -500,23 +499,14 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | ทุก stage ที่ใช้ Python เปิด `docker.image('python:3.12-slim').inside` ของตัวเอง | ขอ admin ติดตั้ง Python/Global Tool บน Jenkins |
 | สร้าง `.venv` ใน workspace แล้วใช้ต่อข้าม stage (`.venv/bin/ruff` …) | `pip install` ใหม่ทุก stage หรือ install ลง system python ของ container |
 | `waitForQualityGate abortPipeline: true` + timeout | ข้าม gate / ใส่ gate โดยไม่มี `abortPipeline` (แดงแต่ pipeline เขียว = มั่นใจหลอก) |
-| Deploy ด้วย `--no-build` (reuse image จากสเตจ Docker Build) | ปล่อย compose build เองตอน deploy (ได้ image คนละตัวกับที่ scan ผ่าน) |
-| Secret File `env-<project>` → `cp` เป็น `.env` | แยก string credential ต่อ var / hardcode ใน Jenkinsfile |
-| Secret ขยายค่าโดย shell (`"$VAR"`) | Groovy interpolation (`"${VAR}"` รั่วลง log) |
 | `dependencyCheckPublisher` นับ CVE | `grep` XML ดิบ (นับ suppressed ด้วย → fail หลอก) |
-| Tag image ด้วย `BUILD_NUMBER` | `latest` อย่างเดียว (rollback ไม่ได้) |
 | Healthcheck ยิง `127.0.0.1:8000` + poll `docker inspect` | `localhost` (slim → IPv6) / host port / `wget` จาก Jenkins |
-| Migrate ก่อน `compose up` — fail = ไม่ deploy | deploy ก่อน แล้วค่อย migrate |
-| Volume ใต้ `/home/docker02/appdata/<project>/` (dev = `/home/docker02/appdata/<project>-dev/`) | named volume / bind โค้ดทับ image / เก็บ secret ใน volume |
 | `mkdir -p` ถึง `<name>` ที่ compose bind จริง ก่อน `chown -R` | mkdir แค่ระดับ `<project>` (dockerd สร้าง subdir เป็น root:root แล้วแอปเขียนไม่ได้) |
 | Django migrate ส่ง `--env-file .env` ทั้งไฟล์ | `-e DATABASE_URL` ตัวเดียว (`settings.py` ต้องการ `SECRET_KEY` ฯลฯ ด้วย) |
 | `ruff format .` ทั้งโปรเจค + commit แยก **ก่อน** push แรก | ปล่อยให้ `ruff format --check` แดงบน Jenkins แล้วค่อยไล่แก้ทีละรอบ |
 | Baseline โค้ดเดิมด้วย `per-file-ignores` ระบุ rule+path+เหตุผล | ตัด rule ออกจาก `select` / `ignore_errors` ยกโฟลเดอร์ |
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
-| `/api/health` คืนแค่ `healthy`/`degraded` | ใส่ version/commit/hostname ลง response |
-| `sonar.sources`/`sonar.tests` ชี้ path ที่มีอยู่จริง | ปล่อย path ค้าง (sonar-scanner fail ทันที) |
-| ทุก suppression/CPD exclusion มีเหตุผลกำกับ | suppress ล่วงหน้าโดยยังไม่เจอ finding จริง |
 | batch: `restart: "no"` + host cron เรียก `docker compose run --rm job` | `restart: unless-stopped` กับ batch (รัน job ซ้ำไม่หยุด) |
 
 ## 7. Verification Checklist

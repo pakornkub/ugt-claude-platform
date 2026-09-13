@@ -185,8 +185,8 @@ Close out with, in this order:
    which enters the installed pipeline — superpowers: brainstorming → plan →
    TDD → review · mattpocock (thin mode): `/grill-with-docs` on that feature
    → `/to-spec` → `/to-tickets` → `/implement`, or `/wayfinder` first when
-   the whole project is still foggy. One feature per session keeps context
-   clean.
+   the whole project is still foggy. One feature per session — the pipeline
+   inside it owns its own subagents (see the orchestration rules below).
 4. Remind: commit the brief, then `/ugt-handoff`.
 
 ### Orchestration decision — propose ONE build plan, confirmed once
@@ -196,7 +196,7 @@ message — never a per-feature question, and never dispatch anything silently:
 
 | Signal | Route |
 | --- | --- |
-| This session's context was already compacted, or heavy work remains | Continue in a **new session** (handoff + commit first) — never push on in a bloated session |
+| The brief is done and implementation is next | Hand off + commit, then start the first feature in a **fresh session** — one feature per session is the pipeline's structure (below), not a context budget |
 | ≥ 2 features whose board `Depends on` is empty **and** whose blocking Open Questions are cleared | Offer parallel: one fresh session + git worktree per feature |
 | Features form a chain, or several touch the same tables | Sequential in dependency order; shared `schema.prisma` changes land first on the main branch, then the independent parts may parallelize |
 

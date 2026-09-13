@@ -135,13 +135,9 @@ CI=true npm run test:coverage && ls test-results/junit.xml coverage/lcov.info
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| Script names exactly as the four above | Invent names (`test:ci`, `lint:all`) and patch the Jenkinsfile to match |
 | `reporters: process.env.CI ? [..., 'junit'] : [...]` | junit always on (report files litter every local run) |
-| `coverage.reporter` includes `lcov` | `text` only (Sonar can't read it → gate sees 0%) |
 | Stub `server-only` with a file in the project | Alias into `node_modules/next` (breaks in worktrees without a full install) |
 | Restate the eslint-config-next defaults in `globalIgnores` so the whole ignore surface is readable in one place | Claim it is required — global ignores **accumulate**, they never replace next's set |
-| pre-commit = `npx lint-staged` | pre-commit = `npm test` (slow → `--no-verify` → pointless) |
-| `SKIP_ENV_VALIDATION: '1'` in `test.env` | Tests requiring a real `.env` |
 
 ## Verification Checklist
 

@@ -278,15 +278,10 @@ Checklist §6
 
 | DO ✅ | DON'T ❌ |
 | --- | --- |
-| `waitForQualityGate abortPipeline: true` + timeout | Skip the Quality Gate or leave it without a timeout |
 | Deploy with `--no-build` (reuse the Docker Build image) | Let compose rebuild at deploy (build args lost → broken bundle) |
-| Client-side vars as `--build-arg` | In compose `environment:` (no effect) |
-| Secret File credential `env-<project>` → `cp` to `.env` | Separate string credentials per var / hardcoding in the Jenkinsfile |
-| Secrets expanded by the shell (`"$VAR"`) | Groovy-interpolated secrets (`"${VAR}"` leaks into the log) |
 | `dependencyCheckPublisher` counts CVEs | Grepping the raw XML (counts suppressed too → false fails) |
 | Tag images with `BUILD_NUMBER` | Bare `latest` (no rollback) |
 | Healthcheck on `127.0.0.1` + poll `docker inspect` | `localhost` (Alpine → IPv6) / wget from Jenkins |
-| `SKIP_ENV_VALIDATION=1` for CI/build only | Setting it in the production container |
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED=0`/`NODE_EXTRA_CA_CERTS` hardcoded directly in compose `environment:` (an infra decision, admin-confirmed via `docs/admin-handoff.md` §4) — or local `.env.local`/`.env.dev` for dev | Ever in `env-<project>` / `env-<project>-dev` (the prod/dev Jenkins Secret File credentials) — it's not a secret, it's an infra decision |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |

@@ -64,6 +64,10 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
   `auto`) · main session model stays the user's `/model` · this table **wins
   over model advice inside any pipeline skill** (e.g. superpowers SDD's Model
   Selection section)
+- Every subagent prompt carries what the task needs — the answers already
+  collected, the files, the definition of done — and says the user is not
+  watching: the subagent proceeds without asking and stops only for a
+  destructive action or a question the prompt does not cover
 
 ## Which skill, when
 
@@ -88,7 +92,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
      detect the installed bundle, keep matching spans, delete the other
      pipeline's spans AND all [PIPELINE] marker comments. No pipeline plugin
      installed at all → delete every span and keep only the unmarked rows. -->
-| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → offer the user a choice, otherwise go full pipeline |
+| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → light version by default, otherwise full pipeline |
 <!-- [/PIPELINE:superpowers] -->
 <!-- [PIPELINE:mattpocock] -->
 | Build a feature / fix a bug | Fully user-driven — do not auto-invoke any pipeline skill for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
@@ -105,7 +109,7 @@ of the requirement, **blast radius** (files/modules touched), **risk domain**
 
 | Size | Signals | What happens |
 | --- | --- | --- |
-| Small | Requirement is unambiguous · ~1–3 files · not a risk domain | **Ask the user**: full pipeline (brainstorming → plan → TDD → review) or the light version (skip brainstorming, straight to TDD → review)? Never pick silently |
+| Small | Requirement is unambiguous · ~1–3 files · not a risk domain | **Light version by default** (skip brainstorming, straight to TDD → review) — say so in one line before starting; the user can answer "full" to get the whole pipeline. Do not stop to ask |
 | Not small (ambiguous, cross-module, or risk domain) | — | Full pipeline, no need to ask — it's clearly warranted |
 
 The light version still writes a test first and still gets reviewed — those
