@@ -3,9 +3,6 @@
 Last updated: 2026-09-13
 
 ## In progress
-- **plugin เครื่องนี้ยังไม่ update** — repo อยู่ที่ nextjs 4.63.0 / core 2.12.2
-  แล้ว แต่เครื่องนี้ยังอยู่ nextjs 4.61.0 — รอ `/plugin marketplace update ugt` +
-  `/plugin update ugt-nextjs-platform` + `/reload-plugins`
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
@@ -23,6 +20,12 @@ Last updated: 2026-09-13
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-13 **merge PR #2** `claude/compassionate-keller-mxx44p` เข้า main (2abacbf) ·
+  tag `ugt-nextjs-platform--v4.63.0` + `ugt-core--v2.12.2` push แล้ว (php/python 0.6.3
+  ไม่ tag ตามมติรอ pilot) · ลบ branch แล้ว เหลือ main ตัวเดียว · plugin เครื่องนี้
+  update ครบ 4 ตัวผ่าน `claude plugin update` (core 2.12.2 · nextjs 4.63.0 ·
+  php/python 0.6.3) — ต้อง restart session ถึงจะมีผล · ยังไม่พิสูจน์ prompt audit
+  ด้วย eval/bug fix เล็ก
 - 2026-09-13 prompt audit รอบ 2 ครบทั้ง 17 skill — nextjs **4.63.0** · core **2.12.2**:
   CLAUDE-block งาน Small → light version เป็น default (ไม่ถามทุกครั้ง) + autonomy
   line สำหรับ subagent · ตัด Quick Rules สำเนาที่ 3 (database/cicd/test-lint) ·
