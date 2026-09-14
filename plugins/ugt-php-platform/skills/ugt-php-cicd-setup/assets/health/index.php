@@ -44,4 +44,4 @@ $ok = true;
 http_response_code($ok ? 200 : 503);
 header('Content-Type: application/json');
 echo json_encode(['status' => $ok ? 'healthy' : 'degraded']);
-// Laravel ไม่ใช้ไฟล์นี้ — ใช้ `Route::get('/api/health', ...)` โค้ดเดียวกันใน routes/web.php แทน
+// Laravel ไม่ใช้ไฟล์นี้ — ใช้ `Route::get('/health', ...)` โค้ดเดียวกันใน routes/api.php แทน

@@ -2,7 +2,7 @@
 
 | Placeholder | Meaning | Example |
 | --- | --- | --- |
-| `__PROJECT_NAME__` | app slug / Keycloak Client ID — **also hidden in a fallback string in `login-form.tsx` (flagged with a ⚠️ PLACEHOLDER comment — grep for it; line numbers drift); don't miss it** | `expense-portal` |
+| `__PROJECT_NAME__` | app slug / Keycloak Client ID | `expense-portal` |
 | `__BASE_PATH__` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
 | `__KEYCLOAK_HOST__` | the org's central Keycloak host | — |
 | `__REALM__` | the org's central realm | — |

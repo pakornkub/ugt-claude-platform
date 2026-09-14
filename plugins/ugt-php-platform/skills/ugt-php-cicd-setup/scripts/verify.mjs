@@ -103,11 +103,20 @@ check('/api/health exists (Laravel route or PHP file)', () => {
   let routeHit = null;
   if (has('routes')) {
     for (const f of readdirSync(p('routes')).filter((n) => n.endsWith('.php'))) {
-      if (read('routes', f).includes('/api/health')) {
+      const src = read('routes', f);
+      // routes/api.php gets the default `api` prefix, so `/health` there IS /api/health (§5.3, 0.6.4)
+      if (src.includes('/api/health') || (f === 'api.php' && /Route::(get|any)\(\s*['"]\/health['"]/.test(src))) {
         routeHit = `routes/${f}`;
         break;
       }
     }
+  }
+  if (routeHit === 'routes/web.php') {
+    return {
+      ok: 'warn',
+      msg:
+        'health route lives in routes/web.php — the `web` middleware group runs StartSession; with SESSION_DRIVER=database and no sessions table yet it answers 500 → move it to routes/api.php (§5.3)',
+    };
   }
   if (!fileHits.length && !routeHit) {
     return {

@@ -1,5 +1,13 @@
 # Changelog — ugt-python-platform
 
+## 0.6.4 (2026-09-13)
+
+**Eval baseline ครั้งแรกของ `ugt-python-cicd-setup` (fastapi-no-tests-full-setup) ผ่าน `claude plugin eval`**: 13/13 assertion ที่วัดได้ผ่าน, 2 ข้อ blocked โดย sandbox (Windows ไม่มี shell + เขียนใต้ `.claude/` ถูกปฏิเสธ) — ผลบันทึกใน `evals/evals.json` key `baseline_result_2026-09-13`; ชุด case แบบรันได้อยู่ที่ `plugins/ugt-python-platform/evals/`
+
+- **Asset `docker-compose*.yml` block `[VOLUME]`**: ตัวอย่างยังชี้ `/srv/appdata` ทั้งที่ contract เป็น `/home/docker02/appdata` ตั้งแต่ core 2.10.1 → แก้แล้ว + เพิ่ม pin ใน `scripts/check-contract-drift.mjs` (ครอบ compose asset ทั้ง 3 stack)
+- **Asset `tooling/pyproject-tooling.toml`**: เพิ่ม `pythonpath = ["."]` ใน `[tool.pytest.ini_options]` — Jenkins เรียก `.venv/bin/pytest` (ไม่ใช่ `python -m pytest`) และ `tests/` ไม่มี `__init__.py` ทำให้ `import app` พังทุกโปรเจค · `verify.mjs` เพิ่ม check ข้อนี้
+- **Comment `docker-compose up` (v1) ใน compose/Jenkinsfile** → `docker compose` (v2)
+
 ## 0.6.3 (2026-09-12)
 
 **Prompt audit `ugt-python-cicd-setup/SKILL.md` สำหรับ Opus 5 / Fable 5.1** (ตาม

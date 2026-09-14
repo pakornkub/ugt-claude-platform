@@ -273,7 +273,7 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 | `assets/docker-compose.yml` | `docker-compose.yml` | เสมอ |
 | `assets/docker-compose.dev.yml` | `docker-compose.dev.yml` | เสมอ |
 | `assets/health/index.php` | `api/health/index.php` (CI4 → `public/api/health/index.php`) | shape ≠ laravel — path ต้องเทียบจาก **DocumentRoot ที่ Dockerfile เสิร์ฟจริง** |
-| — (ไม่ copy ไฟล์) | `routes/web.php`: `Route::get('/api/health', ...)` | shape = laravel — โค้ดอยู่ในคอมเมนต์บรรทัดสุดท้ายของ `assets/health/index.php` (ดู §5.3) |
+| — (ไม่ copy ไฟล์) | `routes/api.php`: `Route::get('/health', ...)` (เสิร์ฟที่ `/api/health` ผ่าน `apiPrefix` ดีฟอลต์) | shape = laravel — โค้ดอยู่ในคอมเมนต์บรรทัดสุดท้ายของ `assets/health/index.php` (ดู §5.3) · **ห้ามอยู่ใน `routes/web.php`** เพราะ middleware group `web` รัน `StartSession` — ถ้า `SESSION_DRIVER=database` แล้วยังไม่มีตาราง `sessions` (โปรเจคที่ยังไม่ migrate) endpoint จะ 500 แทนที่จะ healthy/degraded |
 | `assets/tooling/phpstan.neon` | `phpstan.neon` (root) | เสมอ |
 | `assets/tooling/.php-cs-fixer.php` | `.php-cs-fixer.php` (root) | เสมอ |
 | `assets/tooling/phpunit.xml` | `phpunit.xml` (root) | เสมอ |
@@ -362,11 +362,19 @@ render เอกสารส่ง admin (§5.7):
 - **shape = laravel** → `Dockerfile.web` · **uncomment บล็อก `[LARAVEL]` 2
   บรรทัด** (sed ย้าย DocumentRoot ไป `public/`) · **ไม่ copy
   `health/index.php`** — ไฟล์ที่ root ไม่ถูกเสิร์ฟเมื่อ DocumentRoot = `public/`
-  ให้เพิ่ม route แทน (โค้ดชุดเดียวกับในไฟล์ health):
+  ให้เพิ่ม route แทน (โค้ดชุดเดียวกับในไฟล์ health) **ใน `routes/api.php` ไม่ใช่
+  `routes/web.php`** — middleware group `web` รัน `StartSession`, ถ้า
+  `SESSION_DRIVER=database` แล้วยังไม่มีตาราง `sessions` (โปรเจคที่ยังไม่
+  migrate) endpoint จะ 500 แทน healthy/degraded ทำให้ container ไม่มีวันขึ้น
+  healthy; `routes/api.php` ไม่ผ่าน middleware `web` เลยไม่มีปัญหานี้
+  (`bootstrap/app.php` ของ Laravel 11 ต้องมี `api: __DIR__.'/../routes/api.php'`
+  ใน `->withRouting(...)` — ถ้ายังไม่มีให้เพิ่ม; `apiPrefix` ดีฟอลต์คือ `api`
+  อยู่แล้ว **ห้าม** ตั้งเป็น `''`):
 
   ```php
-  // routes/web.php — ต้องอยู่นอก middleware auth (contract: ไม่ต้อง login)
-  Route::get('/api/health', function () {
+  // routes/api.php — เสิร์ฟที่ /api/health (apiPrefix ดีฟอลต์), ไม่ผ่าน
+  // middleware "web" จึงไม่มี session/CSRF มายุ่ง (contract: ไม่ต้อง login)
+  Route::get('/health', function () {
       $ok = true; // [DB] เช็ค DB จริง (SELECT 1) แล้ว $ok = false เมื่อพัง
       return response()->json(['status' => $ok ? 'healthy' : 'degraded'], $ok ? 200 : 503);
   });
@@ -431,6 +439,10 @@ render เอกสารส่ง admin (§5.7):
   ไฟล์ **ไม่ใช่** `-e DATABASE_URL` ตัวเดียว เพราะ `artisan` boot ทั้ง framework
   ก่อนแตะ DB ขาด `APP_KEY` ก็ตายตั้งแต่ยังไม่ทัน migrate. ผลพลอยได้คือ **ไม่ต้อง
   parse `.env` เองด้วย `grep`/`cut`** (docker อ่านไฟล์ให้ ไม่ต้องลุ้น quote/`\r`)
+  · **shape = laravel** → Laravel ไม่อ่าน `DATABASE_URL` (อ่าน `DB_URL` หรือ
+  `DB_CONNECTION`/`DB_HOST`/`DB_PORT`/`DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD`)
+  ให้ใช้บรรทัด `[DB][LARAVEL]` ที่อยู่ต่อจาก `DATABASE_URL:` ใน compose ทั้ง 2
+  ไฟล์แทน แล้วลบบรรทัด `DATABASE_URL:` ทิ้ง
 - **CI4 (ข้อ 5 = spark migrate)** → คงบล็อกไว้ เปลี่ยนคำสั่งเป็น
   `php spark migrate --all` — ห้ามลบบล็อกทิ้ง เพราะ contract คือ migrate ก่อน deploy
 - **legacy / WordPress** → ลบบล็อก `[DB]` (ไม่มี migration tool มาตรฐาน;
@@ -728,7 +740,8 @@ path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟ
       `APP_URL`/`ASSET_URL` · `app.baseURL` · `WP_HOME`/`WP_SITEURL` ตาม §5.3
       แล้ว) — ทดสอบแค่ `localhost:port` ผ่านเสมอแม้ config ผิด
 - [ ] health endpoint: `/api/health` เข้าถึงได้จริงตาม docroot ของ shape นั้น
-      (Laravel = route ใน `routes/web.php` นอก middleware `auth` · CI4 =
+      (Laravel = route ใน `routes/api.php` (ไม่ใช่ `routes/web.php` — เลี่ยง
+      session middleware ที่ทำ 500 ตอนยังไม่ migrate) · CI4 =
       `public/api/health/index.php` · CI3/legacy/WordPress =
       `api/health/index.php`) · ไม่ต้อง login · 200 healthy / 503 degraded ·
       ไม่มี version/commit ใน response

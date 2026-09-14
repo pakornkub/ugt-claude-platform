@@ -171,7 +171,7 @@ check('Bootstrap redirects into a page that actually exists', () => {
   return { ok: true };
 });
 
-// ── 2. Leftover placeholders (including the one hidden mid-file) ───────────
+// ── 2. Leftover placeholders ────────────────────────────────────────────────
 const PLACEHOLDERS = [
   '__PROJECT_NAME__',
   '__BASE_PATH__',
@@ -219,17 +219,51 @@ function selectedMethods() {
   return selected;
 }
 
+// A [METHOD: …] occurrence only counts as a real leftover marker when it
+// functions as an annotation, not when it's swept up in flowing prose that
+// happens to name a method. Eval 2026-09-13 caught a narrative kit-header
+// comment — "ส่วน [METHOD: LDAP] และ [METHOD: LOCAL] ถูกตัดออกทั้งหมด" (prose
+// SAYING the sections were already cut) — tripping this check on a correctly
+// pruned project. A marker counts when it: trails real code on the line,
+// sits inside a JSX `{/* … */}` comment, appears on a decorative divider/
+// banner line (3+ dash/box-drawing chars, e.g. `// ─── [METHOD: SSO] …`), or
+// opens a plain comment with only whitespace/EOL/a dash following the `]`.
+// Everything else (comment-only line, no divider, prose before or after) is
+// treated as narrative, not a marker.
+function isRealMethodMarker(line, matchIndex, matchEnd) {
+  const before = line.slice(0, matchIndex);
+  const afterBracket = line.slice(matchEnd);
+  const openerRe = /(\{\/\*|\/\/|\/\*|#)/g;
+  let opener = null;
+  let openerIndex = -1;
+  let m;
+  while ((m = openerRe.exec(before))) {
+    opener = m[1];
+    openerIndex = m.index;
+  }
+  if (opener === null) return false; // no comment opener at all on this line
+  if (/\S/.test(before.slice(0, openerIndex))) return true; // trailing annotation after code
+  if (opener === '{/*') return true; // JSX comment
+  if (/[─-]{3,}/.test(line)) return true; // decorative divider/banner line
+  return /^\s*$/.test(afterBracket) || /^\s*[─\-–—]/.test(afterBracket);
+}
+
 check('[METHOD: …] markers remain only for methods actually kept', () => {
   const selected = selectedMethods();
   const found = [];
   for (const file of sourceFiles()) {
     const body = readFileSync(file, 'utf8');
+    const tags = new Set();
+    for (const line of body.split('\n')) {
+      for (const mm of line.matchAll(/\[METHOD:\s*([^\]]+)\]/g)) {
+        if (isRealMethodMarker(line, mm.index, mm.index + mm[0].length)) tags.add(mm[1]);
+      }
+    }
     // A marker can tag more than one method with `|` (e.g. `[METHOD: LDAP|LOCAL]`
     // on an import both form methods share) — that section is legitimate as
     // long as AT LEAST ONE tagged method survived, so only flag a marker whose
     // ENTIRE tag list is unselected.
-    const tags = [...new Set([...body.matchAll(/\[METHOD:\s*([^\]]+)\]/g)].map((m) => m[1]))];
-    const orphaned = tags.filter((tag) => tag.split('|').map((m) => m.trim()).every((m) => !selected.has(m)));
+    const orphaned = [...tags].filter((tag) => tag.split('|').map((m) => m.trim()).every((m) => !selected.has(m)));
     if (orphaned.length) found.push(`${relative(ROOT, file)}: ${orphaned.map((o) => `[METHOD: ${o}]`).join(', ')}`);
   }
   return found.length

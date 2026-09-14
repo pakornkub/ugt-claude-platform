@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-python-cicd-setup",
-  "notes": "Runs on a fixture FastAPI project that already has requirements.txt (uvicorn + fastapi pinned) but no tests/ directory and no pyproject.toml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = fastapi (web), no reverse-proxy subpath, no database, one upload directory (uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input.",
+  "notes": "Runs on a fixture FastAPI project that already has requirements.txt (uvicorn + fastapi pinned) but no tests/ directory and no pyproject.toml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = fastapi (web), no reverse-proxy subpath, no database, one upload directory (uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input. Runnable form for `claude plugin eval`: plugins/ugt-python-platform/evals/fastapi-no-tests-full-setup/ (prompt.md + graders/ + fixture/ + scaffold.sh; run from the repo root with --eval-dir plugins/ugt-python-platform/evals so ../../../ugt-core resolves).",
   "evals": [
     {
       "id": 1,
@@ -24,7 +24,23 @@
         "waitForQualityGate carries abortPipeline: true",
         "Every path in sonar.sources/sonar.tests exists in the project and sonar.python.coverage.reportPaths=coverage.xml"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-13": {
+        "skill_version": "0.6.3",
+        "runner": "`claude plugin eval` (agent opus, judge sonnet, sandbox with NO shell tool on Windows — Read/Glob/Grep/Write/Edit/Skill only; interview answers front-loaded in the prompt) → independent opus grader re-ran verify.mjs on the kept workspace; 8 min, 44 turns, $2.61",
+        "pass": 13,
+        "fail": 0,
+        "blocked": 2,
+        "blocked_items": [
+          "#1 verify exits 0 — sole ✘ is the rules file below",
+          "#2 .claude/rules/ugt-python-ci.md — the agent wrote it (trace) but the eval sandbox denies every Write under .claude/ in dontAsk mode; grader changed to tool_used:Write so the attempt is what is measured"
+        ],
+        "notes": [
+          "All 13 gradable assertions held: 10 stages in order, toolchain in docker.image(python:3.12-slim), no [DB] leftover, [VOLUME] mkdir includes uploads before chown, health router wired, smoke test only file under tests/, sonar paths + coverage.xml, closing message honest about every command it could not run",
+          "Platform defects found and fixed (python 0.6.4): compose assets still showed /srv/appdata in the [VOLUME] example (contract is /home/docker02/appdata since core 2.10.1 — same leftover in php + nextjs compose assets, now pinned by check-contract-drift); pyproject tooling lacked pythonpath=[\".\"] so `.venv/bin/pytest` could not import the app package (verify.mjs now checks it); compose/Jenkinsfile comments said docker-compose v1",
+          "Grader defects fixed: sonar rubric demanded sonar.sources=app while the asset ships sonar.sources=. + exclusions; compose-prod judge read template comments as leftover placeholders (rubric now tolerates them)"
+        ]
+      }
     }
   ]
 }

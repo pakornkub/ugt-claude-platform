@@ -182,10 +182,18 @@ check('layout.tsx wires the agreed font via next/font', () => {
 });
 
 // ── kit ───────────────────────────────────────────────────────────────────
+// `empty` is a shadcn primitive (Step 3's `npx shadcn@latest add` list), not a
+// file this skill copies from assets/ like the rest of this list — a project
+// that hasn't run that add command yet gets a message pointing at the actual
+// install command instead of the misleading "Kit file missing" (eval 2026-09-13).
+const SHADCN_ADD_FILES = new Set(['empty']);
 for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-dialog', 'data-table', 'date-picker', 'empty']) {
-  check(`components/ui/${f}.tsx installed`, () =>
-    hasIn('components', 'ui', `${f}.tsx`) ? { ok: true } : { ok: false, msg: 'Kit file missing' }
-  );
+  check(`components/ui/${f}.tsx installed`, () => {
+    if (hasIn('components', 'ui', `${f}.tsx`)) return { ok: true };
+    return SHADCN_ADD_FILES.has(f)
+      ? { ok: false, msg: `not installed — run npx shadcn@latest add ${f} (SKILL.md Step 3 primitive list)` }
+      : { ok: false, msg: 'Kit file missing' };
+  });
 }
 
 check('lib/format.ts installed (the only formatter)', () =>

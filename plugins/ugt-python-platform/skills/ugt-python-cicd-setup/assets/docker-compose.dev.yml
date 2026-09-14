@@ -17,9 +17,9 @@ services:
     ports:
       - '${APP_PORT:-__PORT_DEV__}:8000'
     # [VOLUME] persistent data — uncomment + rename per interview; path must be
-    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # [VOLUME] under /home/docker02/appdata (org contract). Delete block if nothing persists.
     # volumes:
-    #   - /srv/appdata/__PROJECT_NAME__-dev/<name>:/app/<name>
+    #   - /home/docker02/appdata/__PROJECT_NAME__-dev/<name>:/app/<name>
     networks:
       - proxy-network
     environment:

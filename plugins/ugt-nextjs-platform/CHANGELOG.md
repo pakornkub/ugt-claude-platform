@@ -1,5 +1,29 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.1 (2026-09-13)
+
+**พิสูจน์ prompt audit รอบ 1–2 ด้วย `claude plugin eval`** (case ใหม่ที่ `plugins/ugt-nextjs-platform/evals/`):
+
+- **`vague-interview-batch`**: ตรวจโปรเจคก่อนแล้วถามรวดเดียวจบ 2/2
+- **`small-bugfix-light-version`**: ประกาศ light version บรรทัดเดียวก่อนแก้ ไม่หยุดถาม 2/2 (รอบซ้ำหลังแก้ wording ผ่านเต็ม 2/2)
+- **`config-change-direct`**: แก้ตรงไม่มี ceremony 2/2
+- **`vague-answers-upfront-run-through`** (ทุกคำตอบใส่ล่วงหน้า, ไม่มี pipeline bundle, 272 turn / 53 นาที): รันรวดเดียวตามลำดับ §3 ไม่ถามซ้ำ ไม่แบ่ง chunk ไม่เรียก skill นอกชุด · database + cicd verify exit 0 · 20 ผ่าน / 2 fail / 7 blocked โดย sandbox (เขียนใต้ `.claude/`/`.husky/` ไม่ได้ — agent เอาเนื้อหาไปพักใน `docs/claude-harness/README.md` แล้วแจ้งชัด) — ผลเต็มใน `ugt-nextjs-full-setup/evals/evals.json` eval 1 `baseline_result_2026-09-13`
+
+**แก้จาก run-through** (ทาง "ไม่มี bundle" ไม่เคยถูกรันจริงมาก่อน):
+
+- **CLAUDE-block.md**: บรรทัด `มติ → decisions.md` อยู่ใน span superpowers อย่างเดียว และแถว "Build a feature / fix a bug" มีแต่ใน span ของสอง pipeline → โปรเจคที่ไม่มี bundle เสียทั้งคู่ (agent ต้องเติมเอง) — เพิ่ม tag list `[PIPELINE:superpowers|none]` + span `[PIPELINE:none]` ใหม่ · full-setup §4 step 1 อธิบายกติกา `none` (แบบเดียวกับ `[METHOD: LDAP|LOCAL]`)
+- **auth-setup `verify.mjs`**: check `[METHOD:]` leftovers นับข้อความเล่าใน comment หัวไฟล์ ("ส่วน [METHOD: LDAP] ถูกตัดออก") เป็น marker ค้าง → exit 1 บนโปรเจคที่ตัดถูกแล้ว — regex ต้องมี comment opener นำหน้า
+- **design-setup `verify.mjs`**: `components/ui/empty.tsx` มาจาก `npx shadcn add` ไม่ใช่ asset แต่รายงานว่า "Kit file missing" — แยกข้อความให้บอกคำสั่งที่ต้องรัน
+- **auth-setup asset `login-form.tsx`**: fallback ชื่อแอปเป็น `__PROJECT_NAME__` (slug) ทำให้ agent แทนด้วยชื่อไทยแล้ว `check-i18n` fail → ใช้ `t("appName")` จาก catalog แทน
+
+**CLAUDE-block.md `§Small` ระบุรูปประโยค**: ประกาศ Small (N files, no risk domain) → light version — ตอบ "full" ถ้าต้องการ pipeline เต็ม ก่อน edit แรก + ถ้าไม่มี test runner/pipeline plugin ให้บอกในบรรทัดเดียวกันแล้วแก้ต่อ ห้ามลง tooling ปนกับ bug fix
+
+**`ugt-nextjs-full-setup` SKILL.md §2**: ข้อ 6–9 ต้องถามแยกข้อ (รอบหนึ่งรวม basePath กับ URL แล้ว URL หาย)
+
+**Assets `docker-compose*.yml`**: ตัวอย่าง `[VOLUME]` `/srv/appdata` → `/home/docker02/appdata` + comment `docker compose` v2 (pin ใน drift check)
+
+**หมายเหตุ runner**: บนเครื่อง Windows `claude plugin eval` ให้ shell กับ agent ไม่ได้ (ไม่มี sandbox backend) และปฏิเสธการเขียนใต้ `.claude/` — assertion ที่ต้องรัน `verify.mjs`/npm จึงต้องให้ grader subagent รันบน workspace ที่ `--keep-temp` ไว้แทน
+
 ## 4.63.0 (2026-09-13)
 
 **Prompt audit รอบ 2 — 10 skill ที่เหลือ + `CLAUDE-block.md`** (ตาม `claude-api

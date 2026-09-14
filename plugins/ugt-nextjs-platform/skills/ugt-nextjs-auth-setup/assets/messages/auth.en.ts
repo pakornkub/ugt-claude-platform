@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: d02c5de2505e
+// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: da5049ca6936
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -91,6 +91,10 @@ export const authEn: AuthCatalog = {
     loginAgain: 'Sign in again',
   },
   login: {
+    // Generic fallback for the <h1> app title when NEXT_PUBLIC_APP_NAME isn't
+    // set — the real name always comes from that env var (set by full-setup);
+    // this is only what renders before it's configured.
+    appName: 'Application',
     ssoConnectFailed: "Couldn't connect to SSO. Please try again.",
     ssoTitle: 'Sign in with your organization account (Single Sign-On)',
     ssoConnecting: 'Connecting...',

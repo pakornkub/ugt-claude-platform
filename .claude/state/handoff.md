@@ -10,7 +10,7 @@ Last updated: 2026-09-13
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
-- ugt-python-platform / ugt-php-platform 0.6.0 — รอ pilot พิสูจน์ซ้ำก่อน tag (README ตาราง plugin)
+- ugt-python-platform / ugt-php-platform 0.6.4 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
 - E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
@@ -20,12 +20,21 @@ Last updated: 2026-09-13
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-13 **พิสูจน์ prompt audit ด้วย `claude plugin eval` ครั้งแรก** — nextjs **4.63.1** ·
+  php/python **0.6.4** (core คง 2.12.2): case แบบรันได้ 6 ตัวที่ `plugins/*/evals/`
+  (วิธีรัน + ข้อจำกัด Windows อยู่ใน memory `claude-plugin-eval-runner` + CHANGELOG nextjs
+  4.63.1) · ผล: interview batch 4/4 · light-version บอกก่อนแก้ 4/4 (2/2 หลังแก้ wording) ·
+  config direct 2/2 · python cicd 13/13 วัดได้ · php cicd 12 ผ่าน + 1 skill defect (health
+  route → `routes/api.php`) · run-through ยาว (ทุกคำตอบใส่ล่วงหน้า, ไม่มี bundle) 20 ผ่าน / 2 fail / 7 env-blocked — ลำดับ §3 ถูก ไม่ถามซ้ำ ไม่แบ่ง chunk, database+cicd verify exit 0, พบ gap ทาง none-bundle ของ CLAUDE-block (decisions.md + แถว feature หาย) + auth verify regex + login-form `__PROJECT_NAME__` · defect จริงที่แก้: `/srv/appdata` ค้างใน compose
+  asset ทั้ง 3 stack (+drift pin), pytest `pythonpath`, Laravel `[DB][LARAVEL]` env, CLAUDE-block
+  รูปประโยคประกาศ light version, full-setup Q6–9 ถามแยก · grader/rubric ผิดเองมากกว่าครึ่งของ
+  FAIL ดิบ (แก้แล้ว — ห้ามอ่าน score ดิบโดยไม่ให้ grader subagent ตรวจ) · **ยังไม่ commit/tag**
+  (php/python ยังรอ pilot ก่อน tag ตามมติเดิม; nextjs 4.63.1 ควร tag+push หลัง review diff)
 - 2026-09-13 **merge PR #2** `claude/compassionate-keller-mxx44p` เข้า main (2abacbf) ·
   tag `ugt-nextjs-platform--v4.63.0` + `ugt-core--v2.12.2` push แล้ว (php/python 0.6.3
   ไม่ tag ตามมติรอ pilot) · ลบ branch แล้ว เหลือ main ตัวเดียว · plugin เครื่องนี้
   update ครบ 4 ตัวผ่าน `claude plugin update` (core 2.12.2 · nextjs 4.63.0 ·
-  php/python 0.6.3) — ต้อง restart session ถึงจะมีผล · ยังไม่พิสูจน์ prompt audit
-  ด้วย eval/bug fix เล็ก
+  php/python 0.6.3) — ต้อง restart session ถึงจะมีผล · prompt audit พิสูจน์แล้วในแถวบน
 - 2026-09-13 prompt audit รอบ 2 ครบทั้ง 17 skill — nextjs **4.63.0** · core **2.12.2**:
   CLAUDE-block งาน Small → light version เป็น default (ไม่ถามทุกครั้ง) + autonomy
   line สำหรับ subagent · ตัด Quick Rules สำเนาที่ 3 (database/cicd/test-lint) ·

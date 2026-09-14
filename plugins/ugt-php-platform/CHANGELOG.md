@@ -1,5 +1,14 @@
 # Changelog — ugt-php-platform
 
+## 0.6.4 (2026-09-13)
+
+**Eval baseline ครั้งแรกของ `ugt-php-cicd-setup` (laravel-no-tests-full-setup) ผ่าน `claude plugin eval`**: 12 ผ่าน / 1 skill defect / 2 blocked โดย sandbox / 1 assertion ผิดเอง — ผลบันทึกใน `evals/evals.json` key `baseline_result_2026-09-13`; ชุด case แบบรันได้อยู่ที่ `plugins/ugt-php-platform/evals/`
+
+- **Health route Laravel ย้ายจาก `routes/web.php` ไป `routes/api.php`** (§5.1, §5.3, §7, comment ใน `assets/health/index.php`): กลุ่ม `web` รัน StartSession และ `SESSION_DRIVER=database` บน DB ที่ยังไม่ migrate ทำให้ `/api/health` ตอบ 500 แทน healthy/degraded → container ไม่เคย healthy (agent ใน eval เลือกทางนี้เองแล้ว skill ตามไปแก้) · `verify.mjs` รับ `Route::get('/health')` ใน `routes/api.php` (apiPrefix ดีฟอลต์) และเตือน ⚠ ถ้า route ยังอยู่ `routes/web.php`
+- **Asset compose block `[DB]`**: ส่ง `DATABASE_URL` ซึ่ง Laravel ไม่เคยอ่าน → เพิ่ม variant `[DB][LARAVEL]` (`DB_CONNECTION/DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/DB_PASSWORD`) + bullet ใน §5.3
+- **Asset compose `[VOLUME]`**: ตัวอย่างยังชี้ `/srv/appdata` → `/home/docker02/appdata` (pin ใน drift check) · comment `docker-compose` v1 → v2
+- **`evals.json` assertion #9**: แก้จาก "มี MySQL service ใน compose" เป็น "ส่ง DB connection ผ่าน env" — DB องค์กรเป็น external ไม่มี asset ตัวไหนประกาศ service
+
 ## 0.6.3 (2026-09-12)
 
 **Prompt audit `ugt-php-cicd-setup/SKILL.md` สำหรับ Opus 5 / Fable 5.1** (ตาม

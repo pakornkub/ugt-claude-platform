@@ -1,0 +1,5 @@
+---
+type: llm
+focus: { source: file, path: CLAUDE.md }
+---
+PASS only if: the block sits between <!-- ugt:start <version> … --> and <!-- ugt:end --> (any 4.x stamp is fine); __PROJECT_NAME__ / __BASE_PATH_PROD__ / __BASE_PATH_DEV__ are substituted (leave-request, /leave-request, /leave-request-dev) and no __X__ placeholder is left; no [PIPELINE: marker comment survives; no bundle-specific INSTRUCTION survives (nothing tells the reader to run a superpowers or mattpocock command such as /to-spec, /grill-with-docs, /ask-matt, the SDD sizing section, .scratch/, or docs/adr/ as the decision home) — a sentence merely STATING that this project uses no pipeline bundle, even if it names superpowers/mattpocock, is CORRECT and must not fail; the "Which skill, when" table renders as a valid markdown table with the unmarked rows (ugt-context, install/change infrastructure, write/edit .ts/.tsx, /ugt-handoff) plus a "Build a feature / fix a bug" row; docs/project-context/decisions.md is still named as the decision home.

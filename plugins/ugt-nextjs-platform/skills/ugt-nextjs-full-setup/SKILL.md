@@ -136,6 +136,10 @@ prototype data layer or a fake login; skip on a bare scaffold):**
 8. Host ports prod / dev (e.g. 3000 / 3001)
 9. Full app URLs prod / dev including basePath (e.g. `https://apps.example.com/expense-portal`)
 
+   Ask 6–9 as four separate numbered items — "basePath?" alone does not yield
+   the URLs, and Q9 feeds the Keycloak redirect URIs and the compose env
+   (eval 2026-09-13: one run merged 7+9 and lost the URLs).
+
 **Module-specific questions** — **open the Interview section in the SKILL.md of
 every selected child skill and fold its questions into this same batch**
 (example topics, not the full list: DB: server, database name, existing or new,
@@ -254,9 +258,13 @@ How:
    `[METHOD:]`). Detect the installed pipeline (see step 3's detection rule —
    one detection, used by both steps), keep only the matching spans, delete
    the other pipeline's spans and every `[PIPELINE]` marker comment. **No
-   pipeline plugin installed at all** (step 3's "none" answer) → delete every
-   span and keep only the unmarked content — the block must still render as a
-   complete table either way. A
+   pipeline plugin installed at all** (step 3's "none" answer) → keep the
+   unmarked content plus every span whose tag list contains `none`
+   (`[PIPELINE:none]`, `[PIPELINE:superpowers|none]` — a tag list works like
+   auth-setup's `[METHOD: LDAP|LOCAL]`), delete the rest — the block must
+   still render as a complete table either way, with a "Build a feature / fix
+   a bug" row and `decisions.md` named as the decision home (eval 2026-09-13:
+   both were lost on the no-bundle path and the agent had to patch them in). A
    project that later switches bundles must re-run this step to regenerate
    the block — the spans are resolved at generation time, not at runtime.
    > **Size check**: if the combined file exceeds ~200 lines, move project

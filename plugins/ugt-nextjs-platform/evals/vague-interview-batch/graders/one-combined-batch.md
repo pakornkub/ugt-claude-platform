@@ -1,0 +1,5 @@
+---
+type: llm
+focus: last_message
+---
+The final message must be ONE combined interview batch for ugt-nextjs-full-setup, sent after the project was inspected. PASS only if the single message asks, in one go: module selection (Database / Quality / Design / Auth / CI — stating "default: all five, say if not" counts) plus the two optional modules phrased by what the app does (send email? attach files?); project name (kebab-case) + display name; basePath prod/dev; host ports prod/dev; the full URLs or at least basePath + domain; AND at least one module-specific question folded in from the child skills (e.g. SQL Server host / database name / stored procedures, login methods SSO/LDAP/Local, Keycloak client exists?, Sentry?, primary colour / shell). Questions about keeping the current look or migrating the hard-coded REQUESTS array (SKILL.md §2 Q0/Q0b — the fixture's page.tsx is a prototype data layer) are acceptable. A single run-shape proposal at the end (run straight through vs split into chunks) is NOT "asking more later". FAIL if questions are spread over several turns, if it says it will ask more later, or if installation started.

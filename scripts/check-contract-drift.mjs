@@ -98,6 +98,14 @@ const CHECKS = [
       [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
       [`${PY}/ugt-python-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
       [`${PHP}/ugt-php-cicd-setup/SKILL.md`]: [/\/home\/docker02\/appdata\/<project>\//],
+      // compose assets: the commented [VOLUME] example must show the contract path —
+      // the 2026-09-13 eval baseline found /srv/appdata left behind in all six copies
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/docker-compose.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__\//],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/docker-compose.dev.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__-dev\//],
+      [`${PY}/ugt-python-cicd-setup/assets/docker-compose.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__\//],
+      [`${PY}/ugt-python-cicd-setup/assets/docker-compose.dev.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__-dev\//],
+      [`${PHP}/ugt-php-cicd-setup/assets/docker-compose.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__\//],
+      [`${PHP}/ugt-php-cicd-setup/assets/docker-compose.dev.yml`]: [/\/home\/docker02\/appdata\/__PROJECT_NAME__-dev\//],
     },
   },
   {

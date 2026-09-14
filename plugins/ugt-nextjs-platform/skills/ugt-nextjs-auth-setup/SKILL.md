@@ -495,11 +495,14 @@ does nothing — always do both ends or neither.
 
 ## 6. Placeholders used across the assets
 
-Full table + substitution rules in `references/placeholders.md`. Two traps
-worth repeating: `__PROJECT_NAME__` also hides in a fallback string in
-`login-form.tsx` (grep for the ⚠️ PLACEHOLDER comment), and
-`env.example`/`.env.local`/`.env` must be substituted too — `verify.mjs`
-scans all three, not just `.ts`/`.tsx`/`.prisma`.
+Full table + substitution rules in `references/placeholders.md`. One trap
+worth repeating: `env.example`/`.env.local`/`.env` must be substituted too —
+`verify.mjs` scans all three, not just `.ts`/`.tsx`/`.prisma`.
+
+`login-form.tsx`'s `<h1>` app title has no placeholder to substitute — it
+reads `NEXT_PUBLIC_APP_NAME` at runtime and falls back to the generic
+`auth.login.appName` catalog string (`t('appName')`) when that env var isn't
+set, so it never needs the interview's project name hand-substituted in.
 
 ## 7. Quick Rules — DO / DON'T
 
@@ -522,8 +525,8 @@ scans all three, not just `.ts`/`.tsx`/`.prisma`.
 node <skill-dir>/scripts/verify.mjs
 ```
 
-It checks leftover placeholders (including the one hidden in `login-form.tsx`),
-unremoved `[METHOD: …]` markers, the guard file name + its `config` export, the
+It checks leftover placeholders, unremoved `[METHOD: …]` markers, the guard
+file name + its `config` export, the
 cookie prefix across all 3 files, audit actions coming from constants, the
 schema, and the commonly mis-called APIs.
 

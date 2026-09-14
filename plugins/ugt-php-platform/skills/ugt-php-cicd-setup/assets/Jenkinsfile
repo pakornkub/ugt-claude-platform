@@ -14,7 +14,7 @@
 // CodeIgniter/legacy/WordPress projects have no standard migration tool;
 // delete the block (see the [DB] comment in Deploy for the exact instruction).
 // Sections marked [WEB] apply to the long-running web-service deploy shape
-// (docker-compose up + health poll) — the only deploy shape PHP projects use.
+// (docker compose up + health poll) — the only deploy shape PHP projects use.
 // Sections marked [VOLUME] prepare persistent-data host paths before deploy.
 // Sections marked [WP] flag WordPress-only requirements (e.g. wp-content
 // must always be a mounted volume — see the compose [WP] block).

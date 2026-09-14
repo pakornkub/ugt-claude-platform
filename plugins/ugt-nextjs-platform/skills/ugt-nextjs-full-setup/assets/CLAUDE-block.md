@@ -91,9 +91,13 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
      generating this block (same [MARKER] convention as auth-setup's [METHOD:]):
      detect the installed bundle, keep matching spans, delete the other
      pipeline's spans AND all [PIPELINE] marker comments. No pipeline plugin
-     installed at all → delete every span and keep only the unmarked rows. -->
+     installed at all → keep only the unmarked rows plus spans whose tag list
+     contains `none` (e.g. [PIPELINE:superpowers|none]); delete the rest. -->
 | Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้ว **size it** (below) — small → light version by default, otherwise full pipeline |
 <!-- [/PIPELINE:superpowers] -->
+<!-- [PIPELINE:none] -->
+| Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้วทำตรง ๆ — โปรเจคนี้ไม่มี pipeline bundle จึงไม่มีขั้น brainstorm/plan/review อัตโนมัติ; เขียน test คู่กับโค้ดเอง |
+<!-- [/PIPELINE:none] -->
 <!-- [PIPELINE:mattpocock] -->
 | Build a feature / fix a bug | Fully user-driven — do not auto-invoke any pipeline skill for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
 <!-- [/PIPELINE:mattpocock] -->
@@ -109,13 +113,15 @@ of the requirement, **blast radius** (files/modules touched), **risk domain**
 
 | Size | Signals | What happens |
 | --- | --- | --- |
-| Small | Requirement is unambiguous · ~1–3 files · not a risk domain | **Light version by default** (skip brainstorming, straight to TDD → review) — say so in one line before starting; the user can answer "full" to get the whole pipeline. Do not stop to ask |
+| Small | Requirement is unambiguous · ~1–3 files · not a risk domain | **Light version by default** (skip brainstorming, straight to TDD → review) — announce it in **one line before the first edit**, in this shape: `Small (N files, no risk domain) → light version — ตอบ "full" ถ้าต้องการ pipeline เต็ม`, then keep going; never wait for the answer |
 | Not small (ambiguous, cross-module, or risk domain) | — | Full pipeline, no need to ask — it's clearly warranted |
 
 The light version still writes a test first and still gets reviewed — those
 are the safety net against a broken change. Only brainstorming (exploring
 ambiguity) and the standalone plan step are skippable, and only when there is
-nothing ambiguous left to explore.
+nothing ambiguous left to explore. If no test runner or pipeline plugin is
+installed, say so in that same line and still make the change — never install
+tooling as part of a bug fix (that is `ugt-nextjs-test-lint-setup`'s job).
 
 ### Layer contract — when work is split across sessions/subagents
 
@@ -145,9 +151,9 @@ test/lint suite) and update the board via `/ugt-handoff`.
   (error ที่เคยเจอ → `troubleshooting.md` · กติกา as-built
   → `business-rules.md` · โครงสร้าง → `architecture.md`) or
   `.claude/rules/<project>-*.md` if path-bound · มติ design → `docs/DESIGN.md` §10
-<!-- [PIPELINE:superpowers] -->
+<!-- [PIPELINE:superpowers|none] -->
 - มติ (ไม่ใช่ design) → `docs/project-context/decisions.md` (append-only)
-<!-- [/PIPELINE:superpowers] -->
+<!-- [/PIPELINE:superpowers|none] -->
 <!-- [PIPELINE:mattpocock] -->
 - มติ (ไม่ใช่ design) → `docs/adr/` (ADR ที่ `domain-modeling` เขียน) — โปรเจคนี้
   **ไม่มี `decisions.md`** จะได้ไม่มีบ้านมติสองที่

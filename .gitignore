@@ -6,3 +6,6 @@
 node_modules/
 # wayfinder / planning scratch (ไม่ commit — เป็น scratch ของการวางแผน ไม่ใช่ความรู้ของทีม)
 .scratch/
+# eval runner output
+plugins/*/evals/results/
+plugins/*/skills/*/evals/results/

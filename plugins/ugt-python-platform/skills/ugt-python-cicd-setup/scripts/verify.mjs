@@ -463,6 +463,11 @@ check('pyproject.toml has [tool.ruff] and [tool.pytest.ini_options] wired for CI
     // §5.3: pytest must emit coverage.xml too — sonar.python.coverage.reportPaths
     // reads it, and without it new_coverage is 0% and the gate blocks with no
     // error saying why.
+    // tests/ ships without __init__.py and Jenkins calls `.venv/bin/pytest` (not
+    // `python -m pytest`), so the app package is importable only via pythonpath
+    if (!/pythonpath\s*=\s*\[[^\]]*"\."/.test(pytestSection[1])) {
+      problems.push('[tool.pytest.ini_options] has no pythonpath = ["."] → tests/test_smoke.py cannot import the app module under .venv/bin/pytest');
+    }
     if (!/--cov-report[= ]xml/.test(pytestSection[1])) {
       problems.push('[tool.pytest.ini_options] has no --cov-report=xml → no coverage.xml → new_coverage = 0% → gate blocks silently');
     }

@@ -14,12 +14,12 @@ services:
     ports:
       - '${APP_PORT:-__PORT_DEV__}:80'
     # [VOLUME] persistent data — uncomment + rename per interview; path must be
-    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # [VOLUME] under /home/docker02/appdata (org contract). Delete block if nothing persists.
     # volumes:
-    #   - /srv/appdata/__PROJECT_NAME__-dev/<name>:/var/www/html/<name>
+    #   - /home/docker02/appdata/__PROJECT_NAME__-dev/<name>:/var/www/html/<name>
     # [WP] WordPress: wp-content เป็น volume บังคับ — ห้ามลบบล็อกนี้เมื่อใช้ shape WP
     # volumes:
-    #   - /srv/appdata/__PROJECT_NAME__-dev/wp-content:/var/www/html/wp-content
+    #   - /home/docker02/appdata/__PROJECT_NAME__-dev/wp-content:/var/www/html/wp-content
     networks:
       - proxy-network
     environment:
@@ -27,6 +27,14 @@ services:
       #   DATABASE_URL  → separate dev DB (never point dev at prod data)
       #   auth secret   → never share secrets between environments
       DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # [DB][LARAVEL] Laravel: uncomment these and delete DATABASE_URL — Laravel
+      # reads DB_* (or DB_URL), never DATABASE_URL
+      # DB_CONNECTION: ${DB_CONNECTION} # [DB][LARAVEL]
+      # DB_HOST: ${DB_HOST} # [DB][LARAVEL]
+      # DB_PORT: ${DB_PORT} # [DB][LARAVEL]
+      # DB_DATABASE: ${DB_DATABASE} # [DB][LARAVEL]
+      # DB_USERNAME: ${DB_USERNAME} # [DB][LARAVEL]
+      # DB_PASSWORD: ${DB_PASSWORD} # [DB][LARAVEL]
       # Add the project's runtime secrets below (same keys as prod compose):
       # AUTH_SECRET: ${AUTH_SECRET}
       # SENTRY_DSN: ${SENTRY_DSN:-}

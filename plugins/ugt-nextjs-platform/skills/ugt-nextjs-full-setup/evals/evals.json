@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-nextjs-full-setup",
-  "notes": "Evals 1-2 run on a bare Next.js scaffold; eval 3 on an Express scaffold (not Next.js). Evals 4-5 run on a COPY of fixtures/ai-studio-prototype (strip its README.md from the copy first — it is the answer key) — a real Google-AI-Studio-shaped project (own shell, teal brand, Tailwind v3, better-sqlite3 store, fake login); they exist because the 2026-09-09 field bug was never covered: earlier evals told the model the situation in the prompt and asserted on recorded decisions, never on the outcome (tokens rebased? store migrated? one shell?). Part of this skill's output lives in the transcript (child-skill invocation order, interview questions), not in files — the grader must read the transcript, not only the produced files. Prompts are intentionally kept in Thai: they simulate what org users actually type.",
+  "notes": "Evals 1-2 run on a bare Next.js scaffold; eval 3 on an Express scaffold (not Next.js). Evals 4-5 run on a COPY of fixtures/ai-studio-prototype (strip its README.md from the copy first — it is the answer key) — a real Google-AI-Studio-shaped project (own shell, teal brand, Tailwind v3, better-sqlite3 store, fake login); they exist because the 2026-09-09 field bug was never covered: earlier evals told the model the situation in the prompt and asserted on recorded decisions, never on the outcome (tokens rebased? store migrated? one shell?). Part of this skill's output lives in the transcript (child-skill invocation order, interview questions), not in files — the grader must read the transcript, not only the produced files. Prompts are intentionally kept in Thai: they simulate what org users actually type. Runnable `claude plugin eval` cases live at plugins/ugt-nextjs-platform/evals/ (vague-interview-batch = eval 1 interview half · vague-answers-upfront-run-through = eval 1 install half with every answer front-loaded · small-bugfix-light-version + config-change-direct = the CLAUDE-block sizing rule on an installed project); run from the repo root with --eval-dir plugins/ugt-nextjs-platform/evals.",
   "evals": [
     {
       "id": 1,
@@ -18,7 +18,34 @@
         "Closing summary lists env vars needing real values and items to request from admins",
         "Attaches a smoke-test checklist matching what was actually installed"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-13": {
+        "skill_version": "4.63.0 → 4.63.1",
+        "runner": "`claude plugin eval` on a bare Next.js 15 fixture (agent opus, judge sonnet, Windows sandbox: no shell, Write/Edit only) · 2 runs before + 2 runs after the 4.63.1 wording fixes · independent fable grader read the full traces",
+        "interview_half": {
+          "pass": "4/4 runs",
+          "notes": [
+            "Every run inspected first (Read package.json/Glob/page/layout, findings table: no DB/auth/test/design/CI) then asked ONE combined batch (16–20 numbered questions, sections A–G) — modules default-all + mail/upload phrased by app behaviour + name/display + basePath + ports + child-skill questions (DB server/name/SP/linked server, SSO/LDAP/Local, Keycloak client, Sentry, colour) + a §2.5 run-shape proposal; no Write/Edit before answers",
+            "Never asked who the first admin is — one run STATED the /admin/setup rule, which a regex grader misread as asking (grader → llm judge)",
+            "One of the first two runs merged Q7 basePath with Q9 URLs and lost the URLs → SKILL.md §2 now says ask 6–9 as four separate items; both re-runs asked URLs explicitly",
+            "Judge FAIL on the first two runs was a rubric defect (it forbade Q0/Q0b although the fixture page.tsx IS a hard-coded prototype data layer per §1) — fixed"
+          ]
+        },
+        "install_half": {
+          "case": "vague-answers-upfront-run-through (every interview answer front-loaded, no pipeline bundle)",
+          "runner": "`claude plugin eval` agent opus, 272 turns, 53 min, $27.46, sandbox: no shell + every write under a dot-directory denied → independent opus grader ran all six verify.mjs on the kept workspace",
+          "pass": 20,
+          "fail": 2,
+          "blocked": 7,
+          "notes": [
+            "Ran straight through in §3 order (database → test-lint → design → auth → cicd → ugt-context), zero re-asking, no chunk proposal, no superpowers/mattpocock/frontend-design skill invoked; limitation declared at turn 19 before any write and again at the top of the close-out; never claimed a verify script ran",
+            "database verify exit 0 (LeaveRequests model per conventions, url in prisma.config.ts, page reads via Prisma, seed script for the 2 prototype rows) · cicd verify exit 0 · design/auth/test-lint/full ✘ only from denied dot-dir writes, the un-run `npx shadcn add empty`, and one real Thai literal",
+            "Harness writes denied → agent parked settings.json (enabledPlugins {}), handoff.md, model-mode.md (auto) and the rule-file list in docs/claude-harness/README.md and flagged it in the summary/handoff/board — better than the skill asks; §4 has no such fallback bullet yet (optional follow-up)",
+            "Skill defects fixed in 4.63.1: CLAUDE-block no-bundle render lost the decisions.md line (inside the superpowers span) and had no Build-a-feature row → [PIPELINE:none] / [PIPELINE:superpowers|none] tag lists + SKILL §4 rule; auth verify counted a prose mention of [METHOD: LDAP] in a header comment as a leftover (regex now requires a comment opener); design verify called a missing shadcn primitive a Kit file; login-form asset fell back to __PROJECT_NAME__ for the <h1> so agents substitute the Thai display name and fail check-i18n → t(\"appName\")",
+            "Grader defect fixed: claude-block judge failed a correct file (no-bundle table legitimately has no sizing section; a note naming superpowers/mattpocock is a statement, not span content); the 5 .claude/* file graders replaced by one last_message grader because this runner can never write under .claude/"
+          ]
+        }
+      }
     },
     {
       "id": 2,
@@ -72,14 +99,18 @@
         "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0",
         "The closing summary states which store the screens now read (SQL Server via Prisma) and never claims 'ต่อ database แล้ว' for a store that is still SQLite"
       ],
-      "files": ["fixtures/ai-studio-prototype"],
+      "files": [
+        "fixtures/ai-studio-prototype"
+      ],
       "baseline_result_2026-09-09": {
         "skill_version": "4.61.1",
         "runner": "unattended executor subagent (skill defaults, fixture README stripped; inline run, no subagent dispatch) → independent grader subagent checking files + re-running all four verify scripts; 72 min, 157 files, all five modules + harness",
         "pass": 17,
         "fail": 1,
         "blocked": 0,
-        "failed": ["#14 design verify exit 1 — 'Sidebar shell has the site-header': the project's only SidebarProvider exists because auth-setup's NavUser calls useSidebar(); no SidebarInset exists to mount a site-header into. Skill gap, not the project: design Step 3.5 said 'no second SidebarProvider' while auth §5.5 requires NavUser. Fixed in 4.61.2 — verify gates on SidebarInset/<Sidebar>, Step 3.5 names the bare-provider exception."],
+        "failed": [
+          "#14 design verify exit 1 — 'Sidebar shell has the site-header': the project's only SidebarProvider exists because auth-setup's NavUser calls useSidebar(); no SidebarInset exists to mount a site-header into. Skill gap, not the project: design Step 3.5 said 'no second SidebarProvider' while auth §5.5 requires NavUser. Fixed in 4.61.2 — verify gates on SidebarInset/<Sidebar>, Step 3.5 names the bare-provider exception."
+        ],
         "notes": [
           "Preserve mode held end to end: Q0/Q0b/Q0c defaulted in one batch from the user's sentence, teal --primary, --radius 0.75rem, h-11 controls at the source, admin items merged into the original <aside> via ADMIN_NAV_ITEMS, no <AdminNav>, fake login removed, Requests model + same service signatures on Prisma, better-sqlite3 + data/ gone, ADR-0001 records the entity map (mattpocock bundle → docs/adr/)",
           "Latent defect the assertions did not cover: the runner uninstalled the `cn` npm package as stray while 30 components/ui files import from it — build survived only via hoisting through `shadcn`. Fixed in 4.61.2 (design Step 3.2 says keep it).",
@@ -103,7 +134,9 @@
         "node scripts/verify.mjs of ugt-nextjs-database-setup shows 'No prototype data store left' as a WARN (deferred per decisions.md), not a FAIL and not a pass",
         "Preserve mode still applied on the design side: --primary derives from #0f766e, no sidebar block, Tailwind upgraded to v4"
       ],
-      "files": ["fixtures/ai-studio-prototype"],
+      "files": [
+        "fixtures/ai-studio-prototype"
+      ],
       "baseline_result_2026-09-11": {
         "skill_version": "4.61.3",
         "runner": "unattended executor subagent (all 5 modules + harness) → independent grader subagent re-running verify; 110 min. First grading pass found assertion 5 FAILing (verify.mjs's docs/adr support existed but its same-line-ordered regex missed a well-written prose ADR); fixed to a per-file, order-independent check and re-confirmed directly (0 failed, 1 warning) before recording this result",

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.53.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: 8b42518710f9
+// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: dad2576b8983
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -276,9 +276,12 @@ export function LoginForm({
 }>) {
   // Direct process.env read is intentional here (same reason as lib/auth-client.ts):
   // t3-env createEnv() returns '' for NEXT_PUBLIC_* in the Turbopack client bundle.
-  // ⚠️ PLACEHOLDER: replace '__PROJECT_NAME__' in the fallback below with the real app name (see SKILL.md §6 placeholder table)
-  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? '__PROJECT_NAME__';
+  // Fallback is the generic catalog string (auth.login.appName), not a
+  // substituted literal — NEXT_PUBLIC_APP_NAME (set by full-setup) is the only
+  // place the real display name should come from; a Thai display-name literal
+  // here would also trip check-i18n.mjs's "no Thai outside comments" rule.
   const t = useTranslations('auth.login');
+  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? t('appName');
 
   // validate ครั้งเดียวที่นี่ — ทุก section ได้ค่าที่ปลอดภัยแล้ว (กัน open redirect)
   const returnTo = sanitizeFrom(from);

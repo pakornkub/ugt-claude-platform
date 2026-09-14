@@ -14,7 +14,7 @@
 // Sections marked [DB] are OPTIONAL — delete them if the project has no
 // database / Alembic migrations.
 // Sections marked [WEB] apply when the deploy shape is a long-running web
-// service (docker-compose up + health poll).
+// service (docker compose up + health poll).
 // Sections marked [BATCH] are the alternative for batch/job deploys — swap
 // in the commented block in the Deploy stage instead of [WEB].
 // Sections marked [VOLUME] prepare persistent-data host paths before deploy.

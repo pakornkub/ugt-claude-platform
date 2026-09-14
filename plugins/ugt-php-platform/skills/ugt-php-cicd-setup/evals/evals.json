@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-php-cicd-setup",
-  "notes": "Runs on a fixture Laravel project that already has composer.json (with laravel/framework pinned) but no tests/ directory and no phpunit.xml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = laravel (web), no reverse-proxy subpath, one database (MySQL), one upload directory (storage/uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input.",
+  "notes": "Runs on a fixture Laravel project that already has composer.json (with laravel/framework pinned) but no tests/ directory and no phpunit.xml. No pilot project has run this skill end-to-end yet (see the not-yet-piloted table in SKILL.md §1), so this eval checks the repo-side output the skill is supposed to produce, not a real Jenkins run. Interview answers assumed for this fixture: shape = laravel (web), no reverse-proxy subpath, one database (MySQL), one upload directory (storage/uploads) that must persist across deploys, single docker host with docker compose v2 already installed. Prompts stay in Thai: they simulate real user input. Runnable form for `claude plugin eval`: plugins/ugt-php-platform/evals/laravel-no-tests-full-setup/ (prompt.md + graders/ + fixture/ + scaffold.sh; run from the repo root with --eval-dir plugins/ugt-php-platform/evals so ../../../ugt-core resolves).",
   "evals": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
         "The Dockerfile matches Dockerfile.web (has EXPOSE 80 and HEALTHCHECK) with [LARAVEL] sed lines uncommented for DocumentRoot rewrite, and chown -R www-data:www-data /var/www/html present",
         "routes/web.php contains a health route (e.g., Route::get('/api/health', ...)) that is wired and requires no login",
         "The [DB] block is present in the Jenkinsfile Deploy stage with artisan migrate --force and --env-file flags, since the project has MySQL database",
-        "The [DB] blocks in both compose files declare the MySQL service with image and environment variables (MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD)",
+        "The [DB] block in both compose files passes the database connection through as environment variables (DB_* for Laravel, or DATABASE_URL) — no in-compose MySQL service is expected because the org database is external",
         "tests/SmokeTest.php exists, uses PHPUnit assertions, and is the only file under tests/ (none existed before this run)",
         "phpunit.xml, phpstan.neon, and .php-cs-fixer.php exist at root and are configured for the Laravel project",
         "Both compose files declare an uncommented volumes: bind for uploads at /home/docker02/appdata/<project>/uploads (docker-compose.yml) and /home/docker02/appdata/<project>-dev/uploads (docker-compose.dev.yml) — no named volume is used",
@@ -25,7 +25,27 @@
         "waitForQualityGate carries abortPipeline: true",
         "Every path in sonar.sources/sonar.tests exists in the project and sonar.php.coverage.reportPaths=clover.xml and sonar.php.tests.reportPath=test-results/junit.xml"
       ],
-      "files": []
+      "files": [],
+      "baseline_result_2026-09-13": {
+        "skill_version": "0.6.3",
+        "runner": "`claude plugin eval` (agent opus, judge sonnet, sandbox with NO shell tool on Windows — Read/Glob/Grep/Write/Edit/Skill only; interview answers front-loaded in the prompt) → independent opus grader re-ran verify.mjs on the kept workspace; 12 min, 58 turns, $4.19",
+        "pass": 12,
+        "fail": 1,
+        "blocked": 2,
+        "grader_defects": 1,
+        "failed": [
+          "#7 health route in routes/web.php — the agent put it in routes/api.php on purpose: the web group runs StartSession, and with SESSION_DRIVER=database on a fresh DB /api/health answers 500, not 503. Skill defect, not agent slip → fixed in php 0.6.4 (§5.1/§5.3/§7 + health asset comment now say routes/api.php)"
+        ],
+        "blocked_items": [
+          "#1 verify exits 0 — ✘ no composer.lock (needs composer, no shell) + ✘ rules file below",
+          "#2 .claude/rules/ugt-php-ci.md — written by the agent (trace) but the eval sandbox denies every Write under .claude/ in dontAsk mode; grader changed to tool_used:Write"
+        ],
+        "notes": [
+          "Assertion #9 was wrong (demanded an in-compose MySQL service; the org DB is external) — rewritten; the 0.4.0 Dockerfile composer ordering survived intact; [VOLUME] mkdir includes uploads before chown; closing message honest about every command not run and raised a real storeAs() disk-path question instead of silently fixing it",
+          "Platform defects fixed (php 0.6.4): compose assets still showed /srv/appdata (contract /home/docker02/appdata) — now pinned by check-contract-drift across all three stacks; compose [DB] line passed DATABASE_URL which Laravel never reads → [DB][LARAVEL] DB_* variant added; docker-compose v1 comments",
+          "Grader defects fixed: compose MySQL clause removed; Dockerfile LLM judge false-negatived a correct file (comment line above the uncommented sed) → replaced by 5 regex graders on the trace"
+        ]
+      }
     }
   ]
 }

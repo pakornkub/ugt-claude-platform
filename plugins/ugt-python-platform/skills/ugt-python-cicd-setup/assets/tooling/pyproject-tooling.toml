@@ -9,6 +9,9 @@ ignore_missing_imports = true
 exclude = ["\\.venv"]
 
 [tool.pytest.ini_options]
+# repo root on sys.path — `.venv/bin/pytest` (the Jenkins call) does not add cwd,
+# and tests/ has no __init__.py, so `import app` fails without this
+pythonpath = ["."]
 addopts = "--junitxml=test-results/junit.xml --cov=. --cov-report=xml --cov-report=html:coverage"
 testpaths = ["tests"]
 

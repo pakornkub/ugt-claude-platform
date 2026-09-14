@@ -1,5 +1,5 @@
 # Production compose — deployed by Jenkins on the `main` branch.
-# Jenkins always runs `docker-compose up -d --no-build`, so the build: section
+# Jenkins always runs `docker compose up -d --no-build`, so the build: section
 # is never used at deploy time.
 #
 # [BATCH] shape: เปลี่ยน service name เป็น job, ตัด ports/healthcheck/restart → restart: "no"
@@ -19,9 +19,9 @@ services:
       # always 8000
       - '${APP_PORT:-__PORT_PROD__}:8000'
     # [VOLUME] persistent data — uncomment + rename per interview; path must be
-    # [VOLUME] under /srv/appdata (org contract). Delete block if nothing persists.
+    # [VOLUME] under /home/docker02/appdata (org contract). Delete block if nothing persists.
     # volumes:
-    #   - /srv/appdata/__PROJECT_NAME__/<name>:/app/<name>
+    #   - /home/docker02/appdata/__PROJECT_NAME__/<name>:/app/<name>
     networks:
       - proxy-network
     environment:

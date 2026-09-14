@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.52.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 3b9f5f4c5ae9
+// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 865ab711be87
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -85,6 +85,10 @@ export const authTh = {
     loginAgain: 'เข้าสู่ระบบใหม่',
   },
   login: {
+    // Generic fallback for the <h1> app title when NEXT_PUBLIC_APP_NAME isn't
+    // set — the real name always comes from that env var (set by full-setup);
+    // this is only what renders before it's configured.
+    appName: 'ระบบงาน',
     ssoConnectFailed: 'ไม่สามารถเชื่อมต่อระบบ SSO ได้ กรุณาลองใหม่อีกครั้ง',
     ssoTitle: 'เข้าสู่ระบบด้วยบัญชีองค์กร (Single Sign-On)',
     ssoConnecting: 'กำลังเชื่อมต่อ...',
