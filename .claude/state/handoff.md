@@ -28,7 +28,7 @@ Last updated: 2026-09-14
   route → `routes/api.php`) · run-through ยาว (ทุกคำตอบใส่ล่วงหน้า, ไม่มี bundle) 20 ผ่าน / 2 fail / 7 env-blocked — ลำดับ §3 ถูก ไม่ถามซ้ำ ไม่แบ่ง chunk, database+cicd verify exit 0, พบ gap ทาง none-bundle ของ CLAUDE-block (decisions.md + แถว feature หาย) + auth verify regex + login-form `__PROJECT_NAME__` · defect จริงที่แก้: `/srv/appdata` ค้างใน compose
   asset ทั้ง 3 stack (+drift pin), pytest `pythonpath`, Laravel `[DB][LARAVEL]` env, CLAUDE-block
   รูปประโยคประกาศ light version, full-setup Q6–9 ถามแยก · grader/rubric ผิดเองมากกว่าครึ่งของ
-  FAIL ดิบ (แก้แล้ว — ห้ามอ่าน score ดิบโดยไม่ให้ grader subagent ตรวจ) · commit 48fe5d5 + tag `ugt-nextjs-platform--v4.63.1` แล้ว 2026-09-14 (php/python ไม่ tag ตามมติรอ pilot) · **ยังไม่ push** · เครื่องนี้ยังไม่ `claude plugin update`
+  FAIL ดิบ (แก้แล้ว — ห้ามอ่าน score ดิบโดยไม่ให้ grader subagent ตรวจ) · commit 48fe5d5 + tag `ugt-nextjs-platform--v4.63.1` แล้ว 2026-09-14 (php/python ไม่ tag ตามมติรอ pilot) · push แล้ว (main + tag) · เครื่องนี้ `claude plugin update` ครบ (nextjs 4.63.1 · php/python 0.6.4) — ต้อง restart session ถึงจะมีผล
 - 2026-09-13 **merge PR #2** `claude/compassionate-keller-mxx44p` เข้า main (2abacbf) ·
   tag `ugt-nextjs-platform--v4.63.0` + `ugt-core--v2.12.2` push แล้ว (php/python 0.6.3
   ไม่ tag ตามมติรอ pilot) · ลบ branch แล้ว เหลือ main ตัวเดียว · plugin เครื่องนี้
