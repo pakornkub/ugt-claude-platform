@@ -14,7 +14,7 @@ description: >
   DESIGN decisions ("บันทึกมติ design" → docs/DESIGN.md §10 via the stack's
   design skill), to install anything (→ ugt-<stack>-full-setup), to bootstrap
   docs/project-context/ the first time (→ ugt-context), or for a stack-wide
-  gotcha (→ a PR to the platform repo). Formerly ugt-checkpoint.
+  gotcha (→ /ugt-contribute opens the PR to the platform repo). Formerly ugt-checkpoint.
 ---
 
 # UGT Handoff — close the chunk, file every result where it belongs
@@ -79,7 +79,7 @@ the atomic unit of "what this chunk did and what it taught us".
 | --- | --- | --- |
 | Work state (ค้างไหน คิวอะไร คำถามอะไร) | `handoff.md` | Let it rot in chat history |
 | True only for this project | the matching `docs/project-context/` file, or `.claude/rules/<project>-*.md` if path-bound | — |
-| True for every project on this stack | **PR against the platform repo** (a proven `troubleshooting.md` entry graduates into the stack's pitfalls skill — then delete it here), bump the version | Edit installed skill files (plugin cache is disposable) |
+| True for every project on this stack | **`/ugt-contribute`** — opens the PR against the platform repo (a proven `troubleshooting.md` entry graduates into the owning platform skill, version bumped, then deleted here) | Edit installed skill files (plugin cache is disposable) |
 | Personal preference of the current user | auto memory | Force it into committed files |
 
 **Never create `.claude/skills/ugt-<same-name>/`** shadowing a platform skill —
@@ -97,7 +97,7 @@ extend under a new name (e.g. `.claude/skills/<project>-payroll-rules/`).
 | Board + handoff = feature level | Copy ticket-level state in from the pipeline's own files (`.scratch/<feature>/`, `.superpowers/sdd/`) — or write into them |
 | Feature done → as-built summary into business-rules.md | Leave the knowledge only in the frozen brief |
 | Reference real file/function names | Vague "improved the user page" |
-| Stack-wide gotcha → PR to the platform | Keep it in one project and let others rediscover it |
+| Stack-wide gotcha → `/ugt-contribute` (PR to the platform) | Keep it in one project and let others rediscover it |
 | Commit handoff + context changes together | Commit state but leave knowledge dirty |
 
 ## Verification Checklist

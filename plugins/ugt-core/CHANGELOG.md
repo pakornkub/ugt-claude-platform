@@ -1,5 +1,31 @@
 # Changelog — ugt-core
 
+## 2.13.0 (2026-09-15)
+
+**skill ใหม่ `ugt-contribute` — ยกกับดักจากโปรเจคขึ้น platform เป็น PR** · ที่มา:
+คำถามผู้ดูแล 2026-09-15 "ใช้ plugin ในโปรเจคอื่นแล้วเจอบั๊กที่อยากอัพเดทกลับ
+plugin ต้องทำอย่างไร มี skill/hook เปิด PR ไหม" — ไล่แล้วพบว่า `/ugt-handoff`
+triage จบที่ "→ PR against the platform repo" แต่ไม่มีตัวพาทำ ความรู้จึงมีโอกาส
+ค้างอยู่โปรเจคเดียว
+
+- **flow**: เลือก entry จาก `troubleshooting.md` (หรือบั๊กที่เพิ่งแก้ใน session) →
+  gate 3 คำถาม (สาเหตุอยู่ที่ stack? โปรเจคที่สองจะเจอ? fix พิสูจน์แล้ว?) → เลือก
+  skill เจ้าของจาก description ที่มีอาการกลุ่มนั้นอยู่แล้ว (ไม่ default ลง pitfalls
+  ทุกอย่าง) → clone ชั่วคราวใน scratchpad → เขียน entry ตามโครงไฟล์เดิม + แถว
+  symptom table + CHANGELOG + bump รุ่น (patch ถ้าแค่ entry, minor ถ้า asset ที่
+  โปรเจค copy เปลี่ยน) + chip ใน README/index.html → รัน drift/doc-status →
+  **โชว์ diff + PR text แล้วหยุดรอ yes** → push + `gh pr create` → ลบ clone →
+  ลบ entry ต้นทางในโปรเจค (commit ผ่าน `/ugt-handoff` รอบถัดไป)
+- **สิทธิ์**: push ได้เฉพาะผู้ดูแล platform — push ถูกปฏิเสธ → เขียน patch ให้ส่งต่อ
+  ไม่ fork ไม่ retry
+- **ไม่ทำ hook**: การตัดสิน stack-wide/skill เจ้าของต้องใช้วิจารณญาณ และ PR ออกนอก
+  เครื่องต้องมีคนยืนยัน
+- `ugt-handoff` triage + Quick Rules ชี้ไป `/ugt-contribute` · asset
+  `troubleshooting.md` ของ `ugt-context` ชี้ตาม · README/index.html เพิ่มแถว/การ์ด
+- evals.json 3 case (stack-wide → form-validation.md · business rule → หยุดที่ gate ·
+  อาการ auth → auth-setup ไม่ใช่ pitfalls) **ยังไม่ได้รัน baseline** — ต้อง fixture ที่
+  gh ไม่มีสิทธิ์ push หรือจบก่อนขั้น confirm
+
 ## 2.12.2 (2026-09-13)
 
 **Prompt audit รอบ 2 — `ugt-requirements`** (ตาม `claude-api prompt-audit`):

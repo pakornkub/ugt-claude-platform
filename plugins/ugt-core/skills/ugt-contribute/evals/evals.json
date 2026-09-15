@@ -1,0 +1,46 @@
+{
+  "skill_name": "ugt-contribute",
+  "notes": "Runs on a fixture project that has ugt-nextjs-platform installed and a docs/project-context/troubleshooting.md with 2-3 entries. gh is authenticated but the runner must NOT have push rights, or the eval must end before the confirmation step — the skill stops at 'show diff + PR text, wait for yes', and an eval runner can never say yes. Prompts stay in Thai. No baseline run yet (skill created 2026-09-15).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "stack-wide-entry-lands-in-pitfalls-reference",
+      "prompt": "บรรทัด SelectItem value=\"\" crash ใน troubleshooting.md อันนี้เจอทุกโปรเจคแน่ ๆ ส่งขึ้น platform ให้หน่อย",
+      "expected_output": "Passes the 3-question gate out loud, picks ugt-nextjs-pitfalls with references/form-validation.md as the owner, clones the platform repo into the scratchpad, writes the entry in the file's existing numbering plus a symptom row in SKILL.md, adds a CHANGELOG section, bumps the patch version in plugin.json AND the README/index.html chips, runs both check scripts, then shows the diff and PR text and STOPS waiting for confirmation — no push, no PR",
+      "assertions": [
+        "The three gate questions are answered explicitly before any clone",
+        "The entry is written to plugins/ugt-nextjs-platform/skills/ugt-nextjs-pitfalls/references/form-validation.md, not to a new file",
+        "A new row appears in the pitfalls SKILL.md symptom table",
+        "plugins/ugt-nextjs-platform/.claude-plugin/plugin.json version is bumped by a patch and README.md + docs/web/index.html show the same number",
+        "A CHANGELOG.md section with today's date is added at the top",
+        "git diff and the PR title/body are printed and the run ends without running git push or gh pr create",
+        "The plugin cache under ~/.claude/plugins is never edited",
+        "troubleshooting.md in the project is NOT yet modified (deletion happens only after the PR exists)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "project-only-rule-is-refused-at-the-gate",
+      "prompt": "เอาบรรทัด 'ลาพักร้อนต้องขอล่วงหน้า 3 วันไม่งั้น validate ไม่ผ่าน' ใน troubleshooting.md ไปใส่ platform ด้วย เดี๋ยวโปรเจคอื่นเจอ",
+      "expected_output": "Stops at the gate: the cause is a business rule, not the stack; says so in one or two lines, suggests it belongs in business-rules.md, does not clone anything",
+      "assertions": [
+        "No git clone / gh repo clone is executed",
+        "The response names the failing gate question (cause is a project rule, not the stack)",
+        "The response points to docs/project-context/business-rules.md or troubleshooting.md as the right home",
+        "No files under the platform repo are touched"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "auth-symptom-goes-to-auth-setup-not-pitfalls",
+      "prompt": "เราเพิ่งแก้เรื่อง logout บน https แล้ว cookie ไม่หลุดเพราะ secure flag กับ proxy header เสร็จแล้ว ทดสอบผ่านบน prod ยกขึ้น plugin เลย ไม่ต้องรอ handoff",
+      "expected_output": "Accepts the in-session bug as the source (no troubleshooting.md line to delete later), passes the gate, picks ugt-nextjs-auth-setup as the owner because its description already lists 'logout not sticking on https', writes into that skill's symptom table (and the asset if the asset is the bug) rather than into pitfalls, then stops at the confirmation step",
+      "assertions": [
+        "The owner chosen is ugt-nextjs-auth-setup, not ugt-nextjs-pitfalls",
+        "The reasoning cites that the auth skill's description already carries this symptom family",
+        "The run notes there is nothing to delete from troubleshooting.md because the source was the current session",
+        "The run stops after showing the diff and PR text; no push or PR is created"
+      ]
+    }
+  ]
+}

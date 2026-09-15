@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 ## In progress
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
@@ -20,6 +20,11 @@ Last updated: 2026-09-14
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-09-15 ugt-core **2.13.0** — skill ใหม่ `ugt-contribute` (ยกกับดักจากโปรเจค
+  ขึ้น platform เป็น PR: gate 3 ข้อ → skill เจ้าของ → scratch clone → entry +
+  CHANGELOG + bump + chips → โชว์ diff รอ yes → gh pr create → ลบต้นทาง) · มติ:
+  ไม่ทำ hook, push เฉพาะผู้ดูแล (ปฏิเสธ → patch) · handoff/context/README/index.html
+  ชี้ตาม · evals.json 3 case ยังไม่รัน baseline · commit + tag `ugt-core--v2.13.0` + push แล้ว 2026-09-15 (เครื่องนี้ยังไม่ `claude plugin update`)
 - 2026-09-13 **พิสูจน์ prompt audit ด้วย `claude plugin eval` ครั้งแรก** — nextjs **4.63.1** ·
   php/python **0.6.4** (core คง 2.12.2): case แบบรันได้ 6 ตัวที่ `plugins/*/evals/`
   (วิธีรัน + ข้อจำกัด Windows อยู่ใน memory `claude-plugin-eval-runner` + CHANGELOG nextjs
