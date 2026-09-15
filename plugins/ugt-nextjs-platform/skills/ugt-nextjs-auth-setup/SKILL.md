@@ -31,6 +31,7 @@ Every row below was debugged in a real org project; the fix is in
 | Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
 | Keycloak rejects the redirect URI | client's valid redirect URIs missing the basePath-qualified callback |
 | Mailed reset link 404s | link built without the basePath (needs ugt-nextjs-mail-setup) |
+| Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` right after a `better-auth` bump | twoFactor plugin schema changed (≥1.6.24 needs a `twoFactor` row + lockout columns) and Better Auth ships no migration — diff `dist/plugins/*/schema.mjs` vs `schema.prisma` after every bump |
 
 ## 1. Overview
 
@@ -516,6 +517,7 @@ set, so it never needs the interview's project name hand-substituted in.
 | `isSelf` = `session.empCode === record.empCode` | `!viewAll` — a read-all user then loses the buttons on their **own** record |
 | UI follows the kit's Base UI (base-mira) API: `render` on triggers, `onClick` on menu items | Radix idioms `asChild` / `onSelect` — they are silently ignored by Base UI and the button just stops working (shipped once: "ปุ่ม logout กดไม่ได้") |
 | Destructive actions confirm via the kit's `ConfirmActionDialog`; row buttons via `IconAction` + `soft-*`; page headers via `page-shell` | `window.confirm`, bare ghost icon buttons, hand-written `<h1>` — DESIGN.md §3/§4 apply to these admin pages too |
+| After **any** `better-auth` bump (patch included), diff every plugin's `node_modules/better-auth/dist/plugins/<plugin>/schema.mjs` against `prisma/schema.prisma` and migrate the delta | Assume a minor/patch bump is schema-neutral — Better Auth adds required fields/rows without a migration, and the failure shows up as an unrelated 400/500 in a login step (e.g. twoFactor ≥1.6.24, see auth-flows gotcha table) |
 
 ## 8. Verification Checklist
 

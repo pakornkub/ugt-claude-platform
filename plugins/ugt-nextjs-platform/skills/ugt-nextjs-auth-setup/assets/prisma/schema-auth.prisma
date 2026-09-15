@@ -98,6 +98,34 @@ model verification {
   @@map("Verification")
 }
 
+// ─── Optional: email OTP 2FA (better-auth `twoFactor` plugin) ────────────────
+// OPT-IN — uncomment only if the project registers `twoFactor()` in lib/auth.ts.
+// Not part of the 8-table auth set that verify.mjs enforces.
+//
+// GOTCHA (better-auth ≥1.6.24): `verifyTwoFactorOTP` requires a twoFactor ROW for
+// every user with twoFactorEnabled = true (it throws 400 TWO_FACTOR_NOT_ENABLED
+// before even reading the OTP) and writes `verified` / `failedVerificationCount` /
+// `lockedUntil` on every attempt. When 2FA is enabled by an admin flag instead of
+// the `enableTwoFactor` endpoint, create the row yourself:
+//   tx.twoFactor.create({ data: { userId, secret: '', backupCodes: '', verified: false } })
+// and diff dist/plugins/two-factor/schema.mjs vs this model after every bump.
+//
+// On `user`: add  twoFactorEnabled Boolean @default(false) @map("TwoFactorEnabled")
+//            and  twoFactor        twoFactor?
+//
+// model twoFactor {
+//   id                      String    @id @default(cuid()) @map("Id")
+//   secret                  String    @db.NVarChar(Max)    @map("Secret")
+//   backupCodes             String    @db.NVarChar(Max)    @map("BackupCodes")
+//   userId                  String    @unique              @map("UserId")
+//   user                    user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   verified                Boolean   @default(true)       @map("Verified")
+//   failedVerificationCount Int       @default(0)          @map("FailedVerificationCount")
+//   lockedUntil             DateTime?                      @map("LockedUntil")
+//
+//   @@map("TwoFactor")
+// }
+
 // ─── RBAC ────────────────────────────────────────────────────────────────────
 // user (1) ── (0..1) role (1) ── (M) rolePermission (M) ── (1) permission
 

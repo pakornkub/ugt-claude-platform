@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.2 (2026-09-15)
+
+**auth-setup: gotcha ใหม่จาก ugt-customer-portal — email OTP พังหลัง bump better-auth 1.6.24** (fix ฝั่งโปรเจค `d551298`):
+
+- **`references/auth-flows.md` Gotcha quick table**: อาการ "OTP ถูกแต่ขึ้น expired / `verify-otp` 400 `TWO_FACTOR_NOT_ENABLED`" — better-auth ≥1.6.24 เพิ่ม account lockout: `verifyTwoFactorOTP` หา `twoFactor` row **ก่อน** consume OTP และเขียน `verified`/`failedVerificationCount`/`lockedUntil` ทุกครั้ง โปรเจคที่เปิด 2FA ด้วย flag `user.twoFactorEnabled` (admin สร้าง user เอง) ไม่เคยมีแถวนี้ และ Better Auth ไม่ generate migration ให้
+- **SKILL.md**: เพิ่มอาการใน "When to use" + กติกา DO/DON'T — bump better-auth ทุกครั้ง (patch ด้วย) ต้อง diff `node_modules/better-auth/dist/plugins/<plugin>/schema.mjs` กับ `prisma/schema.prisma` แล้ว migrate ส่วนต่าง; map OTP error ตาม `error.code` ไม่ใช่ HTTP status (400 ตอนนี้มี 3 code)
+- **`assets/prisma/schema-auth.prisma`**: เพิ่ม block `twoFactor` แบบ **opt-in (comment ไว้)** พร้อม 3 คอลัมน์ lockout และตัวอย่าง `tx.twoFactor.create(...)` สำหรับ flow ที่เปิด 2FA ด้วย admin flag — ไม่นับใน 8 ตาราง auth ที่ `verify.mjs` บังคับ
+
 ## 4.63.1 (2026-09-13)
 
 **พิสูจน์ prompt audit รอบ 1–2 ด้วย `claude plugin eval`** (case ใหม่ที่ `plugins/ugt-nextjs-platform/evals/`):
