@@ -140,13 +140,33 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
 });
 
 // ── tokens ────────────────────────────────────────────────────────────────
+// §10 is append-only, so the LAST matching row is the one in force — a
+// re-aligned project still carries its old preserve rows (Re-align mode, 4.63.3).
+// Scoped to §10 because the template body itself says "ยึดของเดิม" (§4).
+const decisionLog = () => {
+  if (!has('docs', 'DESIGN.md')) return '';
+  const md = read('docs', 'DESIGN.md');
+  const i = md.search(/^## 10\./m);
+  return i < 0 ? '' : md.slice(i);
+};
+
 // Preserve mode ข้อ 10 (มติ 2026-09-09): DESIGN.md §10 may record
 // "ฟ้อนต์: คงของเดิม (<name>)" — then the project's own font stays and the
 // Inter/Noto demands below are replaced by "some next/font is wired".
 const keptFont = () => {
-  if (!has('docs', 'DESIGN.md')) return null;
-  const m = /ฟ้อนต์\s*:\s*คงของเดิม\s*\(([^)\n]+)\)/.exec(read('docs', 'DESIGN.md'));
+  const last = [...decisionLog().matchAll(/ฟ้อนต์\s*:\s*([^|\n]+)/g)].at(-1)?.[1] ?? '';
+  const m = /^คงของเดิม\s*\(([^)\n]+)\)/.exec(last.trim());
   return m ? m[1].trim() : null;
+};
+
+// Mode rows ignore font rows: re-aligning tokens while keeping the font writes
+// a later "ฟ้อนต์: คงของเดิม" row that must not flip the mode back.
+const PRESERVE_ROW = /ยึดของเดิม|คงของเดิม|design เดิม|preserve mode/i;
+const REALIGN_ROW = /ยึด org \(re-align\)/;
+const isPreserveMode = () => {
+  const rows = decisionLog().split('\n').filter((l) => !/ฟ้อนต์\s*:/.test(l));
+  const lastPreserve = rows.findLastIndex((l) => PRESERVE_ROW.test(l));
+  return lastPreserve >= 0 && lastPreserve > rows.findLastIndex((l) => REALIGN_ROW.test(l));
 };
 
 check('globals.css carries the org token set', () => {
@@ -267,7 +287,7 @@ const ORG_PRIMARY = 'oklch(0.488 0.243 264.4)';
 check('Preserve mode honored: kit tokens rebased, not left at org defaults', () => {
   if (!has('docs', 'DESIGN.md') || !hasIn('app', 'globals.css')) return { ok: true, msg: 'nothing to compare yet' };
   const md = read('docs', 'DESIGN.md');
-  if (!/ยึดของเดิม|คงของเดิม|design เดิม|preserve mode/i.test(md)) return { ok: true, msg: 'not a preserve-mode project' };
+  if (!isPreserveMode()) return { ok: true, msg: 'not a preserve-mode project (or re-aligned to org)' };
   const css = readIn('app', 'globals.css');
   const primary = /--primary\s*:\s*([^;]+);/.exec(css)?.[1]?.trim();
   if (primary === ORG_PRIMARY && !md.includes(ORG_PRIMARY)) {

@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.3 (2026-09-24)
+
+**design-setup: Re-align mode — โปรเจคที่ติดตั้งแบบ preserve (คงของเดิม) แล้วภายหลังจะปรับให้ตรง org** (เดิมไม่มีทางเดินนี้ ต้องให้โมเดลตีความเอง):
+
+- **SKILL.md `### Re-align mode`**: ขั้นตอน re-scan → รายการ delta (token เก่า → org + ไฟล์ที่ token ไม่ช่วย เช่น hex/`<table>` พร้อมจำนวน) → ถามครั้งเดียว migrate/grandfather รายไฟล์ + ถามฟ้อนต์แยก → คืน token/un-rebase `components/ui/*` → **append** มติ `ยึด org (re-align) — แทนมติ <date>` ห้าม regenerate DESIGN.md · เพิ่มใน description + Quick Rules
+- **`verify.mjs`**: อ่านมติจาก **ส่วน 10 เท่านั้น และถือแถวล่าสุด** — `keptFont()` ใช้แถว `ฟ้อนต์:` สุดท้าย (มติ Sarabun เก่าไม่ค้าง) · preserve check ปิดเมื่อแถว `ยึด org (re-align)` มาหลังแถว preserve (แถวฟ้อนต์ไม่นับเป็นแถว mode) · แก้บั๊กแฝง: เดิมค้นทั้งไฟล์และ template ส่วน 4 มีคำว่า "ยึดของเดิม" ทุกโปรเจคจึงถูกนับเป็น preserve
+- **evals.json**: case 9 `realign-preserve-project-to-org` (ยังไม่รัน baseline)
+
 ## 4.63.2 (2026-09-15)
 
 **auth-setup: gotcha ใหม่จาก ugt-customer-portal — email OTP พังหลัง bump better-auth 1.6.24** (fix ฝั่งโปรเจค `d551298`):

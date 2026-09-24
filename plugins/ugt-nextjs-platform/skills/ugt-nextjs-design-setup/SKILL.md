@@ -12,7 +12,8 @@ description: >
   touching UI. Works on a fresh project (full interview) or an existing one
   (scan → draft agreement → recorded deviations). Also handles "sync ข้อตกลง
   design" after a plugin update (diff against the org contract, record the
-  decision). Run BEFORE ugt-nextjs-auth-setup — auth generates themed pages that
+  decision), and "ปรับให้ตรง org" on a project installed in preserve mode
+  (re-align: delta list, migrate/grandfather per file, append มติ). Run BEFORE ugt-nextjs-auth-setup — auth generates themed pages that
   must inherit these tokens. Not for writing feature UIs, nor Jenkins/DB/auth
   setup (→ their own skills).
 ---
@@ -406,6 +407,34 @@ changed), apply what the user accepts, and record each acceptance/rejection
 as a dated มติ. **Never silently rewrite the project's DESIGN.md** — it may
 contain project มติ that deliberately deviate.
 
+### Re-align mode ("ปรับให้ตรง org" on a preserve-mode project)
+
+Trigger: `DESIGN.md` exists, its §10 carries preserve มติ (ยึดของเดิม /
+คงของเดิม), and the user now wants the org standard. Not a fresh interview and
+not Sync mode — the project is changing direction, and the failure modes are
+reading the old มติ as still in force (tokens re-rebased onto the old brand),
+regenerating DESIGN.md (project มติ lost), or switching tokens only (kit pages
+go indigo, legacy pages stay hardcoded — two templates in one app).
+
+1. **Re-scan** (§Scan in `references/interview.md`) and present the delta:
+   token by token (primary, radius, control scale, font) old → org, plus
+   every file that tokens alone won't move — hex colors, raw `<table>`,
+   inline date formatting, per-page size overrides — with counts per file.
+2. **Ask once** (AskUserQuestion): migrate each listed file now / grandfather
+   into §9 / pick per file. Font is asked separately (keep or move to
+   Inter + Noto Sans Thai) — the org default is not assumed.
+3. **Apply**: tokens back to the org values in `globals.css` (Step 3.2 token
+   merge), un-rebase `components/ui/*` per §Scale bridge in reverse, fonts per
+   Step 3.3 when moving, migrate the files chosen in step 2. The shell stays
+   unless the user asks for the org shell (then Step 3.5).
+4. **Record — append, never rewrite**: §10 gains
+   `ยึด org (re-align) — แทนมติ <date ของมติ preserve>` and the font row
+   `ฟ้อนต์: เปลี่ยนเป็น Inter + Noto Sans Thai` or `ฟ้อนต์: คงของเดิม (<ชื่อ>)`;
+   §2/§4 values updated to the org ones; §9 rows added/closed to match step 2.
+   `verify.mjs` reads the **last** mode and font rows in §10 — the exact
+   phrase `ยึด org (re-align)` is what switches its preserve check off.
+5. Close out as Step 4 (verify exit 0, check-contrast).
+
 ## 4. References
 
 - `references/interview.md` — the question bank + defaults + the
@@ -429,6 +458,7 @@ contain project มติ that deliberately deviate.
 | Diff-and-ask on existing `components/ui/` files | Overwrite the project's components silently |
 | Run check-contrast + verify before closing | Close with a failing script "to fix later" |
 | Sync mode diffs and records มติ | Regenerate DESIGN.md over project decisions |
+| Re-align: list files tokens won't move, append `ยึด org (re-align)` | Flip tokens only and leave hardcoded legacy pages as a second template |
 
 ## 6. Verification Checklist
 
