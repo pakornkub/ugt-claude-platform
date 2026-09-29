@@ -70,7 +70,7 @@ LLM, not a rule engine.
 | --- | --- |
 | Plan / analyze / understand requirements | fable if ambiguous or cross-module, else opus |
 | Write code (feature work) | sonnet; opus if risk domain or >5 files |
-| Review code | never weaker than the model that wrote it; fable when in doubt |
+| Review code | never weaker than the model that wrote it; fable if risk domain or cross-module |
 | Diagnose a bug (root cause unknown) | fable |
 | Fix a bug (root cause known) | sonnet |
 | Run tests / verify scripts (mechanical) | haiku |
@@ -123,8 +123,9 @@ Rules:
 - **The plan is a preview, not a new decision point** — it never rewrites
   `model-mode.md`. If the user answers "ใช้ opus แทน" the override applies to
   that batch only; a lasting change is still `/ugt-model-mode <preset>`.
-- Subagents themselves cannot dispatch further, so the plan is always printed
-  by the main session (or the Agent Teams lead).
+- Whoever dispatches prints the plan — normally the main session or the Agent
+  Teams lead; a subagent that dispatches its own subagents follows the same
+  table and prints its own plan.
 
 ## Switching mode
 
@@ -198,7 +199,7 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 | --- | --- |
 | Plan / analyze / understand requirements | fable if ambiguous or cross-module, else opus |
 | Write code (feature work) | sonnet; opus if risk domain or >5 files |
-| Review code | never weaker than the model that wrote it; fable when in doubt |
+| Review code | never weaker than the model that wrote it; fable if risk domain or cross-module |
 | Diagnose a bug (root cause unknown) | fable |
 | Fix a bug (root cause known) | sonnet |
 | Run tests / verify scripts (mechanical) | haiku |

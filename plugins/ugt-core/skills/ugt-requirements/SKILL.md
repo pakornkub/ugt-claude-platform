@@ -202,8 +202,8 @@ message — never a per-feature question, and never dispatch anything silently:
 Rules the plan must state out loud:
 
 - A feature is always dispatched to a **fresh session**, never a subagent —
-  the pipeline inside it dispatches its own implementer/reviewer subagents,
-  and a subagent cannot dispatch further.
+  its pipeline needs a full context window, its own worktree, and its own
+  implementer/reviewer loop.
 - A feature with an unresolved blocking Open Question is not dispatchable —
   resolving it with stakeholders is the plan's first step, not a footnote.
 - Merging a finished feature back = **integration check only**: run the full

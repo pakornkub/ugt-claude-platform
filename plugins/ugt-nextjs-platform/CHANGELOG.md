@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.5 (2026-09-29)
+
+**ปิดเรื่องค้างจาก prompt audit 5.5**
+
+- **assets/state/model-mode.md**: แถว Review ตาม ugt-core 2.13.2 (`fable if risk domain or cross-module`)
+- **CLAUDE-block Layer contract**: ตัดเหตุผล "a subagent cannot dispatch further" (nested subagent มีแล้ว) → เหตุผลจริง: context เต็ม + worktree + implementer/reviewer loop ของตัวเอง
+- **auth audit-logging.md §Retention**: reference อ้างว่าหน้า viewer บังคับ retention floor แต่ asset ไม่มี → บอกตรง ๆ ว่า window เป็นมติรายโปรเจค ให้เติม floor เมื่อโปรเจคกำหนด window แล้ว · ตัวอย่างกัน `fromDate` ที่เก่ากว่า cutoff ไม่ให้เปิดแถวที่หมดอายุ
+- eval fixtures (config-change-direct, small-bugfix-light-version) sync ตาม template
+
 ## 4.63.4 (2026-09-29)
 
 **Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อความที่ขัดกับโค้ดหรือขัดกันเอง (5.5 ทำตามตรงตัวจึงพาทำผิด) + ถ้อยคำที่ไม่เข้ากับนิสัย 5.5:

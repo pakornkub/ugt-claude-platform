@@ -21,21 +21,20 @@ description: >
 OWASP Dependency Check + two-image Docker build/deploy** — โครงเดียวกับที่
 Next.js ใช้อยู่จริงใน production ต่างกันแค่คำสั่งข้างใน stage
 
-> ### ⚠️ ยังไม่ผ่าน pilot
+> ### ⚠️ สถานะ pilot ราย shape
 >
-> **ทุก shape ยังไม่เคยรันกับโปรเจคจริง** (มติ M2: ต้องผ่านภาษาละ 1 โปรเจคก่อน
-> tag); shape ที่ผ่านแล้วจะย้ายออกจากรายการนี้
+> มติ M2: ต้องผ่านโปรเจคจริงก่อน tag
 >
 > | Shape | สถานะ |
 > | --- | --- |
+> | PHP legacy (ไม่มี framework) | **ผ่าน pilot** — `ugt-mscpl-ana` (2026-08) · `ugt-bd-forecast` (2026-09-03) deploy ขึ้น server จริง |
 > | Laravel | ยังไม่ผ่าน pilot |
 > | CodeIgniter (CI3 / CI4) | ยังไม่ผ่าน pilot |
-> | PHP legacy (ไม่มี framework) | ยังไม่ผ่าน pilot |
 > | WordPress | ยังไม่ผ่าน pilot |
 >
-> แปลว่า: ค่าคงที่ทุกตัวในชุดนี้ (base image, คำสั่ง toolchain, health poll,
-> UID chown, DocumentRoot sed) ถูกไล่ตรวจด้วยเหตุผลแล้วแต่**ยังไม่ถูกพิสูจน์
-> ด้วย build จริง** — โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้รอบ pipeline
+> shape ที่ยังไม่ผ่าน: ค่าคงที่เฉพาะ shape นั้น (คำสั่ง toolchain, DocumentRoot
+> sed, health route) ถูกไล่ตรวจด้วยเหตุผลแล้วแต่**ยังไม่ถูกพิสูจน์ด้วย build
+> จริง** — โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้รอบ pipeline
 > จริง แล้วส่ง feedback กลับมาที่ plugin นี้ (PR ที่ repo platform) ไม่ใช่แก้
 > ค้างไว้ในโปรเจคเดียว
 

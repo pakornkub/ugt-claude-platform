@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## 0.6.6 (2026-09-29)
+
+- **SKILL.md สถานะ pilot**: ตารางเดิมบอกว่าทุก shape ยังไม่ผ่าน ทั้งที่ PHP legacy ขึ้น server จริงแล้ว 2 โปรเจค → **PHP legacy ผ่าน pilot** (`ugt-mscpl-ana` 2026-08 · `ugt-bd-forecast` 2026-09-03) · Laravel / CodeIgniter / WordPress ยังไม่ผ่าน
+
 ## 0.6.5 (2026-09-29)
 
 **Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อเท็จจริงที่ repo ขัดเอง + ถ้อยคำเชิงประวัติ:

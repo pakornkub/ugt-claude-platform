@@ -255,18 +255,22 @@ DELETE FROM ActivityLogs WHERE CreatedAt < DATEADD(day, -180, GETDATE());
 
 - **Never delete rows from application code**
 
-### The viewer query must also enforce the cutoff in its WHERE clause
+### Once the window is fixed, the viewer query enforces it too
 
-The cleanup job runs on a schedule — between runs, stale rows still exist. The
-page (or API) must filter at query time too, or data declared "kept 180 days"
-stays readable longer:
+The shipped `audit-logs/page.tsx` has **no** retention floor — the window is a
+per-project decision. When the project documents one, add the floor to the
+page (or API) WHERE clause as well: the cleanup job runs on a schedule, and
+between runs stale rows stay readable:
 
 ```ts
-// ✅ the query enforces the 180-day floor regardless of the job schedule
+// ✅ the query enforces the floor regardless of the job schedule
 const retentionCutoff = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 const where = {
   createdAt: {
-    gte: fromDate ? new Date(`${fromDate}T00:00:00+07:00`) : retentionCutoff,
+    // a fromDate older than the cutoff must not reopen expired rows
+    gte: fromDate
+      ? new Date(Math.max(new Date(`${fromDate}T00:00:00+07:00`).getTime(), retentionCutoff.getTime()))
+      : retentionCutoff,
     ...(toDate
       ? { lt: new Date(new Date(`${toDate}T00:00:00+07:00`).getTime() + 86_400_000) }
       : {}),
@@ -283,6 +287,6 @@ const where = { createdAt: { gte: fromDate ? new Date(fromDate) : undefined } };
 - [ ] Critical paths (login/logout) use `.catch(() => {})`, not a bare `await`
 - [ ] Every action comes from a constant in `lib/audit-actions.ts` — no raw strings
 - [ ] `detail` is structured JSON · no passwords/secrets/tokens · no over-broad PII
-- [ ] Viewer query: guarded by `audit-logs:read` · username search resolves to userIds (sentinel only needed on raw-SQL paths) · batch name enrichment · pageSize clamped · retention cutoff enforced
+- [ ] Viewer query: guarded by `audit-logs:read` · username search resolves to userIds (sentinel only needed on raw-SQL paths) · batch name enrichment · pageSize clamped · retention floor added once the project fixes its window
 - [ ] No code UPDATEs or DELETEs `ActivityLogs`
 - [ ] A scheduled cleanup job exists and the retention window is documented in the project

@@ -13,7 +13,7 @@ Agent tool, or Agent Teams), judge each task on ambiguity, blast radius
 | --- | --- |
 | Plan / analyze / understand requirements | fable if ambiguous or cross-module, else opus |
 | Write code (feature work) | sonnet; opus if risk domain or >5 files |
-| Review code | never weaker than the model that wrote it; fable when in doubt |
+| Review code | never weaker than the model that wrote it; fable if risk domain or cross-module |
 | Diagnose a bug (root cause unknown) | fable |
 | Fix a bug (root cause known) | sonnet |
 | Run tests / verify scripts (mechanical) | haiku |

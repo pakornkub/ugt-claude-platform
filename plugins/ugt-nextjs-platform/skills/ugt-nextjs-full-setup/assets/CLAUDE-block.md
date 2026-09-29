@@ -125,9 +125,9 @@ tooling as part of a bug fix (that is `ugt-nextjs-test-lint-setup`'s job).
 
 ### Layer contract — when work is split across sessions/subagents
 
-- A feature always goes to a **fresh session**, never a subagent — the
-  pipeline inside it dispatches its own implementer/reviewer subagents, and a
-  subagent cannot dispatch further.
+- A feature always goes to a **fresh session**, never a subagent — its
+  pipeline needs a full context window, its own worktree, and its own
+  implementer/reviewer loop.
 - Merging a finished feature branch = **integration check only** (run the full
   test/lint suite, update the board via `/ugt-handoff`) — the branch was
   already reviewed twice inside its pipeline; never re-review the code.

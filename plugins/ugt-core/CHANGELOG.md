@@ -1,5 +1,13 @@
 # Changelog — ugt-core
 
+## 2.13.2 (2026-09-29)
+
+**ปิดเรื่องค้างจาก prompt audit 5.5**
+
+- **ugt-model-mode — แถว Review (auto)**: "fable when in doubt" → "fable if risk domain or cross-module" · 5.5 อ่าน "when in doubt" กว้างจน review เกือบทุกรอบไป Fable 5.1 (แพงกว่า Opus 5.5 ~2.5×) · โปรเจคเดิมได้ค่าใหม่เมื่อรัน `/ugt-model-mode auto`
+- **ข้อความ "subagent cannot dispatch further" ล้าสมัย**: Claude Code รองรับ nested subagent (ลึกสุด 3 ชั้น — `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`) → model-mode: ใครสั่ง dispatch คนนั้นพิมพ์ dispatch plan · ugt-requirements: เหตุผลที่ feature ต้องไป fresh session คือ context เต็ม + worktree + loop ของตัวเอง
+- **hooks.json**: audit-log บน `PostToolUse` / `PostToolUseFailure` เป็น `async: true` — script แค่ append JSONL ไม่ส่งอะไรกลับ จึงไม่ต้องขวางทุก tool call
+
 ## 2.13.1 (2026-09-29)
 
 **Prompt audit สำหรับ Claude ตระกูล 5.5 (Opus 5.5 / Sonnet 5.5 / Fable 5.1)** — รุ่น 5.5 ทำตามข้อความตรงตัว จึงเกลาเฉพาะจุดที่พาทำผิดหรือเปลืองงบ skill listing:
