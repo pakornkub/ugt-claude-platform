@@ -11,11 +11,10 @@ description: >
   and the harness rule that makes every later session read the agreement before
   touching UI. Works on a fresh project (full interview) or an existing one
   (scan → draft agreement → recorded deviations). Also handles "sync ข้อตกลง
-  design" after a plugin update (diff against the org contract, record the
-  decision), and "ปรับให้ตรง org" on a project installed in preserve mode
-  (re-align: delta list, migrate/grandfather per file, append มติ). Run BEFORE ugt-nextjs-auth-setup — auth generates themed pages that
-  must inherit these tokens. Not for writing feature UIs, nor Jenkins/DB/auth
-  setup (→ their own skills).
+  design" after a plugin update and "ปรับให้ตรง org" on a preserve-mode
+  project (re-align to the org standard). Run BEFORE ugt-nextjs-auth-setup —
+  auth generates themed pages that must inherit these tokens. Not for feature
+  UIs or Jenkins/DB/auth setup.
 ---
 
 # UGT Design Setup — design agreement + tokens + org UI kit
@@ -279,9 +278,8 @@ different size — is the field bug this step exists to prevent.
    resolves `components.json` → base-mira, so it installs the right style).
    **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
    `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` ·
-   ⚠️ **plugin ไม่ประกาศ shadcn MCP แล้ว** (ถอดออก 4.43.0 — มันตอบ style
-   default ที่เป็น Radix โดยไม่มีทางสั่งให้ตอบ base-mira) · ถ้าเครื่องไหนยัง
-   ต่อ MCP ตัวนี้อยู่เอง **ห้ามลอกโค้ดจากมัน** · ลำดับแหล่งอ้างอิงเต็ม +
+   ⚠️ **shadcn MCP ตอบ style default ที่เป็น Radix** และไม่มี parameter สั่งให้
+   ตอบ base-mira — ถ้าเครื่องไหนต่อ MCP ตัวนี้อยู่ **ห้ามลอกโค้ดจากมัน** · ลำดับแหล่งอ้างอิงเต็ม +
    ตารางความต่าง Radix↔Base UI อยู่ที่ `references/conventions.md` §ตรวจ API:
    `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
@@ -299,7 +297,7 @@ different size — is the field bug this step exists to prevent.
    `NextIntlClientProvider`, `useTranslations`, `getTranslations` and
    `createNextIntlPlugin` directly — an unpinned install lets a future major
    change any of those out from under every project, the same class of break
-   that hit `better-auth` unpinned, ดู `docs/backlog.md` §9) · `next-themes`
+   that hit `better-auth` unpinned) · `next-themes`
    when dark mode = มี · `@base-ui/react` (the base-mira primitives package —
    init installs it, verify it's there; combobox in the registry uses it) ·
    `next-intl@^4` เสมอทุกโปรเจค (มติ 2.2 — kit อ่านสตริงผ่าน

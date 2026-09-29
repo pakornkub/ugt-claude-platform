@@ -29,9 +29,9 @@ description: >
 ## 1. Overview
 
 > **ต้องติดตั้งก่อน**: `ugt-nextjs-database-setup` (ตาราง `AppSettings` ที่เก็บ
-> template) → `ugt-nextjs-auth-setup` (หน้า `/admin/mail-templates` อยู่ในกลุ่ม
-> `(admin)` ของ auth และใช้ guard + audit ของมัน) → `ugt-nextjs-design-setup`
-> (หน้า admin ใช้ชุด component ของ kit) · ขาดตัวไหนให้หยุดแล้วไปติดตั้งก่อน
+> template) → `ugt-nextjs-design-setup` (หน้า admin ใช้ชุด component ของ kit)
+> → `ugt-nextjs-auth-setup` (หน้า `/admin/mail-templates` อยู่ในกลุ่ม `(admin)`
+> ของ auth และใช้ guard + audit ของมัน) · ขาดตัวไหนให้หยุดแล้วไปติดตั้งก่อน
 
 Extracted from `ugt-hrms`, where this exact code sends every approval email in
 production. Three pieces:
@@ -108,10 +108,9 @@ Assets mirror their destination — copy the tree, then substitute:
 Placeholders: `__SMTP_HOST__` · `__SMTP_FROM__` · `__SUPPORT_CONTACT__` ·
 `__EMAIL_HEADER_COLOR__` · `__PROJECT_DISPLAY_NAME__` · `__APP_URL_PROD__`
 
-**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
+**i18n wiring (every project):**
 every project already has `messages/`, `i18n/request.ts` and
-`i18n/messages.ts` from design-setup. Since this phase, both converted
-mail-setup assets (`mail-templates-manager.tsx`, the `/admin/mail-templates`
+`i18n/messages.ts` from design-setup. Both mail-setup assets (`mail-templates-manager.tsx`, the `/admin/mail-templates`
 page) call `useTranslations()`/`getTranslations()` unconditionally, so the
 `mail` catalog **must** be registered before either renders:
 
@@ -181,11 +180,13 @@ The page ships in §4.2; two wires make it reachable:
 1. `components/admin-nav.tsx` (auth-setup) — add to `ADMIN_NAV_ITEMS`:
 
    ```ts
-   { href: '/admin/mail-templates', label: 'เทมเพลตอีเมล', icon: Mail, perm: PERMISSIONS.MAIL_TEMPLATES_MANAGE },
+   { href: '/admin/mail-templates', labelKey: 'mailTemplates', icon: Mail, perm: PERMISSIONS.MAIL_TEMPLATES_MANAGE },
    ```
 
    (import `Mail` from lucide; projects with their own sidebar merge this item
-   the same way as the rest — auth SKILL.md §5.6.)
+   the same way as the rest — auth SKILL.md §5.6.) Add the label to
+   `auth.adminNav` in `messages/auth.th.ts` / `auth.en.ts`:
+   `mailTemplates: 'เทมเพลตอีเมล'` / `mailTemplates: 'Email templates'`.
 2. `app/(admin)/layout.tsx` — add `PERMISSIONS.MAIL_TEMPLATES_MANAGE` to
    `ADMIN_SECTION_PERMISSIONS`, so a user whose only admin permission is
    template editing can enter the section.

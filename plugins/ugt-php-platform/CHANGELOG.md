@@ -1,5 +1,12 @@
 # Changelog — ugt-php-platform
 
+## 0.6.5 (2026-09-29)
+
+**Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อเท็จจริงที่ repo ขัดเอง + ถ้อยคำเชิงประวัติ:
+
+- **docker-deploy.md .dockerignore**: อ้างว่า `Dockerfile.wordpress` มี `COPY . .` แต่ไม่มี → แก้ให้ตรง asset
+- **docker-deploy.md config:cache**: ตัด "(v0.1)" / "นอก scope v0.1" (plugin อยู่ที่ 0.6.x) · **SKILL.md reverse-proxy**: ตัดวงเล็บประวัติ
+
 ## 0.6.4 (2026-09-13)
 
 **Eval baseline ครั้งแรกของ `ugt-php-cicd-setup` (laravel-no-tests-full-setup) ผ่าน `claude plugin eval`**: 12 ผ่าน / 1 skill defect / 2 blocked โดย sandbox / 1 assertion ผิดเอง — ผลบันทึกใน `evals/evals.json` key `baseline_result_2026-09-13`; ชุด case แบบรันได้อยู่ที่ `plugins/ugt-php-platform/evals/`

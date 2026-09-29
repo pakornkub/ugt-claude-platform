@@ -1,5 +1,11 @@
 # Changelog — ugt-core
 
+## 2.13.1 (2026-09-29)
+
+**Prompt audit สำหรับ Claude ตระกูล 5.5 (Opus 5.5 / Sonnet 5.5 / Fable 5.1)** — รุ่น 5.5 ทำตามข้อความตรงตัว จึงเกลาเฉพาะจุดที่พาทำผิดหรือเปลืองงบ skill listing:
+
+- **ugt-contribute / ugt-requirements description**: ตัดขั้นตอนการทำงานออกจาก description (body มีครบอยู่แล้ว) เก็บคำ trigger ครบ — session ที่ติดตั้ง plugin หลายตัว รายการ skill เกินงบจน description ของ ugt-model-mode / ugt-requirements ถูกตัดทิ้ง
+
 ## 2.13.0 (2026-09-15)
 
 **skill ใหม่ `ugt-contribute` — ยกกับดักจากโปรเจคขึ้น platform เป็น PR** · ที่มา:

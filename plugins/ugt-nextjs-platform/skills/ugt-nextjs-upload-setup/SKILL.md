@@ -29,8 +29,8 @@ description: >
 ## 1. Overview
 
 > **ต้องติดตั้งก่อน**: `ugt-nextjs-database-setup` (ตาราง `Attachments` +
-> Prisma client) → `ugt-nextjs-auth-setup` (session + permission ที่ด่าน
-> ดาวน์โหลดใช้) → `ugt-nextjs-design-setup` (ตัวอัปโหลดเรียก `ui/icon-action`).
+> Prisma client) → `ugt-nextjs-design-setup` (ตัวอัปโหลดเรียก `ui/icon-action`)
+> → `ugt-nextjs-auth-setup` (session + permission ที่ด่านดาวน์โหลดใช้).
 > ขาดตัวไหนให้หยุดแล้วไปติดตั้งตัวนั้นก่อน — ลำดับใน `ugt-nextjs-full-setup`
 > รับประกันให้อยู่แล้ว
 
@@ -81,15 +81,15 @@ as a starting point that the first real project will sharpen.
    the skeleton ships) · a real FK per owning type · a single column on the
    business table. Trade-offs and how to choose →
    `references/attachment-linking.md`. Record the choice in
-   `docs/project-context/decisions.md`.
+   `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs).
 3. **Who may upload / download** — two permissions are added
    (`files:create`, `files:read`); decide which roles get them.
 4. **Retention** — how long a soft-deleted attachment's bytes should be kept.
    **บอกตรง ๆ ตอนถาม**: ยังไม่มี cleanup job ให้ติดตั้ง (รอมติองค์กรว่า
    background job รันที่ไหน — `docs/backlog.md` ข้อ 3 ของ platform) — คำตอบนี้
-   ถูก**บันทึกไว้ใน `docs/project-context/decisions.md`** เพื่อให้ job ที่จะมา
+   ถูก**บันทึกไว้ใน `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)** เพื่อให้ job ที่จะมา
    ทีหลังใช้ ไม่ใช่ config ที่มีผลวันนี้ อย่าสัญญาว่าไฟล์จะถูกกวาดอัตโนมัติ
-5. **Virus scan — เอาไหม** (default: **ไม่เอา** — opt-in, ไม่ใช่ org mandate อีกต่อไป)
+5. **Virus scan — เอาไหม** (default: **ไม่เอา** — opt-in)
    — ถามพร้อมเงื่อนไข infra ที่ทำให้การ "เอา" มีต้นทุนจริง ไม่ใช่แค่ติ๊กถูก:
    clamav กิน **RAM ~2 GB** และ boot แรกต้อง**ดาวน์โหลด signature DB ~1 GB จาก
    อินเทอร์เน็ต** (host องค์กรที่ไม่มี outbound internet ต้อง preload DB เอง —
@@ -99,7 +99,7 @@ as a starting point that the first real project will sharpen.
    `scannedAt: new Date()`), แก้ด่านดาวน์โหลดใน `[id]/route.ts` เป็น
    `!== 'clean'`, เพิ่ม env `CLAMAV_*`, เพิ่ม service clamav +
    `depends_on` + `clamav-db` ใน compose/Jenkinsfile, เพิ่ม `pingScanner()`
-   ใน §4.6 — บันทึกการเลือก (เอา/ไม่เอา) ไว้ใน `docs/project-context/decisions.md`
+   ใน §4.6 — บันทึกการเลือก (เอา/ไม่เอา) ไว้ใน `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)
    เผื่อโปรเจคย้อนกลับมาถามทีหลังว่าทำไม
 
 ## 4. Setup steps
@@ -122,9 +122,8 @@ as a starting point that the first real project will sharpen.
 **Placeholders**: `__PROJECT_NAME__` (in the compose snippet — bind-mount
 paths + container names). `verify.mjs` checks nothing is left.
 
-**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):**
-`components/file-upload.tsx` calls `useTranslations()` unconditionally since
-this phase, and both `app/api/files/**/route.ts` handlers return bare `code`
+**i18n wiring (every project):**
+`components/file-upload.tsx` calls `useTranslations()` unconditionally, and both `app/api/files/**/route.ts` handlers return bare `code`
 values (มติ 2.6) that the widget translates through the same catalog — so the
 `upload` catalog **must** be registered before the widget renders:
 
@@ -224,7 +223,7 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] [SCAN-on only] Upload the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/)
       → refused with `FILE_INFECTED`, **no file on the volume**, audit row written
 - [ ] [SCAN-on only] Stop the clamav container → upload is refused with 503, not accepted
-- [ ] The virus-scan choice (§3 Q5) is recorded in `docs/project-context/decisions.md`
+- [ ] The virus-scan choice (§3 Q5) is recorded in `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)
 - [ ] Upload a file, `docker compose down && up -d`, download it again → still there
 - [ ] Call the download URL while logged out → 401; as a user without access → **404**
 - [ ] Upload an `.svg` containing `<script>` → downloads as a file, never renders
@@ -234,7 +233,7 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] `docs/admin-handoff.md` mentions the storage-dir backup and that
       deleting the host dir deletes every attachment (verify.mjs greps this)
 - [ ] The attachment→record linking pattern is recorded in
-      `docs/project-context/decisions.md` (polymorphic / FK / single column),
+      `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs) (polymorphic / FK / single column),
       not left as "whatever the skeleton did"
 - [ ] th+en projects: `node <ugt-nextjs-design-setup skill dir>/scripts/check-i18n.mjs .`
       reports 0 failed, and the attach/upload widget's labels + **upload** error

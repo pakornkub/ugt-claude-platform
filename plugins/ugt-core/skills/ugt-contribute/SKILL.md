@@ -5,12 +5,9 @@ description: >
   EVERY project on the org stack and should graduate into the platform plugin
   — "ส่ง PR ไป platform", "อัพเดทกลับ plugin", "ยกขึ้น pitfalls", "เอาบั๊กนี้เข้า
   skill", "ให้ทีมอื่นไม่ต้องเจออีก", "contribute กลับ", or when `/ugt-handoff`'s
-  triage lands on "true for every project on this stack". Takes ONE proven entry
-  from `docs/project-context/troubleshooting.md` (or the bug just fixed in this
-  session), decides which platform skill owns it, clones ugt-claude-platform
-  into a scratch dir, writes the entry + CHANGELOG + version bump, opens the PR
-  with `gh` only after explicit confirmation, then deletes the entry from the
-  project so the knowledge lives in one place. Reach for it even when the user
+  triage lands on "true for every project on this stack". Lifts ONE proven
+  troubleshooting entry (or the bug just fixed) into the owning platform skill
+  as a PR — after explicit confirmation — and removes it from the project. Reach for it even when the user
   only hints ("อันนี้น่าจะเจอทุกโปรเจค", "น้องทีมอื่นก็เจอ") — the alternative is the
   gotcha staying in one repo. Don't use for project-only bugs (→ /ugt-handoff
   writes troubleshooting.md), design decisions (→ DESIGN.md §10), or to edit

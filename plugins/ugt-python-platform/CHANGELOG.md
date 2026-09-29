@@ -1,5 +1,12 @@
 # Changelog — ugt-python-platform
 
+## 0.6.5 (2026-09-29)
+
+**Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อเท็จจริงที่ repo ขัดเอง + ถ้อยคำเชิงประวัติ:
+
+- **docker-deploy.md §J**: ตัวอย่าง `.inside{}` เป็น PHP (`php:8.2-cli` + `php -l`) ที่ copy มาจากฝั่ง PHP → `python:3.12-slim` + ruff
+- **docker-deploy.md cron / guard**: ตัด "ตั้งแต่ 0.5.0" / "รูปแบบก่อน 0.5.0" · **SKILL.md reverse-proxy**: วงเล็บประวัติ → ผลลัพธ์ที่เกิดถ้าไม่ตั้ง
+
 ## 0.6.4 (2026-09-13)
 
 **Eval baseline ครั้งแรกของ `ugt-python-cicd-setup` (fastapi-no-tests-full-setup) ผ่าน `claude plugin eval`**: 13/13 assertion ที่วัดได้ผ่าน, 2 ข้อ blocked โดย sandbox (Windows ไม่มี shell + เขียนใต้ `.claude/` ถูกปฏิเสธ) — ผลบันทึกใน `evals/evals.json` key `baseline_result_2026-09-13`; ชุด case แบบรันได้อยู่ที่ `plugins/ugt-python-platform/evals/`

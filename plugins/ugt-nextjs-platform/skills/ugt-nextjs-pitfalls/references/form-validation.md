@@ -30,9 +30,7 @@ export type RoleFormValues = z.infer<ReturnType<typeof createRoleFormSchema>>;
   may inline Thai messages; the factory shape still pays off in tests.)
 - Wire with `useForm({ resolver: zodResolver(schema) })`.
 - **Do not set `mode` / `reValidateMode`** — RHF's defaults (validate on
-  submit, then re-validate per field) are already the org behavior. An earlier
-  "org standard" restating them was just noise; the real rule is one line:
-  don't override them.
+  submit, then re-validate per field) are the org behavior.
 - `.trim()` on user-typed strings at the schema, not in the submit handler.
 
 ## 2. The boundary side — the action re-validates, always

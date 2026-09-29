@@ -7,7 +7,7 @@ exists or who may read it. That part is fixed.
 **How an attachment relates to the record it belongs to is not.** The skill
 ships one pattern because a skeleton needs one, not because it is the right
 answer everywhere. Pick deliberately at install time and record the choice in
-`docs/project-context/decisions.md`.
+`docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs).
 
 ## Pattern A — polymorphic (what the skeleton ships)
 

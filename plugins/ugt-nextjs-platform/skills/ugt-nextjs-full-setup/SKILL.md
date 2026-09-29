@@ -71,7 +71,9 @@ Read `package.json` and the file layout to learn:
 
 ### 2. Interview — one combined batch of questions
 
-Ask all of this in a single message (use AskUserQuestion if available):
+Ask everything below in one interview round before any install work —
+without AskUserQuestion, one message; with it (≤4 questions per call),
+back-to-back calls with nothing installed in between:
 
 **Existing project — preserve mode (first, whenever §1 found a real UI, a
 prototype data layer or a fake login; skip on a bare scaffold):**
@@ -102,8 +104,8 @@ prototype data layer or a fake login; skip on a bare scaffold):**
    exactly this) → database-setup §4b runs right after its schema step.
    "ทีหลัง" is allowed but must be said out loud in the close-out summary —
    *the app still runs on <store>; nothing the user sees touches SQL Server
-   yet* — and recorded in `docs/project-context/decisions.md` + a board.md
-   row. Never report "ต่อ database แล้ว" while the screens read the old store.
+   yet* — and recorded in the project's decision home (`decisions.md`, or an
+   ADR under `docs/adr/` on the mattpocock bundle) + a board.md row. Never report "ต่อ database แล้ว" while the screens read the old store.
 0c. **[Fake login found] ถอด login จำลองเดิม แทนด้วย login จริง?** (default:
    ถอด) → auth-setup §5.7. Keeping both is not an option — two gates means
    the mock one still lets people in.

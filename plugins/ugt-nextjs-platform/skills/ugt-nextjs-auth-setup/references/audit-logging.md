@@ -266,8 +266,10 @@ stays readable longer:
 const retentionCutoff = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 const where = {
   createdAt: {
-    gte: fromDate ? new Date(fromDate) : retentionCutoff,
-    ...(toDate ? { lte: new Date(`${toDate}T23:59:59Z`) } : {}),
+    gte: fromDate ? new Date(`${fromDate}T00:00:00+07:00`) : retentionCutoff,
+    ...(toDate
+      ? { lt: new Date(new Date(`${toDate}T00:00:00+07:00`).getTime() + 86_400_000) }
+      : {}),
   },
 };
 

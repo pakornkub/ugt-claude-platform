@@ -119,7 +119,8 @@ The org-wide contract:
 
 ## 3. Interview — ask the installer first (one batch)
 
-Ask all of these **in a single message** before doing anything:
+Ask all of these in one interview round before doing anything — one
+message, or back-to-back AskUserQuestion calls (≤4 per call):
 
 1. **Which login methods?** SSO / LDAP / Local (default: SSO only)
 2. **Deployed under a basePath / shared domain?** If yes → what basePath (e.g. `/__BASE_PATH__`)
@@ -136,9 +137,9 @@ Ask all of these **in a single message** before doing anything:
      (from the cicd-setup template — internal-CA cert vs closed-intranet
      confirmation, see `references/keycloak-client.md`); don't delete it even
      if this interview didn't need the Keycloak client section
-5. ~~Who is the first admin?~~ — **do NOT ask this.** SSO/LDAP rows may not be
-   pre-created (มติ 2026-08-11), so nothing can be seeded from a name given in
-   an interview — asking creates an expectation the system can't fulfill. Full
+5. **First admin — not a question.** SSO/LDAP rows can't be pre-created
+   (มติ 2026-08-11), so nothing could be seeded from a name given here; the
+   first login claims admin via `/admin/setup`. Full
    mechanism (layout gate + the exact `docs/admin-handoff.md` wording) is in
    §5.5 step 5.
 6. **Is there a central employee database to read over a linked server?**
@@ -218,7 +219,7 @@ call) — say which path was taken and record it as a DESIGN.md deviation.
 # better-auth 1.7.0 removed genericOAuthClient in a MINOR bump — a deliberate
 # rewrite, not a regression (full migration history in references/auth-flows.md
 # SSO login flow). Every asset here is written for ≥1.7 — do not pin below 1.7.1.
-npm i better-auth@^1.7.1 zod@^4 --legacy-peer-deps   # zod pinned to 4 (clean-code mandates z.flattenError / z.iso.*) · --legacy-peer-deps: better-auth declares an optional peer vitest ^2–^4 and the org test-lint kit is vitest ^5 → plain install dies with ERESOLVE (eval run 2026-09-10); afterwards re-check that vite / @testing-library/dom are still installed — the flag can prune them (docs/backlog.md §11)
+npm i better-auth@^1.7.1 zod@^4 --legacy-peer-deps   # zod pinned to 4 (clean-code mandates z.flattenError / z.iso.*) · --legacy-peer-deps: better-auth declares an optional peer vitest ^2–^4 and the org test-lint kit is vitest ^5 → plain install dies with ERESOLVE; afterwards re-check that vite / @testing-library/dom are still installed — the flag can prune them
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)
@@ -295,8 +296,8 @@ that already has its own sidebar merges the admin menu into it instead of
 shipping a second sidebar — §5.6, and skipping that step is the single most
 common install mistake.
 
-**i18n wiring (every project, since `ugt-nextjs-design-setup` 4.46.0):** every
-converted asset calls `useTranslations()` unconditionally, so the `auth`
+**i18n wiring (every project):** every
+asset calls `useTranslations()` unconditionally, so the `auth`
 catalog must be registered before any of them render — copy
 `assets/messages/auth.{th,en}.ts` to `messages/`, then register in
 `i18n/messages.ts` exactly as `references/i18n-wiring.md` shows.

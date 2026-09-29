@@ -393,8 +393,8 @@ status **สุดท้าย** — ได้ semantics เดียวกั�
 `test-results/` ไว้ใน workspace เดียวกับที่ Docker Build stage ใช้เป็น build
 context (`docker build ... .`) — สเตจ OWASP Dependency Check สร้าง
 `dc-report/` เพิ่มอีก ถ้าไม่กันไว้ ไฟล์เหล่านี้จะถูกส่งเข้า build context
-(ช้าลง และเสี่ยงหลุดเข้า layer ของ image เพราะทั้ง `Dockerfile.web` และ
-`Dockerfile.wordpress` มี `COPY . .`) ต้องมี `.dockerignore` ที่ root โปรเจค:
+(ช้าลง และเสี่ยงหลุดเข้า layer ของ image เพราะ `Dockerfile.web` มี `COPY . .`
+— `Dockerfile.wordpress` ไม่มี แต่ build context ยังถูกส่งไปทั้งก้อน) ต้องมี `.dockerignore` ที่ root โปรเจค:
 
 ```
 vendor
@@ -431,7 +431,7 @@ syntax error (parse ได้/ไม่ได้) ใช้เวลาระด
 syntax error อยู่ `phpstan` จะ fail ด้วย parse error ที่อ่านยากกว่าและช้ากว่า
 `php -l` มาก — ไล่ syntax ให้ผ่านก่อนเสมอค่อยรัน static analysis รอบถัดไป
 
-### Laravel: ห้าม `php artisan config:cache` ตอน build image (v0.1)
+### Laravel: ห้าม `php artisan config:cache` ตอน build image
 
 `Dockerfile.web` ของชุดนี้**ไม่มี** `RUN php artisan config:cache` — ตั้งใจ
 ไม่ใส่ เหตุผล: ค่า config ของ Laravel (`DATABASE_URL`, `APP_KEY`, secret อื่น)
@@ -448,8 +448,8 @@ syntax error อยู่ `phpstan` จะ fail ด้วย parse error ที�
   secret จะถูกฝังลง image layer ถาวร — ดึง image ออกมา diff layer ก็เห็น
   secret ได้แม้ลบไฟล์ทิ้งใน layer ถัดไป (Docker layer เป็น append-only)
 
-ทางเลือกที่ปลอดภัยกว่าถ้าต้องการ config cache จริง ๆ ในอนาคต (นอก scope
-v0.1) คือรัน `php artisan config:cache` เป็นส่วนหนึ่งของ Deploy stage
+ทางเลือกที่ปลอดภัยกว่าถ้าต้องการ config cache จริง ๆ ในอนาคต (ชุดนี้ยัง
+ไม่รองรับ) คือรัน `php artisan config:cache` เป็นส่วนหนึ่งของ Deploy stage
 **หลัง** `.env` ถูกวางแล้ว ไม่ใช่ใน Dockerfile — แต่ต้องแลกกับความซับซ้อนของ
 cache invalidation เมื่อ deploy ซ้ำโดยไม่ rebuild image ซึ่งชุดนี้ยังไม่ทำ
 

@@ -14,8 +14,7 @@ density/sizes · radius · the semantic-6 status set · date/number formats ·
 toast semantics · motion rules · icon library · accessibility floor. **ปีบนจอ
 เป็น ค.ศ. เสมอ ไม่ใช่แค่ default แต่ไม่มีทางเลือกให้ deviate เลย** —
 `lib/format.ts` บังคับ `-u-ca-gregory` ที่ formatter เดียว ไม่มีโค้ดแปลง พ.ศ.
-เส้นทางไหนก็ตาม ถามแล้วให้ตอบ "พ.ศ." คือสร้างมติที่โค้ดทำตามไม่ได้ — เคยเป็น
-คำถามข้อ 7 มาก่อน ตัดออกเมื่อพบว่าขัดกับตัวมันเอง (2026-08-24)
+เส้นทางไหนก็ตาม ถามแล้วให้ตอบ "พ.ศ." คือสร้างมติที่โค้ดทำตามไม่ได้
 **Two exceptions**, both for existing projects: (1) a measured control scale
 that differs from the kit gets ข้อ 9 — silently applying the org density there
 produces a two-scale UI (a 48px legacy input next to a 28px kit button in the

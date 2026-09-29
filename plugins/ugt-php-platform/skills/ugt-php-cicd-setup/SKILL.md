@@ -477,8 +477,7 @@ render เอกสารส่ง admin (§5.7):
   ```
 
 - **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็นค่า
-  env ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (เคยเป็นคำถามที่ไม่มี step
-  รองรับ): เพิ่มลง `.env`/`.env.dev` (§5.5) ให้ตรง shape —
+  env ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้: เพิ่มลง `.env`/`.env.dev` (§5.5) ให้ตรง shape —
   - **Laravel**: `APP_URL=<URL เต็มรวม path>` (+ `ASSET_URL` เมื่อ asset โดน
     proxy ตัด path)
   - **CodeIgniter 4**: `app.baseURL=<URL เต็มรวม path>/`

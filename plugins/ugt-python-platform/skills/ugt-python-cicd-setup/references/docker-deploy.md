@@ -61,8 +61,8 @@ Jenkins deploy image เสร็จแล้ว**จบหน้าที่** 
   ของแต่ละ job แล้วบันทึกไว้ใน admin handoff เพื่อให้ทีมอื่นเห็นว่ามี cron
   แอบรันอยู่
 
-**ใช้ `docker compose` (v2 plugin syntax) ในบรรทัด cron — ตัวเดียวกับที่
-Jenkinsfile ใช้เป็นค่าตั้งต้นตั้งแต่ 0.5.0** — cron รันบน host เดียวกันแต่คนละ
+**ใช้ `docker compose` (v2 plugin syntax) ในบรรทัด cron ให้ตรงกับ
+Jenkinsfile** — cron รันบน host เดียวกันแต่คนละ
 context จาก Jenkins agent; เช็ค binary ที่มีจริงบน host ก่อนตั้ง cron
 (`docker compose version`) แล้วใช้ตัวเดียวกับที่ Jenkinsfile ใช้จริง (host เก่า
 ที่มีแต่ v1 และแก้ Jenkinsfile กลับไป `docker-compose` ก็ต้องใช้ v1 ใน cron
@@ -110,7 +110,7 @@ bind mount ที่ path ปลายทางหาย) แล้ว user `app
 ขึ้น `healthy` ปกติทุกอย่าง.
 
 **ห้ามย้อนกลับไปครอบทั้งบล็อกด้วย guard ระดับโปรเจค**
-(`if [ ! -d /home/docker02/appdata/<project> ]` — รูปแบบก่อน 0.5.0): guard แบบนั้น
+(`if [ ! -d /home/docker02/appdata/<project> ]`): guard แบบนั้น
 กลายเป็น no-op ถาวรทันทีที่ deploy แรกสร้างโฟลเดอร์โปรเจคขึ้นมา — volume ที่
 เพิ่มในรุ่นถัดไปจะไม่มีวันถูก mkdir/chown และไปโผล่เป็น `PermissionError`
 ตอนแอปเขียนไฟล์จริง
@@ -319,8 +319,8 @@ runtime `.env` ทับค่าพวกนี้ทั้งหมดอย�
 
 ## J. Docker-outside-of-Docker (DooD) — bind-mount path ต้องเป็น host path จริงเท่านั้น
 
-**อาการ**: stage ที่เรียก `docker run -v "$PWD/<dir>":/src ...` (เช่น lint
-php files ด้วย container แยกจาก image หลัก) พังบน Jenkins host จริงด้วย:
+**อาการ**: stage ที่เรียก `docker run -v "$PWD/<dir>":/src ...` (เช่นรัน tool
+ด้วย container แยกจาก image หลัก) พังบน Jenkins host จริงด้วย:
 
 ```
 docker: Error response from daemon: error while creating mount source path
@@ -347,8 +347,8 @@ plugin resolve mount ที่ถูกต้องเองโดย inspect ru
 
 ```groovy
 script {
-    docker.image('php:8.2-cli').inside {
-        sh "find public -name '*.php' -print0 | xargs -0 -n1 php -l"
+    docker.image('python:3.12-slim').inside {
+        sh '.venv/bin/ruff check .'
     }
 }
 ```

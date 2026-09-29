@@ -35,7 +35,7 @@ global store also hides who owns a value: any component can write it from
 anywhere, which is exactly the property the ladder exists to avoid. If a real
 case ever appears (state genuinely crossing distant subtrees, living longer
 than a page, and belonging in neither the URL nor the server), record it as a
-dated มติ in `docs/project-context/decisions.md` first — the library is cheap,
+dated มติ in `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs) first — the library is cheap,
 the second source of truth is not.
 
 ## 1. `revalidatePath` does not touch React Query

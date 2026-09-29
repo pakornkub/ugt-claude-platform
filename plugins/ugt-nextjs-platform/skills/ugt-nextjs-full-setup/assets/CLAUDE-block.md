@@ -99,7 +99,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Build a feature / fix a bug | อ่าน `docs/project-context/` ที่เกี่ยวตาม `00-index.md` (architecture + โดเมนที่แตะ) **ก่อน** แล้วทำตรง ๆ — โปรเจคนี้ไม่มี pipeline bundle จึงไม่มีขั้น brainstorm/plan/review อัตโนมัติ; เขียน test คู่กับโค้ดเอง |
 <!-- [/PIPELINE:none] -->
 <!-- [PIPELINE:mattpocock] -->
-| Build a feature / fix a bug | Fully user-driven — do not auto-invoke any pipeline skill for this row; wait for the user to run `/grill-with-docs` (or another mattpocock command) themselves. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
+| Build a feature / fix a bug | Don't auto-invoke any mattpocock skill — they are user-invoked. Read the relevant `docs/project-context/` files, then do the work directly with tests alongside; when the requirement is ambiguous, suggest `/grill-with-docs`. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
 <!-- [/PIPELINE:mattpocock] -->
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Finish work / hand off the session | `/ugt-handoff` |

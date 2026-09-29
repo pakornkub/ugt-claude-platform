@@ -356,8 +356,8 @@ sonar keys = `<project>`, `<project>-dev`
   โดย **host cron** ไม่ใช่ Jenkins → เป็นรายการ `[BATCH]` ใน admin handoff
   (ดู `references/docker-deploy.md` §B–C)
 - **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็น
-  config ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (เคยเป็นคำถามที่ไม่มี step
-  รองรับ — แอป 404 หลัง proxy โดยไม่มีอะไรจับ):
+  config ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (ไม่ตั้ง = แอป 404 หลัง
+  proxy โดยไม่มีอะไรจับ):
   - **FastAPI**: `FastAPI(root_path=os.environ.get("ROOT_PATH", ""))` +
     เพิ่ม `ROOT_PATH` ลง compose ทั้ง 2 ไฟล์ (prod = path prod, dev = path dev)
   - **Flask**: ตั้ง `SCRIPT_NAME` env ใน compose ทั้ง 2 ไฟล์ หรือใช้ `ProxyFix`

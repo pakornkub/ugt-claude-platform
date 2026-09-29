@@ -102,7 +102,7 @@ when nothing outside `lib/prisma.ts` imports `@/lib/prisma`.
 
 ## 6. Record it
 
-`docs/project-context/decisions.md`: the entity map (prototype name → table),
+`docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs): the entity map (prototype name → table),
 fields dropped or renamed, the seed decision, the date. `architecture.md`:
 data now lives in SQL Server via Prisma — the prototype store is gone.
 

@@ -257,13 +257,19 @@ check('Admin handoff covers the storage-dir backup', () => {
     : { ok: false, msg: 'docs/admin-handoff.md never mentions backing up the storage dir — the only copy of every attachment' };
 });
 
-check('Attachment linking pattern recorded in decisions.md', () => {
-  if (!has('docs/project-context/decisions.md')) {
-    return { ok: 'warn', msg: 'no docs/project-context/decisions.md — run ugt-context, then record the §3 Q2 linking choice' };
+check('Attachment linking pattern recorded in the decision home', () => {
+  // Decision home is decisions.md OR docs/adr/*.md (mattpocock bundle keeps ADRs, no decisions.md).
+  const texts = [];
+  if (has('docs/project-context/decisions.md')) texts.push(read('docs/project-context/decisions.md'));
+  if (has('docs/adr')) {
+    for (const f of readdirSync(p('docs/adr'))) if (f.endsWith('.md')) texts.push(read('docs/adr', f));
   }
-  return /attachment|entityType|Attachments|ไฟล์แนบ/i.test(read('docs/project-context/decisions.md'))
+  if (!texts.length) {
+    return { ok: 'warn', msg: 'no decisions.md or docs/adr/ — run ugt-context, then record the §3 Q2 linking choice' };
+  }
+  return texts.some((t) => /attachment|entityType|Attachments|ไฟล์แนบ/i.test(t))
     ? { ok: true }
-    : { ok: false, msg: 'the attachment→record linking choice (§3 Q2) is not recorded in decisions.md' };
+    : { ok: false, msg: 'the attachment→record linking choice (§3 Q2) is not recorded in decisions.md / docs/adr/' };
 });
 
 const icon = { true: '✔', false: '✘', warn: '!' };

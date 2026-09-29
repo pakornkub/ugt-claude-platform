@@ -1,5 +1,19 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.63.4 (2026-09-29)
+
+**Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อความที่ขัดกับโค้ดหรือขัดกันเอง (5.5 ทำตามตรงตัวจึงพาทำผิด) + ถ้อยคำที่ไม่เข้ากับนิสัย 5.5:
+
+- **บ้านมติบน bundle mattpocock**: kit-sync, full-setup Q0b, upload-setup (5 จุด), database-setup, prototype-migration, pitfalls data-fetching และ DESIGN.template §8 สั่งบันทึกลง `decisions.md` ทั้งที่โปรเจค mattpocock ใช้ `docs/adr/` (full-setup `verify.mjs` fail ถ้ามีทั้งคู่) → ชี้ทั้งสองบ้าน · upload `verify.mjs` อ่าน `docs/adr/*.md` ด้วย
+- **mail-setup §4.5**: nav item ใช้ `label:` แต่ `ADMIN_NAV_ITEMS` เป็น `labelKey` → TS error · แก้เป็น `labelKey: mailTemplates` + เพิ่ม key ใน `auth.adminNav`
+- **auth audit-logging.md**: ตัวอย่าง retention ใช้ `T23:59:59Z` (UTC) ขัดกับกฎเวลากรุงเทพในไฟล์เดียวกัน → `+07:00` + ขอบบน exclusive
+- **mail / upload prerequisites**: ลำดับ database → auth → design → database → design → auth (ตรงกับ full-setup และ auth)
+- **design-setup description**: 1,137 → ต่ำกว่า 1,024 ตัวอักษร
+- **CLAUDE-block (mattpocock span)**: "wait for the user to run /grill-with-docs" ทำให้ 5.5 ค้างรอแม้ขอแก้บั๊กธรรมดา → ห้ามเรียก mattpocock skill เอง แต่ลงมือทำได้ และแนะนำ /grill-with-docs เมื่อโจทย์คลุมเครือ
+- **full-setup §2 / auth §3 interview**: "ถามใน message เดียว" ขัดกับ AskUserQuestion (≤4 คำถาม/ครั้ง) → ถามรอบเดียวแบบต่อกันหลายชุด ไม่ติดตั้งอะไรคั่น
+- **auth §3 Q5**: คำถามขีดฆ่า → เขียนเป็น "ไม่ใช่คำถาม" พร้อมเหตุผล
+- **ถ้อยคำเชิงประวัติ → กฎปัจจุบัน**: "since 4.46.0", "ถอดออก 4.43.0", "no longer", eval-run tags, ลิงก์ `docs/backlog.md` ที่มีแค่ใน repo platform (design-setup, auth, mail, upload, auth-flows, form-validation, interview.md, cicd-setup)
+
 ## 4.63.3 (2026-09-24)
 
 **design-setup: Re-align mode — โปรเจคที่ติดตั้งแบบ preserve (คงของเดิม) แล้วภายหลังจะปรับให้ตรง org** (เดิมไม่มีทางเดินนี้ ต้องให้โมเดลตีความเอง):

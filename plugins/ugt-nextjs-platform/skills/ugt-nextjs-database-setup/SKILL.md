@@ -76,7 +76,7 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
    `references/prototype-migration.md`). **ย้าย** (default) → run §4b right
    after §4. **ทีหลัง** → say plainly that the app still runs on the old
    store — installing Prisma beside it connects nothing the user can see —
-   and record it in `docs/project-context/decisions.md` + a board.md row.
+   and record it in `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs) + a board.md row.
 
 ## Setup Steps
 
@@ -204,7 +204,7 @@ procedure and traps → `references/prototype-migration.md`; the shape:
    `scripts/verify.mjs` fails while any of them remain (warns if
    `decisions.md` records a deferral).
 6. Record the migration (entities, dropped fields, seed decision) in
-   `docs/project-context/decisions.md`.
+   `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs).
 
 ### 5. Raw SQL / stored procedures (if the project needs them)
 

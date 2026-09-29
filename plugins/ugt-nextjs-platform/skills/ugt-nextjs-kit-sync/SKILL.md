@@ -84,8 +84,9 @@ new path, or a retirement → propose deleting the copy).
 
 ### Step 3 — Close out
 
-- Append a dated มติ to `docs/project-context/decisions.md`: which files were
-  updated/merged/kept, from which version to which.
+- Append a dated มติ to the project's decision home (the one `00-index.md`
+  names: `docs/project-context/decisions.md`, or `docs/adr/` on the mattpocock
+  bundle): which files were updated/merged/kept, from which version to which.
 - Run the owning skills' `verify.mjs` for every touched area (design/auth/…)
   and the project's tests. **A merge that doesn't compile is worse than the
   outdated file** — never leave without a green build.
@@ -107,4 +108,4 @@ new path, or a retirement → propose deleting the copy).
       now CURRENT; merged files still MERGE (expected) but on the new version
 - [ ] `npm run build` + tests pass
 - [ ] Owning skills' `verify.mjs` green for touched areas
-- [ ] มติบันทึกใน `docs/project-context/decisions.md`
+- [ ] มติบันทึกในบ้านมติของโปรเจค (`decisions.md` หรือ `docs/adr/`)

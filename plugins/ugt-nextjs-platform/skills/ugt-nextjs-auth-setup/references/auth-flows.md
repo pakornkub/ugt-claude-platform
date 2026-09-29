@@ -300,9 +300,8 @@ if (!session) {
 ```
 
 In `proxy.ts` use `getSessionCookie()` (presence check only, no DB call) —
-never `auth.api.getSession()`. Since Next.js 16 this file runs on the **Node.js
-runtime** (a `runtime` config is not allowed in it), so "not Edge-safe" is no
-longer the reason — the reason is that it runs on every non-static request: a DB
+never `auth.api.getSession()`. `proxy.ts` runs on the **Node.js runtime** on
+every non-static request (a `runtime` config is not allowed in it), so a DB
 round-trip there is latency on every navigation and makes a DB hiccup a
 full-app outage.
 
