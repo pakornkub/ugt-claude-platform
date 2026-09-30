@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;font-weight:100 900;src:url(fonts/Inter.ttf)}
+@font-face{font-family:'Noto Sans Thai';font-weight:100 900;src:url(fonts/NotoSansThai.ttf)}
+body{margin:0;background:#f8f9fc;font-family:Inter,'Noto Sans Thai'}
+#s{width:1920px;height:1080px;position:relative;background:#f8f9fc;background-image:radial-gradient(#e0e7ff 18%,transparent 20%);background-size:28px 28px}
+.c{position:absolute;text-align:center;font-weight:700;font-size:22px;color:#4b5268}
+.c svg{display:block}
+</style></head><body><div id="s"></div>
+<script type="module">
+import {dev,mate,ugt,svg} from './mascots.js';
+const items=[
+ [dev({expr:'happy',pose:'down'}),'Dev · happy'],[dev({expr:'shock',pose:'clutch'}),'Dev · shock'],[dev({expr:'confused',pose:'down'}),'Dev · confused'],
+ [dev({expr:'joy',pose:'wave',t:.1}),'Dev · joy + wave'],[dev({expr:'wink',pose:'thumb'}),'Dev · wink + thumb'],
+ [mate({expr:'joy',pose:'wave',t:.1}),'Teammate · joy'],[mate({expr:'happy',pose:'down'}),'Teammate · happy'],
+ [ugt({expr:'happy',pose:'down'}),'UGT-kun · happy'],[ugt({expr:'joy',pose:'cheer'}),'UGT-kun · joy'],[ugt({expr:'wink',pose:'point'}),'UGT-kun · wink + point'],
+];
+const s=document.getElementById('s');
+items.forEach(([g,l],i)=>{const r=i<5?0:1; const col=i<5?i:i-5; const d=document.createElement('div');d.className='c';
+ d.style.left=(40+col*376)+'px'; d.style.top=(20+r*530)+'px'; d.innerHTML=svg(g).replace('<svg ','<svg width="330" height="495" ')+`<div>${l}</div>`; s.appendChild(d);});
+window.done=true;
+</script></body></html>

@@ -3,15 +3,52 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-มีสามเวอร์ชัน:
+มีสี่เวอร์ชัน:
 
 | ไฟล์ | สไตล์ | ความยาว |
 | --- | --- | --- |
+| [`cm/ugt-claude-platform-cm.mp4`](cm/ugt-claude-platform-cm.mp4) | **Trailer สไตล์โฆษณาญี่ปุ่น (CM)** โทนสว่างตาม repo — มาสคอตการ์ตูน chibi, ตัดฉากตามจังหวะเพลง 128 BPM | 61 วินาที |
 | [`explainer/ugt-claude-platform-explainer.mp4`](explainer/ugt-claude-platform-explainer.mp4) | **Tech explainer 3D** — หน้าจอโปรแกรมจริงลอยในอวกาศ เล่าตามขั้นตอนการทำงานจริงของ plugin + คำแปลเป็นภาษาคน | 86 วินาที |
 | [`story/ugt-claude-platform-story.mp4`](story/ugt-claude-platform-story.mp4) | แอนิเมชันเล่าเรื่อง 3D (เมือง = องค์กร) โทนสว่าง ฟอนต์และสีเดียวกับ `docs/web/index.html` | 72 วินาที |
 | [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
 
 ทั้งหมด 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## เวอร์ชัน CM ญี่ปุ่น (`cm/`)
+
+เพลง J-pop 128 BPM ใช้คอร์ด "王道進行" (F–G–Em–Am) — ทุกฉากกำหนดเวลาเป็น **ห้อง/จังหวะ**
+(`T(bar, beat)` ใน `cm.html` และ `music.py` ใช้สูตรเดียวกัน) ภาพกับเสียงจึงตรงกันเสมอ
+
+| ห้อง | เวลา | ฉาก |
+| --- | --- | --- |
+| 1–2 | 0:00 | Hook "ทีม dev ทุกคน ต้องเคยเจอ…!" |
+| 3–6 | 0:04 | ปัญหา 4 ฉาก ฉากละห้อง + ตรา NG ตบลงจังหวะที่ 3 |
+| 7 | 0:11 | เพลงหยุด "แต่ถ้ามี…" → น้อง UGT ตกลงมา |
+| 8–9 | 0:13 | เปิดตัว UGT Claude Platform |
+| 10–11 | 0:17 | ติดตั้ง 3 บรรทัด |
+| 12–13 | 0:21 | สั่งงานแค่ประโยคเดียว |
+| 14–19 | 0:24 | POINT ① ตรวจของเดิม ② ถามครั้งเดียว ③ ติดตั้งตามลำดับ ④ ดีไซน์เดียวกัน ⑤ รุ่นพี่คอยเตือน ⑥ ทีมจำงานต่อได้ |
+| 20–21 | 0:36 | verify ✔ ทุกโมดูล → ALL GREEN |
+| 22–24 | 0:39 | ผลวัดจริง 34/34 vs 18/34 · 14/14 · 9/9 |
+| 25–26 | 0:45 | สติกเกอร์ตัวช่วย 16 ตัว (ตัวละโน้ตเขบ็ต) |
+| 27–28 | 0:49 | ทั้งทีมทำงานต่อกันลื่นไหล |
+| 29–32 | 0:53 | End card + jingle "U・G・T ♪" |
+
+มาสคอต (น้องเดฟ · เพื่อนร่วมทีม · น้อง UGT) วาดด้วย SVG ใน `cm/mascots.js` —
+`dev/mate/ugt({ expr, pose, t })` มี 6 สีหน้า × 7 ท่า ดูทั้งหมดได้ที่ `cm/lineup.html`
+ไฟล์ในโฟลเดอร์นี้ใช้ ES module จึงต้องเปิดผ่าน local server:
+
+```bash
+cd docs/video/cm
+npm i && pip install numpy scipy
+npx http-server -p 8123 . &          # แล้วเปิด http://127.0.0.1:8123/cm.html (คลิกเพื่อเล่นพร้อมเพลง)
+python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
+node render.mjs 0 462 p0.mp4 & node render.mjs 462 924 p1.mp4 & \
+node render.mjs 924 1386 p2.mp4 & node render.mjs 1386 1845 p3.mp4 & wait
+printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
+ffmpeg -y -f concat -safe 0 -i list.txt -i music.wav -c:v libx264 -crf 21 -pix_fmt yuv420p \
+  -af loudnorm=I=-14:TP=-1.2 -c:a aac -b:a 224k -shortest -movflags +faststart ugt-claude-platform-cm.mp4
+```
 
 ## เวอร์ชัน tech explainer (`explainer/`)
 

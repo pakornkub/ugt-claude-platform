@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UGT CM Trailer</title>
+<style>
+@font-face{font-family:Inter;font-weight:100 900;src:url(fonts/Inter.ttf)}
+@font-face{font-family:'Noto Sans Thai';font-weight:100 900;src:url(fonts/NotoSansThai.ttf)}
+@font-face{font-family:'Cascadia Code';font-weight:200 700;src:url(fonts/CascadiaCode.ttf)}
+:root{--bg:#f8f9fc;--tint:#eef2ff;--ink:#1e2436;--ink2:#4b5268;--ink3:#6d7590;--line:#e5e8f0;
+  --ac:#4f46e5;--ac-d:#3730a3;--ac-s:#e0e7ff;--yel:#fcd34d;--ok:#047857;--ok-s:#d1fae5;--red:#e11d48;--red-s:#ffe4e6;--cyan:#22d3ee;
+  --font:'Inter','Noto Sans Thai',system-ui,sans-serif;--mono:'Cascadia Code',Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--ink);flex:none;transform-origin:center}
+#world{position:absolute;inset:0;transform-origin:50% 50%}
+.sc{position:absolute;inset:0;display:none;overflow:hidden}
+.abs{position:absolute}
+.dots{position:absolute;background-image:radial-gradient(var(--ac) 22%,transparent 24%);background-size:26px 26px;opacity:.12}
+.speed{position:absolute;inset:-300px;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(30,36,54,.07) 0 1.2deg,transparent 1.2deg 6deg)}
+.burst{position:absolute;border-radius:50%;background:repeating-conic-gradient(from 0deg,var(--c1) 0 7.5deg,var(--c2) 7.5deg 15deg)}
+.telop{font-weight:900;letter-spacing:-.01em;line-height:1.1;color:#fff;paint-order:stroke fill;-webkit-text-stroke:var(--sw,18px) var(--sc,var(--ac));text-shadow:10px 10px 0 var(--ink);white-space:nowrap}
+.telop.red{--sc:var(--red)}
+.mark{background:linear-gradient(transparent 58%,var(--yel) 58%,var(--yel) 92%,transparent 92%);padding:0 .08em}
+.sub{font-weight:900;font-size:54px;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:8px 24px 8px 10px;font-weight:800;font-size:28px;box-shadow:5px 5px 0 var(--ink);white-space:nowrap}
+.chip b{background:var(--red);color:#fff;border-radius:999px;padding:4px 14px;font-size:22px}
+.stamp{border:10px solid var(--red);color:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-family:Inter;background:rgba(255,255,255,.88)}
+.card{background:#fff;border:3px solid var(--ink);border-radius:26px;box-shadow:10px 10px 0 var(--ink)}
+.note{font-size:21px;color:var(--ink3);white-space:nowrap}
+.star{position:absolute;width:var(--s);height:var(--s);background:var(--c,var(--yel));clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%)}
+.conf{position:absolute;width:22px;height:40px;border-radius:4px}
+.m{position:absolute;overflow:visible}
+.code{font-family:var(--mono);white-space:pre}
+.term{background:var(--ink);color:#e6e9f4;border-radius:24px;box-shadow:10px 10px 0 var(--ac);font-family:var(--mono);font-size:30px;line-height:1.8;padding:26px 40px;white-space:pre}
+.term .p{color:#a5b4fc}.term .ok{color:#6ee7b7}.term .h{color:var(--yel)}
+.caret{display:inline-block;width:14px;height:32px;background:var(--yel);vertical-align:-6px;margin-left:3px}
+.badge{width:190px;height:190px;border-radius:50%;background:var(--ac);border:6px solid var(--ink);box-shadow:8px 8px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:Inter;font-weight:900}
+.blk{position:absolute;display:flex;align-items:center;gap:22px;padding:0 34px;height:112px;width:680px;border:4px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--ink);font-weight:900;font-size:42px;color:#fff}
+.blk small{font-weight:600;font-size:22px;opacity:.92;display:block;margin-top:2px}
+.blk .ic{width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;flex:none}
+.blk .ic svg{width:36px;height:36px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.row{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:28px;padding:14px 24px;border-radius:12px}
+.row.hit{background:#fef3c7}
+.row .bang{margin-left:auto;width:40px;height:40px;border-radius:50%;background:var(--yel);border:3px solid var(--ink);font-family:Inter;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:24px}
+.qi{display:flex;align-items:center;gap:18px;font-size:32px;font-weight:700;padding:16px 26px}
+.qi .bx{width:46px;height:46px;border:4px solid var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:Inter;font-weight:900;color:#fff;font-size:30px;flex:none}
+.qi .ans{margin-left:auto;background:var(--ac);color:#fff;border-radius:999px;padding:4px 18px;font-size:24px}
+.ui{position:absolute;width:300px;height:360px;border:3px solid var(--ink);border-radius:20px;overflow:hidden;box-shadow:8px 8px 0 var(--ink);background:#fff}
+.ui .hd{height:58px}.ui .ln{height:16px;border-radius:8px;margin:16px 22px 0}.ui .bt{height:52px;border-radius:14px;margin:26px 22px 0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px}
+.stk{position:absolute;display:flex;align-items:center;gap:10px;padding:16px 30px;border-radius:999px;border:4px solid #fff;box-shadow:0 0 0 3px var(--ink),6px 6px 0 3px var(--ink);font-family:var(--mono);font-weight:700;font-size:32px;color:#fff;white-space:nowrap}
+.bar2{height:54px;border-radius:14px;background:#e5e8f0;border:3px solid var(--ink);overflow:hidden}
+.bar2 i{display:block;height:100%}
+.tile{background:#fff;border:3px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--ink);padding:20px 28px}
+.tile .v{font-size:66px;font-weight:900;color:var(--ac);line-height:1}.tile .v span{font-size:26px;color:var(--ink3);margin-left:10px}.tile .d{font-size:24px;color:var(--ink2);margin-top:8px;font-weight:600}
+#wipe{position:absolute;top:-10%;height:120%;width:140%;left:0;display:flex;transform:skewX(-18deg);pointer-events:none}
+#wipe i{flex:1}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<svg id="defs" width="0" height="0" style="position:absolute"><defs id="defsIn"></defs>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+  <symbol id="i-q" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-ds" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 10c0-4.4-4.5-8-10-8z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L21 2M16 7l3 3M18.5 4.5l2 2"/></symbol>
+  <symbol id="i-ci" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/></symbol>
+</svg>
+<div id="stage"><div id="world">
+
+<!-- S1 hook -->
+<section class="sc" id="s1">
+  <div class="speed"></div>
+  <div class="dots" style="left:-80px;top:-80px;width:560px;height:460px;border-radius:50%"></div>
+  <div class="dots" style="right:-80px;bottom:-80px;width:560px;height:460px;border-radius:50%"></div>
+  <div class="abs telop" id="h1" style="left:0;right:0;top:170px;text-align:center;font-size:150px">ทีม dev</div>
+  <div class="abs telop" id="h2" style="left:0;right:0;top:360px;text-align:center;font-size:150px">ทุกคน</div>
+  <div class="abs telop red" id="h3" style="left:0;right:0;top:560px;text-align:center;font-size:160px">ต้องเคยเจอ…!</div>
+  <svg class="m" id="m1" viewBox="0 0 400 600" style="left:1460px;top:560px;width:360px;height:540px"></svg>
+</section>
+
+<!-- S2 problems -->
+<section class="sc" id="s2">
+  <div class="speed" style="background:repeating-conic-gradient(from 0deg at 72% 60%,rgba(30,36,54,.07) 0 1.2deg,transparent 1.2deg 6deg)"></div>
+  <div class="dots" style="left:-60px;top:-60px;width:520px;height:420px;border-radius:50%"></div>
+  <div class="abs" style="left:0;right:0;bottom:0;height:260px;background:var(--red-s);clip-path:polygon(0 42%,100% 0,100% 100%,0 100%)"></div>
+  <div class="abs chip" id="pchip" style="left:90px;top:80px"><b id="pn">ปัญหา 1/4</b>ทีม dev ทุกคนต้องเคยเจอ</div>
+  <div class="abs telop red" id="ptitle" style="left:90px;top:190px;font-size:150px"></div>
+  <div class="abs" id="pvis" style="left:96px;top:640px;width:1000px;height:330px"></div>
+  <div class="abs stamp" id="pst" style="left:860px;top:560px;width:240px;height:240px;font-size:92px">NG</div>
+  <svg class="m" id="m2" viewBox="0 0 400 600" style="left:1250px;top:240px;width:600px;height:900px"></svg>
+  <div class="abs telop" id="pex" style="left:1160px;top:150px;font-size:84px;--sw:12px;--sc:var(--ink)">หา!?</div>
+  <div class="abs note" style="right:60px;bottom:30px">ภาพประกอบเพื่อการสื่อสาร</div>
+</section>
+
+<!-- S3 break -->
+<section class="sc" id="s3" style="background:#fff">
+  <div class="abs" id="brk" style="left:0;right:0;top:390px;text-align:center;font-weight:900;font-size:110px;color:var(--ink)">แต่ถ้ามี…</div>
+  <svg class="m" id="m3" viewBox="0 0 400 600" style="left:760px;top:-600px;width:400px;height:600px"></svg>
+  <div class="abs" id="fallLines" style="left:930px;top:0;width:60px;height:400px;background:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 26px);opacity:0"></div>
+</section>
+
+<!-- S4 reveal -->
+<section class="sc" id="s4">
+  <div class="burst" id="rburst" style="left:960px;top:470px;width:2800px;height:2800px;margin:-1400px 0 0 -1400px;--c1:#eef2ff;--c2:#ffffff"></div>
+  <div class="abs" style="left:960px;top:400px;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;background:radial-gradient(circle,#fff 30%,rgba(224,231,255,.9) 60%,rgba(224,231,255,0) 72%)"></div>
+  <div id="confs"></div>
+  <svg class="m" id="m4" viewBox="0 0 400 600" style="left:780px;top:40px;width:360px;height:540px"></svg>
+  <div class="abs" id="rnew" style="left:0;right:0;top:620px;text-align:center"><span style="display:inline-block;font-weight:800;font-size:30px;letter-spacing:.2em;color:var(--ac-d);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:6px 26px;box-shadow:5px 5px 0 var(--ink)">NEW · Claude Code Plugin</span></div>
+  <div class="abs telop" id="rlogo" style="left:0;right:0;top:690px;text-align:center;font-size:118px;letter-spacing:.03em">UGT Claude Platform</div>
+  <div class="abs" id="rtag" style="left:0;right:0;top:872px;text-align:center;font-weight:900;font-size:62px"><span class="mark" id="rmark">ติดตั้งครั้งเดียว</span> มาตรฐานทั้งองค์กร!</div>
+</section>
+
+<!-- S5 install -->
+<section class="sc" id="s5">
+  <div class="abs" style="left:-200px;top:0;width:1000px;height:1080px;background:var(--tint);clip-path:polygon(0 0,100% 0,80% 100%,0 100%)"></div>
+  <div class="dots" style="right:-80px;top:-80px;width:700px;height:600px;border-radius:50%"></div>
+  <div class="abs telop" id="it1" style="left:100px;top:200px;font-size:130px">ติดตั้ง</div>
+  <div class="abs" id="it2" style="left:100px;top:370px;display:flex;align-items:center;gap:24px">
+    <div style="width:170px;height:170px;border-radius:50%;background:var(--yel);border:6px solid var(--ink);box-shadow:8px 8px 0 var(--ink);display:flex;align-items:center;justify-content:center;font-family:Inter;font-weight:900;font-size:120px">3</div>
+    <div class="telop" style="font-size:120px">บรรทัด</div></div>
+  <div class="abs telop red" id="it3" style="left:100px;top:570px;font-size:150px">จบ!</div>
+  <div class="abs term" id="iterm" style="left:780px;top:250px;width:1060px;height:420px"></div>
+  <div class="abs" id="ieasy" style="left:1540px;top:640px;width:260px;height:260px;display:flex;align-items:center;justify-content:center;background:var(--yel);clip-path:polygon(50% 0,61% 20%,82% 9%,80% 32%,100% 38%,86% 55%,100% 72%,78% 74%,80% 97%,60% 86%,50% 100%,40% 86%,20% 97%,22% 74%,0 72%,14% 55%,0 38%,20% 32%,18% 9%,39% 20%);font-weight:900;font-size:40px;text-align:center;line-height:1.1">ง่าย<br>สุด ๆ!</div>
+  <svg class="m" id="m5" viewBox="0 0 400 600" style="left:420px;top:620px;width:300px;height:450px"></svg>
+</section>
+
+<!-- S6 sentence -->
+<section class="sc" id="s6">
+  <div class="speed" style="opacity:.6"></div>
+  <svg class="m" id="m6" viewBox="0 0 400 600" style="left:90px;top:300px;width:500px;height:750px"></svg>
+  <div class="abs" id="bub" style="left:600px;top:150px;width:1220px;padding:44px 56px;background:#fff;border:5px solid var(--ink);border-radius:60px;box-shadow:12px 12px 0 var(--ink);font-weight:800;font-size:62px;line-height:1.35">
+    <span id="bubt"></span><span class="caret" id="bubc" style="height:56px;width:16px;background:var(--ac)"></span>
+    <svg style="position:absolute;left:60px;bottom:-66px" width="110" height="70" viewBox="0 0 110 70"><path d="M8 0 L60 0 L6 64 Z" fill="#fff" stroke="#1e2436" stroke-width="5" stroke-linejoin="round"/><rect x="10" y="-6" width="60" height="10" fill="#fff"/></svg>
+  </div>
+  <div class="abs telop" id="one" style="left:620px;top:610px;font-size:112px">แค่<span style="-webkit-text-stroke-color:var(--red)">ประโยคเดียว</span>!</div>
+  <svg class="m" id="m6b" viewBox="0 0 400 600" style="left:1560px;top:700px;width:260px;height:390px"></svg>
+  <div class="abs telop" id="okay" style="left:1700px;top:560px;font-size:60px;--sw:10px;transform:rotate(-10deg)">OK!</div>
+</section>
+
+<!-- S7 points -->
+<section class="sc" id="s7">
+  <div class="dots" style="right:-80px;top:-80px;width:760px;height:760px;border-radius:50%"></div>
+  <div class="abs" id="ptint" style="left:-200px;top:0;width:1050px;height:1080px;background:var(--tint);clip-path:polygon(0 0,100% 0,82% 100%,0 100%)"></div>
+  <div class="abs badge" id="pbadge" style="left:110px;top:110px"><div style="font-size:30px;letter-spacing:.14em">POINT</div><div id="pnum" style="font-size:104px;line-height:.9">1</div></div>
+  <div class="abs telop" id="pt" style="left:110px;top:350px;font-size:112px"></div>
+  <div class="abs sub" id="psub" style="left:116px;top:640px"></div>
+  <div class="abs" id="pv" style="left:1000px;top:120px;width:840px;height:860px"></div>
+  <svg class="m" id="m7" viewBox="0 0 400 600" style="left:640px;top:720px;width:240px;height:360px"></svg>
+</section>
+
+<!-- S8 verify -->
+<section class="sc" id="s8">
+  <div class="dots" style="left:-80px;bottom:-80px;width:600px;height:500px;border-radius:50%"></div>
+  <div class="abs telop" id="vt" style="left:0;right:0;top:60px;text-align:center;font-size:118px">ตรวจเองจน<span style="-webkit-text-stroke-color:var(--ok)">ผ่าน</span>!</div>
+  <div class="abs card" id="vcard" style="left:360px;top:250px;width:1200px;height:600px;padding:34px 50px">
+    <div class="code" style="font-size:30px;color:var(--ink2)">❯ node verify.mjs</div>
+    <div id="vlines" class="code" style="font-size:32px;line-height:1.62;margin-top:10px"></div>
+  </div>
+  <div class="abs stamp" id="vst" style="left:1330px;top:560px;width:330px;height:330px;font-size:54px;line-height:1;border-color:var(--ok);color:var(--ok);text-align:center">ALL<br>GREEN!</div>
+  <div class="abs chip" id="vdoc" style="left:0;right:0;margin:auto;top:900px;width:max-content;font-size:30px;padding:10px 28px"><span style="font-family:var(--mono);color:var(--ac)">docs/admin-handoff.md</span>→ ส่งทีม IT ได้ทันที</div>
+  <svg class="m" id="m8" viewBox="0 0 400 600" style="left:60px;top:560px;width:300px;height:450px"></svg>
+</section>
+
+<!-- S9 proof -->
+<section class="sc" id="s9">
+  <div class="speed" style="opacity:.5"></div>
+  <div class="abs telop" id="ft" style="left:110px;top:70px;font-size:118px">ผลวัด<span style="-webkit-text-stroke-color:var(--red)">จริง</span>!</div>
+  <div class="abs card" id="fcard" style="left:110px;top:270px;width:1080px;height:520px;padding:40px 50px">
+    <div style="font-size:30px;font-weight:700;color:var(--ink2)">โจทย์ setup / auth / cicd ชุดเดียวกัน — ทำถูกกี่ข้อ?</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:30px;font-size:36px;font-weight:800">มีตัวช่วย UGT<span id="fv1" style="font-size:80px;font-weight:900;color:var(--ac)">0/34</span></div>
+    <div class="bar2"><i id="fb1" style="background:linear-gradient(90deg,var(--ac),#818cf8)"></i></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px;font-size:36px;font-weight:800;color:var(--ink2)">สั่ง AI เปล่า ๆ<span id="fv2" style="font-size:80px;font-weight:900;color:var(--ink3)">0/34</span></div>
+    <div class="bar2"><i id="fb2" style="background:#9aa3bd"></i></div>
+  </div>
+  <div class="abs" id="f100" style="left:1040px;top:20px;width:270px;height:270px;display:flex;align-items:center;justify-content:center;background:var(--yel);clip-path:polygon(50% 0,61% 20%,82% 9%,80% 32%,100% 38%,86% 55%,100% 72%,78% 74%,80% 97%,60% 86%,50% 100%,40% 86%,20% 97%,22% 74%,0 72%,14% 55%,0 38%,20% 32%,18% 9%,39% 20%);font-family:Inter;font-weight:900;font-size:74px;color:var(--red)">100%</div>
+  <div class="abs tile" id="ft1" style="left:110px;top:830px;width:520px"><div class="v">14/14<span>vs 2/14</span></div><div class="d">ตั้งค่าดีไซน์บนโปรเจคเปล่า</div></div>
+  <div class="abs tile" id="ft2" style="left:670px;top:830px;width:520px"><div class="v">9/9<span>vs 6/9</span></div><div class="d">กันกับดักที่เคยพังจริง</div></div>
+  <svg class="m" id="m9" viewBox="0 0 400 600" style="left:1300px;top:300px;width:520px;height:780px"></svg>
+  <div class="abs note" style="left:112px;bottom:22px">*ผลวัดจาก evals ใน repo ugt-claude-platform</div>
+</section>
+
+<!-- S10 stickers -->
+<section class="sc" id="s10">
+  <div class="dots" style="left:-80px;top:-80px;width:600px;height:500px;border-radius:50%"></div>
+  <div class="dots" style="right:-80px;bottom:-80px;width:600px;height:500px;border-radius:50%"></div>
+  <div class="abs telop" id="kt" style="left:0;right:0;top:50px;text-align:center;font-size:118px">ตัวช่วยครบ <span style="-webkit-text-stroke-color:var(--red)">16</span> ตัว!</div>
+  <div id="stks"></div>
+  <svg class="m" id="m10" viewBox="0 0 400 600" style="left:1640px;top:780px;width:220px;height:330px"></svg>
+</section>
+
+<!-- S11 happy -->
+<section class="sc" id="s11">
+  <div class="burst" id="hburst" style="left:960px;top:760px;width:3000px;height:3000px;margin:-1500px 0 0 -1500px;--c1:#fef9c3;--c2:#ffffff"></div>
+  <div class="abs telop" id="hh" style="left:0;right:0;top:60px;text-align:center;font-size:104px;line-height:1.2">ทั้งทีม ทำงานต่อกัน<br><span style="-webkit-text-stroke-color:var(--ok)">ลื่นไหล</span> ♪</div>
+  <svg class="m" id="m11a" viewBox="0 0 400 600" style="left:330px;top:420px;width:420px;height:630px"></svg>
+  <svg class="m" id="m11b" viewBox="0 0 400 600" style="left:760px;top:450px;width:400px;height:600px"></svg>
+  <svg class="m" id="m11c" viewBox="0 0 400 600" style="left:1170px;top:420px;width:420px;height:630px"></svg>
+  <div id="hstars"></div>
+</section>
+
+<!-- S12 end -->
+<section class="sc" id="s12" style="background:#fff">
+  <div class="dots" style="left:-100px;bottom:-140px;width:640px;height:520px;border-radius:50%"></div>
+  <div class="dots" style="right:-100px;top:-140px;width:640px;height:520px;border-radius:50%"></div>
+  <div class="abs" style="left:0;right:0;top:0;height:16px;background:repeating-linear-gradient(90deg,var(--ac) 0 60px,var(--yel) 60px 120px)"></div>
+  <div class="abs" style="left:0;right:0;bottom:0;height:16px;background:repeating-linear-gradient(90deg,var(--ac) 0 60px,var(--yel) 60px 120px)"></div>
+  <svg class="abs" id="elogo" style="left:0;right:0;margin:auto;top:78px;height:96px" viewBox="0 0 190 52"><g transform="translate(0,52) scale(0.1,-0.1)" fill="#1273bc"><path d="M52 318 c-18 -101 -32 -196 -32 -211 0 -18 11 -39 28 -57 36 -35 106 -44 300 -38 147 5 187 16 217 62 12 18 85 378 85 419 0 4 -28 7 -62 5 l-63 -3 -26 -145 c-14 -80 -29 -162 -33 -182 l-7 -38 -154 0 c-85 0 -155 3 -155 8 0 4 14 79 30 167 16 88 30 168 30 178 0 14 -10 17 -63 17 l-63 0 -32 -182z"/><path d="M720 493 c0 -5 -18 -110 -40 -236 -22 -125 -40 -232 -40 -238 0 -8 75 -10 243 -7 210 3 246 6 275 21 38 21 66 75 76 149 6 38 4 50 -12 65 -18 18 -18 19 11 44 28 23 30 31 31 93 1 62 -1 70 -27 92 -28 24 -28 24 -273 24 -134 0 -244 -3 -244 -7z m420 -112 c0 -11 -4 -31 -10 -45 -9 -26 -10 -26 -129 -26 -115 0 -119 -1 -125 -22 -3 -13 -6 -33 -6 -45 0 -23 2 -23 114 -23 65 0 117 -4 121 -10 3 -5 3 -25 -1 -45 l-6 -35 -154 0 c-85 0 -154 4 -154 8 0 12 40 236 45 250 3 9 43 12 155 12 142 0 150 -1 150 -19z"/><path d="M1403 485 c-17 -7 -39 -25 -48 -38 -17 -27 -65 -266 -65 -328 0 -49 33 -87 85 -99 54 -13 412 -13 420 0 3 5 9 32 12 60 l6 50 -197 0 c-182 0 -196 1 -196 18 0 26 38 231 45 243 4 5 91 9 204 9 l198 0 7 38 c3 20 6 43 6 50 0 18 -433 16 -477 -3z"/><path d="M1501 270 c-5 -25 -8 -46 -6 -48 1 -2 76 -3 166 -3 l164 0 6 28 c17 73 27 68 -156 68 l-164 0 -10 -45z"/></g></svg>
+  <div class="abs" id="ename" style="left:0;right:0;top:196px;text-align:center;font-weight:900;font-size:40px;letter-spacing:.14em;color:var(--ac-d)">UGT CLAUDE PLATFORM</div>
+  <div class="abs telop" id="etitle" style="left:0;right:0;top:268px;text-align:center;font-size:112px">ติดตั้งครั้งเดียว</div>
+  <div class="abs" id="etag" style="left:0;right:0;top:420px;text-align:center;font-weight:900;font-size:56px"><span class="mark">มาตรฐานทั้งองค์กร</span></div>
+  <div class="abs term" id="ecmd" style="left:0;right:0;margin:auto;top:560px;width:max-content;font-size:30px;padding:24px 40px"><div><span class="p">❯</span> /plugin marketplace add pakornkub/ugt-claude-platform</div><div><span class="p">❯</span> /plugin install ugt-nextjs-standard-superpowers@ugt</div><div><span class="p">❯</span> /reload-plugins &nbsp;<span class="h">→ พิมพ์ /ugt</span></div></div>
+  <div class="abs" id="eurl" style="left:0;right:0;top:850px;text-align:center;font-family:var(--mono);font-size:32px;font-weight:700;color:var(--ac)">github.com/pakornkub/ugt-claude-platform</div>
+  <svg class="m" id="m12a" viewBox="0 0 400 600" style="left:40px;top:470px;width:380px;height:570px"></svg>
+  <svg class="m" id="m12b" viewBox="0 0 400 600" style="left:1500px;top:470px;width:360px;height:540px"></svg>
+  <div class="abs" id="ejingle" style="right:120px;top:300px;display:flex;gap:10px;font-family:Inter;font-weight:900;font-size:58px;color:var(--ac);transform:rotate(10deg)"><span id="j0">U</span><span>・</span><span id="j1">G</span><span>・</span><span id="j2">T</span><span id="j3">♪</span></div>
+</section>
+
+</div>
+<div id="wipe"><i style="background:var(--ac)"></i><i style="background:var(--yel)"></i><i style="background:var(--ac-d)"></i></div>
+<div id="flash"></div>
+</div>
+
+<script type="module">
+import { dev, mate, ugt, DEFS } from './mascots.js';
+document.getElementById('defsIn').innerHTML = DEFS;
+
+// ---------- timing ----------
+const BPM = 128, BEAT = 60 / BPM, BAR = BEAT * 4;
+const T = (bar, beat = 0) => (bar * 4 + beat) * BEAT;
+const DUR = T(32) + 1.5;
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const E = { out: t => 1 - (1 - t) ** 3, in: t => t * t * t, io: t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2,
+  back: t => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2 }, el: t => t === 0 || t === 1 ? t : 2 ** (-10 * t) * Math.sin((t * 10 - .75) * (2 * Math.PI) / 3) + 1 };
+const P = (t, a, d, e = E.out) => e(cl((t - a) / d));
+const lerp = (a, b, k) => a + (b - a) * k;
+const rnd = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x) };
+const seg = new Intl.Segmenter('th', { granularity: 'grapheme' });
+const graph = s => [...seg.segment(s)].map(x => x.segment);
+const beatPulse = t => Math.exp(-((t % BEAT) / BEAT) * 5);
+
+// element transform helpers
+function tf(el, { o = 1, x = 0, y = 0, s = 1, sx = 1, sy = 1, r = 0, base = '' } = {}) {
+  if (typeof el === 'string') el = $(el);
+  el.style.opacity = o; el.style.visibility = o > .002 ? 'visible' : 'hidden';
+  el.style.transform = `${base} translate(${x}px,${y}px) rotate(${r}deg) scale(${s * sx},${s * sy})`;
+}
+const popIn = (el, t, a, { d = BEAT * .8, r = 0, y = 30, base = '' } = {}) => { const k = P(t, a, d, E.back); tf(el, { o: cl(P(t, a, d * .4)), s: .3 + .7 * k, y: (1 - k) * y, r: r * (1 - cl(k)), base }); };
+const slam = (el, t, a, { d = BEAT * .6, r = -4, base = '' } = {}) => { const k = P(t, a, d, E.out); tf(el, { o: t >= a ? 1 : 0, s: lerp(2.2, 1, k), r: r * (1 - k), base }); };
+const hide = el => tf(el, { o: 0 });
+
+// mascots
+const MB = { dev, mate, ugt };
+function M(id, kind, expr, pose, t, { bounce = 0, squash = 0, x = 0, y = 0, r = 0, o = 1, flip = false } = {}) {
+  const el = $(id); el.innerHTML = MB[kind]({ expr, pose, t });
+  const b = bounce ? Math.abs(Math.sin((t / BEAT) * Math.PI)) * bounce : 0;
+  el.style.transformOrigin = '50% 95%';
+  el.style.opacity = o; el.style.visibility = o > .002 ? 'visible' : 'hidden';
+  el.style.transform = `translate(${x}px,${y - b}px) rotate(${r}deg) scale(${(flip ? -1 : 1) * (1 + squash)},${1 - squash})`;
+}
+const beatSquash = (t, amt = .05) => { const ph = (t % BEAT) / BEAT; return ph < .25 ? amt * Math.sin(ph / .25 * Math.PI) : 0; };
+
+// ---------- scenes ----------
+const SC = [['s1', 0, 2], ['s2', 2, 6], ['s3', 6, 7], ['s4', 7, 9], ['s5', 9, 11], ['s6', 11, 13], ['s7', 13, 19], ['s8', 19, 21], ['s9', 21, 24], ['s10', 24, 26], ['s11', 26, 28], ['s12', 28, 33]];
+const WIPES = [9, 11, 13, 14, 15, 16, 17, 18, 19, 21, 24, 26, 28];
+const FLASH = [2, 3, 4, 5, 7];
+
+// S2 problem data
+const PROB = [
+  { title: 'โค้ดเขียน<br>คนละแบบ!', expr: 'confused', pose: 'down', ex: 'เอ๊ะ!?',
+    vis: `<div class="card code" style="position:absolute;left:0;top:30px;width:420px;padding:22px 26px;font-size:24px;transform:rotate(-5deg);background:#fff7ed">style={{color:'red'}}<br>font: Comic Sans</div>
+      <div class="card code" style="position:absolute;left:330px;top:0;width:430px;padding:22px 26px;font-size:24px;transform:rotate(4deg);background:#ecfeff">SELECT * FROM tbl_x<br>-- TODO fix later</div>
+      <div class="card code" style="position:absolute;left:150px;top:170px;width:470px;padding:22px 26px;font-size:24px;transform:rotate(-2deg);background:#f0fdf4">var data = fetch(url)<br>Button2_final_v3.tsx</div>` },
+  { title: 'deploy<br>ไม่ผ่าน!', expr: 'shock', pose: 'clutch', ex: 'หา!?',
+    vis: `<div class="card" style="position:absolute;left:0;top:60px;width:900px;padding:30px 36px;display:flex;align-items:center;gap:18px;transform:rotate(-2deg)">
+      <div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--ink2)">Jenkins</div>
+      <div style="padding:14px 22px;border-radius:14px;background:var(--ok-s);color:var(--ok);font-weight:800;font-size:26px">✓ build</div><div style="font-size:30px;color:var(--ink3)">→</div>
+      <div style="padding:14px 22px;border-radius:14px;background:var(--ok-s);color:var(--ok);font-weight:800;font-size:26px">✓ test</div><div style="font-size:30px;color:var(--ink3)">→</div>
+      <div style="padding:14px 22px;border-radius:14px;background:var(--red);color:#fff;font-weight:800;font-size:26px">✘ Quality Gate</div></div>` },
+  { title: 'วันที่<br>เลื่อน!?', expr: 'confused', pose: 'down', ex: 'ทำไม!?',
+    vis: `<div class="card" style="position:absolute;left:40px;top:0;width:260px;height:290px;overflow:hidden;text-align:center;transform:rotate(-4deg)"><div style="background:var(--ac);color:#fff;font-weight:900;font-size:32px;padding:12px">มิ.ย.</div><div style="font-family:Inter;font-weight:900;font-size:140px;line-height:1.3">3</div></div>
+      <div style="position:absolute;left:330px;top:100px;font-size:70px;font-weight:900;color:var(--red)">→</div>
+      <div class="card" style="position:absolute;left:440px;top:0;width:260px;height:290px;overflow:hidden;text-align:center;transform:rotate(3deg);border-color:var(--red)"><div style="background:var(--red);color:#fff;font-weight:900;font-size:32px;padding:12px">มิ.ย.</div><div style="font-family:Inter;font-weight:900;font-size:140px;line-height:1.3;color:var(--red)">2</div></div>
+      <div class="chip" style="position:absolute;left:560px;top:250px"><b>−1 วัน</b>บน production</div>` },
+  { title: 'ความรู้<br>หายไปกับคน!', expr: 'shock', pose: 'clutch', ex: 'ใครรู้บ้าง!?',
+    vis: `<div class="card" style="position:absolute;left:30px;top:0;width:540px;padding:26px 32px;transform:rotate(-3deg)"><div style="font-family:var(--mono);font-weight:700;font-size:26px;color:var(--ac)">คู่มือระบบ.md</div>
+      ${[90, 70, 84, 40].map((w, i) => `<div style="height:18px;border-radius:9px;background:#e5e8f0;margin-top:18px;width:${w}%;opacity:${1 - i * .25}"></div>`).join('')}</div>
+      <div style="position:absolute;left:600px;top:10px;font-family:Inter;font-weight:900;font-size:120px;color:var(--ac);transform:rotate(12deg)">?</div>
+      <div style="position:absolute;left:700px;top:120px;font-family:Inter;font-weight:900;font-size:90px;color:var(--red);transform:rotate(-10deg)">?</div>
+      <div class="chip" style="position:absolute;left:60px;top:250px">พี่คนเก่าลาออกไปแล้ว…</div>` },
+];
+
+// S7 point data
+const PTS = [
+  { t: 'ตรวจของเดิม<br>ก่อน', s: '<span class="mark">ไม่รื้อของเดิม</span>เงียบ ๆ', e: 'happy', p: 'point' },
+  { t: 'ถาม<br>ครั้งเดียว', s: 'ตอบครบ <span class="mark">ทำต่อเองจนจบ</span>', e: 'wink', p: 'point' },
+  { t: 'ติดตั้ง<br>ตามลำดับ', s: '<span class="mark">ไม่ต้องจำเอง</span>', e: 'happy', p: 'point' },
+  { t: 'ดีไซน์<br>เดียวกัน', s: '<span class="mark">ทั้งองค์กร</span>', e: 'joy', p: 'cheer' },
+  { t: 'รุ่นพี่<br>คอยเตือน', s: 'กัน<span class="mark">บั๊กที่เคยพังจริง</span>', e: 'focus', p: 'point' },
+  { t: 'ทีม<br>จำงานต่อได้', s: '<span class="mark">/ugt-handoff</span> จดไว้ให้', e: 'wink', p: 'thumb' },
+];
+const FILES = [['app/(dashboard)/leave/', 0], ['lib/mock-auth.ts', 1], ['prisma/schema.prisma  sqlite', 1], ['data/users.json', 1], ['components/', 0]];
+const QS = [['ชื่อโปรเจค', 'leave-request'], ['login แบบไหน', 'SSO บริษัท'], ['ต้องส่งอีเมลไหม', 'ส่ง'], ['ต้องแนบไฟล์ไหม', 'ไม่แนบ']];
+const BLK = [['Database', 'SQL Server + Prisma', '#475569', 'i-db'], ['Quality', 'test + lint ก่อน commit', '#0f766e', 'i-q'], ['Design', 'ธีม · ฟอนต์ไทย · UI kit', '#7c3aed', 'i-ds'], ['Auth', 'SSO + สิทธิ์ + หน้า admin', '#4f46e5', 'i-key'], ['CI/CD', 'Jenkins → SonarQube → Docker', '#0284c7', 'i-ci']];
+const MESSY = [['#f97316', '#16a34a', 'Comic Sans MS'], ['#16a34a', '#e11d48', 'Georgia'], ['#e11d48', '#f59e0b', 'Courier New']];
+function buildPoint(i) {
+  const v = $('pv');
+  if (i === 0) v.innerHTML = `<div class="card" style="position:absolute;left:40px;top:120px;width:760px;padding:26px 20px">${FILES.map((f, k) => `<div class="row" id="fr${k}">📁&nbsp;${f[0]}<span class="bang" id="fb${k}">!</span></div>`).join('')}</div>
+    <svg id="mag" style="position:absolute;left:560px;top:60px;width:220px;height:220px" viewBox="0 0 100 100"><circle cx="40" cy="40" r="28" fill="rgba(224,231,255,.5)" stroke="#1e2436" stroke-width="8"/><path d="M60 60 L90 90" stroke="#1e2436" stroke-width="12" stroke-linecap="round"/><path d="M28 28 Q34 20 44 20" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`;
+  if (i === 1) v.innerHTML = `<div class="card" style="position:absolute;left:30px;top:150px;width:780px;padding:26px 16px"><div style="font-size:34px;font-weight:900;padding:0 26px 10px">ขอถามครั้งเดียวก่อนเริ่ม</div>${QS.map((q, k) => `<div class="qi"><div class="bx" id="qb${k}">✓</div>${q[0]}<span class="ans" id="qa${k}">${q[1]}</span></div>`).join('')}</div>`;
+  if (i === 2) v.innerHTML = BLK.map((b, k) => `<div class="blk" id="bk${k}" style="left:80px;top:${720 - k * 136}px;background:${b[2]}"><div class="ic"><svg><use href="#${b[3]}"/></svg></div><div>${b[0]}<small>${b[1]}</small></div></div>`).join('') +
+    `<div class="chip" id="bwhy" style="position:absolute;left:60px;top:40px;font-size:26px"><b style="background:var(--yel);color:var(--ink)">เพราะ</b>Auth ต้องหลัง Database — เก็บผู้ใช้ในฐานข้อมูล</div>`;
+  if (i === 3) v.innerHTML = [0, 1, 2].map(k => `<div class="ui" id="ui${k}" style="left:${k * 270}px;top:${260 + (k % 2) * 60}px"><div class="hd" id="uih${k}"></div><div class="ln" style="width:70%;background:#e5e8f0"></div><div class="ln" style="width:85%;background:#e5e8f0"></div><div class="ln" style="width:55%;background:#e5e8f0"></div><div class="bt" id="uib${k}">บันทึก</div></div>`).join('');
+  if (i === 4) v.innerHTML = `<div class="card" id="wcard" style="position:absolute;left:420px;top:180px;width:420px;padding:22px 26px;border-color:var(--red);background:#fff1f2"><div style="font-weight:900;font-size:36px;color:var(--red)">⚠ วันที่เลื่อน −1 วัน</div><div class="code" style="font-size:20px;margin-top:8px;color:var(--ink2)">\${startOfDay(date)}</div></div>
+    <svg id="shield" style="position:absolute;left:40px;top:120px;width:320px;height:360px" viewBox="0 0 100 112"><path d="M50 4 L92 20 L92 56 C92 82 72 100 50 108 C28 100 8 82 8 56 L8 20Z" fill="#4f46e5" stroke="#1e2436" stroke-width="5" stroke-linejoin="round"/><path d="M50 16 L80 28 L80 56 C80 74 67 88 50 95Z" fill="#6d67f5"/><path d="M32 56 L45 69 L70 42" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    ${Array.from({ length: 10 }, (_, k) => `<div id="sh${k}" style="position:absolute;left:520px;top:240px;width:${40 + rnd(k) * 40}px;height:${30 + rnd(k + 5) * 30}px;background:${k % 2 ? '#fff1f2' : 'var(--red)'};border:3px solid var(--ink);clip-path:polygon(0 0,100% 20%,70% 100%)"></div>`).join('')}
+    <div class="chip" id="wfix" style="position:absolute;left:60px;top:560px;font-size:28px"><b style="background:var(--ok)">✓</b><span class="code">toLocalYmd(date)</span> แก้ก่อนเขียนเสร็จ</div>`;
+  if (i === 5) v.innerHTML = `<svg class="m" id="m7d" viewBox="0 0 400 600" style="left:-40px;top:250px;width:380px;height:570px"></svg><svg class="m" id="m7m" viewBox="0 0 400 600" style="left:480px;top:250px;width:380px;height:570px"></svg>
+    <div class="card" id="note" style="position:absolute;left:230px;top:340px;width:230px;height:150px;padding:18px;background:#fef9c3;transform:rotate(-8deg)"><div style="font-family:var(--mono);font-weight:700;font-size:24px">handoff.md</div><div style="height:12px;border-radius:6px;background:#e5d99a;margin-top:14px;width:80%"></div><div style="height:12px;border-radius:6px;background:#e5d99a;margin-top:12px;width:60%"></div></div>`;
+}
+const SK = ['full-setup', 'database-setup', 'test-lint-setup', 'design-setup', 'auth-setup', 'mail-setup', 'upload-setup', 'cicd-setup', 'kit-sync', 'clean-code', 'pitfalls', 'handoff', 'context', 'model-mode', 'requirements', 'contribute'];
+const SKC = ['#4f46e5', '#0f766e', '#7c3aed', '#0284c7', '#e11d48', '#ea580c', '#16a34a', '#475569'];
+$('stks').innerHTML = SK.map((n, i) => { const c = i % 4, r = Math.floor(i / 4); return `<div class="stk" id="sk${i}" style="left:${150 + c * 420 + (r % 2) * 60}px;top:${280 + r * 175}px;background:${SKC[i % SKC.length]}">ugt-${n}</div>` }).join('');
+$('confs').innerHTML = Array.from({ length: 26 }, (_, i) => `<div class="conf" id="cf${i}" style="background:${['#4f46e5', '#fcd34d', '#22d3ee', '#34d399', '#f472b6'][i % 5]}"></div>`).join('');
+$('hstars').innerHTML = Array.from({ length: 12 }, (_, i) => `<div class="star" id="hs${i}" style="--s:${40 + rnd(i) * 40}px;left:${100 + rnd(i + 3) * 1700}px;top:${260 + rnd(i + 7) * 700}px;--c:${i % 3 ? 'var(--yel)' : 'var(--ac)'}"></div>`).join('');
+let builtPoint = -1, builtProb = -1;
+
+// ---------- per scene ----------
+const U = {};
+U.s1 = (t) => {
+  popIn('h1', t, T(0, 0), { r: -8 }); popIn('h2', t, T(0, 1), { r: 6 }); slam('h3', t, T(0, 2), { r: -6 });
+  const zoom = 1 + P(t, T(1, 2), BEAT * 2, E.in) * .12;
+  ['h1', 'h2', 'h3'].forEach((id, i) => { $(id).style.transform += ` scale(${zoom + (t > T(1) ? beatPulse(t) * .04 : 0)})`; });
+  const k = P(t, T(0, 3), BEAT, E.back);
+  M('m1', 'dev', t < T(1) ? 'confused' : 'shock', t < T(1) ? 'down' : 'clutch', t, { y: (1 - k) * 500, bounce: 14, squash: beatSquash(t), r: t > T(1) ? Math.sin(t * 40) * 2 : 0 });
+};
+U.s2 = (t) => {
+  const i = Math.min(3, Math.floor((t - T(2)) / BAR)), a = T(2 + i);
+  if (builtProb !== i) { builtProb = i; const p = PROB[i]; $('ptitle').innerHTML = p.title; $('pvis').innerHTML = p.vis; $('pn').textContent = `ปัญหา ${i + 1}/4`; $('pex').textContent = p.ex; $('ptitle').style.fontSize = i === 3 ? '124px' : '150px'; }
+  const p = PROB[i];
+  slam('ptitle', t, a, { r: -3 });
+  popIn('pvis', t, a + BEAT, { y: 60, r: -3 });
+  const sk = P(t, a + BEAT * 2, BEAT * .35, E.out);
+  tf('pst', { o: t >= a + BEAT * 2 ? 1 : 0, s: lerp(2.6, 1, sk), r: -16 + (1 - sk) * 30 });
+  popIn('pex', t, a + BEAT * 1.5, { r: 20, base: 'rotate(8deg)' });
+  tf('pchip', { o: 1, s: 1 + beatPulse(t) * .03 });
+  const shake = t > a + BEAT * 2 && t < a + BEAT * 2.4 ? 1 : 0;
+  M('m2', 'dev', p.expr, p.pose, t, { bounce: 18, squash: beatSquash(t, .06), x: shake * (rnd(Math.floor(t * 60)) - .5) * 30, r: shake * (rnd(Math.floor(t * 60) + 3) - .5) * 6 });
+  world.shake = shake;
+};
+U.s3 = (t) => {
+  const a = T(6);
+  const k = P(t, a, BEAT * .5, E.back); tf('brk', { o: P(t, a, BEAT * .3), s: .6 + .4 * k + (t - a) * .06, y: P(t, T(6, 3), BEAT * .5, E.in) * -120 });
+  const f = cl((t - T(6, 2.5)) / (BEAT * 1.5));
+  M('m3', 'ugt', 'joy', 'cheer', t, { y: E.in(f) * 1040, r: (1 - f) * 20, o: t > T(6, 2.5) ? 1 : 0 });
+  $('fallLines').style.opacity = t > T(6, 2.8) ? .25 : 0; $('fallLines').style.transform = `translateY(${f * 600}px)`;
+};
+U.s4 = (t) => {
+  const a = T(7);
+  $('rburst').style.transform = `rotate(${(t - a) * 14}deg) scale(${1 + beatPulse(t) * .02})`;
+  const land = P(t, a, BEAT * .9, E.el);
+  const sq = t < a + BEAT * .9 ? Math.sin(cl((t - a) / (BEAT * .9)) * Math.PI) * .18 * (1 - cl((t - a) / (BEAT * .9))) : beatSquash(t, .06);
+  M('m4', 'ugt', t > T(8, 2) && t < T(8, 3.2) ? 'wink' : 'joy', 'cheer', t, { y: (1 - land) * -400, squash: sq, bounce: t > T(8) ? 22 : 0 });
+  popIn('rnew', t, a + BEAT, { y: 20 });
+  slam('rlogo', t, a + BEAT * 2, { r: -3 });
+  popIn('rtag', t, T(8, 0), { y: 20 });
+  const mk = P(t, T(8, 1), BEAT); $('rmark').style.backgroundSize = `${mk * 100}% 100%`; $('rmark').style.backgroundRepeat = 'no-repeat';
+  for (let i = 0; i < 26; i++) { const el = $('cf' + i); const lt = t - a - rnd(i) * .6; const fall = lt * (260 + rnd(i + 1) * 260);
+    el.style.left = (120 + rnd(i + 2) * 1680 + Math.sin(lt * 3 + i) * 40) + 'px'; el.style.top = (-60 + fall) + 'px'; el.style.transform = `rotate(${lt * (200 + rnd(i + 4) * 300)}deg) scaleX(${Math.cos(lt * 6 + i)})`; el.style.opacity = lt > 0 ? 1 : 0; }
+};
+U.s5 = (t) => {
+  const a = T(9);
+  slam('it1', t, a, { r: -4 }); popIn('it2', t, a + BEAT, { r: 6 }); slam('it3', t, a + BEAT * 2, { r: -8 });
+  popIn('iterm', t, a + BEAT * .5, { y: 60 });
+  const CMD = [['/plugin marketplace add pakornkub/ugt-claude-platform', 1], ['/plugin install ugt-nextjs-standard-superpowers@ugt', 3.5], ['/reload-plugins', 6]];
+  let html = '';
+  CMD.forEach(([c, b], k) => { const s = a + BEAT * b; if (t < s) return; const g = graph(c); const n = Math.floor(cl((t - s) / (BEAT * 1.4)) * g.length);
+    html += `<div><span class="p">❯</span> ${g.slice(0, n).join('')}${n < g.length ? '<span class="caret"></span>' : ''}</div>`;
+    if (t > s + BEAT * 1.6) html += `<div class="ok">  ✓ ${['marketplace "ugt" added', 'installed', 'ตัวช่วย 16 ตัวพร้อมใช้'][k]}</div>`; });
+  $('iterm').innerHTML = html;
+  const ek = P(t, T(10, 3), BEAT * .6, E.back); tf('ieasy', { o: t > T(10, 3) ? 1 : 0, s: ek * (1 + beatPulse(t) * .05), r: (1 - ek) * -60 + Math.sin(t * 4) * 4 });
+  M('m5', 'ugt', t > T(10, 3) ? 'wink' : 'happy', 'thumb', t, { bounce: 12, squash: beatSquash(t), y: (1 - P(t, a + BEAT, BEAT, E.back)) * 400 });
+};
+U.s6 = (t) => {
+  const a = T(11);
+  const typing = t < a + BEAT * 5.4;
+  M('m6', 'dev', typing ? 'focus' : 'joy', typing ? 'type' : 'wave', t, { bounce: typing ? 4 : 16, squash: beatSquash(t), y: (1 - P(t, a, BEAT, E.back)) * 400 });
+  popIn('bub', t, a + BEAT * .5, { y: 40 });
+  const S = 'ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย', g = graph(S);
+  $('bubt').textContent = g.slice(0, Math.floor(cl((t - a - BEAT) / (BEAT * 4)) * g.length)).join('');
+  $('bubc').style.opacity = typing && Math.floor(t / (BEAT / 2)) % 2 === 0 ? 1 : 0;
+  slam('one', t, T(12, 2), { r: -5 });
+  $('one').style.transform += ` scale(${1 + (t > T(12, 2.6) ? beatPulse(t) * .04 : 0)})`;
+  M('m6b', 'ugt', 'joy', 'cheer', t, { o: t > T(12, 3) ? 1 : 0, bounce: 16, y: (1 - P(t, T(12, 3), BEAT * .6, E.back)) * 300 });
+  popIn('okay', t, T(12, 3.2), { r: 30, base: 'rotate(-10deg)' });
+};
+U.s7 = (t) => {
+  const i = Math.min(5, Math.floor((t - T(13)) / BAR)), a = T(13 + i), lb = (t - a) / BEAT;
+  if (builtPoint !== i) { builtPoint = i; buildPoint(i); $('pt').innerHTML = PTS[i].t; $('psub').innerHTML = PTS[i].s; $('pnum').textContent = i + 1; }
+  const bk = P(t, a, BEAT * .6, E.back); tf('pbadge', { o: 1, s: bk * (1 + beatPulse(t) * .04), r: (1 - bk) * -180 });
+  slam('pt', t, a + BEAT * .25, { r: -3 }); popIn('psub', t, a + BEAT * 1.2, { y: 20 });
+  M('m7', 'ugt', PTS[i].e, PTS[i].p, t, { bounce: 12, squash: beatSquash(t), o: i === 5 ? 0 : 1 });
+  if (i === 0) {
+    const my = cl(lb / 3.6); $('mag').style.transform = `translate(${Math.sin(lb * 2) * 30 - 200}px,${40 + my * 380}px)`;
+    FILES.forEach((f, k) => { const hit = f[1] && lb > .6 + k * .75; $('fr' + k).classList.toggle('hit', !!hit); const bk2 = P(t, a + BEAT * (.6 + k * .75), BEAT * .4, E.back); tf('fb' + k, { o: f[1] && hit ? 1 : 0, s: bk2 }); });
+  }
+  if (i === 1) QS.forEach((q, k) => { const on = lb >= .5 + k * .8; const e = $('qb' + k); e.style.background = on ? 'var(--ok)' : '#fff'; e.style.color = on ? '#fff' : 'transparent'; tf('qa' + k, { o: on ? 1 : 0, s: P(t, a + BEAT * (.5 + k * .8), BEAT * .4, E.back) }); });
+  if (i === 2) { BLK.forEach((b, k) => { const s = a + BEAT * k * .5; const f = P(t, s, BEAT * .45, E.in); const land = t > s + BEAT * .45 ? Math.sin(cl((t - s - BEAT * .45) / (BEAT * .3)) * Math.PI) * .08 : 0; tf('bk' + k, { o: t > s ? 1 : 0, y: (1 - f) * -900, sy: 1 - land, r: k === 4 && f < 1 ? -4 : 0 }); }); popIn('bwhy', t, a + BEAT * 2.6, { y: 20 }); }
+  if (i === 3) [0, 1, 2].forEach(k => { const s = a + BEAT * (1 + k * .8); const f = P(t, s, BEAT * .5, E.io); const flipped = f > .5; const m = MESSY[k];
+    $('uih' + k).style.background = flipped ? 'var(--ac)' : m[0]; $('uib' + k).style.background = flipped ? 'var(--ac)' : m[1]; $('uib' + k).style.fontFamily = flipped ? 'var(--font)' : m[2]; $('ui' + k).style.borderRadius = flipped ? '20px' : (k * 6) + 'px';
+    tf('ui' + k, { o: P(t, a, BEAT * .4), s: 1 + (flipped ? beatPulse(t) * .03 : 0), sx: Math.abs(Math.cos(f * Math.PI)) || .02, r: flipped ? 0 : (k - 1) * 6 }); });
+  if (i === 4) {
+    const hit = a + BEAT * 2; const fx = cl((t - a) / (BEAT * 2)); const on = t < hit;
+    tf('wcard', { o: on ? 1 : 0, x: lerp(400, -40, E.in(fx)), r: -6 + fx * 10 });
+    const sk = P(t, a + BEAT * 1.2, BEAT * .5, E.back); tf('shield', { o: t > a + BEAT * 1.2 ? 1 : 0, s: sk * (1 + (t > hit && t < hit + .15 ? .12 : 0)) });
+    for (let k = 0; k < 10; k++) { const lt = t - hit; tf('sh' + k, { o: lt > 0 && lt < 1.2 ? 1 - lt / 1.2 : 0, x: lt * (200 + rnd(k) * 500) * (rnd(k + 1) > .5 ? 1 : .3), y: lt * (-300 + rnd(k + 2) * 500) + lt * lt * 900, r: lt * 720 * (rnd(k + 3) - .5) }); }
+    popIn('wfix', t, a + BEAT * 3, { y: 20 });
+  }
+  if (i === 5) {
+    const f = P(t, a + BEAT * .5, BEAT * 1.6, E.io);
+    M('m7d', 'dev', 'joy', f < .3 ? 'point' : 'wave', t, { bounce: 10 });
+    M('m7m', 'mate', t > a + BEAT * 2.1 ? 'joy' : 'happy', t > a + BEAT * 2.1 ? 'wave' : 'down', t, { bounce: 10, squash: beatSquash(t) });
+    tf('note', { o: 1, x: lerp(-40, 330, f), y: -Math.sin(f * Math.PI) * 220 + f * 210, r: -8 + f * 368 });
+  }
+};
+U.s8 = (t) => {
+  const a = T(19);
+  slam('vt', t, a, { r: -3 }); popIn('vcard', t, a + BEAT * .3, { y: 60 });
+  const V = ['database-setup', 'test-lint-setup', 'design-setup', 'auth-setup', 'mail-setup', 'cicd-setup', 'full-setup (harness)'];
+  let h = ''; V.forEach((v, k) => { if (t > a + BEAT * (.5 + k * .5)) h += `<span style="color:var(--ok);font-weight:700">✔</span> ${v}\n`; });
+  if (t > T(20)) h += `\n<b style="color:var(--ok)">7 passed · 0 failed</b>`;
+  $('vlines').innerHTML = h;
+  const sk = P(t, T(20, 1), BEAT * .35); tf('vst', { o: t > T(20, 1) ? 1 : 0, s: lerp(2.6, 1, sk), r: -14 + (1 - sk) * 30 });
+  popIn('vdoc', t, T(20, 2.5), { y: 30 });
+  M('m8', 'ugt', t > T(20, 1) ? 'joy' : 'focus', t > T(20, 1) ? 'cheer' : 'down', t, { bounce: 14, squash: beatSquash(t), y: (1 - P(t, a + BEAT, BEAT, E.back)) * 400 });
+};
+U.s9 = (t) => {
+  const a = T(21);
+  slam('ft', t, a, { r: -3 }); popIn('fcard', t, a + BEAT * .3, { y: 60 });
+  const k = P(t, a + BEAT, BEAT * 3, E.out); $('fb1').style.width = k * 100 + '%'; $('fb2').style.width = k * 53 + '%'; $('fv1').textContent = Math.round(k * 34) + '/34'; $('fv2').textContent = Math.round(k * 18) + '/34';
+  const bk = P(t, T(22), BEAT * .6, E.back); tf('f100', { o: t > T(22) ? 1 : 0, s: bk * (1 + beatPulse(t) * .06), r: (1 - bk) * -90 + Math.sin(t * 3) * 5 });
+  popIn('ft1', t, T(22, 2), { y: 40 }); popIn('ft2', t, T(22, 3), { y: 40 });
+  M('m9', 'dev', t > T(22) ? 'wink' : 'happy', 'thumb', t, { bounce: 14, squash: beatSquash(t), y: (1 - P(t, a + BEAT * 2, BEAT, E.back)) * 600 });
+};
+U.s10 = (t) => {
+  const a = T(24);
+  slam('kt', t, a, { r: -3 });
+  SK.forEach((n, i) => { const s = a + i * BEAT / 2; const k = P(t, s, BEAT * .5, E.back); tf('sk' + i, { o: t > s ? 1 : 0, s: k * (1 + (t > s + .3 ? beatPulse(t) * .03 : 0)), r: (rnd(i) - .5) * 14 + (1 - cl(k)) * 40 }); });
+  M('m10', 'ugt', 'joy', 'cheer', t, { bounce: 14, squash: beatSquash(t) });
+};
+U.s11 = (t) => {
+  const a = T(26);
+  $('hburst').style.transform = `rotate(${(t - a) * 10}deg)`;
+  slam('hh', t, a, { r: -2 });
+  const ph = Math.floor(t / BEAT) % 2;
+  M('m11a', 'mate', 'joy', 'wave', t, { bounce: ph ? 26 : 8, y: (1 - P(t, a + BEAT * .5, BEAT, E.back)) * 600 });
+  M('m11b', 'ugt', t > T(27, 2) ? 'wink' : 'joy', 'cheer', t, { bounce: 30, squash: beatSquash(t, .08), y: (1 - P(t, a + BEAT, BEAT, E.back)) * 600 });
+  M('m11c', 'dev', 'joy', 'wave', t, { bounce: ph ? 8 : 26, y: (1 - P(t, a + BEAT * 1.5, BEAT, E.back)) * 600 });
+  for (let i = 0; i < 12; i++) { const s = a + BEAT * (1 + i * .5); const k = P(t, s, BEAT * .5, E.back); tf('hs' + i, { o: t > s ? .5 + .5 * Math.sin(t * 6 + i) ** 2 : 0, s: k, r: t * 90 }); }
+};
+U.s12 = (t) => {
+  const a = T(28);
+  popIn('elogo', t, a, { y: 30 }); popIn('ename', t, a + BEAT * .5, { y: 20 }); slam('etitle', t, a + BEAT, { r: -3 }); popIn('etag', t, a + BEAT * 2, { y: 20 });
+  popIn('ecmd', t, T(29), { y: 50 }); popIn('eurl', t, T(29, 1.5), { y: 20 });
+  M('m12a', 'dev', 'joy', 'wave', t, { bounce: 14, squash: beatSquash(t), y: (1 - P(t, a + BEAT * 2, BEAT, E.back)) * 600 });
+  M('m12b', 'ugt', t > T(31) ? 'wink' : 'joy', 'cheer', t, { bounce: 14, squash: beatSquash(t), y: (1 - P(t, a + BEAT * 2.5, BEAT, E.back)) * 600 });
+  popIn('ejingle', t, T(30) - BEAT * .5, { y: 20, base: 'rotate(10deg)' });
+  ['j0', 'j1', 'j2', 'j3'].forEach((j, k) => { const s = T(30, k); const kk = P(t, s, BEAT * .5, E.back); const e = $(j); e.style.display = 'inline-block'; e.style.color = t > s ? 'var(--red)' : 'var(--ac)'; e.style.transform = `translateY(${t > s ? -Math.sin(cl((t - s) / (BEAT * .6)) * Math.PI) * 30 : 0}px) scale(${t > s ? .9 + .1 * kk + .15 * Math.max(0, 1 - (t - s) / BEAT) : 1})`; });
+  if (t > T(31)) { const b = Math.abs(Math.sin(((t - T(31)) / BEAT) * Math.PI)) * Math.max(0, 1 - (t - T(31)) / (BEAT * 3)); $('elogo').style.transform += ` translateY(${-b * 20}px)`; }
+};
+
+// ---------- master ----------
+const world = { shake: 0 };
+function render(t) {
+  world.shake = 0;
+  for (const [id, b0, b1] of SC) { const on = t >= T(b0) - 1e-6 && t < T(b1); const el = $(id); el.style.display = on ? 'block' : 'none'; if (on) U[id](t); }
+  // wipes (Japanese CM stripe wipe) centered on bar starts
+  let wp = -1; for (const b of WIPES) { const c = T(b); if (t > c - BEAT * .5 && t < c + BEAT * .5) wp = (t - (c - BEAT * .5)) / BEAT; }
+  const W = $('wipe'); W.style.display = wp >= 0 ? 'flex' : 'none'; if (wp >= 0) W.style.transform = `translateX(${lerp(-150, 110, E.io(wp))}%) skewX(-18deg)`;
+  let fl = 0; for (const b of FLASH) { const c = T(b); if (t >= c && t < c + .3) fl = Math.max(fl, 1 - (t - c) / .3); }
+  $('flash').style.opacity = fl * .8;
+  const zoomPunch = 1 + beatPulse(t) * .012;
+  $('world').style.transform = `translate(${world.shake * (rnd(Math.floor(t * 60)) - .5) * 24}px,${world.shake * (rnd(Math.floor(t * 60) + 9) - .5) * 24}px) scale(${zoomPunch})`;
+}
+window.render = render; window.DUR = DUR;
+window.__ready = document.fonts.ready;
+function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); $('stage').style.transform = `scale(${s})` }
+if (!window.__RENDER) {
+  addEventListener('resize', fit); fit();
+  const q = new URLSearchParams(location.search); const T0 = parseFloat(q.get('t') || '0');
+  document.fonts.ready.then(() => { render(T0); if (q.has('still')) return;
+    let start = null; const au = new Audio('music.mp3');
+    addEventListener('click', () => { if (start !== null) return; start = performance.now() - T0 * 1000; au.currentTime = T0; au.play().catch(() => { });
+      const loop = now => { const t = (now - start) / 1000; if (t >= DUR) { render(DUR - .01); return } render(t); requestAnimationFrame(loop) }; requestAnimationFrame(loop) }); });
+}
+</script>
+</body>
+</html>
