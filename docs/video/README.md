@@ -3,7 +3,56 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-ไฟล์พร้อมใช้: [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) — 1920×1080 · 30fps · 77 วินาที · มีเพลงประกอบ
+มีสองเวอร์ชัน:
+
+| ไฟล์ | สไตล์ | ความยาว |
+| --- | --- | --- |
+| [`story/ugt-claude-platform-story.mp4`](story/ugt-claude-platform-story.mp4) | **แอนิเมชันเล่าเรื่อง 3D (Three.js/WebGL)** โทนสว่าง ฟอนต์และสีเดียวกับ `docs/web/index.html` — แนะนำตัวนี้ | 72 วินาที |
+| [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
+
+ทั้งคู่ 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## เวอร์ชันเล่าเรื่อง (`story/`)
+
+เมือง = องค์กร · ตึกแต่ละหลัง = โปรเจค · กล้องบินต่อเนื่องตลอดเรื่อง ไม่มีการตัดฉากแบบสไลด์
+
+| เวลา | เกิดอะไรขึ้น |
+| --- | --- |
+| 0:00 | developer นั่งทำงาน กล้องถอยออกเห็นเมืองที่ตึกคนละทรง คนละสี เอียง มีหมุดเตือนสีแดง ตึกหนึ่งโยกจนชิ้นส่วนหล่น |
+| 0:08 | พิมพ์ `/plugin install ugt-nextjs-standard-superpowers@ugt` → กล่อง UBE ลงมาตามลำแสง แล้วกางออกเป็นสายพาน 5 สถานี |
+| 0:13 | พูดประโยคเดียว "ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย" → แท่นว่างวางบนสายพาน |
+| 0:20 | Database (ฐานราก + ถังข้อมูล) → Quality (นั่งร้าน + เลเซอร์สแกน ✓test ✓lint) → Design (ตึกมาตรฐานโผล่ขึ้น) → Auth (ประตู + โดมป้องกัน) → CI/CD (ไฟ 3 ดวง แล้วตึกบินขึ้น) |
+| 0:40 | ตึกลงจอดในเมือง "verify ALL GREEN · docs/admin-handoff.md → ทีม DevOps" |
+| 0:42 | คลื่นแผ่ออกจากตึกใหม่ ตึกรกทั้งเมืองเปลี่ยนเป็นมาตรฐานเดียวกันทีละหลัง |
+| 0:50 | หอความรู้ `/ugt-handoff` โผล่ขึ้น เชื่อมทุกตึก เพื่อนร่วมทีมเดินมารับโน้ตไปทำต่อ |
+| 0:56 | ผลวัดจริง 34/34 vs 18/34 · 14/14 vs 2/14 · 9/9 vs 6/9 |
+| 1:02 | end card: คำสั่งติดตั้ง + ลิงก์ repo |
+
+### แก้แล้วเรนเดอร์ใหม่
+
+ทุกอย่างอยู่ใน `story/story.html` — ฉาก 3D, ตัวละคร, กล้อง (`CK` = keyframe กล้อง), คำบรรยาย (`CAPS`)
+คำนวณจากเวลาใน `render(t)` ล้วน ๆ จึงเรนเดอร์ทีละเฟรมได้ตรงเป๊ะ · เปิดด้วย local server
+(เช่น `npx http-server docs/video/story`) แล้วคลิกหนึ่งครั้งเพื่อดูแบบเล่นจริงพร้อมเพลง หรือ
+`story.html?still&t=30` เพื่อดูเฟรมเดียว — three.js โหลดจาก jsDelivr ผ่าน import map
+
+ถ้าเลื่อนเวลาเหตุการณ์ใน `story.html` ต้องเลื่อนเสียงประกอบจุดเดียวกันใน `music.py` ด้วย
+
+```bash
+cd docs/video/story
+npm i && pip install numpy scipy
+python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
+# WebGL เรนเดอร์ด้วย SwiftShader (CPU) ~0.5 วินาที/เฟรม — แบ่ง 4 ท่อนขนานกัน
+node render.mjs 0 540 p0.mp4 & node render.mjs 540 1080 p1.mp4 & \
+node render.mjs 1080 1620 p2.mp4 & node render.mjs 1620 2160 p3.mp4 & wait
+printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
+ffmpeg -y -f concat -safe 0 -i list.txt -i music.wav -c:v copy -af loudnorm=I=-15:TP=-1.2 \
+  -c:a aac -b:a 224k -shortest -movflags +faststart ugt-claude-platform-story.mp4
+rm p?.mp4 list.txt music.wav
+```
+
+ฟอนต์ใน `story/fonts/` (Inter, Noto Sans Thai, Cascadia Code) เป็น SIL Open Font License จาก Google Fonts
+
+## เวอร์ชัน motion graphic (รุ่นแรก)
 
 | เวลา | ฉาก | เล่าอะไร |
 | --- | --- | --- |
@@ -17,20 +66,14 @@
 | 0:58 | Proof | 34/34 vs 18/34 · 14/14 vs 2/14 · 42/42 · 9/9 vs 6/9 |
 | 1:06 | Get started | คำสั่งติดตั้ง + ลิงก์ repo |
 
-## แก้แล้วเรนเดอร์ใหม่
-
-แอนิเมชันทั้งหมดอยู่ใน `promo.html` (ทุกอย่างคำนวณจากเวลา `render(t)` ไม่มี CSS animation
-จึงเรนเดอร์ทีละเฟรมได้ตรงเป๊ะ) — เปิดใน browser แล้วคลิกหนึ่งครั้งเพื่อดูแบบเล่นจริงพร้อมเพลง
-หรือเปิด `promo.html?still&t=30` เพื่อดูเฟรมเดียว ณ วินาทีที่ 30
-
-ถ้าเลื่อนเวลาฉากใน `promo.html` ต้องเลื่อนจุดเดียวกันใน `music.py` ด้วย (เพลงล็อกจังหวะตัดฉากไว้ที่ 120 BPM)
+แอนิเมชันอยู่ใน `promo.html` (หลักการเดียวกัน: `render(t)` ไม่มี CSS animation) —
+เปิดใน browser แล้วคลิกหนึ่งครั้ง หรือ `promo.html?still&t=30`
 
 ```bash
 cd docs/video
-npm i playwright               # ใช้ Chromium ของ Playwright
+npm i playwright
 pip install numpy scipy
 python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
-# เรนเดอร์เป็น 4 ท่อนขนานกัน (ต้องมี ffmpeg ที่มี libx264 — หรือตั้ง FF=/path/to/ffmpeg)
 node render.mjs 0 578 p0.mp4 & node render.mjs 578 1156 p1.mp4 & \
 node render.mjs 1156 1734 p2.mp4 & node render.mjs 1734 2310 p3.mp4 & wait
 printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
