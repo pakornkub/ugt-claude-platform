@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UGT Corporate Film</title>
+<style>
+@font-face{font-family:Inter;font-weight:100 900;src:url(fonts/Inter.ttf)}
+@font-face{font-family:'Noto Sans Thai';font-weight:100 900;src:url(fonts/NotoSansThai.ttf)}
+@font-face{font-family:'Geist Mono';font-weight:100 900;src:url(fonts/GeistMono.ttf)}
+/* tokens = docs/web/design-preview.html (org design contract, plugins/ugt-core/contracts/design.md) */
+:root{
+  --primary:oklch(0.488 0.243 264.4);--primary-fg:oklch(0.985 0.008 255);
+  --bg:oklch(0.977 0.004 258);--fg:oklch(0.16 0.01 258);--card:oklch(1 0 0);
+  --muted:oklch(0.955 0.006 258);--muted-fg:oklch(0.49 0.018 258);--border:oklch(0.905 0.008 258);
+  --amber:oklch(0.666 0.179 58.3);--amber-fg:oklch(0.473 0.137 46.2);
+  --emerald:oklch(0.596 0.145 163.2);--emerald-fg:oklch(0.432 0.095 166.9);
+  --red:oklch(0.577 0.245 27.3);--red-fg:oklch(0.444 0.177 26.9);
+  --coral:oklch(0.68 0.18 35);--coral-fg:oklch(0.5 0.15 33);
+  --sky:oklch(0.588 0.158 242);--sky-fg:oklch(0.443 0.11 240.8);
+  --gray:oklch(0.554 0.041 257.4);--gray-fg:oklch(0.372 0.044 257.3);
+  --font:'Inter','Noto Sans Thai',system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--fg);flex:none;transform-origin:center}
+#grid{position:absolute;inset:-96px;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:96px 96px;opacity:.45;-webkit-mask-image:radial-gradient(ellipse at 60% 45%,#000 30%,transparent 78%)}
+#glow{position:absolute;width:1400px;height:1400px;border-radius:50%;background:radial-gradient(circle,color-mix(in oklch,var(--primary) 9%,transparent),transparent 65%);left:900px;top:-500px}
+#cam{position:absolute;inset:0;transform-origin:50% 50%}
+.ch{position:absolute;inset:0;display:none}
+.abs{position:absolute}
+.brand{position:absolute;left:96px;top:56px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:20px}
+.brand svg{height:20px}
+.sect{position:absolute;right:96px;top:56px;display:flex;align-items:center;gap:14px;font-size:20px;color:var(--muted-fg)}
+.sect b{font-family:var(--mono);font-weight:500;color:var(--fg)}
+.sect i{width:44px;height:1px;background:var(--fg);opacity:.4}
+.foot{position:absolute;left:96px;right:96px;bottom:48px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:17px;color:var(--muted-fg)}
+.prog{position:absolute;left:96px;right:96px;bottom:34px;height:2px;background:var(--border)}
+.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--primary)}
+.eyebrow{font-family:var(--mono);font-size:20px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+h1{font-weight:600;font-size:92px;line-height:1.18;letter-spacing:-.02em}
+h2{font-weight:600;font-size:62px;line-height:1.2;letter-spacing:-.015em}
+.line{display:block;overflow:hidden;padding-bottom:.08em}
+.line>span{display:inline-block}
+.lead{font-size:28px;line-height:1.6;color:var(--muted-fg)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 2px rgba(20,24,40,.04),0 12px 32px -12px rgba(20,24,40,.12)}
+.mono{font-family:var(--mono)}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:18px;font-weight:500;padding:5px 12px 5px 10px;border-radius:999px;white-space:nowrap}
+.badge svg,.ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.b-emerald{background:color-mix(in oklch,var(--emerald) 14%,white);color:var(--emerald-fg)}
+.b-amber{background:color-mix(in oklch,var(--amber) 16%,white);color:var(--amber-fg)}
+.b-red{background:color-mix(in oklch,var(--red) 12%,white);color:var(--red-fg)}
+.b-coral{background:color-mix(in oklch,var(--coral) 14%,white);color:var(--coral-fg)}
+.b-sky{background:color-mix(in oklch,var(--sky) 14%,white);color:var(--sky-fg)}
+.b-gray{background:color-mix(in oklch,var(--gray) 14%,white);color:var(--gray-fg)}
+.b-primary{background:var(--primary);color:var(--primary-fg)}
+.spec{display:grid;grid-template-columns:220px 1fr}
+.spec>div{padding:20px 0;border-bottom:1px solid var(--border);font-size:24px}
+.spec>div:nth-child(odd){font-family:var(--mono);font-size:18px;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.1em;padding-top:25px}
+.pcard{position:absolute;top:400px;width:540px;padding:36px 38px}
+.pcard .no{font-family:var(--mono);font-size:18px;color:var(--muted-fg)}
+.pcard .ic{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-top:22px}
+.pcard .ic svg{width:30px;height:30px;stroke-width:2}
+.pcard .t{font-size:34px;font-weight:600;margin-top:24px}
+.pcard .d{font-size:23px;line-height:1.55;color:var(--muted-fg);margin-top:12px}
+.layer{position:absolute;border:1px solid var(--border);border-radius:16px;background:var(--card);padding:26px 30px}
+.layer .t{font-family:var(--mono);font-size:24px;font-weight:500}
+.layer .d{font-size:21px;color:var(--muted-fg);margin-top:8px;line-height:1.45}
+.chipm{font-family:var(--mono);font-size:20px;padding:10px 18px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:inline-block}
+.term{font-family:var(--mono);font-size:24px;line-height:1.5}
+.term .row{display:flex;gap:16px;align-items:flex-start;padding:7px 0}
+.term .dot{width:26px;height:26px;border-radius:50%;flex:none;margin-top:3px;display:flex;align-items:center;justify-content:center}
+.term .dot svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.term .main{font-family:var(--font);font-size:25px;font-weight:500}
+.term .sub{font-family:var(--font);font-size:20px;color:var(--muted-fg);margin-top:4px}
+.caret{display:inline-block;width:12px;height:30px;background:var(--primary);vertical-align:-5px;margin-left:3px}
+.step{position:absolute;left:0;display:flex;align-items:center;gap:22px}
+.step .c{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;color:var(--muted-fg);flex:none}
+.step .c svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.step .l{font-size:26px;font-weight:500}.step .s{font-size:19px;color:var(--muted-fg);margin-top:2px}
+.modc{font-family:var(--mono);font-size:18px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted-fg)}
+.tbl{width:100%;border-collapse:collapse;font-size:21px}
+.tbl th{text-align:left;font-weight:500;font-size:17px;color:var(--muted-fg);padding:12px 18px;border-bottom:1px solid var(--border);background:var(--muted)}
+.tbl td{padding:14px 18px;border-bottom:1px solid var(--border)}
+.tbl td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.sw{width:88px;height:88px;border-radius:14px;border:1px solid var(--border)}
+.stage{position:absolute;width:150px;text-align:center}
+.stage .n{width:56px;height:56px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--card);font-family:var(--mono);font-size:18px;color:var(--muted-fg)}
+.stage .n svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.stage .l{font-size:19px;margin-top:14px;line-height:1.3;font-weight:500}
+.node{position:absolute;width:190px;text-align:center}
+.node .b{height:84px;border-radius:14px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:22px}
+.node .s{font-size:17px;color:var(--muted-fg);margin-top:8px;font-family:var(--mono)}
+.fact{display:flex;align-items:center;gap:14px;font-size:22px;padding:12px 0;border-top:1px solid var(--border)}
+.kpi{position:absolute;top:400px;width:540px;padding:36px 40px}
+.kpi .v{font-size:96px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.kpi .v span{font-size:32px;color:var(--muted-fg);font-weight:500;margin-left:12px;letter-spacing:0}
+.kpi .d{font-size:23px;color:var(--muted-fg);margin-top:16px}
+.kpi .bars{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+.kpi .br{display:flex;align-items:center;gap:14px;font-size:17px;color:var(--muted-fg);font-family:var(--mono)}
+.kpi .br .tr{flex:1;height:10px;border-radius:5px;background:var(--muted);overflow:hidden}
+.kpi .br .tr i{display:block;height:100%;border-radius:5px}
+.cmd{font-family:var(--mono);font-size:26px;line-height:1.8;padding:24px 36px;text-align:left}
+.cmd .p{color:var(--primary)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></symbol>
+  <symbol id="minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></symbol>
+  <symbol id="layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="bot" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12v1M15 12v1"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <g id="ube"><g transform="translate(0,52) scale(0.1,-0.1)" fill="#1273bc"><path d="M52 318 c-18 -101 -32 -196 -32 -211 0 -18 11 -39 28 -57 36 -35 106 -44 300 -38 147 5 187 16 217 62 12 18 85 378 85 419 0 4 -28 7 -62 5 l-63 -3 -26 -145 c-14 -80 -29 -162 -33 -182 l-7 -38 -154 0 c-85 0 -155 3 -155 8 0 4 14 79 30 167 16 88 30 168 30 178 0 14 -10 17 -63 17 l-63 0 -32 -182z"/><path d="M720 493 c0 -5 -18 -110 -40 -236 -22 -125 -40 -232 -40 -238 0 -8 75 -10 243 -7 210 3 246 6 275 21 38 21 66 75 76 149 6 38 4 50 -12 65 -18 18 -18 19 11 44 28 23 30 31 31 93 1 62 -1 70 -27 92 -28 24 -28 24 -273 24 -134 0 -244 -3 -244 -7z m420 -112 c0 -11 -4 -31 -10 -45 -9 -26 -10 -26 -129 -26 -115 0 -119 -1 -125 -22 -3 -13 -6 -33 -6 -45 0 -23 2 -23 114 -23 65 0 117 -4 121 -10 3 -5 3 -25 -1 -45 l-6 -35 -154 0 c-85 0 -154 4 -154 8 0 12 40 236 45 250 3 9 43 12 155 12 142 0 150 -1 150 -19z"/><path d="M1403 485 c-17 -7 -39 -25 -48 -38 -17 -27 -65 -266 -65 -328 0 -49 33 -87 85 -99 54 -13 412 -13 420 0 3 5 9 32 12 60 l6 50 -197 0 c-182 0 -196 1 -196 18 0 26 38 231 45 243 4 5 91 9 204 9 l198 0 7 38 c3 20 6 43 6 50 0 18 -433 16 -477 -3z"/><path d="M1501 270 c-5 -25 -8 -46 -6 -48 1 -2 76 -3 166 -3 l164 0 6 28 c17 73 27 68 -156 68 l-164 0 -10 -45z"/></g></g>
+</defs></svg>
+
+<div id="stage">
+  <div id="grid"></div><div id="glow"></div>
+  <div id="cam">
+
+  <!-- 01 overview -->
+  <section class="ch" id="c1">
+    <div class="abs" style="left:96px;top:250px;width:980px">
+      <div class="eyebrow" id="o_e">Claude Code Plugin · Org Standard</div>
+      <h1 style="margin-top:28px"><span class="line"><span id="o_l1">มาตรฐานองค์กร</span></span><span class="line"><span id="o_l2">สำหรับทุกโปรเจค</span></span><span class="line"><span id="o_l3" style="color:var(--primary)">ที่สร้างด้วย AI</span></span></h1>
+      <p class="lead" id="o_lead" style="margin-top:34px;width:820px">ติดตั้งครั้งเดียว — ฐานข้อมูล ระบบ login ดีไซน์ การทดสอบ และการ deploy เป็นไปตามมาตรฐานเดียวกันโดยอัตโนมัติ</p>
+    </div>
+    <div class="abs card" id="o_card" style="left:1180px;top:250px;width:644px;padding:34px 40px 18px">
+      <div class="eyebrow" style="color:var(--muted-fg);margin-bottom:22px">Supported stack</div>
+      <div style="height:1px;background:var(--border);transform-origin:left" id="o_rule"></div>
+      <div class="spec" id="o_spec"></div>
+    </div>
+  </section>
+
+  <!-- 02 challenge -->
+  <section class="ch" id="c2">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="p_e">The challenge</div><h2 style="margin-top:18px"><span class="line"><span id="p_h">ทุกทีมเก่ง — แต่ทำกันคนละแบบ</span></span></h2></div>
+    <div id="p_cards"></div>
+    <div class="abs" id="p_end" style="left:96px;top:880px;font-size:30px;font-weight:500;display:flex;align-items:center;gap:16px"><span class="badge b-primary" style="font-size:20px">UGT</span>ย้ายกติกาเหล่านี้จาก "ในหัวคน" ไปอยู่ใน AI — ใช้ได้ทุกโปรเจค</div>
+  </section>
+
+  <!-- 03 architecture -->
+  <section class="ch" id="c3">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="a_e">Architecture</div><h2 style="margin-top:18px"><span class="line"><span id="a_h">3 ชั้น — มาตรฐานกลางเขียนที่เดียว</span></span></h2></div>
+    <svg class="abs" style="left:0;top:0" width="1920" height="1080"><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path id="a_w1" d="M536 458 V490 H396 V520" stroke="oklch(0.488 0.243 264.4)"/>
+      <path id="a_w2" d="M1412 458 V490 H396 V520" stroke="oklch(0.905 0.008 258)"/>
+      <path id="a_w3" d="M396 674 V768" stroke="oklch(0.488 0.243 264.4)"/>
+      <path id="a_w4" d="M960 644 V768" stroke="oklch(0.905 0.008 258)"/>
+      <path id="a_w5" d="M1524 644 V768" stroke="oklch(0.905 0.008 258)"/></g></svg>
+    <div class="layer" id="a_b1" style="left:96px;top:330px;width:880px;border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in oklch,var(--primary) 12%,transparent)">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-nextjs-standard-superpowers</span><span class="badge b-primary" id="a_rec">แนะนำ</span></div>
+      <div class="d">Bundle — ติดตัวเดียวได้ครบ · pipeline อัตโนมัติ คิด → วางแผน → เทสต์ → review</div></div>
+    <div class="layer" id="a_b2" style="left:1000px;top:330px;width:824px">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-nextjs-standard-mattpocock</span><span class="badge b-gray"><svg><use href="#minus"/></svg>ทางเลือก</span></div>
+      <div class="d">Bundle — สั่งทีละขั้นเอง · ใช้ token น้อยกว่า</div></div>
+    <div class="layer" id="a_p1" style="left:96px;top:520px;width:600px">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-nextjs-platform</span><span class="badge b-emerald"><svg><use href="#ck"/></svg>4.63.5</span></div>
+      <div class="d">11 ตัวช่วย — database · quality · design · auth · mail · upload · cicd</div></div>
+    <div class="layer" id="a_p2" style="left:720px;top:520px;width:480px">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-python-platform</span><span class="badge b-amber"><svg><use href="#clock"/></svg>pilot</span></div>
+      <div class="d">Deploy — FastAPI · Flask · Django</div></div>
+    <div class="layer" id="a_p3" style="left:1224px;top:520px;width:600px">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-php-platform</span><span class="badge b-amber"><svg><use href="#clock"/></svg>pilot</span></div>
+      <div class="d">Deploy — Laravel · CodeIgniter · WordPress</div></div>
+    <div class="layer" id="a_core" style="left:96px;top:768px;width:1728px;background:var(--muted)">
+      <div style="display:flex;align-items:center;gap:14px"><span class="t">ugt-core</span><span class="badge b-emerald"><svg><use href="#ck"/></svg>2.13.2</span><span class="badge b-sky"><svg><use href="#info"/></svg>ติดตั้งมาเองอัตโนมัติ</span></div>
+      <div style="display:flex;gap:14px;margin-top:18px" id="a_chips"></div></div>
+  </section>
+
+  <!-- 04 demo -->
+  <section class="ch" id="c4">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="d_e">Demo · ugt-nextjs-full-setup</div><h2 style="margin-top:18px"><span class="line"><span id="d_h">สั่งประโยคเดียว ที่เหลือเป็นไปตามมาตรฐาน</span></span></h2></div>
+    <div class="abs card" id="d_card" style="left:96px;top:330px;width:1120px;height:620px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:18px 26px;border-bottom:1px solid var(--border);background:var(--muted)"><i style="width:12px;height:12px;border-radius:50%;background:var(--border)"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--border)"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--border)"></i><span class="mono" style="margin-left:12px;font-size:18px;color:var(--muted-fg)">claude — ~/leave-request</span></div>
+      <div class="term" style="padding:26px 34px">
+        <div style="display:flex;gap:14px;align-items:center;padding:14px 20px;border:1px solid var(--border);border-radius:12px;font-family:var(--font);font-size:27px;font-weight:500"><span class="mono" style="color:var(--primary)">❯</span><span id="d_prompt"></span><span class="caret" id="d_caret"></span></div>
+        <div id="d_rows" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="abs" id="d_steps" style="left:1290px;top:340px;width:540px;height:600px">
+      <div class="abs" style="left:25px;top:30px;width:2px;height:520px;background:var(--border)"></div>
+      <div class="abs" id="d_fill" style="left:25px;top:30px;width:2px;height:0;background:var(--emerald)"></div>
+    </div>
+  </section>
+
+  <!-- 05 design -->
+  <section class="ch" id="c5">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="g_e">Design contract</div><h2 style="margin-top:18px"><span class="line"><span id="g_h">หน้าตาเดียวกัน ทุกแอปในองค์กร</span></span></h2></div>
+    <div class="abs card" id="g_left" style="left:96px;top:360px;width:800px;padding:34px 40px">
+      <div class="eyebrow" style="color:var(--muted-fg)">Typography</div>
+      <div style="display:flex;align-items:baseline;gap:30px;margin-top:14px" id="g_type"><div style="font-size:120px;font-weight:600;letter-spacing:-.03em" id="g_w">Aa</div><div style="font-size:120px;font-weight:600">กข</div>
+        <div style="font-size:22px;color:var(--muted-fg);line-height:1.6">Inter + Noto Sans Thai<br><span class="mono">400 · 500 · 600</span></div></div>
+      <div style="height:1px;background:var(--border);margin:26px 0;transform-origin:left" id="g_rule"></div>
+      <div class="eyebrow" style="color:var(--muted-fg)">Primary · Status</div>
+      <div style="display:flex;align-items:center;gap:22px;margin-top:20px" id="g_prim">
+        <div class="sw" style="background:var(--primary)"></div>
+        <div><div class="mono" style="font-size:20px">oklch(0.488 0.243 264.4)</div><div style="font-size:20px;color:var(--muted-fg);margin-top:6px">ใช้เฉพาะสิ่งที่กดได้เท่านั้น</div></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:26px" id="g_badges"></div>
+    </div>
+    <div class="abs card" id="g_right" style="left:940px;top:360px;width:884px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 28px;border-bottom:1px solid var(--border)"><div style="font-size:26px;font-weight:600">คำขอลา</div>
+        <div style="display:flex;gap:12px"><div style="width:260px;height:44px;border:1px solid var(--border);border-radius:10px;font-size:18px;color:var(--muted-fg);display:flex;align-items:center;padding:0 14px">ค้นหา…</div><div id="g_btn" style="height:44px;padding:0 20px;border-radius:10px;background:var(--primary);color:#fff;font-size:18px;font-weight:500;display:flex;align-items:center">+ สร้างคำขอ</div></div></div>
+      <table class="tbl"><thead><tr><th>เลขที่</th><th>ผู้ขอ</th><th style="text-align:right">จำนวนวัน</th><th>สถานะ</th></tr></thead><tbody id="g_rows"></tbody></table></div>
+  </section>
+
+  <!-- 06 identity + database -->
+  <section class="ch" id="c6">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="i_e">Identity · Database</div><h2 style="margin-top:18px"><span class="line"><span id="i_h">ความปลอดภัยและข้อมูล ตามกติกาเดียวกัน</span></span></h2></div>
+    <div class="abs card" id="i_left" style="left:96px;top:340px;width:880px;height:600px;padding:32px 36px">
+      <div class="eyebrow" style="color:var(--muted-fg)">Keycloak · OIDC</div>
+      <div class="abs" style="left:36px;top:96px;width:808px;height:180px" id="i_flow">
+        <svg class="abs" style="left:0;top:0" width="808" height="180"><g fill="none" stroke="oklch(0.488 0.243 264.4)" stroke-width="2.5" stroke-linecap="round">
+          <path id="i_a1" d="M190 42 H222"/><path id="i_a2" d="M412 42 H444"/><path id="i_a3" d="M634 42 H666"/></g></svg>
+      </div>
+      <div class="abs mono" id="i_pkce" style="left:36px;top:240px;font-size:19px;color:var(--primary)">Authorization Code + PKCE (S256) · backchannel logout</div>
+      <div class="abs" style="left:36px;right:36px;top:300px" id="i_facts"></div>
+    </div>
+    <div class="abs card" id="i_right" style="left:1000px;top:340px;width:824px;height:600px;overflow:hidden">
+      <div style="padding:26px 30px 16px" class="eyebrow"><span style="color:var(--muted-fg)">SQL Server · Naming</span></div>
+      <table class="tbl"><thead><tr><th>Object</th><th>Convention</th><th>ตัวอย่าง</th></tr></thead><tbody id="i_rows"></tbody></table>
+      <div style="padding:22px 30px 0;font-size:18px;color:var(--muted-fg)" id="i_auditl">Audit columns — ทุกตารางหลัก · ลบแบบ soft delete</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;padding:14px 30px" id="i_audit"></div>
+    </div>
+  </section>
+
+  <!-- 07 delivery -->
+  <section class="ch" id="c7">
+    <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="v_e">Jenkins · SonarQube · Docker</div><h2 style="margin-top:18px"><span class="line"><span id="v_h">Pipeline 10 ขั้น — เหมือนกันทุกภาษา</span></span></h2></div>
+    <div class="abs" id="v_base" style="left:171px;top:414px;width:1578px;height:2px;background:var(--border);transform-origin:left"></div>
+    <div class="abs" id="v_fill" style="left:171px;top:414px;width:0;height:2px;background:var(--emerald)"></div>
+    <div id="v_stages"></div>
+    <div class="abs card" id="v_branch" style="left:96px;top:600px;width:760px;padding:30px 34px">
+      <div class="eyebrow" style="color:var(--muted-fg)">Branch model</div>
+      <div style="display:flex;flex-direction:column;gap:18px;margin-top:22px;font-size:24px">
+        <div style="display:flex;align-items:center;gap:16px"><span class="mono" style="width:130px">main</span><span style="color:var(--muted-fg)">→</span><span class="badge b-emerald"><svg><use href="#ck"/></svg>production</span></div>
+        <div style="display:flex;align-items:center;gap:16px"><span class="mono" style="width:130px">develop</span><span style="color:var(--muted-fg)">→</span><span class="badge b-sky"><svg><use href="#info"/></svg>dev · ชื่อต่อท้าย -dev</span></div>
+        <div style="display:flex;align-items:center;gap:16px"><span class="mono" style="width:130px">branch อื่น</span><span style="color:var(--muted-fg)">→</span><span class="badge b-gray"><svg><use href="#minus"/></svg>ตรวจเท่านั้น ไม่ deploy</span></div>
+      </div></div>
+    <div class="abs card" id="v_qg" style="left:900px;top:600px;width:924px;overflow:hidden">
+      <table class="tbl"><thead><tr><th>Quality Gate · New code</th><th style="text-align:right">เกณฑ์</th><th>สถานะ</th></tr></thead><tbody id="v_rows"></tbody></table></div>
+  </section>
+
+  <!-- 08 results + close -->
+  <section class="ch" id="c8">
+    <div id="r_part">
+      <div class="abs" style="left:96px;top:170px"><div class="eyebrow" id="r_e">Evals · หลักฐานว่าใช้ได้จริง</div><h2 style="margin-top:18px"><span class="line"><span id="r_h">ผลลัพธ์ที่วัดได้</span></span></h2></div>
+      <div id="r_kpis"></div>
+      <div class="abs" id="r_note" style="left:96px;top:860px;font-size:20px;color:var(--muted-fg)">โจทย์ชุดเดียวกัน วัดตอนมีตัวช่วย เทียบกับตอนสั่ง AI เปล่า ๆ — ผลจาก <span class="mono">evals/</span> ของแต่ละตัวช่วยใน repo</div>
+    </div>
+    <div id="close" class="abs" style="inset:0">
+      <div class="abs" style="left:0;right:0;top:230px;text-align:center" id="x_logo"><svg viewBox="0 0 190 52" style="height:84px"><use href="#ube"/></svg></div>
+      <div class="abs eyebrow" id="x_ey" style="left:0;right:0;top:350px;text-align:center">Claude Code Plugin · Org Standard</div>
+      <div class="abs" id="x_t" style="left:0;right:0;top:396px;text-align:center"><h1>UGT Claude Platform</h1></div>
+      <div class="abs lead" id="x_tag" style="left:0;right:0;top:524px;text-align:center;font-size:32px;color:var(--fg)">ติดตั้งครั้งเดียว — มาตรฐานเดียวกันทั้งองค์กร</div>
+      <div class="abs card cmd" id="x_cmd" style="left:0;right:0;margin:auto;top:620px;width:max-content">
+        <div><span class="p">❯</span> /plugin marketplace add pakornkub/ugt-claude-platform</div>
+        <div><span class="p">❯</span> /plugin install ugt-nextjs-standard-superpowers@ugt</div>
+        <div><span class="p">❯</span> /reload-plugins</div></div>
+      <div class="abs mono" id="x_url" style="left:0;right:0;top:880px;text-align:center;font-size:24px;color:var(--primary)">github.com/pakornkub/ugt-claude-platform</div>
+    </div>
+  </section>
+
+  </div>
+  <div class="brand" id="brand"><svg viewBox="0 0 190 52"><use href="#ube"/></svg><span>UGT Claude Platform</span></div>
+  <div class="sect" id="sect"><b id="sn">01</b><i></i><span id="st">ภาพรวม</span></div>
+  <div class="foot" id="foot"><span id="fs"></span><span id="fn"></span></div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<script>
+// ---------- timing: 100 BPM, 1 bar = 2.4 s ----------
+const BPM = 100, BEAT = 60 / BPM, BAR = BEAT * 4;
+const B = b => b * BEAT;
+const DUR = B(128) + 2.4;
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const E = { out: t => 1 - (1 - t) ** 4, io: t => t < .5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2, lin: t => t };
+const P = (t, a, d, e = E.out) => e(cl((t - a) / d));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = new Intl.Segmenter('th', { granularity: 'grapheme' });
+const graph = s => [...seg.segment(s)].map(x => x.segment);
+const IC = n => `<svg><use href="#${n}"/></svg>`;
+
+// primitives
+function rise(id, t, a, { d = .7, y = 26 } = {}) { const el = typeof id === 'string' ? $(id) : id; const k = P(t, B(a), d); el.style.opacity = k; el.style.transform = `translateY(${(1 - k) * y}px)`; }
+function mask(id, t, a, { d = .9 } = {}) { const el = $(id); const k = P(t, B(a), d); el.style.transform = `translateY(${(1 - k) * 110}%)`; }
+function draw(el, t, a, d = .8) { const L = el.getTotalLength(); el.style.strokeDasharray = L; el.style.strokeDashoffset = L * (1 - P(t, B(a), d, E.io)); }
+function pop(el, t, a, d = .45) { const k = P(t, B(a), d); el.style.opacity = k; el.style.transform = `scale(${.85 + .15 * k})`; }
+
+// ---------- chapters ----------
+const CH = [
+  { id: 'c1', a: 0, b: 16, n: '01', t: 'ภาพรวม', src: 'README.md' },
+  { id: 'c2', a: 16, b: 28, n: '02', t: 'ความท้าทาย', src: 'README.md' },
+  { id: 'c3', a: 28, b: 44, n: '03', t: 'สถาปัตยกรรม', src: 'README.md · .claude-plugin/marketplace.json' },
+  { id: 'c4', a: 44, b: 64, n: '04', t: 'Demo', src: 'plugins/ugt-nextjs-platform/skills/ugt-nextjs-full-setup/SKILL.md' },
+  { id: 'c5', a: 64, b: 80, n: '05', t: 'Design system', src: 'plugins/ugt-core/contracts/design.md · docs/web/design-preview.html' },
+  { id: 'c6', a: 80, b: 96, n: '06', t: 'Identity · Database', src: 'plugins/ugt-core/contracts/auth.md · database.md' },
+  { id: 'c7', a: 96, b: 112, n: '07', t: 'Delivery', src: 'plugins/ugt-core/contracts/cicd.md' },
+  { id: 'c8', a: 112, b: 1e9, n: '08', t: 'ผลลัพธ์', src: 'README.md — หลักฐานว่าใช้ได้จริง' },
+];
+
+// ---------- build dynamic content ----------
+const SPEC = [['Framework', 'Next.js App Router · TypeScript'], ['Database', 'SQL Server · Prisma'], ['Identity', 'Keycloak · OIDC + PKCE'], ['Delivery', 'Jenkins · SonarQube · Docker'], ['UI', 'shadcn · Base UI · UI kit องค์กร']];
+$('o_spec').innerHTML = SPEC.map((r, i) => `<div id="os${i}a">${r[0]}</div><div id="os${i}b">${r[1]}</div>`).join('');
+const PROB = [['01', 'clock', 'amber', 'ตั้งค่าไม่เหมือนกัน', 'แต่ละโปรเจคต่อฐานข้อมูล ทำ login และ deploy ด้วยวิธีของตัวเอง'],
+  ['02', 'user', 'coral', 'มาตรฐานอยู่ในหัวคน', 'ความรู้หายไปเมื่อคนย้ายทีม เอกสารไม่ตรงกับของจริง'],
+  ['03', 'bot', 'sky', 'AI ไม่รู้กติกาองค์กร', 'เขียนโค้ดได้เร็ว แต่ไม่รู้ naming สิทธิ์ หรือ pipeline ของบริษัท']];
+$('p_cards').innerHTML = PROB.map((p, i) => `<div class="card pcard" id="pc${i}" style="left:${96 + i * 594}px"><div class="no">${p[0]}</div><div class="ic b-${p[2]}">${IC(p[1])}</div><div class="t">${p[3]}</div><div class="d">${p[4]}</div></div>`).join('');
+$('a_chips').innerHTML = ['contracts/database', 'contracts/auth', 'contracts/design', 'contracts/cicd', 'contracts/harness', '/ugt-handoff · /ugt-context'].map((c, i) => `<span class="chipm" id="ac${i}">${c}</span>`).join('');
+const DEMO = [['ตรวจโปรเจคเดิมก่อน', 'พบ SQLite ของ prototype · login จำลอง · UI เดิม — ไม่ทับของเดิมเงียบ ๆ'],
+  ['ถามคำถามชุดเดียว', 'ชื่อโปรเจค · แบบ login · ส่งอีเมล · แนบไฟล์'],
+  ['ติดตั้งตามลำดับ', ''],
+  ['ตรวจผลทุกโมดูล', 'verify.mjs — 0 failed'],
+  ['ส่งมอบ', 'docs/admin-handoff.md — เอกสารสำหรับทีม IT พร้อม checklist ทดสอบ']];
+const DT = [50, 52.5, 55, 59, 61];
+$('d_rows').innerHTML = DEMO.map((d, i) => `<div class="row" id="dr${i}"><div class="dot" id="dd${i}"></div><div><div class="main">${d[0]}</div><div class="sub" id="ds${i}">${d[1]}</div></div></div>`).join('');
+const MODS = ['Database', 'Quality', 'Design', 'Auth', 'Mail', 'CI/CD'];
+$('ds2').innerHTML = `<div style="display:flex;gap:8px;margin-top:6px">${MODS.map((m, i) => `<span class="modc" id="dm${i}">${m}</span>`).join('<span style="color:var(--muted-fg)">→</span>')}</div>`;
+const STEPS = [['ตรวจ', 'Inspect'], ['ถาม', 'Interview'], ['ติดตั้ง', 'Install'], ['ตรวจผล', 'Verify'], ['ส่งมอบ', 'Handoff']];
+$('d_steps').insertAdjacentHTML('beforeend', STEPS.map((s, i) => `<div class="step" id="st${i}" style="top:${i * 125}px"><div class="c" id="sc${i}">${String(i + 1).padStart(2, '0')}</div><div><div class="l">${s[0]}</div><div class="s mono">${s[1]}</div></div></div>`).join(''));
+const BADGES = [['amber', 'clock', 'รออนุมัติ'], ['emerald', 'ck', 'อนุมัติ'], ['red', 'x', 'ปฏิเสธ'], ['coral', 'half', 'ขอยกเลิก'], ['sky', 'info', 'ระบบแจ้ง'], ['gray', 'minus', 'ฉบับร่าง']];
+$('g_badges').innerHTML = BADGES.map((b, i) => `<span class="badge b-${b[0]}" id="gb${i}">${IC(b[1])}${b[2]}</span>`).join('');
+const ROWS = [['LV-0142', 'สมชาย ใจดี', 2, 1], ['LV-0141', 'วิภา สายชล', 1, 0], ['LV-0140', 'ธนา รุ่งเรือง', 3, 3], ['LV-0139', 'กมล ศรีสุข', 1, 5]];
+$('g_rows').innerHTML = ROWS.map((r, i) => `<tr id="gr${i}"><td class="mono">${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td><span class="badge b-${BADGES[r[3]][0]}" id="grb${i}">${IC(BADGES[r[3]][1])}${BADGES[r[3]][2]}</span></td></tr>`).join('');
+const NODES = [['ผู้ใช้', 'browser'], ['แอป', 'Next.js'], ['Keycloak', 'realm กลาง'], ['AD / LDAP', 'directory']];
+$('i_flow').insertAdjacentHTML('beforeend', NODES.map((n, i) => `<div class="node" id="in${i}" style="left:${i * 222}px;top:0"><div class="b" ${i === 2 ? 'style="border-color:var(--primary);color:var(--primary)"' : ''}>${n[0]}</div><div class="s">${n[1]}</div></div>`).join(''));
+const FACTS = [['sky', 'info', 'หนึ่งโปรเจค = หนึ่ง OIDC client', 'Client ID = ชื่อโปรเจค'], ['emerald', 'clock', 'Session 8 ชั่วโมง', 'ต่ออายุเมื่อเหลือ 30 นาที'], ['gray', 'layers', 'RBAC: user → role → permission', 'resource:action']];
+$('i_facts').innerHTML = FACTS.map((f, i) => `<div class="fact" id="if${i}"><span class="badge b-${f[0]}">${IC(f[1])}${f[2]}</span><span class="mono" style="font-size:19px;color:var(--muted-fg)">${f[3]}</span></div>`).join('');
+const NAMING = [['Table', 'PascalCase พหูพจน์', 'LeaveRequests'], ['Column', 'PascalCase', 'EmpCode'], ['Stored procedure', 'usp_*', 'usp_RecalculateWeeklySummary'], ['View', 'vw*', 'vwEmployee'], ['Read-only (ภายนอก)', '<EXT>_*', 'SELECT เท่านั้น']];
+$('i_rows').innerHTML = NAMING.map((r, i) => `<tr id="ir${i}"><td>${r[0]}</td><td class="mono" style="font-size:19px">${r[1].replace(/</g, '&lt;')}</td><td class="mono" style="font-size:19px;color:var(--primary)">${r[2]}</td></tr>`).join('');
+$('i_audit').innerHTML = ['Id', 'CreatedAt', 'UpdatedAt', 'CreatedBy', 'UpdatedBy', 'IsActive', 'IsDeleted'].map((c, i) => `<span class="chipm" id="ia${i}" style="font-size:18px;padding:6px 12px">${c}</span>`).join('');
+const ST = ['Checkout', 'Install', 'Code Quality', 'Unit Tests', 'Build', 'OWASP Check', 'SonarQube', 'Quality Gate', 'Docker Build', 'Deploy'];
+$('v_stages').innerHTML = ST.map((s, i) => `<div class="stage" id="vs${i}" style="left:${96 + i * 172}px;top:386px"><div class="n" id="vn${i}">${String(i + 1).padStart(2, '0')}</div><div class="l">${s}</div></div>`).join('');
+const QG = [['new_violations', '= 0'], ['new_duplicated_lines_density', '≤ 3%'], ['new_coverage', '≥ 60%'], ['new_security_hotspots_reviewed', '= 100%']];
+$('v_rows').innerHTML = QG.map((q, i) => `<tr id="vr${i}"><td class="mono">${q[0]}</td><td class="num">${q[1]}</td><td><span class="badge b-emerald" id="vb${i}">${IC('ck')}ผ่าน</span></td></tr>`).join('');
+const KPI = [[34, 34, 18, 'โจทย์ setup · auth · cicd'], [14, 14, 2, 'design-setup บนโปรเจคเปล่า'], [9, 9, 6, 'กันกับดักที่เคยพังบน production']];
+$('r_kpis').innerHTML = KPI.map((k, i) => `<div class="card kpi" id="rk${i}" style="left:${96 + i * 594}px"><div class="v"><span id="rv${i}" style="font-size:96px;color:var(--fg);margin:0;font-weight:600;letter-spacing:-.03em">0</span><span>/ ${k[1]}</span></div><div class="d">${k[3]}</div>
+  <div class="bars"><div class="br">UGT<div class="tr"><i id="rb${i}a" style="background:var(--primary)"></i></div></div><div class="br">AI<div class="tr"><i id="rb${i}b" style="background:var(--gray)"></i></div><span id="rw${i}" style="width:60px;text-align:right">${k[2]}/${k[1]}</span></div></div></div>`).join('');
+
+// ---------- chapter updates (a = chapter start beat) ----------
+const U = {};
+U.c1 = (t) => {
+  rise('o_e', t, .5); mask('o_l1', t, 1); mask('o_l2', t, 1.6); mask('o_l3', t, 2.2); rise('o_lead', t, 4);
+  rise('o_card', t, 4.5, { y: 40 }); $('o_rule').style.transform = `scaleX(${P(t, B(5), 1, E.io)})`;
+  SPEC.forEach((r, i) => { const a = 5.5 + i * .55; rise('os' + i + 'a', t, a, { y: 10 }); rise('os' + i + 'b', t, a + .15, { y: 10 }); $('os' + i + 'a').style.borderBottomColor = $('os' + i + 'b').style.borderBottomColor = t > B(a) ? '' : 'transparent'; });
+};
+U.c2 = (t) => {
+  rise('p_e', t, 16.3); mask('p_h', t, 16.6);
+  PROB.forEach((p, i) => rise('pc' + i, t, 18.5 + i * 1.2, { y: 40, d: .8 }));
+  rise('p_end', t, 23.5);
+};
+U.c3 = (t) => {
+  rise('a_e', t, 28.3); mask('a_h', t, 28.6);
+  rise('a_core', t, 30, { y: 40 }); for (let i = 0; i < 6; i++) rise('ac' + i, t, 30.6 + i * .3, { y: 10 });
+  rise('a_p1', t, 33.2, { y: 30 }); rise('a_p2', t, 33.6, { y: 30 }); rise('a_p3', t, 34, { y: 30 });
+  draw($('a_w3'), t, 34.6); draw($('a_w4'), t, 34.8); draw($('a_w5'), t, 35);
+  rise('a_b1', t, 36.2, { y: 30 }); rise('a_b2', t, 36.6, { y: 30 });
+  draw($('a_w1'), t, 37.2, 1); draw($('a_w2'), t, 37.4, 1.2);
+  const pl = t > B(39) ? .5 + .5 * Math.sin((t - B(39)) * 3) : 0; $('a_b1').style.boxShadow = `0 0 0 ${4 + pl * 6}px color-mix(in oklch,var(--primary) ${12 - pl * 4}%,transparent)`;
+};
+U.c4 = (t) => {
+  rise('d_e', t, 44.3); mask('d_h', t, 44.6); rise('d_card', t, 45.2, { y: 40 }); rise('d_steps', t, 45.6, { y: 20 });
+  const S = 'ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย', g = graph(S);
+  $('d_prompt').textContent = g.slice(0, Math.floor(cl((t - B(46.2)) / B(3)) * g.length)).join('');
+  $('d_caret').style.opacity = t < B(49.4) && Math.floor(t / .4) % 2 === 0 ? 1 : 0;
+  DEMO.forEach((d, i) => {
+    rise('dr' + i, t, DT[i], { y: 12 });
+    const done = t > B((DT[i + 1] || 63) - .3), active = t > B(DT[i]) && !done;
+    const dot = $('dd' + i); dot.style.background = done ? 'var(--emerald)' : active ? 'var(--primary)' : 'var(--border)'; dot.innerHTML = done ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '';
+    const c = $('sc' + i); c.style.background = done ? 'var(--emerald)' : active ? 'var(--primary)' : 'var(--card)'; c.style.borderColor = done ? 'var(--emerald)' : active ? 'var(--primary)' : '';
+    c.style.color = active ? '#fff' : ''; c.innerHTML = done ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : String(i + 1).padStart(2, '0');
+    c.style.boxShadow = active ? '0 0 0 8px color-mix(in oklch,var(--primary) 15%,transparent)' : '';
+  });
+  MODS.forEach((m, i) => { const on = t > B(55.6 + i * .5); const e = $('dm' + i); e.style.background = on ? 'color-mix(in oklch,var(--emerald) 14%,white)' : ''; e.style.color = on ? 'var(--emerald-fg)' : ''; e.style.borderColor = on ? 'transparent' : ''; });
+  let fh = 0; for (let k = 0; k < 4; k++) fh += 125 * P(t, B((DT[k + 1] || 63) - .3), .6, E.io);
+  $('d_fill').style.height = fh + 'px';
+};
+U.c5 = (t) => {
+  rise('g_e', t, 64.3); mask('g_h', t, 64.6);
+  rise('g_left', t, 66, { y: 40 }); rise('g_right', t, 66.6, { y: 40 });
+  const wk = cl((t - B(67)) / B(3)); $('g_w').style.fontWeight = Math.round(400 + 200 * Math.abs(Math.sin(wk * Math.PI * 1.5)));
+  $('g_rule').style.transform = `scaleX(${P(t, B(68), 1, E.io)})`; rise('g_prim', t, 68.6, { y: 12 });
+  BADGES.forEach((b, i) => pop($('gb' + i), t, 69.6 + i * .3));
+  ROWS.forEach((r, i) => { rise('gr' + i, t, 68 + i * .4, { y: 12 }); pop($('grb' + i), t, 70.5 + i * .35); });
+  const bp = t > B(73) && t < B(74) ? 1 : 0; $('g_btn').style.boxShadow = bp ? '0 0 0 6px color-mix(in oklch,var(--primary) 25%,transparent)' : '';
+};
+U.c6 = (t) => {
+  rise('i_e', t, 80.3); mask('i_h', t, 80.6);
+  rise('i_left', t, 82, { y: 40 }); rise('i_right', t, 82.6, { y: 40 });
+  NODES.forEach((n, i) => rise('in' + i, t, 83 + i * .8, { y: 14 }));
+  draw($('i_a1'), t, 83.5, .5); draw($('i_a2'), t, 84.3, .5); draw($('i_a3'), t, 85.1, .5);
+  rise('i_pkce', t, 86); FACTS.forEach((f, i) => rise('if' + i, t, 86.8 + i * .7, { y: 12 }));
+  NAMING.forEach((r, i) => rise('ir' + i, t, 84 + i * .45, { y: 12 }));
+  rise('i_auditl', t, 87.5); for (let i = 0; i < 7; i++) pop($('ia' + i), t, 88 + i * .25);
+};
+U.c7 = (t) => {
+  rise('v_e', t, 96.3); mask('v_h', t, 96.6);
+  $('v_base').style.transform = `scaleX(${P(t, B(97.2), 1.2, E.io)})`;
+  const fill = cl((t - B(99)) / B(5.5)); $('v_fill').style.width = (E.io(fill) * 1578) + 'px';
+  ST.forEach((s, i) => { rise('vs' + i, t, 97.4 + i * .12, { y: 16 }); const on = E.io(fill) * 1578 >= i * 172 - 1 && t > B(99); const n = $('vn' + i);
+    const gate = i === 7;
+    n.style.background = on ? (gate ? 'var(--primary)' : 'var(--emerald)') : ''; n.style.borderColor = on ? (gate ? 'var(--primary)' : 'var(--emerald)') : '';
+    n.innerHTML = on ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : String(i + 1).padStart(2, '0');
+    n.style.boxShadow = on && gate ? '0 0 0 8px color-mix(in oklch,var(--primary) 15%,transparent)' : ''; });
+  rise('v_branch', t, 101.5, { y: 40 }); rise('v_qg', t, 102.2, { y: 40 });
+  QG.forEach((q, i) => { rise('vr' + i, t, 102.8 + i * .4, { y: 10 }); pop($('vb' + i), t, 104.6 + i * .35); });
+};
+U.c8 = (t) => {
+  const out = P(t, B(119.4), .6, E.io);
+  $('r_part').style.opacity = 1 - out; $('r_part').style.transform = `translateY(${-out * 30}px)`;
+  rise('r_e', t, 112.3); mask('r_h', t, 112.6);
+  KPI.forEach((k, i) => { rise('rk' + i, t, 113.6 + i * .5, { y: 40 }); const c = P(t, B(114.6 + i * .5), 2.2); $('rv' + i).textContent = Math.round(k[0] * c);
+    $('rb' + i + 'a').style.width = c * 100 + '%'; $('rb' + i + 'b').style.width = c * (k[2] / k[1]) * 100 + '%'; });
+  rise('r_note', t, 116.5);
+  const on = t > B(119.6);
+  $('close').style.display = on ? 'block' : 'none';
+  if (on) { rise('x_logo', t, 120.2, { y: 20 }); rise('x_ey', t, 120.8); rise('x_t', t, 121.2, { y: 30 }); rise('x_tag', t, 122); rise('x_cmd', t, 123.2, { y: 30 }); rise('x_url', t, 124.4); }
+};
+
+// ---------- master ----------
+function render(t) {
+  const cur = [...CH].reverse().find(c => t >= B(c.a) - 1e-6) || CH[0];
+  for (const c of CH) {
+    const el = $(c.id); const on = c === cur || (t >= B(c.b) - B(.5) && t < B(c.b) + .01 && c.b < 1e9 && false);
+    el.style.display = c === cur ? 'block' : 'none';
+    if (c === cur) {
+      const outk = c.b < 1e9 ? P(t, B(c.b) - .45, .45, E.io) : 0;
+      el.style.opacity = 1 - outk; el.style.transform = `translateY(${-outk * 24}px)`;
+      U[c.id](t);
+    }
+  }
+  // chrome
+  $('sn').textContent = cur.n; $('st').textContent = cur.t; $('fs').textContent = cur.src; $('fn').textContent = `${cur.n} / 08`;
+  const ck = P(t, B(cur.a), .6); $('sect').style.opacity = ck; $('foot').style.opacity = t > B(119.6) ? 1 - P(t, B(119.6), .6) : ck;
+  $('brand').style.opacity = P(t, 0, .8) * (1 - P(t, B(119.6), .6));
+  $('sect').style.visibility = t > B(119.8) ? 'hidden' : 'visible';
+  $('pg').style.width = (cl(t / B(128)) * 100) + '%';
+  // slow camera drift within each chapter
+  const lc = (t - B(cur.a)) / Math.max(1, (Math.min(cur.b, 128) - cur.a) * BEAT);
+  $('cam').style.transform = `scale(${1 + cl(lc) * .015}) translateX(${-cl(lc) * 6}px)`;
+  $('grid').style.transform = `translate(${-(t * 6) % 96}px,${-(t * 3) % 96}px)`;
+  $('glow').style.transform = `translate(${Math.sin(t * .15) * 120}px,${Math.cos(t * .12) * 60}px)`;
+}
+window.render = render; window.DUR = DUR;
+window.__ready = document.fonts.ready;
+function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); $('stage').style.transform = `scale(${s})` }
+if (!window.__RENDER) {
+  addEventListener('resize', fit); fit();
+  const q = new URLSearchParams(location.search); const T0 = parseFloat(q.get('t') || '0');
+  document.fonts.ready.then(() => { render(T0); if (q.has('still')) return;
+    let start = null; const au = new Audio('music.mp3');
+    addEventListener('click', () => { if (start !== null) return; start = performance.now() - T0 * 1000; au.currentTime = T0; au.play().catch(() => { });
+      const loop = now => { const t = (now - start) / 1000; if (t >= DUR) { render(DUR - .01); return } render(t); requestAnimationFrame(loop) }; requestAnimationFrame(loop) }); });
+}
+</script>
+</body>
+</html>

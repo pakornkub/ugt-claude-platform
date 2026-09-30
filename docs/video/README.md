@@ -3,10 +3,11 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-มีห้าเวอร์ชัน:
+มีหกเวอร์ชัน:
 
 | ไฟล์ | สไตล์ | ความยาว |
 | --- | --- | --- |
+| [`corporate/ugt-claude-platform-corporate.mp4`](corporate/ugt-claude-platform-corporate.mp4) | **Corporate film** — motion graphic ทางการ ใช้ design system ขององค์กรเอง (token/ฟอนต์จาก `contracts/design.md`) เล่าภาพรวม + demo + มาตรฐานของ stack | 79 วินาที |
 | [`sizzle/ugt-claude-platform-sizzle.mp4`](sizzle/ugt-claude-platform-sizzle.mp4) | **Sizzle reel** — ตัดภาพเร็วตามจังหวะ ผสมช็อตเมือง 3D + ฉาก CM โทนสว่าง สำหรับเปิดงาน/ประชุม | 39 วินาที |
 | [`cm/ugt-claude-platform-cm.mp4`](cm/ugt-claude-platform-cm.mp4) | **Trailer สไตล์โฆษณาญี่ปุ่น (CM)** โทนสว่างตาม repo — มาสคอตการ์ตูน chibi, ตัดฉากตามจังหวะเพลง 128 BPM | 61 วินาที |
 | [`explainer/ugt-claude-platform-explainer.mp4`](explainer/ugt-claude-platform-explainer.mp4) | **Tech explainer 3D** — หน้าจอโปรแกรมจริงลอยในอวกาศ เล่าตามขั้นตอนการทำงานจริงของ plugin + คำแปลเป็นภาษาคน | 86 วินาที |
@@ -14,6 +15,37 @@
 | [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
 
 ทั้งหมด 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## Corporate film (`corporate/`)
+
+ใช้ **design system ขององค์กร** ตรง ๆ: สี = token oklch จาก `docs/web/design-preview.html`,
+ฟอนต์ Inter + Noto Sans Thai (400/500/600) + Geist Mono, สถานะ 6 สีพร้อมไอคอน, primary ใช้เป็นจุดเน้นเท่านั้น
+— ตามกติกาใน `plugins/ugt-core/contracts/design.md` · เพลง 100 BPM (1 ห้อง = 2.4 วินาที) บทละ 3–5 ห้อง
+
+| บท | เวลา | เนื้อหา · ที่มา |
+| --- | --- | --- |
+| 01 ภาพรวม | 0:00 | หัวข้อ + stack ที่รองรับ · README |
+| 02 ความท้าทาย | 0:10 | ตั้งค่าไม่เหมือนกัน · มาตรฐานอยู่ในหัวคน · AI ไม่รู้กติกา |
+| 03 สถาปัตยกรรม | 0:17 | ugt-core → stack platform → bundle · README, marketplace.json |
+| 04 Demo | 0:26 | ประโยคเดียว → ตรวจ → ถาม → ติดตั้งตามลำดับ → verify → ส่งมอบ · `ugt-nextjs-full-setup` |
+| 05 Design system | 0:38 | ฟอนต์ · primary · สถานะ 6 สี · ตารางตัวอย่าง · `contracts/design.md` |
+| 06 Identity · Database | 0:48 | Keycloak OIDC + PKCE · session 8 ชม. · RBAC · กติกาตั้งชื่อ · audit columns · `contracts/auth.md`, `database.md` |
+| 07 Delivery | 0:58 | Pipeline 10 ขั้น · Quality Gate · branch model · `contracts/cicd.md` |
+| 08 ผลลัพธ์ | 1:07 | 34/34 vs 18/34 · 14/14 vs 2/14 · 9/9 vs 6/9 → คำสั่งติดตั้ง |
+
+ข้อมูลในตารางคำขอลาเป็นตัวอย่างสมมติ · แถว "branch อื่น → ตรวจเท่านั้น" อนุมานจากกติกาที่ว่า
+Docker Build/Deploy รันเฉพาะ `main`/`develop`
+
+```bash
+(cd docs/video/corporate && npm i) && pip install numpy scipy
+npx http-server -p 8124 docs/video &            # เปิด http://127.0.0.1:8124/corporate/corp.html
+cd docs/video/corporate && python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
+node render.mjs 0 594 p0.mp4 & node render.mjs 594 1188 p1.mp4 & \
+node render.mjs 1188 1782 p2.mp4 & node render.mjs 1782 2376 p3.mp4 & wait
+printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
+ffmpeg -y -f concat -safe 0 -i list.txt -i music.wav -c:v libx264 -crf 20 -pix_fmt yuv420p \
+  -af loudnorm=I=-16:TP=-1.5 -c:a aac -b:a 224k -shortest -movflags +faststart ugt-claude-platform-corporate.mp4
+```
 
 ## Sizzle reel (`sizzle/`)
 

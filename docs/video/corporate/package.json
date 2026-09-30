@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Render tooling for the UGT corporate film (corp.html)",
+  "dependencies": {
+    "playwright": "^1.56.1"
+  }
+}
