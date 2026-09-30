@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UGT Claude Platform Promo</title>
+<style>
+@font-face{font-family:Kanit;font-weight:900;src:url(fonts/Kanit-Black.ttf)}
+@font-face{font-family:Kanit;font-weight:700;src:url(fonts/Kanit-Bold.ttf)}
+@font-face{font-family:Plex;font-weight:400;src:url(fonts/IBMPlexSansThai-Regular.ttf)}
+@font-face{font-family:Plex;font-weight:600;src:url(fonts/IBMPlexSansThai-SemiBold.ttf)}
+@font-face{font-family:Plex;font-weight:700;src:url(fonts/IBMPlexSansThai-Bold.ttf)}
+@font-face{font-family:JB;font-weight:100 800;src:url(fonts/JetBrainsMono.ttf)}
+:root{
+  --bg:#05070f;--ink:#e6e9f4;--ink2:#9aa3c7;--ink3:#5d6690;
+  --cyan:#22d3ee;--indigo:#6366f1;--violet:#a78bfa;--green:#34d399;--red:#fb7185;--amber:#fbbf24;
+  --line:rgba(120,140,255,.28);--card:rgba(14,19,40,.82);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;overflow:hidden;height:100%}
+body{display:flex;align-items:center;justify-content:center}
+#stage{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Plex,sans-serif;transform-origin:center center;flex:none}
+#bg{position:absolute;inset:0}
+.scene{position:absolute;inset:0;opacity:0;will-change:opacity,transform}
+.abs{position:absolute}
+.mono{font-family:JB,monospace}
+.kanit{font-family:Kanit,Plex,sans-serif}
+.grad{background:linear-gradient(90deg,#67e8f9,#818cf8 55%,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{font-family:JB,monospace;font-size:22px;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase}
+.h1{font-family:Kanit,sans-serif;font-weight:900;font-size:112px;line-height:1.12;letter-spacing:-.01em;text-align:center}
+.h2{font-family:Kanit,sans-serif;font-weight:900;font-size:78px;line-height:1.1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(99,102,241,.12) inset}
+.center-x{left:0;right:0;text-align:center}
+
+/* HUD */
+#hud{position:absolute;inset:0;pointer-events:none;font-family:JB,monospace;color:var(--ink2);font-size:17px;letter-spacing:.12em}
+.brk{position:absolute;width:46px;height:46px;border-color:var(--cyan);border-style:solid;opacity:.8}
+.brk.tl{left:36px;top:36px;border-width:3px 0 0 3px}.brk.tr{right:36px;top:36px;border-width:3px 3px 0 0}
+.brk.bl{left:36px;bottom:36px;border-width:0 0 3px 3px}.brk.br{right:36px;bottom:36px;border-width:0 3px 3px 0}
+#hud .tl-t{position:absolute;left:100px;top:44px;display:flex;align-items:center;gap:14px}
+#hud .tl-t svg{height:20px;color:#fff}
+#hud .tr-t{position:absolute;right:100px;top:44px;text-align:right}
+#hud .bl-t{position:absolute;left:100px;bottom:46px}
+#hud .br-t{position:absolute;right:100px;bottom:46px;display:flex;gap:10px;align-items:center}
+#prog{position:absolute;left:100px;right:100px;bottom:30px;height:3px;background:rgba(255,255,255,.08)}
+#prog i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--cyan),var(--violet));box-shadow:0 0 12px var(--cyan)}
+#rec{width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red)}
+#scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px);mix-blend-mode:overlay}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.75) 100%)}
+#flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,#e0f7ff,#7dd3fc 40%,#6366f1 100%);opacity:0;mix-blend-mode:screen}
+#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+
+/* S1 */
+.chip{position:absolute;font-family:JB,monospace;font-size:24px;padding:10px 18px;border-radius:10px;white-space:nowrap;background:rgba(20,24,44,.85);border:1px solid rgba(255,255,255,.12);color:#b8c0e0}
+.chip.bad{border-color:rgba(251,113,133,.6);color:#fecdd3;background:rgba(60,12,24,.8);box-shadow:0 0 24px rgba(251,113,133,.25)}
+.chip.warn{border-color:rgba(251,191,36,.55);color:#fde68a;background:rgba(56,40,8,.8)}
+#s1core{position:absolute;left:960px;top:540px;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;box-shadow:0 0 40px 20px #67e8f9,0 0 120px 60px #6366f1;opacity:0}
+
+/* S2 */
+.ring{position:absolute;left:960px;top:330px;border-radius:50%;border:2px solid var(--cyan);transform:translate(-50%,-50%)}
+#s2logo{position:absolute;left:960px;top:300px;width:420px;transform:translate(-50%,-50%);color:#fff;filter:drop-shadow(0 0 30px rgba(103,232,249,.7))}
+.pill{display:inline-flex;align-items:center;gap:10px;font-family:JB,monospace;font-size:24px;padding:12px 22px;border-radius:999px;border:1px solid var(--line);background:rgba(14,19,40,.8);color:#cdd5f5}
+.pill b{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+
+/* S3 terminal */
+.term{position:absolute;overflow:hidden}
+.term .bar{height:52px;display:flex;align-items:center;gap:10px;padding:0 22px;border-bottom:1px solid var(--line);font-family:JB,monospace;font-size:18px;color:var(--ink3)}
+.term .bar i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.term .body{padding:26px 34px;font-family:JB,monospace;font-size:27px;line-height:1.62}
+.ln{white-space:pre;height:44px}
+.ps{color:var(--violet)}
+.ok{color:var(--green)}
+.caret{display:inline-block;width:14px;height:30px;background:var(--cyan);vertical-align:-5px;margin-left:2px;box-shadow:0 0 10px var(--cyan)}
+.ugtlist{display:grid;grid-template-columns:1fr 1fr;column-gap:30px;font-size:21px;line-height:1.55;margin-top:6px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(99,102,241,.08)}
+.ugtlist div{white-space:nowrap;color:#c7d2fe}
+.ugtlist div span{color:var(--ink3)}
+.bcard{position:absolute;padding:30px 34px;width:640px}
+.bcard .t{font-family:JB,monospace;font-size:34px;font-weight:700}
+.bcard .d{font-size:27px;color:var(--ink2);margin-top:10px;line-height:1.45}
+.tag{display:inline-block;font-family:Plex;font-weight:700;font-size:20px;padding:4px 14px;border-radius:999px;margin-left:12px;vertical-align:6px}
+
+/* S4 */
+#chat{position:absolute;left:260px;width:1400px;top:238px;height:110px;display:flex;align-items:center;gap:22px;padding:0 34px;font-size:40px;font-weight:600}
+#chat .gt{font-family:JB,monospace;color:var(--cyan);font-size:40px}
+#chat .send{margin-left:auto;width:62px;height:62px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--indigo));display:flex;align-items:center;justify-content:center}
+.node{position:absolute;width:190px;text-align:center;transform:translate(-50%,0)}
+.node .c{width:128px;height:128px;margin:0 auto;border-radius:50%;border:2px solid rgba(120,140,255,.35);background:rgba(14,19,40,.9);display:flex;align-items:center;justify-content:center;position:relative}
+.node .c svg{width:58px;height:58px;stroke:#7c86b8;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.node .c .chk{position:absolute;right:-4px;top:-4px;width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px var(--green)}
+.node .c .chk svg{width:24px;height:24px;stroke:#04221a;stroke-width:4}
+.node .l{font-family:Kanit;font-weight:700;font-size:32px;margin-top:18px}
+.node .s{font-size:21px;color:var(--ink2);margin-top:4px;line-height:1.35}
+.node.opt .c{border-style:dashed}
+#pline{position:absolute;left:160px;width:1600px;top:563px;height:4px;background:rgba(120,140,255,.18);border-radius:4px}
+#pline i{position:absolute;left:0;top:-1px;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--violet));box-shadow:0 0 16px var(--cyan)}
+#pline b{position:absolute;top:-9px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#fff;box-shadow:0 0 20px 8px var(--cyan)}
+#stamp{position:absolute;left:960px;top:830px;transform:translate(-50%,-50%);font-family:JB,monospace;font-weight:800;font-size:38px;color:var(--green);border:3px solid var(--green);padding:10px 28px;border-radius:12px;box-shadow:0 0 30px rgba(52,211,153,.4),0 0 30px rgba(52,211,153,.2) inset;background:rgba(4,34,26,.7);white-space:nowrap}
+#doc{position:absolute;left:960px;top:900px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:14px 28px;white-space:nowrap}
+#doc .f{font-family:JB,monospace;font-size:26px;color:#c7d2fe}
+#doc .d{font-size:24px;color:var(--ink2)}
+
+/* S5 grid */
+#grid{position:absolute;left:150px;top:300px;width:1620px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.sk{height:142px;padding:20px 24px;position:relative;overflow:hidden}
+.sk .n{font-family:JB,monospace;font-size:25px;font-weight:700}
+.sk .n span{color:var(--ink3);font-weight:400}
+.sk .d{font-size:22px;color:var(--ink2);margin-top:10px;line-height:1.35}
+.sk .dot{position:absolute;right:20px;top:24px;width:10px;height:10px;border-radius:50%}
+.sk .auto{position:absolute;right:16px;top:16px;font-family:JB,monospace;font-size:16px;font-weight:800;padding:4px 10px;border-radius:6px;background:var(--amber);color:#1a1200;letter-spacing:.1em}
+
+/* S6 mock app */
+.mock{position:absolute;left:0;top:0;width:1040px;height:660px;border-radius:18px;overflow:hidden;font-family:Plex;--p:#4f46e5;--mbg:#f8f9fc;--mcard:#ffffff;--mink:#1e2436;--mink2:#6d7590;--mline:#e5e8f0;--mside:#ffffff;background:var(--mbg);color:var(--mink)}
+.mock.dark{--p:#818cf8;--mbg:#0d1020;--mcard:#161a2e;--mink:#e6e9f4;--mink2:#8f97b8;--mline:#262b45;--mside:#11152a}
+.mock .hd{position:absolute;left:0;right:0;top:0;height:64px;background:var(--mcard);border-bottom:1px solid var(--mline);display:flex;align-items:center;padding:0 24px;gap:14px}
+.mock .hd svg{height:18px;color:var(--p)}
+.mock .hd .nm{font-weight:700;font-size:20px}
+.mock .hd .tg{margin-left:auto;width:64px;height:32px;border-radius:999px;background:var(--mline);position:relative}
+.mock .hd .tg i{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:var(--p)}
+.mock.dark .hd .tg i{left:36px}
+.mock .hd .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#22d3ee)}
+.mock .sd{position:absolute;left:0;top:64px;bottom:0;width:220px;background:var(--mside);border-right:1px solid var(--mline);padding:20px 14px}
+.mock .sd div{font-size:18px;padding:11px 14px;border-radius:10px;color:var(--mink2);margin-bottom:4px}
+.mock .sd div.on{background:color-mix(in srgb,var(--p) 14%,transparent);color:var(--p);font-weight:700}
+.mock .mn{position:absolute;left:220px;right:0;top:64px;bottom:0;padding:26px 30px}
+.mock .pt{font-size:26px;font-weight:700}
+.mock .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.mock .kpi{background:var(--mcard);border:1px solid var(--mline);border-radius:14px;padding:16px 18px}
+.mock .kpi .a{font-size:15px;color:var(--mink2)}
+.mock .kpi .b{font-size:32px;font-weight:700;margin-top:2px}
+.mock .kpi .b small{font-size:15px;color:#10b981;margin-left:8px}
+.mock .tbl{margin-top:18px;background:var(--mcard);border:1px solid var(--mline);border-radius:14px;overflow:hidden}
+.mock .tb-top{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--mline)}
+.mock .srch{flex:1;height:36px;border:1px solid var(--mline);border-radius:9px;font-size:15px;color:var(--mink2);display:flex;align-items:center;padding:0 12px}
+.mock .btn{height:36px;padding:0 16px;border-radius:9px;background:var(--p);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center}
+.mock.dark .btn{color:#0d1020}
+.mock .tr{display:grid;grid-template-columns:110px 1fr 150px 120px;padding:11px 18px;font-size:16px;border-bottom:1px solid var(--mline);align-items:center}
+.mock .tr.th{color:var(--mink2);font-weight:700;font-size:14px}
+.bd{display:inline-block;font-size:14px;font-weight:700;padding:3px 12px;border-radius:999px}
+.bd.g{background:#d1fae5;color:#065f46}.bd.a{background:#fef3c7;color:#92400e}.bd.s{background:#e5e7eb;color:#374151}.bd.r{background:#ffe4e6;color:#9f1239}
+.mock.dark .bd.g{background:#064e3b;color:#a7f3d0}.mock.dark .bd.a{background:#78350f;color:#fde68a}.mock.dark .bd.s{background:#374151;color:#e5e7eb}.mock.dark .bd.r{background:#881337;color:#fecdd3}
+#mockwrap{position:absolute;left:800px;top:250px;width:1040px;height:660px;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(120,140,255,.35),0 0 60px rgba(99,102,241,.25)}
+.bul{font-size:34px;display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.bul i{width:36px;height:36px;border-radius:10px;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.6);display:flex;align-items:center;justify-content:center;flex:none}
+.bul i svg{width:22px;height:22px;stroke:var(--green);stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* S7 */
+.fnode{position:absolute;transform:translate(-50%,-50%);padding:14px 22px;font-family:JB,monospace;font-size:24px;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.fnode svg{width:24px;height:24px;stroke:var(--violet);fill:none;stroke-width:2}
+#hub{position:absolute;left:960px;top:600px;width:250px;height:250px;margin:-125px 0 0 -125px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#3a2f8a,#10142c 72%);border:2px solid var(--violet);box-shadow:0 0 60px rgba(167,139,250,.5)}
+#hub .a{font-family:JB,monospace;font-size:28px;font-weight:800}
+#hub .b{font-size:20px;color:var(--ink2);margin-top:6px}
+.orb{position:absolute;left:960px;top:600px;border-radius:50%;border:1px dashed rgba(167,139,250,.45);transform:translate(-50%,-50%)}
+#tl7{position:absolute;left:360px;width:1200px;top:965px;height:4px;background:rgba(167,139,250,.2)}
+#tl7 .st{position:absolute;top:-44px;transform:translateX(-50%);font-size:24px;color:var(--ink2);white-space:nowrap}
+#tl7 .pt{position:absolute;top:-8px;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:rgba(167,139,250,.35)}
+#tl7 .mv{position:absolute;top:-10px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:#fff;box-shadow:0 0 20px 6px var(--violet)}
+
+/* S8 */
+.barrow{margin-bottom:30px}
+.barrow .lb{display:flex;justify-content:space-between;align-items:baseline;font-size:32px;font-weight:600;margin-bottom:14px}
+.barrow .lb .v{font-family:Kanit;font-weight:900;font-size:64px}
+.barrow .tr{height:44px;border-radius:12px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+.barrow .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:12px}
+.stat{position:absolute;left:1150px;width:660px;height:170px;padding:26px 32px;display:flex;align-items:center;gap:30px}
+.stat .big{font-family:Kanit;font-weight:900;font-size:84px;line-height:1;min-width:230px}
+.stat .vs{font-family:JB,monospace;font-size:22px;color:var(--ink3);margin-top:8px}
+.stat .d{font-size:27px;line-height:1.35}
+
+/* S9 */
+#cmd{position:absolute;left:960px;top:535px;transform:translateX(-50%);width:1180px;padding:30px 40px;font-family:JB,monospace;font-size:32px;line-height:1.75}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1920" height="1080"></canvas>
+
+  <!-- ============ S1: problem ============ -->
+  <section class="scene" id="s1">
+    <div id="chips"></div>
+    <div class="abs center-x" style="top:300px">
+      <div class="kicker" id="s1k">// problem_detected</div>
+    </div>
+    <div class="abs center-x h1" id="s1a" style="top:390px">ทุกโปรเจค<br>เขียนกันคนละแบบ</div>
+    <div class="abs center-x h1" id="s1b" style="top:390px">AI เขียนโค้ดเร็ว…<br><span class="grad">แต่ไม่รู้มาตรฐานบริษัท</span></div>
+    <div id="s1core"></div>
+  </section>
+
+  <!-- ============ S2: logo ============ -->
+  <section class="scene" id="s2">
+    <div class="ring" id="r1"></div><div class="ring" id="r2"></div><div class="ring" id="r3"></div>
+    <div id="s2logo"><svg class="logo" viewBox="0 0 190 52"></svg></div>
+    <div class="abs center-x mono" id="s2t" style="top:420px;font-size:58px;font-weight:800;letter-spacing:.3em;color:#fff">UGT CLAUDE PLATFORM</div>
+    <div class="abs center-x" id="s2s" style="top:510px;font-size:36px;color:var(--ink2)">ชุดเครื่องมือ Claude Code ขององค์กร</div>
+    <div class="abs center-x kanit" id="s2b" style="top:600px;font-size:66px;font-weight:900;line-height:1.2">ติดตั้งครั้งเดียว → <span class="grad">ทุกโปรเจคทำตามมาตรฐานเอง</span></div>
+    <div class="abs center-x" id="s2stack" style="top:770px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding:0 200px"></div>
+  </section>
+
+  <!-- ============ S3: install ============ -->
+  <section class="scene" id="s3">
+    <div class="abs" style="left:150px;top:130px"><div class="kicker" id="s3k">01 — install</div></div>
+    <div class="abs h2" id="s3h" style="left:150px;top:170px">ติดตั้งใน <span class="grad">3 บรรทัด</span></div>
+    <div class="term card" id="term" style="left:150px;top:300px;width:1000px;height:680px">
+      <div class="bar"><i style="background:#fb7185"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i><span style="margin-left:16px">claude — ~/my-project</span></div>
+      <div class="body">
+        <div class="ln" id="tl0"></div><div class="ln ok" id="tl1"></div>
+        <div class="ln" id="tl2"></div><div class="ln ok" id="tl3"></div>
+        <div class="ln" id="tl4"></div><div class="ln ok" id="tl5"></div>
+        <div class="ln" id="tl6"></div>
+        <div class="ugtlist" id="ugtlist"></div>
+      </div>
+    </div>
+    <div class="bcard card" id="bc1" style="left:1190px;top:300px;border-color:rgba(34,211,238,.6)">
+      <div class="t" style="color:var(--cyan)">superpowers<span class="tag" style="background:var(--cyan);color:#022">แนะนำ</span></div>
+      <div class="d">Pipeline อัตโนมัติ<br>คิด → วางแผน → เขียนเทสต์ → review</div>
+    </div>
+    <div class="bcard card" id="bc2" style="left:1190px;top:545px">
+      <div class="t" style="color:var(--violet)">mattpocock<span class="tag" style="background:rgba(167,139,250,.2);color:var(--violet);border:1px solid var(--violet)">ทางเลือก</span></div>
+      <div class="d">สั่งเองทีละขั้น<br>คุมละเอียด · ประหยัด token</div>
+    </div>
+    <div class="abs pill" id="bc3" style="left:1190px;top:800px"><b style="background:var(--green);box-shadow:0 0 10px var(--green)"></b>ugt-core มาด้วยอัตโนมัติ</div>
+  </section>
+
+  <!-- ============ S4: one sentence -> pipeline ============ -->
+  <section class="scene" id="s4">
+    <div class="abs center-x"><div class="kicker" id="s4k" style="margin-top:100px">02 — one sentence</div></div>
+    <div class="abs center-x h2" id="s4h" style="top:132px;font-size:60px">พิมพ์<span class="grad">ประโยคเดียว</span></div>
+    <div class="card" id="chat"><span class="gt">❯</span><span id="chatTxt"></span><span class="caret" id="chatCaret"></span>
+      <div class="send"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div></div>
+    <div class="abs center-x" id="s4note" style="top:370px;font-size:27px;color:var(--ink2)">ตรวจของเดิมก่อนเสมอ → ถามคำถามชุดเดียว → ติดตั้งตามลำดับที่ถูกต้อง</div>
+    <div id="pline"><i></i><b></b></div>
+    <div id="nodes"></div>
+    <div id="stamp">verify.mjs &nbsp;▸&nbsp; ALL GREEN ✓</div>
+    <div id="doc" class="card"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><span class="f">docs/admin-handoff.md</span><span class="d">— เอกสารส่งต่อทีม DevOps พร้อมใช้ทันที</span></div>
+  </section>
+
+  <!-- ============ S5: skills ============ -->
+  <section class="scene" id="s5">
+    <div class="abs" style="left:150px;top:130px"><div class="kicker" id="s5k">03 — skills</div></div>
+    <div class="abs h2" id="s5h" style="left:150px;top:170px"><span class="grad">16 ตัวช่วย</span> ครบทุกงาน</div>
+    <div class="abs" id="s5leg" style="right:150px;top:215px;display:flex;gap:30px;font-size:24px;color:var(--ink2)">
+      <span><b style="display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--cyan);margin-right:10px"></b>Next.js</span>
+      <span><b style="display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--violet);margin-right:10px"></b>ugt-core</span>
+      <span><b style="display:inline-block;padding:0 8px;border-radius:5px;background:var(--amber);color:#1a1200;font-family:JB;font-size:15px;margin-right:10px">AUTO</b>ทำงานเอง</span>
+    </div>
+    <div id="grid"></div>
+    <div class="abs" id="beam" style="top:290px;width:6px;height:640px;background:linear-gradient(180deg,transparent,#fde68a,transparent);box-shadow:0 0 30px 10px rgba(251,191,36,.5)"></div>
+    <div class="abs center-x" id="s5cap" style="top:960px;font-size:30px;color:var(--ink)">บางตัว<b style="color:var(--amber)">ทำงานเอง</b>ทันทีที่แตะไฟล์ที่เกี่ยวข้อง — ไม่ต้องเรียก</div>
+  </section>
+
+  <!-- ============ S6: design ============ -->
+  <section class="scene" id="s6">
+    <div class="abs" style="left:110px;top:250px">
+      <div class="kicker" id="s6k">04 — design</div>
+      <div class="h2" id="s6h" style="margin-top:14px;margin-bottom:46px">ดีไซน์เดียวกัน<br><span class="grad">ทั้งองค์กร</span></div>
+      <div id="buls"></div>
+    </div>
+    <div id="mockwrap"></div>
+    <div class="abs mono" id="s6sw" style="left:1320px;top:940px;transform:translateX(-50%);font-size:24px;letter-spacing:.2em;color:var(--ink2)">LIGHT ⇄ DARK</div>
+  </section>
+
+  <!-- ============ S7: memory ============ -->
+  <section class="scene" id="s7">
+    <div class="abs center-x"><div class="kicker" id="s7k" style="margin-top:120px;color:var(--violet)">05 — team memory</div></div>
+    <div class="abs center-x h2" id="s7h" style="top:160px">โปรเจค<span class="grad">จำเองได้</span></div>
+    <div class="abs center-x" id="s7s" style="top:260px;font-size:32px;color:var(--ink2)">ไม่ต้องเล่าใหม่ทุกครั้ง — session หน้า หรือเพื่อนร่วมทีม เปิดมาทำต่อได้ทันที</div>
+    <svg id="links" class="abs" width="1920" height="1080" style="left:0;top:0"></svg>
+    <div class="orb" id="o1" style="width:420px;height:420px"></div>
+    <div class="orb" id="o2" style="width:560px;height:560px"></div>
+    <div id="hub"><div class="a">/ugt-handoff</div><div class="b">จบงาน = อัปเดตความรู้</div></div>
+    <div id="fnodes"></div>
+    <div id="tl7"><div class="mv"></div></div>
+  </section>
+
+  <!-- ============ S8: proof ============ -->
+  <section class="scene" id="s8">
+    <div class="abs" style="left:110px;top:130px"><div class="kicker" id="s8k" style="color:var(--green)">06 — proof</div></div>
+    <div class="abs h2" id="s8h" style="left:110px;top:170px">พิสูจน์ด้วย<span class="grad">ตัวเลข</span></div>
+    <div class="abs card" id="cmp" style="left:110px;top:320px;width:980px;height:544px;padding:38px 48px">
+      <div style="font-size:26px;color:var(--ink2);margin-bottom:22px">โจทย์ setup / auth / cicd ชุดเดียวกัน — ทำถูกกี่ข้อ?</div>
+      <div class="barrow"><div class="lb"><span>มีตัวช่วย UGT</span><span class="v grad" id="v1">0/34</span></div><div class="tr"><i id="b1" style="background:linear-gradient(90deg,#22d3ee,#818cf8);box-shadow:0 0 24px rgba(34,211,238,.5)"></i></div></div>
+      <div class="barrow"><div class="lb"><span style="color:var(--ink2)">สั่ง AI เปล่า ๆ</span><span class="v" id="v2" style="color:#8a92b4">0/34</span></div><div class="tr"><i id="b2" style="background:linear-gradient(90deg,#4b5268,#6d7590)"></i></div></div>
+      <div id="pct" style="font-family:Kanit;font-weight:900;font-size:40px;margin-top:6px"><span style="color:var(--cyan)">100%</span> <span style="color:var(--ink3)">vs</span> <span style="color:#8a92b4">53%</span></div>
+    </div>
+    <div class="stat card" id="st1" style="top:320px"><div><div class="big grad">14/14</div><div class="vs">vs 2/14 ไม่มีตัวช่วย</div></div><div class="d">design-setup<br><span style="color:var(--ink2)">บนโปรเจคเปล่า</span></div></div>
+    <div class="stat card" id="st2" style="top:507px"><div><div class="big grad">42/42</div><div class="vs">trigger accuracy</div></div><div class="d">เรียกตัวช่วย<br><span style="color:var(--ink2)">ถูกตัวทุกครั้ง</span></div></div>
+    <div class="stat card" id="st3" style="top:694px"><div><div class="big grad">9/9</div><div class="vs">vs 6/9 ไม่มีตัวช่วย</div></div><div class="d">กันกับดัก<br><span style="color:var(--ink2)">ที่เคยพังบน production</span></div></div>
+    <div class="abs center-x" id="s8cap" style="top:935px;font-size:28px;color:var(--ink2)">มาตรฐานสกัดจากโปรเจค <b style="color:var(--ink)">production จริง</b> · ตารางข้อมูลผ่าน <b style="color:var(--ink)">62 เทสต์</b> ก่อนเป็นของกลาง</div>
+  </section>
+
+  <!-- ============ S9: CTA ============ -->
+  <section class="scene" id="s9">
+    <div class="abs" id="s9logo" style="left:960px;top:200px;width:300px;transform:translate(-50%,-50%);color:#fff;filter:drop-shadow(0 0 24px rgba(103,232,249,.6))"><svg class="logo" viewBox="0 0 190 52"></svg></div>
+    <div class="abs center-x h1" id="s9h" style="top:300px;font-size:120px">เริ่มใช้<span class="grad">วันนี้</span></div>
+    <div class="abs center-x" id="s9s" style="top:465px;font-size:32px;color:var(--ink2)">เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วรัน</div>
+    <div id="cmd" class="card">
+      <div id="c0"><span class="ps">❯</span> /plugin marketplace add <span style="color:var(--cyan)">pakornkub/ugt-claude-platform</span></div>
+      <div id="c1"><span class="ps">❯</span> /plugin install <span style="color:var(--cyan)">ugt-nextjs-standard-superpowers@ugt</span></div>
+      <div id="c2"><span class="ps">❯</span> /reload-plugins</div>
+      <div id="c3" style="margin-top:10px;padding-top:14px;border-top:1px solid var(--line)"><span class="ps">❯</span> <span style="color:var(--amber);font-weight:800">/ugt</span> <span style="color:var(--ink3);font-family:Plex">&nbsp;← เห็นรายการตัวช่วยครบ = พร้อมใช้</span></div>
+    </div>
+    <div class="abs center-x mono" id="s9u" style="top:872px;font-size:30px;color:#c7d2fe;letter-spacing:.04em">github.com/pakornkub/ugt-claude-platform</div>
+    <div class="abs center-x kanit" id="s9t" style="top:928px;font-size:34px;font-weight:700;color:var(--ink2)">ติดตั้งครั้งเดียว · มาตรฐานเดียวกันทุกโปรเจค</div>
+  </section>
+
+  <div id="flash"></div>
+  <div id="scan"></div>
+  <div id="vig"></div>
+  <div id="hud">
+    <div class="brk tl"></div><div class="brk tr"></div><div class="brk bl"></div><div class="brk br"></div>
+    <div class="tl-t"><svg class="logo" viewBox="0 0 190 52"></svg><span>// CLAUDE_PLATFORM</span></div>
+    <div class="tr-t"><div id="tc">T+00:00.00</div><div id="sl" style="color:var(--cyan);margin-top:6px">[00/09] BOOT</div></div>
+    <div class="bl-t">core 2.13.2 · nextjs 4.63.5</div>
+    <div class="br-t"><div id="rec"></div><span>LIVE</span></div>
+    <div id="prog"><i></i></div>
+  </div>
+  <div id="fade"></div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const LOGO = `<g transform="translate(0,52) scale(0.1,-0.1)" fill="currentColor"><path d="M52 318 c-18 -101 -32 -196 -32 -211 0 -18 11 -39 28 -57 36 -35 106 -44 300 -38 147 5 187 16 217 62 12 18 85 378 85 419 0 4 -28 7 -62 5 l-63 -3 -26 -145 c-14 -80 -29 -162 -33 -182 l-7 -38 -154 0 c-85 0 -155 3 -155 8 0 4 14 79 30 167 16 88 30 168 30 178 0 14 -10 17 -63 17 l-63 0 -32 -182z"/><path d="M720 493 c0 -5 -18 -110 -40 -236 -22 -125 -40 -232 -40 -238 0 -8 75 -10 243 -7 210 3 246 6 275 21 38 21 66 75 76 149 6 38 4 50 -12 65 -18 18 -18 19 11 44 28 23 30 31 31 93 1 62 -1 70 -27 92 -28 24 -28 24 -273 24 -134 0 -244 -3 -244 -7z m420 -112 c0 -11 -4 -31 -10 -45 -9 -26 -10 -26 -129 -26 -115 0 -119 -1 -125 -22 -3 -13 -6 -33 -6 -45 0 -23 2 -23 114 -23 65 0 117 -4 121 -10 3 -5 3 -25 -1 -45 l-6 -35 -154 0 c-85 0 -154 4 -154 8 0 12 40 236 45 250 3 9 43 12 155 12 142 0 150 -1 150 -19z"/><path d="M1403 485 c-17 -7 -39 -25 -48 -38 -17 -27 -65 -266 -65 -328 0 -49 33 -87 85 -99 54 -13 412 -13 420 0 3 5 9 32 12 60 l6 50 -197 0 c-182 0 -196 1 -196 18 0 26 38 231 45 243 4 5 91 9 204 9 l198 0 7 38 c3 20 6 43 6 50 0 18 -433 16 -477 -3z"/><path d="M1501 270 c-5 -25 -8 -46 -6 -48 1 -2 76 -3 166 -3 l164 0 6 28 c17 73 27 68 -156 68 l-164 0 -10 -45z"/></g>`;
+document.querySelectorAll('svg.logo').forEach(s=>s.innerHTML=LOGO);
+
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const E={
+  lin:t=>t, out:t=>1-(1-t)**3, in:t=>t*t*t, io:t=>t<.5?4*t*t*t:1-(-2*t+2)**3/2,
+  back:t=>{const c1=2.2,c3=c1+1;return 1+c3*(t-1)**3+c1*(t-1)**2},
+  expo:t=>t>=1?1:1-2**(-10*t)
+};
+const P=(t,a,d,e=E.out)=>e(cl((t-a)/d));
+const lerp=(a,b,k)=>a+(b-a)*k;
+const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+const seg=new Intl.Segmenter('th',{granularity:'grapheme'});
+const graphemes=s=>[...seg.segment(s)].map(x=>x.segment);
+const GL='01<>/{}[]#$%&*=+ABCDEFXZ';
+function decode(str,k,seed){ // latin only
+  k=k*1.15;let o='';for(let i=0;i<str.length;i++){const c=str[i];
+    if(c===' '){o+=' ';continue}
+    const th=i/str.length; o+= k>=th+0.08 ? c : (k>th-0.25 ? GL[Math.floor(rnd(seed+i*7+Math.floor(k*40))*GL.length)] : ' ');}
+  return o;}
+// element state: opacity, translate, scale, blur
+function S(el,o,x=0,y=0,s=1,blur=0,extra=''){
+  if(typeof el==='string')el=$(el);
+  el.style.opacity=o;
+  el.style.transform=`${el.dataset.base||''} translate(${x}px,${y}px) scale(${s}) ${extra}`;
+  el.style.filter=blur>0.05?`blur(${blur}px)`:'';
+}
+// standard "pop in" from below, with optional out
+function pop(el,t,a,out=1e9,dy=40){
+  const k=P(t,a,.5,E.out), ko=P(t,out,.35,E.in);
+  S(el,k*(1-ko),0,(1-k)*dy-ko*20,1,(1-k)*8+ko*6);
+}
+// glitch-wipe text reveal (Thai safe): clip + rgb split
+function gwipe(el,t,a,out=1e9,d=.45){
+  if(typeof el==='string')el=$(el);
+  const k=P(t,a,d,E.expo), ko=P(t,out,.3,E.in);
+  const g=Math.max(0,1-(t-a)/0.35)*(t>=a?1:0) + Math.max(0,(t-out)/0.3)*(t>=out?1:0);
+  const jx=(rnd(Math.floor(t*30)+a*100)-.5)*40*g;
+  el.style.opacity=t<a?0:(1-ko);
+  el.style.clipPath=`inset(0 ${100-k*100}% 0 0)`;
+  el.style.transform=`${el.dataset.base||''} translate(${jx+ko*-30}px,0) skewX(${-g*8}deg)`;
+  el.style.textShadow=g>0.02?`${-8*g}px 0 rgba(255,0,90,.8), ${8*g}px 0 rgba(0,240,255,.8)`:'none';
+  el.style.filter=ko>0?`blur(${ko*10}px)`:'';
+}
+
+// ---------- scene timeline ----------
+const SC=[
+  {id:'s1',a:0,b:8,lab:'PROBLEM'},
+  {id:'s2',a:8,b:16,lab:'PLATFORM'},
+  {id:'s3',a:16,b:24,lab:'INSTALL'},
+  {id:'s4',a:24,b:36,lab:'ONE_SENTENCE'},
+  {id:'s5',a:36,b:44,lab:'SKILLS'},
+  {id:'s6',a:44,b:52,lab:'DESIGN'},
+  {id:'s7',a:52,b:58,lab:'MEMORY'},
+  {id:'s8',a:58,b:66,lab:'PROOF'},
+  {id:'s9',a:66,b:77,lab:'GET_STARTED'},
+];
+const DUR=77;
+const CUTS=[8,16,24,36,44,52,58,66,74];
+
+// ---------- build dynamic DOM ----------
+const CHIPS=[
+  ['var data = fetch(url)',''],['✗ build failed','bad'],['SELECT * FROM tbl_x',''],['style={{color:"red"}}','warn'],
+  ['password = "1234"','bad'],['// TODO: fix date bug','warn'],['404 Not Found','bad'],['Button2_final_v3.tsx',''],
+  ['any as any',''],['✗ lint: 238 errors','bad'],['new Date("2026-09-30")','warn'],['console.log(user)',''],
+  ['<div onClick=...>',''],['✗ Quality Gate','bad'],['utils_old.js',''],['font-family: Arial','warn'],
+  ['git push --force','bad'],['cache: "no-store"?',''],['login.php?id=1','bad'],['#ff0000 !important','warn'],
+  ['npm i random-lib',''],['deploy_manual.txt','warn']
+];
+const chipEls=CHIPS.map(([txt,c],i)=>{const d=document.createElement('div');d.className='chip '+c;d.textContent=txt;$('chips').appendChild(d);
+  // start positions around the frame, away from center band
+  const ang=rnd(i*3+1)*Math.PI*2, rad=380+rnd(i*5+2)*420;
+  d._x=960+Math.cos(ang)*rad*1.35; d._y=540+Math.sin(ang)*rad*.62; d._vx=(rnd(i*7)-.5)*50; d._vy=(rnd(i*11)-.5)*30; d._r=(rnd(i*13)-.5)*14;
+  return d;});
+
+['Next.js','TypeScript','SQL Server','Keycloak SSO','Jenkins','SonarQube','Docker'].forEach(n=>{
+  const d=document.createElement('div');d.className='pill';d.innerHTML='<b></b>'+n;$('s2stack').appendChild(d);});
+
+const UGT=['full-setup','database-setup','test-lint-setup','design-setup','auth-setup','mail-setup','upload-setup','cicd-setup','kit-sync','clean-code','pitfalls','handoff','context','model-mode','requirements','contribute'];
+$('ugtlist').innerHTML=UGT.map(n=>`<div><span>ugt-</span>${n}</div>`).join('');
+
+const IC={
+ db:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+ q:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+ ds:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 10c0-4.4-4.5-8-10-8z"/>',
+ key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L21 2M16 7l3 3M18.5 4.5l2 2"/>',
+ mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>',
+ up:'<path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+ ci:'<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/>',
+ chk:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>'
+};
+const NODES=[
+  ['db','Database','SQL Server<br>ตั้งชื่อมาตรฐาน'],['q','Quality','test + lint<br>ก่อน commit'],['ds','Design','ธีม · ฟอนต์ไทย<br>UI kit'],
+  ['key','Auth','SSO / AD<br>สิทธิ์ + admin'],['mail','Mail','relay บริษัท<br>[ตัวเลือก]',1],['up','Upload','สแกนไวรัส<br>[ตัวเลือก]',1],['ci','CI/CD','Jenkins · Sonar<br>Docker']];
+const NX=i=>160+i*(1600/6);
+NODES.forEach(([ic,l,s,opt],i)=>{const d=document.createElement('div');d.className='node'+(opt?' opt':'');d.style.left=NX(i)+'px';d.style.top='500px';d.dataset.base='translate(-50%,0)';
+  d.innerHTML=`<div class="c"><svg viewBox="0 0 24 24">${IC[ic]}</svg><div class="chk"><svg viewBox="0 0 24 24">${IC.chk}</svg></div></div><div class="l">${l}</div><div class="s">${s}</div>`;$('nodes').appendChild(d);});
+
+const SKILLS=[
+ ['full-setup','ตัวแม่ — ถามครั้งเดียว ติดตั้งครบ','n'],['database-setup','SQL Server + ชื่อตามมาตรฐาน','n'],['test-lint-setup','เทสต์ + ตรวจโค้ดก่อน commit','n'],['design-setup','ธีม สี ฟอนต์ไทย component','n'],
+ ['auth-setup','SSO / AD + สิทธิ์ + หน้า admin','n'],['mail-setup','ส่งเมลผ่าน relay บริษัท','n'],['upload-setup','แนบไฟล์ + สแกนไวรัส','n'],['cicd-setup','Jenkins ตรวจ · ทดสอบ · deploy','n'],
+ ['kit-sync','อัปเดต kit ไม่ทับงานที่แก้เอง','n'],['clean-code','โค้ดผ่านเกณฑ์ตั้งแต่ครั้งแรก','n',1],['pitfalls','กันกับดักที่เคยพังบน production','n',1],['handoff','ปิดงาน จดสิ่งที่ค้าง','c'],
+ ['context','สารบัญความรู้ของโปรเจค','c'],['model-mode','เลือกความแรง AI ตามงาน','c'],['requirements','requirement → brief ภาษาไทย','c'],['contribute','ส่งความรู้กลับเข้า platform','c']];
+const skEls=SKILLS.map(([n,d,c,auto])=>{const e=document.createElement('div');e.className='sk card';
+  const col=c==='n'?'var(--cyan)':'var(--violet)';
+  e.innerHTML=`<div class="n"><span>ugt-</span>${n}</div><div class="d">${d}</div>`+(auto?'<div class="auto">AUTO</div>':`<div class="dot" style="background:${col};box-shadow:0 0 10px ${col}"></div>`);
+  e.style.borderLeft=`4px solid ${col}`; e._auto=!!auto; $('grid').appendChild(e); return e;});
+
+const BULS=['ธีมสี + ฟอนต์ไทยมาตรฐาน','ผ่านการตรวจ contrast ทุกคู่สี','ตารางข้อมูล ค้นหา · กรอง · เรียง','หน้า admin ผู้ใช้ / สิทธิ์ / audit'];
+$('buls').innerHTML=BULS.map((b,i)=>`<div class="bul" id="bu${i}"><i><svg viewBox="0 0 24 24">${IC.chk}</svg></i>${b}</div>`).join('');
+
+const ROWS=[['REQ-0142','ขออนุมัติจัดซื้อเครื่องมือวัด','สมชาย ใจดี','g','อนุมัติ'],['REQ-0141','เบิกค่าเดินทางไซต์งานระยอง','วิภา สายชล','a','รอตรวจ'],['REQ-0140','ปรับปรุงระบบไฟสำนักงาน','ธนา รุ่งเรือง','s','ร่าง'],['REQ-0139','จ้างเหมาบำรุงรักษาหม้อแปลง','กมล ศรีสุข','g','อนุมัติ'],['REQ-0138','ซื้อ License ซอฟต์แวร์ออกแบบ','ปรีชา วงศ์ดี','r','ปฏิเสธ']];
+function mockHTML(dark){return `<div class="mock${dark?' dark':''}">
+ <div class="hd m-hd"><svg class="logo" viewBox="0 0 190 52">${LOGO}</svg><span class="nm">ระบบคำขอ</span><div class="tg"><i></i></div><div class="av"></div></div>
+ <div class="sd m-sd"><div class="on">แดชบอร์ด</div><div>คำขอทั้งหมด</div><div>รายงาน</div><div>ผู้ใช้ &amp; สิทธิ์</div><div>Audit log</div><div>ตั้งค่า</div></div>
+ <div class="mn"><div class="pt m-pt">แดชบอร์ด</div>
+  <div class="kpis"><div class="kpi m-k"><div class="a">คำขอเดือนนี้</div><div class="b">128<small>+12%</small></div></div><div class="kpi m-k"><div class="a">รออนุมัติ</div><div class="b">23</div></div><div class="kpi m-k"><div class="a">ปิดงานแล้ว</div><div class="b">96<small>+8%</small></div></div></div>
+  <div class="tbl m-tb"><div class="tb-top"><div class="srch">⌕ &nbsp;ค้นหาคำขอ…</div><div class="btn">+ สร้างคำขอ</div></div>
+   <div class="tr th"><div>เลขที่</div><div>รายการ</div><div>ผู้ขอ</div><div>สถานะ</div></div>
+   ${ROWS.map(r=>`<div class="tr m-r"><div style="font-family:JB;font-size:14px">${r[0]}</div><div>${r[1]}</div><div>${r[2]}</div><div><span class="bd ${r[3]}">${r[4]}</span></div></div>`).join('')}
+  </div></div></div>`;}
+$('mockwrap').innerHTML=mockHTML(false)+mockHTML(true);
+const mockDark=$('mockwrap').children[1];
+
+const FILES=['handoff.md','architecture.md','business-rules.md','api.md','board.md','decisions.md','troubleshooting.md'];
+const FPOS=FILES.map((f,i)=>{const a=-Math.PI/2+i*(Math.PI*2/FILES.length)+0.25;return [960+Math.cos(a)*560,600+Math.sin(a)*250]});
+FILES.forEach((f,i)=>{const d=document.createElement('div');d.className='fnode card';d.id='fn'+i;d.dataset.base='translate(-50%,-50%)';
+  d.innerHTML=`<svg viewBox="0 0 24 24">${IC.file}</svg>${f}`;d.style.left=FPOS[i][0]+'px';d.style.top=FPOS[i][1]+'px';$('fnodes').appendChild(d);});
+$('links').innerHTML=FPOS.map((p,i)=>`<line id="ln${i}" x1="960" y1="600" x2="${p[0]}" y2="${p[1]}" stroke="rgba(167,139,250,.5)" stroke-width="2" stroke-dasharray="6 8"/><circle id="pk${i}" r="6" fill="#fff" style="filter:drop-shadow(0 0 6px #a78bfa)"/>`).join('');
+[['Session วันนี้',0],['Session พรุ่งนี้',.5],['เพื่อนร่วมทีม',1]].forEach(([s,k])=>{
+  $('tl7').insertAdjacentHTML('beforeend',`<div class="pt" style="left:${k*100}%"></div><div class="st" style="left:${k*100}%">${s}</div>`);});
+
+// base transforms
+$('s2logo').dataset.base='translate(-50%,-50%)';
+$('s9logo').dataset.base='translate(-50%,-50%)';
+$('stamp').dataset.base='translate(-50%,-50%)';
+$('doc').dataset.base='translateX(-50%)';
+$('cmd').dataset.base='translateX(-50%)';
+$('s6sw').dataset.base='translateX(-50%)';
+
+// ---------- background canvas ----------
+const cv=$('bg'),g=cv.getContext('2d');
+const PARTS=Array.from({length:140},(_,i)=>({x:rnd(i+.1)*1920,y:rnd(i+.2)*1080,s:rnd(i+.3)*2+.5,v:rnd(i+.4)*30+8,ph:rnd(i+.5)*6.28}));
+function beatPulse(t){
+  if(t<8||(t>=52&&t<58)||t>=74) return 0;
+  const ph=(t%0.5); return Math.exp(-ph*9);
+}
+function drawBG(t,hue){
+  const W=1920,H=1080; g.clearRect(0,0,W,H);
+  const gr=g.createRadialGradient(960,480,50,960,540,1200);
+  gr.addColorStop(0,`hsla(${hue},70%,16%,1)`);gr.addColorStop(.5,'#070a18');gr.addColorStop(1,'#03040a');
+  g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const bp=beatPulse(t);
+  // perspective floor grid
+  const hy=700, speed=(t>=8&&!(t>=52&&t<58))?1.6:0.6;
+  g.save();
+  const lg=g.createLinearGradient(0,hy,0,H);lg.addColorStop(0,'rgba(0,0,0,0)');lg.addColorStop(1,`hsla(${hue},90%,65%,${.35+.35*bp})`);
+  g.strokeStyle=lg;g.lineWidth=1.4;
+  for(let i=-24;i<=24;i++){g.beginPath();g.moveTo(960+i*18,hy);g.lineTo(960+i*260,H+40);g.stroke();}
+  const off=(t*speed)%1;
+  for(let j=0;j<18;j++){const z=(j+1-off);const y=hy+(H-hy)*(1/(18/z))**1.8; if(y<hy)continue;
+    g.globalAlpha=cl((y-hy)/(H-hy))*(.8+bp*.4);g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.globalAlpha=1;
+  // ceiling grid (fainter)
+  const hy2=380;const lg2=g.createLinearGradient(0,hy2,0,0);lg2.addColorStop(0,'rgba(0,0,0,0)');lg2.addColorStop(1,`hsla(${hue+30},80%,60%,${.12+.12*bp})`);
+  g.strokeStyle=lg2;
+  for(let i=-24;i<=24;i+=2){g.beginPath();g.moveTo(960+i*18,hy2);g.lineTo(960+i*260,-40);g.stroke();}
+  // horizon glow
+  const hg=g.createLinearGradient(0,hy-60,0,hy+60);hg.addColorStop(0,'rgba(0,0,0,0)');hg.addColorStop(.5,`hsla(${hue},100%,70%,${.18+.2*bp})`);hg.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=hg;g.fillRect(0,hy-60,W,120);
+  g.restore();
+  // particles
+  for(const p of PARTS){const y=((p.y-t*p.v)%H+H)%H;const a=.25+.35*Math.sin(t*2+p.ph)**2;
+    g.fillStyle=`hsla(${hue+40},90%,80%,${a})`;g.fillRect(p.x,y,p.s,p.s);}
+  // light streaks during high energy
+  if(t>=8&&!(t>=52&&t<58)&&t<74){for(let k=0;k<6;k++){const s=Math.floor(t*2)+k*17;const y=rnd(s)*1080;const len=200+rnd(s+1)*500;const x=((t*1400+rnd(s+2)*4000)%(W+len*2))-len;
+    const sg=g.createLinearGradient(x,0,x+len,0);sg.addColorStop(0,'rgba(0,0,0,0)');sg.addColorStop(1,`hsla(${hue},100%,75%,.35)`);g.fillStyle=sg;g.fillRect(x,y,len,1.5);}}
+}
+
+// ---------- per-scene updates ----------
+const U={};
+U.s1=(t)=>{
+  chipEls.forEach((d,i)=>{
+    const a=.25+i*.1, k=P(t,a,.35,E.back);
+    let x=d._x+d._vx*t, y=d._y+d._vy*t;
+    const suck=P(t,6.0+rnd(i)*0.5,1.3,E.in);
+    x=lerp(x,960,suck); y=lerp(y,540,suck);
+    const jit=(rnd(Math.floor(t*12)+i*31)-.5)*(d.classList.contains('bad')?6:0);
+    d.style.opacity=t<a?0:k*(1-P(t,7.2,.4))*(d.classList.contains('bad')&&rnd(Math.floor(t*8)+i)<.12?.35:1);
+    d.style.transform=`translate(${x+jit}px,${y}px) translate(-50%,-50%) rotate(${d._r*(1-suck)}deg) scale(${k*(1-suck*.9)})`;
+    d.style.filter=suck>0?`blur(${suck*4}px)`:'';
+  });
+  pop('s1k',t,.5,6.0,10);
+  gwipe('s1a',t,.9,3.5);
+  gwipe('s1b',t,3.9,6.0);
+  const c=P(t,6.8,1.2,E.in);
+  $('s1core').style.opacity=c;$('s1core').style.transform=`scale(${.5+c*3+ (t>7.6?(t-7.6)*20:0)})`;
+};
+U.s2=(t)=>{
+  const lt=t-8;
+  ['r1','r2','r3'].forEach((r,i)=>{const k=P(lt,i*.12,1.4,E.out);const sz=100+k*(1400+i*300);const e=$(r);e.style.width=e.style.height=sz+'px';e.style.opacity=(1-k)*.9;e.style.borderWidth=(1-k)*6+1+'px';});
+  const k=P(lt,0,.7,E.expo);
+  const fl=(lt>0&&lt<.4)?(rnd(Math.floor(lt*30))>.5?1:.4):1;
+  S('s2logo',k*fl*(1-P(t,15.6,.3)),0,0,lerp(2.6,1,k),(1-k)*20);
+  const tk=cl((lt-.35)/1.1);
+  $('s2t').textContent=decode('UGT CLAUDE PLATFORM',tk,3);
+  $('s2t').style.opacity=lt>.35?1:0;
+  pop('s2s',lt,1.6,1e9,20);
+  gwipe('s2b',lt,3.1,1e9,.5);
+  [...$('s2stack').children].forEach((c,i)=>{const kk=P(lt,4.6+i*.13,.4,E.back);S(c,cl(kk),0,(1-kk)*30,.6+.4*kk)});
+  // exit
+  const ex=P(t,15.6,.4,E.in); $('s2').style.transform=`scale(${1+ex*.15})`;
+};
+const TYPE=(el,str,t,a,d,prefix)=>{const gs=graphemes(str);const n=Math.floor(cl((t-a)/d)*gs.length);
+  if(t<a){el.innerHTML='';return false}
+  const typing=t<a+d+.15;el.innerHTML=(prefix||'')+gs.slice(0,n).join('')+(typing&&(Math.floor(t*4)%2===0||t<a+d)?'<span class="caret"></span>':'');return true};
+U.s3=(t)=>{
+  pop('s3k',t,16.1,1e9,10); gwipe('s3h',t,16.2);
+  pop('term',t,16.4,1e9,60);
+  const PS='<span class="ps">❯ </span>';
+  TYPE($('tl0'),'/plugin marketplace add pakornkub/ugt-claude-platform',t,16.9,1.2,PS);
+  $('tl1').textContent=t>18.25?'  ✓ marketplace "ugt" added':'';
+  TYPE($('tl2'),'/plugin install ugt-nextjs-standard-superpowers@ugt',t,18.5,1.1,PS);
+  $('tl3').textContent=t>19.8?'  ✓ installed · ugt-core + ugt-nextjs-platform':'';
+  TYPE($('tl4'),'/reload-plugins',t,20.0,.45,PS);
+  $('tl5').textContent=t>20.6?'  ✓ plugins reloaded':'';
+  TYPE($('tl6'),'/ugt',t,21.0,.25,PS);
+  const lst=$('ugtlist'); lst.style.opacity=t>21.4?1:0;
+  [...lst.children].forEach((c,i)=>{const kk=P(t,21.45+i*.07,.25);c.style.opacity=kk;c.style.transform=`translateX(${(1-kk)*-20}px)`});
+  pop('bc1',t,18.6,1e9,50);pop('bc2',t,19.5,1e9,50);pop('bc3',t,20.3,1e9,30);
+  const ex=P(t,23.65,.35,E.in); $('s3').style.transform=`scale(${1+ex*.12})`;
+};
+const SENT='ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย';
+U.s4=(t)=>{
+  pop('s4k',t,24.1,1e9,10);
+  pop('chat',t,24.2,1e9,40); gwipe('s4h',t,24.15);
+  const gs=graphemes(SENT);const n=Math.floor(cl((t-24.6)/1.7)*gs.length);
+  $('chatTxt').textContent=gs.slice(0,n).join('');
+  $('chatCaret').style.opacity=(t<26.4||Math.floor(t*4)%2===0)&&t<26.6?1:0;
+  const ent=P(t,26.5,.5); const ch=$('chat');
+  ch.style.boxShadow=`0 0 ${ent<1&&t>26.5?60*(1-ent):0}px rgba(34,211,238,.8), 0 20px 60px rgba(0,0,0,.5)`;
+  ch.style.borderColor=t>26.5?`rgba(34,211,238,${.3+.7*(1-ent)})`:'';
+  pop('s4note',t,26.8,1e9,20);
+  // pipeline
+  const pl=$('pline'); pl.style.opacity=P(t,26.9,.4);
+  const prog=cl((t-27.0)/6.0); const px=prog*1600;
+  pl.children[0].style.width=px+'px'; pl.children[1].style.left=px+'px'; pl.children[1].style.opacity=(t>27&&t<33.2)?1:0;
+  [...$('nodes').children].forEach((d,i)=>{
+    const a=27.0+i*1.0; const ki=P(t,26.9+i*.08,.4,E.out);
+    const act=P(t,a,.35,E.back);
+    const on=t>=a;
+    d.style.opacity=ki; d.style.transform=`translate(-50%,${(1-ki)*30}px) scale(${1+ (on? (1-P(t,a,.4))*.18:0)})`;
+    const c=d.querySelector('.c');
+    c.style.borderColor=on?'var(--cyan)':''; c.style.boxShadow=on?`0 0 ${20+30*(1-P(t,a,.6))}px rgba(34,211,238,.6), 0 0 30px rgba(34,211,238,.25) inset`:'';
+    c.querySelector('svg').style.stroke=on?'#e0faff':'';
+    const chk=c.querySelector('.chk'); chk.style.opacity=on?1:0; chk.style.transform=`scale(${on?act:0})`;
+  });
+  const sk=P(t,33.3,.35,E.back);
+  S('stamp',t>33.3?1:0,0,0,lerp(2.2,1,cl(sk)),(1-cl(sk))*6);
+  pop('doc',t,34.0,1e9,40);
+  const ex=P(t,35.65,.35,E.in); $('s4').style.transform=`scale(${1+ex*.12})`;
+};
+U.s5=(t)=>{
+  pop('s5k',t,36.1,1e9,10); gwipe('s5h',t,36.2); pop('s5leg',t,36.6,1e9,15);
+  skEls.forEach((e,i)=>{const a=36.5+i*.2;const k=P(t,a,.4,E.back);
+    e.style.opacity=cl(k*1.5); e.style.transform=`translateY(${(1-k)*40}px) scale(${.85+.15*k}) rotateX(${(1-cl(k))*50}deg)`;
+    let glow=0;
+    if(e._auto&&t>40.6){glow=.6+.4*Math.sin((t-40.6)*8)**2}
+    e.style.boxShadow=glow?`0 0 ${30*glow}px rgba(251,191,36,${.6*glow}), 0 20px 60px rgba(0,0,0,.5)`:'';
+    e.style.borderColor=glow?'rgba(251,191,36,.9)':'';
+    if(glow) e.style.borderLeftColor='var(--amber)';
+  });
+  const bm=$('beam'); const bk=cl((t-40.0)/1.2); bm.style.left=(150+bk*1620)+'px'; bm.style.opacity=(t>40&&t<41.3)?1:0;
+  pop('s5cap',t,41.0,1e9,20);
+  const ex=P(t,43.65,.35,E.in); $('s5').style.transform=`scale(${1+ex*.12})`;
+};
+U.s6=(t)=>{
+  pop('s6k',t,44.1,1e9,10); gwipe('s6h',t,44.2);
+  BULS.forEach((b,i)=>pop('bu'+i,t,45.0+i*.45,1e9,25));
+  const w=$('mockwrap'); const wk=P(t,44.3,.6,E.expo);
+  w.style.opacity=wk; w.style.transform=`perspective(1600px) rotateY(${(1-wk)*-25 + 6*(1-P(t,44.3,6,E.io))}deg) translateX(${(1-wk)*200}px)`;
+  const parts=[['.m-hd',44.6],['.m-sd',44.9],['.m-pt',45.1]];
+  w.querySelectorAll('.mock').forEach(m=>{
+    parts.forEach(([s,a])=>{const k=P(t,a,.45);const e=m.querySelector(s);e.style.opacity=k;e.style.transform=s==='.m-sd'?`translateX(${(1-k)*-60}px)`:`translateY(${(1-k)*-20}px)`});
+    m.querySelectorAll('.m-k').forEach((e,i)=>{const k=P(t,45.3+i*.15,.4,E.back);e.style.opacity=cl(k);e.style.transform=`scale(${.8+.2*k})`});
+    const tb=m.querySelector('.m-tb');const tk=P(t,45.8,.4);tb.style.opacity=tk;tb.style.transform=`translateY(${(1-tk)*30}px)`;
+    m.querySelectorAll('.m-r').forEach((e,i)=>{const k=P(t,46.1+i*.15,.35);e.style.opacity=k;e.style.transform=`translateX(${(1-k)*40}px)`});
+  });
+  // theme wipe
+  const r=P(t,48.5,.9,E.io)*1300;
+  mockDark.style.position='absolute';mockDark.style.left='0';mockDark.style.top='0';
+  mockDark.style.clipPath=`circle(${r}px at 960px 32px)`;
+  pop('s6sw',t,48.3,1e9,15);
+  $('s6sw').style.color=t>48.5?'var(--cyan)':'';
+  const ex=P(t,51.65,.35,E.in); $('s6').style.transform=`scale(${1+ex*.12})`;
+};
+U.s7=(t)=>{
+  pop('s7k',t,52.1,1e9,10); gwipe('s7h',t,52.2,1e9,.6); pop('s7s',t,52.8,1e9,20);
+  const hk=P(t,52.4,.7,E.back); S('hub',cl(hk),0,0,.3+.7*hk);
+  $('hub').style.boxShadow=`0 0 ${60+30*Math.sin(t*3)}px rgba(167,139,250,.55)`;
+  ['o1','o2'].forEach((o,i)=>{const k=P(t,52.5+i*.2,.8);const e=$(o);e.style.opacity=k*.9;e.style.transform=`translate(-50%,-50%) rotate(${t*(i?-12:18)}deg) scale(${.6+.4*k})`});
+  FILES.forEach((f,i)=>{const a=52.9+i*.22;const k=P(t,a,.45,E.back);const fl=Math.sin(t*1.4+i)*6;
+    S('fn'+i,cl(k),0,fl,.5+.5*k);
+    const ln=$('ln'+i);ln.style.opacity=P(t,a,.4)*.9;ln.setAttribute('stroke-dashoffset',-t*30);
+    const pk=$('pk'+i);const q=((t*0.7+i*.37)%1);const inbound=i%2===0;const qq=inbound?1-q:q;
+    pk.setAttribute('cx',lerp(960,FPOS[i][0],qq));pk.setAttribute('cy',lerp(600,FPOS[i][1],qq)+fl*qq);pk.style.opacity=t>a+.4?1:0;});
+  const tl=$('tl7'); tl.style.opacity=P(t,54.0,.5);
+  const mk=cl((t-54.4)/2.8); tl.querySelector('.mv').style.left=(E.io(mk)*100)+'%';
+  tl.querySelectorAll('.pt').forEach((p,i)=>{const on=mk>=i*.5-.001&&t>54.4;p.style.background=on?'var(--violet)':'';p.style.boxShadow=on?'0 0 16px var(--violet)':''});
+  tl.querySelectorAll('.st').forEach((p,i)=>{const on=mk>=i*.5-.001&&t>54.4;p.style.color=on?'#fff':''});
+  const ex=P(t,57.65,.35,E.in); $('s7').style.transform=`scale(${1+ex*.12})`;
+};
+U.s8=(t)=>{
+  pop('s8k',t,58.1,1e9,10); gwipe('s8h',t,58.2);
+  pop('cmp',t,58.4,1e9,40);
+  const k1=P(t,58.9,1.6,E.out), k2=P(t,58.9,1.6,E.out);
+  $('b1').style.width=(k1*100)+'%'; $('b2').style.width=(k2*53)+'%';
+  $('v1').textContent=Math.round(k1*34)+'/34'; $('v2').textContent=Math.round(k2*18)+'/34';
+  pop('pct',t,60.6,1e9,20);
+  pop('st1',t,61.0,1e9,40);pop('st2',t,61.5,1e9,40);pop('st3',t,62.0,1e9,40);
+  pop('s8cap',t,63.2,1e9,20);
+  const ex=P(t,65.65,.35,E.in); $('s8').style.transform=`scale(${1+ex*.12})`;
+};
+U.s9=(t)=>{
+  const lk=P(t,66.0,.7,E.expo);
+  S('s9logo',lk,0,0,lerp(2,1,lk),(1-lk)*16);
+  gwipe('s9h',t,66.3,1e9,.5);
+  pop('s9s',t,66.9,1e9,20);
+  pop('cmd',t,67.2,1e9,40);
+  ['c0','c1','c2','c3'].forEach((c,i)=>{const k=P(t,67.5+i*.45,.35);$(c).style.opacity=k;$(c).style.transform=`translateX(${(1-k)*-30}px)`});
+  const u=$('s9u'); u.style.opacity=t>69.6?1:0; u.textContent=decode('github.com/pakornkub/ugt-claude-platform',cl((t-69.6)/1.0),9);
+  pop('s9t',t,70.6,1e9,20);
+  // final hit at 74: glow logo
+  const fin=P(t,74,.5); $('s9logo').style.filter=`drop-shadow(0 0 ${24+60*(t>74?(1-fin)+.3:0)}px rgba(103,232,249,.8))`;
+};
+
+// ---------- master render ----------
+function render(t){
+  // scenes
+  for(const s of SC){const el=$(s.id);
+    const vis=t>=s.a-0.001&&t<s.b; el.style.display=vis?'block':'none';
+    if(!vis) continue;
+    el.style.opacity=(s.id==='s1'?1:P(t,s.a,.12,E.lin))*(1-P(t,s.b-0.1,.1,E.lin));
+    U[s.id](t);
+  }
+  // bg hue per scene
+  const hues={s1:350,s2:220,s3:225,s4:195,s5:235,s6:245,s7:270,s8:165,s9:225};
+  const cur=SC.find(s=>t>=s.a&&t<s.b)||SC[SC.length-1];
+  let hue=hues[cur.id]; if(cur.id==='s1') hue=lerp(350,220,P(t,6,2));
+  drawBG(t,hue);
+  // flash at cuts
+  let f=0; for(const c of CUTS){ if(t>=c&&t<c+.5) f=Math.max(f,Math.exp(-(t-c)*9)*(c===8||c===74?1:.55)); }
+  $('flash').style.opacity=f;
+  // global glitch near cuts: stage rgb jitter via hue-rotate
+  let gl=0; for(const c of CUTS){ gl=Math.max(gl,Math.exp(-Math.abs(t-c)*16)); }
+  const st=$('stage');
+  // HUD
+  const idx=SC.indexOf(cur)+1;
+  const mm=Math.floor(t/60),ss=(t%60);
+  $('tc').textContent=`T+${String(mm).padStart(2,'0')}:${ss.toFixed(2).padStart(5,'0')}`;
+  $('sl').textContent=`[${String(idx).padStart(2,'0')}/09] ${cur.lab}`;
+  $('prog').firstElementChild.style.width=(t/DUR*100)+'%';
+  $('rec').style.opacity=Math.floor(t*2)%2?1:.25;
+  const bp=beatPulse(t);
+  document.querySelectorAll('.brk').forEach(b=>{b.style.opacity=.55+.45*bp;b.style.borderColor=gl>.3?'#fb7185':'var(--cyan)'});
+  $('hud').style.opacity=1-P(t,75,1);
+  $('hud').style.transform=gl>.2?`translate(${(rnd(Math.floor(t*30))-.5)*14*gl}px,0)`:'';
+  // end fade
+  $('fade').style.opacity=P(t,75.6,1.4,E.lin);
+}
+window.render=render; window.DUR=DUR;
+
+// preview playback (non-render mode)
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);$('stage').style.transform=`scale(${s})`;}
+if(!window.__RENDER){
+  addEventListener('resize',fit);fit();
+  const q=new URLSearchParams(location.search); const T0=parseFloat(q.get('t')||'0');
+  if(q.has('still')){document.fonts.ready.then(()=>render(T0));}
+  else{
+    let start=null;const au=new Audio('music.mp3');
+    document.fonts.ready.then(()=>{
+      const go=()=>{start=performance.now()-T0*1000;au.currentTime=T0;au.play().catch(()=>{});requestAnimationFrame(loop)};
+      function loop(now){const t=(now-start)/1000; if(t>=DUR){render(DUR-0.01);return} render(t);requestAnimationFrame(loop)}
+      render(T0); addEventListener('click',()=>{if(start===null)go()},{once:true});
+    });
+  }
+}
+</script>
+</body>
+</html>
