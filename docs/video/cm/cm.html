@@ -485,6 +485,8 @@ function render(t) {
   const zoomPunch = 1 + beatPulse(t) * .012;
   $('world').style.transform = `translate(${world.shake * (rnd(Math.floor(t * 60)) - .5) * 24}px,${world.shake * (rnd(Math.floor(t * 60) + 9) - .5) * 24}px) scale(${zoomPunch})`;
 }
+// ?embed → used as a shot source by another page (sizzle): no wipes/flashes, driven by render(t)
+if (new URLSearchParams(location.search).has('embed')) { window.__RENDER = true; $('wipe').style.visibility = 'hidden'; $('flash').style.visibility = 'hidden'; }
 window.render = render; window.DUR = DUR;
 window.__ready = document.fonts.ready;
 function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); $('stage').style.transform = `scale(${s})` }

@@ -3,16 +3,46 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-มีสี่เวอร์ชัน:
+มีห้าเวอร์ชัน:
 
 | ไฟล์ | สไตล์ | ความยาว |
 | --- | --- | --- |
+| [`sizzle/ugt-claude-platform-sizzle.mp4`](sizzle/ugt-claude-platform-sizzle.mp4) | **Sizzle reel** — ตัดภาพเร็วตามจังหวะ ผสมช็อตเมือง 3D + ฉาก CM โทนสว่าง สำหรับเปิดงาน/ประชุม | 39 วินาที |
 | [`cm/ugt-claude-platform-cm.mp4`](cm/ugt-claude-platform-cm.mp4) | **Trailer สไตล์โฆษณาญี่ปุ่น (CM)** โทนสว่างตาม repo — มาสคอตการ์ตูน chibi, ตัดฉากตามจังหวะเพลง 128 BPM | 61 วินาที |
 | [`explainer/ugt-claude-platform-explainer.mp4`](explainer/ugt-claude-platform-explainer.mp4) | **Tech explainer 3D** — หน้าจอโปรแกรมจริงลอยในอวกาศ เล่าตามขั้นตอนการทำงานจริงของ plugin + คำแปลเป็นภาษาคน | 86 วินาที |
 | [`story/ugt-claude-platform-story.mp4`](story/ugt-claude-platform-story.mp4) | แอนิเมชันเล่าเรื่อง 3D (เมือง = องค์กร) โทนสว่าง ฟอนต์และสีเดียวกับ `docs/web/index.html` | 72 วินาที |
 | [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
 
 ทั้งหมด 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## Sizzle reel (`sizzle/`)
+
+ไม่ได้ตัดจาก MP4 เดิม — `sizzle.html` ฝัง `../story/story.html?embed` กับ `../cm/cm.html?embed`
+เป็น iframe แล้วสั่ง `render(t)` ของแต่ละตัวตามรายการช็อต (`S` = `[beatเริ่ม, จำนวน beat, แหล่ง,
+เวลาต้นทาง, ความเร็ว, คำใหญ่, สไตล์, กล้องเริ่ม, กล้องจบ]`) ช็อตเมือง 3D ใส่กล้องเองได้ผ่าน
+`window.camOverride` · โหมด `?embed` ซ่อน UI ของหน้าเดิมทั้งหมด
+
+| beat | เวลา | ช่วง |
+| --- | --- | --- |
+| 0–7 | 0:00 | Cold open "โค้ด · คนละ · แบบ!" → เมืองรก |
+| 8–15 | 0:04 | "จนกระทั่ง…" → กล่อง UGT ตก → เปิดตัว |
+| 16–31 | 0:08 | Build — ติดตั้ง, ประโยคเดียว, สถานี Database/Quality/Design/Auth (ช็อตละ 1 beat), POINT ①–⑥ + ALL GREEN (ช็อตละครึ่ง beat), ตึกบินขึ้น |
+| 32–47 | 0:15 | Drop — เมืองเปลี่ยนเป็นมาตรฐาน "มาตรฐาน · เดียวกัน · ทั้ง · องค์กร!" + ทีม, หอความรู้, 100%, ตัวช่วย 16 ตัว |
+| 48–63 | 0:22 | Hero shot — กล้องบินขึ้นเหนือเมือง + โลโก้ประกอบตัว |
+| 64–80 | 0:30 | End card + jingle U・G・T ♪ |
+
+```bash
+(cd docs/video/story && npm i) && (cd docs/video/sizzle && npm i) && pip install numpy scipy
+npx http-server -p 8124 docs/video &            # เปิด http://127.0.0.1:8124/sizzle/sizzle.html เพื่อดู
+cd docs/video/sizzle && python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
+node render.mjs 0 293 p0.mp4 & node render.mjs 293 585 p1.mp4 & \
+node render.mjs 585 878 p2.mp4 & node render.mjs 878 1170 p3.mp4 & wait
+printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
+ffmpeg -y -f concat -safe 0 -i list.txt -i music.wav -c:v libx264 -crf 21 -pix_fmt yuv420p \
+  -af loudnorm=I=-14:TP=-1.2 -c:a aac -b:a 224k -shortest -movflags +faststart ugt-claude-platform-sizzle.mp4
+```
+
+ถ้าแก้ `story/story.html` หรือ `cm/cm.html` ช็อตใน sizzle จะเปลี่ยนตามด้วย — เรนเดอร์ sizzle ใหม่ทุกครั้งที่แก้สองไฟล์นั้น
 
 ## เวอร์ชัน CM ญี่ปุ่น (`cm/`)
 
