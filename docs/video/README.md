@@ -3,10 +3,11 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-มีหกเวอร์ชัน:
+มีเจ็ดเวอร์ชัน:
 
 | ไฟล์ | สไตล์ | ความยาว |
 | --- | --- | --- |
+| [`showcase/ugt-claude-platform-showcase.mp4`](showcase/ugt-claude-platform-showcase.mp4) | **Showcase (Sizzle + Demo)** — ต่อยอดจาก corporate film: ฉาก 3D จริงด้วย WebGL/three.js (ชั้น platform, กอง module, token, identity flow, pipeline, กราฟผลลัพธ์) ผสม UI 2D ตาม design system จังหวะเร็วขึ้น 120 BPM | 62 วินาที |
 | [`corporate/ugt-claude-platform-corporate.mp4`](corporate/ugt-claude-platform-corporate.mp4) | **Corporate film** — motion graphic ทางการ ใช้ design system ขององค์กรเอง (token/ฟอนต์จาก `contracts/design.md`) เล่าภาพรวม + demo + มาตรฐานของ stack | 79 วินาที |
 | [`sizzle/ugt-claude-platform-sizzle.mp4`](sizzle/ugt-claude-platform-sizzle.mp4) | **Sizzle reel** — ตัดภาพเร็วตามจังหวะ ผสมช็อตเมือง 3D + ฉาก CM โทนสว่าง สำหรับเปิดงาน/ประชุม | 39 วินาที |
 | [`cm/ugt-claude-platform-cm.mp4`](cm/ugt-claude-platform-cm.mp4) | **Trailer สไตล์โฆษณาญี่ปุ่น (CM)** โทนสว่างตาม repo — มาสคอตการ์ตูน chibi, ตัดฉากตามจังหวะเพลง 128 BPM | 61 วินาที |
@@ -15,6 +16,36 @@
 | [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
 
 ทั้งหมด 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## Showcase — Sizzle + Demo (`showcase/`)
+
+รุ่นต่อจาก corporate film ที่ปรับตาม feedback: **ไม่สั่น** (ข้อความ/การ์ด 2D นิ่งสนิทหลังเข้าฉาก, ป้ายที่ผูกกับวัตถุ 3D ปัดเป็นพิกเซลเต็ม,
+การเคลื่อนไหวต่อเนื่องอยู่ในชั้น WebGL เท่านั้น) · **อลังการขึ้น** ด้วยฉาก three.js ฉากเดียวที่กล้องบินไปทีละสถานี (0.7 วินาทีลงจังหวะ downbeat)
+· **layout ตาม grid 12 คอลัมน์** — ใช้ camera view offset วางวัตถุ 3D ไว้ในคอลัมน์ของตัวเองไม่ทับข้อความ · **เร็วขึ้น** 120 BPM (1 ห้อง = 2 วินาที)
+· token สี/ฟอนต์ชุดเดียวกับ corporate film
+
+| บท | เวลา | ฉาก 3D · เนื้อหา |
+| --- | --- | --- |
+| 01 ภาพรวม | 0:00 | ชั้น platform ตกลงมาประกอบกัน + หัวข้อ + stack ที่รองรับ |
+| 02 ความท้าทาย | 0:08 | ชั้นแตกกระจาย · 3 ประโยคปัญหาตัดตามจังหวะ |
+| 03 สถาปัตยกรรม | 0:12 | ชั้นกลับมาเรียง แล้วแยกเป็น exploded view 3 ชั้น (Contract → Stack plugin → Bundle) พร้อมชื่อ plugin จริง |
+| 04 Demo | 0:20 | terminal สั่งประโยคเดียว + กอง module 3D (Database → Quality → Design → Auth → Mail → CI/CD) หล่นตามลำดับติดตั้ง |
+| 05 Design system | 0:32 | ตารางคำขอลา + token สถานะ 6 สีและ primary เป็นชิ้น 3D |
+| 06 Identity · Database | 0:38 | ผู้ใช้ → แอป → Keycloak → AD/LDAP มี packet วิ่ง · ข้อเท็จจริง auth · กติกาตั้งชื่อ SQL Server |
+| 07 Delivery | 0:44 | pipeline 10 ขั้นเป็นราง 3D ไหลเขียวทีละขั้น ผ่านวง Quality Gate · เกณฑ์ QG · branch model |
+| 08 ผลลัพธ์ | 0:52 | แท่ง 3D UGT เทียบ AI เปล่า — 34/34 vs 18/34 · 14/14 vs 2/14 · 9/9 vs 6/9 |
+| 09 เริ่มใช้ | 0:56 | โลโก้ + คำสั่งติดตั้ง + ลิงก์ repo |
+
+```bash
+(cd docs/video/showcase && npm i) && pip install numpy scipy
+npx http-server -p 8124 docs/video &            # เปิด http://127.0.0.1:8124/showcase/showcase.html (คลิกเพื่อเล่นพร้อมเพลง)
+cd docs/video/showcase && python3 music.py && ffmpeg -y -i music.wav -b:a 192k music.mp3
+node render.mjs 0 465 p0.mp4 & node render.mjs 465 930 p1.mp4 & \
+node render.mjs 930 1395 p2.mp4 & node render.mjs 1395 1860 p3.mp4 & wait
+printf "file 'p0.mp4'\nfile 'p1.mp4'\nfile 'p2.mp4'\nfile 'p3.mp4'\n" > list.txt
+ffmpeg -y -f concat -safe 0 -i list.txt -i music.wav -c:v libx264 -crf 20 -pix_fmt yuv420p \
+  -af loudnorm=I=-16:TP=-1.5 -c:a aac -b:a 224k -shortest -movflags +faststart ugt-claude-platform-showcase.mp4
+```
 
 ## Corporate film (`corporate/`)
 

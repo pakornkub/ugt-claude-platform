@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Render tooling for the UGT showcase film (showcase.html)",
+  "dependencies": {
+    "playwright": "^1.56.1",
+    "three": "0.186.1"
+  }
+}
