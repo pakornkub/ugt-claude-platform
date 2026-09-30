@@ -3,14 +3,40 @@
 > **Status:** Living · **Date:** 2026-09-30 · **Applies-to:** ugt-core 2.13.2 · ugt-nextjs-platform 4.63.5
 > **Last-reviewed:** 2026-09-30 — ตัวเลขเวอร์ชัน/ผล eval/รายชื่อตัวช่วยในวิดีโอตรงกับ README.md ณ วันที่นี้
 
-มีสองเวอร์ชัน:
+มีสามเวอร์ชัน:
 
 | ไฟล์ | สไตล์ | ความยาว |
 | --- | --- | --- |
-| [`story/ugt-claude-platform-story.mp4`](story/ugt-claude-platform-story.mp4) | **แอนิเมชันเล่าเรื่อง 3D (Three.js/WebGL)** โทนสว่าง ฟอนต์และสีเดียวกับ `docs/web/index.html` — แนะนำตัวนี้ | 72 วินาที |
+| [`explainer/ugt-claude-platform-explainer.mp4`](explainer/ugt-claude-platform-explainer.mp4) | **Tech explainer 3D** — หน้าจอโปรแกรมจริงลอยในอวกาศ เล่าตามขั้นตอนการทำงานจริงของ plugin + คำแปลเป็นภาษาคน | 86 วินาที |
+| [`story/ugt-claude-platform-story.mp4`](story/ugt-claude-platform-story.mp4) | แอนิเมชันเล่าเรื่อง 3D (เมือง = องค์กร) โทนสว่าง ฟอนต์และสีเดียวกับ `docs/web/index.html` | 72 วินาที |
 | [`ugt-claude-platform-promo.mp4`](ugt-claude-platform-promo.mp4) | motion graphic โทนมืดแบบ tech ทีละฉาก (รุ่นแรก) | 77 วินาที |
 
-ทั้งคู่ 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+ทั้งหมด 1920×1080 · 30fps · มีเพลงประกอบที่สังเคราะห์ด้วยโค้ด (ไม่ติดลิขสิทธิ์)
+
+## เวอร์ชัน tech explainer (`explainer/`)
+
+กล้องบินผ่านแผงหน้าจอ (HTML ที่วางในพื้นที่ 3D ด้วย `CSS3DRenderer`) บนพื้นหลัง WebGL —
+ข้อความบนจอดึงจากของจริงใน repo: ลำดับติดตั้งและเหตุผลจาก `ugt-nextjs-full-setup`,
+สิ่งที่ตรวจเจอก่อนติดตั้ง (SQLite ของ prototype / login ปลอม / UI เดิม), ตัวอย่างกับดัก
+`$queryRaw` + `startOfDay` → `toLocalYmd` จาก `ugt-nextjs-pitfalls`, และผล evals ใน README
+
+| เวลา | ช่วง |
+| --- | --- |
+| 0:00 | ปัญหา — AI เขียนโค้ดเร็วแต่ไม่รู้กติกา (404 เฉพาะ production, วันที่เลื่อน, Quality Gate แดง, UI ไม่เหมือนกัน) |
+| 0:07 | ติดตั้ง 3 คำสั่ง → เครือข่ายตัวช่วย 16 ตัวติดไฟ |
+| 0:15 | สั่งงานประโยคเดียว |
+| 0:21 | ตรวจของเดิมก่อน (สแกนไฟล์ → สิ่งที่เจอ) |
+| 0:29 | ถามครั้งเดียว (ชื่อโปรเจค · login · อีเมล · แนบไฟล์) |
+| 0:35 | ติดตั้งตามลำดับ Database → Quality → Design → Auth → Mail → [Upload ข้าม] → CI/CD พร้อมเหตุผลที่สลับไม่ได้ |
+| 0:52 | `verify.mjs` ผ่านทุกโมดูล → `docs/admin-handoff.md` |
+| 0:58 | pitfalls เตือนกับดักวันที่เลื่อน แล้วแก้ก่อนเขียนเสร็จ |
+| 1:08 | `/ugt-handoff` → session หน้า / เพื่อนร่วมทีมทำต่อได้ |
+| 1:15 | ผลวัดจริง 34/34 vs 18/34 · 14/14 vs 2/14 · 9/9 vs 6/9 |
+| 1:20 | คำสั่งติดตั้ง + ลิงก์ repo |
+
+แก้ข้อความ/เวลาได้ใน `explainer/explainer.html` (`CK` = กล้อง, `CAPS` = คำบรรยาย, `CH` = ชื่อบท)
+แล้วเรนเดอร์ใหม่ด้วยขั้นตอนเดียวกับเวอร์ชันเล่าเรื่องด้านล่าง (86 วินาที = 2580 เฟรม แบ่ง 4 ท่อน
+`0–645 / 645–1290 / 1290–1935 / 1935–2580`)
 
 ## เวอร์ชันเล่าเรื่อง (`story/`)
 
