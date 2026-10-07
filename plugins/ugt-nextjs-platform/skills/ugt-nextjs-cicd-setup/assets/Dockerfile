@@ -12,7 +12,9 @@ WORKDIR /app
 # libc compatibility for native modules (e.g. mssql) — keep unless proven unneeded
 RUN apk add --no-cache libc6-compat
 
-COPY package.json package-lock.json ./
+# .npmrc* = optional match: auth-setup commits one with legacy-peer-deps=true
+# (better-auth peer vs vitest 5) — without it npm ci below dies with ERESOLVE
+COPY package.json package-lock.json .npmrc* ./
 # Prevent husky from failing (`npm ci` runs the prepare script; no .git dir in Docker)
 ENV HUSKY=0
 RUN npm ci --include=optional

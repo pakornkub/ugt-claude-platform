@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.65.0 (2026-10-07)
+
+**auth + cicd: `npm ci` ล้มด้วย ERESOLVE บน Jenkins และใน `docker build` ทั้งที่เครื่องผู้ติดตั้งผ่าน** — auth-setup §5.1 ติดตั้ง better-auth ด้วย `--legacy-peer-deps` (peer optional `vitest ^2–^4` ชนกับ vitest 5 ของ test-lint kit) แต่ flag ใช้ได้กับการติดตั้งครั้งนั้นครั้งเดียว · `npm ci` ใน stage Install และ deps stage ของ Dockerfile ไม่เห็น flag
+
+- **auth-setup §5.1**: เขียน `.npmrc` (`legacy-peer-deps=true`) และ commit · แถวอาการใหม่
+- **cicd-setup assets/Dockerfile**: `COPY package.json package-lock.json .npmrc* ./` (wildcard — โปรเจคที่ไม่มี `.npmrc` ไม่พัง) · แถวอาการใหม่ · โปรเจคที่ copy Dockerfile ไปแล้วแก้บรรทัดนี้เอง
+- Origin: gov-customs-drawback (pipeline เขียวด้วย `.npmrc` + Dockerfile ที่ copy ไฟล์นี้) · 2026-10-07
+
 ## 4.64.0 (2026-10-07)
 
 **cicd-setup: ขั้น migrate ใน Deploy พิมพ์รหัสผ่าน DB ลง build log** — `sh` ของ Jenkins รันแบบ `-x` · บล็อก `[DB]` อ่าน `DATABASE_URL` จาก `.env` ใส่ตัวแปร `DB_URL` แล้วขยายบน command line ของ `docker run` → trace พิมพ์ connection string ทั้งเส้น (user + password) ใน console ของทุก build ที่ถึง Deploy · `withCredentials` mask แค่ path ของไฟล์ credential ไม่ได้ mask ค่าข้างใน

@@ -29,6 +29,7 @@ Every row below was debugged in a real org project; the fix is in
 | Login works locally but loops in production | secure-cookie + trusted-origin settings differ from the deployed URL |
 | Logout does not stick on https | cookie cleared with a different name/path than it was set with |
 | Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
+| `npm ci` dies with `ERESOLVE` on Jenkins / in `docker build` (works on the installer's machine) | better-auth's optional peer `vitest ^2–^4` vs the kit's vitest 5 — the `--legacy-peer-deps` flag was never persisted; commit `.npmrc` (§5.1) |
 | Keycloak rejects the redirect URI | client's valid redirect URIs missing the basePath-qualified callback |
 | Mailed reset link 404s | link built without the basePath (needs ugt-nextjs-mail-setup) |
 | Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` right after a `better-auth` bump | twoFactor plugin schema changed (≥1.6.24 needs a `twoFactor` row + lockout columns) and Better Auth ships no migration — diff `dist/plugins/*/schema.mjs` vs `schema.prisma` after every bump |
@@ -220,6 +221,7 @@ call) — say which path was taken and record it as a DESIGN.md deviation.
 # rewrite, not a regression (full migration history in references/auth-flows.md
 # SSO login flow). Every asset here is written for ≥1.7 — do not pin below 1.7.1.
 npm i better-auth@^1.7.1 zod@^4 --legacy-peer-deps   # zod pinned to 4 (clean-code mandates z.flattenError / z.iso.*) · --legacy-peer-deps: better-auth declares an optional peer vitest ^2–^4 and the org test-lint kit is vitest ^5 → plain install dies with ERESOLVE; afterwards re-check that vite / @testing-library/dom are still installed — the flag can prune them
+printf '# better-auth optional peer vitest ^2-^4 vs the org vitest ^5 — npm ci (Jenkins Install + Docker deps) needs this too\nlegacy-peer-deps=true\n' > .npmrc   # commit it: the --legacy-peer-deps flag above fixes THIS install only
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
 npm i ldapts          # [METHOD: LDAP] only — never ldapjs (deprecated, no types)
 npx shadcn@latest add button input label tabs card sonner field      # login/setup forms (field = error ใต้ช่อง ตาม DESIGN §4)
