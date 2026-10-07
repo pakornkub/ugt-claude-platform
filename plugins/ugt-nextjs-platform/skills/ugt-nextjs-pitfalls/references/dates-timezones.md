@@ -48,7 +48,14 @@ Rules:
 | SQL `DATE` column via Prisma | UTC-midnight | `getUTCFullYear/Month/Date`, `toISOString().slice(0, 10)` |
 | SQL `TIME(0)` via `mssql` driver | wall-clock stored in the UTC part | `getUTCHours`/`getUTCMinutes` via one central formatter |
 | `new Date('2026-06-03T00:00:00')` (no `Z`) | local-midnight | **local** getters / `toLocalYmd` — `.toISOString()` shifts it −1 day |
+| A calendar cell / `DatePicker` `onSelect(date)` (react-day-picker) | local-midnight | `toDateKey(date)`, or `formatDate(toDateKey(date))` for a label — `formatDate(date)` reads UTC parts and shows **one day early** on a UTC+7 browser |
 | `createdAt` / `new Date()` | real instant | local getters for display; never date-only slice without deciding the timezone |
+
+**Picker label (observed):** the kit `DatePicker` defaulted `formatLabel` to
+`formatDate`, so a form defaulted to today (`2026-10-08`) showed `07/10/2026` on
+the button while the stored value was correct — the table next to it showed the
+right date. A calendar `Date` is local-midnight; `formatDate` is the UTC-anchor
+formatter (§3). Convert through `toDateKey` first.
 
 Cross-side comparisons (JS date-key ↔ SQL `DATE`) must use the **same anchor on
 both sides**. And the value that one side *writes* and the other side *filters

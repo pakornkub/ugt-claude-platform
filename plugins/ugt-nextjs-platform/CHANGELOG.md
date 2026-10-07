@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.68.0 (2026-10-08)
+
+**design-setup: ป้ายวันที่บน `DatePicker` ขึ้นวันก่อนหน้า** — `ui/date-picker.tsx` ตั้ง `formatLabel = formatDate` แต่ `formatDate` อ่านส่วน UTC ส่วน `Date` จากเซลล์ปฏิทินเป็น local-midnight → เบราว์เซอร์ +07:00 เห็นวันที่ถอยหลังหนึ่งวัน (ค่าที่บันทึกและตารางถูกต้อง เห็นเฉพาะที่ปุ่ม)
+
+- **asset `ui/date-picker.tsx`**: default `formatLabel` ผ่าน `toDateKey` ก่อน — kit-sync จะเสนอให้
+- **pitfalls dates-timezones §2**: แถวตาราง anchor + ย่อหน้า "Picker label" · SKILL.md แถวอาการ
+- Origin: gov-customs-drawback · 2026-10-08
+
 ## 4.67.1 (2026-10-07)
 
 **design-setup: logo บริษัทใน sidebar ออกมาเป็นสีดำ อ่านไม่ออก** — `ube-logo-*.svg` ใช้ `fill="currentColor"` ให้ย้อมสีด้วย CSS แต่ SVG ที่โหลดผ่าน `<img>` รับ `color` จาก CSS ไม่ได้ จึงเป็นสีดำเสมอ (บนกล่อง primary สีฟ้าแทบมองไม่เห็น) และ `size-5` บีบโลโก้ที่กว้าง ≈3.7:1 จนเหลือเส้นเล็ก ๆ

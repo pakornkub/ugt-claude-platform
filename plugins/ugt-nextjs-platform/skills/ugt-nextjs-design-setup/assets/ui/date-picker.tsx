@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: ea15da3aafbb
+// kit: ugt-nextjs-platform 4.68.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: cef8fb8a0141
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -50,7 +50,9 @@ export function DatePicker({
   placeholder,
   disabled,
   className,
-  formatLabel = formatDate,
+  // value เป็น Date สร้างจาก local (เซลล์ปฏิทิน) → ผ่าน toDateKey ก่อน; formatDate(Date) อ่าน UTC parts
+  // ทำให้เบราว์เซอร์ +07:00 เห็นวันที่ถอยหลังหนึ่งวัน
+  formatLabel = (d: Date) => formatDate(toDateKey(d)),
   modifiers,
   modifiersClassNames,
   footer,

@@ -32,6 +32,7 @@ appears.
 | Symptom | Root cause | Reference |
 | --- | --- | --- |
 | Date shifts by one day ("วันที่เลื่อน −1", "วันเพี้ยน") — off only at night or only on the server; OT/attendance windows read the wrong day | JS Date bound into `$queryRaw`/SP as UTC; server TZ ≠ Bangkok | dates-timezones |
+| Date picker button shows yesterday ("ปุ่มเลือกวันที่ขึ้นวันก่อนหน้า") while the saved value and the table are right | `formatDate(Date)` (UTC anchor) applied to a calendar-cell `Date` (local-midnight) | dates-timezones |
 | Year on screen off by ~543 ("ปีเป็น พ.ศ.") | BE conversion somewhere — org rule is ค.ศ. always, no BE path | dates-timezones |
 | Data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต"), stale list until reload | React Query invalidated with a specific key instead of a prefix | data-fetching |
 | A fetch that 404s only in production | client fetch missing the basePath | data-fetching |
