@@ -1,5 +1,12 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.67.1 (2026-10-07)
+
+**design-setup: logo บริษัทใน sidebar ออกมาเป็นสีดำ อ่านไม่ออก** — `ube-logo-*.svg` ใช้ `fill="currentColor"` ให้ย้อมสีด้วย CSS แต่ SVG ที่โหลดผ่าน `<img>` รับ `color` จาก CSS ไม่ได้ จึงเป็นสีดำเสมอ (บนกล่อง primary สีฟ้าแทบมองไม่เห็น) และ `size-5` บีบโลโก้ที่กว้าง ≈3.7:1 จนเหลือเส้นเล็ก ๆ
+
+- **layout-shells.md** cleanup ข้อ 2: ห้าม `<img>` + snippet CSS mask (basePath ใน URL) · **conventions.md** แถว brand · **DESIGN.template.md** §3 เพิ่มกฎ
+- Origin: gov-customs-drawback · 2026-10-07
+
 ## 4.67.0 (2026-10-07)
 
 **auth + pitfalls: Select แสดง id / `__all__` แทนชื่อ** — Base UI `<SelectValue>` render ค่าดิบของ value ถ้า root ไม่ได้รับ `items` · หน้า `/admin/users` ช่องบทบาทโชว์ cuid ของ role, ตัวกรอง audit-logs โชว์ `__all__`, dialog เพิ่มผู้ใช้ local โชว์ id

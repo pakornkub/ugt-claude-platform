@@ -119,7 +119,8 @@
   > ข้อยกเว้นนี้ใช้ได้เฉพาะการ์ดโปรไฟล์ ที่อื่นยังใช้ `DetailDialogShell` ตามเดิม
 - **Logo บริษัท** (`public/brand/` — SVG ย้อมสีผ่าน CSS `color`):
   header ของ shell = `ube-logo-short.svg` · หน้า login/landing =
-  `ube-logo-long.svg` (มี tagline) — ห้าม embed logo เป็นรูปอื่น/สีเพี้ยน
+  `ube-logo-long.svg` (มี tagline) — ห้าม embed logo เป็นรูปอื่น/สีเพี้ยน ·
+  แสดงผ่าน CSS mask เท่านั้น ห้าม `<img>` (SVG ใน `<img>` รับสีจาก CSS ไม่ได้ ออกมาเป็นสีดำ)
 - Nav highlight: longest-prefix ด้วย `${href}/` · เมนูล้น = scroll แนวนอน
   ห้าม wrap
 - **กฎ overflow — ข้อมูลต้องไม่หายเงียบ ๆ** (มติ 2026-08-09 จากบั๊กจริง):

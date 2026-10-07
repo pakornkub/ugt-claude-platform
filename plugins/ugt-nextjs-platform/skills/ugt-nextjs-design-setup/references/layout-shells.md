@@ -25,6 +25,26 @@ a demo, not an app shell; both eval runs independently needed these steps):
    `nav-main`'s sample data, the demo `app/dashboard/page.tsx`. **The demo
    logo goes with them** — the sidebar header shows `ube-logo-short.svg`
    from `public/brand/` (DESIGN.md §3), never the block's placeholder icon.
+   **Never through `<img>`**: the logos are `fill="currentColor"`, and an
+   SVG loaded as an image cannot inherit CSS `color` — it renders black
+   (field bug: a near-invisible black mark on the blue tile). Use a CSS mask
+   so the token colour applies, and keep the basePath in the URL:
+
+   ```tsx
+   // client component — read the basePath directly (createEnv is empty in the client bundle)
+   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+   <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white">
+     <span
+       aria-hidden
+       className="h-2 w-7 bg-primary [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
+       style={{ maskImage: `url(${basePath}/brand/ube-logo-short.svg)` }}
+     />
+   </span>
+   ```
+
+   (The inline `style` is the sanctioned dynamic-value exception — the URL
+   carries the runtime basePath.) The short logo is wide (≈3.7 : 1), so size
+   it by width; `size-5` squeezes it to an unreadable sliver.
 3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
    `/` — remove/redirect the root one.
 4. Rebuild `app-sidebar.tsx` per the org rules below (Thai menu, app-name
