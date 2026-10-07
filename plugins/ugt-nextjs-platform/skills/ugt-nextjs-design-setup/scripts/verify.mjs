@@ -363,6 +363,11 @@ check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () 
     if (/SidebarContent/.test(body) && !/scroll-thin/.test(body)) {
       return { ok: 'warn', msg: 'SidebarContent has no `scroll-thin` — the menu will use the OS scrollbar, which differs per machine' };
     }
+    // SidebarInset without min-w-0 lets a wide table stretch the whole page sideways
+    const inset = /function SidebarInset[\s\S]*?className=\{cn\(([\s\S]*?)\)\}/.exec(body)?.[1];
+    if (inset && !/min-w-0/.test(inset)) {
+      return { ok: 'warn', msg: 'SidebarInset has no `min-w-0` — a wide table will make the whole page scroll sideways instead of the table' };
+    }
   }
   return { ok: true };
 });

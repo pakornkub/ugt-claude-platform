@@ -119,6 +119,17 @@ their own.
   'scroll-thin flex min-h-0 flex-1 flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
   ```
   (the right-side group dropping to a second line was a real production fix)
+- **Overflow (content)**: `SidebarInset` is a flex item with `min-width: auto`, so a wide table
+  makes **the whole page** scroll sideways (the sidebar slides under the content, the page
+  header buttons fall off the right edge) instead of the table scrolling inside its own
+  wrapper. During the block cleanup add `min-w-0` to the `SidebarInset` class list. Seen on a page
+  with an 11-column table at 1280px: `main` measured 1094px in a 1024px slot, and with `min-w-0`
+  the table wrapper scrolls internally. `scripts/verify.mjs` warns when it is missing.
+
+  ```tsx
+  // components/ui/sidebar.tsx — SidebarInset
+  'relative flex w-full min-w-0 flex-1 flex-col bg-background ...',
+  ```
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน
   + content in a card — **except form pages** (centered container, no card —

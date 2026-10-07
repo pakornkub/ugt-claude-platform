@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.68.1 (2026-10-08)
+
+**design-setup: หน้าที่มีตารางกว้างเลื่อนซ้ายขวาทั้งหน้า** — `SidebarInset` (`<main>`) เป็น flex item ที่ min-width เป็น auto จึงขยายตามตารางกว้าง แทนที่ตารางจะเลื่อนในกรอบตัวเอง ปุ่มหัวหน้าหลุดขอบขวาและ sidebar ทับเนื้อหา (เจอที่ตาราง 11 คอลัมน์ ความกว้าง 1280px: `main` กว้าง 1094px ในช่อง 1024px)
+
+- **layout-shells.md** Org shell rules: ข้อ Overflow (content) — เติม `min-w-0` ให้ `SidebarInset` ตอน cleanup block
+- **verify.mjs**: เตือนเมื่อ `SidebarInset` ไม่มี `min-w-0`
+- Origin: gov-customs-drawback · 2026-10-08
+
 ## 4.68.0 (2026-10-08)
 
 **design-setup: ป้ายวันที่บน `DatePicker` ขึ้นวันก่อนหน้า** — `ui/date-picker.tsx` ตั้ง `formatLabel = formatDate` แต่ `formatDate` อ่านส่วน UTC ส่วน `Date` จากเซลล์ปฏิทินเป็น local-midnight → เบราว์เซอร์ +07:00 เห็นวันที่ถอยหลังหนึ่งวัน (ค่าที่บันทึกและตารางถูกต้อง เห็นเฉพาะที่ปุ่ม)
