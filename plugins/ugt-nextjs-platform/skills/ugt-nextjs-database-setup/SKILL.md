@@ -167,7 +167,10 @@ closing summary must list them under "env vars needing real values".
    `references/migrations.md` §5 (`db pull` → convention refactor → offline
    `0_init` baseline → `migrate resolve --applied`); `migrate dev` against a
    database that already holds data is the one command this skill must never
-   run
+   run · **New database but no server reachable yet** (DB not provisioned at
+   install time) → write `0_init` offline with `migrate diff` and let the
+   pipeline's `migrate deploy` apply it → `references/migrations.md` §5
+   trap (c): the hand-written `migration_lock.toml` must say `mssql`
    > **First `migrate dev` on the shared org server fails without a shadow
    > database** — the app login has no `CREATE DATABASE` right and the error
    > talks about permissions, not the shadow DB. Set `shadowDatabaseUrl` to a

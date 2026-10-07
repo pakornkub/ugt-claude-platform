@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.65.1 (2026-10-07)
+
+**database-setup: `migrate deploy` ล้มด้วย P3019 เมื่อสร้าง migration `0_init` แบบ offline** — `migrate diff` เขียนแค่ `migration.sql` ไม่เขียน `migration_lock.toml` · เขียน lock file เองเป็น `provider = "sqlserver"` ตามชื่อใน schema → Prisma 7 ใช้ชื่อภายใน `mssql` · deploy ทุกครั้งหยุดที่ P3019 และ error แนะนำให้ลบ migration history (ห้ามทำ)
+
+- **references/migrations.md §5**: trap (c) — lock file ต้องเป็น `provider = "mssql"` + ตัวอย่างไฟล์
+- **SKILL.md §4 ข้อ 2**: ทางของ greenfield ที่ยังไม่มี DB server ตอนติดตั้ง (offline `0_init` → pipeline `migrate deploy`)
+- Origin: gov-customs-drawback (build #7 ล้ม P3019 · #8 ผ่านหลังแก้ lock file) · 2026-10-07
+
 ## 4.65.0 (2026-10-07)
 
 **auth + cicd: `npm ci` ล้มด้วย ERESOLVE บน Jenkins และใน `docker build` ทั้งที่เครื่องผู้ติดตั้งผ่าน** — auth-setup §5.1 ติดตั้ง better-auth ด้วย `--legacy-peer-deps` (peer optional `vitest ^2–^4` ชนกับ vitest 5 ของ test-lint kit) แต่ flag ใช้ได้กับการติดตั้งครั้งนั้นครั้งเดียว · `npm ci` ใน stage Install และ deps stage ของ Dockerfile ไม่เห็น flag
