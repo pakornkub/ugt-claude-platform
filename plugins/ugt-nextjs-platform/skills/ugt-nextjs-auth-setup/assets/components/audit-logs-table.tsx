@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.61.2 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: ce2812fa3a90
+// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: fc28003f860b
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
@@ -144,6 +144,7 @@ export function AuditLogsTable({
             <DateRangePicker
               fromLabel={t('auditLogsTable.fromLabel')}
               toLabel={t('auditLogsTable.toLabel')}
+              hideLabels
               from={parseDateParam(filters.from)}
               to={parseDateParam(filters.to)}
               onFromChange={(d) => applyFilters({ from: d ? toDateParam(d) : '' })}

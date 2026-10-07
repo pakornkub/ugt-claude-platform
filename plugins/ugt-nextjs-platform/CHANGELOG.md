@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.66.0 (2026-10-07)
+
+**auth: หน้า admin ดูพังเมื่อย้ายเข้า shell ของโปรเจค (merge branch §5.6)** — สามอาการที่เห็นพร้อมกันบนหน้า `/admin/*` หลัง merge เข้า sidebar ของโปรเจค:
+
+- **ชิดขอบ ไม่มี padding**: SKILL §5.6 ข้อ 2 + คอมเมนต์ใน `app/(admin)/layout.tsx` สั่ง render `{children}` เปล่า ซึ่งทิ้ง `<main className="p-6">` ของ shell สำรอง — padding ชุดเดียวที่หน้า admin มี → render `<PageShell>{children}</PageShell>`
+- **แถวตัวกรองหน้า audit-logs ไม่ตรงแนว**: ป้าย "ตั้งแต่/ถึง" เหนือ DatePicker ทำให้สูงกว่าช่องค้นหา ตัวกรอง action ตกบรรทัด → `ui/date-range-picker` เพิ่ม prop `hideLabels` (ป้ายเป็น sr-only + ยังเป็น placeholder) · `audit-logs-table` ใช้ใน toolbar
+- **คำอธิบายหน้าผู้ใช้งานพูดถึงบัญชี local** ทั้งที่โปรเจค SSO-only ไม่มี → ข้อความไม่ผูกกับวิธี login
+- Origin: gov-customs-drawback · 2026-10-07 (เห็นบน prod หลัง merge branch)
+
 ## 4.65.1 (2026-10-07)
 
 **database-setup: `migrate deploy` ล้มด้วย P3019 เมื่อสร้าง migration `0_init` แบบ offline** — `migrate diff` เขียนแค่ `migration.sql` ไม่เขียน `migration_lock.toml` · เขียน lock file เองเป็น `provider = "sqlserver"` ตามชื่อใน schema → Prisma 7 ใช้ชื่อภายใน `mssql` · deploy ทุกครั้งหยุดที่ P3019 และ error แนะนำให้ลบ migration history (ห้ามทำ)

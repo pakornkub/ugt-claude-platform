@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
-// kit-hash: f2d992d20826
+// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
+// kit-hash: 7fa01ff70df3
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -22,6 +22,11 @@ interface DateRangePickerProps {
   onToChange: (d: Date | undefined) => void;
   fromLabel?: string;
   toLabel?: string;
+  /**
+   * ซ่อนป้ายเหนือช่อง (ยังอยู่สำหรับ screen reader + เป็น placeholder) — ใช้ใน toolbar
+   * ของ DataTable ที่ตัวกรองต้องสูงเท่าช่องค้นหาและอยู่แถวเดียวกัน (DESIGN.md §4)
+   */
+  hideLabels?: boolean;
   /** เงื่อนไข disable เพิ่มเติมนอกจาก from≤to */
   disabled?: (date: Date) => boolean;
   className?: string;
@@ -40,6 +45,7 @@ export function DateRangePicker({
   onToChange,
   fromLabel,
   toLabel,
+  hideLabels = false,
   disabled,
   className,
   pickerClassName,
@@ -48,9 +54,11 @@ export function DateRangePicker({
   const beforeFrom = isBeforeFrom(from);
   return (
     <div className={cn('flex flex-wrap gap-3', className)}>
-      <div className="flex flex-col gap-1.5">
+      <div className={cn('flex flex-col', !hideLabels && 'gap-1.5')}>
         {fromLabel && (
-          <span className="text-xs font-medium text-muted-foreground">{fromLabel}</span>
+          <span className={cn('text-xs font-medium text-muted-foreground', hideLabels && 'sr-only')}>
+            {fromLabel}
+          </span>
         )}
         <DatePicker
           value={from}
@@ -60,8 +68,12 @@ export function DateRangePicker({
           className={pickerClassName}
         />
       </div>
-      <div className="flex flex-col gap-1.5">
-        {toLabel && <span className="text-xs font-medium text-muted-foreground">{toLabel}</span>}
+      <div className={cn('flex flex-col', !hideLabels && 'gap-1.5')}>
+        {toLabel && (
+          <span className={cn('text-xs font-medium text-muted-foreground', hideLabels && 'sr-only')}>
+            {toLabel}
+          </span>
+        )}
         <DatePicker
           value={to}
           onSelect={onToChange}

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.28.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
-// kit-hash: 64c11f771e61
+// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
+// kit-hash: 772c7e9f24c7
 // app/(admin)/layout.tsx — the ongoing admin section (users/roles/audit-logs).
 // Different route group from (admin-setup): that one only requires a session
 // (permissions don't exist pre-bootstrap); this one requires an actual
@@ -9,7 +9,7 @@
 //   GUARD (always keep): session → syncPermissionsIfNeeded → permission → redirect
 //   SHELL (fallback only): the <AdminNav> two-pane below is for projects with
 //     NO app shell yet. If the project already has its own sidebar/layout,
-//     delete the shell part, render only {children}, and merge ADMIN_NAV_ITEMS
+//     delete the shell part, render only <PageShell>{children}</PageShell>, and merge ADMIN_NAV_ITEMS
 //     into the existing sidebar instead — SKILL.md §5.6.
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
@@ -42,7 +42,9 @@ export default async function AdminLayout({
   if (!canAdmin) redirect('/'); // adjust to your app's "forbidden" landing page
 
   // SHELL fallback — replace everything from here down with plain
-  // `return <>{children}</>;` when the project's own shell wraps these pages
+  // `return <PageShell>{children}</PageShell>;` (ui/page-shell) when the project's
+  // own shell wraps these pages — plain `<>{children}</>` drops the `p-6` below,
+  // the only padding these pages have, so they render flush against the sidebar
   // (see header comment). SidebarProvider is required: NavUser (in AdminNav's
   // footer) calls useSidebar() and throws without it.
   // ข้อมูลตัวตนสำหรับ NavUser — query เดียวเฉพาะ fallback shell; โปรเจคที่มี

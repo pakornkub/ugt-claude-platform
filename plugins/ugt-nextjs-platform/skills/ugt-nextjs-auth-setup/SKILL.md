@@ -452,7 +452,10 @@ with a nav exists and `<AdminNav>` is still rendered anywhere):
    sidebar (it already has hook context): `const t = useTranslations('auth.adminNav'); t(item.labelKey)`.
 2. In `app/(admin)/layout.tsx`, keep the guard (session →
    `syncPermissionsIfNeeded()` → permission check) but delete the shell —
-   render plain `{children}` so the pages sit inside the project's own shell
+   render `<PageShell>{children}</PageShell>` (`ui/page-shell`) so the pages sit
+   inside the project's own shell — plain `{children}` drops the fallback's
+   `p-6`, the only padding the admin pages have, and they render flush against
+   the sidebar and the right edge
    (nest the `(admin)` group under the shell's layout, or move the three admin
    pages under the project's protected route group with the guard preserved).
 

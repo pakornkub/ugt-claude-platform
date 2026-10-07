@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 865ab711be87
+// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 9cb91007bb78
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -199,7 +199,7 @@ export const authTh = {
   },
   adminUsersPage: {
     title: 'ผู้ใช้งาน',
-    description: 'บัญชี SSO/AD เกิดเองตอนเข้าสู่ระบบครั้งแรก — เพิ่มด้วยมือเฉพาะบัญชี local',
+    description: 'บัญชีเกิดขึ้นเองเมื่อเข้าสู่ระบบครั้งแรก — กำหนดบทบาทให้แต่ละคนได้ที่นี่',
   },
   adminAuditLogsPage: {
     title: 'บันทึกกิจกรรม',

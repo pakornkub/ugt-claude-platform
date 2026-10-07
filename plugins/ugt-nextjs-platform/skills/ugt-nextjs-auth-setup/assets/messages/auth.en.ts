@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: da5049ca6936
+// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: b989b5e371fc
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -203,7 +203,7 @@ export const authEn: AuthCatalog = {
   },
   adminUsersPage: {
     title: 'Users',
-    description: 'SSO/AD accounts are created automatically on first sign-in — only local accounts are added manually',
+    description: 'Accounts are created on first sign-in — assign each person a role here',
   },
   adminAuditLogsPage: {
     title: 'Activity Log',
