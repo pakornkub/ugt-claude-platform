@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: 61ea21224cca
+// kit: ugt-nextjs-platform 4.67.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: 8006946be2db
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
@@ -179,7 +179,15 @@ export function CreateUserDialog({
                   control={control}
                   name="roleId"
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      // items: without it Base UI renders the raw value in <SelectValue> (a cuid, "__all__")
+                      items={[
+                        { value: NO_ROLE, label: tAdmin('noRoleOption') },
+                        ...roles.map((r) => ({ value: r.id, label: r.name })),
+                      ]}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <SelectTrigger id="new-user-role">
                         <SelectValue />
                       </SelectTrigger>

@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.67.0 (2026-10-07)
+
+**auth + pitfalls: Select แสดง id / `__all__` แทนชื่อ** — Base UI `<SelectValue>` render ค่าดิบของ value ถ้า root ไม่ได้รับ `items` · หน้า `/admin/users` ช่องบทบาทโชว์ cuid ของ role, ตัวกรอง audit-logs โชว์ `__all__`, dialog เพิ่มผู้ใช้ local โชว์ id
+
+- **auth assets**: `user-role-select`, `audit-logs-table`, `admin-user-actions` ส่ง `items={[{ value, label }]}`
+- **pitfalls SKILL.md**: แถวอาการ + Quick Rules — ทุก Select ที่ value ไม่ใช่ข้อความที่เห็น (id, sentinel) ต้องมี `items`
+- Origin: gov-customs-drawback · 2026-10-07
+
 ## 4.66.0 (2026-10-07)
 
 **auth: หน้า admin ดูพังเมื่อย้ายเข้า shell ของโปรเจค (merge branch §5.6)** — สามอาการที่เห็นพร้อมกันบนหน้า `/admin/*` หลัง merge เข้า sidebar ของโปรเจค:

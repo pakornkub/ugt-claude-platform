@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.61.2 · ugt-nextjs-auth-setup/components/user-role-select.tsx
-// kit-hash: a249c14ba0d6
+// kit: ugt-nextjs-platform 4.67.0 · ugt-nextjs-auth-setup/components/user-role-select.tsx
+// kit-hash: 32d110eedd4c
 
 // components/user-role-select.tsx — inline role-assign dropdown for one user row.
 import { useTransition } from 'react';
@@ -37,7 +37,13 @@ export function UserRoleSelect({
   }
 
   return (
-    <Select value={currentRoleId ?? NO_ROLE} onValueChange={handleChange} disabled={disabled || isPending}>
+    <Select
+      // items: without it Base UI renders the raw value in <SelectValue> (a cuid, "__all__")
+      items={[{ value: NO_ROLE, label: t('noRole') }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
+      value={currentRoleId ?? NO_ROLE}
+      onValueChange={handleChange}
+      disabled={disabled || isPending}
+    >
       <SelectTrigger className="w-48">
         <SelectValue placeholder={t('noRole')} />
       </SelectTrigger>

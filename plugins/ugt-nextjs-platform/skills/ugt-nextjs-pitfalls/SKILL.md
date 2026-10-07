@@ -38,6 +38,7 @@ appears.
 | "Maximum update depth exceeded" pointing at a UI-primitive component (Base UI now, Radix in legacy projects) | `useEffect` + `setState` reset pattern | data-fetching |
 | Pagination shows "หน้า 1 จาก 0" | `getPageCount()` / `totalPages` rendered raw on empty data | data-fetching |
 | Select crashes on an empty value | `<SelectItem value="">` — empty is the "not selected" sentinel | form-validation |
+| Select shows an id / `__none__` instead of the label after choosing | Base UI `<SelectValue>` renders the raw value unless the root gets `items` | form-validation |
 | Ticking one table row selects a different one ("ติ๊กแถวนึงได้อีกแถว") | selection riding on row index, no `getRowId` | data-fetching |
 | Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
 | Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | hardening |
@@ -65,6 +66,7 @@ upstream library docs.
 | Keep RHF defaults (`mode: 'onSubmit'`, `reValidateMode: 'onChange'` **are** the defaults) | Override `mode`/`reValidateMode` — `onChange`/`onBlur` modes break `SearchableSelect` UX |
 | Pair every manual `form.setError` with `clearErrors` in that field's `onChange` — better: move the check into Zod `superRefine` | Leave a manual error on screen after the user fixes the value |
 | `"__none__"` sentinel for a clear/no-selection option, mapped back to `undefined` in `onValueChange` | `<SelectItem value="">` — value ว่างคือกลไก "ยังไม่เลือก" ของ Select (Base UI พังเงียบ · Radix เดิม throw) |
+| `<Select items={[{ value, label }, …]}>` whenever the value is not the visible text (ids, sentinels) | Rely on `<SelectValue>` alone — Base UI shows the raw value (a cuid, `__none__`) once something is picked |
 | Escape literal braces in next-intl messages with quotes (`'{'`) or reword | Put `{` / `}` (e.g. a `{{token}}` example) in any translated string — ICU parse error at runtime |
 | `Math.max(1, table.getPageCount())` and a dedicated zero-items message | Render `getPageCount()` / API `totalPages` raw — shows "หน้า 1 จาก 0" and "1–0" ranges on empty data |
 | Log-and-rethrow in DB helpers; check `response.ok` before `.json()` | `catch { return []; }` — masks schema/connection errors as "no data" |
