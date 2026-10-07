@@ -281,10 +281,16 @@ pipeline {
                         //      surrounding quotes AND Windows CRLF that docker
                         //      --env-file does not remove.
                         //      Delete this sh block if the project has no database.
+                        //      set +x + `-e DATABASE_URL` (name only, value from the
+                        //      exported env): Jenkins runs sh with -x, so the trace
+                        //      would print the full connection string — password
+                        //      included. withCredentials masks the credential's
+                        //      file path, never the secrets inside the file.
                         sh """
-                          DB_URL=\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
+                          set +x
+                          export DATABASE_URL="\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')"
                           docker run --rm \\
-                            -e DATABASE_URL="\$DB_URL" \\
+                            -e DATABASE_URL \\
                             -e SKIP_ENV_VALIDATION=1 \\
                             --entrypoint npx \\
                             ${migImage} \\

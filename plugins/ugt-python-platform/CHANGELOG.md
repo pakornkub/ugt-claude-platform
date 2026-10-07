@@ -1,5 +1,11 @@
 # Changelog — ugt-python-platform
 
+## 0.7.0 (2026-10-07)
+
+**cicd-setup: ขั้น migrate (alembic) ใน Deploy พิมพ์รหัสผ่าน DB ลง build log** — บล็อกเดียวกับฝั่ง Next.js: `DB_URL=$(grep …)` แล้ว `docker run -e DATABASE_URL="$DB_URL"` ใต้ `sh -x` → connection string ทั้งเส้นอยู่ใน console · แก้เป็น `set +x` + `export DATABASE_URL=…` + `-e DATABASE_URL` · rules/ugt-python-ci.md §Secrets เพิ่มกฎ · โปรเจคที่ copy ไปแล้วแก้บล็อกนี้เอง + เปลี่ยนรหัสผ่าน
+
+- Origin: gov-customs-drawback (asset เดียวกับ ugt-nextjs-platform 4.64.0) · 2026-10-07
+
 ## 0.6.5 (2026-09-29)
 
 **Prompt audit สำหรับ Claude ตระกูล 5.5** — แก้ข้อเท็จจริงที่ repo ขัดเอง + ถ้อยคำเชิงประวัติ:

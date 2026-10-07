@@ -63,8 +63,16 @@ A `.env` edited on Windows carries CRLF and values may be quoted —
 `\r` attached → Prisma connection error:
 
 ```sh
-DB_URL=$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
+set +x   # Jenkins runs sh with -x — the trace would print the password
+export DATABASE_URL="$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')"
+docker run --rm -e DATABASE_URL ...   # pass the NAME only, never -e DATABASE_URL="$VAR"
 ```
+
+Never expand a secret read out of the credential file on a command line
+without `set +x` first: `sh` steps run with `-x`, and `withCredentials` masks
+only the credential's file path, not the values inside the file — the whole
+connection string, password included, lands in the console of every build
+that reaches Deploy.
 
 ### `--no-build` — never forget it
 

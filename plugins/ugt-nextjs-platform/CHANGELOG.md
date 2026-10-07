@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.64.0 (2026-10-07)
+
+**cicd-setup: ขั้น migrate ใน Deploy พิมพ์รหัสผ่าน DB ลง build log** — `sh` ของ Jenkins รันแบบ `-x` · บล็อก `[DB]` อ่าน `DATABASE_URL` จาก `.env` ใส่ตัวแปร `DB_URL` แล้วขยายบน command line ของ `docker run` → trace พิมพ์ connection string ทั้งเส้น (user + password) ใน console ของทุก build ที่ถึง Deploy · `withCredentials` mask แค่ path ของไฟล์ credential ไม่ได้ mask ค่าข้างใน
+
+- **assets/Jenkinsfile**: `set +x` + `export DATABASE_URL=…` + `docker run -e DATABASE_URL` (ส่งแค่ชื่อ) — **โปรเจคที่ copy Jenkinsfile ไปแล้วต้องแก้บล็อกนี้เอง** (kit-sync ไม่ครอบคลุม Jenkinsfile) แล้วเปลี่ยนรหัสผ่าน DB ที่เคยอยู่ใน log + ลบ build เก่า
+- **references/docker-deploy.md** snippet + เหตุผล · **rules/ugt-nextjs-ci.md** §Secrets เพิ่มกฎ · SKILL.md แถวอาการ
+- Origin: gov-customs-drawback (build #5–#6 รหัสผ่านหลุด · #8 ผ่าน log สะอาด) · 2026-10-07
+
 ## 4.63.5 (2026-09-29)
 
 **ปิดเรื่องค้างจาก prompt audit 5.5**

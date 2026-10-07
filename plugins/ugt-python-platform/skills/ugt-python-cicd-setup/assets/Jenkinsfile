@@ -259,9 +259,14 @@ pipeline {
 
                         // [DB] migrate ก่อน deploy — migration fail = ไม่ deploy (contract)
                         // ใช้ image ที่เพิ่ง build (มี alembic + code)
+                        // set +x + `-e DATABASE_URL` (ชื่ออย่างเดียว ค่ามาจาก env ที่ export):
+                        // Jenkins รัน sh แบบ -x — trace จะพิมพ์ connection string ทั้งเส้น
+                        // รวมรหัสผ่านลง build log · withCredentials mask แค่ path ของไฟล์
+                        // credential ไม่ได้ mask secret ข้างในไฟล์
                         sh """
-                          DB_URL=\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')
-                          docker run --rm -e DATABASE_URL="\$DB_URL" ${imageName}:${buildNum} alembic upgrade head
+                          set +x
+                          export DATABASE_URL="\$(grep "^DATABASE_URL=" .env | cut -d= -f2- | tr -d '"\r')"
+                          docker run --rm -e DATABASE_URL ${imageName}:${buildNum} alembic upgrade head
                         """
                         // [DB] Django variant — สลับทั้งบล็อกข้างบนเป็นบรรทัดนี้แทน:
                         //   sh "docker run --rm --env-file .env ${imageName}:${buildNum} python manage.py migrate --noinput"

@@ -55,6 +55,9 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 - Secrets ใน `sh` ต้องถูกขยายค่าโดย **shell**: `"$VAR"` — **ห้าม** ใช้ Groovy
   interpolation `"${VAR}"` เพราะจะรั่วค่าลง build log (ระวังเป็นพิเศษใน
   `sh """..."""` เพราะ Groovy interpolate ทุก `${}` ที่เจอ)
+- อ่าน secret ออกจากไฟล์ credential ใน `sh`: `set +x` ก่อนเสมอ แล้วส่งต่อด้วย**ชื่อ**
+  (`export X=...; docker run -e X`) — `sh` รันแบบ `-x` และ `withCredentials`
+  mask แค่ path ของไฟล์ ไม่ได้ mask ค่าข้างในไฟล์
 - ไฟล์ชั่วคราวที่เก็บ secret (เช่น `dc-nvd.properties`) ต้องลบใน `post { always }`
 - `NOTIFY_EMAIL` / `SMTP_FROM` เป็น Jenkins Global env vars — ห้าม hardcode
 - ชื่อ credential: `nvd` (global ต่อ server ไม่ผูกโปรเจค) · `env-<project>` ·

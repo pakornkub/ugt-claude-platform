@@ -41,6 +41,9 @@ worse than no gate because it manufactures false confidence.
 - Secrets in `sh` must be expanded by the **shell**: `"$VAR"` — **never** Groovy
   interpolation `"${VAR}"`, which leaks the value into the build log (watch out
   especially inside `sh """..."""` where Groovy interpolates every `${}`)
+- Reading a secret out of the credential file inside `sh`: `set +x` first and
+  pass it by **name** (`export X=...; docker run -e X`). `sh` runs with `-x`,
+  and `withCredentials` masks only the file path — not the values in the file
 - Temp files holding secrets are deleted in `post { always }`
 - `NOTIFY_EMAIL` / `SMTP_FROM` are Jenkins Global env vars — never hardcode
 - Credential naming: `nvd` · `env-<project>` · `env-<project>-dev` · `sentry-dsn-<project>`
