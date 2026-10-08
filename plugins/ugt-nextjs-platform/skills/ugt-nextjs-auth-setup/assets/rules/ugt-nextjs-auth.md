@@ -43,7 +43,9 @@ shipped as bugs once (4.25.0):
 - **Base UI API, never Radix**: triggers `render={<X />}` · menu items
   `onClick` (Radix's `asChild`/`onSelect` are ignored silently — the button
   renders and does nothing) · checkbox tri-state = `checked` boolean +
-  `indeterminate` prop.
+  `indeterminate` prop · `DropdownMenuLabel` (= `Menu.GroupLabel`) only inside
+  `DropdownMenuGroup` — outside it Base UI throws error #31 the moment the menu
+  opens and the whole page fails to load (shipped in `nav-user`, fixed 4.69.0).
 - **DESIGN.md applies here too**: destructive → `ConfirmActionDialog`
   (never `window.confirm`) · row buttons → `IconAction` + `soft-*` ·
   page headers → `ui/page-shell` (title + subtitle) · long checklists →

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: 65d874f05ae4
+// kit: ugt-nextjs-platform 4.69.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: 57915b4fed2e
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -140,18 +140,21 @@ export function NavUser({
               align="end"
               sideOffset={4}
             >
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="size-8 rounded-lg">
-                    <AvatarImage src={avatar ?? undefined} alt={name} />
-                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{email}</span>
+              {/* Base UI: GroupLabel ต้องอยู่ใน Menu.Group — ไม่งั้นเปิดเมนูแล้ว throw error #31 ทั้งหน้าพัง */}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="size-8 rounded-lg">
+                      <AvatarImage src={avatar ?? undefined} alt={name} />
+                      <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">{name}</span>
+                      <span className="truncate text-xs text-muted-foreground">{email}</span>
+                    </div>
                   </div>
-                </div>
-              </DropdownMenuLabel>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => setProfileOpen(true)}>

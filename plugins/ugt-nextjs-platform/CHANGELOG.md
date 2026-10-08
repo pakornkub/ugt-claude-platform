@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.69.0 (2026-10-08)
+
+**auth-setup: กดเมนูโปรไฟล์ (⋮ ท้าย sidebar) แล้วทั้งหน้าพัง** — "This page couldn’t load" และ console ขึ้น `Base UI error #31` (MenuGroupContext is missing) · `components/nav-user.tsx` วาง `DropdownMenuLabel` (= `Menu.GroupLabel`) ไว้นอก `DropdownMenuGroup` ซึ่ง Base UI ไม่ยอม
+
+- **asset `components/nav-user.tsx`**: ครอบหัวเมนู (avatar + ชื่อ + อีเมล) ด้วย `DropdownMenuGroup` — kit-sync จะเสนอให้
+- **rules `ugt-nextjs-auth.md`** ข้อ Base UI API + **SKILL.md** แถวอาการ
+- Origin: gov-customs-drawback · 2026-10-08 (เจอบน dev หลังเปิดใช้จริง, ทดสอบแก้แล้วด้วยเทสต์ที่เปิดเมนูจริง)
+
 ## 4.68.1 (2026-10-08)
 
 **design-setup: หน้าที่มีตารางกว้างเลื่อนซ้ายขวาทั้งหน้า** — `SidebarInset` (`<main>`) เป็น flex item ที่ min-width เป็น auto จึงขยายตามตารางกว้าง แทนที่ตารางจะเลื่อนในกรอบตัวเอง ปุ่มหัวหน้าหลุดขอบขวาและ sidebar ทับเนื้อหา (เจอที่ตาราง 11 คอลัมน์ ความกว้าง 1280px: `main` กว้าง 1094px ในช่อง 1024px)

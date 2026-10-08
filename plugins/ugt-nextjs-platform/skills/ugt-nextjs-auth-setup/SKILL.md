@@ -30,6 +30,7 @@ Every row below was debugged in a real org project; the fix is in
 | Logout does not stick on https | cookie cleared with a different name/path than it was set with |
 | Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
 | `npm ci` dies with `ERESOLVE` on Jenkins / in `docker build` (works on the installer's machine) | better-auth's optional peer `vitest ^2–^4` vs the kit's vitest 5 — the `--legacy-peer-deps` flag was never persisted; commit `.npmrc` (§5.1) |
+| Opening the profile menu (sidebar footer ⋮) kills the page — "This page couldn’t load", console `Base UI error #31` | `DropdownMenuLabel` outside `DropdownMenuGroup` in `nav-user.tsx` (fixed in the asset 4.69.0 — re-sync old installs) |
 | Keycloak rejects the redirect URI | client's valid redirect URIs missing the basePath-qualified callback |
 | Mailed reset link 404s | link built without the basePath (needs ugt-nextjs-mail-setup) |
 | Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` right after a `better-auth` bump | twoFactor plugin schema changed (≥1.6.24 needs a `twoFactor` row + lockout columns) and Better Auth ships no migration — diff `dist/plugins/*/schema.mjs` vs `schema.prisma` after every bump |
