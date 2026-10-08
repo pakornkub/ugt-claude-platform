@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.72.0 (2026-10-08)
+
+**auth-setup: login SSO พังทั้งระบบหลัง deploy บางรอบ — `Provider not found` ทั้งที่ health เขียว** — genericOAuth ของ better-auth 1.7 ดึง discovery ของ Keycloak ครั้งเดียวตอน `init` ถ้าครั้งนั้นพลาด provider ถูกข้ามจนกว่า process จะ restart
+
+- **asset `lib/auth.ts`**: `keycloakEndpoints(issuer)` ใส่ endpoint `/protocol/openid-connect/{auth,token,userinfo}` ให้ provider ลงทะเบียนเสมอ; discovery สำเร็จก็ยังตรวจ id_token ด้วย JWKS — kit-sync จะเสนอให้
+- **auth-flows.md** · **rules `ugt-nextjs-auth.md`** · SKILL.md แถวอาการ
+- Origin: gov-customs-drawback · 2026-10-08 (prod #19 พัง dev #28 commit เดียวกันไม่พัง · เทสต์จำลอง fetch ล้ม: ไม่มี endpoint = `PROVIDER_NOT_FOUND`, มี = ได้ URL login)
+
 ## 4.71.0 (2026-10-08)
 
 **design-setup: dev กับ prod หน้าตาเหมือนกันทุกจุด — ผู้ใช้ไม่รู้ว่าอยู่ตัวไหนถ้าไม่ดู URL** — สองตัวอยู่ host เดียวกัน ต่างกันแค่ basePath (`/<project>` vs `/<project>-dev`)

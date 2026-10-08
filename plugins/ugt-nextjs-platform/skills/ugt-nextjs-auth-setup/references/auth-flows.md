@@ -140,9 +140,18 @@ vars are `undefined` and the build crashes — always guard:
 
 ```ts
 plugins: env.KEYCLOAK_ISSUER && env.KEYCLOAK_CLIENT_ID && env.KEYCLOAK_CLIENT_SECRET
-  ? [genericOAuth({ config: [{ ...keycloak({ ... }) }] })]
+  ? [genericOAuth({ config: [{ ...keycloak({ ... }), ...keycloakEndpoints(env.KEYCLOAK_ISSUER) }] })]
   : [],
 ```
+
+**Explicit endpoints, not discovery alone**: genericOAuth fetches
+`.well-known/openid-configuration` once in `init`; a failed fetch logs
+`Discovery fetch failed for "keycloak"` and drops the provider until the
+process restarts — SSO answers `404 {"code":"PROVIDER_NOT_FOUND"}` while
+`/api/health` stays green (the deploy looks fine). `keycloakEndpoints()` in
+`lib/auth.ts` supplies Keycloak's fixed `/protocol/openid-connect/{auth,token,userinfo}`
+so the provider always registers. Hit on one prod deploy while the dev deploy
+of the same commit minutes earlier was fine — it is timing, not code.
 
 ## LDAP login flow (ldapLoginAction)
 

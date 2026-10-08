@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 27c52b1c773f
+// kit: ugt-nextjs-platform 4.72.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: bbadd23d3503
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -19,6 +19,20 @@ import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
 // Falls back to 'better-auth' when no BASE_PATH is configured (local dev, single app).
 // MUST stay in sync with proxy.ts (getSessionCookie) and lib/actions/auth.ts (SESSION_COOKIE_NAME).
 const cookiePrefix = (env.NEXT_PUBLIC_BASE_PATH || '').replace(/^\//, '') || 'better-auth';
+
+// [METHOD: SSO] — Keycloak's fixed OIDC endpoints under the realm issuer (the same values its
+// discovery document returns). genericOAuth fetches discovery ONCE in init and, if that fetch
+// fails (Keycloak/proxy blip while the container starts), SKIPS the provider for the life of
+// the process — every login then answers 404 PROVIDER_NOT_FOUND until a restart. Passing the
+// endpoints keeps the provider registered; when discovery succeeds, id_token JWKS checks still apply.
+function keycloakEndpoints(issuer: string) {
+  const base = `${issuer.replace(/\/$/, '')}/protocol/openid-connect`;
+  return {
+    authorizationUrl: `${base}/auth`,
+    tokenUrl: `${base}/token`,
+    userInfoUrl: `${base}/userinfo`,
+  };
+}
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
@@ -165,6 +179,7 @@ export const auth = betterAuth({
                   redirectURI: `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH}/api/auth/callback/keycloak`,
                   overrideUserInfo: true, // refresh user fields on every SSO login
                 }),
+                ...keycloakEndpoints(env.KEYCLOAK_ISSUER), // survives a failed discovery — see above
                 mapProfileToUser: async (profile: Record<string, unknown>) => {
                   const loginName = profile.preferred_username as string | undefined;
                   if (!loginName) return {};

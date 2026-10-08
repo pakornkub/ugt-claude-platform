@@ -85,6 +85,9 @@ http has no `__Secure-` prefix).
   `cookieStore.set` (otherwise double-encoding → 404)
 - Guard Keycloak plugin registration with `env.KEYCLOAK_* &&` or builds with
   `SKIP_ENV_VALIDATION=1` crash
+- Keep `...keycloakEndpoints(env.KEYCLOAK_ISSUER)` in the Keycloak config — without
+  it a failed discovery fetch at startup drops the provider until restart
+  (`PROVIDER_NOT_FOUND` on every login, health still green)
 - auth-client: pass no `baseURL`; pass the path via the `basePath` option and
   read `process.env.NEXT_PUBLIC_BASE_PATH` directly (reading through
   `createEnv()` yields undefined in the client bundle)
