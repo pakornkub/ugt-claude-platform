@@ -262,9 +262,13 @@ different size — is the field bug this step exists to prevent.
 
    ```tsx
    import { env } from '@/lib/env';
-   const DEV_SUFFIX = env.NEXT_PUBLIC_BASE_PATH.endsWith('-dev') ? ' (DEV)' : '';
+   // `?? ''` ห้ามตัด: CI build ตั้ง SKIP_ENV_VALIDATION → zod ไม่ใส่ default ให้ ค่าเป็น undefined
+   const DEV_SUFFIX = (env.NEXT_PUBLIC_BASE_PATH ?? '').endsWith('-dev') ? ' (DEV)' : '';
    export const metadata: Metadata = { title: `<App name>${DEV_SUFFIX}`, ... };
    ```
+
+   ไม่มี `?? ''` = Jenkins stage Build พัง `Cannot read properties of undefined (reading 'endsWith')`
+   ที่ `app/layout.tsx` (เจอจริงตอนทำ 4.71.0)
 
    ถ้าหน้าไหนตั้ง `title` เอง ให้ root ใช้ `title: { template: `%s · <App name>${DEV_SUFFIX}`, default: ... }`
    แทน ไม่งั้นหน้านั้นทับ suffix หาย
