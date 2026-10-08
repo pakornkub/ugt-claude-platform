@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.69.0 (2026-10-08)
+
+**ตัวกรองช่วงวันที่ใน DataTable toolbar ไม่อยู่แนวเดียวกับช่องอื่น**
+
+- Activity Log (`audit-logs-table.tsx`) ส่ง `fromLabel`/`toLabel` ให้ `ui/date-range-picker` ซึ่งวาง label ไว้เหนือช่อง → ช่องวันที่ตกต่ำกว่าช่องค้นหาและ Select ในแถวเดียวกัน ("filter วันที่มี label แล้วบรรทัดตก") → `date-range-picker` เพิ่ม `showLabels` (default `true`), Activity Log ใช้ `showLabels={false}` · conventions.md: ตัวกรองวันที่ใน toolbar ใช้ `showLabels={false}`
+- **โปรเจคเดิม**: kit-sync เสนอ 2 ไฟล์ใหม่ (ของเดิมที่ใช้ label ยังทำงานเหมือนเดิม)
+- ที่มา: ugt-rd-velocity
+
 ## 4.63.5 (2026-09-29)
 
 **ปิดเรื่องค้างจาก prompt audit 5.5**

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
-// kit-hash: f2d992d20826
+// kit: ugt-nextjs-platform 4.69.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
+// kit-hash: 642935b0c6e7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -22,6 +22,8 @@ interface DateRangePickerProps {
   onToChange: (d: Date | undefined) => void;
   fromLabel?: string;
   toLabel?: string;
+  /** false = label เป็นแค่ placeholder (ไม่มีบรรทัด label เหนือช่อง) — ใช้ใน DataTable toolbar ให้สูงเท่าตัวกรองอื่น */
+  showLabels?: boolean;
   /** เงื่อนไข disable เพิ่มเติมนอกจาก from≤to */
   disabled?: (date: Date) => boolean;
   className?: string;
@@ -40,6 +42,7 @@ export function DateRangePicker({
   onToChange,
   fromLabel,
   toLabel,
+  showLabels = true,
   disabled,
   className,
   pickerClassName,
@@ -49,7 +52,7 @@ export function DateRangePicker({
   return (
     <div className={cn('flex flex-wrap gap-3', className)}>
       <div className="flex flex-col gap-1.5">
-        {fromLabel && (
+        {showLabels && fromLabel && (
           <span className="text-xs font-medium text-muted-foreground">{fromLabel}</span>
         )}
         <DatePicker
@@ -61,7 +64,7 @@ export function DateRangePicker({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        {toLabel && <span className="text-xs font-medium text-muted-foreground">{toLabel}</span>}
+        {showLabels && toLabel && <span className="text-xs font-medium text-muted-foreground">{toLabel}</span>}
         <DatePicker
           value={to}
           onSelect={onToChange}

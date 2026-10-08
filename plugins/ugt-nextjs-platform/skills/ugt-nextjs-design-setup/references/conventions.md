@@ -170,7 +170,8 @@ table's per-column filters. Fixed placement so page N+1 never moves them:
 - Page actions stay top-right in `PageActions`; never mix an action button
   into the toolbar's filter zone.
 - Control per the ladder above (≤5 RadioGroup · 6–15 Select · >15 Combobox ·
-  date range = `ui/date-range-picker`). **A bare `Input` is never a filter** —
+  date range = `ui/date-range-picker` with `showLabels={false}` — the labels above the pickers push them
+  below the search box; as placeholders the whole row lines up). **A bare `Input` is never a filter** —
   free-text search is the DataTable's own toolbar search; do not duplicate it
   here.
 - A filter that changes *which rows exist* must be part of the query key and
