@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.72.1 (2026-10-09)
+
+**design-setup conventions: ตัวกรองวันที่ใน DataTable toolbar ใช้ `hideLabels`** — กฎที่ขาดไปตั้งแต่ 4.66.0 (asset แก้แล้วแต่ conventions.md ยังไม่บอก) · ยกมาจาก PR #15 (ปิดแล้ว — แก้ซ้ำกับ 4.66.0) · docs-only ไม่มี asset เปลี่ยน
+
 ## 4.72.0 (2026-10-08)
 
 **auth-setup: login SSO พังทั้งระบบหลัง deploy บางรอบ — `Provider not found` ทั้งที่ health เขียว** — genericOAuth ของ better-auth 1.7 ดึง discovery ของ Keycloak ครั้งเดียวตอน `init` ถ้าครั้งนั้นพลาด provider ถูกข้ามจนกว่า process จะ restart
