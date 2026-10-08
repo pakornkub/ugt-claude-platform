@@ -67,7 +67,10 @@ before 4.58.0 it existed only as words pointing at HRMS code, which is why
 installs shipped empty top bars). Composition, left→right:
 
 1. `SidebarTrigger` — the collapse button.
-2. Vertical `Separator`.
+2. Vertical `Separator` — `h-4` **plus `data-vertical:self-center`**: `ui/separator`
+   gives vertical separators `self-stretch`, which overrides the header's
+   `items-center`, so a fixed-height line hugs the top edge instead of sitting
+   in the middle (looked like a broken/missing line next to the trigger).
 3. **Breadcrumb = เส้นทางเต็ม** derived from the SAME nav config the sidebar
    renders (pass the resolved items in — labels identical to the menu, never
    hardcoded): `group › หน้า` on a nav page ("งานหลัก › ใบลา"), plus any

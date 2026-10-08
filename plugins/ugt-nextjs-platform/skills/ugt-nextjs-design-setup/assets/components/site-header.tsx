@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.58.0 · ugt-nextjs-design-setup/components/site-header.tsx
-// kit-hash: e78b7497865c
+// kit: ugt-nextjs-platform 4.70.0 · ugt-nextjs-design-setup/components/site-header.tsx
+// kit-hash: fdff04499b11
 // source: ugt-hrms site-header pattern — installed by ugt-nextjs-design-setup (org UI kit)
 // Mount at the top of SidebarInset in app/(app)/layout.tsx — every sidebar
 // shell gets this header; a bare header (trigger only, no breadcrumb/toggles)
@@ -95,7 +95,11 @@ export function SiteHeader({
       className={`flex h-12 shrink-0 items-center gap-2 border-b px-4 ${className ?? ''}`}
     >
       <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mx-1 data-[orientation=vertical]:h-4" />
+      {/* ui/separator ใส่ self-stretch ให้แนวตั้ง — ทับ items-center ของ header เส้น h-4 จึงติดขอบบน · self-center ดึงกลับมากลาง */}
+      <Separator
+        orientation="vertical"
+        className="mx-1 data-[orientation=vertical]:h-4 data-vertical:self-center"
+      />
       <Breadcrumb>
         <BreadcrumbList>
           {crumbs.map((crumb, i) => (

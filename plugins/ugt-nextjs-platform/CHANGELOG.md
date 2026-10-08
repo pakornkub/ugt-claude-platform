@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.70.0 (2026-10-08)
+
+**design-setup: เส้นคั่นข้างปุ่มเปิด/ปิด sidebar ไปติดขอบบน (ดูเหมือนเส้นขาด)** — `ui/separator` ให้ Separator แนวตั้ง `self-stretch` ซึ่งทับ `items-center` ของ header ใน `site-header.tsx` เส้นสูง `h-4` จึงอยู่ที่ y=0 แทนกลาง header 48px
+
+- **asset `components/site-header.tsx`**: เพิ่ม `data-vertical:self-center` (tailwind-merge ให้ตัวหลังชนะ `self-stretch`) — kit-sync จะเสนอให้
+- **layout-shells.md** §Site header ข้อ 2: เขียนเหตุผลไว้ ไม่ให้ใครถอดออก
+- Origin: gov-customs-drawback · 2026-10-08 (วัดบน dev หลังแก้: กึ่งกลางเส้น = กึ่งกลางปุ่ม y=23.5)
+
 ## 4.69.0 (2026-10-08)
 
 **auth-setup: กดเมนูโปรไฟล์ (⋮ ท้าย sidebar) แล้วทั้งหน้าพัง** — "This page couldn’t load" และ console ขึ้น `Base UI error #31` (MenuGroupContext is missing) · `components/nav-user.tsx` วาง `DropdownMenuLabel` (= `Menu.GroupLabel`) ไว้นอก `DropdownMenuGroup` ซึ่ง Base UI ไม่ยอม
