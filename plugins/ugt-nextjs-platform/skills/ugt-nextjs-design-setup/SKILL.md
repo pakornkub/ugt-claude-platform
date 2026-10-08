@@ -257,6 +257,18 @@ different size — is the field bug this step exists to prevent.
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 
+   **Title ของ dev ต้องต่างจาก prod** — แท็บ browser เป็นที่เดียวที่เห็นตอนสลับแท็บ
+   (คู่กับป้าย `DEV` ใน `site-header.tsx`, ใช้ basePath ตัวเดียวกัน):
+
+   ```tsx
+   import { env } from '@/lib/env';
+   const DEV_SUFFIX = env.NEXT_PUBLIC_BASE_PATH.endsWith('-dev') ? ' (DEV)' : '';
+   export const metadata: Metadata = { title: `<App name>${DEV_SUFFIX}`, ... };
+   ```
+
+   ถ้าหน้าไหนตั้ง `title` เอง ให้ root ใช้ `title: { template: `%s · <App name>${DEV_SUFFIX}`, default: ... }`
+   แทน ไม่งั้นหน้านั้นทับ suffix หาย
+
    **แล้วลงทะเบียน plugin ของ next-intl ใน `next.config.ts` — ไม่ใช่ของเสริม**:
 
    ```ts

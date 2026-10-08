@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.71.0 (2026-10-08)
+
+**design-setup: dev กับ prod หน้าตาเหมือนกันทุกจุด — ผู้ใช้ไม่รู้ว่าอยู่ตัวไหนถ้าไม่ดู URL** — สองตัวอยู่ host เดียวกัน ต่างกันแค่ basePath (`/<project>` vs `/<project>-dev`)
+
+- **asset `components/site-header.tsx`**: ป้าย `DEV` (`StatusBadge` tone warning + `FlaskConical`) แสดงเมื่อ `NEXT_PUBLIC_BASE_PATH` ลงท้าย `-dev` — kit-sync จะเสนอให้ ไม่ต้องเพิ่ม env var
+- **SKILL.md** ขั้น 3: `metadata.title` ต่อ ` (DEV)` จาก basePath เดียวกัน (แท็บ browser) · **layout-shells.md** §Site header ข้อ 5
+- Origin: gov-customs-drawback · 2026-10-08 (ผู้ใช้ขอหลังสับสน dev/prod)
+
 ## 4.70.0 (2026-10-08)
 
 **design-setup: เส้นคั่นข้างปุ่มเปิด/ปิด sidebar ไปติดขอบบน (ดูเหมือนเส้นขาด)** — `ui/separator` ให้ Separator แนวตั้ง `self-stretch` ซึ่งทับ `items-center` ของ header ใน `site-header.tsx` เส้นสูง `h-4` จึงอยู่ที่ y=0 แทนกลาง header 48px

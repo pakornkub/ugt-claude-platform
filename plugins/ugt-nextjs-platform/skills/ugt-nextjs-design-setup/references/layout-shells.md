@@ -88,6 +88,14 @@ installs shipped empty top bars). Composition, left→right:
    (เมื่อ dark mode = มี). Copying those two components and rendering them
    nowhere was the other half of the empty-header bug. Page-specific
    actions do NOT go here — they stay in `PageActions`.
+5. **ป้าย `DEV`** (built into the asset, left of the toggles) — a warning
+   `StatusBadge` shown when `NEXT_PUBLIC_BASE_PATH` ends with `-dev`, which is
+   exactly the develop deploy (`ugt-nextjs-ci.md`: develop = everything
+   suffixed `-dev`). prod and dev share one host and look identical, so
+   without it nothing but the URL says which one a user is typing into. No new env
+   var — the basePath already tells the two apart. Pair it with the
+   `(DEV)` title suffix in `app/layout.tsx` (SKILL.md step 3) so the browser
+   tab differs too.
 
 The header carries `border-b` — the line separating it from the page. This
 **replaces** the old rule "breadcrumb above the title when depth > 2": the

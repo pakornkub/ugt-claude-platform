@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.70.0 · ugt-nextjs-design-setup/components/site-header.tsx
-// kit-hash: fdff04499b11
+// kit: ugt-nextjs-platform 4.71.0 · ugt-nextjs-design-setup/components/site-header.tsx
+// kit-hash: 733037157c56
 // source: ugt-hrms site-header pattern — installed by ugt-nextjs-design-setup (org UI kit)
 // Mount at the top of SidebarInset in app/(app)/layout.tsx — every sidebar
 // shell gets this header; a bare header (trigger only, no breadcrumb/toggles)
@@ -9,6 +9,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { FlaskConical } from 'lucide-react';
 
 import {
   Breadcrumb,
@@ -20,6 +21,11 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { StatusBadge } from '@/components/ui/status-badge';
+
+// dev = basePath ลงท้าย -dev (Jenkinsfile: develop → /<project>-dev) — prod กับ dev หน้าตาเหมือนกันทุกจุด
+// ถ้าไม่มีป้ายนี้ ผู้ใช้กรอกข้อมูลจริงลง dev โดยไม่รู้ตัว
+const IS_DEV_DEPLOY = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').endsWith('-dev');
 
 /**
  * One nav entry, labels already resolved (the caller owns t() — this
@@ -120,7 +126,14 @@ export function SiteHeader({
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="ml-auto flex items-center gap-2">{actions}</div>
+      <div className="ml-auto flex items-center gap-2">
+        {IS_DEV_DEPLOY && (
+          <StatusBadge tone="warning" icon={FlaskConical}>
+            DEV
+          </StatusBadge>
+        )}
+        {actions}
+      </div>
     </header>
   );
 }
