@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.74.0 (2026-10-09)
+
+**auth-setup: `ERR_TOO_MANY_REDIRECTS` ระหว่าง `/` กับ `/login` เมื่อ browser ยังถือ session cookie ที่หมดอายุ/ถูก revoke** — `proxy.ts` เด้ง `/login` → `/` เพราะ cookie *มีอยู่* (`getSessionCookie`) แต่ layout ของหน้าที่ป้องกันเด้ง `/` → `/login` เมื่อ `auth.api.getSession` เป็น null — สองฝั่งไล่กันไม่จบ (browser ใหม่/ล้าง cookie แล้วหาย จึงเจอเฉพาะคนที่ session หมดอายุ)
+
+- **asset `proxy.ts`**: เลิก redirect path ฝั่ง auth (`/login`, `/reset-password`) ตาม cookie presence — `AUTH_ONLY_PATHS` เหลือความหมายแค่ "ไม่ต้องมี cookie" · kit-sync จะเสนอให้
+- **SKILL.md §5.5 ข้อ 1**: หน้า login (Server Component) เช็ค session จริงด้วย `auth.api.getSession` แล้ว `redirect('/')` เฉพาะเมื่อ session ใช้ได้ — cookie เก่าจะเห็นฟอร์มแทนวน loop (หน้า login เป็นโค้ดที่เขียนเองตาม §5.5 ไม่มี asset ให้ copy: โปรเจคเดิมที่ copy `proxy.ts` ไปแล้วต้องลบบล็อก `isAuthOnlyPath && sessionCookie` เองและเพิ่ม 2 บรรทัดในหน้า login)
+- **verify.mjs** +1 ข้อ (fail ถ้า proxy ยัง bounce ตาม cookie · warn ถ้าหน้า login ไม่เรียก `getSession`) · `rules/ugt-nextjs-auth.md` + `verification.md` + `auth-flows.md` (gotcha + ย่อหน้า Server Component session check) + SKILL.md แถวอาการ
+- Origin: ugt-voice-platform · 2026-10-09
+
 ## 4.73.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)

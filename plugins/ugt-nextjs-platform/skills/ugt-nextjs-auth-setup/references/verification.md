@@ -10,7 +10,8 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
 - [ ] Unselected methods are fully removed (login-form sections, actions, imports, env vars)
 - [ ] Logout clears the cookie + the DB session + returns to `/login` (test on https too if possible)
 - [ ] [SSO] after logout, clicking login again → must see the Keycloak page again (backchannel logout works)
-- [ ] Visiting `/login` while logged in → bounces to the dashboard; a protected page without login → bounces to `/login`; API routes without a session → 401 JSON
+- [ ] Visiting `/login` while logged in → bounces to the dashboard (done by the login page's own `getSession` check, not by `proxy.ts`); a protected page without login → bounces to `/login`; API routes without a session → 401 JSON
+- [ ] A browser holding an **expired/stale** session cookie (set a junk value for the session cookie in devtools, or let a session expire) opens `/` → lands on the login form once — no redirect loop, no `ERR_TOO_MANY_REDIRECTS`
 - [ ] [Local + mail] "ลืมรหัสผ่าน?" with a **real** email and with a made-up one →
       **the same message both times**, and the email arrives for the real one
 - [ ] The mailed link opens the reset page **on the deployed basePath**, not a 404

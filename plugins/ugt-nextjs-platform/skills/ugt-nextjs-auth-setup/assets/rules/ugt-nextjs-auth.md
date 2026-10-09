@@ -186,6 +186,10 @@ employee view over a linked server — `lib/directory.ts`.
   file runs on Node.js), but because it runs on **every** request: a DB
   round-trip there is latency on every navigation and turns a DB hiccup into a
   full outage. The real session check belongs in the layout/Server Action
+- Never redirect away from `/login` (or `/reset-password`) on cookie presence —
+  a stale cookie loops `/` ↔ `/login`. "Already signed in → `/`" belongs in the
+  login page, which checks `auth.api.getSession()` and redirects only on a real
+  session
 - `export const config` is the only export name Next.js reads for the matcher —
   renaming it silently disables route protection
 

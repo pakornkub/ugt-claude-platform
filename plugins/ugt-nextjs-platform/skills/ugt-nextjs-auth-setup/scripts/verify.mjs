@@ -310,6 +310,23 @@ check('proxy redirects are app-relative', () => {
     : { ok: true };
 });
 
+check('proxy does not bounce auth pages on cookie presence (stale-cookie redirect loop)', () => {
+  if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
+  const body = stripComments(read(GUARD_FILE));
+  // `if (isAuthOnlyPath && sessionCookie) { …redirect('/') }` — a cookie is not a session:
+  // an expired one makes the layout send the browser back to /login, which this sends to /.
+  const bounce = /isAuthOnlyPath\s*&&\s*(?:!!)?\s*sessionCookie|sessionCookie\s*&&\s*isAuthOnlyPath/.test(body);
+  const problems = [];
+  if (bounce) {
+    problems.push(`${GUARD_FILE} redirects an auth page (/login) to the app on cookie presence — an expired cookie loops / ↔ /login (ERR_TOO_MANY_REDIRECTS); do that in the login page with auth.api.getSession`);
+  }
+  const loginPage = ['app/(auth)/login/page.tsx', 'app/login/page.tsx'].find((f) => has(f));
+  if (loginPage && !/getSession/.test(read(loginPage))) {
+    problems.push(`${loginPage} never checks auth.api.getSession — a signed-in user still sees the login form (SKILL.md §5.5 step 1)`);
+  }
+  return problems.length ? { ok: bounce ? false : 'warn', msg: problems.join(' · ') } : { ok: true };
+});
+
 check('proxy bypasses /_next/ and /api/health', () => {
   if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
   const body = read(GUARD_FILE);
