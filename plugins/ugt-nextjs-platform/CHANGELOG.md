@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.74.0 (2026-10-09)
+
+**auth-setup: login SSO ล้มด้วย `เข้าสู่ระบบไม่สำเร็จ (internal_server_error)` บน better-auth ≥ 1.7 — schema ของ kit ไม่มี `Account.Issuer`** — 1.7 ผูกตัวตนบัญชีกับ issuer (OIDC `iss`) callback ค้นหา/เขียน `account.issuer` แต่ model `account` ใน `schema-auth.prisma` ไม่มีคอลัมน์นี้ query จึง throw แล้ว Better Auth ตอบ `internal_server_error` เปล่า ๆ ทั้งที่ Keycloak redirect กลับมาปกติ
+
+- **asset `prisma/schema-auth.prisma`**: เพิ่ม `issuer String @map("Issuer") @db.NVarChar(450)` + `@@unique([issuer, accountId])` (เก็บ `@@unique([providerId, accountId])` เดิม)
+- **asset `lib/actions/admin-users.ts`** + **`scripts/create-first-user.ts`**: แถว credential ที่เขียนมือใส่ `issuer: 'local:credential'` (ค่าของ Better Auth เอง) — kit-sync จะเสนอ · **schema เป็นไฟล์ที่ paste** kit-sync ไม่แตะ — โปรเจคเดิมต้องเพิ่ม 2 บรรทัดเองแล้ว `npx prisma migrate dev` → `npx prisma generate` (ตารางที่มีแถวแล้ว: เพิ่มแบบ nullable → backfill → NOT NULL ดู `auth-flows.md`)
+- **verify.mjs** +1 ข้อ: model `account` มี `issuer` + unique · `prisma.account.create` ที่เขียนมือต้องมี `issuer` · SKILL.md + `auth-flows.md` แถวอาการ
+- Origin: ugt-voice-platform · 2026-10-09 (migration `20261009000000_account_issuer` บน DEV — Account ว่าง)
+
 ## 4.73.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)
