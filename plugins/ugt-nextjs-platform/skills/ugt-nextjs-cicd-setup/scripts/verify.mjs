@@ -8,7 +8,7 @@
 // Only the repo side is checkable here; the server side (Jenkins
 // credentials/tools, SonarQube projects, webhooks) needs admin confirmation —
 // see §6 in SKILL.md.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -114,6 +114,31 @@ check('Quality Gate actually blocks the pipeline', () => {
   return /abortPipeline\s*:\s*true/.test(jf)
     ? { ok: true }
     : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
+});
+
+check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
+  const deps = { ...(pkg?.dependencies ?? {}), ...(pkg?.devDependencies ?? {}) };
+  const schedulers = ['node-cron', 'node-schedule', 'cron', 'toad-scheduler', 'agenda', 'bree'].filter((d) => d in deps);
+  if (schedulers.length) {
+    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron → /api/cron/<job> (references/docker-deploy.md §H)` };
+  }
+  const cronDir = ['app/api/cron', 'src/app/api/cron'].find((d) => has(d));
+  if (!cronDir) return { ok: true };
+  const routes = [];
+  const walk = (dir) => {
+    for (const e of readdirSync(p(dir), { withFileTypes: true })) {
+      const rel = `${dir}/${e.name}`;
+      if (e.isDirectory()) walk(rel);
+      else if (/^route\.(ts|js)$/.test(e.name)) routes.push(rel);
+    }
+  };
+  walk(cronDir);
+  const open = routes.filter((r) => !/CRON_SECRET/.test(read(r)));
+  const problems = open.map((r) => `${r} never checks CRON_SECRET — proxy.ts lets /api/cron/ through without a session`);
+  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
+    if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
 check('Builds of the same job never overlap (disableConcurrentBuilds)', () => {

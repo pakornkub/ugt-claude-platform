@@ -7,6 +7,7 @@ RENDER RULES (delete this comment block in the rendered file):
   [DB] = Prisma/SQL Server · [LINKED] = reads over a linked server · [VOLUME] = compose has
   an /home/docker02/appdata bind · [UPLOAD] = ugt-nextjs-upload-setup installed ·
   [SSO] = Keycloak login · [SENTRY] = Sentry · [BASEPATH] = served under a basePath ·
+  [CRON] = has scheduled jobs (one cron-table row per job) ·
   [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
 -->
@@ -27,7 +28,8 @@ RENDER RULES (delete this comment block in the rendered file):
 | 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
 | 7 | Admin | Keycloak | สร้าง client SSO | [G](#g-keycloak--client-sso) <!-- [SSO] --> |
 | 8 | Admin | Nginx | เพิ่ม reverse proxy | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] --> |
-| 9 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
+| 9 | Admin | Server prod (Docker host) | ตั้ง cron รัน job | [I](#i-server--cron) <!-- [CRON] --> |
+| 10 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
 
 ---
 
@@ -129,6 +131,18 @@ RENDER RULES (delete this comment block in the rendered file):
 | prod + dev <!-- [UPLOAD] --> | `client_max_body_size __UPLOAD_MAX_MB__m;` ใน location ของโปรเจค (ไม่ตั้ง = อัปโหลดไฟล์ใหญ่ได้ 413) |
 
 > port `__PORT_DEV__` เป็นค่าเสนอ — ถ้าจัดสรร port อื่น ใช้ port นั้นแทนแล้วแจ้งในตารางส่งกลับ
+
+<!-- [CRON] -->
+### I. Server — Cron
+
+ที่: **Docker host prod → `crontab -e`** (job ทุกตัวของระบบตั้งที่นี่ที่เดียว — dev ไม่ต้องตั้ง)
+
+| Job | รอบเวลา | บรรทัดที่เพิ่มใน crontab |
+| --- | --- | --- |
+| (ครั้งแรก) สร้าง folder log | — | `mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` (รันมือ 1 ครั้ง) |
+| `__JOB_NAME__` | __JOB_WHEN__ | `__CRON_SCHEDULE__ docker exec __PROJECT_NAME__ sh -c 'wget -qO- -T 600 --post-data="" --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000__BASE_PATH_PROD__/api/cron/__JOB_NAME__' >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1` |
+
+<!-- one row per job · after adding: run the docker exec part once by hand, expect {"ok":true…} -->
 
 ---
 

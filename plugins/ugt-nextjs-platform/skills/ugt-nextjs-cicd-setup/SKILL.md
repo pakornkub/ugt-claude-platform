@@ -197,6 +197,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__VOLUME__` | ชื่อ volume ใน compose (`uploads`, `storage`, …) — หนึ่งคู่แถว prod/dev ต่อ volume |
 | `__REALM__` | realm Keycloak ขององค์กร (ค่าเดียวกับ auth-setup) |
 | `__UPLOAD_MAX_MB__` | `UPLOAD_MAX_BYTES` ÷ 1 048 576 ปัดขึ้น (upload-setup) |
+| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` | ต่อ job หนึ่งแถว: ชื่อ route ใต้ `app/api/cron/` · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) — `references/docker-deploy.md` §H |
 
 ### 4.3 Adjust per interview answers
 
@@ -300,6 +301,7 @@ Checklist §6
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
+| Scheduled jobs = host cron → `docker exec` `wget` `/api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table (`references/docker-deploy.md` §H) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |

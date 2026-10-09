@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.74.0 · ugt-nextjs-auth-setup/proxy.ts
-// kit-hash: 50fe30e61497
+// kit: ugt-nextjs-platform 4.75.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: c3f2702b9b26
 // proxy.ts — Next.js 16 route protection (Next.js 16 uses proxy.ts, not middleware.ts;
 // on Next.js 15 or older this same content must be named middleware.ts instead).
 // Cookie-presence check only (no DB call) + CSP nonce injection
@@ -127,6 +127,7 @@ export function proxy(request: NextRequest) {
     pathname === '/favicon.ico' ||
     pathname.startsWith('/api/auth/') ||
     pathname.startsWith('/api/health') || // Health check — must bypass auth for monitoring tools
+    pathname.startsWith('/api/cron/') || // Host-cron jobs — each route checks CRON_SECRET itself (cicd docker-deploy.md §H)
     /\.(?:png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|eot|otf|css|js|map)$/i.test(pathname)
   ) {
     return applySecurityHeaders(NextResponse.next(), request, nonce);

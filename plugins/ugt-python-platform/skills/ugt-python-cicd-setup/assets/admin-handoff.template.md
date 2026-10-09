@@ -5,7 +5,7 @@ RENDER RULES (delete this comment block in the rendered file):
   row/section otherwise, then renumber the overview table and the section letters
   so they stay A, B, C… with no gaps. Never leave an empty table or "N/A" rows.
   [DB] = has a database · [VOLUME] = compose has an /home/docker02/appdata bind ·
-  [BATCH] = shape batch (host cron) · [FIRST] = first org project on this Jenkins/Docker host
+  [CRON] = has scheduled jobs (one cron-table row per job) · [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
 -->
 # คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)
@@ -23,7 +23,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | 4 | Admin | Jenkins | สร้าง pipeline job | [D](#d-jenkins--pipeline-job) |
 | 5 | Admin | GitHub | ตั้ง webhook ไป Jenkins | [E](#e-github--webhook) |
 | 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
-| 7 | Admin | Server (Docker host) | ตั้ง cron รัน job | [G](#g-server--cron) <!-- [BATCH] --> |
+| 7 | Admin | Server prod (Docker host) | ตั้ง cron รัน job | [G](#g-server--cron) <!-- [CRON] --> |
 | 8 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
 
 ---
@@ -96,16 +96,17 @@ RENDER RULES (delete this comment block in the rendered file):
 | Project Settings → Quality Gate | Gate | มาตรฐานองค์กร — ผูก**ทั้ง 2 project** |
 | Administration → Configuration → Webhooks → Create | URL | `http://__JENKINS_HOST__:8080/sonarqube-webhook/` (ไม่ตั้ง = pipeline ค้างตลอด) |
 
-<!-- [BATCH] -->
+<!-- [CRON] -->
 ### G. Server — Cron
 
-ที่: **Docker host prod → `crontab -e`** (Jenkins ไม่ตั้ง cron ให้ — batch ไม่มี container ค้างไว้)
+ที่: **Docker host prod → `crontab -e`** (job ทุกตัวของระบบตั้งที่นี่ที่เดียว — dev ไม่ต้องตั้ง)
 
-| ขั้น | คำสั่ง |
-| --- | --- |
-| 1. สร้าง folder log | `mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` |
-| 2. เพิ่มบรรทัด crontab (รอบเวลา `__CRON_SCHEDULE__`) | `__CRON_SCHEDULE__ cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1` |
-| 3. ทดสอบรันมือ 1 รอบก่อนปล่อย cron | `cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job` |
+| Job | รอบเวลา | บรรทัดที่เพิ่มใน crontab |
+| --- | --- | --- |
+| (ครั้งแรก) สร้าง folder log | — | `mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` (รันมือ 1 ครั้ง) |
+| `__JOB_NAME__` | __JOB_WHEN__ | `__CRON_SCHEDULE__ __JOB_CMD__ >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1` |
+
+<!-- one row per job · __JOB_CMD__: batch → cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job · web → docker exec __PROJECT_NAME__ python -m <module> · after adding: run the command once by hand -->
 
 ---
 

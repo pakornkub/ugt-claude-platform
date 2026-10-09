@@ -34,6 +34,7 @@ services:
       # 1. runtime
       NODE_ENV: production
       NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
+      # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] host cron → /api/cron/<job>
       # 2. database
       DATABASE_URL: ${DATABASE_URL} # [DB]
       # 3. auth

@@ -56,6 +56,16 @@ Branch-dependent values **must** be resolved inside `script {}` from
 `env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last()` — never in the
 global `environment {}` block (global = one value for every branch).
 
+## Scheduled jobs — host cron only (org decision 2026-10-09)
+
+- Every scheduled/recurring job = one **host cron** line in the admin handoff
+  cron table → `docker exec <container> wget` the app's `/api/cron/<job>` route
+  (`references/docker-deploy.md` §H). **No in-app scheduler**: no `node-cron`,
+  `node-schedule`, `setInterval` loops, no SQL Agent job, no Jenkins timer
+- `/api/cron/*` routes: `POST` only · `Authorization: Bearer ${CRON_SECRET}`
+  checked first (401 otherwise) · idempotent · destructive jobs keep the
+  in-code date guard (pitfalls `hardening.md` §4)
+
 ## Docker
 
 - `NEXT_PUBLIC_*` is inlined into the bundle at compile time → pass it as

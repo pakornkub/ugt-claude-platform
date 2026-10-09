@@ -69,6 +69,21 @@ context จาก Jenkins agent; เช็ค binary ที่มีจริง
 ด้วย) — สอง binary ไม่ compatible กัน 100% ในทุกกรณี (env-var interpolation
 ต่างกันเล็กน้อย).
 
+### shape web ที่มี job ตามรอบ (มติ 2026-10-09: host cron เท่านั้น)
+
+ไม่ต้องแยก shape batch — code อยู่ใน container web อยู่แล้ว ให้ cron สั่งรันใน
+container ที่ยืนอยู่:
+
+```
+0 2 * * * docker exec __PROJECT_NAME__ python -m app.jobs.cleanup >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+```
+
+- job หนึ่งตัว = module หนึ่งตัวที่รันจบแล้ว exit (`if __name__ == "__main__"`) ·
+  idempotent · exit code ≠ 0 เมื่อพัง (cron log จะเห็น)
+- **ห้าม** APScheduler / Celery beat / `schedule` / loop `sleep` ในแอป — container
+  restart หรือรันสองตัวจะได้ job ซ้ำ และไม่มีใครเห็นใน handoff
+- ตั้งเฉพาะ prod (dev รันมือด้วยบรรทัดเดียวกันกับ `__PROJECT_NAME__-dev`)
+
 ## D. Volume — ownership เป็นเรื่องคนละเรื่องกับ path
 
 Path ของ persistent data ตาม contract กลาง (`ugt-core/contracts/cicd.md` §

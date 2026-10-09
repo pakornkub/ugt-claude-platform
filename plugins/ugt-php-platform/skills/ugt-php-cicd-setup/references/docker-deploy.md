@@ -21,8 +21,21 @@ reuse image ที่เพิ่งผ่าน Quality Gate ในสเตจ
 (ดู comment หัว Jenkinsfile: "Sections marked [WEB] apply to the long-running
 web-service deploy shape ... the only deploy shape PHP projects use") ทุก
 โปรเจค (Laravel / CodeIgniter / legacy / WordPress) จบที่ apache container
-ที่ยืนรอ request ผ่าน reverse proxy เสมอ — ไม่มีตาราง cron ให้ตั้งฝั่ง host,
-ไม่มี `docker/Dockerfile.batch`, ไม่มีรายการ `[BATCH]` ใน admin handoff
+ที่ยืนรอ request ผ่าน reverse proxy เสมอ — ไม่มี `docker/Dockerfile.batch`,
+ไม่มีรายการ `[BATCH]` ใน admin handoff
+
+**Job ตามรอบ = host cron เท่านั้น** (มติ 2026-10-09) — cron สั่งรันใน container
+web ที่ยืนอยู่ หนึ่งบรรทัดต่อ job (ตาราง cron `[CRON]` ใน admin handoff):
+
+```
+0 2 * * * docker exec __PROJECT_NAME__ php artisan reports:daily >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+```
+
+- Laravel: เขียน job เป็น artisan command แล้วตั้ง cron ทีละ command — **ไม่ใช้**
+  `Schedule::` + `schedule:run` ทุกนาที (ตารางเวลาไปซ่อนในโค้ด admin ไม่เห็น)
+- CodeIgniter/legacy: `docker exec <container> php jobs/<name>.php` (หรือ `php index.php <controller> <method>`)
+- WordPress: `define('DISABLE_WP_CRON', true)` แล้วตั้ง `docker exec <container> php /var/www/html/wp-cron.php` ทุก 5–15 นาที
+- job ต้อง idempotent · ตั้งเฉพาะ prod (dev รันมือ)
 
 ## B. WordPress — wp-content เป็น volume บังคับ + core upgrade path
 

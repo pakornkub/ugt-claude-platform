@@ -246,14 +246,25 @@ Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'
 ## Retention
 
 - Define a minimum retention window in the project docs (e.g. 180 days)
-- The schema has no `expiresAt`/soft-delete → use a DB-side scheduled job:
+- The schema has no `expiresAt`/soft-delete → purge on a schedule. Scheduling is
+  **host cron only** (org decision 2026-10-09 — no SQL Agent job): the delete
+  lives in a stored procedure, and a cron route calls it
+  (cicd-setup `references/docker-deploy.md` §H):
 
 ```sql
--- SQL Agent job
-DELETE FROM ActivityLogs WHERE CreatedAt < DATEADD(day, -180, GETDATE());
+CREATE OR ALTER PROCEDURE usp_PurgeActivityLogs @Days INT = 180 AS
+  SET NOCOUNT ON;
+  DELETE FROM ActivityLogs WHERE CreatedAt < DATEADD(day, -@Days, GETDATE());
+  SELECT @@ROWCOUNT AS Deleted;
 ```
 
-- **Never delete rows from application code**
+```ts
+// app/api/cron/audit-retention/route.ts — body of the §H route
+const [{ Deleted }] = await prisma.$queryRaw<{ Deleted: number }[]>`EXEC usp_PurgeActivityLogs @Days = 180`;
+```
+
+- **That route is the only code path that deletes audit rows** — no delete
+  action, button or API anywhere else
 
 ### Once the window is fixed, the viewer query enforces it too
 

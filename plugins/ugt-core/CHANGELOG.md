@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.14.0 (2026-10-09)
+
+- **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — `contracts/cicd.md` หัวข้อใหม่ "Scheduled jobs": job ตามรอบทุกตัวรันจาก crontab ของ Docker host หนึ่งบรรทัดต่อ job ตั้งโดย admin จากตาราง cron ใน handoff · ห้าม in-app scheduler (node-cron / setInterval / APScheduler / Celery beat / Laravel `schedule:run`) · ห้าม SQL Agent job และ Jenkins timer สำหรับงานของแอป (timer ของ CI เช่น NVD update ยังได้) · job idempotent · log `/home/docker02/appdata/<project>/logs/cron.log` · prod เท่านั้น · drift check ข้อใหม่ pin กฎนี้ใน rules ของทั้ง 3 stack
+
 ## 2.13.2 (2026-09-29)
 
 **ปิดเรื่องค้างจาก prompt audit 5.5**

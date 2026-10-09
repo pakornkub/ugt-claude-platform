@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.75.0 (2026-10-09)
+
+- **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — host cron → `docker exec <container> sh -c 'wget … --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000<basePath>/api/cron/<job>'` (secret ไม่ออกนอก container, ไม่ผ่าน nginx) · `cicd docker-deploy.md` §H: route handler ตัวอย่าง (POST · `timingSafeEqual` · idempotent) + บรรทัด crontab
+- **asset `proxy.ts`**: ให้ `/api/cron/` ผ่านโดยไม่ต้องมี session (route เช็ค `CRON_SECRET` เอง) · kit-sync จะเสนอ
+- `CRON_SECRET` ใน `.env.example` หัวข้อ 1 + บรรทัด `[CRON]` ใน compose ทั้ง 2 ไฟล์ · admin-handoff ตาราง I "Server — Cron" (หนึ่งแถวต่อ job · `__JOB_NAME__`/`__JOB_WHEN__`/`__CRON_SCHEDULE__`)
+- `audit-logging.md`: ลบ log เก่าเปลี่ยนจาก SQL Agent job → `usp_PurgeActivityLogs` + cron route · pitfalls `hardening.md` §4 ชี้ cron route · rules `ugt-nextjs-ci.md` หัวข้อ Scheduled jobs
+- cicd verify.mjs +1: ห้าม `node-cron`/`node-schedule`/`cron`/`agenda`/`bree`/`toad-scheduler` ใน package.json · ทุก route ใต้ `app/api/cron/` ต้องเช็ค `CRON_SECRET` · compose ต้องเปิดบรรทัด `CRON_SECRET` เมื่อมี cron route
+
 ## 4.74.0 (2026-10-09)
 
 รวม contribute PR #16–#20 (ugt-voice-platform) เป็น release เดียว — PR แตกจาก main พร้อมกันจึงจองเลข 4.73.1/4.74.0 ซ้ำกัน

@@ -30,6 +30,7 @@ services:
       # 1. runtime
       NODE_ENV: production
       NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
+      # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] host cron → /api/cron/<job>
       SENTRY_ENVIRONMENT: development # [SENTRY] distinguishes dev events; DSN is shared
       # Dev .env MUST differ from prod in at least DATABASE_URL (separate dev DB)
       # and BETTER_AUTH_SECRET (never share secrets between environments)

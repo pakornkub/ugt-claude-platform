@@ -154,3 +154,52 @@ Env-var caveats:
 - `NODE_TLS_REJECT_UNAUTHORIZED: '0'` is in both compose files, always on —
   org standard (closed intranet, internal-CA Keycloak/LDAP/SQL Server). It
   disables TLS verification for the whole process; that is the accepted trade-off
+
+## H. Scheduled jobs — host cron → `/api/cron/<job>` (org decision 2026-10-09)
+
+Every recurring job runs from the **host crontab** (`ugt-core/contracts/cicd.md`
+§ Scheduled jobs). The standalone image holds no scripts or `tsx`, so the job
+body lives in the app as a Route Handler and cron calls it **from inside the
+container** — `CRON_SECRET` never leaves the container, the port is always
+3000, and nginx is not in the path.
+
+```ts
+// app/api/cron/audit-retention/route.ts — one route per job, POST only
+import { timingSafeEqual } from 'node:crypto';
+import { env } from '@/lib/env';
+
+export const dynamic = 'force-dynamic';
+
+function authorized(request: Request) {
+  if (!env.CRON_SECRET) return false; // unset = every call refused
+  const want = Buffer.from(`Bearer ${env.CRON_SECRET}`);
+  const got = Buffer.from(request.headers.get('authorization') ?? '');
+  return got.length === want.length && timingSafeEqual(got, want);
+}
+
+export async function POST(request: Request) {
+  if (!authorized(request)) return new Response('Unauthorized', { status: 401 });
+  const result = await runAuditRetention(); // lib/jobs/*.ts — idempotent, safe to re-run
+  console.log(`[cron] audit-retention ${JSON.stringify(result)}`);
+  return Response.json({ ok: true, ...result });
+}
+```
+
+```
+# crontab of the PROD Docker host — one line per job (admin handoff cron table)
+0 2 * * * docker exec __PROJECT_NAME__ sh -c 'wget -qO- -T 600 --post-data="" --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000__BASE_PATH_PROD__/api/cron/audit-retention' >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+```
+
+- Single quotes around the `sh -c` body: `$CRON_SECRET` expands **inside** the
+  container (from compose `environment:`), never on the host or in the crontab
+- `wget` exits non-zero on 401/5xx → the failure lands in `cron.log`
+- `proxy.ts` lets `/api/cron/` through without a session cookie — the route's
+  own `CRON_SECRET` check is the guard. Never skip it
+- `CRON_SECRET` (≥ 32 chars, `openssl rand -base64 32`) lives in `.env.example`
+  section 1, `lib/env.ts` (`z.string().min(32).optional()`) and the compose
+  `[CRON]` line — different value in prod and dev
+- Prod only; on dev call the route by hand when testing (same `docker exec`
+  line against `__PROJECT_NAME__-dev`)
+- Forbidden: `node-cron` / `node-schedule` / `setInterval` loops in the app
+  (every container restart or second replica double-runs them, nobody sees
+  them in the handoff), SQL Agent jobs, Jenkins timed builds for app work

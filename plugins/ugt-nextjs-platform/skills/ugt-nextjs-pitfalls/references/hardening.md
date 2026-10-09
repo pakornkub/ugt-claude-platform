@@ -53,7 +53,9 @@ A cron whose job is "wipe/cut something on date X" must check the date **in
 code** (pure helper, unit-tested), not rely on the scheduler being configured
 to fire exactly once:
 
-- Cron path passes `{ enforceDeadline: true }` → no-op until the deadline.
+- Cron path (`app/api/cron/<job>/route.ts`, called by host cron — the only
+  scheduler allowed; never `node-cron`/`setInterval`, cicd `docker-deploy.md` §H)
+  passes `{ enforceDeadline: true }` → no-op until the deadline.
 - Admin manual path omits it → runs immediately (behind an irreversible
   confirm).
 

@@ -492,6 +492,15 @@ check('.claude/rules/ugt-python-ci.md in place', () => {
     : { ok: false, msg: 'No .claude/rules/ugt-python-ci.md — §5.1 copies it; without it the next session has no CI contract to read' };
 });
 
+check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
+  // มติ 2026-10-09 (rules/ugt-python-ci.md): job ตามรอบ = host cron เท่านั้น
+  const deps = ['requirements.txt', 'requirements-dev.txt'].filter((f) => has(f)).map((f) => read(f)).join('\n') + '\n' + pyproject;
+  const hit = deps.match(/^\s*["']?(apscheduler|schedule|django-celery-beat|rq-scheduler|django-q2?|huey)\b/im);
+  return hit
+    ? { ok: false, msg: `${hit[1]} in the dependencies — org rule: scheduled jobs run from host cron (docker exec / docker compose run --rm job), never an in-app scheduler (references/docker-deploy.md §C)` }
+    : { ok: true };
+});
+
 check('docs/admin-handoff.md rendered', () => {
   // Content (leftover __*__) is covered by the placeholder scan above; this is
   // the existence half of the same §7 line.

@@ -726,6 +726,15 @@ check('.claude/rules/ugt-php-ci.md in place', () => {
     : { ok: false, msg: 'No .claude/rules/ugt-php-ci.md — §5.1 copies it; without it the next session has no CI contract to read' };
 });
 
+check('Scheduled jobs go through host cron, not the Laravel scheduler', () => {
+  // มติ 2026-10-09 (rules/ugt-php-ci.md): หนึ่ง artisan command = หนึ่งบรรทัด host cron
+  const files = ['routes/console.php', 'app/Console/Kernel.php', 'bootstrap/app.php'].filter((f) => has(f));
+  const hit = files.find((f) => /\bSchedule::|\$schedule->|->withSchedule\(/.test(read(f)));
+  return hit
+    ? { ok: false, msg: `${hit} defines a Laravel schedule — org rule: each job is an artisan command with its own host-cron line in the admin handoff cron table (references/docker-deploy.md §A), never schedule:run` }
+    : { ok: true };
+});
+
 check('docs/admin-handoff.md rendered', () => {
   // Content (leftover __*__) is covered by the placeholder scan above; this is
   // the existence half of the same §7 line.

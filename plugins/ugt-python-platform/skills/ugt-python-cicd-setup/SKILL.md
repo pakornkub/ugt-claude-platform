@@ -307,7 +307,7 @@ render เอกสารส่ง admin (§5.7):
 | `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database prod/dev — จากคำตอบ interview; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` |
 | `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | login ของ DB — ไม่รู้ → เสนอ `<project>_app` / `<project>_dev` |
 | `__VOLUME__` | ชื่อ volume ใน compose — หนึ่งคู่แถว prod/dev ต่อ volume |
-| `__CRON_SCHEDULE__` | รอบเวลา cron 5 ช่องที่ทีมพัฒนาต้องการ เช่น `0 2 * * *` |
+| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` / `__JOB_CMD__` | ต่อ job หนึ่งแถวในตาราง cron: ชื่อ job · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) · คำสั่ง — batch: `cd /opt/apps/<project> && docker compose run --rm job` · web: `docker exec <project> python -m <module>` (`references/docker-deploy.md`) |
 
 ชื่อที่ derive อัตโนมัติจาก `__PROJECT_NAME__`: image/container ของ dev =
 `<project>-dev` · credentials = `env-<project>`, `env-<project>-dev` ·
@@ -356,7 +356,7 @@ sonar keys = `<project>`, `<project>-dev`
   variant `[BATCH]`: service name `app` → `job`, ตัด `ports:` / `healthcheck:`
   / `networks:` ทิ้ง, `restart: unless-stopped` → `restart: "no"`
   (batch รันจบต้องหายไป — restart loop = รัน job ซ้ำไม่หยุด). ตัว job เรียก
-  โดย **host cron** ไม่ใช่ Jenkins → เป็นรายการ `[BATCH]` ใน admin handoff
+  โดย **host cron** ไม่ใช่ Jenkins → เป็นแถวในตาราง cron `[CRON]` ของ admin handoff
   (ดู `references/docker-deploy.md` §B–C)
 - **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็น
   config ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้ (ไม่ตั้ง = แอป 404 หลัง
@@ -481,7 +481,7 @@ python -m venv .venv
 **Render `assets/admin-handoff.template.md` → เขียนลงโปรเจคเป็น
 `docs/admin-handoff.md`** ตาม RENDER RULES ที่หัวไฟล์: แทน `__...__` ทุกตัว ·
 ลบแถว/หัวข้อที่ติดป้าย `[TAG]` ที่โปรเจคไม่มี (ไม่มี DB → ไม่มีตาราง A · ไม่มี
-volume → ไม่มีตาราง B · shape = web → ไม่มีตาราง G cron · ไม่ใช่โปรเจคแรกของ
+volume → ไม่มีตาราง B · ไม่มี job ตามรอบ → ไม่มีตาราง G cron (shape batch มีเสมอ) · ไม่ใช่โปรเจคแรกของ
 server → ไม่มีภาคผนวก) · เรียงตัวอักษรหัวข้อและเลขในตารางขั้นตอนรวมใหม่ · ลบ
 comment กติกาและ comment ป้ายออก · **รูปแบบตายตัว**: ตารางขั้นตอนรวม → ตารางแยก
 ต่อระบบ → ตาราง "ส่งกลับ" ห้ามเพิ่มย่อหน้าอธิบาย
@@ -610,7 +610,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
       ให้ทั้งสอง
 - [ ] ปิด Lightweight checkout ใน job config
 - [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server)
-- [ ] [BATCH] เท่านั้น: ตั้ง host cron เรียก `docker compose run --rm job` แล้ว
+- [ ] มี job ตามรอบ: ตั้ง host cron (ตาราง cron ของ handoff) — batch เรียก `docker compose run --rm job` แล้ว
       + ทดสอบรันมือ 1 รอบผ่าน
 - [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)
 

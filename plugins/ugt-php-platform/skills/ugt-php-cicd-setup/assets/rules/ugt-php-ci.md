@@ -64,6 +64,15 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 - ชื่อ credential: `nvd` (global ต่อ server ไม่ผูกโปรเจค) · `env-<project>` ·
   `env-<project>-dev` — ไม่มี sentry credential ใน stack นี้
 
+## Scheduled jobs — host cron เท่านั้น (มติ 2026-10-09)
+
+- job ตามรอบทุกตัว = **host cron** หนึ่งบรรทัดต่อ job ในตาราง cron ของ admin handoff:
+  `docker exec <container> php artisan <command>` (Laravel) · `docker exec <container> php <script>.php`
+  (CodeIgniter/legacy) · **ห้าม in-app scheduler**: Laravel `Schedule::` / `schedule:run`
+  ทุกนาที, WP-Cron (`DISABLE_WP_CRON` = true แล้วตั้ง `wp-cron.php` เป็นบรรทัด cron) ·
+  ห้าม SQL Agent job / Jenkins timer สำหรับงานของแอป
+- job ต้อง idempotent (รันซ้ำได้) · log ไป `/home/docker02/appdata/<project>/logs/cron.log` · ตั้งเฉพาะ prod
+
 ## Branch / ค่าตามสาขา
 
 `main` = prod · `develop` = dev (ทุกอย่างต่อท้ายด้วย `-dev`)

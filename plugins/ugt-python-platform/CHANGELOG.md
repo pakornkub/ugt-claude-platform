@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.0 (2026-10-09)
+
+- **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — shape web ที่มี job: `docker exec <container> python -m <module>` (ไม่ต้องแยก shape batch) · batch ใช้ `docker compose run --rm job` ตามเดิม · admin-handoff ตาราง G cron ใช้ได้ทั้งสอง shape (`[CRON]` แทน `[BATCH]`, `__JOB_CMD__`) · rules + `docker-deploy.md` §C · verify.mjs +1: ห้าม APScheduler / schedule / django-celery-beat / rq-scheduler / django-q / huey
+
 ## 0.8.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · เพิ่มตาราง A: database + login (สิทธิ์สร้าง/แก้ตารางสำหรับ migration) · ตาราง B: folder บน server + backup · cron `[BATCH]` เป็นตาราง 3 ขั้น (`__CRON_SCHEDULE__`) · DB host ต้องเป็น FQDN/IP อยู่ในตารางส่งกลับ · ภาคผนวก server แรกเป็นตาราง · ตัด `__N_CREDS__` (ชุดเดียวกับ ugt-nextjs-platform 4.73.0)

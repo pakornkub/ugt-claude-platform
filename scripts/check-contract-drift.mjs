@@ -92,6 +92,15 @@ const CHECKS = [
     },
   },
   {
+    name: 'Scheduled jobs: host cron only',
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/host crontab/, /No in-app scheduler/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/host cron/, /in-app scheduler/],
+      [`${PY}/ugt-python-cicd-setup/assets/rules/ugt-python-ci.md`]: [/host cron/, /in-app scheduler/],
+      [`${PHP}/ugt-php-cicd-setup/assets/rules/ugt-php-ci.md`]: [/host cron/, /in-app scheduler/],
+    },
+  },
+  {
     name: 'Persistent data: bind mounts under /home/docker02/appdata/<project>',
     files: {
       [`${CORE}/contracts/cicd.md`]: [/\/home\/docker02\/appdata\/<project>\//],
