@@ -114,6 +114,9 @@ const OPTIONAL_CONVERTED_FILES = [
   // copy-in reference example (chart projects only) — converted in 4.48.1 so
   // the one kit UI file this gate previously never saw is covered too.
   'ui/chart-example.tsx',
+  // DEV bar (4.76.0) — ships with every install, but verify.mjs already fails on its
+  // absence; listing it here only keeps Thai out of the file once it is there.
+  'components/dev-environment-bar.tsx',
   // ugt-nextjs-auth-setup (phase 2, 2026-08-24) — optional because a th+en
   // project may not have auth-setup installed at all.
   'components/login-form.tsx',

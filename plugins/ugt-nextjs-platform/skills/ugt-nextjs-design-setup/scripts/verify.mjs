@@ -540,6 +540,35 @@ check('Excel/CSV export goes through lib/export.ts', () => {
     : { ok: true };
 });
 
+// ── dev environment indicator ─────────────────────────────────────────────
+// dev and prod share one host and look identical — the basePath (`-dev`) is the
+// only difference. Two signals, both driven by isDevEnvironment(): the amber bar
+// on every page (the root layout, NOT the shell: the login page has no shell)
+// and the `[DEV] ` tab-title prefix. Reads the code, not a deployment — whether
+// a real dev deploy shows them is the by-eye line in the SKILL checklist.
+check('Root layout shows the DEV bar + "[DEV] " title on the dev deployment', () => {
+  if (!hasIn('app', 'layout.tsx')) return { ok: false, msg: 'No app/layout.tsx' };
+  const problems = [];
+  if (!hasIn('lib', 'environment.ts')) problems.push('lib/environment.ts missing (copy assets/lib/environment.ts)');
+  if (!hasIn('components', 'dev-environment-bar.tsx')) {
+    problems.push('components/dev-environment-bar.tsx missing (copy assets/components/dev-environment-bar.tsx)');
+  }
+  if (hasIn('lib', 'env.ts')) {
+    // isDevEnvironment() reads env.NEXT_PUBLIC_BASE_PATH — declared in the client block AND runtimeEnv
+    const n = (readIn('lib', 'env.ts').match(/NEXT_PUBLIC_BASE_PATH/g) ?? []).length;
+    if (n < 2) problems.push('lib/env.ts must declare NEXT_PUBLIC_BASE_PATH in both the client block and runtimeEnv');
+  }
+  const code = readIn('app', 'layout.tsx').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  if (!/from ['"]@\/lib\/environment['"]/.test(code)) problems.push('app/layout.tsx does not import isDevEnvironment from @/lib/environment');
+  if (!/isDevEnvironment\(\)\s*(&&|\?)\s*<DevEnvironmentBar\b/.test(code)) {
+    problems.push('app/layout.tsx does not render {isDevEnvironment() && <DevEnvironmentBar />} — mount it in the ROOT layout, above the shell, so the login page gets it too');
+  }
+  if (!/\[DEV\] /.test(code)) {
+    problems.push('metadata title has no "[DEV] " prefix (an old " (DEV)" suffix does not count — SKILL Step 3.3)');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 // ── harness ───────────────────────────────────────────────────────────────
 check('.claude/rules/ugt-nextjs-design.md installed', () => {
   if (!has('.claude', 'rules', 'ugt-nextjs-design.md')) {

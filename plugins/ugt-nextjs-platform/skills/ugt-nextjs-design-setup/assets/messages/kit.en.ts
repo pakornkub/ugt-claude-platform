@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.1 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: a55694edf171
+// kit: ugt-nextjs-platform 4.76.0 · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: dbc7cb603477
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -58,5 +58,12 @@ export const kitEn = {
   languageSwitcher: {
     english: 'English',
     thai: 'ไทย',
+  },
+  // Banner for components/dev-environment-bar.tsx (dev deployment only). Neutral on
+  // purpose: a project with ugt-nextjs-mail-setup dev mode adds the mail clause
+  // itself through the bar's `note` prop, from its own messages/app.*.ts.
+  devEnvironment: {
+    label: 'DEV environment',
+    message: 'test data only',
   },
 } as const;

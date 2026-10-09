@@ -1,5 +1,18 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.76.0 (2026-10-09)
+
+**design-setup: dev กับ prod หน้าตาเหมือนกัน — ผู้ใช้เผลอกรอกข้อมูลจริงลง dev หรือทดสอบบน prod** — 4.71.0 ใส่ป้าย `DEV` ไว้ใน `site-header` แต่หน้า login อยู่นอก shell (ไม่มี header) จึงไม่มีสัญญาณอะไรเลยตั้งแต่หน้าแรก และ title แท็บเป็น suffix ` (DEV)` ที่แท็บแคบตัดทิ้ง · ทั้งสองตัวใช้ `process.env` กระจายคนละที่ ไม่มีจุดตัดสิน "นี่คือ dev" ที่เดียว
+
+- **asset `lib/environment.ts`** (ใหม่ + `environment.test.ts`): `isDevEnvironment()` = `env.NEXT_PUBLIC_BASE_PATH` ลงท้าย `-dev` (ตาม cicd: develop → `/<project>-dev`) · อ่านผ่าน `@/lib/env` · `?? ''` คงไว้ให้ CI build ที่ `SKIP_ENV_VALIDATION` ไม่ throw · server-only
+- **asset `components/dev-environment-bar.tsx`** (ใหม่): แถบเหลืองเต็มกว้าง ไอคอน `FlaskConical` สี `TONE_STYLES.warning` (token `--status-amber`) **ไม่ sticky** (เลื่อนพ้นจอแทนการทับ top bar) · ข้อความจาก `kit.devEnvironment` (th+en เป็นกลาง: "DEV environment — test data only") + prop `note` ต่อประโยคจาก catalog ของโปรเจคเอง (เช่น อีเมลทุกฉบับส่งกลับหาผู้ทดสอบ — ใช้เมื่อ mail-setup dev mode เปิดจริงเท่านั้น)
+- **`messages/kit.th.ts` + `kit.en.ts`**: namespace `devEnvironment` (`label`, `message`) · kit-sync จะเสนอให้โปรเจคที่ลง catalog ไว้แล้ว
+- **SKILL.md ขั้น 3.3**: wiring ที่ root layout — `{isDevEnvironment() && <DevEnvironmentBar />}` เป็นลูกคนแรกใน `NextIntlClientProvider` (ครอบหน้า login ด้วย) + title ขึ้นต้น **`[DEV] `** (ตรงกับ `[DEV] ` ที่หัวเรื่องอีเมลของ mail-setup) · ประกาศ `NEXT_PUBLIC_BASE_PATH` ใน `lib/env.ts` ตั้งแต่ design-setup (รันก่อน auth) · ป้าย `DEV` ใน site-header คงไว้เป็นตัวเตือนเล็ก · แถว Quick Rules + checklist + วลีใน description ("แยกไม่ออกว่าอยู่ dev หรือ prod", "เผลอทดสอบบน prod")
+- **verify.mjs** +1 ข้อ: root layout import `isDevEnvironment`, render `<DevEnvironmentBar />` ภายใต้เงื่อนไข และ title มี `[DEV] ` (suffix เก่า ` (DEV)` ไม่ผ่าน) · มีไฟล์ environment/bar · `lib/env.ts` ประกาศ basePath ทั้ง client + runtimeEnv · `check-i18n.mjs` ดูแลไฟล์ bar ไม่ให้มีภาษาไทยนอก catalog
+- cicd-setup SKILL §2.2 + mail-setup SKILL: บรรทัดอ้างอิง (suffix `-dev` ของ basePath คือสัญญาณที่แถบอ่าน · ประโยคอีเมลต้องจริงถึงจะใส่)
+- **โปรเจคเดิม**: เปลี่ยน suffix ` (DEV)` เป็น prefix `[DEV] ` เอง + mount แถบใน root layout ตามขั้น 3.3 · asset ใหม่ 3 ไฟล์ต้อง copy เอง (kit-sync ตามเฉพาะไฟล์ที่ลงไว้แล้ว — `verify.mjs` จะ ✘ บอก) ส่วน `kit.th/en.ts` kit-sync เสนอให้ · layout ไม่ใช่ kit asset · โปรเจคที่ไม่มี basePath ไม่มีสัญญาณแยก dev/prod — แถบไม่ขึ้น
+- Origin: ugt-voice-platform · 2026-10-09 (commit `629d509`, deploy บน dev แล้ว) — ต้นฉบับเป็น Tailwind ล้วน + context ภาษาของตัวเอง เขียนใหม่บน next-intl catalog + shadcn token
+
 ## 4.75.0 (2026-10-09)
 
 - **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — host cron → `docker exec <container> sh -c 'wget … --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000<basePath>/api/cron/<job>'` (secret ไม่ออกนอก container, ไม่ผ่าน nginx) · `cicd docker-deploy.md` §H: route handler ตัวอย่าง (POST · `timingSafeEqual` · idempotent) + บรรทัด crontab
