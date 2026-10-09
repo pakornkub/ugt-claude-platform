@@ -10,7 +10,7 @@ Last updated: 2026-10-09
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
-- ugt-python-platform 0.8.0 / ugt-php-platform 0.7.0 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
+- ugt-python-platform 0.9.0 / ugt-php-platform 0.8.0 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
 - E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
@@ -21,6 +21,16 @@ Last updated: 2026-10-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-09 **มติ: scheduled job ทุกตัว = host cron** — core **2.14.0** · nextjs **4.75.0** ·
+  python **0.9.0** · php **0.8.0** (9ae878c): contract `cicd.md` หัวข้อ Scheduled jobs · Next.js
+  `docker exec` → `wget /api/cron/<job>` + `CRON_SECRET` (proxy.ts ปล่อย `/api/cron/`) · Python web/PHP
+  `docker exec <command>` · Laravel เลิก `schedule:run` · audit retention SQL Agent → usp + cron route ·
+  ตาราง cron ใน admin-handoff ทั้ง 3 stack · verify ห้าม in-app scheduler · drift 23/23 ·
+  tag core + nextjs push แล้ว · plugin เครื่องนี้ update แล้ว
+- 2026-10-09 **merge contribute PR #16–#20** (ugt-voice-platform) เป็น release เดียว nextjs **4.74.0**
+  (e2da5fe): stale-cookie redirect loop · `Account.Issuer` (better-auth 1.7) · `disableConcurrentBuilds()` ·
+  upload verify scan-off/`src/` · OWASP suppression braces/sprintf-js · merge commit จริง GitHub ขึ้น merged เอง ·
+  ซ้ำรอบที่ 2 แล้วที่ PR ขนานจองเลขเวอร์ชันชนกัน
 - 2026-10-09 nextjs **4.73.0** · python **0.8.0** · php **0.7.0** (5265d46) — ตามคำขอผู้ดูแล:
   (1) admin-handoff เป็นตารางล้วน (ขั้นตอนรวม → ตารางต่อระบบ เมนู + ช่อง/ค่า → ตารางส่งกลับ)
   + เพิ่มตาราง SQL Server (db/login/สิทธิ์) และ folder server/backup ที่เดิมไม่มี ·
