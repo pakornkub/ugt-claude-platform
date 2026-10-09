@@ -56,6 +56,18 @@ docker compose -f <file> up -d --no-build
 poll: docker inspect .State.Health.Status  # until healthy (max 24×10s = 4 min)
 ```
 
+### One deploy at a time — `disableConcurrentBuilds()`
+
+Everything above mutates shared state: `prisma migrate deploy` on one database
+and `docker compose up -d` on one named container. Jenkins runs builds of the
+same job **in parallel by default**, so two pushes in quick succession make two
+Deploy stages overlap — the second migration races the first, and compose
+recreates the container while the first build is still polling its health.
+`options { disableConcurrentBuilds() }` (top of `assets/Jenkinsfile`, next to
+`timestamps()`) makes the second build wait in the queue instead. Do not remove
+it to "go faster"; if queue time hurts, `disableConcurrentBuilds(abortPrevious: true)`
+cancels the older run instead — still never two at once.
+
 ### DATABASE_URL extraction — why `tr -d '"\r'`
 
 A `.env` edited on Windows carries CRLF and values may be quoted —

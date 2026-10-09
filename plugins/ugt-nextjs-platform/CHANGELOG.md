@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.74.0 (2026-10-09)
+
+**cicd-setup: push ติดกันสองครั้ง → pipeline ของ job เดียวกันรันซ้อนกัน แล้ว Deploy ชนกัน** — Jenkins รัน build ของ job เดียวกันขนานกันเป็นค่า default และ `assets/Jenkinsfile` ไม่มี `disableConcurrentBuilds()` ใน `options {}` ดังนั้น build ที่สองรัน `prisma migrate deploy` + `docker compose up` กับ container เดียวกันตอน build แรกยัง deploy ไม่เสร็จ (เจอจริงบน dev build #13/#14)
+
+- **asset `Jenkinsfile`**: เพิ่ม `disableConcurrentBuilds()` พร้อม comment เหตุผลใน `options {}` — build ที่สองรอคิวแทน · **Jenkinsfile ไม่อยู่ใน kit-sync** — โปรเจคเดิมเพิ่มบรรทัดนี้เองข้าง `timestamps()`
+- **verify.mjs** +1 ข้อ: `options {}` ระดับบนต้องมี `disableConcurrentBuilds()` · SKILL.md แถวอาการ + Quick Rules · `docker-deploy.md` §C หัวข้อ "One deploy at a time" · `rules/ugt-nextjs-ci.md`
+- Origin: ugt-voice-platform · 2026-10-09 (ugt-voice-platform-dev build #13/#14)
+
 ## 4.73.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)
