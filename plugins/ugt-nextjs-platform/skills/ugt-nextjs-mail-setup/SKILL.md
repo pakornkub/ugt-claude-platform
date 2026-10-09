@@ -54,7 +54,9 @@ assembled in code at send time; only the inner prose is stored and editable.
 2. **Dev mode is mandatory, not optional.** Every call passes `actor`
    (`email` + `hasDevMode`). A tester with `dev-mode:enable` gets the mail
    themselves, CC dropped, `[DEV] ` on the subject, and a banner naming the real
-   recipients.
+   recipients. (The DEV bar that `ugt-nextjs-design-setup` puts on the dev deployment
+   can carry a "mail goes back to the tester" clause via its `note` prop — add it only
+   if every dev user really has dev mode on; the clause must stay true.)
 3. **Mail must never fail the work.** Send after the transaction commits, inside
    `try/catch`, and log the failure. An approval that succeeded must stay
    succeeded when SMTP is down.

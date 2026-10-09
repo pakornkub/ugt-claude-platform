@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.1 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: a719a063e3c4
+// kit: ugt-nextjs-platform 4.76.0 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: 229ad578047c
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -59,5 +59,12 @@ export const kitTh = {
   languageSwitcher: {
     english: 'English',
     thai: 'ไทย',
+  },
+  // ข้อความแถบ components/dev-environment-bar.tsx (เฉพาะ dev deploy) — เป็นกลางโดยตั้งใจ:
+  // โปรเจคที่ลง dev mode ของ ugt-nextjs-mail-setup เติมประโยคเรื่องอีเมลเองผ่าน
+  // prop `note` จาก messages/app.*.ts ของตัวเอง ไม่ใส่ในชุด kit
+  devEnvironment: {
+    label: 'สภาพแวดล้อมทดสอบ (DEV)',
+    message: 'ข้อมูลในระบบนี้ไม่ใช่ข้อมูลจริง',
   },
 } as const;
