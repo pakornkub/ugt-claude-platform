@@ -229,6 +229,9 @@ pipeline {
                         //          [DB] If no database: this builder image build can be deleted.
                         // Image 2: runner (production image deployed by docker-compose)
                         // --network host: npm run build needs internet (e.g. Google Fonts fetch)
+                        // NEXT_DEPLOYMENT_ID = BUILD_NUMBER on BOTH builds (same id in both images) —
+                        //   next.config deploymentId; lets Next.js detect a tab left open across a
+                        //   deploy instead of failing every Server Action (docker-deploy.md §I)
                         sh """
                             docker build \\
                                 --network host \\
@@ -236,6 +239,7 @@ pipeline {
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
                                 --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
+                                --build-arg NEXT_DEPLOYMENT_ID=${buildNum} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:${buildNum}-builder \\
                                 .
@@ -244,6 +248,7 @@ pipeline {
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
                                 --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
+                                --build-arg NEXT_DEPLOYMENT_ID=${buildNum} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:latest \\
                                 -t ${imageName}:${buildNum} \\

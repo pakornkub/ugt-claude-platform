@@ -9,7 +9,9 @@ description: >
   misbehaves during setup — causes documented here: Quality Gate that never
   finishes (SonarQube→Jenkins webhook), OWASP stage timing out, container never
   reaching healthy, `COPY .next/standalone` failing, client-side env vars empty
-  in the browser bundle, Groovy parse error after removing an optional block.
+  in the browser bundle, Groovy parse error after removing an optional block,
+  a page left open across a deploy that can't save any more ("ส่งข้อมูลไม่ได้หลัง
+  deploy", `Server Action … was not found on the server`).
   Run ugt-nextjs-test-lint-setup first — the pipeline calls `lint`,
   `format:check` and `test:coverage` by exact name and goes red without them.
   Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth
@@ -31,6 +33,7 @@ description: >
 | `npm ci` fails with `ERESOLVE` in Install or the Docker deps stage | `.npmrc` (`legacy-peer-deps=true`, auth-setup §5.1) missing from the repo or not copied by the Dockerfile | `assets/Dockerfile` deps stage · auth-setup §5.1 |
 | OWASP Dependency Check stays UNSTABLE (yellow) on every build — HIGH `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`) via `eslint-config-next`, moderate `sprintf-js@1.1.3` (`GHSA-hp3w-g68c-fv3c`) via `@prisma/adapter-mssql` → tedious; `npm audit fix` offers a downgrade of `eslint-config-next` to 14.x | no fixed release of either package exists; both were reviewed (CI-lint-only / literal format strings) — do **not** take the audit downgrade (cannot run Next 16); suppress pinned to exact version + advisory after `npm ls braces sprintf-js` confirms the same path | `references/sonarqube-setup.md` §E "OWASP: two reviewed findings" |
 | Two quick pushes → two builds of the same job run at once; the second `prisma migrate deploy` / `docker compose up` collides with the first still deploying (flaky Deploy, container recreated mid-health-poll) | `options {}` had no `disableConcurrentBuilds()` — Jenkins runs same-job builds in parallel by default | `assets/Jenkinsfile` `options {}` · `references/docker-deploy.md` §C |
+| Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy") — console `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; a refresh fixes it | Server Action ids change every build and the old client bundle calls the previous ids; no `deploymentId` is set, so Next.js cannot detect the skew and reload — `next.config` `deploymentId` ← Docker `ARG NEXT_DEPLOYMENT_ID` ← Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${buildNum}` on both builds | `references/docker-deploy.md` §I · pitfalls `data-fetching.md` §6 (client half) |
 | Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview
@@ -232,6 +235,11 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `.next/standalone`; without it the `COPY` fails (see
   `references/docker-deploy.md` §F) — commonly gated on CI:
   `output: process.env.CI ? 'standalone' : undefined`
+- **`deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined` is required** —
+  the Dockerfile `ARG NEXT_DEPLOYMENT_ID` and the Jenkinsfile
+  `--build-arg NEXT_DEPLOYMENT_ID=${buildNum}` (both builds) feed it; without it
+  a tab left open across a deploy fails every Server Action
+  (`references/docker-deploy.md` §I). Unset locally and in the CI build stage
 - If deploying under a basePath (interview answer 3) → also wire
   `basePath: process.env.NEXT_PUBLIC_BASE_PATH` in next.config
 
@@ -303,6 +311,7 @@ Checklist §6
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
 | Scheduled jobs = host cron → `docker exec` `wget` `/api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table (`references/docker-deploy.md` §H) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
+| `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${buildNum}` build arg on **both** `docker build` commands (`docker-deploy.md` §I) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 
