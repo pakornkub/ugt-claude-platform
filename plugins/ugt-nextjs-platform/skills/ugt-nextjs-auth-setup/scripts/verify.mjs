@@ -537,6 +537,28 @@ check('Auth/RBAC tables map singular per convention', () => {
   return wrong.length ? { ok: false, msg: wrong.join(' · ') } : { ok: true };
 });
 
+check('account model carries the issuer (better-auth >= 1.7)', () => {
+  if (!schema) return { ok: false, msg: 'No prisma/schema.prisma' };
+  const body = schema.match(/model\s+account\s*\{([\s\S]*?)\n\}/)?.[1];
+  if (!body) return { ok: false, msg: 'No account model' };
+  const problems = [];
+  if (!/\bissuer\s+String\b[^\n]*@map\("Issuer"\)/.test(body)) problems.push('no `issuer String @map("Issuer") @db.NVarChar(450)` column');
+  if (!/@@unique\(\[issuer,\s*accountId\]\)/.test(body)) problems.push('no @@unique([issuer, accountId])');
+  // hand-written credential rows (admin-created local users, first-user script) need it too
+  for (const file of sourceFiles()) {
+    if (file.endsWith('.prisma')) continue;
+    const src = stripComments(readFileSync(file, 'utf8'));
+    for (const m of src.matchAll(/\baccount\.create\s*\(\s*\{([\s\S]*?)\n\s*\}\s*\)/g)) {
+      if (!/\bissuer\b/.test(m[1])) {
+        problems.push(`${relative(ROOT, file).replaceAll('\\', '/')}: prisma.account.create without \`issuer\` (credential rows: 'local:credential')`);
+      }
+    }
+  }
+  return problems.length
+    ? { ok: false, msg: `${problems.join(' · ')} — SSO login ends in "internal_server_error" on better-auth >= 1.7 (references/auth-flows.md)` }
+    : { ok: true };
+});
+
 check('Audit actions come from lib/audit-actions.ts, not raw strings', () => {
   if (!has('lib/audit-actions.ts')) {
     return {

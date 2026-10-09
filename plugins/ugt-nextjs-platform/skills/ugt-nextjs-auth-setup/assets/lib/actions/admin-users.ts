@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: bdb3d75afb89
+// kit: ugt-nextjs-platform 4.74.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: 312ef9153503
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -119,6 +119,8 @@ export async function createLocalUserAction(values: {
         id: generateId(24),
         accountId: email,
         providerId: 'credential',
+        // better-auth >= 1.7: issuer is required; credential rows use 'local:credential'
+        issuer: 'local:credential',
         userId,
         password: hashed,
       },

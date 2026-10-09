@@ -69,6 +69,10 @@ model session {
 
 model account {
   id                    String    @id @default(cuid())  @map("Id")
+  // better-auth >= 1.7 scopes account identity by issuer (OIDC `iss`; credential
+  // rows use 'local:credential') — required, see
+  // https://better-auth.com/docs/guides/1-7-upgrade-guide#account-identity-is-scoped-by-issuer
+  issuer                String                           @map("Issuer") @db.NVarChar(450)
   accountId             String                           @map("AccountId")
   providerId            String                           @map("ProviderId")
   userId                String                           @map("UserId")
@@ -84,6 +88,7 @@ model account {
   updatedAt             DateTime  @updatedAt             @map("UpdatedAt")
 
   @@unique([providerId, accountId])
+  @@unique([issuer, accountId])
   @@map("Account")
 }
 
