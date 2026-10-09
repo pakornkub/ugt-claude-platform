@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.73.1 (2026-10-09)
+
+**upload-setup: `verify.mjs` ล้มบนโปรเจคที่เลือกไม่เปิด virus scan (default ของ §3 Q5) หรือใช้โครง `src/`** — ตรวจ `lib/virus-scan.ts`, `clamav` ใน compose และ `app/api/files/route.ts` ตายตัว: โปรเจคที่ route อยู่ `src/app/api/files/` ไม่เข้าเงื่อนไข scan-off (ต้องเจอ route ที่ root ก่อน) จึงถูกบังคับให้มี scanner ทั้งที่ไม่ได้เลือก
+
+- **verify.mjs**: ส่วน `[SCAN]` เป็น opt-in จริง — เช็ค scanner/clamav เฉพาะเมื่อมี `lib/virus-scan.ts` หรือ env ประกาศ `CLAMAV_HOST`; ไม่งั้นเช็คความสม่ำเสมอของโหมด off (ไม่เรียก `scanBuffer`, ไม่เก็บ `'clean'`, ด่านดาวน์โหลด `=== 'infected'`) และเตือนถ้ามี clamav ค้างใน compose · ทุก path หาที่ root ก่อนแล้วลอง `src/`
+- SKILL.md แถวอาการ + ย่อหน้าใน §6 · docs/script เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
+- Origin: ugt-voice-platform · 2026-10-09 (ไม่มี `lib/virus-scan.ts`/`CLAMAV_*`, route อยู่ `src/app/api/files/` — ที่เหลือล้มคือ widget/messages ที่โปรเจคนี้ไม่ใช้ ไม่เกี่ยวกับ scan)
+
 ## 4.73.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)
