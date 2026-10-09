@@ -10,7 +10,13 @@ import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
 const results = [];
-const p = (...s) => join(ROOT, ...s);
+// A src/ layout (src/app, src/lib, …) is legal Next.js — resolve every relative
+// path at the root first, then under src/, so a project that keeps its code in
+// src/ is checked instead of reported as "missing".
+const p = (...s) => {
+  const flat = join(ROOT, ...s);
+  return existsSync(flat) ? flat : existsSync(join(ROOT, 'src', ...s)) ? join(ROOT, 'src', ...s) : flat;
+};
 const has = (...s) => existsSync(p(...s));
 const read = (...s) => readFileSync(p(...s), 'utf8');
 
@@ -25,13 +31,16 @@ function check(name, fn) {
 const UPLOAD = 'app/api/files/route.ts';
 const DOWNLOAD = join('app', 'api', 'files', '[id]', 'route.ts');
 
-// [SCAN] default (SKILL.md §3 Q5): virus scan เป็น opt-in — ไม่มี
-// lib/virus-scan.ts + upload route ตั้ง scanStatus 'unscanned' = สถานะ default
-// ปกติ ไม่ใช่การถอดอะไรออก ข้ามเช็คฝั่ง scanner แล้วเช็คความสม่ำเสมอของโหมดแทน.
-// เข้าเงื่อนไขครึ่งเดียว (แค่ไฟล์หาย แต่ scanStatus ยังเป็น 'clean') ยังนับเป็น
-// การติดตั้งพัง
-const SCAN_OFF =
-  !has('lib/virus-scan.ts') && has(UPLOAD) && /scanStatus:\s*'unscanned'/.test(read(UPLOAD));
+// [SCAN] default (SKILL.md §3 Q5): virus scan เป็น opt-in — โปรเจคเลือก "เอา"
+// ก็ต่อเมื่อมี lib/virus-scan.ts หรือ env.ts ประกาศ CLAMAV_HOST. ไม่มีทั้งสอง =
+// สถานะ default ปกติ (ไม่ใช่การถอดอะไรออก) → ข้ามเช็คฝั่ง scanner/clamav ทั้งหมด
+// แล้วเช็คความสม่ำเสมอของโหมดแทน (ไม่ขึ้นกับว่า upload route อยู่ที่ app/ หรือ src/app/).
+// เข้าเงื่อนไขครึ่งเดียว (ไม่มี scanner แต่ route ยังตั้ง 'clean' / เรียก scanBuffer)
+// ยังนับเป็นการติดตั้งพัง
+const SCAN_ON =
+  has('lib/virus-scan.ts') ||
+  ['lib/env.ts', 'env.ts', '.env.example'].some((f) => has(f) && /CLAMAV_HOST/.test(read(f)));
+const SCAN_OFF = !SCAN_ON;
 
 // messages/ catalogs are REQUIRED, not optional: file-upload.tsx calls
 // useTranslations('upload') unconditionally and translates the codes the
@@ -56,11 +65,21 @@ check('Core files present', () => {
 if (SCAN_OFF) {
   check('[SCAN off] default state is internally consistent', () => {
     const problems = [];
-    if (/\bscanBuffer\s*\(/.test(read(UPLOAD)))
-      problems.push('upload route still calls scanBuffer but lib/virus-scan.ts is gone');
+    const notes = [];
+    if (has(UPLOAD)) {
+      const up = read(UPLOAD);
+      if (/\bscanBuffer\s*\(/.test(up))
+        problems.push('upload route calls scanBuffer but there is no lib/virus-scan.ts / CLAMAV_HOST — copy the [SCAN] parts (SKILL.md §3 Q5) or drop the call');
+      if (/scanStatus:\s*'clean'/.test(up))
+        problems.push("upload route stores scanStatus 'clean' with no scanner installed — nothing was scanned; use 'unscanned' (SKILL.md §3 Q5)");
+    }
     if (has(DOWNLOAD) && /scanStatus\s*!==\s*'clean'/.test(read(DOWNLOAD)))
       problems.push("download guard still requires 'clean' — every 'unscanned' row answers 409; use === 'infected' (SKILL.md §3 Q5)");
-    return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+    for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
+      if (/clamav/i.test(read(f))) notes.push(`${f}: clamav service present although virus scan is off — ~2 GB RAM for nothing (remove it, or opt in properly: SKILL.md §3 Q5)`);
+    }
+    if (problems.length) return { ok: false, msg: problems.join(' · ') };
+    return notes.length ? { ok: 'warn', msg: notes.join(' · ') } : { ok: true };
   });
 } else {
   check('Scan happens BEFORE the file is written', () => {
@@ -218,7 +237,7 @@ check('Upload/download permissions declared', () => {
   return missing.length ? { ok: false, msg: `lib/permissions.ts missing: ${missing.join(', ')}` } : { ok: true };
 });
 
-check('Compose mounts a storage volume and runs the scanner', () => {
+check('Compose mounts a storage volume (and the scanner, when scan is on)', () => {
   const files = ['docker-compose.yml', 'docker-compose.dev.yml'].filter((f) => has(f));
   if (!files.length) return { ok: 'warn', msg: 'no compose files — install ugt-nextjs-cicd-setup first' };
   const problems = [];
@@ -284,6 +303,8 @@ for (const r of results) {
 }
 console.log(
   `\n${results.length - failed - warned} passed · ${warned} warning(s) · ${failed} failed\n` +
-    'Then run the EICAR upload and the scanner-down test by hand — those are the ones that prove it\n'
+    (SCAN_OFF
+    ? 'Virus scan: off (default, SKILL.md §3 Q5) — the scanner checks were skipped\n'
+    : 'Then run the EICAR upload and the scanner-down test by hand — those are the ones that prove it\n')
 );
 process.exit(failed > 0 ? 1 : 0);

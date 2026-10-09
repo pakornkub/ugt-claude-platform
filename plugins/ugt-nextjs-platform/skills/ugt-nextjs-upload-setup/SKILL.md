@@ -25,6 +25,7 @@ description: >
 | A 413 that never reaches the app | reverse-proxy body limit |
 | Files readable by anyone who knows the URL | served from `public/` — no auth there, ever |
 | An uploaded `.svg`/`.html` runs as script on your domain | served inline with its own MIME type instead of `application/octet-stream` + attachment |
+| `verify.mjs` fails on `lib/virus-scan.ts` / "no clamav service" / "No app/api/files/route.ts" in a project that chose **no** virus scan (the default, §3 Q5) or keeps its code under `src/` | the scan-off detection only recognised a root `app/` layout; fixed in 4.73.1 — the scanner checks run only when `lib/virus-scan.ts` or `CLAMAV_HOST` exists, and every path also resolves under `src/` |
 
 ## 1. Overview
 
@@ -219,6 +220,13 @@ npx prisma migrate dev --name add-attachments && npx prisma generate
 ```bash
 node <skill-dir>/scripts/verify.mjs
 ```
+
+`verify.mjs` treats the `[SCAN]` parts as opt-in: the scanner / clamav checks run
+only when the project opted in (`lib/virus-scan.ts` exists or `lib/env.ts` /
+`.env.example` declares `CLAMAV_HOST`); otherwise it checks that the scan-off
+state is consistent instead (no `scanBuffer` call, rows stored `'unscanned'`,
+download guard `=== 'infected'`) and warns about a leftover clamav service.
+Paths resolve at the root first, then under `src/`.
 
 Then by hand — these are the ones that catch real breakage:
 

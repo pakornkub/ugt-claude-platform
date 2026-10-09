@@ -7,6 +7,11 @@
 - **references/sonarqube-setup.md §E**: หัวข้อ "OWASP: two reviewed findings with no fixed release" — ตารางเหตุผล + `<suppress>` 2 บล็อก pin ที่ version + GHSA เป๊ะ (`<packageUrl regex="true">^pkg:npm/braces@3\.0\.3$</packageUrl>` + `<vulnerabilityName>`) พร้อม `<notes>` · โปรเจคคัดลอกได้เมื่อ `npm ls braces sprintf-js` ยืนยัน path เดียวกันเท่านั้น · ลบเมื่อมี version ที่แก้แล้ว
 - **`assets/owasp-suppressions.xml` ยังว่างตามเดิม** (กฎ "never suppress preemptively") · SKILL.md แถวอาการ · docs เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
 - Origin: ugt-voice-platform · 2026-10-09 (commit `9d5c00b`)
+**upload-setup: `verify.mjs` ล้มบนโปรเจคที่เลือกไม่เปิด virus scan (default ของ §3 Q5) หรือใช้โครง `src/`** — ตรวจ `lib/virus-scan.ts`, `clamav` ใน compose และ `app/api/files/route.ts` ตายตัว: โปรเจคที่ route อยู่ `src/app/api/files/` ไม่เข้าเงื่อนไข scan-off (ต้องเจอ route ที่ root ก่อน) จึงถูกบังคับให้มี scanner ทั้งที่ไม่ได้เลือก
+
+- **verify.mjs**: ส่วน `[SCAN]` เป็น opt-in จริง — เช็ค scanner/clamav เฉพาะเมื่อมี `lib/virus-scan.ts` หรือ env ประกาศ `CLAMAV_HOST`; ไม่งั้นเช็คความสม่ำเสมอของโหมด off (ไม่เรียก `scanBuffer`, ไม่เก็บ `'clean'`, ด่านดาวน์โหลด `=== 'infected'`) และเตือนถ้ามี clamav ค้างใน compose · ทุก path หาที่ root ก่อนแล้วลอง `src/`
+- SKILL.md แถวอาการ + ย่อหน้าใน §6 · docs/script เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
+- Origin: ugt-voice-platform · 2026-10-09 (ไม่มี `lib/virus-scan.ts`/`CLAMAV_*`, route อยู่ `src/app/api/files/` — ที่เหลือล้มคือ widget/messages ที่โปรเจคนี้ไม่ใช้ ไม่เกี่ยวกับ scan)
 
 ## 4.73.0 (2026-10-09)
 
