@@ -25,7 +25,7 @@ description: >
 | A 413 that never reaches the app | reverse-proxy body limit |
 | Files readable by anyone who knows the URL | served from `public/` — no auth there, ever |
 | An uploaded `.svg`/`.html` runs as script on your domain | served inline with its own MIME type instead of `application/octet-stream` + attachment |
-| `verify.mjs` fails on `lib/virus-scan.ts` / "no clamav service" / "No app/api/files/route.ts" in a project that chose **no** virus scan (the default, §3 Q5) or keeps its code under `src/` | the scan-off detection only recognised a root `app/` layout; fixed in 4.73.1 — the scanner checks run only when `lib/virus-scan.ts` or `CLAMAV_HOST` exists, and every path also resolves under `src/` |
+| `verify.mjs` fails on `lib/virus-scan.ts` / "no clamav service" / "No app/api/files/route.ts" in a project that chose **no** virus scan (the default, §3 Q5) or keeps its code under `src/` | the scan-off detection only recognised a root `app/` layout; fixed in 4.74.0 — the scanner checks run only when `lib/virus-scan.ts` or `CLAMAV_HOST` exists, and every path also resolves under `src/` |
 
 ## 1. Overview
 

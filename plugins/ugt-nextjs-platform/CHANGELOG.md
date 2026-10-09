@@ -1,18 +1,8 @@
 # Changelog — ugt-nextjs-platform
 
-## 4.73.1 (2026-10-09)
-
-**cicd-setup: OWASP Dependency Check ค้าง UNSTABLE (เหลือง) ในทุกโปรเจค Next.js + MSSQL จาก 2 finding ที่ยังไม่มี release แก้** — `braces@3.0.3` `GHSA-vfj7-8cjw-p6xm` (HIGH · มาทาง `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` เฉพาะ lint บน CI ไม่เคยรับ input ผู้ใช้ · `npm audit fix` แนะนำ downgrade `eslint-config-next` เป็น 14.x ซึ่งรัน Next 16 ไม่ได้) และ `sprintf-js@1.1.3` `GHSA-hp3w-g68c-fv3c` (moderate · มาทาง `@prisma/adapter-mssql` → `mssql` → `tedious` ซึ่งส่งแต่ format string ที่เขียนไว้ในไลบรารี)
-
-- **references/sonarqube-setup.md §E**: หัวข้อ "OWASP: two reviewed findings with no fixed release" — ตารางเหตุผล + `<suppress>` 2 บล็อก pin ที่ version + GHSA เป๊ะ (`<packageUrl regex="true">^pkg:npm/braces@3\.0\.3$</packageUrl>` + `<vulnerabilityName>`) พร้อม `<notes>` · โปรเจคคัดลอกได้เมื่อ `npm ls braces sprintf-js` ยืนยัน path เดียวกันเท่านั้น · ลบเมื่อมี version ที่แก้แล้ว
-- **`assets/owasp-suppressions.xml` ยังว่างตามเดิม** (กฎ "never suppress preemptively") · SKILL.md แถวอาการ · docs เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
-- Origin: ugt-voice-platform · 2026-10-09 (commit `9d5c00b`)
-**upload-setup: `verify.mjs` ล้มบนโปรเจคที่เลือกไม่เปิด virus scan (default ของ §3 Q5) หรือใช้โครง `src/`** — ตรวจ `lib/virus-scan.ts`, `clamav` ใน compose และ `app/api/files/route.ts` ตายตัว: โปรเจคที่ route อยู่ `src/app/api/files/` ไม่เข้าเงื่อนไข scan-off (ต้องเจอ route ที่ root ก่อน) จึงถูกบังคับให้มี scanner ทั้งที่ไม่ได้เลือก
-
-- **verify.mjs**: ส่วน `[SCAN]` เป็น opt-in จริง — เช็ค scanner/clamav เฉพาะเมื่อมี `lib/virus-scan.ts` หรือ env ประกาศ `CLAMAV_HOST`; ไม่งั้นเช็คความสม่ำเสมอของโหมด off (ไม่เรียก `scanBuffer`, ไม่เก็บ `'clean'`, ด่านดาวน์โหลด `=== 'infected'`) และเตือนถ้ามี clamav ค้างใน compose · ทุก path หาที่ root ก่อนแล้วลอง `src/`
-- SKILL.md แถวอาการ + ย่อหน้าใน §6 · docs/script เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
-- Origin: ugt-voice-platform · 2026-10-09 (ไม่มี `lib/virus-scan.ts`/`CLAMAV_*`, route อยู่ `src/app/api/files/` — ที่เหลือล้มคือ widget/messages ที่โปรเจคนี้ไม่ใช้ ไม่เกี่ยวกับ scan)
 ## 4.74.0 (2026-10-09)
+
+รวม contribute PR #16–#20 (ugt-voice-platform) เป็น release เดียว — PR แตกจาก main พร้อมกันจึงจองเลข 4.73.1/4.74.0 ซ้ำกัน
 
 **auth-setup: `ERR_TOO_MANY_REDIRECTS` ระหว่าง `/` กับ `/login` เมื่อ browser ยังถือ session cookie ที่หมดอายุ/ถูก revoke** — `proxy.ts` เด้ง `/login` → `/` เพราะ cookie *มีอยู่* (`getSessionCookie`) แต่ layout ของหน้าที่ป้องกันเด้ง `/` → `/login` เมื่อ `auth.api.getSession` เป็น null — สองฝั่งไล่กันไม่จบ (browser ใหม่/ล้าง cookie แล้วหาย จึงเจอเฉพาะคนที่ session หมดอายุ)
 
@@ -33,6 +23,18 @@
 - **asset `Jenkinsfile`**: เพิ่ม `disableConcurrentBuilds()` พร้อม comment เหตุผลใน `options {}` — build ที่สองรอคิวแทน · **Jenkinsfile ไม่อยู่ใน kit-sync** — โปรเจคเดิมเพิ่มบรรทัดนี้เองข้าง `timestamps()`
 - **verify.mjs** +1 ข้อ: `options {}` ระดับบนต้องมี `disableConcurrentBuilds()` · SKILL.md แถวอาการ + Quick Rules · `docker-deploy.md` §C หัวข้อ "One deploy at a time" · `rules/ugt-nextjs-ci.md`
 - Origin: ugt-voice-platform · 2026-10-09 (ugt-voice-platform-dev build #13/#14)
+
+**cicd-setup: OWASP Dependency Check ค้าง UNSTABLE (เหลือง) ในทุกโปรเจค Next.js + MSSQL จาก 2 finding ที่ยังไม่มี release แก้** — `braces@3.0.3` `GHSA-vfj7-8cjw-p6xm` (HIGH · มาทาง `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` เฉพาะ lint บน CI ไม่เคยรับ input ผู้ใช้ · `npm audit fix` แนะนำ downgrade `eslint-config-next` เป็น 14.x ซึ่งรัน Next 16 ไม่ได้) และ `sprintf-js@1.1.3` `GHSA-hp3w-g68c-fv3c` (moderate · มาทาง `@prisma/adapter-mssql` → `mssql` → `tedious` ซึ่งส่งแต่ format string ที่เขียนไว้ในไลบรารี)
+
+- **references/sonarqube-setup.md §E**: หัวข้อ "OWASP: two reviewed findings with no fixed release" — ตารางเหตุผล + `<suppress>` 2 บล็อก pin ที่ version + GHSA เป๊ะ (`<packageUrl regex="true">^pkg:npm/braces@3\.0\.3$</packageUrl>` + `<vulnerabilityName>`) พร้อม `<notes>` · โปรเจคคัดลอกได้เมื่อ `npm ls braces sprintf-js` ยืนยัน path เดียวกันเท่านั้น · ลบเมื่อมี version ที่แก้แล้ว
+- **`assets/owasp-suppressions.xml` ยังว่างตามเดิม** (กฎ "never suppress preemptively") · SKILL.md แถวอาการ · docs เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
+- Origin: ugt-voice-platform · 2026-10-09 (commit `9d5c00b`)
+
+**upload-setup: `verify.mjs` ล้มบนโปรเจคที่เลือกไม่เปิด virus scan (default ของ §3 Q5) หรือใช้โครง `src/`** — ตรวจ `lib/virus-scan.ts`, `clamav` ใน compose และ `app/api/files/route.ts` ตายตัว: โปรเจคที่ route อยู่ `src/app/api/files/` ไม่เข้าเงื่อนไข scan-off (ต้องเจอ route ที่ root ก่อน) จึงถูกบังคับให้มี scanner ทั้งที่ไม่ได้เลือก
+
+- **verify.mjs**: ส่วน `[SCAN]` เป็น opt-in จริง — เช็ค scanner/clamav เฉพาะเมื่อมี `lib/virus-scan.ts` หรือ env ประกาศ `CLAMAV_HOST`; ไม่งั้นเช็คความสม่ำเสมอของโหมด off (ไม่เรียก `scanBuffer`, ไม่เก็บ `'clean'`, ด่านดาวน์โหลด `=== 'infected'`) และเตือนถ้ามี clamav ค้างใน compose · ทุก path หาที่ root ก่อนแล้วลอง `src/`
+- SKILL.md แถวอาการ + ย่อหน้าใน §6 · docs/script เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
+- Origin: ugt-voice-platform · 2026-10-09 (ไม่มี `lib/virus-scan.ts`/`CLAMAV_*`, route อยู่ `src/app/api/files/` — ที่เหลือล้มคือ widget/messages ที่โปรเจคนี้ไม่ใช้ ไม่เกี่ยวกับ scan)
 
 ## 4.73.0 (2026-10-09)
 
