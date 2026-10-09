@@ -10,7 +10,7 @@ Last updated: 2026-10-09
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
-- ugt-python-platform 0.7.0 / ugt-php-platform 0.6.6 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
+- ugt-python-platform 0.8.0 / ugt-php-platform 0.7.0 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
 - E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
@@ -21,6 +21,14 @@ Last updated: 2026-10-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-09 nextjs **4.73.0** · python **0.8.0** · php **0.7.0** (5265d46) — ตามคำขอผู้ดูแล:
+  (1) admin-handoff เป็นตารางล้วน (ขั้นตอนรวม → ตารางต่อระบบ เมนู + ช่อง/ค่า → ตารางส่งกลับ)
+  + เพิ่มตาราง SQL Server (db/login/สิทธิ์) และ folder server/backup ที่เดิมไม่มี ·
+  (2) `.env.example` โครง 7 หัวข้อตายตัว + compose `environment:` รายการตายตัวลำดับเดียวกัน ·
+  (3) **มติ: `NODE_TLS_REJECT_UNAUTHORIZED=0` เปิดเสมอ** (compose + env) เลิกให้ admin ตัดสิน ·
+  cicd verify +2 · tag `ugt-nextjs-platform--v4.73.0` push แล้ว (python/php ไม่ tag) ·
+  plugin เครื่องนี้ update ครบ — ต้อง restart session · ยังไม่ได้ลองกับโปรเจคจริง
+  (ชื่อ DB/login ไม่มี convention องค์กร — template เสนอ `<ระบบ>`/`<ระบบ>_Dev`, `<project>_app`)
 - 2026-10-09 **merge contribute PR #3–#14** (stack จาก /ugt-contribute, 12 PR) — nextjs
   **4.64.0→4.72.0** + python **0.7.0**: DB password รั่วใน Deploy console (`set +x` +
   `-e DATABASE_URL` ทั้ง nextjs/python), `.npmrc` legacy-peer-deps + Dockerfile copy,
