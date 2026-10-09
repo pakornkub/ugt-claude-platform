@@ -29,6 +29,7 @@ description: >
 | Client-side env vars empty in the browser | `NEXT_PUBLIC_*` must be build args, not runtime env | `references/docker-deploy.md` |
 | DB password visible in the Deploy console (`+ DB_URL=sqlserver://…;password=…`) | migrate step expanded the URL under `sh -x`; `withCredentials` masks the file path only | `assets/Jenkinsfile` Deploy `[DB]` block · `references/docker-deploy.md` |
 | `npm ci` fails with `ERESOLVE` in Install or the Docker deps stage | `.npmrc` (`legacy-peer-deps=true`, auth-setup §5.1) missing from the repo or not copied by the Dockerfile | `assets/Dockerfile` deps stage · auth-setup §5.1 |
+| OWASP Dependency Check stays UNSTABLE (yellow) on every build — HIGH `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`) via `eslint-config-next`, moderate `sprintf-js@1.1.3` (`GHSA-hp3w-g68c-fv3c`) via `@prisma/adapter-mssql` → tedious; `npm audit fix` offers a downgrade of `eslint-config-next` to 14.x | no fixed release of either package exists; both were reviewed (CI-lint-only / literal format strings) — do **not** take the audit downgrade (cannot run Next 16); suppress pinned to exact version + advisory after `npm ls braces sprintf-js` confirms the same path | `references/sonarqube-setup.md` §E "OWASP: two reviewed findings" |
 | Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview

@@ -65,6 +65,68 @@ Administration → Webhooks → Create:
 **rationale comment** in the file — added only after reviewing a real finding
 and judging it intentional/false-positive, never preemptively.
 
+### OWASP: two reviewed findings with no fixed release (Next.js + MSSQL stack)
+
+The OWASP Dependency Check stage ends **UNSTABLE** (yellow, a HIGH finding) on a
+project that follows these skills as written, because of two advisories whose
+affected package has **no fixed release yet**. Both were reviewed once for the
+whole org stack; neither is exploitable here:
+
+| Advisory | Package | Only reachable via | Why it does not apply |
+| --- | --- | --- | --- |
+| `GHSA-vfj7-8cjw-p6xm` (HIGH — stack exhaustion on deeply nested brace patterns) | `braces@3.0.3` (latest) | `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` | CI lint only: it expands this repository's own glob patterns, never user input; a devDependency, absent from the standalone image. `npm audit fix` "fixes" it by **downgrading `eslint-config-next` to 14.x, which cannot run Next 16** — do not take it |
+| `GHSA-hp3w-g68c-fv3c` (moderate — RangeError when an attacker controls the format string's precision) | `sprintf-js@1.1.3` (latest) | `@prisma/adapter-mssql` → `mssql` → `tedious` | tedious only passes literal format strings written in the library (e.g. `'Unrecognised data type 0x%02X'`, packet debug dumps) — no user-controlled format string reaches `sprintf` |
+
+A project **may** copy these blocks into its `owasp-suppressions.xml` — only after
+confirming it has the same dependency path and versions:
+
+```bash
+npm ls braces sprintf-js      # braces@3.0.3 under eslint-config-next · sprintf-js@1.1.3 under tedious
+```
+
+Any other path (a runtime dependency pulling `braces`, a different version, a
+project that feeds user input into a glob/format string) → this review does not
+cover it; review that finding yourself. Pin to the **exact version + advisory**
+so a new vulnerable version or a different advisory is never hidden, and keep the
+`<notes>` (the verify script rejects a `<suppress>` without one):
+
+```xml
+<suppress>
+   <notes><![CDATA[
+      GHSA-vfj7-8cjw-p6xm (braces <= 3.0.3, stack exhaustion on deeply nested brace patterns).
+      Not applicable: braces arrives only via eslint-config-next → @next/eslint-plugin-next →
+      fast-glob → micromatch, i.e. the lint step on CI, which expands this repository's own glob
+      patterns. devDependency, not in the standalone production image, never sees user input.
+      No fixed braces release exists yet (3.0.3 is latest); npm audit's "fix" downgrades
+      eslint-config-next to 14.x, which does not support Next 16.
+      Remove this suppression when braces > 3.0.3 ships.
+      Reviewed by: <name>, <date>
+   ]]></notes>
+   <packageUrl regex="true">^pkg:npm/braces@3\.0\.3$</packageUrl>
+   <vulnerabilityName>GHSA-vfj7-8cjw-p6xm</vulnerabilityName>
+</suppress>
+
+<suppress>
+   <notes><![CDATA[
+      GHSA-hp3w-g68c-fv3c (sprintf-js <= 1.1.3, RangeError when an attacker controls the format
+      string's precision). Not applicable: sprintf-js arrives via @prisma/adapter-mssql → mssql →
+      tedious, and every tedious call site passes a literal format string written in the library —
+      no user-controlled format string reaches sprintf.
+      No fixed sprintf-js release exists (1.1.3 is latest).
+      Remove this suppression when sprintf-js > 1.1.3 ships or tedious drops it.
+      Reviewed by: <name>, <date>
+   ]]></notes>
+   <packageUrl regex="true">^pkg:npm/sprintf-js@1\.1\.3$</packageUrl>
+   <vulnerabilityName>GHSA-hp3w-g68c-fv3c</vulnerabilityName>
+</suppress>
+```
+
+The shipped `assets/owasp-suppressions.xml` stays **empty on purpose** (iron rule
+above: never suppress preemptively) — add these only when the stage actually
+reports them. **Remove each block when its fixed version ships** (re-check with
+`npm ls` after dependency bumps); a suppression outliving its reason is how a
+later, different issue in the same package gets silenced.
+
 ### Prevent duplication while writing (better than suppressing)
 
 SonarQube flags any 10+-line block duplicated across files — about to copy a
