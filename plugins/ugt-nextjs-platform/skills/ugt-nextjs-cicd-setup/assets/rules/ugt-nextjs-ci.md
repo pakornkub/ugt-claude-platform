@@ -66,6 +66,9 @@ global `environment {}` block (global = one value for every branch).
 - Healthchecks hit `127.0.0.1`, not `localhost` (Alpine resolves it to IPv6 and fails)
 - `pull_policy: never` in compose — the image is built locally, not in a registry
 - **Migrate before `compose up`, always** — migrate fail = no deploy
+- Keep `disableConcurrentBuilds()` in the pipeline `options {}` — otherwise two
+  quick pushes run two Deploy stages (migrate + `compose up`) on the same
+  container at the same time
 - `next.config` must set `output: 'standalone'` or the Dockerfile's
   `COPY .next/standalone` fails
 

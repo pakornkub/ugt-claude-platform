@@ -30,6 +30,7 @@ description: >
 | DB password visible in the Deploy console (`+ DB_URL=sqlserver://…;password=…`) | migrate step expanded the URL under `sh -x`; `withCredentials` masks the file path only | `assets/Jenkinsfile` Deploy `[DB]` block · `references/docker-deploy.md` |
 | `npm ci` fails with `ERESOLVE` in Install or the Docker deps stage | `.npmrc` (`legacy-peer-deps=true`, auth-setup §5.1) missing from the repo or not copied by the Dockerfile | `assets/Dockerfile` deps stage · auth-setup §5.1 |
 | OWASP Dependency Check stays UNSTABLE (yellow) on every build — HIGH `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`) via `eslint-config-next`, moderate `sprintf-js@1.1.3` (`GHSA-hp3w-g68c-fv3c`) via `@prisma/adapter-mssql` → tedious; `npm audit fix` offers a downgrade of `eslint-config-next` to 14.x | no fixed release of either package exists; both were reviewed (CI-lint-only / literal format strings) — do **not** take the audit downgrade (cannot run Next 16); suppress pinned to exact version + advisory after `npm ls braces sprintf-js` confirms the same path | `references/sonarqube-setup.md` §E "OWASP: two reviewed findings" |
+| Two quick pushes → two builds of the same job run at once; the second `prisma migrate deploy` / `docker compose up` collides with the first still deploying (flaky Deploy, container recreated mid-health-poll) | `options {}` had no `disableConcurrentBuilds()` — Jenkins runs same-job builds in parallel by default | `assets/Jenkinsfile` `options {}` · `references/docker-deploy.md` §C |
 | Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview
@@ -300,6 +301,7 @@ Checklist §6
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
+| `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 
 ## 6. Verification Checklist

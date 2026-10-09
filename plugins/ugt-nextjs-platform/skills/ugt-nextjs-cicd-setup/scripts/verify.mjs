@@ -116,6 +116,13 @@ check('Quality Gate actually blocks the pipeline', () => {
     : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
 });
 
+check('Builds of the same job never overlap (disableConcurrentBuilds)', () => {
+  if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
+  return /\boptions\s*\{[^}]*\bdisableConcurrentBuilds\s*\(/.test(jfActive)
+    ? { ok: true }
+    : { ok: false, msg: "no disableConcurrentBuilds() in the top-level options {} — two quick pushes run two Deploy stages at once (migrate + compose up on the same container); add it next to timestamps()" };
+});
+
 check('post block complete (notifications + cleanWs)', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
