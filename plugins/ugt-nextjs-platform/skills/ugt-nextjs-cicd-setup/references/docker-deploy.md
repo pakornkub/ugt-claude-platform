@@ -139,7 +139,6 @@ Env-var caveats:
   **bare origin without the basePath** (`https://<domain>`) — adding the
   basePath breaks the cookie/callback domain
 - `NEXT_PUBLIC_APP_URL` = the full URL including basePath (used in links/sitemap)
-- If internal services use an internal-CA cert Node doesn't trust →
-  `NODE_TLS_REJECT_UNAUTHORIZED: '0'` in compose is acceptable **only on a
-  fully closed intranet** — never if the app can reach the internet (it
-  disables TLS verification globally)
+- `NODE_TLS_REJECT_UNAUTHORIZED: '0'` is in both compose files, always on —
+  org standard (closed intranet, internal-CA Keycloak/LDAP/SQL Server). It
+  disables TLS verification for the whole process; that is the accepted trade-off

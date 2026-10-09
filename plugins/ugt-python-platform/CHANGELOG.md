@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.8.0 (2026-10-09)
+
+- **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · เพิ่มตาราง A: database + login (สิทธิ์สร้าง/แก้ตารางสำหรับ migration) · ตาราง B: folder บน server + backup · cron `[BATCH]` เป็นตาราง 3 ขั้น (`__CRON_SCHEDULE__`) · DB host ต้องเป็น FQDN/IP อยู่ในตารางส่งกลับ · ภาคผนวก server แรกเป็นตาราง · ตัด `__N_CREDS__` (ชุดเดียวกับ ugt-nextjs-platform 4.73.0)
+
 ## 0.7.0 (2026-10-07)
 
 **cicd-setup: ขั้น migrate (alembic) ใน Deploy พิมพ์รหัสผ่าน DB ลง build log** — บล็อกเดียวกับฝั่ง Next.js: `DB_URL=$(grep …)` แล้ว `docker run -e DATABASE_URL="$DB_URL"` ใต้ `sh -x` → connection string ทั้งเส้นอยู่ใน console · แก้เป็น `set +x` + `export DATABASE_URL=…` + `-e DATABASE_URL` · rules/ugt-python-ci.md §Secrets เพิ่มกฎ · โปรเจคที่ copy ไปแล้วแก้บล็อกนี้เอง + เปลี่ยนรหัสผ่าน

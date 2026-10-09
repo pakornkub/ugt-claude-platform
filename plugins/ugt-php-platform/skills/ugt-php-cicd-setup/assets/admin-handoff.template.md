@@ -1,182 +1,123 @@
+<!--
+RENDER RULES (delete this comment block in the rendered file):
+- Substitute every __...__ (table in SKILL.md). `grep __ docs/admin-handoff.md` must find nothing.
+- A row/section tagged [X] exists only when the project has X — delete the whole
+  row/section otherwise, then renumber the overview table and the section letters
+  so they stay A, B, C… with no gaps. Never leave an empty table or "N/A" rows.
+  [DB] = has a database · [VOLUME] = compose has an /home/docker02/appdata bind · [FIRST] = first org project on this Jenkins/Docker host
+- Tags live in HTML comments (invisible when rendered) — strip them after deciding.
+-->
 # คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)
 
-> **เอกสารส่งต่อทีม Admin / DevOps** · สร้างอัตโนมัติเมื่อ __DATE__
-> ผู้ขอ: __REQUESTER__ · โปรเจค: __REPO_URL__
-> ทำเสร็จแล้วกรุณา**กรอกหัวข้อสุดท้าย "ค่าที่ต้องส่งกลับ" แล้วส่งไฟล์นี้คืน**ทีมพัฒนา
->
-> ชื่อทุกตัวในเอกสารนี้ถูก generate ให้ตรงกับค่าที่ตั้งไว้ในโปรเจคแล้ว —
-> **กรุณาใช้ชื่อตามนี้เป๊ะ ๆ** (ต่างแม้ตัวเดียว pipeline จะไม่ทำงาน)
+ผู้ขอ: __REQUESTER__ · __DATE__ · repo: `__REPO_URL__`
+**ทำเสร็จแล้ว กรอกตาราง "ส่งกลับ" ท้ายไฟล์ แล้วส่งไฟล์นี้คืนทีมพัฒนา** · ชื่อทุกตัวต้องพิมพ์ตามนี้เป๊ะ
 
-## ภาพรวม 1 นาที — ต้องทำอะไรบ้าง
+## ขั้นตอนรวม
 
-| # | ระบบ | งาน | ใช้เวลาโดยประมาณ |
+| # | ใครทำ | ระบบ | ทำอะไร | ดูตาราง |
+| --- | --- | --- | --- | --- |
+| 1 | DBA | Database server | สร้าง database 2 ตัว + login 2 ตัว | [A](#a-database--login) <!-- [DB] --> |
+| 2 | Admin | Server (Docker host) | เตรียม folder เก็บไฟล์ + ตั้ง backup | [B](#b-server--folder-เก็บไฟล์) <!-- [VOLUME] --> |
+| 3 | Admin | Jenkins | สร้าง credential | [C](#c-jenkins--credentials) |
+| 4 | Admin | Jenkins | สร้าง pipeline job | [D](#d-jenkins--pipeline-job) |
+| 5 | Admin | GitHub | ตั้ง webhook ไป Jenkins | [E](#e-github--webhook) |
+| 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
+| 7 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
+
+---
+
+<!-- [DB] -->
+### A. Database + Login
+
+ที่: **database server ตามคอลัมน์ "Server"**
+
+| สร้าง | Server | ชื่อ (พิมพ์ตามนี้) | สิทธิ์ที่ต้องให้ |
 | --- | --- | --- | --- |
-| 1 | Jenkins | สร้าง credentials __N_CREDS__ ตัว + pipeline job + webhook | ~15 นาที |
-| 2 | SonarQube | สร้าง 2 projects + ผูก Quality Gate + webhook | ~10 นาที |
+| Database prod | prod | `__DB_NAME_PROD__` | — |
+| Database dev | dev | `__DB_NAME_DEV__` | — |
+| Login prod | prod | `__DB_LOGIN_PROD__` | ใน `__DB_NAME_PROD__`: อ่าน/เขียนข้อมูล + สร้าง/แก้ตาราง (migration รันด้วย login นี้) |
+| Login dev | dev | `__DB_LOGIN_DEV__` | ใน `__DB_NAME_DEV__`: เหมือน login prod |
 
-<!-- ลบแถว/หัวข้อของระบบที่โปรเจคนี้ไม่ใช้ออกทั้งหัวข้อ — อย่าปล่อยค้างไว้ -->
-<!-- ถ้า Jenkins server นี้เคยตั้งโปรเจคอื่นแล้ว งานระดับ server (plugins, tools,
-     nvd credential, NOTIFY_EMAIL, docker group) ทำไปแล้ว — ทำเฉพาะระดับโปรเจคด้านล่าง
-     ถ้าเป็นโปรเจคแรกของ server ดูภาคผนวกท้ายไฟล์ -->
+> ตารางสร้างเองตอน deploy (pipeline รัน migration) — DBA ไม่ต้องสร้างตาราง
 
----
+<!-- [VOLUME] -->
+### B. Server — Folder เก็บไฟล์
 
-## 1. Jenkins
+ที่: **Docker host (prod และ dev)**
 
-### 1.1 สร้าง Credentials (Manage Jenkins → Credentials → Global)
-
-| ชื่อ credential (ID) | ชนิด | ใส่อะไร |
+| Folder | ใครสร้าง | Admin ต้องทำ |
 | --- | --- | --- |
-| `env-__PROJECT_NAME__` | **Secret file** | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาแนบให้ / นัดส่งช่องทางปลอดภัย) |
-| `env-__PROJECT_NAME__-dev` | **Secret file** | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod (คนละ DATABASE_URL คนละ secret) |
+| `/home/docker02/appdata` <!-- [FIRST] --> | Admin — **ครั้งเดียวต่อ server** | `sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata` |
+| `/home/docker02/appdata/__PROJECT_NAME__/__VOLUME__` | pipeline สร้างเองตอน deploy | **ตั้ง backup job** — ข้อมูลอยู่ที่นี่ที่เดียว ไม่อยู่ใน DB backup · ห้ามลบ folder นี้ |
+| `/home/docker02/appdata/__PROJECT_NAME__-dev/__VOLUME__` | pipeline สร้างเองตอน deploy | ไม่ต้อง backup |
 
-### 1.2 สร้าง Pipeline job
+<!-- one prod/dev row pair per volume -->
 
-1. New Item → ชื่อ `__PROJECT_NAME__` → เลือก **Multibranch Pipeline**
-2. Branch Sources → GitHub → repo `__REPO_URL__` → discover branches `main` และ `develop`
-3. **สำคัญ**: ปิด "Lightweight checkout" (ถ้าเปิดไว้ stage แรกจะพัง)
+### C. Jenkins — Credentials
 
-### 1.3 ตั้ง Webhook ที่ GitHub repo
+ที่: **Manage Jenkins → Credentials → System → Global → Add Credentials**
 
-- Settings → Webhooks → Add: URL `http://__JENKINS_HOST__:8080/github-webhook/` · event: **push เท่านั้น**
+| ID (พิมพ์ตามนี้) | Kind | ใส่อะไร |
+| --- | --- | --- |
+| `env-__PROJECT_NAME__` | Secret file | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาส่งให้ทางช่องทางปลอดภัย) |
+| `env-__PROJECT_NAME__-dev` | Secret file | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod |
+| `nvd` <!-- [FIRST] --> | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมทุกโปรเจคบน server |
 
----
+### D. Jenkins — Pipeline job
 
-## 2. SonarQube
+ที่: **Dashboard → New Item**
 
-### 2.1 สร้าง Projects (Administration → Projects → Create)
-
-| Project Key | Display name |
+| ช่อง | ใส่ค่า |
 | --- | --- |
-| `__PROJECT_NAME__` | __PROJECT_DISPLAY_NAME__ |
-| `__PROJECT_NAME__-dev` | __PROJECT_DISPLAY_NAME__ (Dev) |
+| Item name | `__PROJECT_NAME__` |
+| Type | Multibranch Pipeline |
+| Branch Sources → GitHub → Repository URL | `__REPO_URL__` |
+| Discover branches | `main`, `develop` |
+| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) |
 
-### 2.2 ผูก Quality Gate
+### E. GitHub — Webhook
 
-- ใช้ gate มาตรฐานองค์กร (ถ้ายังไม่มี ดูภาคผนวก) → assign ให้**ทั้งสอง** projects ข้างบน
+ที่: **repo → Settings → Webhooks → Add webhook**
 
-### 2.3 Webhook กลับไป Jenkins (Administration → Configuration → Webhooks)
-
-- URL: `http://__JENKINS_HOST__:8080/sonarqube-webhook/`
-- **ถ้าไม่ตั้งข้อนี้ pipeline จะค้างตลอดไป** ที่ขั้นรอผล Quality Gate
-
----
-
-## ✅ ค่าที่ต้องส่งกลับให้ทีมพัฒนา (กรอกแล้วส่งไฟล์นี้คืน)
-
-| ค่า | มาจากไหน | กรอกตรงนี้ |
-| --- | --- | --- |
-| **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `8081` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** (เลี่ยง `8080` ที่ชนกับ Jenkins เองบน host) |
-| **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `8082` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** (ต้องคนละพอร์ตกับ prod — สอง container อยู่บน host เดียวกันได้) |
-| ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
-| ยืนยัน SonarQube projects + webhook แล้ว | ลิงก์ project | |
-
-## เช็คก่อนปิดงาน (ฝั่ง Admin)
-
-- [ ] ชื่อทุกตัวตรงกับตารางเป๊ะ (โดยเฉพาะ credential ID)
-- [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
-- [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
-- [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `8081`/`8082`
-- [ ] `/home/docker02/appdata` เตรียมไว้แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ต้องเขียนได้ก่อน Deploy stage รันครั้งแรก
-- [ ] Jenkins user อยู่ใน `docker` group แล้ว (ดูภาคผนวกถ้ายังไม่เคยทำ) — ไม่งั้นทุก stage ที่ใช้ `docker.image().inside` จะพัง
-- [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** — คนละเรื่องกับ `docker` group ข้างบน ถ้าขาดตัวนี้ pipeline ตายตั้งแต่ stage แรก (ดูภาคผนวก)
-- [ ] Docker network `proxy-network` สร้างแล้วบน host (compose ทั้งสองไฟล์ประกาศเป็น `external: true`)
-- [ ] **คอนเทนเนอร์ต่อถึง DB ได้** — ไม่ใช่แค่ตัว host ต่อได้ · คอนเทนเนอร์ใช้ DNS ของ Docker จึงมัก resolve ชื่อสั้น (`SQLSRV01`) ไม่ได้ · ถ้าเป็นแบบนั้นกรุณาแจ้ง **FQDN หรือ IP ของ DB** กลับมาให้ทีมพัฒนา (หรือ IP ของ DNS server องค์กร)
-- [ ] host มี `docker compose` (v2, ไม่มีขีด) — เช็คด้วย `docker compose version` · Jenkinsfile ที่ส่งมาเรียก v2 ซึ่งเป็นค่ามาตรฐาน **ถ้า host มีแต่ `docker-compose` (v1) ตัวเก่า กรุณาแจ้งทีมพัฒนา** ให้แก้สเตจ Deploy หนึ่งบรรทัด (v1 EOL ตั้งแต่กลางปี 2023)
-
----
-
-<!-- ภาคผนวก: ใส่เฉพาะเมื่อเป็นโปรเจคแรกบน server (server-level setup) —
-     ถ้าไม่ใช่ ลบทั้งหัวข้อทิ้งได้เลย -->
-
-## ภาคผนวก — Server-level setup (ทำครั้งเดียวต่อ server)
-
-ข้ามทั้งหัวข้อได้ถ้า Jenkins/SonarQube server นี้เคยตั้งโปรเจคที่ใช้มาตรฐาน
-เดียวกันมาก่อนแล้ว
-
-### ก. ปลั๊กอิน Jenkins ที่ต้องมี
-
-Manage Jenkins → Plugins → Available:
-
-| Plugin | ใช้ทำอะไรใน pipeline |
+| ช่อง | ใส่ค่า |
 | --- | --- |
-| **Docker Pipeline** (`docker-workflow`) | ให้ global variable `docker` — สเตจ PHP ทุกตัวรันใน `docker.image('<project>-ci').inside{}` |
-| SonarQube Scanner | `withSonarQubeEnv` + `waitForQualityGate` |
-| OWASP Dependency-Check | `dependencyCheck` + `dependencyCheckPublisher` |
-| JUnit | publish `test-results/junit.xml` |
-| HTML Publisher | publish coverage HTML |
-| Email Extension | `emailext` (เมล HTML — `mail` ธรรมดาไม่รองรับ) |
-| Pipeline · Git | Declarative Pipeline core + `checkout scm` |
+| Payload URL | `http://__JENKINS_HOST__:8080/github-webhook/` |
+| Content type | `application/json` |
+| Events | Just the push event |
 
-> ⚠️ **Docker Pipeline เป็นข้อที่พลาดกันบ่อยที่สุด** — ขาดตัวนี้แล้ว pipeline ตาย
-> ตั้งแต่สเตจ Install ด้วย `groovy.lang.MissingPropertyException: No such
-> property: docker` ซึ่งอ่านไม่ออกเลยว่าแปลว่า "ไม่ได้ลงปลั๊กอิน" (ยืนยันจาก
-> โปรเจค pilot 2026-08) · **คนละเรื่องกับการมี Docker CLI บนเครื่อง** — `sh
-> 'docker …'` ใช้ CLI ได้อยู่แล้วโดยไม่ต้องมีปลั๊กอิน แต่ syntax
-> `docker.image().inside{}` พึ่งปลั๊กอินตัวนี้โดยเฉพาะ
-> เช็คว่าลงแล้วหรือยัง: Manage Jenkins → Plugins → Installed → ค้นหา "Docker Pipeline"
+### F. SonarQube
 
-### ข. Tools (ชื่อต้องตรงเป๊ะ — Jenkinsfile อ้างชื่อตรง ๆ)
-
-Manage Jenkins → Tools: `SonarQube-Scanner` · `Dependency-Check` (Install automatically)
-Manage Jenkins → System → SonarQube servers: เพิ่ม server ชื่อ `SonarQube` พร้อม token
-
-> ชื่อผิดตัวพิมพ์เดียว = `sonar-scanner: command not found` หรือ `dependencyCheck`
-> หา installation ไม่เจอ · **ไม่ต้องตั้ง Global Tool ของ PHP/composer** — สเตจ
-> ทั้งหมดรันใน CI image ที่ build จาก `Dockerfile.ci` เอง และ Jenkinsfile ใช้
-> `agent any` ไม่ต้องมี node label พิเศษ
-
-### ค. Credential ระดับ server
-
-| ID | ชนิด | ใส่อะไร |
+| ที่ | ช่อง | ใส่ค่า |
 | --- | --- | --- |
-| `nvd` | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมกันทุกโปรเจคบน server นี้ ไม่มีแล้ว OWASP DC ช้ามาก (rate limit 5 req/30s) |
+| Administration → Projects → Create | Project key / Display name | `__PROJECT_NAME__` / __PROJECT_DISPLAY_NAME__ |
+| 〃 | Project key / Display name | `__PROJECT_NAME__-dev` / __PROJECT_DISPLAY_NAME__ (Dev) |
+| Project Settings → Quality Gate | Gate | มาตรฐานองค์กร — ผูก**ทั้ง 2 project** |
+| Administration → Configuration → Webhooks → Create | URL | `http://__JENKINS_HOST__:8080/sonarqube-webhook/` (ไม่ตั้ง = pipeline ค้างตลอด) |
 
-### ง. Global environment variables
+---
 
-Manage Jenkins → System → Global properties: `NOTIFY_EMAIL`, `SMTP_FROM`
-แล้วตั้ง SMTP ที่ Manage Jenkins → System → Extended E-mail Notification
+## ส่งกลับ
 
-### จ. Docker group ของ Jenkins user
+| ค่า | หาได้ที่ | ค่า |
+| --- | --- | --- |
+| DB prod — host:port <!-- [DB] --> | ตาราง A — ใช้ **FQDN หรือ IP** (container resolve ชื่อสั้นอย่าง `SQLSRV01` ไม่ได้) | |
+| DB dev — host:port <!-- [DB] --> | ตาราง A — FQDN หรือ IP | |
+| รหัสผ่าน `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| `APP_PORT` prod | port ที่จัดสรรบน server prod (ทีมพัฒนาใช้ `8081` ไว้ก่อน) | |
+| `APP_PORT` dev | port ที่จัดสรรบน server dev (ทีมพัฒนาใช้ `8082` ไว้ก่อน) | |
+| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` | |
 
-```bash
-sudo usermod -aG docker jenkins
-```
+<!-- [FIRST] -->
+## ภาคผนวก — ครั้งแรกของ server (ข้ามถ้า server นี้มีโปรเจคมาตรฐานเดียวกันแล้ว)
 
-แล้ว **restart Jenkins service** ให้ group มีผล — ไม่งั้นทุกสเตจที่เรียก
-`docker.image().inside` จะ fail ด้วย permission denied ต่อ `/var/run/docker.sock`
-
-### ฉ. Docker network สำหรับ reverse proxy
-
-```bash
-docker network create proxy-network
-```
-
-compose ทั้ง prod และ dev ประกาศ `proxy-network` เป็น `external: true` —
-ไม่มี network นี้ `docker compose up` จะ fail ทันทีตอน Deploy
-
-### ช. `/home/docker02/appdata` (ข้อมูลถาวร)
-
-```bash
-sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata
-```
-
-โฟลเดอร์ย่อยรายโปรเจคสร้างเองในสเตจ Deploy
-
-### ซ. NVD data strategy (`--noupdate` ใน pipeline)
-
-Jenkinsfile รัน dependency-check ด้วย `--noupdate` = สแกนกับ local NVD cache
-เท่านั้น ไม่โหลดกลาง pipeline — แปลว่า **ต้องมีข้อมูล NVD บนเครื่องอยู่ก่อน**
-ไม่งั้นรอบแรกบน Jenkins ใหม่จะสแกนกับ DB ว่าง (ผ่านหมดแบบหลอก ๆ) เลือกทางใดทางหนึ่ง:
-
-1. **แนะนำ** — สร้าง job แยก (cron เช่น `H 2 * * *`) รัน
-   `dependency-check --updateonly` พร้อม `--nvdApiKey` จาก credential `nvd`
-   แล้ว pipeline หลักคง `--noupdate` ไว้ตลอดไป
-2. หรือ **ถอด `--noupdate` ชั่วคราว** สำหรับรอบแรกเพื่อโหลด NVD ทั้งชุด
-   (⚠️ 60–90 นาที — timeout 90 นาทีของสเตจเผื่อไว้แล้ว) แล้วใส่กลับ
-
-### ฌ. SonarQube Quality Gate มาตรฐานองค์กร (ถ้ายังไม่มี)
-
-สร้าง Quality Gate ที่มีเงื่อนไข `new_violations = 0` ·
-`new_duplicated_lines_density ≤ 3%` · `new_coverage ≥ 60%` ·
-`new_security_hotspots_reviewed = 100%` แล้ว assign ให้ทุกโปรเจคใหม่
+| ที่ | ทำอะไร | ใส่ค่า (ชื่อต้องตรงเป๊ะ) |
+| --- | --- | --- |
+| Manage Jenkins → Plugins | ติดตั้ง plugin | **Docker Pipeline** (`docker-workflow` — ขาดตัวนี้ pipeline ตายที่ stage แรกด้วย `No such property: docker`) · SonarQube Scanner · OWASP Dependency-Check · JUnit · HTML Publisher · Email Extension · Pipeline · Git |
+| Manage Jenkins → Tools | เพิ่ม tool | SonarQube Scanner `SonarQube-Scanner` · Dependency-Check `Dependency-Check` (Install automatically) — ไม่ต้องตั้ง PHP/composer (รันใน CI image) |
+| Manage Jenkins → System → SonarQube servers | เพิ่ม server | Name `SonarQube` + token |
+| Manage Jenkins → System → Global properties | env var | `NOTIFY_EMAIL` · `SMTP_FROM` |
+| Jenkins → New Item (Pipeline, cron `H 2 * * *`) | job อัปเดตข้อมูล NVD | `dependency-check --updateonly --nvdApiKey <nvd>` (pipeline หลักรัน `--noupdate` — ไม่มีข้อมูล NVD = สแกนผ่านแบบหลอก) |
+| SonarQube → Quality Gates → Create | เงื่อนไข (On New Code) | `new_violations` = 0 · `new_duplicated_lines_density` ≤ 3% · `new_coverage` ≥ 60% · `new_security_hotspots_reviewed` = 100% |
+| Docker host | ให้ Jenkins สั่ง docker ได้ | `sudo usermod -aG docker jenkins` แล้ว restart Jenkins |
+| Docker host | สร้าง network | `docker network create proxy-network` |
+| Docker host | เช็ค compose v2 | `docker compose version` ต้องได้ — มีแต่ `docker-compose` (v1) ให้แจ้งทีมพัฒนา |

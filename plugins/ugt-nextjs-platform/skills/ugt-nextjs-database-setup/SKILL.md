@@ -105,7 +105,7 @@ npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 | `assets/prisma/schema-skeleton.prisma` | `prisma/schema.prisma` |
 | `assets/lib/prisma.ts` | `lib/prisma.ts` |
 | `assets/lib/env.ts` | `lib/env.ts` |
-| `assets/env.example` | `.env.example` (+ copy to `.env.local` and fill real values) |
+| `assets/env.example` | `.env.example` (+ copy to `.env.local` and fill real values) — the **canonical layout** every org project shares (7 sections, fixed order + key names); a project that already has env files gets its keys re-sorted into these sections, values kept, own extras → section 6 |
 | `assets/gitignore` | `.gitignore` — if the project already has one, append any of its lines that are missing rather than overwrite it |
 | `assets/rules/ugt-nextjs-database.md` | `.claude/rules/ugt-nextjs-database.md` (whole-file overwritable on plugin update) |
 

@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## 0.7.0 (2026-10-09)
+
+- **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · เพิ่มตาราง A: database + login (สิทธิ์สร้าง/แก้ตารางสำหรับ migration) · ตาราง B: folder บน server + backup · DB host ต้องเป็น FQDN/IP อยู่ในตารางส่งกลับ · ภาคผนวก server แรกเป็นตาราง · ตัด `__N_CREDS__` (ชุดเดียวกับ ugt-nextjs-platform 4.73.0)
+
 ## 0.6.6 (2026-09-29)
 
 - **SKILL.md สถานะ pilot**: ตารางเดิมบอกว่าทุก shape ยังไม่ผ่าน ทั้งที่ PHP legacy ขึ้น server จริงแล้ว 2 โปรเจค → **PHP legacy ผ่าน pilot** (`ugt-mscpl-ana` 2026-08 · `ugt-bd-forecast` 2026-09-03) · Laravel / CodeIgniter / WordPress ยังไม่ผ่าน

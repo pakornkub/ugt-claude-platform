@@ -337,7 +337,7 @@ WordPress    api/health/index.php
 > (ไม่มีไฟล์นี้ = image build ไม่ผ่านตั้งแต่แรกอยู่แล้ว) จึงเป็น smoke check ที่
 > ตรงกับความจริงของ shape นี้ที่สุด
 
-placeholder อีก 5 ตัวอยู่ใน `admin-handoff.template.md` **เท่านั้น** เติมตอน
+placeholder อีกชุดอยู่ใน `admin-handoff.template.md` **เท่านั้น** เติมตอน
 render เอกสารส่ง admin (§5.7):
 
 | Placeholder | เติมด้วย |
@@ -346,7 +346,9 @@ render เอกสารส่ง admin (§5.7):
 | `__REQUESTER__` | ชื่อผู้ขอ (ทีมพัฒนา) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | host ของ Jenkins ที่ใช้ตั้ง webhook |
-| `__N_CREDS__` | จำนวน credential ที่ admin ต้องสร้าง (ปกติ `2` — `env-<project>` + `env-<project>-dev`; ถ้าเป็นโปรเจคแรกของ server นับ `nvd` ด้วยเป็น `3`) |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database prod/dev — จากคำตอบ interview; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` |
+| `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | login ของ DB — ไม่รู้ → เสนอ `<project>_app` / `<project>_dev` |
+| `__VOLUME__` | ชื่อ volume ใน compose — หนึ่งคู่แถว prod/dev ต่อ volume |
 
 > **`__DIR__` ไม่ใช่ placeholder** — เป็น magic constant ของภาษา PHP ที่โผล่ใน
 > `tooling/.php-cs-fixer.php` และ `tooling/SmokeTest.php` **ห้ามแทนค่า** (แทน
@@ -642,15 +644,15 @@ vendor/bin/phpunit
 ### 5.7 ฝั่ง server — ส่งรายการให้ admin
 
 **Render `assets/admin-handoff.template.md` → เขียนลงโปรเจคเป็น
-`docs/admin-handoff.md`** โดยแทน `__...__` ทุกตัว (ชื่อโปรเจค, credential ID,
-sonar key, Jenkins host, repo URL, วันที่, ชื่อผู้ขอ) และ **ลบหัวข้อของสิ่งที่
-โปรเจคนี้ไม่ใช้ทิ้งทั้งหัวข้อ**:
-
-- ไม่ใช่โปรเจคแรกของ server → ลบภาคผนวกท้ายไฟล์ (server-level setup)
-- ไม่มี volume และไม่ใช่ WordPress → ตัดบรรทัด `/home/docker02/appdata` ในเช็คลิสต์ออก
+`docs/admin-handoff.md`** ตาม RENDER RULES ที่หัวไฟล์: แทน `__...__` ทุกตัว ·
+ลบแถว/หัวข้อที่ติดป้าย `[TAG]` ที่โปรเจคไม่มี (ไม่มี DB → ไม่มีตาราง A · ไม่มี
+volume → ไม่มีตาราง B · ไม่ใช่โปรเจคแรกของ
+server → ไม่มีภาคผนวก) · เรียงตัวอักษรหัวข้อและเลขในตารางขั้นตอนรวมใหม่ · ลบ
+comment กติกาและ comment ป้ายออก · **รูปแบบตายตัว**: ตารางขั้นตอนรวม → ตารางแยก
+ต่อระบบ → ตาราง "ส่งกลับ" ห้ามเพิ่มย่อหน้าอธิบาย
 
 บอกผู้ใช้ให้ชัด: "ส่งไฟล์ `docs/admin-handoff.md` ให้ทีม admin ได้เลย
-แล้วรอค่าที่ต้องส่งกลับ (`APP_PORT` prod/dev + ยืนยัน job/webhook)" —
+แล้วรอตาราง "ส่งกลับ" (DB host + รหัสผ่าน, `APP_PORT` prod/dev, ลิงก์ job)" —
 สรุปในแชทเพิ่มได้ แต่ไฟล์คือของที่ส่งจริง อย่าให้ admin ไปไล่ก๊อบชื่อจาก
 บทสนทนา
 

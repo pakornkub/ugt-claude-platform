@@ -272,6 +272,24 @@ check('.env / .env.dev are gitignored (and .env.example is not)', () => {
   return { ok: true };
 });
 
+check('NODE_TLS_REJECT_UNAUTHORIZED=0 on in compose + .env.example (org standard)', () => {
+  const files = ['docker-compose.yml', 'docker-compose.dev.yml', '.env.example'].filter((f) => has(f));
+  const off = files.filter((f) => !/^\s*NODE_TLS_REJECT_UNAUTHORIZED\s*[:=]\s*['"]?0['"]?/m.test(read(f)));
+  return off.length
+    ? { ok: false, msg: `Missing or commented out in: ${off.join(', ')} — SSO/LDAP against the internal-CA servers fails without it` }
+    : { ok: true };
+});
+
+check('.env.example keeps the canonical section order', () => {
+  if (!has('.env.example')) return { ok: 'warn', msg: '.env.example missing — database-setup writes the canonical one' };
+  const env = read('.env.example');
+  const at = ['1. App', '2. Database', '3. Auth', '4. Mail', '5. Upload', '6. Project', '7. Misc'].map((h) =>
+    env.indexOf(`# ─── ${h}`)
+  );
+  if (at.includes(-1)) return { ok: 'warn', msg: 'Not on the canonical layout (sections 1–7, database-setup env.example) — re-sort the keys into it' };
+  return at.every((v, i) => i === 0 || v > at[i - 1]) ? { ok: true } : { ok: false, msg: '.env.example sections out of order' };
+});
+
 check('docs/admin-handoff.md rendered (no __*__ left)', () => {
   if (!has('docs/admin-handoff.md')) {
     return { ok: 'warn', msg: 'docs/admin-handoff.md missing — §4.6 renders it; the admin gets a chat snippet instead of a file' };

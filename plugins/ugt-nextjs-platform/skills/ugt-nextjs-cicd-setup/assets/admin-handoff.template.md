@@ -1,164 +1,163 @@
+<!--
+RENDER RULES (delete this comment block in the rendered file):
+- Substitute every __...__ (table in SKILL.md §4.2). `grep __ docs/admin-handoff.md` must find nothing.
+- A row/section tagged [X] exists only when the project has X — delete the whole
+  row/section otherwise, then renumber the overview table and the section letters
+  so they stay A, B, C… with no gaps. Never leave an empty table or "N/A" rows.
+  [DB] = Prisma/SQL Server · [LINKED] = reads over a linked server · [VOLUME] = compose has
+  an /home/docker02/appdata bind · [UPLOAD] = ugt-nextjs-upload-setup installed ·
+  [SSO] = Keycloak login · [SENTRY] = Sentry · [BASEPATH] = served under a basePath ·
+  [FIRST] = first org project on this Jenkins/Docker host
+- Tags live in HTML comments (invisible when rendered) — strip them after deciding.
+-->
 # คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)
 
-> **เอกสารส่งต่อทีม Admin / DevOps** · สร้างอัตโนมัติเมื่อ __DATE__
-> ผู้ขอ: __REQUESTER__ · โปรเจค: __REPO_URL__
-> ทำเสร็จแล้วกรุณา**กรอกหัวข้อสุดท้าย "ค่าที่ต้องส่งกลับ" แล้วส่งไฟล์นี้คืน**ทีมพัฒนา
->
-> ชื่อทุกตัวในเอกสารนี้ถูก generate ให้ตรงกับค่าที่ตั้งไว้ในโปรเจคแล้ว —
-> **กรุณาใช้ชื่อตามนี้เป๊ะ ๆ** (ต่างแม้ตัวเดียว pipeline/login จะไม่ทำงาน)
+ผู้ขอ: __REQUESTER__ · __DATE__ · repo: `__REPO_URL__`
+**ทำเสร็จแล้ว กรอกตาราง "ส่งกลับ" ท้ายไฟล์ แล้วส่งไฟล์นี้คืนทีมพัฒนา** · ชื่อทุกตัวต้องพิมพ์ตามนี้เป๊ะ
 
-## ภาพรวม 1 นาที — ต้องทำอะไรบ้าง
+## ขั้นตอนรวม
 
-| # | ระบบ | งาน | ใช้เวลาโดยประมาณ |
+| # | ใครทำ | ระบบ | ทำอะไร | ดูตาราง |
+| --- | --- | --- | --- | --- |
+| 1 | DBA | SQL Server | สร้าง database 3 ตัว + login 2 ตัว | [A](#a-sql-server--database--login) <!-- [DB] --> |
+| 2 | Admin | Server (Docker host) | เตรียม folder เก็บไฟล์ + ตั้ง backup | [B](#b-server--folder-เก็บไฟล์) <!-- [VOLUME] --> |
+| 3 | Admin | Jenkins | สร้าง credential | [C](#c-jenkins--credentials) |
+| 4 | Admin | Jenkins | สร้าง pipeline job | [D](#d-jenkins--pipeline-job) |
+| 5 | Admin | GitHub | ตั้ง webhook ไป Jenkins | [E](#e-github--webhook) |
+| 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
+| 7 | Admin | Keycloak | สร้าง client SSO | [G](#g-keycloak--client-sso) <!-- [SSO] --> |
+| 8 | Admin | Nginx | เพิ่ม reverse proxy | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] --> |
+| 9 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
+
+---
+
+<!-- [DB] -->
+### A. SQL Server — Database + Login
+
+ที่: **SSMS → server ตามคอลัมน์ "Server"** · login ใช้ SQL authentication
+
+| สร้าง | Server | ชื่อ (พิมพ์ตามนี้) | สิทธิ์ที่ต้องให้ |
 | --- | --- | --- | --- |
-| 1 | Jenkins | สร้าง credentials __N_CREDS__ ตัว + pipeline job + webhook | ~15 นาที |
-| 2 | SonarQube | สร้าง 2 projects + ผูก Quality Gate + webhook | ~10 นาที |
-| 3 | Keycloak | สร้าง client 1 ตัว (SSO) | ~10 นาที |
+| Database prod | prod | `__DB_NAME_PROD__` | — |
+| Database dev | dev | `__DB_NAME_DEV__` | — |
+| Database shadow (ว่างไว้ ห้ามใส่ข้อมูล) | dev | `__DB_NAME_DEV___shadow` | — |
+| Login prod | prod | `__DB_LOGIN_PROD__` | ใน `__DB_NAME_PROD__`: `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` |
+| Login dev | dev | `__DB_LOGIN_DEV__` | ใน `__DB_NAME_DEV__`: เหมือน login prod · ใน `__DB_NAME_DEV___shadow`: `db_owner` |
+| อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | prod + dev | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ทั้ง 2 login |
 
-<!-- ลบแถว/หัวข้อของระบบที่โปรเจคนี้ไม่ใช้ออกทั้งหัวข้อ — อย่าปล่อยค้างไว้ -->
-<!-- ถ้า Jenkins server นี้เคยตั้งโปรเจคอื่นแล้ว งานระดับ server (plugins, tools,
-     nvd credential, NOTIFY_EMAIL) ทำไปแล้ว — ทำเฉพาะระดับโปรเจคด้านล่าง
-     ถ้าเป็นโปรเจคแรกของ server ดูภาคผนวกท้ายไฟล์ -->
+> ตารางสร้างเองตอน deploy (pipeline รัน migration) — DBA ไม่ต้องสร้างตาราง
 
----
+<!-- [VOLUME] -->
+### B. Server — Folder เก็บไฟล์
 
-## 1. Jenkins
+ที่: **Docker host (prod และ dev)**
 
-### 1.1 สร้าง Credentials (Manage Jenkins → Credentials → Global)
-
-| ชื่อ credential (ID) | ชนิด | ใส่อะไร |
+| Folder | ใครสร้าง | Admin ต้องทำ |
 | --- | --- | --- |
-| `env-__PROJECT_NAME__` | **Secret file** | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาแนบให้ / นัดส่งช่องทางปลอดภัย) |
-| `env-__PROJECT_NAME__-dev` | **Secret file** | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod (คนละ DATABASE_URL คนละ secret) |
-| `sentry-dsn-__PROJECT_NAME__` | **Secret text** | Sentry DSN <!-- ลบแถวนี้ถ้าโปรเจคไม่ใช้ Sentry --> |
+| `/home/docker02/appdata` <!-- [FIRST] --> | Admin — **ครั้งเดียวต่อ server** | `sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata` |
+| `/home/docker02/appdata/__PROJECT_NAME__/__VOLUME__` | pipeline สร้างเองตอน deploy | **ตั้ง backup job** — ข้อมูลอยู่ที่นี่ที่เดียว ไม่อยู่ใน DB backup · ห้ามลบ folder นี้ |
+| `/home/docker02/appdata/__PROJECT_NAME__-dev/__VOLUME__` | pipeline สร้างเองตอน deploy | ไม่ต้อง backup |
 
-### 1.2 สร้าง Pipeline job
+<!-- one prod/dev row pair per volume (uploads, storage, reports…) -->
 
-1. New Item → ชื่อ `__PROJECT_NAME__` → เลือก **Multibranch Pipeline**
-2. Branch Sources → GitHub → repo `__REPO_URL__` → discover branches `main` และ `develop`
-3. **สำคัญ**: ปิด "Lightweight checkout" (ถ้าเปิดไว้ stage แรกจะพัง)
+### C. Jenkins — Credentials
 
-### 1.3 ตั้ง Webhook ที่ GitHub repo
+ที่: **Manage Jenkins → Credentials → System → Global → Add Credentials**
 
-- Settings → Webhooks → Add: URL `http://__JENKINS_HOST__:8080/github-webhook/` · event: **push เท่านั้น**
+| ID (พิมพ์ตามนี้) | Kind | ใส่อะไร |
+| --- | --- | --- |
+| `env-__PROJECT_NAME__` | Secret file | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาส่งให้ทางช่องทางปลอดภัย) |
+| `env-__PROJECT_NAME__-dev` | Secret file | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod |
+| `sentry-dsn-__PROJECT_NAME__` <!-- [SENTRY] --> | Secret text | Sentry DSN |
+| `nvd` <!-- [FIRST] --> | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมทุกโปรเจคบน server |
 
-<!-- ถ้าโปรเจคใช้ basePath: -->
-### 1.4 Reverse proxy (dev)
+### D. Jenkins — Pipeline job
 
-เพิ่ม location block ใน nginx ของเครื่อง dev:
+ที่: **Dashboard → New Item**
 
-```nginx
-location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; proxy_set_header Host $host; }
-```
-
-`__PORT_DEV__` ด้านบนเป็นแค่ค่า default ที่เสนอไป (`3000`/`3001`) — ถ้า port จริงที่จัดสรรให้ต่างไป ใช้ค่าจริงแทน และแจ้งกลับตามหัวข้อ "ค่าที่ต้องส่งกลับ" ท้ายเอกสาร
-
----
-
-## 2. SonarQube
-
-### 2.1 สร้าง Projects (Administration → Projects → Create)
-
-| Project Key | Display name |
+| ช่อง | ใส่ค่า |
 | --- | --- |
-| `__PROJECT_NAME__` | __PROJECT_DISPLAY_NAME__ |
-| `__PROJECT_NAME__-dev` | __PROJECT_DISPLAY_NAME__ (Dev) |
+| Item name | `__PROJECT_NAME__` |
+| Type | Multibranch Pipeline |
+| Branch Sources → GitHub → Repository URL | `__REPO_URL__` |
+| Discover branches | `main`, `develop` |
+| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) |
 
-### 2.2 ผูก Quality Gate
+### E. GitHub — Webhook
 
-- ใช้ gate มาตรฐานองค์กร (ถ้ายังไม่มี ดูภาคผนวก) → assign ให้**ทั้งสอง** projects ข้างบน
+ที่: **repo → Settings → Webhooks → Add webhook**
 
-### 2.3 Webhook กลับไป Jenkins (Administration → Configuration → Webhooks)
+| ช่อง | ใส่ค่า |
+| --- | --- |
+| Payload URL | `http://__JENKINS_HOST__:8080/github-webhook/` |
+| Content type | `application/json` |
+| Events | Just the push event |
 
-- URL: `http://__JENKINS_HOST__:8080/sonarqube-webhook/`
-- **ถ้าไม่ตั้งข้อนี้ pipeline จะค้างตลอดไป** ที่ขั้นรอผล Quality Gate
+### F. SonarQube
 
----
+| ที่ | ช่อง | ใส่ค่า |
+| --- | --- | --- |
+| Administration → Projects → Create | Project key / Display name | `__PROJECT_NAME__` / __PROJECT_DISPLAY_NAME__ |
+| 〃 | Project key / Display name | `__PROJECT_NAME__-dev` / __PROJECT_DISPLAY_NAME__ (Dev) |
+| Project Settings → Quality Gate | Gate | มาตรฐานองค์กร — ผูก**ทั้ง 2 project** |
+| Administration → Configuration → Webhooks → Create | URL | `http://__JENKINS_HOST__:8080/sonarqube-webhook/` (ไม่ตั้ง = pipeline ค้างตลอด) |
 
-## 3. Keycloak (SSO)
+<!-- [SSO] -->
+### G. Keycloak — Client (SSO)
 
-สร้าง client ใหม่ใน realm กลางขององค์กร (**1 client ต่อ 1 โปรเจค** — ห้ามใช้ร่วมกับโปรเจคอื่น):
+ที่: **realm `__REALM__` → Clients → Create client** (1 client ต่อ 1 โปรเจค)
 
-| การตั้งค่า | ค่า |
+| ช่อง | ใส่ค่า |
 | --- | --- |
 | Client type | OpenID Connect |
 | Client ID | `__PROJECT_NAME__` |
-| Client authentication | **On** (confidential) |
-| Standard flow (Authorization Code) | **On** |
-| Direct access grants / Implicit / Service accounts | **Off ทั้งหมด** |
-| PKCE (Advanced → Proof Key for Code Exchange) | **S256** |
+| Client authentication | On |
+| Standard flow | On · ช่องอื่น (Direct access / Implicit / Service accounts) **Off** |
+| Valid redirect URIs | `__APP_URL_DEV__/api/auth/callback/keycloak` |
+| 〃 (บรรทัดที่ 2) | `__APP_URL_PROD__/api/auth/callback/keycloak` |
 | Web origins | `+` |
+| Advanced → PKCE Method | S256 |
 
-**Valid redirect URIs — ลงทะเบียนให้ตรงทุกตัวอักษร:**
+<!-- [BASEPATH] or [UPLOAD] -->
+### H. Nginx — Reverse proxy
 
-```
-__APP_URL_DEV__/api/auth/callback/keycloak
-__APP_URL_PROD__/api/auth/callback/keycloak
-```
+ที่: **ไฟล์ nginx ของ server** (เพิ่มแล้ว `nginx -s reload`)
 
-(ไม่ต้องตั้ง post-logout redirect — ระบบ logout ผ่านหลังบ้าน)
+| Server | เพิ่ม |
+| --- | --- |
+| dev <!-- [BASEPATH] --> | `location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; proxy_set_header Host $host; }` |
+| prod + dev <!-- [UPLOAD] --> | `client_max_body_size __UPLOAD_MAX_MB__m;` ใน location ของโปรเจค (ไม่ตั้ง = อัปโหลดไฟล์ใหญ่ได้ 413) |
 
-<!-- [AUTH] — ลบ section นี้เมื่อโปรเจคไม่ได้ติดตั้ง ugt-nextjs-auth-setup -->
-
-<!-- [AUTH: SSO or LDAP] — ลบ section นี้เมื่อโปรเจคเป็น local-only (ไม่ได้
-     เลือก SSO หรือ LDAP ตอน interview) -->
-## 4. TLS ภายในองค์กร (เฉพาะ SSO/LDAP)
-
-ถ้า Keycloak หรือ LDAP server ขององค์กรใช้ certificate ที่เซ็นโดย **internal
-CA** (ไม่ใช่ public CA อย่าง Let's Encrypt) container ของแอปจะ verify
-certificate นี้ไม่ผ่านเอง (SSO ขึ้น "Invalid OAuth configuration" หรือ LDAP
-bind ล้มเหลว) — Node.js มี CA store ของตัวเอง ไม่ได้ใช้ของเครื่อง host
-
-**เลือกทางใดทางหนึ่ง แล้วแจ้งกลับทีมพัฒนา (หัวข้อ "ค่าที่ต้องส่งกลับ" ด้านล่าง):**
-
-| ทาง | เมื่อไหร่ควรใช้ | Admin ต้องทำอะไร |
-| --- | --- | --- |
-| **แนบไฟล์ CA cert** (แนะนำ) | ทุกกรณี โดยเฉพาะถ้า server มีทางออกอินเทอร์เน็ตบ้าง | ส่งไฟล์ certificate ของ internal CA (`.pem`/`.crt`) ให้ทีมพัฒนา |
-| **ยืนยัน closed intranet** | เฉพาะ server ที่**ไม่มีทางออกอินเทอร์เน็ตเลย** (ตัดขาดจริง ไม่ใช่แค่ผ่าน proxy) | ยืนยันเป็นลายลักษณ์อักษรว่า server นี้เป็น closed intranet |
-
-⚠️ ทางที่สองปิด TLS verification ของ container **ทั้งตัว** ไม่ใช่แค่ต่อ
-Keycloak/LDAP — ถ้า server มีทางออกอินเทอร์เน็ตแม้แต่ทางเดียว (เช่น Windows
-Update, npm registry) ห้ามใช้ทางนี้ ทีมพัฒนาจะตั้งค่าที่เลือกไว้ตรงใน
-`docker-compose.yml` ของ server นี้เอง (ไม่ใช่ Jenkins Secret File — เป็นการ
-ตัดสินใจของ infra ไม่ใช่ secret)
-
-## ผู้ดูแลระบบคนแรก
-
-ระบบ**ไม่มีบัญชี admin ที่ seed ไว้ล่วงหน้า** (บัญชี SSO/AD เกิดเองตอน login
-ครั้งแรก จึง seed ล่วงหน้าไม่ได้) — **คนแรกที่ login จะถูกพาไปหน้า
-`/admin/setup` และกดปุ่มเดียวเพื่อเป็น Administrator**
-เลือกคนที่จะ login คนแรกให้ถูกคน แล้วคนนั้นค่อยกำหนดบทบาทให้คนอื่นจากหน้า
-`/admin/users`
+> port `__PORT_DEV__` เป็นค่าเสนอ — ถ้าจัดสรร port อื่น ใช้ port นั้นแทนแล้วแจ้งในตารางส่งกลับ
 
 ---
 
-## ✅ ค่าที่ต้องส่งกลับให้ทีมพัฒนา (กรอกแล้วส่งไฟล์นี้คืน)
+## ส่งกลับ
 
-| ค่า | มาจากไหน | กรอกตรงนี้ |
+| ค่า | หาได้ที่ | ค่า |
 | --- | --- | --- |
-| **→ `APP_PORT` (prod)** | Host port ที่จัดสรรให้บน server จริง | **จำเป็น — ทีมพัฒนาใช้ `3000` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
-| **→ `APP_PORT` (dev)** | Host port ที่จัดสรรให้บน server dev | **จำเป็น — ทีมพัฒนาใช้ `3001` เป็นค่า placeholder ไว้ก่อน จนกว่าจะได้ค่านี้** |
-| `KEYCLOAK_ISSUER` | `https://<keycloak-host>/realms/<realm>` (ตรวจว่าเปิด `<issuer>/.well-known/openid-configuration` ได้) | |
-| `KEYCLOAK_CLIENT_SECRET` | Keycloak → client `__PROJECT_NAME__` → Credentials | **ส่งช่องทางปลอดภัย อย่ากรอกในไฟล์นี้** |
-| TLS ภายในองค์กร (ดูหัวข้อ 4) | ไฟล์ CA cert หรือคำยืนยัน closed intranet | **จำเป็นถ้าใช้ SSO/LDAP — เลือกทางใดทางหนึ่ง** |
-| ยืนยัน Jenkins job สร้างแล้ว | ลิงก์ job | |
-| ยืนยัน SonarQube projects + webhook แล้ว | ลิงก์ project | |
+| SQL Server prod — host:port <!-- [DB] --> | ตาราง A | |
+| SQL Server dev — host:port <!-- [DB] --> | ตาราง A | |
+| รหัสผ่าน `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| `APP_PORT` prod | port ที่จัดสรรบน server prod (ทีมพัฒนาใช้ `__PORT_PROD__` ไว้ก่อน) | |
+| `APP_PORT` dev | port ที่จัดสรรบน server dev (ทีมพัฒนาใช้ `__PORT_DEV__` ไว้ก่อน) | |
+| `KEYCLOAK_ISSUER` <!-- [SSO] --> | `https://<keycloak-host>/realms/__REALM__` | |
+| `KEYCLOAK_CLIENT_SECRET` <!-- [SSO] --> | Keycloak → Clients → `__PROJECT_NAME__` → Credentials | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` | |
 
-## เช็คก่อนปิดงาน (ฝั่ง Admin)
+## หลังระบบขึ้นแล้ว
 
-- [ ] ชื่อทุกตัวตรงกับตารางเป๊ะ (โดยเฉพาะ credential ID และ Client ID)
-- [ ] redirect URI ตรงทุกตัวอักษรรวม path
-- [ ] webhook ทั้งสองฝั่ง (GitHub→Jenkins, SonarQube→Jenkins) ตั้งแล้ว
-- [ ] กรอก "ค่าที่ต้องส่งกลับ" + ส่ง secret ช่องทางปลอดภัยแล้ว
-- [ ] `APP_PORT` (prod/dev) ส่งกลับแล้ว ไม่ใช่แค่ placeholder `3000`/`3001`
-- [ ] TLS ภายในองค์กร (SSO/LDAP): ส่งไฟล์ CA cert แล้ว หรือยืนยัน closed intranet แล้ว
+- คนแรกที่ login จะถูกพาไปหน้า `/admin/setup` → กดปุ่มเดียวเป็น Administrator (ไม่มีบัญชี admin ตั้งไว้ล่วงหน้า) — **ให้คนที่ควรเป็น admin login คนแรก** <!-- [AUTH] -->
 
----
+<!-- [FIRST] -->
+## ภาคผนวก — ครั้งแรกของ server (ข้ามถ้า server นี้มีโปรเจคมาตรฐานเดียวกันแล้ว)
 
-<!-- ภาคผนวก: ใส่เฉพาะเมื่อเป็นโปรเจคแรกบน server (server-level setup) —
-     ถ้าไม่ใช่ ลบทิ้ง · เนื้อหาสรุปจาก jenkins-one-time-setup.md §A + sonarqube-setup.md:
-     plugins ที่ต้องลง, tool names NodeJS-22/SonarQube-Scanner/Dependency-Check,
-     credential nvd, global NOTIFY_EMAIL/SMTP_FROM, การสร้าง org Quality Gate,
-     สร้าง `/home/docker02/appdata` ครั้งเดียว (ครั้งแรกของ server):
-     `sudo mkdir -p /home/docker02/appdata && sudo chown jenkins:jenkins /home/docker02/appdata` —
-     โปรเจคย่อยข้างใน Deploy stage สร้างเอง -->
+| ที่ | ทำอะไร | ใส่ค่า (ชื่อต้องตรงเป๊ะ) |
+| --- | --- | --- |
+| Manage Jenkins → Plugins | ติดตั้ง plugin | NodeJS · SonarQube Scanner · OWASP Dependency-Check · JUnit · HTML Publisher · Email Extension · Pipeline · Git |
+| Manage Jenkins → Tools | เพิ่ม tool | NodeJS `NodeJS-22` (22.x) · SonarQube Scanner `SonarQube-Scanner` · Dependency-Check `Dependency-Check` (Install automatically) |
+| Manage Jenkins → System → SonarQube servers | เพิ่ม server | Name `SonarQube` + token |
+| Manage Jenkins → System → Global properties | env var | `NOTIFY_EMAIL` · `SMTP_FROM` |
+| SonarQube → Quality Gates → Create | เงื่อนไข (On New Code) | `new_violations` = 0 · `new_duplicated_lines_density` ≤ 3% · `new_coverage` ≥ 60% · `new_security_hotspots_reviewed` = 100% |
+| Docker host | สร้าง network | `docker network create proxy-network` |
+| Docker host (Jenkins) | ให้ Jenkins สั่ง docker ได้ | Jenkins มี Docker CLI · user `jenkins` อยู่ใน group `docker` ที่ GID ตรงกับ host (`getent group docker`) |

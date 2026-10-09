@@ -27,7 +27,7 @@ services:
   app:
     # … existing config …
     environment:
-      # … existing vars …
+      # uncomment the two [UPLOAD] lines already in the fixed list (section 5)
       STORAGE_ROOT: /app/storage
       UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}
     volumes:

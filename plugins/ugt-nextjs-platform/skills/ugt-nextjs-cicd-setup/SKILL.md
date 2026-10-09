@@ -181,7 +181,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 `<project>-dev` · credentials = `env-<project>`, `env-<project>-dev`,
 `sentry-dsn-<project>` · sonar keys = `<project>`, `<project>-dev`
 
-**5 more, only in `admin-handoff.template.md`** — filled at §4.6 render time:
+**More, only in `admin-handoff.template.md`** — filled at §4.6 render time:
 
 | Placeholder | Meaning |
 | --- | --- |
@@ -189,7 +189,12 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__REQUESTER__` | ชื่อ/อีเมลผู้ขอ (คนที่ admin ติดต่อกลับ) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
-| `__N_CREDS__` | จำนวน credentials ที่ต้องสร้าง (2 หรือ 3 เมื่อมี Sentry) |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` (shadow = `<dev>_shadow` ตาม `SHADOW_DATABASE_URL`) |
+| `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | SQL login — จาก `.env.local`; ยังเป็น `CHANGE_ME_DB_USER` → เสนอ `<project>_app` / `<project>_dev` |
+| `__LINKED_SERVER__` / `__LINKED_OBJECTS__` | ชื่อ linked server + object 4 ส่วนที่อ่าน (database-setup Q3) |
+| `__VOLUME__` | ชื่อ volume ใน compose (`uploads`, `storage`, …) — หนึ่งคู่แถว prod/dev ต่อ volume |
+| `__REALM__` | realm Keycloak ขององค์กร (ค่าเดียวกับ auth-setup) |
+| `__UPLOAD_MAX_MB__` | `UPLOAD_MAX_BYTES` ÷ 1 048 576 ปัดขึ้น (upload-setup) |
 
 ### 4.3 Adjust per interview answers
 
@@ -203,6 +208,10 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `[SENTRY] end withCredentials` + both DSN build-args — **keep the docker
   build block inside, unindented one level**), Dockerfile (`ARG`/`ENV`
   `NEXT_PUBLIC_SENTRY_DSN`), compose (`SENTRY_ENVIRONMENT`)
+- compose `environment:` is a fixed list — **uncomment** the lines of every module
+  already installed (`[AUTH]`, `[AUTH: SSO]`/`[AUTH: LDAP]` per method, `[MAIL]`,
+  `[UPLOAD]`), leave the rest commented (their setup skill uncomments later). Never
+  reorder, never delete a commented line, never comment out `NODE_TLS_REJECT_UNAUTHORIZED`
 - No basePath → basePath = empty, health path = `/api/health`
 - Check `package.json` has the scripts the pipeline calls: `lint`,
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
@@ -257,13 +266,16 @@ not a style nit.
 - SonarQube: projects ×2 (prod/dev), Global Analysis Token, Quality Gate per
   §2.3, webhook back to Jenkins → **`references/sonarqube-setup.md`**
 - **Render `assets/admin-handoff.template.md` → write it to the project as
-  `docs/admin-handoff.md`** with every `__...__` substituted (project name,
-  ports, basePaths, credential IDs, URLs) and every section for an unselected
-  system deleted (no Sentry → no Sentry row; no SSO → no Keycloak section;
-  not the first project on the server → no server-level appendix). This is
-  the **standard handoff file** the user forwards to the admin/DevOps team:
-  plain-Thai steps, exact names, and a fill-in "ค่าที่ต้องส่งกลับ" section
-  the admin completes and returns. Tell the user explicitly: "ส่งไฟล์
+  `docs/admin-handoff.md`** per the RENDER RULES comment at its top: every
+  `__...__` substituted, every `[TAG]` row/section the project lacks deleted
+  (no DB → no table A; no Sentry → no Sentry row; no SSO → no Keycloak table;
+  not the first project on the server → no appendix), the overview table and
+  section letters renumbered, the rules comment and tag comments stripped.
+  Shape is fixed: one overview table (who · system · what · link), then one
+  table per system (menu path on top, `ช่อง | ใส่ค่า` rows), then one
+  "ส่งกลับ" table — never add prose sections or explanations; the why lives
+  in the references. This is the **standard handoff file** the user forwards
+  to the admin/DevOps team. Tell the user explicitly: "ส่งไฟล์
   `docs/admin-handoff.md` ให้ทีม admin ได้เลย แล้วรอค่าตอบกลับมาใส่
   `.env.local`". A chat summary is fine too, but the file is the deliverable
   — don't make admins copy names out of a chat log or cross-reference three
@@ -284,7 +296,8 @@ Checklist §6
 | Tag images with `BUILD_NUMBER` | Bare `latest` (no rollback) |
 | Healthcheck on `127.0.0.1` + poll `docker inspect` | `localhost` (Alpine → IPv6) / wget from Jenkins |
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
-| `NODE_TLS_REJECT_UNAUTHORIZED=0`/`NODE_EXTRA_CA_CERTS` hardcoded directly in compose `environment:` (an infra decision, admin-confirmed via `docs/admin-handoff.md` §4) — or local `.env.local`/`.env.dev` for dev | Ever in `env-<project>` / `env-<project>-dev` (the prod/dev Jenkins Secret File credentials) — it's not a secret, it's an infra decision |
+| `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
+| compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 

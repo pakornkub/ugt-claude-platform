@@ -25,23 +25,38 @@ services:
     networks:
       - proxy-network
     environment:
-      # Runtime secrets — read from .env (copied from the Jenkins Secret File
-      # credential at deploy time). NEVER bake secrets into image layers, and
-      # NEVER put NEXT_PUBLIC_* / client-side vars here (no effect at runtime).
+      # FIXED LIST — same keys, same order in every org project (= .env.example
+      # sections 1–5, ugt-nextjs-database-setup/assets/env.example). Values come
+      # from .env (the Jenkins Secret File copied at deploy). A module not
+      # installed keeps its lines commented; its setup skill uncomments them.
+      # NEVER put NEXT_PUBLIC_* here (build args — no effect at runtime) and
+      # NEVER bake secrets into image layers.
+      # 1. runtime
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
-      # [METHOD: SSO or LDAP] Internal-CA TLS — decide with admin via
-      # docs/admin-handoff.md ("TLS ภายในองค์กร") before uncommenting either
-      # line. This is an infra decision, NOT a secret — set it here directly,
-      # never inside the env-<project>/-dev Jenkins Secret File credential.
-      # NODE_EXTRA_CA_CERTS: /etc/ssl/certs/org-ca.pem   # preferred — mount the cert (see references/keycloak-client.md); needs a matching volumes: bind
-      # NODE_TLS_REJECT_UNAUTHORIZED: '0'                # closed intranet only, admin-confirmed — disables TLS verification for the whole container
-      # Add the project's runtime secrets below, e.g.:
-      # AUTH_SECRET: ${AUTH_SECRET}
-      # SMTP_HOST: ${SMTP_HOST}
-      # SMTP_PORT: ${SMTP_PORT:-25}
-      # SMTP_FROM: ${SMTP_FROM}
-      # SENTRY_DSN: ${SENTRY_DSN:-}
+      NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
+      # 2. database
+      DATABASE_URL: ${DATABASE_URL} # [DB]
+      # 3. auth
+      # BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}                   # [AUTH]
+      # BETTER_AUTH_URL: ${BETTER_AUTH_URL}                         # [AUTH]
+      # BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS} # [AUTH]
+      # KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}                         # [AUTH: SSO]
+      # KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}                   # [AUTH: SSO]
+      # KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}           # [AUTH: SSO]
+      # LDAP_URL: ${LDAP_URL}                                       # [AUTH: LDAP]
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}                               # [AUTH: LDAP]
+      # LDAP_DOMAIN: ${LDAP_DOMAIN}                                 # [AUTH: LDAP]
+      # 4. mail
+      # SMTP_HOST: ${SMTP_HOST}                                     # [MAIL]
+      # SMTP_PORT: ${SMTP_PORT:-25}                                 # [MAIL]
+      # SMTP_SECURE: ${SMTP_SECURE:-false}                          # [MAIL]
+      # SMTP_USER: ${SMTP_USER:-}                                   # [MAIL]
+      # SMTP_PASS: ${SMTP_PASS:-}                                   # [MAIL]
+      # SMTP_FROM: ${SMTP_FROM}                                     # [MAIL]
+      # 5. upload
+      # STORAGE_ROOT: /app/storage                                  # [UPLOAD]
+      # UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}             # [UPLOAD]
+      # 6. project-specific — add below, same order as .env.example section 6
     healthcheck:
       # Always 127.0.0.1 (NOT localhost — Alpine resolves it to IPv6 ::1) and
       # always internal port 3000 (container-internal, not the host port)

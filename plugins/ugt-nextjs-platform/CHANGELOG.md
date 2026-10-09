@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.73.0 (2026-10-09)
+
+- **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)
+- **env layout มาตรฐานเดียวทุกโปรเจค** — `.env.example` ของ database-setup เป็นโครง 7 หัวข้อเรียงตายตัว (App · Database · Auth · Mail · Upload · Project-specific · Misc) · skill อื่นเติมในหัวข้อของตัวเอง ห้ามต่อท้ายไฟล์ · ชื่อ key ไม่เปลี่ยนตามเวอร์ชัน lib (map ใน `lib/env.ts`) · compose ทั้ง 2 ไฟล์ `environment:` เป็นรายการตายตัวลำดับเดียวกัน module ที่ยังไม่ลงคง comment ไว้ (เดิม "เพิ่มเอง" + ตัวอย่าง `AUTH_SECRET` ผิด lib → แต่ละโปรเจคไม่เหมือนกัน)
+- **`NODE_TLS_REJECT_UNAUTHORIZED=0` เปิดเสมอ** (มติผู้ดูแล 2026-10-09) — compose ทั้ง 2 + `.env.example`/`.env.local` หัวข้อ 1 · เลิกเป็นเรื่องให้ admin ตัดสิน (ตัดหัวข้อ TLS ออกจาก handoff) · ปิด TLS verification ทั้ง process — ยอมรับได้เพราะ server เป็น intranet ปิด
+- cicd verify.mjs +2 ข้อ: TLS เปิดใน compose/.env.example · `.env.example` เรียงหัวข้อตามมาตรฐาน
+- แก้ `external-config-handoff.md` redirect URI `/api/auth/oauth2/callback/keycloak` → `/api/auth/callback/keycloak` (ของเดิมลงทะเบียนตามแล้ว login พัง)
+- **โปรเจคเดิม**: compose/env ไม่ใช่ kit asset (kit-sync ไม่เสนอ) — เรียง `.env.example` + `environment:` ตามโครงใหม่และใส่ TLS เอง; cicd verify ชี้ให้
+
 ## 4.72.1 (2026-10-09)
 
 **design-setup conventions: ตัวกรองวันที่ใน DataTable toolbar ใช้ `hideLabels`** — กฎที่ขาดไปตั้งแต่ 4.66.0 (asset แก้แล้วแต่ conventions.md ยังไม่บอก) · ยกมาจาก PR #15 (ปิดแล้ว — แก้ซ้ำกับ 4.66.0) · docs-only ไม่มี asset เปลี่ยน

@@ -115,7 +115,7 @@ as a starting point that the first real project will sharpen.
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
 | `assets/components/file-upload.tsx` | `components/file-upload.tsx` |
 | `assets/prisma/schema-attachment.prisma` | paste INTO `prisma/schema.prisma` |
-| `assets/env.example` | append to `.env.example` (+ real values in `.env.local`) — **substitute the interviewed max size** into `UPLOAD_MAX_BYTES` here and in the compose default (§3 Q1's answer has no other landing spot) |
+| `assets/env.example` | fill section **5. Upload** of `.env.example` in place (+ real values in `.env.local`; canonical layout, never append at the bottom) — **substitute the interviewed max size** into `UPLOAD_MAX_BYTES` here and in the compose default (§3 Q1's answer has no other landing spot) |
 | `assets/rules/ugt-nextjs-upload.md` | `.claude/rules/ugt-nextjs-upload.md` |
 | `assets/compose-and-dockerfile.snippet.md` | **not copied** — applied to the Dockerfile + both compose files in §4.4 (after cicd-setup has written them) |
 
@@ -184,10 +184,12 @@ step waits until after cicd-setup and runs as a close-out.
 
 ### 4.5 Handoff to the admin team
 
-Append the snippet's §3 bullets (volume backup · deleting the host dir ·
-clamav RAM · reverse-proxy body limit) to `docs/admin-handoff.md` — create the
-file from cicd-setup's template if it does not exist yet. The checklist below
-fails without it.
+Fill the template rows, never append prose (create the file from
+cicd-setup's `admin-handoff.template.md` if it does not exist yet): table B
+gets the `storage` prod/dev row pair (backup job · ห้ามลบ), table H gets the
+`client_max_body_size` row with `__UPLOAD_MAX_MB__`, and **[SCAN]** table B gets
+one more row for `clamav-db` whose "Admin ต้องทำ" cell reads
+`เผื่อ RAM ~2 GB ให้ container clamav`. The checklist below fails without it.
 
 ### 4.6 Health + migrate
 

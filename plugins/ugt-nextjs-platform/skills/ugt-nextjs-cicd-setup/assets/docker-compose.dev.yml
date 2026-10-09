@@ -21,20 +21,41 @@ services:
     networks:
       - proxy-network
     environment:
+      # FIXED LIST — same keys, same order in every org project (= .env.example
+      # sections 1–5, ugt-nextjs-database-setup/assets/env.example). Values come
+      # from .env (the Jenkins Secret File copied at deploy). A module not
+      # installed keeps its lines commented; its setup skill uncomments them.
+      # NEVER put NEXT_PUBLIC_* here (build args — no effect at runtime) and
+      # NEVER bake secrets into image layers.
+      # 1. runtime
       NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
       SENTRY_ENVIRONMENT: development # [SENTRY] distinguishes dev events; DSN is shared
-      # Dev .env MUST differ from prod in at least:
-      #   DATABASE_URL  → separate dev DB (never point dev at prod data)
-      #   auth secret   → never share secrets between environments
-      DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
-      # [METHOD: SSO or LDAP] Internal-CA TLS — same admin decision as prod
-      # compose (docs/admin-handoff.md "TLS ภายในองค์กร"); dev may use a
-      # different Keycloak/LDAP endpoint, confirm separately if so.
-      # NODE_EXTRA_CA_CERTS: /etc/ssl/certs/org-ca.pem
-      # NODE_TLS_REJECT_UNAUTHORIZED: '0'
-      # Add the project's runtime secrets below (same keys as prod compose):
-      # AUTH_SECRET: ${AUTH_SECRET}
-      # SENTRY_DSN: ${SENTRY_DSN:-}
+      # Dev .env MUST differ from prod in at least DATABASE_URL (separate dev DB)
+      # and BETTER_AUTH_SECRET (never share secrets between environments)
+      # 2. database
+      DATABASE_URL: ${DATABASE_URL} # [DB]
+      # 3. auth
+      # BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}                   # [AUTH]
+      # BETTER_AUTH_URL: ${BETTER_AUTH_URL}                         # [AUTH]
+      # BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS} # [AUTH]
+      # KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}                         # [AUTH: SSO]
+      # KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}                   # [AUTH: SSO]
+      # KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}           # [AUTH: SSO]
+      # LDAP_URL: ${LDAP_URL}                                       # [AUTH: LDAP]
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}                               # [AUTH: LDAP]
+      # LDAP_DOMAIN: ${LDAP_DOMAIN}                                 # [AUTH: LDAP]
+      # 4. mail
+      # SMTP_HOST: ${SMTP_HOST}                                     # [MAIL]
+      # SMTP_PORT: ${SMTP_PORT:-25}                                 # [MAIL]
+      # SMTP_SECURE: ${SMTP_SECURE:-false}                          # [MAIL]
+      # SMTP_USER: ${SMTP_USER:-}                                   # [MAIL]
+      # SMTP_PASS: ${SMTP_PASS:-}                                   # [MAIL]
+      # SMTP_FROM: ${SMTP_FROM}                                     # [MAIL]
+      # 5. upload
+      # STORAGE_ROOT: /app/storage                                  # [UPLOAD]
+      # UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}             # [UPLOAD]
+      # 6. project-specific — add below, same order as .env.example section 6
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000__BASE_PATH_DEV__/api/health || exit 1']
       interval: 30s

@@ -345,12 +345,12 @@ How:
    follow-up in the summary, not a fix in this run. **Admin handoff is a FILE, not a chat
    message**: if CI was installed, `ugt-nextjs-cicd-setup` has already
    written `docs/admin-handoff.md` (from its
-   `assets/admin-handoff.template.md` — plain-Thai steps + exact names +
-   fill-in return section covering Jenkins + SonarQube + Keycloak); confirm
+   `assets/admin-handoff.template.md` — overview table + one table per system
+   (DB, server folders, Jenkins, GitHub, SonarQube, Keycloak, nginx) + one "ส่งกลับ" table); confirm
    it exists, has no `__...__` left, and tell the user to forward that file
    to the admin/DevOps team and wait for the returned values to fill
    `.env.local`. If CI was NOT installed but Auth was, render the same
-   template with only the Keycloak section into `docs/admin-handoff.md`
+   template with only table G (Keycloak) + its "ส่งกลับ" rows into `docs/admin-handoff.md`
    (SSO needs a client either way).
 3. Attach a **smoke-test checklist** — the Verification Checklist below,
    trimmed to what was actually installed.

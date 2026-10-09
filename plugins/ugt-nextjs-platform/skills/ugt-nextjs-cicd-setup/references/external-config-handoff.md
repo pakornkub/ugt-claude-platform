@@ -30,7 +30,7 @@ rows below. Full checklist: `jenkins-one-time-setup.md` §A.
 | 9 | SonarQube | Project — dev | Key `__PROJECT_NAME__-dev`, name `__PROJECT_DISPLAY_NAME__ (Dev)` | |
 | 10 | SonarQube | Quality Gate | Org-standard gate (§2.3 of `ugt-nextjs-cicd-setup`) assigned to **both** projects above | |
 | 11 | SonarQube | Webhook → Jenkins | `http://<jenkins-host>:8080/sonarqube-webhook/` | Without this, `waitForQualityGate` hangs forever. |
-| 12 | Keycloak [SSO only] | Client | Client ID `__PROJECT_NAME__`, confidential, PKCE S256, redirect URI `__APP_URL_PROD__/api/auth/oauth2/callback/keycloak` (+ the dev URL) | Delete this row and #13 if SSO is not selected. |
+| 12 | Keycloak [SSO only] | Client | Client ID `__PROJECT_NAME__`, confidential, PKCE S256, redirect URI `__APP_URL_PROD__/api/auth/callback/keycloak` (+ the dev URL) | Delete this row and #13 if SSO is not selected. |
 | 13 | Keycloak [SSO only] | Env vars to collect | `KEYCLOAK_ISSUER`, `KEYCLOAK_CLIENT_ID=__PROJECT_NAME__`, `KEYCLOAK_CLIENT_SECRET` | Verify the issuer via `<issuer>/.well-known/openid-configuration`. |
 
 ## After filling it in

@@ -102,7 +102,7 @@ Assets mirror their destination — copy the tree, then substitute:
 | `assets/app/(admin)/admin/mail-templates/page.tsx` | `app/(admin)/admin/mail-templates/page.tsx` — inside auth-setup's `(admin)` group so its guard + permission sync apply |
 | `assets/components/mail-templates-manager.tsx` | `components/mail-templates-manager.tsx` — needs the design kit (`ConfirmActionDialog`, `page-shell`, `textarea` from the base set) |
 | `assets/prisma/schema-mail.prisma` | paste INTO `prisma/schema.prisma` |
-| `assets/env.example` | append to `.env.example` (+ real values in `.env.local`) |
+| `assets/env.example` | fill section **4. Mail** of `.env.example` in place (+ real values in `.env.local`) — canonical layout, never append at the bottom · uncomment the `[MAIL]` lines in both compose files |
 | `assets/rules/ugt-nextjs-mail.md` | `.claude/rules/ugt-nextjs-mail.md` (whole-file overwritable) |
 
 Placeholders: `__SMTP_HOST__` · `__SMTP_FROM__` · `__SUPPORT_CONTACT__` ·

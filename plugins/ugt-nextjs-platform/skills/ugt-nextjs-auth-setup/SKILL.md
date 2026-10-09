@@ -132,14 +132,12 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
    - not yet → follow `references/keycloak-client.md` (the redirect URI must
      be known before requesting) — and **render the request as a project file
      `docs/admin-handoff.md`** (Thai, real values, settings table + exact
-     redirect URIs + a "ค่าที่ต้องส่งกลับ" section) so the user forwards a
+     redirect URIs + the "ส่งกลับ" table — cicd-setup's template, table G only) so the user forwards a
      file, not a chat snippet. If the file already exists (e.g. cicd-setup
      wrote it), update its Keycloak section instead of overwriting.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
-   — **[If SSO or LDAP]** also keep `docs/admin-handoff.md` §4 "TLS ภายในองค์กร"
-     (from the cicd-setup template — internal-CA cert vs closed-intranet
-     confirmation, see `references/keycloak-client.md`); don't delete it even
-     if this interview didn't need the Keycloak client section
+   (internal-CA TLS is not a question — `NODE_TLS_REJECT_UNAUTHORIZED=0` is org
+   standard, already in env section 1 and both compose files)
 5. **First admin — not a question.** SSO/LDAP rows can't be pre-created
    (มติ 2026-08-11), so nothing could be seeded from a name given here; the
    first login claims admin via `/admin/setup`. Full
@@ -271,7 +269,7 @@ exceptions:
 | Asset | Destination | Note |
 | --- | --- | --- |
 | `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see §5.3 |
-| `assets/env.example` | merge into `.env.example` + `.env.local` | drop vars for unselected methods |
+| `assets/env.example` | fill section **3. Auth** of `.env.example` + `.env.local` in place (canonical layout — never append at the bottom) | drop vars for unselected methods · basePath goes in section 1 `NEXT_PUBLIC_BASE_PATH` · compose already exists → uncomment its `[AUTH]` + `[AUTH: <method>]` lines |
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
 | `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
 | `assets/lib/audit-actions.ts` | `lib/audit-actions.ts` | every project — the only place an `ActivityLogs.action` string may be written; every shipped action imports `AUDIT_ACTIONS` from here (`references/audit-logging.md`) |
@@ -407,8 +405,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    app.
 5. First deployment: log in → the layout gate (step 2) lands on `/admin/setup`
    → one click → Administrator role → redirects to `/admin/users`, which now
-   really exists. Write this into `docs/admin-handoff.md` (section "ผู้ดูแลระบบ
-   คนแรก", Thai): *คนแรกที่ login จะถูกพาไปหน้า `/admin/setup` และกดปุ่มเดียว
+   really exists. Keep this line in `docs/admin-handoff.md` ("หลังระบบขึ้นแล้ว", Thai): *คนแรกที่ login จะถูกพาไปหน้า `/admin/setup` และกดปุ่มเดียว
    เพื่อเป็น Administrator — เลือกคนที่จะ login คนแรกให้ถูกคน* — do not promise
    any pre-seeded admin account; there is none by design (§3 Q5).
    **[Local-only projects have a chicken-and-egg here]**: a local account can
