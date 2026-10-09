@@ -32,8 +32,8 @@ Last updated: 2026-10-09
   — แก้ซ้ำกับ 4.66.0 (`showLabels` vs `hideLabels`) เหลือแค่กฎ conventions.md ยกมาเป็น
   **4.72.1** (70bee8b) · drift 22/22 · lint-kit-assets 0 warning · kit stamps ตรง ·
   tag `ugt-nextjs-platform--v4.72.1` push แล้ว (4.64.0–4.72.0 ไม่ tag แยก, python 0.7.0
-  ไม่ tag ตามมติรอ pilot) · ลบ branch `contribute/*` หมดแล้ว · **เครื่องนี้ยังไม่
-  `claude plugin update`** · บทเรียน: stack PR ของ /ugt-contribute ทุกตัว bump เวอร์ชันเอง →
+  ไม่ tag ตามมติรอ pilot) · ลบ branch `contribute/*` หมดแล้ว · เครื่องนี้ `claude plugin update`
+  แล้ว (nextjs 4.72.1 · python 0.7.0) — ต้อง restart session · บทเรียน: stack PR ของ /ugt-contribute ทุกตัว bump เวอร์ชันเอง →
   PR ที่แตกจาก main ขนานกันชนเลข (#15 = 4.69.0 ซ้ำ #11)
 - 2026-09-29 prompt audit Claude 5.5 ปิดครบ — core **2.13.2** · nextjs **4.63.5** ·
   php **0.6.6** · python **0.6.5** (6d70ab7 + 6961a82)
