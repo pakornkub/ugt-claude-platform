@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.73.1 (2026-10-09)
+
+**cicd-setup: OWASP Dependency Check ค้าง UNSTABLE (เหลือง) ในทุกโปรเจค Next.js + MSSQL จาก 2 finding ที่ยังไม่มี release แก้** — `braces@3.0.3` `GHSA-vfj7-8cjw-p6xm` (HIGH · มาทาง `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` เฉพาะ lint บน CI ไม่เคยรับ input ผู้ใช้ · `npm audit fix` แนะนำ downgrade `eslint-config-next` เป็น 14.x ซึ่งรัน Next 16 ไม่ได้) และ `sprintf-js@1.1.3` `GHSA-hp3w-g68c-fv3c` (moderate · มาทาง `@prisma/adapter-mssql` → `mssql` → `tedious` ซึ่งส่งแต่ format string ที่เขียนไว้ในไลบรารี)
+
+- **references/sonarqube-setup.md §E**: หัวข้อ "OWASP: two reviewed findings with no fixed release" — ตารางเหตุผล + `<suppress>` 2 บล็อก pin ที่ version + GHSA เป๊ะ (`<packageUrl regex="true">^pkg:npm/braces@3\.0\.3$</packageUrl>` + `<vulnerabilityName>`) พร้อม `<notes>` · โปรเจคคัดลอกได้เมื่อ `npm ls braces sprintf-js` ยืนยัน path เดียวกันเท่านั้น · ลบเมื่อมี version ที่แก้แล้ว
+- **`assets/owasp-suppressions.xml` ยังว่างตามเดิม** (กฎ "never suppress preemptively") · SKILL.md แถวอาการ · docs เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
+- Origin: ugt-voice-platform · 2026-10-09 (commit `9d5c00b`)
+
 ## 4.73.0 (2026-10-09)
 
 - **admin-handoff ใหม่: ตารางล้วน กระชับ** — ขั้นตอนรวม 1 ตาราง (ใครทำ · ระบบ · ทำอะไร · ลิงก์) → ตารางแยกต่อระบบ (เมนูที่ต้องเข้า + `ช่อง | ใส่ค่า`) → ตาราง "ส่งกลับ" · แถว/หัวข้อเลือกได้ติดป้าย `[TAG]` ใน HTML comment + RENDER RULES หัวไฟล์ · ตัดย่อหน้าอธิบาย/เช็คลิสต์ซ้ำ · **เพิ่มตาราง A: SQL Server** (database prod/dev/shadow + login + สิทธิ์ `db_ddladmin`/`EXECUTE` + linked server) และ **ตาราง B: folder บน server** (`/home/docker02/appdata` ครั้งแรก · backup volume) ที่เดิมไม่มี · nginx `client_max_body_size` เมื่อมี upload · ภาคผนวก server แรกเป็นตาราง · placeholder ใหม่ `__DB_NAME_PROD__/_DEV__`, `__DB_LOGIN_PROD__/_DEV__`, `__LINKED_*__`, `__VOLUME__`, `__REALM__`, `__UPLOAD_MAX_MB__` (ตัด `__N_CREDS__`)
