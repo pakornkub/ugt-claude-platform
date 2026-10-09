@@ -26,6 +26,7 @@ Every row below was debugged in a real org project; the fix is in
 | Symptom | Likely cause |
 | --- | --- |
 | `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain | cookie prefix / basePath mismatch between apps on the same host |
+| `ERR_TOO_MANY_REDIRECTS` between `/` and `/login` for one browser only — it still holds an expired / revoked session cookie (clearing cookies fixes it; a fresh browser is fine) | `proxy.ts` redirected `/login` → `/` on cookie **presence** while the `(app)` layout redirects `/` → `/login` when `auth.api.getSession` is null; fixed in the `proxy.ts` asset 4.74.0 — the login page (Server Component) now does the real-session redirect (§5.5 step 1) |
 | Login works locally but loops in production | secure-cookie + trusted-origin settings differ from the deployed URL |
 | Logout does not stick on https | cookie cleared with a different name/path than it was set with |
 | Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
@@ -366,6 +367,15 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    Better Auth appends when `onAPIError.errorURL` (lib/auth.ts) redirects a
    failed flow back here (e.g. `unable_to_create_user`), and the form maps it
    to a Thai message. Without it a failed SSO login shows the user nothing.
+   **The page is also where "already signed in → into the app" lives** — an
+   `async` Server Component that checks the REAL session, never `proxy.ts`
+   (which only sees a cookie, and an expired/stale cookie would make `/` ↔
+   `/login` redirect forever — `references/auth-flows.md` gotcha table):
+
+   ```tsx
+   const session = await auth.api.getSession({ headers: await headers() });
+   if (session) redirect('/'); // valid session only — a stale cookie falls through to the form
+   ```
    [Local + mail] also create `app/(auth)/reset-password/page.tsx` rendering
    `<ResetPasswordForm token={(await searchParams).token ?? ''} />`. **This route
    must stay public** — `proxy.ts` already lists it in `AUTH_ONLY_PATHS`

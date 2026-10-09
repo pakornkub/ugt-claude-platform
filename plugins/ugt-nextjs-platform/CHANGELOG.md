@@ -12,6 +12,14 @@
 - **verify.mjs**: ส่วน `[SCAN]` เป็น opt-in จริง — เช็ค scanner/clamav เฉพาะเมื่อมี `lib/virus-scan.ts` หรือ env ประกาศ `CLAMAV_HOST`; ไม่งั้นเช็คความสม่ำเสมอของโหมด off (ไม่เรียก `scanBuffer`, ไม่เก็บ `'clean'`, ด่านดาวน์โหลด `=== 'infected'`) และเตือนถ้ามี clamav ค้างใน compose · ทุก path หาที่ root ก่อนแล้วลอง `src/`
 - SKILL.md แถวอาการ + ย่อหน้าใน §6 · docs/script เท่านั้น ไม่มี asset ที่ copy เข้าโปรเจคเปลี่ยน
 - Origin: ugt-voice-platform · 2026-10-09 (ไม่มี `lib/virus-scan.ts`/`CLAMAV_*`, route อยู่ `src/app/api/files/` — ที่เหลือล้มคือ widget/messages ที่โปรเจคนี้ไม่ใช้ ไม่เกี่ยวกับ scan)
+## 4.74.0 (2026-10-09)
+
+**auth-setup: `ERR_TOO_MANY_REDIRECTS` ระหว่าง `/` กับ `/login` เมื่อ browser ยังถือ session cookie ที่หมดอายุ/ถูก revoke** — `proxy.ts` เด้ง `/login` → `/` เพราะ cookie *มีอยู่* (`getSessionCookie`) แต่ layout ของหน้าที่ป้องกันเด้ง `/` → `/login` เมื่อ `auth.api.getSession` เป็น null — สองฝั่งไล่กันไม่จบ (browser ใหม่/ล้าง cookie แล้วหาย จึงเจอเฉพาะคนที่ session หมดอายุ)
+
+- **asset `proxy.ts`**: เลิก redirect path ฝั่ง auth (`/login`, `/reset-password`) ตาม cookie presence — `AUTH_ONLY_PATHS` เหลือความหมายแค่ "ไม่ต้องมี cookie" · kit-sync จะเสนอให้
+- **SKILL.md §5.5 ข้อ 1**: หน้า login (Server Component) เช็ค session จริงด้วย `auth.api.getSession` แล้ว `redirect('/')` เฉพาะเมื่อ session ใช้ได้ — cookie เก่าจะเห็นฟอร์มแทนวน loop (หน้า login เป็นโค้ดที่เขียนเองตาม §5.5 ไม่มี asset ให้ copy: โปรเจคเดิมที่ copy `proxy.ts` ไปแล้วต้องลบบล็อก `isAuthOnlyPath && sessionCookie` เองและเพิ่ม 2 บรรทัดในหน้า login)
+- **verify.mjs** +1 ข้อ (fail ถ้า proxy ยัง bounce ตาม cookie · warn ถ้าหน้า login ไม่เรียก `getSession`) · `rules/ugt-nextjs-auth.md` + `verification.md` + `auth-flows.md` (gotcha + ย่อหน้า Server Component session check) + SKILL.md แถวอาการ
+- Origin: ugt-voice-platform · 2026-10-09
 
 ## 4.73.0 (2026-10-09)
 

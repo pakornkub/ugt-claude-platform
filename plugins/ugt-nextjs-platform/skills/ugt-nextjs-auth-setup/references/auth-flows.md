@@ -309,7 +309,11 @@ if (!session) {
 ```
 
 In `proxy.ts` use `getSessionCookie()` (presence check only, no DB call) —
-never `auth.api.getSession()`. `proxy.ts` runs on the **Node.js runtime** on
+never `auth.api.getSession()`. Because it only proves a cookie exists, `proxy.ts`
+may use it to send a cookie-less visitor **to** `/login`, but never to send a
+visitor **away from** `/login`: that direction needs the real session, so it
+lives in the login page (`const session = await auth.api.getSession(...);
+if (session) redirect('/')`) — otherwise an expired cookie loops `/` ↔ `/login`. `proxy.ts` runs on the **Node.js runtime** on
 every non-static request (a `runtime` config is not allowed in it), so a DB
 round-trip there is latency on every navigation and makes a DB hiccup a
 full-app outage.
@@ -344,3 +348,4 @@ full-app outage.
 | Auth error shows a bare proxy 404 (`/api/auth/error` Not Found) instead of any message | Better Auth's default error page URL is computed WITHOUT the Next.js basePath — same trap as redirectURI and the reset link | `onAPIError.errorURL: `${NEXT_PUBLIC_BASE_PATH}/login`` — the login page maps `?error=<code>` to a Thai toast; shipped in `lib/auth.ts` since 4.21.0 |
 | LDAP always "Invalid username or password" on prod, works in dev | An `ldaps://`-only guard throws before the bind attempt | Allow plain `ldap://` for private-network AD; let the bind itself decide |
 | Email OTP (twoFactor plugin) always fails right after a `better-auth` bump — the login form says "expired" although the code is fresh; `verify-otp` returns 400 `TWO_FACTOR_NOT_ENABLED`; the `2fa-otp-*` rows in `Verification` are never consumed | better-auth ≥1.6.24 added account lockout: `verifyTwoFactorOTP` does `findOne twoFactor where userId` **before** consuming the OTP and throws when no row exists, and it writes `verified` / `failedVerificationCount` / `lockedUntil` on every attempt. Projects that enable 2FA by flagging `user.twoFactorEnabled` directly (admin-created users, no `enableTwoFactor` endpoint) never had that row, and the plugin schema change ships with no migration | Add the three columns to `twoFactor`, backfill a placeholder row (`secret ''`, `backupCodes ''`, `verified false`) for every `twoFactorEnabled` user, and create/upsert that row wherever the flag is set. Map OTP errors by `error.code`, never by HTTP status — 400 now covers three different codes. **After every better-auth bump, diff `node_modules/better-auth/dist/plugins/*/schema.mjs` against `prisma/schema.prisma`** — Better Auth never generates migrations and the failure surfaces as an unrelated 400/500. Seen in ugt-customer-portal 2026-09-15 (fix `d551298`) |
+| Endless 307 between `/` and `/login` (`ERR_TOO_MANY_REDIRECTS`) for a browser that still holds an expired / revoked session cookie — a fresh browser or cleared cookies works | `proxy.ts` sent `/login` → `/` whenever `getSessionCookie()` returned something, but the protected layout sends `/` → `/login` when `auth.api.getSession()` is null. A cookie proves nothing (the session row may be expired, revoked, or deleted by logout elsewhere), so the two redirects chase each other | `proxy.ts` no longer redirects auth-only paths on cookie presence (the `AUTH_ONLY_PATHS` list only means "no cookie required"). The login page — an `async` Server Component — checks the real session and `redirect('/')`s only when `auth.api.getSession({ headers: await headers() })` is non-null (SKILL.md §5.5 step 1); a stale cookie then renders the form and the next login overwrites it. Seen in ugt-voice-platform 2026-10-09 |

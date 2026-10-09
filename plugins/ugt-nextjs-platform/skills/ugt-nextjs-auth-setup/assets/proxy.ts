@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.53.0 · ugt-nextjs-auth-setup/proxy.ts
-// kit-hash: e50d8a460dcd
+// kit: ugt-nextjs-platform 4.74.0 · ugt-nextjs-auth-setup/proxy.ts
+// kit-hash: 50fe30e61497
 // proxy.ts — Next.js 16 route protection (Next.js 16 uses proxy.ts, not middleware.ts;
 // on Next.js 15 or older this same content must be named middleware.ts instead).
 // Cookie-presence check only (no DB call) + CSP nonce injection
@@ -15,8 +15,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 
-// Paths that only unauthenticated users should access.
-// Authenticated users visiting these will be sent to the dashboard.
+// Auth pages — reachable WITHOUT a session cookie (everything else needs one).
+// This list never redirects anyone away: "already signed in → go to the app" is
+// the login page's own job (a Server Component that checks the REAL session —
+// SKILL.md §5.5 step 1). Doing it here on cookie presence loops forever when
+// the browser still holds an expired/stale cookie: / → layout (no valid session)
+// → /login → here (cookie present) → / → …
 // [METHOD: LOCAL] '/reset-password' MUST be listed — someone who cannot log in
 // also cannot reach a protected page, so leaving it out makes the reset link in
 // the email bounce straight back to /login. Remove it only when local login is off.
@@ -139,16 +143,14 @@ export function proxy(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(p + '/')
   );
 
-  // Authenticated user visiting /login → redirect to dashboard.
+  // NO "cookie present on /login → redirect to /" here: a cookie proves nothing
+  // (it may be expired or revoked server-side), and the (app) layout sends such
+  // a browser to /login — the two redirects would chase each other
+  // (ERR_TOO_MANY_REDIRECTS). The login page checks the real session instead.
+  //
+  // Unauthenticated user visiting a protected page → redirect to /login.
   // Use the basePath-relative path — Next re-adds basePath to a cloned nextUrl.
   // NEVER assign `basePath + '/...'` here — that duplicates the basePath in the redirect URL.
-  if (isAuthOnlyPath && sessionCookie) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return applySecurityHeaders(NextResponse.redirect(url), request, nonce);
-  }
-
-  // Unauthenticated user visiting a protected page → redirect to /login.
   // For API routes return 401 JSON instead of a redirect.
   if (!isAuthOnlyPath && !sessionCookie) {
     if (pathname.startsWith('/api/')) {
