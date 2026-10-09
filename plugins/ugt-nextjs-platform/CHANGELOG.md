@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.76.0 (2026-10-09)
+
+**cicd-setup + pitfalls: ส่งข้อมูลไม่ได้หลัง deploy — หน้าที่เปิดค้างไว้ข้าม deploy ล้มทุก Server Action (`UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`)** — id ของ Server Action เปลี่ยนทุก build แต่ client bundle เก่ายังเรียก id เดิม และ `assets/` ของ cicd-setup ไม่ตั้ง `deploymentId` Next.js จึงตรวจ skew ไม่ได้และ reload ให้ไม่ได้ · Jenkins deploy ทุก push + ผู้ใช้เปิดแท็บทิ้งไว้ → เจอทุกโปรเจค หนักสุดกับฟอร์มยาว (รีเฟรชแล้วข้อความที่พิมพ์หาย)
+
+- **asset `Dockerfile`**: builder stage เพิ่ม `ARG NEXT_DEPLOYMENT_ID` + `NEXT_DEPLOYMENT_ID=$NEXT_DEPLOYMENT_ID` ในบล็อก `ENV` ข้าง `NEXT_PUBLIC_*` · **asset `Jenkinsfile`** Docker Build: `--build-arg NEXT_DEPLOYMENT_ID=${buildNum}` ใน `docker build` **ทั้งสองคำสั่ง** (builder + runner ได้ id เดียวกัน · ไม่ใช่ secret) · **Dockerfile/Jenkinsfile/next.config ไม่อยู่ใน kit-sync** — โปรเจคเดิมเพิ่มเอง 3 จุด + `deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined` ใน `next.config` (ไม่ตั้งตอน local / CI `npm run build`)
+- **cicd-setup**: `docker-deploy.md` §I (อาการ·สาเหตุ·แก้ 3 จุด) · SKILL.md แถวอาการ + description + §4.4 bullet next.config + Quick Rules · `rules/ugt-nextjs-ci.md` · **verify.mjs** +1 ข้อ (fail ถ้า next.config ไม่มี `deploymentId` · Dockerfile ไม่มี `ARG`/`ENV` · `docker build` คำสั่งใดไม่มี `--build-arg NEXT_DEPLOYMENT_ID=`)
+- **pitfalls `data-fetching.md` §6** (ฝั่ง client): จับ `unstable_isUnrecognizedActionError` (`next/navigation` Next 15.4+/16) → เก็บ draft ที่ผู้ใช้พิมพ์ใน `sessionStorage` แบบ read-once → เสนอ reload ที่คืน draft แทนข้อความ error กลาง ๆ · ห้ามมี `router.refresh()`/polling เบื้องหลังบนหน้าฟอร์ม · SKILL.md แถวอาการ + description
+- Origin: ugt-voice-platform · 2026-10-09 (commits `5d0c712`, `4a1429e` — prod + dev บน Jenkins/Docker)
+
 ## 4.75.0 (2026-10-09)
 
 - **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — host cron → `docker exec <container> sh -c 'wget … --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000<basePath>/api/cron/<job>'` (secret ไม่ออกนอก container, ไม่ผ่าน nginx) · `cicd docker-deploy.md` §H: route handler ตัวอย่าง (POST · `timingSafeEqual` · idempotent) + บรรทัด crontab

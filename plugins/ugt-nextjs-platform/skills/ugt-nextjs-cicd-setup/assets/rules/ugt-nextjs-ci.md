@@ -81,6 +81,10 @@ global `environment {}` block (global = one value for every branch).
   container at the same time
 - `next.config` must set `output: 'standalone'` or the Dockerfile's
   `COPY .next/standalone` fails
+- Version-skew protection: `next.config` `deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined`
+  + Dockerfile `ARG`/`ENV NEXT_DEPLOYMENT_ID` + Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${buildNum}`
+  on **both** `docker build` commands — without it a tab left open across a deploy
+  fails every Server Action (`references/docker-deploy.md` §I)
 
 ## SonarQube config
 

@@ -10,7 +10,9 @@ description: >
   "Maximum update depth exceeded", pagination "หน้า 1 จาก 0", Select crashing on
   an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form passes
   validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
-  showing in the browser ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"). Loads itself via paths
+  showing in the browser ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"), a form left open across a
+  deploy that can no longer save ("ส่งข้อมูลไม่ได้หลัง deploy", `Server Action …
+  was not found on the server`). Loads itself via paths
   on app/components/lib edits. Don't use for SonarQube violations (→
   ugt-nextjs-clean-code) or installing infrastructure (→ the ugt-nextjs-*-setup
   skills).
@@ -42,6 +44,7 @@ appears.
 | Select shows an id / `__none__` instead of the label after choosing | Base UI `<SelectValue>` renders the raw value unless the root gets `items` | form-validation |
 | Ticking one table row selects a different one ("ติ๊กแถวนึงได้อีกแถว") | selection riding on row index, no `getRowId` | data-fetching |
 | Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
+| Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy"): `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; refresh fixes it, a long form loses the typed text | Action ids change per build and the open page's old bundle calls the previous ids; deploy half = `deploymentId` (cicd-setup `docker-deploy.md` §I), client half = catch `unstable_isUnrecognizedActionError`, keep a read-once sessionStorage draft, offer a reload that restores it | data-fetching |
 | Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | hardening |
 
 ## Which reference, when
@@ -49,7 +52,7 @@ appears.
 | You are about to… | Read |
 | --- | --- |
 | Bind a date/time into `$queryRaw`/an SP, format a DB date, show a Thai year | `references/dates-timezones.md` |
-| Fetch or mutate data shown in a table/list, add a filter, call an API from the client | `references/data-fetching.md` |
+| Fetch or mutate data shown in a table/list, add a filter, call an API or a Server Action from the client (incl. a page left open across a deploy) | `references/data-fetching.md` |
 | Guard a route/action, build a batch/cron job, shape a DTO, pre-fill an edit form | `references/hardening.md` |
 | Build or change a form, add a validation rule, write the Server Action it submits to | `references/form-validation.md` |
 
