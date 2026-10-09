@@ -105,20 +105,30 @@ Then, in the same PR:
 - **Description phrase** — add the user-facing symptom wording to the skill's
   `description:` only if a developer would *describe* it that way to Claude
   (e.g. "วันที่เลื่อน −1"). Skip for internal mechanisms nobody types.
-- **CHANGELOG** of the plugin — new top section `## x.y.z (YYYY-MM-DD)`, a bold
-  Thai headline, then the symptom → cause → fix in two or three lines, and the
-  origin project. Match the existing entries' format.
-- **Version bump** in `plugins/<plugin>/.claude-plugin/plugin.json`: **patch**
-  for a new entry or table row (nothing for projects to do), **minor** if an
-  asset that projects copy into their repo changed (kit-sync will offer it).
-- **Version chips** — `README.md` plugin table and `docs/web/index.html`
-  version card must show the new number; `scripts/check-contract-drift.mjs`
-  fails otherwise.
+- **CHANGELOG** of the plugin — one bullet under `## Unreleased`, the first
+  `##` heading of the file. Missing → create it directly above the newest
+  `## x.y.z (date)` section. Present → add your bullet **below** the bullets
+  already there, never above or inside them. Shape: `- **<bold Thai headline>**
+  — symptom → cause → fix in two or three lines · origin <project> ·
+  YYYY-MM-DD`. If a kit asset (a file projects copy) changed, end the bullet
+  with `· asset: <skill>/<path>` — that tells the maintainer the release is a
+  minor, not a patch.
 
-Verify from the clone root before showing anything:
+**No version number anywhere.** Do not touch `plugin.json`, the `README.md`
+plugin table, or the `docs/web/index.html` version cards. Contribute PRs are
+opened in parallel from the same `main`; each one picking "the next version"
+made every merge conflict in four files and forced a manual renumber. The
+maintainer picks the number once, at release, for everything under
+`## Unreleased`.
+
+**Changed a `.ts`/`.tsx` asset?** Run `node scripts/stamp-kit-assets.mjs`
+after the CHANGELOG bullet exists — with `## Unreleased` on top it stamps the
+file `unreleased`, and the release run turns that into the real version.
+
+Verify from the clone root before showing anything — all must exit 0:
 
 ```bash
-node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs
+node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/lint-kit-assets.mjs && node scripts/stamp-kit-assets.mjs --check
 ```
 
 ## 5. Show, confirm, push, PR
@@ -129,11 +139,12 @@ yes — print, then stop:
 1. `git diff --stat` + the full diff of the entry and CHANGELOG
 2. The PR title and body you intend to send
 
-Title: `feat(<plugin-short>-<version>): pitfall <slug>` — e.g.
-`feat(nextjs-4.63.2): pitfall select-empty-value`. Body: symptom / cause / fix
-in three lines, origin project, which skill + file it landed in, version bump
-reason. End the body with the attribution line the session's system reminder
-prescribes.
+Title: `feat(<plugin-short>): pitfall <slug>` — e.g.
+`feat(nextjs): pitfall select-empty-value`; no version, the release commit
+carries it. Body: symptom / cause / fix in three lines, origin project, which
+skill + file it landed in, and "patch" or "minor (asset changed)" as a hint for
+the release. End the body with the attribution line the session's system
+reminder prescribes.
 
 Only after the yes:
 
@@ -175,14 +186,14 @@ rm -rf "$SCRATCH/ugt-claude-platform"
 | Scratch clone, match the file's existing format | Edit the plugin cache, or a platform checkout you happened to find |
 | Show diff + PR text, wait for the explicit yes | `gh pr create` in the same breath as the edit |
 | Delete the project entry after the PR exists | Keep it "for reference" — two copies drift |
-| Version chips in README + index.html move with plugin.json | Bump plugin.json alone (drift-check goes red) |
+| CHANGELOG bullet under `## Unreleased`, appended below the others | Bump plugin.json / README / index.html chips — the maintainer numbers the release |
 
 ## Verification Checklist
 
 - [ ] §1 answered yes ×3 in the transcript (or the run stopped with the reason)
 - [ ] Entry sits in the owner skill's existing structure, numbered/tabled like its neighbours
 - [ ] SKILL.md symptom row added; description phrase added only if user-facing
-- [ ] CHANGELOG section + plugin.json bump + README/index.html chips agree; both check scripts exit 0
+- [ ] CHANGELOG bullet under `## Unreleased`; plugin.json, README and index.html untouched; all four check scripts exit 0
 - [ ] Diff and PR text were shown and the user said yes before push
 - [ ] PR URL printed; scratch clone removed
 - [ ] Project `troubleshooting.md` entry deleted; user told to run `/ugt-handoff`

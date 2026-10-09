@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.75.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.9.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.0 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.14.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.14.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -61,7 +61,7 @@ context ใหม่ที่อ่านโปรเจคซ้ำ) ส่ว�
 | `ugt-context` | สร้าง**สารบัญความรู้ของโปรเจค** (`docs/project-context/`) ครั้งแรก — สแกนโค้ดเดิมให้ด้วย | ตอนติดตั้ง หรือโปรเจคเดิมที่ยังไม่มี |
 | `ugt-model-mode` | เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน | `/ugt-model-mode god` / "โหมดประหยัด" |
 | `ugt-requirements` | อ่านโฟลเดอร์ requirement แล้วสรุปเป็นเอกสารภาษาไทยแยกตาม feature | เริ่มโปรเจคจากกอง requirement |
-| `ugt-contribute` | ยกกับดักที่พิสูจน์แล้วว่าเจอทุกโปรเจคจาก `troubleshooting.md` ขึ้นเป็น PR เข้ารีโปนี้ — เลือก skill เจ้าของ, เขียน entry + CHANGELOG + bump รุ่น, โชว์ diff ให้กดยืนยันก่อนเปิด PR แล้วลบต้นทางในโปรเจค | "ส่ง PR ไป platform" / "อันนี้เจอทุกโปรเจค" |
+| `ugt-contribute` | ยกกับดักที่พิสูจน์แล้วว่าเจอทุกโปรเจคจาก `troubleshooting.md` ขึ้นเป็น PR เข้ารีโปนี้ — เลือก skill เจ้าของ, เขียน entry + CHANGELOG ใต้ `## Unreleased` (ไม่เลือกเลขรุ่น — ผู้ดูแลตั้งตอน release), โชว์ diff ให้กดยืนยันก่อนเปิด PR แล้วลบต้นทางในโปรเจค | "ส่ง PR ไป platform" / "อันนี้เจอทุกโปรเจค" |
 
 ## ติดตั้ง (ครั้งเดียวต่อเครื่อง)
 
@@ -228,7 +228,7 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 | --- | --- | --- |
 | งานค้าง / คิวถัดไป / คำถามที่รอคำตอบ | `.claude/state/handoff.md` | — |
 | จริงเฉพาะโปรเจคนั้น (business rule, โครงสร้าง, มติ, บั๊กที่เคยเจอ) | ไฟล์ที่ตรงเรื่องใน `docs/project-context/` — มติดีไซน์ไปที่ `docs/DESIGN.md` | ❌ เก็บเรื่องเดียวกันสองที่ |
-| จริงกับทุกโปรเจค (กับดักของ Prisma/Keycloak/Jenkins/shadcn) | **เปิด PR เข้ารีโปนี้** ด้วย `/ugt-contribute` — มันเลือก skill เจ้าของ เขียน entry + bump รุ่น แล้วโชว์ให้กดยืนยันก่อนเปิด PR · ทีมอื่นจะได้ด้วยตอนอัปเดต | ❌ แก้ไฟล์ตัวช่วยที่ติดตั้งมา (หายตอน update และไม่มีใครได้) |
+| จริงกับทุกโปรเจค (กับดักของ Prisma/Keycloak/Jenkins/shadcn) | **เปิด PR เข้ารีโปนี้** ด้วย `/ugt-contribute` — มันเลือก skill เจ้าของ เขียน entry + CHANGELOG (ไม่ bump รุ่นเอง) แล้วโชว์ให้กดยืนยันก่อนเปิด PR · ทีมอื่นจะได้ด้วยตอนอัปเดต | ❌ แก้ไฟล์ตัวช่วยที่ติดตั้งมา (หายตอน update และไม่มีใครได้) |
 | ความชอบส่วนตัว | ปล่อยให้ memory ของ Claude จัดการเอง | ❌ ยัดลงไฟล์ที่ commit |
 
 **ห้ามสร้างตัวช่วยชื่อ `ugt-*` ซ้ำของเดิม** — จะได้ความรู้สองชุดที่ขัดกันเอง
@@ -249,8 +249,16 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 `Superseded` = ถูกแทนที่แล้ว (ต้องมี `Superseded-by` ชี้ path จริง) · `Done` = งานจบแล้ว เก็บเป็นประวัติ
 · **เอกสารไม่มี version ของตัวเอง** — แกน version มีแกนเดียวคือ tag ของ plugin ส่วนประวัติการแก้อยู่ใน git
 
-1. รับ PR → merge เข้า `main`
-2. bump `version` ใน `.claude-plugin/plugin.json` ของ plugin ที่เปลี่ยน + เพิ่มหัวข้อ CHANGELOG
+1. รับ PR → merge เข้า `main` — PR จาก `/ugt-contribute` **ไม่เลือกเลขรุ่น** เขียนแค่
+   bullet ใต้ `## Unreleased` ใน CHANGELOG (ไม่แตะ plugin.json / README / index.html)
+   PR หลายตัวที่เปิดพร้อมกันจึงชนกันได้แค่ใน `## Unreleased` — แก้ conflict โดย
+   เก็บ bullet ทุกตัวไว้ใต้หัวข้อเดียว
+2. **ตั้งเลขรุ่นครั้งเดียวตอน release** ต่อ plugin ที่เปลี่ยน: เปลี่ยน `## Unreleased`
+   เป็น `## <version> (<YYYY-MM-DD>)` → bump `version` ใน `.claude-plugin/plugin.json`
+   → แก้แถวตาราง "รุ่นล่าสุด" ใน README.md + การ์ดเวอร์ชันใน `docs/web/index.html`
+   ให้เลขเดียวกัน · patch ถ้าไม่มี bullet ไหนลงท้าย `· asset:` · minor ถ้ามี
+   (asset ที่โปรเจค copy ไปเปลี่ยน → kit-sync จะเสนอ) · งานที่ผู้ดูแลแก้เองตรง ๆ
+   เขียนหัวข้อรุ่นทันทีได้ ไม่ต้องผ่าน Unreleased
 3. **ถามข้อเดียว: release นี้ทำให้เอกสารใน `docs/` ผิดไปไหม?** — รวมตาราง
    "รุ่นล่าสุด" ใน README.md และการ์ดเวอร์ชันใน `docs/web/index.html` ด้วย
    (สคริปต์ข้อ 5 ตรวจเลขเวอร์ชันสองไฟล์นี้ให้แล้ว) ส่วนใหญ่ตอบว่าไม่ ใช้เวลาสิบวินาที
@@ -270,8 +278,10 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
    แต่ละตัวทำคนละอย่าง:
 
    - `stamp-kit-assets` เขียนเวอร์ชัน+hash ลงหัวไฟล์ asset ทุกตัว (กลไกของ
-     `ugt-nextjs-kit-sync` ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · ตัวเดียวกัน
-     ท้ายแถวใส่ `--check` เพื่อยืนยันว่า stamp นิ่งแล้ว
+     `ugt-nextjs-kit-sync` ที่ทำให้โปรเจครู้ว่าสำเนาของตัวเองตกรุ่น) · asset ที่
+     contribute PR แก้มาจะมี stamp `unreleased` — รอบนี้เปลี่ยนเป็นเลขรุ่นให้เอง
+     (ต้องเปลี่ยนหัวข้อ `## Unreleased` ก่อน ไม่งั้นมันรอต่อ) · ตัวเดียวกัน
+     ท้ายแถวใส่ `--check` เพื่อยืนยันว่า stamp นิ่งแล้ว และไม่มี `unreleased` ค้าง
    - `lint-kit-assets` เช็คว่า asset ที่แจกไม่มีของ Radix หลงเหลือ (`asChild`,
      `onSelect` บนเมนู, `@radix-ui/*`), ไม่มี `window.confirm`, ไม่ override
      ขนาดปุ่มด้วย className และไม่มี native `title=` บนปุ่ม

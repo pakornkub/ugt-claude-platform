@@ -24,6 +24,13 @@
 // docs-only release doesn't churn 84 asset files, and kit-sync's "ติดตั้งที่ X"
 // report tells the project when this file actually moved, not when anything
 // in the plugin last did.
+//
+// `unreleased` — contribute PRs never pick a version (the maintainer does at
+// release time). While a plugin's CHANGELOG starts with `## Unreleased`, a
+// changed file is stamped `unreleased` instead of a number. Once the maintainer
+// turns that heading into `## <version> (<date>)` and bumps plugin.json, the
+// next run rewrites every `unreleased` stamp to that version, and --check fails
+// if one is left behind.
 
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -62,6 +69,12 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
     continue;
   }
 
+  let changelog = '';
+  try {
+    changelog = readFileSync(join(ROOT, 'plugins', pluginDir, 'CHANGELOG.md'), 'utf8');
+  } catch {}
+  const pending = /^## (.*)$/m.exec(changelog)?.[1].trim() === 'Unreleased';
+
   const skillsDir = join(ROOT, 'plugins', pluginDir, 'skills');
   let skills = [];
   try {
@@ -88,7 +101,9 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
       // Content unchanged since the last stamp → keep that release's version.
       const prevHash = /^\/\/ kit-hash: ([0-9a-f]{12})$/m.exec(original)?.[1];
       const prevVersion = /^\/\/ kit: \S+ (\S+) · /m.exec(original)?.[1];
-      const version = prevHash === hash && prevVersion ? prevVersion : manifest.version;
+      // An `unreleased` stamp is kept only while the Unreleased heading is.
+      const keep = prevHash === hash && prevVersion && (pending || prevVersion !== 'unreleased');
+      const version = keep ? prevVersion : pending ? 'unreleased' : manifest.version;
 
       const stampLines =
         `// kit: ${manifest.name} ${version} · ${skill}/${relAsset}\n` +

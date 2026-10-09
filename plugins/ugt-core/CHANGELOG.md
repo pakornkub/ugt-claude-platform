@@ -1,5 +1,11 @@
 # Changelog — ugt-core
 
+## 2.14.1 (2026-10-09)
+
+- **ugt-contribute ไม่เลือกเลขรุ่นอีกต่อไป** — ที่มา: PR #3–#15 (2026-10-08) และ #16–#20 (2026-10-09) เปิดขนานกันจาก `main` เดียวกัน ทุกตัวจองเลขรุ่นถัดไปเลขเดียวกัน (เช่นสามตัวเป็น 4.74.0) → merge ทีไร conflict ใน plugin.json / README / index.html / CHANGELOG และผู้ดูแลต้องไล่เลขใหม่มือ · ตอนนี้ PR เขียนแค่ bullet ใต้ `## Unreleased` (สร้างถ้ายังไม่มี ต่อท้าย bullet เดิมถ้ามี) ไม่แตะ plugin.json / README / index.html · ชื่อ PR ไม่มีเลขรุ่น (`feat(nextjs): pitfall <slug>`) · bullet ลงท้าย `· asset: <path>` เมื่อแก้ asset ที่โปรเจค copy ไป เป็นสัญญาณให้ release เป็น minor · ตรวจด้วยสคริปต์ 4 ตัว (เพิ่ม `lint-kit-assets` + `stamp-kit-assets --check`)
+- **`scripts/stamp-kit-assets.mjs`** (ระดับรีโป): เมื่อ CHANGELOG ของ plugin ขึ้นต้นด้วย `## Unreleased` asset ที่เปลี่ยนได้ stamp `unreleased` แทนเลขรุ่น · พอผู้ดูแลเปลี่ยนหัวข้อเป็นเลขรุ่นแล้วรัน stamp ก็กลายเป็นเลขจริง · `--check` แดงถ้ายังเหลือ `unreleased` หลังหัวข้อถูกเปลี่ยนแล้ว
+- **ขั้นตอน release ใน README** ("สำหรับทีมดูแล platform" ข้อ 1–2, 5): ผู้ดูแลตั้งเลขครั้งเดียว — `## Unreleased` → `## <version> (<date>)`, bump plugin.json + README + index.html, รัน stamp แล้วสคริปต์ตรวจ
+
 ## 2.14.0 (2026-10-09)
 
 - **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — `contracts/cicd.md` หัวข้อใหม่ "Scheduled jobs": job ตามรอบทุกตัวรันจาก crontab ของ Docker host หนึ่งบรรทัดต่อ job ตั้งโดย admin จากตาราง cron ใน handoff · ห้าม in-app scheduler (node-cron / setInterval / APScheduler / Celery beat / Laravel `schedule:run`) · ห้าม SQL Agent job และ Jenkins timer สำหรับงานของแอป (timer ของ CI เช่น NVD update ยังได้) · job idempotent · log `/home/docker02/appdata/<project>/logs/cron.log` · prod เท่านั้น · drift check ข้อใหม่ pin กฎนี้ใน rules ของทั้ง 3 stack
