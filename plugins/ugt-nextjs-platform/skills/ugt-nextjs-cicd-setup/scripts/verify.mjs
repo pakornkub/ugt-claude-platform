@@ -264,6 +264,32 @@ for (const f of ['docker-compose.yml', 'docker-compose.dev.yml']) {
   });
 }
 
+check('Version-skew protection: deploymentId wired through next.config, Dockerfile and both docker builds', () => {
+  const problems = [];
+  const cfg = ['next.config.ts', 'next.config.mjs', 'next.config.js'].find((f) => has(f));
+  if (!cfg) problems.push('no next.config.*');
+  else if (!/deploymentId\s*:/.test(read(cfg))) {
+    problems.push(`${cfg} sets no deploymentId (deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined)`);
+  }
+  if (!has('Dockerfile')) problems.push('no Dockerfile');
+  else {
+    const df = read('Dockerfile');
+    if (!/^\s*ARG\s+NEXT_DEPLOYMENT_ID\b/m.test(df)) problems.push('Dockerfile has no ARG NEXT_DEPLOYMENT_ID');
+    if (!/NEXT_DEPLOYMENT_ID=\$/.test(df)) problems.push('Dockerfile never exports it (NEXT_DEPLOYMENT_ID=$NEXT_DEPLOYMENT_ID in the builder ENV block)');
+  }
+  // Every `docker build` command (up to its lone "." context line) must carry the build arg —
+  // the builder-target image and the runner image share one id.
+  const builds = jfActive.match(/docker build\b[\s\S]*?\n\s*\.\s*(?:\n|$)/g) ?? [];
+  if (builds.length === 0) problems.push('no docker build command found in the Jenkinsfile');
+  else {
+    const without = builds.filter((b) => !/--build-arg\s+NEXT_DEPLOYMENT_ID=/.test(b)).length;
+    if (without) problems.push(`${without} of ${builds.length} docker build commands lack --build-arg NEXT_DEPLOYMENT_ID=\${buildNum}`);
+  }
+  return problems.length
+    ? { ok: false, msg: `${problems.join(' · ')} — a page left open across a deploy fails every Server Action (docker-deploy.md §I)` }
+    : { ok: true };
+});
+
 check('Dockerfile has a HEALTHCHECK', () => {
   if (!has('Dockerfile')) return { ok: false, msg: 'No Dockerfile' };
   return /HEALTHCHECK/.test(read('Dockerfile'))

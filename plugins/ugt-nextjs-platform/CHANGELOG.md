@@ -12,6 +12,12 @@
 - cicd-setup SKILL §2.2 + mail-setup SKILL: บรรทัดอ้างอิง (suffix `-dev` ของ basePath คือสัญญาณที่แถบอ่าน · ประโยคอีเมลต้องจริงถึงจะใส่)
 - **โปรเจคเดิม**: เปลี่ยน suffix ` (DEV)` เป็น prefix `[DEV] ` เอง + mount แถบใน root layout ตามขั้น 3.3 · asset ใหม่ 3 ไฟล์ต้อง copy เอง (kit-sync ตามเฉพาะไฟล์ที่ลงไว้แล้ว — `verify.mjs` จะ ✘ บอก) ส่วน `kit.th/en.ts` kit-sync เสนอให้ · layout ไม่ใช่ kit asset · โปรเจคที่ไม่มี basePath ไม่มีสัญญาณแยก dev/prod — แถบไม่ขึ้น
 - Origin: ugt-voice-platform · 2026-10-09 (commit `629d509`, deploy บน dev แล้ว) — ต้นฉบับเป็น Tailwind ล้วน + context ภาษาของตัวเอง เขียนใหม่บน next-intl catalog + shadcn token
+**cicd-setup + pitfalls: ส่งข้อมูลไม่ได้หลัง deploy — หน้าที่เปิดค้างไว้ข้าม deploy ล้มทุก Server Action (`UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`)** — id ของ Server Action เปลี่ยนทุก build แต่ client bundle เก่ายังเรียก id เดิม และ `assets/` ของ cicd-setup ไม่ตั้ง `deploymentId` Next.js จึงตรวจ skew ไม่ได้และ reload ให้ไม่ได้ · Jenkins deploy ทุก push + ผู้ใช้เปิดแท็บทิ้งไว้ → เจอทุกโปรเจค หนักสุดกับฟอร์มยาว (รีเฟรชแล้วข้อความที่พิมพ์หาย)
+
+- **asset `Dockerfile`**: builder stage เพิ่ม `ARG NEXT_DEPLOYMENT_ID` + `NEXT_DEPLOYMENT_ID=$NEXT_DEPLOYMENT_ID` ในบล็อก `ENV` ข้าง `NEXT_PUBLIC_*` · **asset `Jenkinsfile`** Docker Build: `--build-arg NEXT_DEPLOYMENT_ID=${buildNum}` ใน `docker build` **ทั้งสองคำสั่ง** (builder + runner ได้ id เดียวกัน · ไม่ใช่ secret) · **Dockerfile/Jenkinsfile/next.config ไม่อยู่ใน kit-sync** — โปรเจคเดิมเพิ่มเอง 3 จุด + `deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined` ใน `next.config` (ไม่ตั้งตอน local / CI `npm run build`)
+- **cicd-setup**: `docker-deploy.md` §I (อาการ·สาเหตุ·แก้ 3 จุด) · SKILL.md แถวอาการ + description + §4.4 bullet next.config + Quick Rules · `rules/ugt-nextjs-ci.md` · **verify.mjs** +1 ข้อ (fail ถ้า next.config ไม่มี `deploymentId` · Dockerfile ไม่มี `ARG`/`ENV` · `docker build` คำสั่งใดไม่มี `--build-arg NEXT_DEPLOYMENT_ID=`)
+- **pitfalls `data-fetching.md` §6** (ฝั่ง client): จับ `unstable_isUnrecognizedActionError` (`next/navigation` Next 15.4+/16) → เก็บ draft ที่ผู้ใช้พิมพ์ใน `sessionStorage` แบบ read-once → เสนอ reload ที่คืน draft แทนข้อความ error กลาง ๆ · ห้ามมี `router.refresh()`/polling เบื้องหลังบนหน้าฟอร์ม · SKILL.md แถวอาการ + description
+- Origin: ugt-voice-platform · 2026-10-09 (commits `5d0c712`, `4a1429e` — prod + dev บน Jenkins/Docker)
 
 ## 4.75.0 (2026-10-09)
 
