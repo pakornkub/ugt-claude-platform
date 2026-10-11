@@ -12,7 +12,9 @@ description: >
   touching UI. Works on a fresh project (full interview) or an existing one
   (scan → draft agreement → recorded deviations). Also handles "sync ข้อตกลง
   design" after a plugin update and "ปรับให้ตรง org" on a preserve-mode
-  project (re-align to the org standard). Run BEFORE ugt-nextjs-auth-setup —
+  project (re-align to the org standard). Also the home of the DEV environment
+  bar + `[DEV] ` tab title ("แยกไม่ออกว่าอยู่ dev หรือ prod", "เผลอทดสอบบน
+  prod", "คนกรอกข้อมูลจริงลง dev"). Run BEFORE ugt-nextjs-auth-setup —
   auth generates themed pages that must inherit these tokens. Not for feature
   UIs or Jenkins/DB/auth setup.
 ---
@@ -45,6 +47,7 @@ What lands in the project:
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
 | Site header (breadcrumb เส้นทางเต็ม + จุด mount ของ toggles) | `components/site-header.tsx` — from `assets/components/`, mandatory on every sidebar shell (§Site header in layout-shells.md) |
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
+| DEV environment indicator (amber bar on every page + `[DEV] ` tab title, dev deployment only) | `lib/environment.ts` + `components/dev-environment-bar.tsx` + `app/layout.tsx` — from `assets/lib/` + `assets/components/`; strings in `kit.devEnvironment` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules/ugt-nextjs-design.md` |
 
 ## 2. Org Standards (summary — full text in ugt-core `contracts/design.md`)
@@ -257,21 +260,49 @@ different size — is the field bug this step exists to prevent.
    Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
    without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 
-   **Title ของ dev ต้องต่างจาก prod** — แท็บ browser เป็นที่เดียวที่เห็นตอนสลับแท็บ
-   (คู่กับป้าย `DEV` ใน `site-header.tsx`, ใช้ basePath ตัวเดียวกัน):
+   **dev ต้องมองออกทันทีว่าไม่ใช่ prod** — สองตัวอยู่ host เดียวกัน ต่างกันแค่ basePath
+   (`/<project>` vs `/<project>-dev`, ตาม `ugt-nextjs-cicd-setup`) · ผู้ใช้จึงกรอกข้อมูลจริงลง
+   dev หรือทดสอบบน prod โดยไม่รู้ตัว · มี 2 จุด ใช้ `isDevEnvironment()` ตัวเดียวกัน:
+   **(1) แถบเหลืองเต็มความกว้างบนสุดของทุกหน้า** (รวมหน้า login ที่อยู่นอก shell — จึงต้อง
+   mount ที่ root layout ไม่ใช่ใน site-header) และ **(2) แท็บ browser ขึ้นต้น `[DEV] `**
+   (prefix ไม่ใช่ suffix: แท็บแคบตัดท้ายทิ้ง — และตรงกับ `[DEV] ` ที่หัวเรื่องอีเมลของ
+   mail-setup)
+
+   **ก่อนอื่นให้ `lib/env.ts` รู้จัก basePath** (design-setup รันก่อน auth-setup จึงอาจยังไม่มี):
+   `NEXT_PUBLIC_BASE_PATH: z.string().default('')` ใน `client` block **และ**
+   `NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH` ใน `runtimeEnv` — มีอยู่แล้วก็อย่า
+   ซ้ำ (auth-setup §5.4 ประกาศตัวเดียวกัน) · แล้ว copy `assets/lib/environment.ts`
+   (+ `environment.test.ts`) → `lib/` และ `assets/components/dev-environment-bar.tsx`
+   → `components/`:
 
    ```tsx
-   import { env } from '@/lib/env';
-   // `?? ''` ห้ามตัด: CI build ตั้ง SKIP_ENV_VALIDATION → zod ไม่ใส่ default ให้ ค่าเป็น undefined
-   const DEV_SUFFIX = (env.NEXT_PUBLIC_BASE_PATH ?? '').endsWith('-dev') ? ' (DEV)' : '';
-   export const metadata: Metadata = { title: `<App name>${DEV_SUFFIX}`, ... };
+   import { DevEnvironmentBar } from '@/components/dev-environment-bar';
+   import { isDevEnvironment } from '@/lib/environment';
+
+   const DEV_PREFIX = isDevEnvironment() ? '[DEV] ' : '';
+   export const metadata: Metadata = { title: `${DEV_PREFIX}<App name>`, ... };
+
+   // <NextIntlClientProvider> ... — แถบเป็นลูกคนแรก อยู่เหนือ provider/shell ทั้งหมด (ไม่ sticky)
+   //   {isDevEnvironment() && <DevEnvironmentBar />}
+   //   <QueryProvider> ...{children}... </QueryProvider>
    ```
 
-   ไม่มี `?? ''` = Jenkins stage Build พัง `Cannot read properties of undefined (reading 'endsWith')`
-   ที่ `app/layout.tsx` (เจอจริงตอนทำ 4.71.0)
+   ถ้าหน้าไหนตั้ง `title` เอง ให้ root ใช้
+   `title: { template: `${DEV_PREFIX}%s · <App name>`, default: `${DEV_PREFIX}<App name>` }`
+   แทน ไม่งั้นหน้านั้นทับ prefix หาย · **โปรเจคที่ลง 4.71.0–4.75.0 มา** ใช้ suffix ` (DEV)` →
+   เปลี่ยนเป็น prefix ตามนี้ (ป้าย `DEV` ใน site-header คงไว้เป็นตัวเตือนเล็กตอนแถบเลื่อนพ้นจอ)
 
-   ถ้าหน้าไหนตั้ง `title` เอง ให้ root ใช้ `title: { template: `%s · <App name>${DEV_SUFFIX}`, default: ... }`
-   แทน ไม่งั้นหน้านั้นทับ suffix หาย
+   - `isDevEnvironment()` เป็น **server-only** (ใช้ `env` จาก `@/lib/env`) — Client Component
+     ห้าม import · `?? ''` ข้างในห้ามตัด (CI build ตั้ง `SKIP_ENV_VALIDATION` → ค่าเป็น
+     `undefined` → ไม่มี `?? ''` = Jenkins stage Build พัง `Cannot read properties of
+     undefined (reading 'endsWith')` ที่ `app/layout.tsx` · เจอจริงตอนทำ 4.71.0)
+   - โปรเจคที่ deploy **ไม่มี basePath** (cicd interview ข้อ 3 = ไม่มี) ไม่มีอะไรแยก dev/prod —
+     `isDevEnvironment()` เป็น false เสมอ แถบไม่ขึ้น · แจ้งเจ้าของ ไม่ต้องเดา
+   - ข้อความมาตรฐานเป็นกลาง ("DEV environment — test data only" / "สภาพแวดล้อมทดสอบ (DEV) —
+     ข้อมูลในระบบนี้ไม่ใช่ข้อมูลจริง") ใน `kit.devEnvironment` · โปรเจคที่ลง **dev mode ของ
+     mail-setup** ต่อประโยคเรื่องอีเมลได้ผ่าน `note` — เขียนใน `messages/app.*.ts` ของโปรเจค
+     (ไม่ใช่ namespace kit): `<DevEnvironmentBar note={tApp('devMailNote')} />` เช่น "every email
+     goes back to the person who triggered it" · ประโยคนี้จริงเฉพาะเมื่อ dev mode เปิดอยู่
 
    **แล้วลงทะเบียน plugin ของ next-intl ใน `next.config.ts` — ไม่ใช่ของเสริม**:
 
@@ -348,7 +379,8 @@ different size — is the field bug this step exists to prevent.
 6. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
    th+en only; **`site-header` + `site-header.test.ts` คู่กันเสมอ
-   (ทุกโปรเจคที่มี sidebar shell)**,
+   (ทุกโปรเจคที่มี sidebar shell)**, `lib/environment.ts` + `environment.test.ts` +
+   `components/dev-environment-bar.tsx` (ทุกโปรเจค — wiring อยู่ Step 3.3),
    `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
    `references/conventions.md` §Kit; copying the two toggles without
@@ -472,6 +504,7 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
 | Diff-and-ask on existing `components/ui/` files | Overwrite the project's components silently |
 | Run check-contrast + verify before closing | Close with a failing script "to fix later" |
 | Sync mode diffs and records มติ | Regenerate DESIGN.md over project decisions |
+| Dev deploy: root layout mounts `<DevEnvironmentBar />` + title `[DEV] ` from `isDevEnvironment()` | Rely on the site-header `DEV` badge alone (login page has none) or leave dev and prod looking identical |
 | Re-align: list files tokens won't move, append `ยึด org (re-align)` | Flip tokens only and leave hardcoded legacy pages as a second template |
 
 ## 6. Verification Checklist
@@ -509,6 +542,9 @@ node <skill-dir>/scripts/check-contrast.mjs
 - [ ] `i18n/request.ts` + `i18n/messages.ts` + `messages/kit.*.ts` copy เข้าโปรเจคแล้ว
       (**ทุกโปรเจค ไม่ใช่เฉพาะ th+en**) และ `NextIntlClientProvider` อยู่นอกสุด
       ของ provider stack ใน `app/layout.tsx`
+- [ ] `app/layout.tsx` เรียก `isDevEnvironment()` สองที่: render `<DevEnvironmentBar />` กับ title
+      `[DEV] ` (verify.mjs เช็ค) · dev deploy จริงเห็นแถบเหลืองบนสุดของ**หน้า login ด้วย** และแท็บขึ้นต้น
+      `[DEV] ` · prod ไม่เห็นทั้งสองอย่าง (by eye — verify.mjs ดูโค้ดไม่ใช่ deployment)
 - [ ] `next.config.ts` ลงทะเบียน `createNextIntlPlugin('./i18n/request.ts')` แล้ว
       (ขาดข้อนี้ = `t()` ทุกตัวโยนตอน render, แอปไม่ขึ้น)
 - [ ] th+en เท่านั้น: กดสลับภาษาแล้ว **ข้อความในตารางเปลี่ยนจริง** (หัวคอลัมน์

@@ -93,9 +93,14 @@ installs shipped empty top bars). Composition, left→right:
    exactly the develop deploy (`ugt-nextjs-ci.md`: develop = everything
    suffixed `-dev`). prod and dev share one host and look identical, so
    without it nothing but the URL says which one a user is typing into. No new env
-   var — the basePath already tells the two apart. Pair it with the
-   `(DEV)` title suffix in `app/layout.tsx` (SKILL.md step 3) so the browser
-   tab differs too.
+   var — the basePath already tells the two apart. It is the **compact** signal:
+   the primary one is the full-width amber `<DevEnvironmentBar />` mounted in
+   `app/layout.tsx` above the whole shell (SKILL.md step 3.3) — it also covers the
+   login page, which has no header — plus the `[DEV] ` title prefix so the browser
+   tab differs too. The bar is non-sticky by design (it scrolls away rather than
+   cover a sticky top bar), which is why the badge stays. The sidebar block's
+   panel is `fixed` and overlays the bar's left edge at scroll 0 — keep the bar's
+   text centered (default) and any `note` short.
 
 The header carries `border-b` — the line separating it from the page. This
 **replaces** the old rule "breadcrumb above the title when depth > 2": the

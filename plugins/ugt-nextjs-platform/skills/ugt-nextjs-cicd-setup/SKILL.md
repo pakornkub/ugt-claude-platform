@@ -76,6 +76,11 @@ post: emailext (success/unstable/failure/aborted) + cleanWs
 | `main` | prod | container name, host port, basePath, sonar projectKey, env credential |
 | `develop` | dev | everything suffixed `-dev` + separate compose file |
 
+The `-dev` basePath suffix is also what the app reads to show its **DEV
+environment bar** and `[DEV] ` tab title (`ugt-nextjs-design-setup` Step 3.3,
+`isDevEnvironment()`) — keep `__BASE_PATH_DEV__` ending in `-dev`; a project deployed
+without a basePath has no dev/prod signal and gets no bar.
+
 All per-branch values resolve inside `script {}` from
 `def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` —
 never put branch-specific values in the global `environment {}`.
