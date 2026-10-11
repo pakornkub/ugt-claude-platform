@@ -120,7 +120,7 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
   const deps = { ...(pkg?.dependencies ?? {}), ...(pkg?.devDependencies ?? {}) };
   const schedulers = ['node-cron', 'node-schedule', 'cron', 'toad-scheduler', 'agenda', 'bree'].filter((d) => d in deps);
   if (schedulers.length) {
-    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron → /api/cron/<job> (references/docker-deploy.md §H)` };
+    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron → /api/cron/<job> (references/scheduled-jobs.md)` };
   }
   const cronDir = ['app/api/cron', 'src/app/api/cron'].find((d) => has(d));
   if (!cronDir) return { ok: true };
@@ -291,7 +291,7 @@ check('Version-skew protection: deploymentId wired through next.config, Dockerfi
     if (without) problems.push(`${without} of ${builds.length} docker build commands lack --build-arg NEXT_DEPLOYMENT_ID=\${buildNum}`);
   }
   return problems.length
-    ? { ok: false, msg: `${problems.join(' · ')} — a page left open across a deploy fails every Server Action (docker-deploy.md §I)` }
+    ? { ok: false, msg: `${problems.join(' · ')} — a page left open across a deploy fails every Server Action (references/version-skew.md)` }
     : { ok: true };
 });
 

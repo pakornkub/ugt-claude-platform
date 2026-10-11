@@ -181,7 +181,7 @@ const PLACEHOLDERS = [
   '__AD_BASE_DN__',
   '__COMPANY_DOMAIN__',
   '__APP_HOST__',
-  // lib/directory.ts + lib/approval-chain.ts (SKILL §6 table) — the mid-file
+  // lib/directory.ts + lib/approval-chain.ts (references/asset-map.md table) — the mid-file
   // ones that survive an install that only edited the obvious env values
   '__LINKED_SERVER__',
   '__HR_DB__',
@@ -542,7 +542,7 @@ check('account model has no required issuer (better-auth >= 1.7.4 never writes i
   const body = schema.match(/model\s+account\s*\{([\s\S]*?)\n\}/)?.[1];
   if (!body) return { ok: false, msg: 'No account model' };
   return /^\s*issuer\s+String\b(?!\?)/m.test(body)
-    ? { ok: false, msg: 'account.issuer is NOT NULL — better-auth 1.7.4+ never writes it, so every SSO/credential insert fails (make it String? or drop it; references/auth-flows.md)' }
+    ? { ok: false, msg: 'account.issuer is NOT NULL — better-auth 1.7.4+ never writes it, so every SSO/credential insert fails (make it String? or drop it; references/troubleshooting-upgrades.md §Account.issuer)' }
     : { ok: true };
 });
 

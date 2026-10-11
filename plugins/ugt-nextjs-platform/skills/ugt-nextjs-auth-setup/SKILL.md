@@ -20,23 +20,25 @@ description: >
 
 ## When to use — symptoms with a documented cause here
 
-Every row below was debugged in a real org project; the fix is in
-`references/auth-flows.md` — read it when a symptom appears or before changing a flow.
+Every row below was debugged in a real org project. This is an index only — the
+cause and fix live in the file named (all under `references/`); read it when a
+symptom appears, and `auth-flows.md` before changing a flow.
 
-| Symptom | Likely cause |
+| Symptom | Cause + fix in |
 | --- | --- |
-| `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain | cookie prefix / basePath mismatch between apps on the same host |
-| `ERR_TOO_MANY_REDIRECTS` between `/` and `/login` for one browser only — it still holds an expired / revoked session cookie (clearing cookies fixes it; a fresh browser is fine) | `proxy.ts` redirected `/login` → `/` on cookie **presence** while the `(app)` layout redirects `/` → `/login` when `auth.api.getSession` is null; fixed in the `proxy.ts` asset 4.74.0 — the login page (Server Component) now does the real-session redirect (§5.5 step 1) |
-| Login works locally but loops in production | secure-cookie + trusted-origin settings differ from the deployed URL |
-| Logout does not stick on https | cookie cleared with a different name/path than it was set with |
-| Static assets return `Unexpected token '<'` | the route guard in `proxy.ts` matches `_next/static` and serves the login page instead |
-| `npm ci` dies with `ERESOLVE` on Jenkins / in `docker build` (works on the installer's machine) | better-auth's optional peer `vitest ^2–^4` vs the kit's vitest 5 — the `--legacy-peer-deps` flag was never persisted; commit `.npmrc` (§5.1) |
-| Opening the profile menu (sidebar footer ⋮) kills the page — "This page couldn’t load", console `Base UI error #31` | `DropdownMenuLabel` outside `DropdownMenuGroup` in `nav-user.tsx` (fixed in the asset 4.69.0 — re-sync old installs) |
-| SSO button → "ไม่สามารถเชื่อมต่อระบบ SSO ได้", `POST /api/auth/sign-in/social` 404 `PROVIDER_NOT_FOUND`, health green — after one deploy only | genericOAuth discovery fetch failed at startup and the provider was dropped for the process (`references/auth-flows.md`); fixed in `lib/auth.ts` 4.72.0 (`keycloakEndpoints`) — re-sync; restart the container to recover an old install |
-| SSO login ends with "เข้าสู่ระบบไม่สำเร็จ (internal_server_error)"; server log shows a Prisma error on `Account.issuer` / `Issuer` | better-auth **1.7.0–1.7.2 only** keyed accounts by `issuer`; 1.7.4+ dropped it again and never writes the column. Upgrade to `better-auth@^1.7.4` (§5.1 floor). A project that already added a required `Issuer` column must make it nullable or drop it — a NOT NULL column Better Auth never writes fails every insert (`references/auth-flows.md`) |
-| Keycloak rejects the redirect URI | client's valid redirect URIs missing the basePath-qualified callback |
-| Mailed reset link 404s | link built without the basePath (needs ugt-nextjs-mail-setup) |
-| Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` right after a `better-auth` bump | twoFactor plugin schema changed (≥1.6.24 needs a `twoFactor` row + lockout columns) and Better Auth ships no migration — diff `dist/plugins/*/schema.mjs` vs `schema.prisma` after every bump |
+| `ERR_TOO_MANY_REDIRECTS` after deploying behind a shared domain | `troubleshooting-session.md` §Cookies and redirect loops |
+| `ERR_TOO_MANY_REDIRECTS` `/` ↔ `/login` in one browser only (stale cookie; fresh browser fine) | `troubleshooting-session.md` §Stale cookie loop |
+| Login works locally but loops in production | `troubleshooting-session.md` §Cookies and redirect loops |
+| Logout does not stick on https | `troubleshooting-session.md` §Cookies and redirect loops |
+| Static assets return `Unexpected token '<'` | `troubleshooting-session.md` §basePath and proxy.ts |
+| `npm ci` dies with `ERESOLVE` on Jenkins / in `docker build` only | `troubleshooting-upgrades.md` §Dependencies and schema |
+| Profile menu (sidebar footer ⋮) kills the page — `Base UI error #31` | `troubleshooting-upgrades.md` §Kit re-syncs |
+| SSO button 404 `PROVIDER_NOT_FOUND`, health green — after one deploy only | `troubleshooting-sso.md` §Keycloak / genericOAuth |
+| SSO ends in `internal_server_error`, Prisma error on `Account.issuer` | `troubleshooting-upgrades.md` §Account.issuer |
+| Keycloak rejects the redirect URI | `troubleshooting-sso.md` §Keycloak / genericOAuth · `keycloak-client.md` |
+| Mailed reset link 404s | `troubleshooting-session.md` §basePath and proxy.ts |
+| Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` after a `better-auth` bump | `troubleshooting-upgrades.md` §twoFactor lockout columns |
+| SSO `unable_to_create_user` / `account_not_linked`, TLS errors, LDAP "Invalid username" on prod only | `troubleshooting-sso.md` |
 
 ## 1. Overview
 
@@ -62,8 +64,10 @@ role), `/admin/roles` (CRUD + permission checkboxes), `/admin/audit-logs`
 Real code lives in `assets/` — adjust placeholders and copy straight into the
 project. Deep detail lives in `references/`:
 
-- `references/auth-flows.md` — every flow + every gotcha already debugged
-  (read it before changing a login flow, cookie/guard setting, or when a symptom above appears)
+- `references/auth-flows.md` — how every flow works (read it before changing a login flow or cookie/guard setting)
+- `references/troubleshooting-{session,sso,upgrades}.md` — every debugged symptom → cause → fix,
+  split by topic (cookies/loops/basePath · Keycloak/LDAP · better-auth bumps/peer deps/re-syncs)
+- `references/asset-map.md` · `references/schema-and-env.md` — per-asset table (§5.2), auth-table + env-var detail (§5.3–5.4)
 - `references/rbac.md` — data model, guard pattern, bootstrap, adding permissions later
 - `references/audit-logging.md` — action naming, write pattern, payload rules (PDPA), retention, viewer API
 - `references/keycloak-client.md` — requesting/creating a Keycloak client for a new project
@@ -199,8 +203,8 @@ with the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
 `lib/table-query.ts` and `lib/format.ts`, all installed by
 `ugt-nextjs-design-setup` (the full-setup order design → auth guarantees
 this). Table modes follow DESIGN.md §4 and are fixed per table, not asked in
-the interview — each table's mode is stated on its row in the §5.2 asset
-table.
+the interview — each table's mode is stated on its row in the asset table
+(`references/asset-map.md`, §5.2).
 
 Separately — and this covers far more of the skill than the three DataTable
 pages — every converted asset calls `useTranslations()` unconditionally, so
@@ -220,8 +224,8 @@ call) — say which path was taken and record it as a DESIGN.md deviation.
 
 ```bash
 # better-auth 1.7.0 removed genericOAuthClient in a MINOR bump — a deliberate
-# rewrite, not a regression (full migration history in references/auth-flows.md
-# SSO login flow). Every asset here is written for ≥1.7 — do not pin below 1.7.4 (1.7.0–1.7.2 required an `Account.issuer` column that 1.7.4+ removed again).
+# rewrite, not a regression (full migration history in references/troubleshooting-upgrades.md
+# §better-auth 1.7 migration note). Every asset here is written for ≥1.7 — do not pin below 1.7.4 (1.7.0–1.7.2 required an `Account.issuer` column that 1.7.4+ removed again).
 npm i better-auth@^1.7.4 zod@^4 --legacy-peer-deps   # zod pinned to 4 (clean-code mandates z.flattenError / z.iso.*) · --legacy-peer-deps: better-auth declares an optional peer vitest ^2–^4 and the org test-lint kit is vitest ^5 → plain install dies with ERESOLVE; afterwards re-check that vite / @testing-library/dom are still installed — the flag can prune them
 grep -qs '^legacy-peer-deps=true' .npmrc || printf '# better-auth optional peer vitest ^2-^4 vs the org vitest ^5 — npm ci (Jenkins Install + Docker deps) needs this too\nlegacy-peer-deps=true\n' >> .npmrc   # append (never overwrite a registry/auth .npmrc) · commit it: the --legacy-peer-deps flag above fixes THIS install only
 npm i react-hook-form @hookform/resolvers   # ฟอร์ม auth ทุกตัวใช้ RHF + zodResolver (design-setup ลงให้แล้วถ้าติดตั้งก่อน)
@@ -230,24 +234,10 @@ npx shadcn@latest add button input label tabs card sonner field      # login/set
 npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avatar dropdown-menu sidebar tooltip   # admin pages + NavUser (NavUser imports ui/sidebar even in a topbar shell; IconAction/TruncatedText need tooltip)
 ```
 
-> **After `add sidebar`, re-check `components/ui/button.tsx` and `input.tsx`
-> against DESIGN.md §4's control scale.** The `sidebar` block's own `add`
-> can revert a project's rebased
-> scale (preserve mode's §Scale bridge) back to the registry default —
-> `git diff` those two files immediately after this command and re-apply the
-> rebase if it reverted. This is a shadcn CLI behavior, not something this
-> skill controls, so no flag fixes it — the check is the fix.
-
-> `TooltipProvider` must already wrap the root layout (design-setup step 3
-> installs it) — mira's Tooltip does not self-wrap a provider, and IconAction
-> in the admin tables crashes prerender without it.
-
-> **No shadcn yet?** Never run a plain `npx shadcn@latest init` — it installs
-> the default (Radix) style while every kit asset targets **base-mira
-> (Base UI)**: components render but menu items silently do nothing. The org
-> preset init lives in design-setup §Step 3 — run that skill first (§4
-> requires it anyway). With it installed, the `add` lines above are mostly
-> no-ops — keep them for projects that trimmed the base set.
+> **After the `add` lines:** `git diff components/ui/button.tsx input.tsx`
+> (the `sidebar` block can revert a rebased control scale) · `TooltipProvider`
+> must already wrap the root layout · never a plain `npx shadcn@latest init`
+> (Radix, not base-mira) — why for each: `references/asset-map.md` §shadcn caveats.
 
 Then mount `<Toaster richColors />` (from sonner) in the root layout
 (`app/layout.tsx`) — otherwise `toast.*()` in the login form renders nothing.
@@ -268,26 +258,9 @@ exceptions:
 > `proxy` function to `middleware`; `export const config` stays as-is), or
 > upgrade Next first.
 
-| Asset | Destination | Note |
-| --- | --- | --- |
-| `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see §5.3 |
-| `assets/env.example` | fill section **3. Auth** of `.env.example` + `.env.local` in place (canonical layout — never append at the bottom) | drop vars for unselected methods · basePath goes in section 1 `NEXT_PUBLIC_BASE_PATH` · compose already exists → uncomment its `[AUTH]` + `[AUTH: <method>]` lines |
-| `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
-| `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
-| `assets/lib/audit-actions.ts` | `lib/audit-actions.ts` | every project — the only place an `ActivityLogs.action` string may be written; every shipped action imports `AUDIT_ACTIONS` from here (`references/audit-logging.md`) |
-| `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
-| `assets/lib/directory.ts` | `lib/directory.ts` | only when a central employee view exists — substitute the four-part view name + column map; skipping it means deleting the directory columns from the schema too (§3 Q6) |
-| `assets/lib/scope.ts` + `assets/lib/scope.test.ts` | `lib/…` | row-level data scope (read-all → own → team). Needs `lib/directory.ts` for the management chain |
-| `assets/lib/approval-chain.ts` | `lib/approval-chain.ts` | only when the app has an approval workflow — substitute `__HR_AUTHORIZE_VIEW__` (a **different** view from the employee one) |
-| `assets/lib/password-policy.ts` · `assets/lib/actions/password.ts` | `lib/…` | Local only — the policy file is the single source for length/complexity, shared by reset · change · admin-create |
-| `assets/components/change-password-dialog.tsx` | `components/…` | Local only; opened from NavUser, hidden for SSO/LDAP accounts |
-| `assets/components/session-expired-dialog.tsx` | `components/…` | every project — receiver for the `session-expired` event (mid-page 401) that `query-provider` and `lib/auth-client.ts` dispatch; undismissable AlertDialog, single button → `/login?reason=session_expired&from=<path>` (return-to-page — §5.5). Mount in the protected layout — §5.5 step 2 |
-| `assets/components/admin-user-actions.tsx` | `components/…` | Local only — the "เพิ่มผู้ใช้ local" dialog on `/admin/users` + admin set-password; **no sign-up page, and no AD pre-registration** (SSO/AD accounts appear on first login — มติ 2026-08-11) |
-| `assets/components/users-table.tsx` | `components/users-table.tsx` | client half of `/admin/users` — DataTable **client mode**; the password column is `[METHOD: LOCAL]` (delete it with the other local sections) |
-| `assets/components/audit-logs-table.tsx` | `components/audit-logs-table.tsx` | client half of `/admin/audit-logs` — DataTable **server mode**: toolbar filters (ชื่อผู้ใช้ / ช่วงวันที่ / action) push `q`/`from`/`to`/`action` to the URL, DataTable pushes `page`/`pageSize`/`sort`/`dir` itself; needs the design kit (§4) |
-| `assets/lib/permission-group-select.ts` | `lib/permission-group-select.ts` | pure helpers behind the checklist's group select-all (tri-state + counts) — from HRMS มติ 13.3 |
-| `assets/scripts/create-first-user.ts` | `scripts/…` | Local only, run once — see §5.5 |
-| `assets/components/forgot-password-dialog.tsx` · `assets/components/reset-password-form.tsx` | `components/…` | Local **and** mail-setup only — skip both when there is no mail |
+Per-asset destinations and notes (which assets are method-, mail- or
+workflow-conditional, which shadcn/kit components each needs, DataTable mode
+per table) are in **`references/asset-map.md`** — walk that table while copying.
 
 The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
 `lib/actions/auth.ts`, `components/login-form.tsx`, `env.example`) carry
@@ -314,46 +287,20 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
 
 1. Paste `assets/prisma/schema-auth.prisma` into `prisma/schema.prisma`
    (adjust `@db.NVarChar(Max)` if not MSSQL)
-   > **Naming-rule exception — 8 tables, not 5**: `User`, `Session`, `Account`,
-   > `Verification`, `RateLimit`, `Role`, `Permission`, `RolePermission` map to
-   > **singular** names (Better Auth's own convention for the first five; the
-   > last three share the form because they live in the same file and are read
-   > together) — an explicit exception to the org's PascalCase-**plural** rule.
-   > Do not pluralize them. `ActivityLogs` is the one plural in the set, and
-   > both `verify.mjs` scripts enforce exactly this list.
-   > **The same exception covers the audit columns and hard delete**: these
-   > tables carry no `CreatedBy`/`UpdatedBy`/`IsActive`/`IsDeleted`, and the
-   > shipped actions really do call `prisma.role.delete` / `prisma.user.delete`
-   > instead of `IsDeleted = 1` — Better Auth owns these rows (it writes and
-   > deletes them itself and never reads our columns), and `Session`/`Account`
-   > cascade from `User`, so a soft-deleted user would keep working sessions.
-   > **Record it during install** as a `⚠ deviation` line in
-   > `docs/project-context/architecture.md` — `contracts/database.md` requires
-   > that line for every audit-column / soft-delete exemption, e.g.
-   > *⚠ deviation: ตาราง auth ทั้ง 8 ไม่มี audit columns และใช้ hard delete —
-   > Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)*
+   > **Naming-rule exception — 8 singular tables + no audit columns + hard
+   > delete** (Better Auth owns these rows). Do not pluralize them, and **record
+   > the `⚠ deviation` line during install** — the table list, the reason and the
+   > exact line are in `references/schema-and-env.md` §Auth-table exception.
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
 3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately
 
 ### 5.4 Env schema (`lib/env.ts` or equivalent)
 
-- `BETTER_AUTH_SECRET` → `z.string().min(32)` (required)
-- `BETTER_AUTH_URL` → **required** (`z.url()`), not optional: Better Auth decides
-  the `__Secure-` cookie prefix from `baseURL`'s scheme and falls back to
-  `NODE_ENV` when it is empty — unset in production means the name it sets and
-  the name `lib/actions/auth.ts` looks for disagree → redirect loop
-- `BETTER_AUTH_TRUSTED_ORIGINS` → optional string
-- `KEYCLOAK_ISSUER/CLIENT_ID/CLIENT_SECRET` → required only when SSO is on
-  (the code in `lib/auth.ts` already guards `undefined` to survive `SKIP_ENV_VALIDATION=1`)
-- `LDAP_URL/LDAP_BASE_DN/LDAP_DOMAIN` → required only when LDAP is on
-- `NEXT_PUBLIC_BASE_PATH` → `z.string().default('')` — **must** live in the
-  t3-env `client` block **and** be listed in `runtimeEnv` (otherwise undefined at
-  runtime). That declaration is what **server** files import from `@/lib/env`;
-  **client** components read `process.env.NEXT_PUBLIC_BASE_PATH` directly instead,
-  because a `createEnv()` wrapper comes back empty in the client bundle under
-  Turbopack (gotcha table in `references/auth-flows.md`)
-- `NEXT_PUBLIC_APP_NAME` → optional string (login-form.tsx displays it) — also
-  in the `client` block + `runtimeEnv`
+Declare `BETTER_AUTH_SECRET` (`min(32)`), `BETTER_AUTH_URL` (**required**
+`z.url()`, never optional — redirect loop otherwise), `BETTER_AUTH_TRUSTED_ORIGINS`,
+`KEYCLOAK_*` (SSO only), `LDAP_*` (LDAP only), and `NEXT_PUBLIC_BASE_PATH` +
+`NEXT_PUBLIC_APP_NAME` in the t3-env `client` block **and** `runtimeEnv`. Type,
+requiredness and the reason for each: `references/schema-and-env.md` §Env schema.
 
 ### 5.5 Wire the login page + guards
 
@@ -371,7 +318,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    **The page is also where "already signed in → into the app" lives** — an
    `async` Server Component that checks the REAL session, never `proxy.ts`
    (which only sees a cookie, and an expired/stale cookie would make `/` ↔
-   `/login` redirect forever — `references/auth-flows.md` gotcha table):
+   `/login` redirect forever — `references/troubleshooting-session.md` §Stale cookie loop):
 
    ```tsx
    const session = await auth.api.getSession({ headers: await headers() });
@@ -512,14 +459,9 @@ does nothing — always do both ends or neither.
 
 ## 6. Placeholders used across the assets
 
-Full table + substitution rules in `references/placeholders.md`. One trap
-worth repeating: `env.example`/`.env.local`/`.env` must be substituted too —
-`verify.mjs` scans all three, not just `.ts`/`.tsx`/`.prisma`.
-
-`login-form.tsx`'s `<h1>` app title has no placeholder to substitute — it
-reads `NEXT_PUBLIC_APP_NAME` at runtime and falls back to the generic
-`auth.login.appName` catalog string (`t('appName')`) when that env var isn't
-set, so it never needs the interview's project name hand-substituted in.
+Full table, substitution rules and why the login `<h1>` needs no placeholder:
+`references/placeholders.md`. One trap worth repeating: `env.example`/`.env.local`/`.env`
+must be substituted too — `verify.mjs` scans all three, not just `.ts`/`.tsx`/`.prisma`.
 
 ## 7. Quick Rules — DO / DON'T
 
@@ -533,7 +475,7 @@ set, so it never needs the interview's project name hand-substituted in.
 | `isSelf` = `session.empCode === record.empCode` | `!viewAll` — a read-all user then loses the buttons on their **own** record |
 | UI follows the kit's Base UI (base-mira) API: `render` on triggers, `onClick` on menu items | Radix idioms `asChild` / `onSelect` — they are silently ignored by Base UI and the button just stops working (shipped once: "ปุ่ม logout กดไม่ได้") |
 | Destructive actions confirm via the kit's `ConfirmActionDialog`; row buttons via `IconAction` + `soft-*`; page headers via `page-shell` | `window.confirm`, bare ghost icon buttons, hand-written `<h1>` — DESIGN.md §3/§4 apply to these admin pages too |
-| After **any** `better-auth` bump (patch included), diff every plugin's `node_modules/better-auth/dist/plugins/<plugin>/schema.mjs` against `prisma/schema.prisma` and migrate the delta | Assume a minor/patch bump is schema-neutral — Better Auth adds required fields/rows without a migration, and the failure shows up as an unrelated 400/500 in a login step (e.g. twoFactor ≥1.6.24, see auth-flows gotcha table) |
+| After **any** `better-auth` bump (patch included), diff every plugin's `node_modules/better-auth/dist/plugins/<plugin>/schema.mjs` against `prisma/schema.prisma` and migrate the delta | Assume a minor/patch bump is schema-neutral — Better Auth adds required fields/rows without a migration, and the failure shows up as an unrelated 400/500 in a login step (e.g. twoFactor ≥1.6.24, see `references/troubleshooting-upgrades.md`) |
 
 ## 8. Verification Checklist
 

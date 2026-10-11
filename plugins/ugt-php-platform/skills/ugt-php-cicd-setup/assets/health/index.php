@@ -15,8 +15,8 @@ $ok = true;
 //     // — ยิงใส่ host ที่เข้าไม่ถึง) ส่วน build ปัจจุบัน (PECL ไม่ pin เวอร์ชัน)
 //     // ถือว่าเป็น attribute ที่ไม่รู้จักเลยและ throw ตรง ๆ ตั้งแต่ `new PDO()`:
 //     // `SQLSTATE[IMSSP]: An unsupported attribute was designated on the PDO
-//     // object` (ยืนยัน ugt-bd-forecast 2026-09-03 — ดู references/docker-deploy.md
-//     // §C) — คนละอาการ (เมินเงียบ ๆ vs throw ทันที) แต่ทางแก้เดียวกัน: ห้ามใส่
+//     // object` (ยืนยัน ugt-bd-forecast 2026-09-03 — ดู
+//     // references/sqlserver.md) — คนละอาการ (เมินเงียบ ๆ vs throw ทันที) แต่ทางแก้เดียวกัน: ห้ามใส่
 //     $dsn = 'sqlsrv:Server=' . getenv('DB_SERVER') . ';Database=' . getenv('DB_DATABASE')
 //          . ';TrustServerCertificate=1;LoginTimeout=5';
 //     // MySQL/MariaDB ใช้ PDO::ATTR_TIMEOUT ได้ตามปกติ:
@@ -29,7 +29,7 @@ $ok = true;
 //     // [WP] WordPress: base image `wordpress:*` มี **mysqli** แต่ **ไม่มี pdo_mysql**
 //     // → ปลด comment บล็อก PDO ข้างบนแล้วจะ fatal (500 ไม่ใช่ 503) container ไม่ขึ้น healthy
 //     // ใช้บล็อกนี้แทนสำหรับ shape = wordpress (หรือเติม `RUN docker-php-ext-install pdo_mysql`
-//     // ใน Dockerfile.wordpress ถ้าอยากใช้ PDO จริง ๆ — ดู references §C):
+//     // ใน Dockerfile.wordpress ถ้าอยากใช้ PDO จริง ๆ — ดู references/sqlserver.md):
 //     // $db = @new mysqli(getenv('WORDPRESS_DB_HOST'), getenv('WORDPRESS_DB_USER'),
 //     //                   getenv('WORDPRESS_DB_PASSWORD'), getenv('WORDPRESS_DB_NAME'));
 //     // if ($db->connect_errno) { throw new RuntimeException('db'); }

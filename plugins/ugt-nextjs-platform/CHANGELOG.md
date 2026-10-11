@@ -1,5 +1,15 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.77.1 (2026-10-11)
+
+**แตก pitfall / เอกสารยาวเป็นไฟล์ตามเรื่อง** (มติผู้ดูแล 2026-10-11: `SKILL.md` ≤ 500 บรรทัด · ตารางอาการเป็นดัชนีบรรทัดเดียว · reference หลายเรื่อง → แยกไฟล์) — ย้ายเนื้อหา ไม่ตัดข้อเท็จจริง:
+
+- **auth-setup** `SKILL.md` 554 → 496: ตารางอาการเป็นดัชนี 13 แถว · รายละเอียดไป `troubleshooting-session.md` · `troubleshooting-sso.md` · `troubleshooting-upgrades.md` (รวมตาราง gotcha 19 แถวจาก `auth-flows.md`) · `asset-map.md` · `schema-and-env.md`
+- **design-setup** `SKILL.md` 552 → 404: Step 3.2 → `shadcn-init.md` · Step 3.3 → `root-layout.md` · `conventions.md` 399 → 219: `datatable.md` · `export.md` · `kit-inventory.md`
+- **pitfalls** `data-fetching.md` §6 → `version-skew.md` · แถวอาการที่ชี้ไฟล์ที่ไม่มีเนื้อหา 3 แถวชี้ Quick Rules แทน
+- **cicd-setup** `docker-deploy.md` §H → `scheduled-jobs.md` · §I → `version-skew.md`
+- pointer ข้าม skill ทั้งหมดชี้ไฟล์ใหม่ · asset `proxy.ts` แก้ comment อย่างเดียว
+
 ## 4.77.0 (2026-10-11)
 
 **Post-merge code review ของ 4.64.0–4.76.0** (กติกาใหม่: merge แล้วต้อง review + eval) — reviewer 4 ตัวขนานกัน แก้ที่ยืนยันแล้ว:

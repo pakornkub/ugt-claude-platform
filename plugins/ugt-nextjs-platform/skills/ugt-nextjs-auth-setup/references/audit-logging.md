@@ -249,7 +249,7 @@ Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'
 - The schema has no `expiresAt`/soft-delete → purge on a schedule. Scheduling is
   **host cron only** (org decision 2026-10-09 — no SQL Agent job): the delete
   lives in a stored procedure, and a cron route calls it
-  (cicd-setup `references/docker-deploy.md` §H):
+  (cicd-setup `references/scheduled-jobs.md`):
 
 ```sql
 CREATE OR ALTER PROCEDURE usp_PurgeActivityLogs @Days INT = 180 AS
@@ -259,7 +259,7 @@ CREATE OR ALTER PROCEDURE usp_PurgeActivityLogs @Days INT = 180 AS
 ```
 
 ```ts
-// app/api/cron/audit-retention/route.ts — body of the §H route
+// app/api/cron/audit-retention/route.ts — body of the scheduled-jobs.md route
 const [{ Deleted }] = await prisma.$queryRaw<{ Deleted: number }[]>`EXEC usp_PurgeActivityLogs @Days = 180`;
 ```
 

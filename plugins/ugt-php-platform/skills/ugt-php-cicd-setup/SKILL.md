@@ -52,7 +52,11 @@ Skill layout:
 | `assets/tooling/phpstan.neon` · `.php-cs-fixer.php` · `phpunit.xml` · `SmokeTest.php` · `composer-require-dev.md` | tooling ขั้นต่ำ (php-cs-fixer/phpstan/PHPUnit + smoke test) ให้ stage 2–3 **มีคำสั่งให้รันได้จริง** โดยไม่ต้องเขียน test เดิมใหม่ (มติ M4) — แต่โค้ดเดิมต้องผ่าน `php-cs-fixer fix` ก่อน ซึ่งขั้น setup จัดการให้ใน §5.6 |
 | `assets/rules/ugt-php-ci.md` | ไฟล์ `.claude/rules/` — โหลดเองเมื่อ session แตะ Jenkinsfile/Docker/Sonar (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 | `assets/admin-handoff.template.md` | เอกสารส่งทีม admin — render แล้วเขียนลงโปรเจคเป็น `docs/admin-handoff.md` |
-| `references/docker-deploy.md` | กลไก deploy เชิงลึก: `[WEB]` shape เดียว, WordPress wp-content + core upgrade, `pdo_sqlsrv` + `msodbcsql18`, healthcheck บน apache image, `.dockerignore`, ห้าม `config:cache` ตอน build, compose conventions, volume ownership (`www-data`) |
+| `references/org-standards.md` | contract ร่วมเต็ม (stages, CI image, gate, credentials, secret, health, persistent data) — สรุปอยู่ §2 |
+| `references/shapes.md` | ปรับตาม shape เต็ม: Laravel (route health, DB env) · CodeIgniter · legacy (PHPUnit 9) · WordPress (โค้ดขึ้น container ทางไหน, composer) — ตารางสรุปอยู่ §5.3 |
+| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, `[WEB]` shape เดียว, host cron + ตารางชี้ไฟล์เชิงลึกด้านล่าง |
+| `references/wordpress-deploy.md` · `sqlserver.md` · `healthcheck.md` · `build-gotchas.md` · `compose.md` · `subpath.md` · `volumes.md` | เชิงลึกทีละหัวข้อ: WordPress wp-content + core upgrade · `pdo_sqlsrv` + `msodbcsql18` + DNS · healthcheck บน apache image · `.dockerignore` / `config:cache` · compose conventions + `no-new-privileges` · subpath · volume ownership (`www-data`) + DooD |
+| `references/verification.md` | เช็คลิสต์ตรวจเต็มหลัง setup (repo · server · รันจริง) — สรุปอยู่ §7 |
 | `references/legacy-test-generation.md` | ขั้น optional (มติ M7) — ไล่สร้าง characterization test ให้โค้ดเดิม ทำใน session แยก |
 | `scripts/verify.mjs` | ตรวจฝั่ง repo ให้อัตโนมัติหลัง setup เสร็จ (§7) |
 
@@ -60,152 +64,35 @@ Server setup ระดับ Jenkins/SonarQube (ทำครั้งเดี�
 ไว้ในนี้** — เป็นงานฝั่ง admin ไม่ใช่ไฟล์ในโปรเจค จึงส่งผ่าน
 `assets/admin-handoff.template.md` แทน (ภาคผนวกท้ายไฟล์นั้นคือ server-level setup)
 
-## 2. Org Standards
+## 2. Org Standards (สรุป — รายละเอียดเต็ม → `references/org-standards.md`)
 
-contract ร่วมที่ **ทุกโปรเจคทำเหมือนกันหมด** ไม่ว่าภาษาอะไร:
+contract ร่วมที่ **ทุกโปรเจคทำเหมือนกันหมด** ไม่ว่าภาษาอะไร — เหตุผล + กับดักของแต่ละข้ออยู่ใน
+`references/org-standards.md` **อ่านก่อนแก้ Jenkinsfile / compose**:
 
-### 2.1 Stages (all 10, in order)
-
-```
-Checkout → Install → Code Quality (parallel: php -l / php-cs-fixer --dry-run / phpstan)
-  → Unit Tests (JUnit + coverage publish) → Build
-  → OWASP Dependency Check (90-min timeout + suppression file)
-  → SonarQube Analysis → Quality Gate (waitForQualityGate abortPipeline: true)
-  → Docker Build → Deploy          ← last 2 stages only on main/develop
-post: emailext (success/unstable/failure/aborted) + cleanWs
-```
-
-รายการ stage คือ contract — สลับคำสั่งข้างในได้ **ห้ามตัด stage**. โครง
-10-stage นี้คงไว้แม้ stage `Build` ของ PHP จะเป็น no-op (`echo` เฉย ๆ)
-เพราะ PHP มี artifact เดียวคือ image ซึ่งถูกสร้างที่ stage `Docker Build`
-อยู่แล้ว — การตัดออกทำให้ pipeline ของแต่ละภาษาเทียบกันไม่ได้
-
-### 2.2 Toolchain รันใน docker (มติ M8 — ไม่แตะ Jenkins Global Tools)
-
-สเตจ `Install` **build CI image เอง** ด้วย
-`docker build -f Dockerfile.ci -t <project>-ci .` แล้วทุก stage ที่ต้องใช้ PHP
-(`Install` / `Lint` / `Format Check` / `Static Analysis` / `Unit Tests`) เปิด
-`docker.image('<project>-ci').inside { ... }` ของตัวเอง — Jenkins server ไม่ต้อง
-ติดตั้ง PHP/composer เพิ่มเลย. ที่ต้องมี image ของตัวเองแทนที่จะใช้
-`php:8.3-cli` ตรง ๆ เพราะ image ทางการ **ไม่มี coverage driver, ไม่มี composer,
-และไม่มี unzip** — `Dockerfile.ci` เติมให้ 3 อย่างพอดี (`unzip` — ไม่มีแล้ว
-`composer install` ตายด้วย "zip extension and unzip/7z commands are both
-missing", `pecl install pcov`, `COPY --from=composer:2`) ไม่มีอย่างอื่น และ
-**ห้ามเอา image นี้ไป deploy**.
-`vendor/` ถูกสร้างในสเตจ `Install` แล้วอยู่ใน **workspace** (ไม่ใช่ในตัว
-container ที่ถูกทิ้งเมื่อ stage จบ) จึงรอดข้ามไปสเตจถัดไปได้ เพราะ
-`docker.image().inside` mount workspace เดิมทุกครั้ง. เงื่อนไขฝั่ง server **สองข้อ**
-(อยู่ในเช็คลิสต์ + ภาคผนวกของ admin handoff แล้วทั้งคู่):
-
-1. **ปลั๊กอิน Docker Pipeline (`docker-workflow`)** — เป็นตัวที่ให้ global
-   variable `docker` ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
-   `groovy.lang.MissingPropertyException: No such property: docker` ซึ่งอ่านไม่
-   ออกว่าหมายถึงปลั๊กอินหาย (ยืนยันจากโปรเจค pilot 2026-08) · **คนละเรื่องกับการ
-   มี Docker CLI** — `sh 'docker …'` ไม่ต้องใช้ปลั๊กอินนี้ แต่
-   `docker.image().inside{}` ต้องใช้
-2. **Jenkins user อยู่ใน `docker` group** ไม่งั้นทุก stage fail ด้วย permission
-   denied ต่อ `/var/run/docker.sock`
-
-### 2.3 Branch model
-
-| Branch | Environment | Differs in |
-| --- | --- | --- |
-| `main` | prod | container name, host port, sonar projectKey, env credential |
-| `develop` | dev | ทุกอย่างต่อท้าย `-dev` + คนละไฟล์ compose |
-
-ค่าที่ขึ้นกับ branch resolve ใน `script {}` จาก
-`def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` เสมอ —
-ห้ามใส่ค่าเฉพาะ branch ใน `environment {}` ระดับ global
-
-### 2.4 Quality Gate thresholds (org standard — วัดที่ New Code)
-
-| Condition | Threshold |
-| --- | --- |
-| `new_violations` | = 0 |
-| `new_duplicated_lines_density` | ≤ 3% |
-| `new_coverage` | ≥ 60% |
-| `new_security_hotspots_reviewed` | = 100% |
-
-OWASP publisher: **fail** at CRITICAL ≥ 1 · **unstable** at HIGH ≥ 1
-(suppression-aware — นับเฉพาะ CVE ที่ไม่ถูก suppress)
-
-ห้ามลดค่า gate ในฝั่ง SonarQube เพื่อให้ pipeline ผ่านง่ายขึ้น — โปรเจคที่ผ่อน
-ค่าเองทำให้ตัวเลขทั้งองค์กรเทียบกันไม่ได้
-
-### 2.5 Credential naming convention
-
-| Credential ID | Type | Purpose |
-| --- | --- | --- |
-| `nvd` | Secret text | NVD API key (ตัวเดียวทั้ง server ทุกโปรเจคใช้ร่วมกัน) |
-| `env-<project>` | Secret file | prod `.env` → `cp` เข้า workspace ตอน Deploy |
-| `env-<project>-dev` | Secret file | dev `.env` (คนละ DB คนละ secret กับ prod) |
-| SonarQube token | — | ผูกที่ System → SonarQube servers (`withSonarQubeEnv`) — ห้าม bind มือใน Jenkinsfile |
-
-stack นี้ **ไม่มี** `sentry-dsn-<project>` (ไม่มี client bundle ให้ inline DSN)
-
-### 2.6 Secret rules
-
-- Secrets ใน `sh` ต้องถูกขยายค่าโดย **shell** (`"$VAR"`) — ห้าม Groovy
-  interpolation (`"${VAR}"`) เพราะรั่วลง build log (ระวังเป็นพิเศษใน
-  `sh """..."""` ที่ Groovy interpolate ทุก `${}` ที่เจอ)
-- ไฟล์ชั่วคราวที่เก็บ secret (`dc-nvd.properties`) ลบใน `post { always }`
-- `NOTIFY_EMAIL` / `SMTP_FROM` = Jenkins Global env vars — ห้าม hardcode
-
-### 2.7 Build & deploy rules
-
-- Tag image ด้วย `BUILD_NUMBER` คู่กับ `latest` เสมอ — `latest` เปล่า ๆ =
-  rollback ไม่ได้
-- **Migrate ก่อน deploy** — migration fail = ไม่ deploy
-- Deploy ด้วย `--no-build` (reuse image ที่เพิ่งผ่าน Quality Gate) — ปล่อยให้
-  compose build เองจะได้ image คนละตัวกับที่ scan ผ่าน
-- Compose: `pull_policy: never` · host port override ได้จาก `.env`
-  (`${APP_PORT:-...}`) · log rotation จำกัดขนาด
-
-### 2.8 Health endpoint
-
-`/api/health` — ไม่ต้อง login · 200 `healthy` / 503 `degraded` · **ห้ามใส่
-version หรือ commit hash ใน response**. Container healthcheck ยิง `127.0.0.1`
-เท่านั้น **ไม่ใช้ `localhost`** — เป็นกติกาเชิงป้องกัน ไม่ใช่บั๊กที่ยืนยันแล้ว:
-`localhost` ต้องผ่าน resolver ซึ่งอาจให้ `::1` มาก่อน แล้วผลลัพธ์ขึ้นกับว่า
-server ผูก dual-stack ไว้หรือไม่ (apache ของ image นี้ผูกทั้งสอง stack ตาม
-default จึงมักไม่พัง) — ระบุ IP ตรง ๆ ตัดตัวแปรนั้นทิ้งเลย ไม่ต้องลุ้นเมื่อ
-base image หรือ config เปลี่ยน. ยิง **port 80 ภายใน container** เสมอ ไม่ใช่
-host port. healthcheck ใช้ `curl -fsS -L http://127.0.0.1:80/api/health` ทั้งใน
-Dockerfile และ compose — **`curl` ติดมากับ base image อยู่แล้ว** (php image
-ฝั่ง Debian ลงเป็น persistent dep) ไม่ต้อง `apt-get install` เพิ่ม แต่
-**ห้าม purge ทิ้ง** ในบล็อกที่เพิ่มมาทีหลัง · `wget` ต่างหากที่ไม่มีจริง.
-**`-L` ห้ามตัด** — `/api/health` โดน 301 คนละทิศแล้วแต่ shape (Laravel ตัด `/`
-ท้ายทิ้ง · shape ที่เป็นไฟล์เติม `/` เข้ามา) และ `curl -f` ที่ไม่มี `-L` นับ 301
-ว่าสำเร็จ = เขียวหลอกทั้งที่ข้างใต้ 503. **ห้ามกลับไปใช้
-`php -r file_get_contents`** — พังเงียบเมื่อโปรเจคตั้ง `allow_url_fopen = Off`
-ตาม OWASP (container ไม่มีวัน healthy โดยไม่มี error บอก). PHP มี deploy shape
-เดียวคือ `[WEB]` — ไม่มี shape ที่ยกเว้น health endpoint ได้
-(→ `references/docker-deploy.md` §A, §D)
-
-### 2.9 Persistent data
-
-ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/home/docker02/appdata/<project>/<name>`
-(dev = `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
-ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image (ข้อยกเว้นเดียวที่ contract
-ประกาศไว้คือ `wp-content` ของ WordPress ซึ่ง **บังคับ** ต้องเป็น volume).
-บล็อก `[VOLUME]` ในสเตจ Deploy สร้าง path + `chown` ให้ตรง UID ของ user ที่
-**เขียนไฟล์จริงตอน runtime** คือ `www-data` โดยอ่าน UID จาก image จริง
-(`id -u www-data`) ไม่ hardcode — ห้ามเปลี่ยนเป็น `id -u` เปล่า ๆ เพราะทั้งสอง
-Dockerfile ไม่มี `USER` directive จะได้ 0 (root) แล้ว chown ผิดทั้ง volume —
-**มันวนเช็คทีละ
-subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่มทีหลัง release แรกให้ด้วย และ
-ข้ามตัวที่มีอยู่แล้วโดยไม่ chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน
-`uploads`/`reports` ในบรรทัด `for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่
-ในลิสต์จะถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว container เขียนไม่ได้
-(`verify.mjs` จับข้อนี้ให้). admin เตรียม `/home/docker02/appdata` ให้เขียนได้ครั้งเดียว
-ต่อ server (ดู admin handoff). รายละเอียดกลไก chown → `references/docker-deploy.md` §H
-
-### 2.10 CI env
-
-`CI=true` อย่างเดียว. **ไม่มีกติกา build-arg สำหรับ client-side env vars**
-แบบที่ Next.js ต้องมี (`NEXT_PUBLIC_*` ต้องเป็น `--build-arg`) เพราะ stack นี้
-ไม่มี compile-time client bundle — secret ทุกตัวเป็น runtime env จาก `.env`
-ล้วน ๆ นี่คือความง่ายที่ได้มา ไม่ใช่ของที่หายไป
+- **Stages (all 10, in order)** — Checkout → Install → Code Quality → Unit Tests → Build →
+  OWASP Dependency Check → SonarQube Analysis → Quality Gate → Docker Build → Deploy
+  (2 ตัวท้ายเฉพาะ `main`/`develop`) + post `emailext` + `cleanWs` · สลับคำสั่งข้างในได้
+  **ห้ามตัด stage** (`Build` เป็น no-op ก็คงไว้) — org-standards §1
+- **Toolchain ใน docker (มติ M8)** — Install `docker build -f Dockerfile.ci -t <project>-ci .`
+  แล้วทุก stage ที่ใช้ PHP เปิด `docker.image('<project>-ci').inside` (CI image เติม unzip +
+  pcov + composer — **ห้ามเอาไป deploy**) · server ต้องมีปลั๊กอิน `docker-workflow` +
+  Jenkins user อยู่ใน `docker` group — org-standards §2
+- **Branch** — `main` = prod · `develop` = dev (ต่อท้าย `-dev` + คนละไฟล์ compose) — org-standards §3
+- **Quality Gate (New Code)** — `new_violations` = 0 · `new_duplicated_lines_density` ≤ 3% ·
+  `new_coverage` ≥ 60% · `new_security_hotspots_reviewed` = 100% · OWASP **fail** at
+  CRITICAL ≥ 1 · **unstable** at HIGH ≥ 1 · ห้ามลดค่า gate — org-standards §4
+- **Credentials** — `nvd` · `env-<project>` (prod `.env`) · `env-<project>-dev` — org-standards §5
+- **Secrets** — ใน `sh` ขยายค่าด้วย shell (`"$VAR"`) ห้าม Groovy interpolation (`"${VAR}"`) — org-standards §6
+- **Build & deploy** — tag `BUILD_NUMBER` คู่ `latest` · migrate ก่อน deploy · `--no-build` — org-standards §7
+- **Health** — `/api/health` ไม่ต้อง login · 200 `healthy` / 503 `degraded` · ไม่มี
+  version/commit · healthcheck `curl -fsS -L http://127.0.0.1:80/api/health` (curl มากับ
+  image — ห้าม purge · **ห้ามตัด `-L`** · ห้าม `php -r file_get_contents`) · PHP มี shape
+  เดียว `[WEB]` ไม่มี shape ที่ยกเว้น health — org-standards §8
+- **Persistent data** — bind mount ใต้ `/home/docker02/appdata/<project>/<name>` (dev =
+  `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น · WordPress `wp-content` เป็น volume
+  **บังคับ** · chown ให้ UID ของ `www-data` (`id -u www-data` ไม่ใช่ `id -u` เปล่า) · บรรทัด
+  `for p in` ของบล็อก `[VOLUME]` ต้องมีทุก `<name>` — org-standards §9
+- **CI env** — `CI=true` อย่างเดียว ไม่มีกติกา build-arg แบบ Next.js — org-standards §10
 
 ## 3. อ่าน codebase ก่อนถาม
 
@@ -276,7 +163,7 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 | `assets/docker-compose.yml` | `docker-compose.yml` | เสมอ |
 | `assets/docker-compose.dev.yml` | `docker-compose.dev.yml` | เสมอ |
 | `assets/health/index.php` | `api/health/index.php` (CI4 → `public/api/health/index.php`) | shape ≠ laravel — path ต้องเทียบจาก **DocumentRoot ที่ Dockerfile เสิร์ฟจริง** |
-| — (ไม่ copy ไฟล์) | `routes/api.php`: `Route::get('/health', ...)` (เสิร์ฟที่ `/api/health` ผ่าน `apiPrefix` ดีฟอลต์) | shape = laravel — โค้ดอยู่ในคอมเมนต์บรรทัดสุดท้ายของ `assets/health/index.php` (ดู §5.3) · **ห้ามอยู่ใน `routes/web.php`** เพราะ middleware group `web` รัน `StartSession` — ถ้า `SESSION_DRIVER=database` แล้วยังไม่มีตาราง `sessions` (โปรเจคที่ยังไม่ migrate) endpoint จะ 500 แทนที่จะ healthy/degraded |
+| — (ไม่ copy ไฟล์) | `routes/api.php`: `Route::get('/health', ...)` (เสิร์ฟที่ `/api/health` ผ่าน `apiPrefix` ดีฟอลต์) | shape = laravel — โค้ดอยู่ในคอมเมนต์บรรทัดสุดท้ายของ `assets/health/index.php` (ดู §5.3 · `references/shapes.md` §Laravel) · **ห้ามอยู่ใน `routes/web.php`** เพราะ middleware group `web` รัน `StartSession` — ถ้า `SESSION_DRIVER=database` แล้วยังไม่มีตาราง `sessions` (โปรเจคที่ยังไม่ migrate) endpoint จะ 500 แทนที่จะ healthy/degraded |
 | `assets/tooling/phpstan.neon` | `phpstan.neon` (root) | เสมอ |
 | `assets/tooling/.php-cs-fixer.php` | `.php-cs-fixer.php` (root) | เสมอ |
 | `assets/tooling/phpunit.xml` | `phpunit.xml` (root) | เสมอ |
@@ -298,20 +185,14 @@ test-results
 !.env.example
 ```
 
-สเตจ Install สร้าง `vendor/` (มี dev dependencies) ไว้ใน workspace เดียวกับที่
-Docker Build ใช้เป็น build context และ `Dockerfile.web` ใช้ `COPY . .` —
-ไม่กันไว้ `vendor/` เวอร์ชัน CI จะหลุดเข้า build context ทั้งก้อน (image เอง
-รัน `composer install --no-dev` สร้าง `vendor/` ของตัวเองอยู่แล้ว) · สามบรรทัด
-`.env`/`.env.*`/`!.env.example` กัน `.env` จริงที่เผลอเหลือใน workspace (dev
-เครื่องใครเครื่องมันมักมี `.env` ค่าจริงอยู่) ไม่ให้ `COPY . .` ฝัง secret ลง
-image layer ถาวร (Docker layer เป็น append-only — ลบไฟล์ใน layer ถัดไปก็ยัง
-ดึง layer เก่ามาดู secret ได้) **โปรเจค CI3/legacy ที่เก็บ DB credential ใน
-ไฟล์ config เอง ไม่ใช่ `.env`** (เช่น `application/config/database.php`) ต้อง
-เพิ่มชื่อไฟล์นั้นเข้า `.dockerignore` เองด้วย — plugin เดาชื่อไฟล์ของ legacy
-app แต่ละโปรเจคไม่ได้ รายละเอียด → `references/docker-deploy.md` §E
+`vendor` กัน `vendor/` เวอร์ชัน CI (มี dev deps) หลุดเข้า build context ของ `COPY . .` ·
+`.env`/`.env.*`/`!.env.example` กัน `.env` ค่าจริงไม่ให้ถูกฝังลง image layer ถาวร ·
+**โปรเจค CI3/legacy ที่เก็บ DB credential ในไฟล์ config เอง ไม่ใช่ `.env`** (เช่น
+`application/config/database.php`) ต้องเพิ่มชื่อไฟล์นั้นเข้า `.dockerignore` เอง — plugin
+เดาชื่อไฟล์ของ legacy app ไม่ได้. เหตุผลเต็ม → `references/build-gotchas.md`
 
-> **`/api/health` ไม่ใช่ของเลือกได้ — กติกาทั้งหมดอยู่ที่ §2.8** (โปรเจคที่มี
-> endpoint นี้อยู่แล้ว → ไม่ copy ทับ แค่ตรวจให้ตรง §2.8)
+> **`/api/health` ไม่ใช่ของเลือกได้ — กติกาทั้งหมดอยู่ที่ `references/org-standards.md` §8**
+> (โปรเจคที่มี endpoint นี้อยู่แล้ว → ไม่ copy ทับ แค่ตรวจให้ตรงข้อนั้น)
 
 ### 5.2 แทน placeholder (นี่คือรายการครบ)
 
@@ -329,17 +210,8 @@ app แต่ละโปรเจคไม่ได้ รายละเอี
 Laravel      public/index.php
 CodeIgniter  public/index.php   (CI4)   ·   index.php   (CI3)
 legacy       index.php          (หรือ public/index.php ถ้าใช้ public/ เป็น webroot)
-WordPress    api/health/index.php
+WordPress    api/health/index.php   (ไม่ใช่ index.php — repo ของ WP ไม่ได้ commit core · references/shapes.md §WordPress)
 ```
-
-> **WordPress ใช้ `api/health/index.php` ไม่ใช่ `index.php`** — repo ของโปรเจค
-> WordPress ไม่ได้ commit core ไว้ (core มากับ base image `wordpress:*` และ
-> `Dockerfile.wordpress` ไม่มี `COPY . .`) ดังนั้น `index.php` ที่ root **ไม่มี
-> อยู่ใน repo** ที่ CI checkout มา — `assertFileExists` จะ fail แล้วสเตจ Unit
-> Tests แดงตั้งแต่ build แรก. `api/health/index.php` เป็นไฟล์ที่ **การันตีว่า
-> commit อยู่จริง** เพราะ `Dockerfile.wordpress` `COPY` มันจาก build context
-> (ไม่มีไฟล์นี้ = image build ไม่ผ่านตั้งแต่แรกอยู่แล้ว) จึงเป็น smoke check ที่
-> ตรงกับความจริงของ shape นี้ที่สุด
 
 placeholder อีกชุดอยู่ใน `admin-handoff.template.md` **เท่านั้น** เติมตอน
 render เอกสารส่ง admin (§5.7):
@@ -365,90 +237,24 @@ render เอกสารส่ง admin (§5.7):
 
 ### 5.3 Adjust ตามคำตอบ interview
 
-- **shape = laravel** → `Dockerfile.web` · **uncomment บล็อก `[LARAVEL]` 2
-  บรรทัด** (sed ย้าย DocumentRoot ไป `public/`) · **ไม่ copy
-  `health/index.php`** — ไฟล์ที่ root ไม่ถูกเสิร์ฟเมื่อ DocumentRoot = `public/`
-  ให้เพิ่ม route แทน (โค้ดชุดเดียวกับในไฟล์ health) **ใน `routes/api.php` ไม่ใช่
-  `routes/web.php`** — middleware group `web` รัน `StartSession`, ถ้า
-  `SESSION_DRIVER=database` แล้วยังไม่มีตาราง `sessions` (โปรเจคที่ยังไม่
-  migrate) endpoint จะ 500 แทน healthy/degraded ทำให้ container ไม่มีวันขึ้น
-  healthy; `routes/api.php` ไม่ผ่าน middleware `web` เลยไม่มีปัญหานี้
-  (`bootstrap/app.php` ของ Laravel 11 ต้องมี `api: __DIR__.'/../routes/api.php'`
-  ใน `->withRouting(...)` — ถ้ายังไม่มีให้เพิ่ม; `apiPrefix` ดีฟอลต์คือ `api`
-  อยู่แล้ว **ห้าม** ตั้งเป็น `''`):
+**ต่อ shape** (รายละเอียดเต็ม + โค้ด route ของ Laravel + โมเดลโค้ด WordPress → **`references/shapes.md`**):
 
-  ```php
-  // routes/api.php — เสิร์ฟที่ /api/health (apiPrefix ดีฟอลต์), ไม่ผ่าน
-  // middleware "web" จึงไม่มี session/CSRF มายุ่ง (contract: ไม่ต้อง login)
-  Route::get('/health', function () {
-      $ok = true; // [DB] เช็ค DB จริง (SELECT 1) แล้ว $ok = false เมื่อพัง
-      return response()->json(['status' => $ok ? 'healthy' : 'degraded'], $ok ? 200 : 503);
-  });
-  ```
+| Shape | Dockerfile | บล็อก `[LARAVEL]` (DocumentRoot → `public/`) | `/api/health` | อื่น ๆ |
+| --- | --- | --- | --- | --- |
+| laravel | `Dockerfile.web` | **uncomment** | route ใน **`routes/api.php`** (ไม่ใช่ `routes/web.php` — `StartSession` ทำ 500 ตอนยังไม่ migrate) · ไม่ copy `health/index.php` | DB env ใช้บรรทัด `[DB][LARAVEL]` แทน `DATABASE_URL:` |
+| codeigniter | `Dockerfile.web` | CI4 uncomment · CI3 **ลบ** | CI4 `public/api/health/index.php` · CI3 `api/health/index.php` | — |
+| legacy | `Dockerfile.web` | **ลบ** (เว้นแต่ใช้ `public/` เป็น webroot จริง) | `api/health/index.php` | PHPUnit 9 ถ้า `composer.json` ปัก PHP เก่า |
+| wordpress | `Dockerfile.wordpress` | — | `api/health/index.php` **เป๊ะ ๆ** (Dockerfile hardcode `COPY`) | บล็อก `[WP]` ห้ามลบ · `WP_AUTO_UPDATE_CORE = false` · `compose up` เติม `--force-recreate --renew-anon-volumes` · **บอกผู้ใช้ว่าโค้ดใน `wp-content` ขึ้น container ทางไหน** |
 
-- **shape = codeigniter** → `Dockerfile.web` · **CI4** (มี `public/`): uncomment
-  บล็อก `[LARAVEL]` แล้ววาง health ที่ `public/api/health/index.php` ·
-  **CI3** (index.php อยู่ที่ root): **ลบ** บล็อก `[LARAVEL]` ทิ้ง แล้ววาง health
-  ที่ `api/health/index.php`
-- **shape = legacy** → `Dockerfile.web` · ลบบล็อก `[LARAVEL]` ทิ้ง (เว้นแต่
-  โปรเจคใช้ `public/` เป็น webroot จริง ๆ) · health ที่ `api/health/index.php`
-- **shape = wordpress** → `Dockerfile.wordpress` · health **ต้อง** อยู่ที่
-  `api/health/index.php` เป๊ะ ๆ (Dockerfile hardcode path นี้ใน `COPY` และ image
-  นี้ **ไม่มี `COPY . .`** — วางที่อื่นแล้วจะไม่มีอะไรเข้า image เลย) · บล็อก
-  `[WP]` ในทั้ง 2 compose **ห้ามลบ** · เพิ่ม `define('WP_AUTO_UPDATE_CORE', false);`
-  ใน `wp-config.php` (เหตุผล → `references/docker-deploy.md` §B) ·
-  **แก้บรรทัด `compose up` ในสเตจ Deploy ตามคอมเมนต์ `[WP]`** เป็น
-  `up -d --no-build --force-recreate --renew-anon-volumes` — image นี้ประกาศ
-  `VOLUME /var/www/html` เอง ไม่ใส่ flag แล้วไฟล์ที่แก้ใน image ใหม่ (รวมไฟล์
-  health) จะไม่ขึ้นถึง container เลยตั้งแต่ deploy รอบที่ 2
-  (→ `references/docker-deploy.md` §B)
+**ข้อที่ไม่ขึ้นกับ shape:**
 
-  **โค้ดของโปรเจค WordPress ขึ้น container ทางไหน — ต้องบอกผู้ใช้ให้ชัดตั้งแต่
-  ตอน setup** เพราะ `Dockerfile.wordpress` = base image + ไฟล์ health เท่านั้น
-  ไม่มีอะไรจาก repo เข้า image อีกเลย และ `wp-content` เป็น bind mount ที่**ไม่มี
-  อะไรเติมให้อัตโนมัติ**:
-
-  1. **โมเดลหลัก (default) — `wp-content` เป็นข้อมูล runtime** อยู่ที่
-     `/home/docker02/appdata/<project>/wp-content` บนโฮสต์ ไม่ใช่ของที่ pipeline ส่งขึ้นไป:
-     theme/plugin/media ติดตั้งผ่าน **wp-admin ครั้งแรกหลัง deploy** แล้วอยู่ยาว
-     ข้าม deploy ถัดไปเอง (นี่คือเหตุผลที่ volume นี้บังคับ) — deploy รอบถัดไป
-     เปลี่ยนแค่ core/health ที่มากับ image ไม่แตะ `wp-content`
-  2. **ถ้า repo track theme/plugin ที่เขียนเอง** (มี `wp-content/themes/<custom>`
-     หรือ `wp-content/plugins/<custom>` อยู่ใน git) โค้ดชุดนั้น**ยังไม่มีทางขึ้น
-     ไปเอง** — ต้องเติมขั้น copy ฝั่งโฮสต์ลง bind mount **ก่อน** `compose up`
-     ในสเตจ Deploy (ทำได้เพราะเป็น bind mount ไม่ใช่ named volume):
-
-     ```groovy
-     // [WP] เฉพาะโปรเจคที่ track theme/plugin ของตัวเองใน repo —
-     // ⚠️ ยังไม่ผ่าน pilot: ต้องพิสูจน์ ownership/permission กับโปรเจคจริงก่อนใช้ยาว
-     sh "cp -r wp-content/. /home/docker02/appdata/${containerName}/wp-content/"
-     ```
-
-     วางไว้**หลัง**บล็อก `[VOLUME]` (path + chown ต้องมีก่อน) และ **ก่อน**
-     `docker-compose ... up -d`. `cp -r <dir>/.` (มีจุดต่อท้าย) = คัดลอก
-     *เนื้อใน* ไม่ใช่ตัวโฟลเดอร์ — ไม่งั้นจะได้ `wp-content/wp-content`.
-     ข้อนี้ทับไฟล์ชื่อซ้ำแต่**ไม่ลบ**ของที่ผู้ใช้ติดตั้งผ่าน wp-admin ไว้ ถ้า
-     ต้องการ mirror เป๊ะ ๆ ค่อยพิจารณา `rsync --delete` เป็นกรณีไป (เสี่ยงลบ
-     uploads — ห้ามใส่เป็นค่า default)
-  3. **ข้อนี้กำหนดว่า Sonar สแกนอะไรด้วย** — สิ่งที่ scanner เห็นคือโค้ดใน repo
-     (theme/plugin ที่เขียนเอง) ไม่ใช่ WordPress core ซึ่งไม่เคยอยู่ใน repo อยู่
-     แล้ว และถูก `sonar.exclusions` กัน `wp-admin`/`wp-includes` ไว้ซ้ำอีกชั้น —
-     ถ้าโปรเจคไม่มีโค้ดของตัวเองใน repo เลย ให้บอกผู้ใช้ตรง ๆ ว่า Quality Gate
-     จะวัดแทบไม่มีอะไร (นั่นเป็นเรื่องปกติของ WP ที่ใช้แต่ปลั๊กอินสำเร็จรูป
-     ไม่ใช่สัญญาณว่าตั้งค่าผิด)
 - **ไม่มี DB (ข้อ 5 = ไม่มี)** → ลบทุกบล็อกที่ติดป้าย `[DB]`: บล็อก migrate ใน
   สเตจ Deploy ของ `Jenkinsfile`, บรรทัด `DATABASE_URL:` ใน compose **ทั้ง 2
   ไฟล์**, ตัวเลือก extension `[DB]` ใน `Dockerfile.web` และคอมเมนต์ `[DB]` ใน
   ไฟล์ health (ตัว health ยัง return `healthy` ถูกต้องเพราะ `$ok = true` อยู่แล้ว)
-- **Laravel (ข้อ 5 = artisan migrate)** → คงบล็อก `[DB]` ไว้ตามที่ template ให้มา
-  (`php artisan migrate --force` ผ่าน `--env-file .env`) — ใช้ `--env-file` ทั้ง
-  ไฟล์ **ไม่ใช่** `-e DATABASE_URL` ตัวเดียว เพราะ `artisan` boot ทั้ง framework
-  ก่อนแตะ DB ขาด `APP_KEY` ก็ตายตั้งแต่ยังไม่ทัน migrate. ผลพลอยได้คือ **ไม่ต้อง
-  parse `.env` เองด้วย `grep`/`cut`** (docker อ่านไฟล์ให้ ไม่ต้องลุ้น quote/`\r`)
-  · **shape = laravel** → Laravel ไม่อ่าน `DATABASE_URL` (อ่าน `DB_URL` หรือ
-  `DB_CONNECTION`/`DB_HOST`/`DB_PORT`/`DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD`)
-  ให้ใช้บรรทัด `[DB][LARAVEL]` ที่อยู่ต่อจาก `DATABASE_URL:` ใน compose ทั้ง 2
-  ไฟล์แทน แล้วลบบรรทัด `DATABASE_URL:` ทิ้ง
+- **Laravel (ข้อ 5 = artisan migrate)** → คงบล็อก `[DB]` (`php artisan migrate --force` ผ่าน
+  `--env-file .env` ทั้งไฟล์ — **ไม่ใช่** `-e DATABASE_URL` ตัวเดียว) + ใช้บรรทัด `[DB][LARAVEL]` ใน compose
+  ทั้ง 2 ไฟล์แทน `DATABASE_URL:` (เหตุผล → `references/shapes.md` §Laravel)
 - **CI4 (ข้อ 5 = spark migrate)** → คงบล็อกไว้ เปลี่ยนคำสั่งเป็น
   `php spark migrate --all` — ห้ามลบบล็อกทิ้ง เพราะ contract คือ migrate ก่อน deploy
 - **legacy / WordPress** → ลบบล็อก `[DB]` (ไม่มี migration tool มาตรฐาน;
@@ -468,13 +274,11 @@ render เอกสารส่ง admin (§5.7):
   ```
 
   `<name>` ที่ไม่อยู่ในบรรทัดนี้ถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว
-  `www-data` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม §2.9 / `references/docker-deploy.md` §H
-- **มีทั้ง `[VOLUME]` และ `[WP]` (WordPress ที่มี volume อื่นนอกจาก wp-content)**
-  → compose มี **สอง** บล็อกคอมเมนต์ `volumes:` แยกกัน แต่ YAML อนุญาต key
-  `volumes:` ได้ **แค่อันเดียวต่อ service** — ต้อง **merge รายการทั้งหมดเข้า
-  `volumes:` ก้อนเดียว** ไม่ใช่ปล่อยสองก้อนไว้ (จะ parse ไม่ผ่าน หรือก้อนหลัง
-  ทับก้อนแรกเงียบ ๆ ขึ้นกับ parser) และ `wp-content` ต้องอยู่ในรายการที่ merge
-  แล้วเสมอ:
+  `www-data` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม `references/org-standards.md` §9 / `references/volumes.md`
+- **มีทั้ง `[VOLUME]` และ `[WP]` (WordPress ที่มี volume อื่นนอกจาก wp-content)** → compose มี
+  **สอง** บล็อกคอมเมนต์ `volumes:` แต่ YAML ยอม key `volumes:` **แค่อันเดียวต่อ service**
+  (สองก้อน = parse ไม่ผ่าน หรือก้อนหลังทับก้อนแรกเงียบ ๆ ขึ้นกับ parser) — ต้อง **merge
+  ทั้งหมดเข้า `volumes:` ก้อนเดียว** และ `wp-content` ต้องอยู่ในรายการที่ merge แล้วเสมอ:
 
   ```yaml
   volumes:
@@ -483,18 +287,10 @@ render เอกสารส่ง admin (§5.7):
   ```
 
 - **อยู่หลัง reverse-proxy subpath (ข้อ 3 = ใช่)** → คำตอบนี้ต้องกลายเป็นค่า
-  env ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้: เพิ่มลง `.env`/`.env.dev` (§5.5) ให้ตรง shape —
-  - **Laravel**: `APP_URL=<URL เต็มรวม path>` (+ `ASSET_URL` เมื่อ asset โดน
-    proxy ตัด path)
-  - **CodeIgniter 4**: `app.baseURL=<URL เต็มรวม path>/`
-  - **WordPress**: `WP_HOME` + `WP_SITEURL` = URL เต็มรวม path
-  - CI3/legacy: `base_url` ใน config ของโปรเจคเอง · แอป legacy ที่อ้าง asset
-    แบบ **relative** (ไม่มี config กลางให้แก้) → วาง inline redirect เติม
-    trailing slash เป็นสิ่งแรกใน `<head>` ของ entry/header ร่วม — สูตรพิสูจน์
-    แล้วใน `references/docker-deploy.md` §G (เปิดผ่าน `…/app` ไม่มี `/` ท้าย
-    แล้ว asset relative หลุด subpath 404 ทั้งหน้า)
-  แล้วเช็คของจริงตาม checklist: เปิดแอป**ผ่าน URL เต็มหลัง proxy** ไม่ใช่
-  `localhost:port` (อย่างหลังผ่านเสมอแม้ config ผิด)
+  env ฝั่งแอปจริง ๆ ในขั้นนี้ ไม่ใช่แค่จดไว้: เพิ่มลง `.env`/`.env.dev` (§5.5) ให้ตรง shape
+  (Laravel `APP_URL`/`ASSET_URL` · CI4 `app.baseURL` · WordPress `WP_HOME`/`WP_SITEURL` ·
+  CI3/legacy `base_url` หรือสูตร inline redirect สำหรับ asset relative) → **`references/subpath.md`**
+  · เช็คของจริงด้วยการเปิด**ผ่าน URL เต็มหลัง proxy** ไม่ใช่ `localhost:port`
 - **host มีแต่ `docker-compose` v1 (ข้อ 7)** → เปลี่ยน `docker compose -f ... up`
   ใน Jenkinsfile กลับเป็น `docker-compose -f ... up` (สอง binary ไม่ compatible
   100%) — กรณีนี้ควรเป็นข้อยกเว้น ไม่ใช่ค่าปกติ
@@ -523,17 +319,8 @@ stage ที่ 1 ก่อนถึงอย่างอื่น
   composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit
   ```
 
-> **[WP] WordPress เดินเส้นเดียวกับ legacy ข้อนี้** — repo ของโปรเจค WordPress
-> แทบไม่เคยมี `composer.json` (core มากับ base image, ปลั๊กอินติดตั้งผ่าน
-> wp-admin) แต่ **ไม่ได้แปลว่าข้ามขั้นนี้ได้** เพราะ Jenkinsfile ยังรัน
-> `composer install` + `vendor/bin/*` ให้ shape นี้เหมือนกันเป๊ะ ๆ →
-> `composer init --no-interaction --name org/<project>` แล้ว
-> `composer require --dev ...` ทั้ง 3 ตัวตามปกติ. `composer.json` ที่ได้จะมีแต่
-> `require-dev` (ไม่มี runtime dependency สักตัว) — **ถูกต้องแล้ว** ไม่ใช่ความ
-> ผิดพลาด: `Dockerfile.wordpress` ไม่รัน composer เลย ไฟล์ชุดนี้มีไว้ให้ CI
-> ใช้อย่างเดียว (`Dockerfile.web` ก็รองรับเคสนี้ด้วย — `composer install
-> --no-dev` บน composer.json ที่ไม่มี runtime dependency แค่ไม่ติดตั้งอะไร
-> แล้วจบแบบสำเร็จเฉย ๆ ไม่ต้องมี `|| true` มากลืน error)
+> **[WP] WordPress ไม่ข้ามขั้นนี้** — `composer init` + `require --dev` ทั้ง 3 ตัวเหมือน legacy
+> (`composer.json` ที่มีแต่ `require-dev` ถูกต้องแล้ว — `references/shapes.md` §WordPress)
 
 - **commit `composer.lock`** — Install stage กับ image ต้อง resolve ชุดเดียวกัน
   ทุกครั้ง ไม่งั้น scan กับที่ deploy คนละ dependency tree
@@ -541,20 +328,9 @@ stage ที่ 1 ก่อนถึงอย่างอื่น
   production image (`Dockerfile.wordpress` ไม่รัน composer เลย — core มากับ
   base image)
 
-> **`phpunit.xml` ที่ให้มาเป็น schema ของ PHPUnit ≥ 10** (ใช้ `<source>` +
-> `<logging><junit>`). โปรเจค legacy ที่ `composer.json` ปักเวอร์ชัน PHP เก่า
-> (`require.php` หรือ `config.platform.php`) จะถูก composer resolve ไปได้แค่
-> PHPUnit 9 ซึ่ง **ไม่รู้จัก `<source>`** (element นี้เข้ามาใน schema 10 —
-> 9.x ใช้ `<coverage><include>`) ผลที่ตามมา **ต่างกันตาม 9.x minor**: บางรุ่น
-> เตือนแล้วรันต่อโดยไม่ config coverage, บางรุ่นปฏิเสธไฟล์ทั้งไฟล์ —
-> ปลายทางที่เจอบ่อยคือ `clover.xml` ว่างหรือไม่ถูกสร้าง แล้ว `new_coverage`
-> อ่านเป็น 0% ซึ่ง gate บล็อกโดยไม่มี error ชี้สาเหตุ. **ตรวจในเครื่องก่อน**
-> (`vendor/bin/phpunit --version` + ดูว่ามี `clover.xml` ออกมาจริงไหม ตาม §5.6)
-> อย่าเดาจากเลขเวอร์ชันอย่างเดียว แล้วเลือกทางใดทางหนึ่ง **ก่อน push แรก**:
-> (ก) ปลด/bump ข้อจำกัดให้ composer ลง PHPUnit ≥ 10 ได้ (CI image เป็น PHP 8.3
-> อยู่แล้ว) หรือ (ข) แปลง `phpunit.xml` เป็น schema 9 (`<coverage><include>
-> <directory>` แทน `<source>`) — ทั้งสองทาง **ผลลัพธ์ต้องคงเดิม**: ได้
-> `test-results/junit.xml` + `clover.xml` ครบทั้งคู่
+> **`phpunit.xml` ที่ให้มาเป็น schema ของ PHPUnit ≥ 10** — โปรเจคที่ composer resolve ได้แค่
+> PHPUnit 9 (ปัก PHP เก่า) ต้องแก้ **ก่อน push แรก** ไม่งั้น `clover.xml` ไม่เกิดแล้ว gate อ่าน
+> coverage 0% → สองทางแก้ใน `references/shapes.md` §legacy
 
 ### 5.5 ไฟล์ env ในเครื่อง + `.gitignore`
 
@@ -685,7 +461,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | Baseline โค้ดเดิมด้วย `phpstan-baseline.neon` / `ignoreErrors` ระบุ path+เหตุผล | `excludePaths` ยกโฟลเดอร์ / `ignoreErrors: ['#.*#']` / ถอด `@PSR12` |
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `vendor` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
-| `pdo_sqlsrv` มาคู่กับ `msodbcsql18` + `unixodbc-dev` (→ references §C) | `pecl install sqlsrv` บรรทัดเดียว (fail ที่ configure หา `sql.h` ไม่เจอ) |
+| `pdo_sqlsrv` มาคู่กับ `msodbcsql18` + `unixodbc-dev` (→ `references/sqlserver.md`) | `pecl install sqlsrv` บรรทัดเดียว (fail ที่ configure หา `sql.h` ไม่เจอ) |
 
 ## 7. Verification Checklist
 
@@ -695,131 +471,21 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 node <skill-dir>/scripts/verify.mjs
 ```
 
-ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง — ยกเว้น `__DIR__`, ครบ 10 stages +
-`emailext` ×4, brace balance หลังลบบล็อก, บล็อก `[LARAVEL]` ตรงกับ framework,
-`composer install` ใน `Dockerfile.web` ต้องมี `--no-scripts` (ไม่ใช่ `|| true`)
-พร้อม `composer dump-autoload` หลัง `COPY . .`, `/api/health` อยู่ใต้ docroot
-ที่เสิร์ฟจริง, `volumes:` ก้อนเดียวต่อ service, `mkdir -p` ↔ bind, composer +
-require-dev 3 ตัว, schema `phpunit.xml` ตรงกับเวอร์ชันที่ composer resolve,
-path ใน `sonar.sources` มีจริง, compose, tooling, health, ไฟล์ที่ §5.1 copy มาครบ)
-— ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+script ครอบฝั่ง repo ให้ทั้งหมด (อ่านเฉพาะบรรทัดที่ยังทำงานจริง — ตัดคอมเมนต์ออกก่อน)
+ส่วนที่เหลือไล่ตาม **`references/verification.md`** ซึ่งมีรายการเต็ม: สิ่งที่ script
+ไม่ตรวจโดยตั้งใจ · ไฟล์ในโปรเจค · ฝั่ง server (admin ยืนยัน) · รันจริง. ขั้นต่ำที่ห้ามข้าม:
 
-> **ทุก check ที่อ่าน Jenkinsfile / Dockerfile / compose อ่านเฉพาะบรรทัดที่ยัง
-> ทำงานจริง** (ตัดคอมเมนต์ออกก่อน) — ไฟล์ template พก legend, บล็อก `[LARAVEL]`
-> และบล็อก `volumes:` ทั้ง `[VOLUME]`/`[WP]` ไว้เป็นคอมเมนต์ ถ้าอ่านดิบ ๆ ป้าย
-> พวกนี้กับชื่อ volume ตัวอย่างจะทำให้ check ผ่านฟรีทั้งที่ยังไม่ได้เปิดใช้จริง
-
-**ไม่ตรวจโดยตั้งใจ (out of scope ของ script — ต้องตรวจเอง):**
-
-- **พฤติกรรมตอนรันจริงของ `/api/health`** — script พิสูจน์แค่ว่าไฟล์/route มีจริง
-  **และอยู่ใต้ docroot ของ shape นั้น**; ส่วน "เข้าได้โดยไม่ต้อง login" กับ
-  "200 healthy / 503 degraded" ต้องยิงจริงตามหัวข้อ **รันจริง** ท้ายหน้านี้
-- **[subpath]** (`APP_URL`/`ASSET_URL` · `app.baseURL` · `WP_HOME`/`WP_SITEURL`)
-  — ค่าเหล่านี้อยู่ใน `.env` ที่ gitignore ไว้ ตรวจแทนไม่ได้ ต้องเปิดผ่าน URL
-  เต็มหลัง proxy เอง
-- **§5.6 toolchain ในเครื่อง** (`php -l` / `php-cs-fixer` / `phpstan` /
-  `phpunit`) — ต้องมี `vendor/` จริงถึงจะรู้ผล script ไม่รันแทนให้
-- **[WP] โค้ดใน `wp-content` ขึ้น container ทางไหน** (§5.3 ข้อ 1 หรือ 2) — เป็น
-  มติที่ต้องคุยกับผู้ใช้ ไม่ใช่สิ่งที่อ่านจากไฟล์ได้ · script ตรวจแค่ว่า
-  `wp-content` เป็น volume จริงและ `wp-config.php` ปิด auto-update แล้ว
-- **ค่าใน `.env` / `.env.dev`** — เช็คแค่ว่ามีไฟล์และมี `APP_PORT` (เตือน ไม่
-  fail เพราะ clone ใหม่ยังไม่มีทั้งคู่ตามปกติ) · **ไม่อ่านค่า secret ใด ๆ** ·
-  คีย์ที่ framework ต้องใช้ (`APP_KEY`, `WORDPRESS_DB_*`) เป็นของ admin
-- **ฝั่ง server ทั้งหมด** (Jenkins tools/credentials/global env, docker group,
-  SonarQube projects + gate, webhook, `proxy-network` บน host) — อยู่นอก repo
-
-**ไฟล์ในโปรเจค:**
-
-- [ ] `Jenkinsfile` ครบ 10 stages + post (emailext ×4 + `cleanWs`) — ไม่มี
-      `__*__` ค้าง
-- [ ] บล็อก `[DB]` / `[VOLUME]` / `[WP]` / `[LARAVEL]` คงหรือถูกลบตรงตามคำตอบ
-      interview — และ Groovy ยัง parse ผ่านหลังลบ (brace ครบ) · **`[WEB]` คงไว้
-      เสมอ** (PHP มี shape เดียว — §2.8; ป้ายนี้มีไว้บอกว่าก้อนไหนคือ health
-      poll ไม่ใช่ให้เลือกลบ)
-- [ ] `Dockerfile` มาจาก shape ที่ถูก (`Dockerfile.web` สำหรับ laravel/
-      codeigniter/legacy · `Dockerfile.wordpress` สำหรับ wordpress) ·
-      `Dockerfile.ci` อยู่ที่ **root** ด้วยอีกไฟล์
-- [ ] Laravel/CI4: บล็อก `[LARAVEL]` (sed DocumentRoot → `public/`) ถูก
-      uncomment แล้ว · shape อื่น: ถูกลบทิ้งแล้ว
-- [ ] [subpath] เปิดแอป**ผ่าน URL เต็มหลัง reverse proxy** ได้จริง (ตั้ง
-      `APP_URL`/`ASSET_URL` · `app.baseURL` · `WP_HOME`/`WP_SITEURL` ตาม §5.3
-      แล้ว) — ทดสอบแค่ `localhost:port` ผ่านเสมอแม้ config ผิด
-- [ ] health endpoint: `/api/health` เข้าถึงได้จริงตาม docroot ของ shape นั้น
-      (Laravel = route ใน `routes/api.php` (ไม่ใช่ `routes/web.php` — เลี่ยง
-      session middleware ที่ทำ 500 ตอนยังไม่ migrate) · CI4 =
-      `public/api/health/index.php` · CI3/legacy/WordPress =
-      `api/health/index.php`) · ไม่ต้อง login · 200 healthy / 503 degraded ·
-      ไม่มี version/commit ใน response
-- [ ] `sonar-project.properties`: `sonar.projectKey`/`projectName` แทนค่าแล้ว ·
-      **ทุก path ใน `sonar.sources`/`sonar.tests` มีอยู่จริงในโปรเจค** ·
-      `sonar.php.coverage.reportPaths=clover.xml`
-- [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
-- [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
-      healthcheck ยิง `127.0.0.1:80` · volume (ถ้ามี) อยู่ใต้ `/home/docker02/appdata/` ·
-      มี `volumes:` **ก้อนเดียว** ต่อ service
-- [ ] shape = wordpress: `wp-content` อยู่ใน `volumes:` ทั้ง 2 ไฟล์ ·
-      `wp-config.php` มี `define('WP_AUTO_UPDATE_CORE', false);` ·
-      `__ENTRY_FILE__` = `api/health/index.php` (**ไม่ใช่** `index.php` ที่ไม่มี
-      ใน repo) · **บรรทัด `compose up` ในสเตจ Deploy มี `--force-recreate
-      --renew-anon-volumes`** (webroot ของ image เป็น anonymous volume — ไม่มี
-      flag นี้ไฟล์ health เวอร์ชันใหม่ไม่ขึ้นถึง container ตั้งแต่ deploy รอบ 2) ·
-      บล็อกเช็ค DB ในไฟล์ health ใช้ `mysqli` ไม่ใช่ PDO (image ไม่มี
-      `pdo_mysql`) หรือเติม `docker-php-ext-install pdo_mysql` แล้ว ·
-      มี `composer.json` + `require-dev` ครบ 3 ตัวเหมือน shape อื่น ·
-      บอกผู้ใช้แล้วว่าโค้ดใน `wp-content` ขึ้น container ทางไหน (§5.3 ข้อ 1 หรือ 2)
-- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `for p in` ของ
-      บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
-- [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
-      (`git check-ignore .env .env.dev` → exit 0) · `.env.example` commit แล้ว
-      และ **ไม่** ถูก ignore
-- [ ] `php -l` ทุกไฟล์ · `vendor/bin/php-cs-fixer fix --dry-run` ·
-      `vendor/bin/phpstan analyse` · `vendor/bin/phpunit` ผ่านครบในเครื่องก่อน
-      push แรก (§5.6) — baseline ที่มีระบุ path+เหตุผล ไม่ใช่ปิดยกโปรเจค
-- [ ] `phpunit.xml` ตรงกับเวอร์ชัน PHPUnit ที่ composer resolve จริง (schema ≥10
-      ตาม asset หรือแปลงเป็น 9 แล้ว) และออก `test-results/junit.xml` +
-      `clover.xml` ครบทั้งคู่
-- [ ] `composer.json` + `composer.lock` อยู่ที่ root และ commit แล้ว ·
-      dev tooling ทั้ง 3 ตัวอยู่ใน `require-dev` (ไม่ใช่ `require`)
-- [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `*Test.php` และ `tests/SmokeTest.php` ชี้
-      `__ENTRY_FILE__` ที่มีอยู่จริง (`vendor/bin/phpunit` ผ่านในเครื่อง)
-- [ ] `.dockerignore` มี `vendor`, `coverage`, `dc-report`, `test-results`,
-      `.env`, `.env.*` (+ `!.env.example`) — CI3/legacy เพิ่มไฟล์ config DB
-      ของโปรเจคเองถ้าไม่ใช้ `.env`
-- [ ] `.claude/rules/ugt-php-ci.md` อยู่ในที่ของมัน **และไม่มี `__PROJECT_NAME__`
-      ค้าง** (ชื่อ CI image 2 จุดในไฟล์นั้นต้องถูกแทนค่าแล้ว)
-- [ ] `docs/admin-handoff.md` ถูก render แล้ว (ไม่มี `__*__` ค้าง, หัวข้อที่ไม่
-      ใช้ถูกลบ)
-
-**ฝั่ง server (admin ยืนยัน) — `docs/admin-handoff.md` ที่ส่งไปครอบรายการนี้
-ด้วยชื่อจริงของโปรเจคแล้ว:**
-
-- [ ] Jenkins tool ชื่อตรงเป๊ะ: `SonarQube-Scanner`, `Dependency-Check` ·
-      SonarQube server entry ชื่อ `SonarQube` — **ไม่ต้องขอ Global Tool ของ
-      PHP/composer/NodeJS** (มติ M8: toolchain รันใน docker ทั้งหมด)
-- [ ] **Jenkins user อยู่ใน `docker` group** (มติ M8 — ไม่มีข้อนี้ทุก stage พัง
-      ตั้งแต่ Install ที่ `docker build -f Dockerfile.ci`)
-- [ ] Credentials ครบ: `nvd`, `env-<project>`, `env-<project>-dev`
-- [ ] Global env vars: `NOTIFY_EMAIL`, `SMTP_FROM`
-- [ ] webhook ทั้งคู่: GitHub → Jenkins (`/github-webhook/`) และ
-      SonarQube → Jenkins (`/sonarqube-webhook/`)
-- [ ] SonarQube projects prod+dev สร้างแล้ว + assign Quality Gate ตาม §2.4
-      ให้ทั้งสอง
-- [ ] ปิด Lightweight checkout ใน job config
-- [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server) —
-      บังคับสำหรับ WordPress ทุกโปรเจค (wp-content) และทุกโปรเจคที่ตอบข้อ 6
-- [ ] network `proxy-network` มีอยู่บน host (`external: true` ในทั้ง 2 compose)
-- [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)
-
-**รันจริง:**
-
-- [ ] push `develop` → pipeline เขียวครบ 10 stages · coverage report + DC report
-      ขึ้นบนหน้า build
-- [ ] container `healthy` ภายใน 4 นาที · เข้าแอปผ่าน reverse proxy ได้
-- [ ] shape = wordpress: อัปโหลดไฟล์/ติดตั้ง plugin 1 ตัว → deploy ซ้ำ → ของยัง
-      อยู่ (พิสูจน์ว่า `wp-content` bind mount ทำงานจริง)
-- [ ] อีเมลผลลัพธ์ถึง `NOTIFY_EMAIL`
-- [ ] พิสูจน์ว่า gate บล็อกจริง: ใส่ violation เข้าไป 1 จุด → pipeline ต้อง abort
-      ที่สเตจ Quality Gate
+- [ ] `verify.mjs` ไม่มี fail · ไม่มี `__*__` ค้าง (ยกเว้น `__DIR__`) ทั้งในไฟล์โปรเจค,
+      `.claude/rules/ugt-php-ci.md` และ `docs/admin-handoff.md`
+- [ ] toolchain §5.6 ผ่านในเครื่อง (`php -l` · `php-cs-fixer fix --dry-run` · `phpstan` ·
+      `phpunit`) และได้ `clover.xml` + `test-results/junit.xml` จริง
+- [ ] ยิง `/api/health` จริงตาม docroot ของ shape — ไม่ต้อง login · 200 healthy /
+      503 degraded · ไม่มี version/commit · [subpath] เปิดผ่าน **URL เต็มหลัง proxy**
+- [ ] shape = wordpress: บอกผู้ใช้แล้วว่าโค้ดใน `wp-content` ขึ้น container ทางไหน ·
+      deploy ซ้ำแล้วไฟล์ที่อัปโหลดยังอยู่
+- [ ] admin ยืนยันฝั่ง server ครบตาม `docs/admin-handoff.md` (`docker` group, credentials `nvd` /
+      `env-<project>` / `env-<project>-dev`, webhook ทั้งคู่, Quality Gate ตาม §2, `proxy-network`)
+- [ ] push `develop` → เขียวครบ 10 stages · ใส่ violation 1 จุดแล้ว pipeline abort ที่ Quality Gate
 
 ## 8. หลังจากนี้ (optional)
 

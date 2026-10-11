@@ -7,7 +7,7 @@
 // can't be found is a FAIL, never a pass.
 // Only the repo side is checkable here; the server side (Jenkins
 // tools/credentials, docker group membership, SonarQube projects, webhooks)
-// needs admin confirmation — see §7 (server side) in SKILL.md.
+// needs admin confirmation — see references/verification.md (server side).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -93,7 +93,7 @@ check('CI files present', () => {
 });
 
 // ── 2. /api/health — three fixed locations, never a tree walk ──────────────
-// SKILL.md §5.3: Laravel serves /api/health as a route (DocumentRoot = public/
+// references/shapes.md §Laravel: Laravel serves /api/health as a route (DocumentRoot = public/
 // so a root-level file is never served); CI4/legacy/WordPress serve it as a
 // plain file. Checking a small fixed set instead of walking **/*.php avoids
 // false hits inside vendor/ and matches exactly the locations the setup step
@@ -104,7 +104,7 @@ check('/api/health exists (Laravel route or PHP file)', () => {
   if (has('routes')) {
     for (const f of readdirSync(p('routes')).filter((n) => n.endsWith('.php'))) {
       const src = read('routes', f);
-      // routes/api.php gets the default `api` prefix, so `/health` there IS /api/health (§5.3, 0.6.4)
+      // routes/api.php gets the default `api` prefix, so `/health` there IS /api/health (references/shapes.md §Laravel, 0.6.4)
       if (src.includes('/api/health') || (f === 'api.php' && /Route::(get|any)\(\s*['"]\/health['"]/.test(src))) {
         routeHit = `routes/${f}`;
         break;
@@ -115,7 +115,7 @@ check('/api/health exists (Laravel route or PHP file)', () => {
     return {
       ok: 'warn',
       msg:
-        'health route lives in routes/web.php — the `web` middleware group runs StartSession; with SESSION_DRIVER=database and no sessions table yet it answers 500 → move it to routes/api.php (§5.3)',
+        'health route lives in routes/web.php — the `web` middleware group runs StartSession; with SESSION_DRIVER=database and no sessions table yet it answers 500 → move it to routes/api.php (references/shapes.md §Laravel)',
     };
   }
   if (!fileHits.length && !routeHit) {
@@ -212,8 +212,8 @@ check('No PDO::ATTR_TIMEOUT alongside an sqlsrv: DSN (pdo_sqlsrv throws, does no
   // drifts build to build) -- it throws `SQLSTATE[IMSSP]: An unsupported
   // attribute was designated on the PDO object` at connect time instead of
   // ignoring it, turning a clean 503 into a fatal 500 and the container never
-  // reports healthy (confirmed incident: ugt-bd-forecast 2026-09-03; §C of
-  // docker-deploy.md). LoginTimeout in the DSN already covers the connect-hang
+  // reports healthy (confirmed incident: ugt-bd-forecast 2026-09-03; references/
+  // sqlserver.md). LoginTimeout in the DSN already covers the connect-hang
   // this attribute was meant to guard against — there is no reason to combine
   // the two, so this is a hard fail, not a warn.
   // strip `/* */` blocks and whole-line `//` comments first (same convention
@@ -232,7 +232,7 @@ check('No PDO::ATTR_TIMEOUT alongside an sqlsrv: DSN (pdo_sqlsrv throws, does no
     return /sqlsrv:/.test(body) && /PDO::ATTR_TIMEOUT/.test(body);
   });
   return hits.length
-    ? { ok: false, msg: `${hits.join(', ')}: PDO::ATTR_TIMEOUT next to an sqlsrv: DSN — drop PDO::ATTR_TIMEOUT entirely (docker-deploy.md §C); LoginTimeout in the DSN already covers connect timeout` }
+    ? { ok: false, msg: `${hits.join(', ')}: PDO::ATTR_TIMEOUT next to an sqlsrv: DSN — drop PDO::ATTR_TIMEOUT entirely (references/sqlserver.md); LoginTimeout in the DSN already covers connect timeout` }
     : { ok: true };
 });
 
@@ -385,7 +385,7 @@ check('Quality Gate actually blocks the pipeline', () => {
 check('post block complete (emailext ×4 + cleanWs)', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
-  // §7 declares emailext ×4 — one per outcome. Missing `failure` is the
+  // references/verification.md declares emailext ×4 — one per outcome. Missing `failure` is the
   // expensive one: the pipeline goes red and nobody is told.
   const missingOutcome = ['success', 'unstable', 'failure', 'aborted'].filter(
     (o) => !new RegExp(String.raw`\b${o}\s*\{[\s\S]{0,200}?emailext`).test(jfActive)
@@ -428,7 +428,7 @@ check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
   // $PWD/$WORKSPACE is a path INSIDE the agent — the host docker daemon that
   // `docker run -v` talks to over docker.sock has never heard of it and tries
   // to mkdir it on the host, hitting a read-only filesystem (confirmed
-  // incident: ugt-bd-forecast, 2026-09-03; see docker-deploy.md §I). This is a
+  // incident: ugt-bd-forecast, 2026-09-03; see references/volumes.md, DooD). This is a
   // plain per-line grep, not a real block-scope parse, so it can false-positive
   // inside a `.inside{}` block that legitimately builds its own `sh` string —
   // warn only, never fail the build on it.
@@ -440,7 +440,7 @@ check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
   return hits.length
     ? {
         ok: 'warn',
-        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (docker-deploy.md §I)`,
+        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (references/volumes.md, DooD)`,
       }
     : { ok: true };
 });
@@ -543,7 +543,7 @@ check('Dockerfile has a HEALTHCHECK', () => {
     : { ok: false, msg: 'No HEALTHCHECK — the Deploy stage cannot poll for healthy' };
 });
 
-// §2.8 — the two ways a healthcheck reports green while the app is down.
+// references/org-standards.md §8 — the two ways a healthcheck reports green while the app is down.
 // Both were found on the pilot project, both are invisible in a build log.
 check('healthcheck survives redirects and PHP hardening', () => {
   const spots = [
@@ -557,7 +557,7 @@ check('healthcheck survives redirects and PHP hardening', () => {
     if (!line) continue;
     if (/file_get_contents/.test(line)) {
       problems.push(
-        `${name}: healthcheck uses php file_get_contents — returns false whenever the project sets allow_url_fopen=Off (standard OWASP RFI hardening), so the container never reports healthy and nothing logs why (§2.8: use curl -fsS -L)`,
+        `${name}: healthcheck uses php file_get_contents — returns false whenever the project sets allow_url_fopen=Off (standard OWASP RFI hardening), so the container never reports healthy and nothing logs why (org-standards.md §8: use curl -fsS -L)`,
       );
       continue;
     }
@@ -566,7 +566,7 @@ check('healthcheck survives redirects and PHP hardening', () => {
     // shapes add one) — without -L that is a green healthcheck over a 503.
     if (/\bcurl\b/.test(line) && !/-[a-zA-Z]*L\b|--location/.test(line) && !/api\/health\/["'\s]|api\/health\/$/.test(line)) {
       problems.push(
-        `${name}: curl healthcheck has neither -L nor a trailing slash on /api/health/ — curl -f treats Apache's 301 as success, so it reports healthy even when the endpoint underneath returns 503 (§2.8)`,
+        `${name}: curl healthcheck has neither -L nor a trailing slash on /api/health/ — curl -f treats Apache's 301 as success, so it reports healthy even when the endpoint underneath returns 503 (org-standards.md §8)`,
       );
     }
   }
@@ -574,7 +574,7 @@ check('healthcheck survives redirects and PHP hardening', () => {
 });
 
 // [WP] contract: wp-content must always be a mounted volume under /home/docker02/appdata
-// when the Dockerfile is WordPress-shaped (SKILL.md §5.3/§2.9) — this is the
+// when the Dockerfile is WordPress-shaped (references/shapes.md §WordPress, references/org-standards.md §9) — this is the
 // one exception to "delete [VOLUME] block if nothing persists", so it is
 // checked unconditionally and FAILs (not warns) when missing.
 check('[WP] wp-content volume present when Dockerfile is FROM wordpress', () => {
@@ -594,7 +594,7 @@ check('[WP] wp-content volume present when Dockerfile is FROM wordpress', () => 
     if (!hasUncommentedVolume) problems.push(`${f}: no uncommented wp-content volume under /home/docker02/appdata`);
   }
   return problems.length
-    ? { ok: false, msg: `Dockerfile is FROM wordpress — ${problems.join(' · ')} (SKILL.md §2.9: wp-content is a mandatory volume for WordPress)` }
+    ? { ok: false, msg: `Dockerfile is FROM wordpress — ${problems.join(' · ')} (references/org-standards.md §9: wp-content is a mandatory volume for WordPress)` }
     : { ok: true };
 });
 
@@ -629,7 +629,7 @@ check('phpunit.xml emits junit.xml + clover.xml', () => {
 });
 
 check('phpunit.xml schema matches the PHPUnit version composer resolved', () => {
-  // §5.4: PHPUnit 9 cannot read the <source> element of the schema-10 asset →
+  // §5.4 + references/shapes.md §legacy: PHPUnit 9 cannot read the <source> element of the schema-10 asset →
   // coverage is never configured, clover.xml comes out empty, new_coverage
   // reads 0% and the gate blocks with no error pointing at the cause.
   if (!has('phpunit.xml') || !has('composer.lock')) return { ok: true };
@@ -641,10 +641,10 @@ check('phpunit.xml schema matches the PHPUnit version composer resolved', () => 
   const schema10 = /<source\b/.test(body);
   if (Number.isNaN(major)) return { ok: true };
   if (major <= 9 && schema10) {
-    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml uses the schema-10 <source> element — PHPUnit 9 ignores it, clover.xml comes out empty and the gate blocks (§5.4: bump PHPUnit, or convert phpunit.xml to <coverage><include>)` };
+    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml uses the schema-10 <source> element — PHPUnit 9 ignores it, clover.xml comes out empty and the gate blocks (references/shapes.md §legacy: bump PHPUnit, or convert phpunit.xml to <coverage><include>)` };
   }
   if (major >= 10 && !schema10 && /<coverage\b[\s\S]*?<include\b/.test(body)) {
-    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml still uses the schema-9 <coverage><include> shape — PHPUnit 10 removed it (§5.4)` };
+    return { ok: false, msg: `composer resolved phpunit ${pkg.version} but phpunit.xml still uses the schema-9 <coverage><include> shape — PHPUnit 10 removed it (references/shapes.md §legacy)` };
   }
   return { ok: true };
 });
@@ -676,7 +676,7 @@ check('tests/ has SmokeTest.php pointing at an entry file that exists', () => {
     return { ok: false, msg: 'No tests/SmokeTest.php — §5.1 copies it into every project (the __ENTRY_FILE__ existence check)' };
   }
   // The placeholder scan proves __ENTRY_FILE__ was replaced; this proves it was
-  // replaced with a path that is really there (§7: WordPress must point at
+  // replaced with a path that is really there (references/verification.md: WordPress must point at
   // api/health/index.php, never the index.php that is not in the repo).
   const m = read('tests/SmokeTest.php').match(/__DIR__\s*\.\s*['"]\/\.\.\/([^'"]+)['"]/);
   if (!m) return { ok: 'warn', msg: 'tests/SmokeTest.php no longer uses the __DIR__ . "/../<entry>" form — cannot verify the entry path automatically' };
@@ -734,13 +734,13 @@ check('Scheduled jobs go through host cron, not the Laravel scheduler', () => {
     /\bSchedule::|\$schedule->|->withSchedule\(|Artisan::command\([\s\S]*?\)\s*->\s*(?:hourly|daily\w*|weekly\w*|monthly\w*|yearly|every\w+|cron|twiceDaily\w*|weekdays|weekends)\s*\(/.test(code(f))
   );
   return hit
-    ? { ok: false, msg: `${hit} defines a Laravel schedule — org rule: each job is an artisan command with its own host-cron line in the admin handoff cron table (references/docker-deploy.md §A), never schedule:run` }
+    ? { ok: false, msg: `${hit} defines a Laravel schedule — org rule: each job is an artisan command with its own host-cron line in the admin handoff cron table (references/docker-deploy.md, host cron), never schedule:run` }
     : { ok: true };
 });
 
 check('docs/admin-handoff.md rendered', () => {
   // Content (leftover __*__) is covered by the placeholder scan above; this is
-  // the existence half of the same §7 line.
+  // the existence half of the same references/verification.md line.
   return has('docs/admin-handoff.md')
     ? { ok: true }
     : { ok: 'warn', msg: 'docs/admin-handoff.md missing — §5.7 renders it; the admin gets a chat snippet instead of a file' };

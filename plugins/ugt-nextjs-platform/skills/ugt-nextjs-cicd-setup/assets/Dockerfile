@@ -36,7 +36,7 @@ ARG NEXT_PUBLIC_APP_NAME=__PROJECT_DISPLAY_NAME__
 # [SENTRY] delete this ARG if the project has no Sentry
 ARG NEXT_PUBLIC_SENTRY_DSN
 # Version-skew protection: the Jenkinsfile passes BUILD_NUMBER (not a secret) and
-# next.config reads it as `deploymentId` (references/docker-deploy.md §I).
+# next.config reads it as `deploymentId` (references/version-skew.md).
 # Never delete: without it a tab left open across a redeploy fails every Server Action.
 ARG NEXT_DEPLOYMENT_ID
 

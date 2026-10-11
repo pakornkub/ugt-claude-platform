@@ -20,10 +20,10 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.77.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-python-platform` | 0.9.1 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-php-platform` | 0.8.1 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.14.2 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-nextjs-platform` | 4.77.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-python-platform` | 0.9.2 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-php-platform` | 0.8.2 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-core` | 2.14.3 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -253,6 +253,16 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
    bullet ใต้ `## Unreleased` ใน CHANGELOG (ไม่แตะ plugin.json / README / index.html)
    PR หลายตัวที่เปิดพร้อมกันจึงชนกันได้แค่ใน `## Unreleased` — แก้ conflict โดย
    เก็บ bullet ทุกตัวไว้ใต้หัวข้อเดียว
+   **หลัง merge ทุกครั้ง (มติผู้ดูแล 2026-10-11) — ก่อนออกรุ่น:**
+   - **code-review** ช่วง commit ที่ merge (ทุก skill ที่ PR แตะ — bug ใน asset,
+     regex ของ `verify.mjs` ที่ผ่าน/ล้มผิด, ข้อความที่ขัดกันเองหลังหลาย PR แก้ที่เดียวกัน)
+     แล้วแก้ที่ยืนยันแล้วก่อนตั้งเลขรุ่น — PR จากโปรเจคจริงพิสูจน์แค่เวอร์ชัน lib ของโปรเจคนั้น
+     (เคยหลุด: `Account.issuer` จริงเฉพาะ better-auth 1.7.0–1.7.2)
+   - **eval** ของ skill ที่ถูกแตะ: `claude plugin eval` ชุดใน `plugins/<plugin>/evals/`
+     (วิธีรัน + ข้อจำกัดบน Windows ดู CHANGELOG ugt-nextjs-platform 4.63.1) — ให้ grader
+     ตรวจผลอีกชั้น ห้ามเชื่อ score ดิบ
+   - **ขนาด**: `SKILL.md` ≤ 500 บรรทัด · ตารางอาการใน SKILL.md เป็นดัชนีบรรทัดเดียวต่ออาการ
+     · reference ที่เกิน ~200 บรรทัดหรือมีหลายเรื่อง → **แตกเป็นไฟล์ตามเรื่อง** ไม่ต่อท้ายเรื่อย ๆ
 2. **ตั้งเลขรุ่นครั้งเดียวตอน release** ต่อ plugin ที่เปลี่ยน: เปลี่ยน `## Unreleased`
    เป็น `## <version> (<YYYY-MM-DD>)` → bump `version` ใน `.claude-plugin/plugin.json`
    → แก้แถวตาราง "รุ่นล่าสุด" ใน README.md + การ์ดเวอร์ชันใน `docs/web/index.html`
@@ -273,7 +283,7 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
    เส้นคั่น header-footer และปุ่มปิดของ dialog · สีตรวจด้วยสคริปต์ข้อ 5 ให้แล้ว
 5. **ประทับ stamp ให้ asset** (ทำหลัง bump version เสมอ) แล้วรันสคริปต์ตรวจ — ต้องเขียวทุกตัว:
    ```bash
-   node scripts/stamp-kit-assets.mjs && node scripts/lint-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/stamp-kit-assets.mjs --check
+   node scripts/stamp-kit-assets.mjs && node scripts/lint-kit-assets.mjs && node scripts/check-contract-drift.mjs && node scripts/check-doc-status.mjs && node scripts/check-preview-tokens.mjs && node scripts/check-skill-size.mjs && node scripts/stamp-kit-assets.mjs --check
    ```
    แต่ละตัวทำคนละอย่าง:
 

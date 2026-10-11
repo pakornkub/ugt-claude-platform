@@ -50,7 +50,9 @@ Skill layout:
 | `assets/tooling/pyproject-tooling.toml` · `requirements-dev.txt` · `test_smoke.py` | tooling ขั้นต่ำ (ruff/mypy/pytest+cov) ให้ stage 2–4 **มีคำสั่งให้รันได้จริง** โดยไม่ต้องเขียน test เดิมใหม่ (มติ M4) — แต่โค้ดเดิมต้องผ่าน `ruff format` ก่อน ซึ่งขั้น setup จัดการให้ใน §5.6 |
 | `assets/rules/ugt-python-ci.md` | ไฟล์ `.claude/rules/` — โหลดเองเมื่อ session แตะ Jenkinsfile/Docker/Sonar (overwrite ทั้งไฟล์ได้ตอน plugin update) |
 | `assets/admin-handoff.template.md` | เอกสารส่งทีม admin — render แล้วเขียนลงโปรเจคเป็น `docs/admin-handoff.md` |
-| `references/docker-deploy.md` | กลไก deploy เชิงลึก: [WEB] vs [BATCH], host cron, volume ownership/chown, healthcheck บน slim, `.dockerignore`, compose conventions |
+| `references/org-standards.md` | contract ร่วมเต็ม (stages, toolchain, gate, credentials, secret, health, persistent data) — สรุปอยู่ §2 |
+| `references/verification.md` | เช็คลิสต์ตรวจเต็มหลัง setup (repo · server · รันจริง) — สรุปอยู่ §7 |
+| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, [WEB] vs [BATCH], host cron + ตาราง index ไปไฟล์เชิงลึก: `volumes.md` (ownership/chown, DooD) · `healthcheck.md` · `build-gotchas.md` (`.dockerignore`) · `db-dns.md` · `compose.md` · `django-static.md` |
 | `references/legacy-test-generation.md` | ขั้น optional (มติ M7) — ไล่สร้าง characterization test ให้โค้ดเดิม ทำใน session แยก |
 | `scripts/verify.mjs` | ตรวจฝั่ง repo ให้อัตโนมัติหลัง setup เสร็จ (§7) |
 
@@ -58,133 +60,36 @@ Server setup ระดับ Jenkins/SonarQube (ทำครั้งเดี�
 ไว้ในนี้** — เป็นงานฝั่ง admin ไม่ใช่ไฟล์ในโปรเจค จึงส่งผ่าน
 `assets/admin-handoff.template.md` แทน (ภาคผนวกท้ายไฟล์นั้นคือ server-level setup)
 
-## 2. Org Standards
+## 2. Org Standards (สรุป — รายละเอียดเต็ม → `references/org-standards.md`)
 
-contract ร่วมที่ **ทุกโปรเจคทำเหมือนกันหมด** ไม่ว่าภาษาอะไร:
+contract ร่วมที่ **ทุกโปรเจคทำเหมือนกันหมด** ไม่ว่าภาษาอะไร — เหตุผล + กับดักของแต่ละข้ออยู่ใน
+`references/org-standards.md` **อ่านก่อนแก้ Jenkinsfile / compose**:
 
-### 2.1 Stages (all 10, in order)
-
-```
-Checkout → Install → Code Quality (parallel: ruff check / ruff format --check / mypy)
-  → Unit Tests (JUnit + coverage publish) → Build
-  → OWASP Dependency Check (90-min timeout + suppression file)
-  → SonarQube Analysis → Quality Gate (waitForQualityGate abortPipeline: true)
-  → Docker Build → Deploy          ← last 2 stages only on main/develop
-post: emailext (success/unstable/failure/aborted) + cleanWs
-```
-
-รายการ stage คือ contract — สลับคำสั่งข้างในได้ **ห้ามตัด stage**. โครง
-10-stage นี้คงไว้แม้ stage `Build` ของ Python จะเป็น no-op (`echo` เฉย ๆ)
-เพราะ Python มี artifact เดียวคือ image ซึ่งถูกสร้างที่ stage `Docker Build`
-อยู่แล้ว — การตัดออกทำให้ pipeline ของแต่ละภาษาเทียบกันไม่ได้
-
-### 2.2 Toolchain รันใน docker (มติ M8 — ไม่แตะ Jenkins Global Tools)
-
-ทุก stage ที่ต้องใช้ Python (`Install` / `Lint` / `Format Check` / `Type Check`
-/ `Unit Tests`) เปิด `docker.image('python:3.12-slim').inside { ... }` ของตัวเอง
-— Jenkins server ไม่ต้องติดตั้ง Python เพิ่มเลย. `.venv` ถูกสร้างในสเตจ
-`Install` แล้วอยู่ใน **workspace** (ไม่ใช่ในตัว container ที่ถูกทิ้งเมื่อ stage
-จบ) จึงรอดข้ามไปสเตจถัดไปได้ เพราะ `docker.image().inside` mount workspace เดิม
-ทุกครั้ง. เงื่อนไขฝั่ง server **สองข้อ** (อยู่ในเช็คลิสต์ + ภาคผนวกของ admin
-handoff แล้วทั้งคู่):
-
-1. **ปลั๊กอิน Docker Pipeline (`docker-workflow`)** — เป็นตัวที่ให้ global
-   variable `docker` ขาดแล้ว pipeline ตายตั้งแต่ stage Install ด้วย
-   `groovy.lang.MissingPropertyException: No such property: docker` ซึ่งอ่านไม่
-   ออกว่าหมายถึงปลั๊กอินหาย · **คนละเรื่องกับการมี Docker CLI** — `sh 'docker …'`
-   ไม่ต้องใช้ปลั๊กอินนี้ แต่ `docker.image().inside{}` ต้องใช้
-2. **Jenkins user อยู่ใน `docker` group** ไม่งั้นทุก stage fail ด้วย permission
-   denied ต่อ `/var/run/docker.sock`
-
-### 2.3 Branch model
-
-| Branch | Environment | Differs in |
-| --- | --- | --- |
-| `main` | prod | container name, host port, sonar projectKey, env credential |
-| `develop` | dev | ทุกอย่างต่อท้าย `-dev` + คนละไฟล์ compose |
-
-ค่าที่ขึ้นกับ branch resolve ใน `script {}` จาก
-`def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` เสมอ —
-ห้ามใส่ค่าเฉพาะ branch ใน `environment {}` ระดับ global
-
-### 2.4 Quality Gate thresholds (org standard — วัดที่ New Code)
-
-| Condition | Threshold |
-| --- | --- |
-| `new_violations` | = 0 |
-| `new_duplicated_lines_density` | ≤ 3% |
-| `new_coverage` | ≥ 60% |
-| `new_security_hotspots_reviewed` | = 100% |
-
-OWASP publisher: **fail** at CRITICAL ≥ 1 · **unstable** at HIGH ≥ 1
-(suppression-aware — นับเฉพาะ CVE ที่ไม่ถูก suppress)
-
-ห้ามลดค่า gate ในฝั่ง SonarQube เพื่อให้ pipeline ผ่านง่ายขึ้น — โปรเจคที่ผ่อน
-ค่าเองทำให้ตัวเลขทั้งองค์กรเทียบกันไม่ได้
-
-### 2.5 Credential naming convention
-
-| Credential ID | Type | Purpose |
-| --- | --- | --- |
-| `nvd` | Secret text | NVD API key (ตัวเดียวทั้ง server ทุกโปรเจคใช้ร่วมกัน) |
-| `env-<project>` | Secret file | prod `.env` → `cp` เข้า workspace ตอน Deploy |
-| `env-<project>-dev` | Secret file | dev `.env` (คนละ DB คนละ secret กับ prod) |
-| SonarQube token | — | ผูกที่ System → SonarQube servers (`withSonarQubeEnv`) — ห้าม bind มือใน Jenkinsfile |
-
-stack นี้ **ไม่มี** `sentry-dsn-<project>` (ไม่มี client bundle ให้ inline DSN)
-
-### 2.6 Secret rules
-
-- Secrets ใน `sh` ต้องถูกขยายค่าโดย **shell** (`"$VAR"`) — ห้าม Groovy
-  interpolation (`"${VAR}"`) เพราะรั่วลง build log (ระวังเป็นพิเศษใน
-  `sh """..."""` ที่ Groovy interpolate ทุก `${}` ที่เจอ)
-- ไฟล์ชั่วคราวที่เก็บ secret (`dc-nvd.properties`) ลบใน `post { always }`
-- `NOTIFY_EMAIL` / `SMTP_FROM` = Jenkins Global env vars — ห้าม hardcode
-
-### 2.7 Build & deploy rules
-
-- Tag image ด้วย `BUILD_NUMBER` คู่กับ `latest` เสมอ — `latest` เปล่า ๆ =
-  rollback ไม่ได้
-- **Migrate ก่อน deploy** — migration fail = ไม่ deploy
-- Deploy ด้วย `--no-build` (reuse image ที่เพิ่งผ่าน Quality Gate) — ปล่อยให้
-  compose build เองจะได้ image คนละตัวกับที่ scan ผ่าน
-- Compose: `pull_policy: never` · host port override ได้จาก `.env`
-  (`${APP_PORT:-...}`) · log rotation จำกัดขนาด
-
-### 2.8 Health endpoint
-
-`/api/health` — ไม่ต้อง login · 200 `healthy` / 503 `degraded` · **ห้ามใส่
-version หรือ commit hash ใน response**. Container healthcheck ยิง `127.0.0.1`
-เท่านั้น **ไม่ใช้ `localhost`** — เป็นกติกาเชิงป้องกัน ไม่ใช่บั๊กที่ยืนยันแล้ว:
-`localhost` ต้องผ่าน resolver ซึ่งอาจให้ `::1` มาก่อน ขณะที่ uvicorn/gunicorn
-ผูก IPv4 (`--host 0.0.0.0`) — ระบุ IP ตรง ๆ ตัดตัวแปรนั้นทิ้ง ไม่ต้องลุ้น
-`/etc/hosts`/resolver order ของ base image ที่เปลี่ยนได้เงียบ ๆ ตอน bump.
-ยิง **port 8000 ภายใน container** เสมอ ไม่ใช่
-host port. `python:3.12-slim` ไม่มี `wget`/`curl` → healthcheck ใช้
-`python -c "import urllib.request,sys; ..."` (stdlib ล้วน) ทั้งใน Dockerfile และ
-compose. Shape `[BATCH]` ไม่มี health endpoint เลย (ไม่มี long-running process
-ให้ poll) — ดู `references/docker-deploy.md` §E
-
-### 2.9 Persistent data
-
-ข้อมูลที่ต้องรอดข้าม deploy ใช้ bind mount ใต้ `/home/docker02/appdata/<project>/<name>`
-(dev = `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น — ห้าม named volume,
-ห้ามเก็บ secret ใน volume, ห้าม bind โค้ดทับ image. บล็อก `[VOLUME]` ในสเตจ
-Deploy สร้าง path + `chown` ให้ตรง UID ของ user `app` ใน container ให้เอง โดย
-อ่าน UID จาก image จริง ไม่ hardcode — **มันวนเช็คทีละ subdir** (`for p in …`)
-จึงสร้าง volume ที่เพิ่มทีหลัง release แรกให้ด้วย และข้ามตัวที่มีอยู่แล้วโดยไม่
-chown ซ้ำ — แต่ **session ที่กรอก volume ต้องแทน `uploads`/`reports` ในบรรทัด
-`for p in` ด้วยชื่อจริงทุกตัว** subdir ที่ไม่อยู่ในลิสต์จะถูก dockerd สร้างเป็น
-`root:root` ตอน `up -d` แล้ว container เขียนไม่ได้ (`verify.mjs` จับข้อนี้ให้).
-admin เตรียม `/home/docker02/appdata` ให้เขียนได้ครั้งเดียวต่อ server (ดู admin handoff).
-รายละเอียดกลไก chown → `references/docker-deploy.md` §D
-
-### 2.10 CI env
-
-`CI=true` อย่างเดียว. **ไม่มีกติกา build-arg สำหรับ client-side env vars**
-แบบที่ Next.js ต้องมี (`NEXT_PUBLIC_*` ต้องเป็น `--build-arg`) เพราะ stack นี้
-ไม่มี compile-time client bundle — secret ทุกตัวเป็น runtime env จาก `.env`
-ล้วน ๆ นี่คือความง่ายที่ได้มา ไม่ใช่ของที่หายไป
+- **Stages (all 10, in order)** — Checkout → Install → Code Quality → Unit Tests → Build →
+  OWASP Dependency Check → SonarQube Analysis → Quality Gate → Docker Build → Deploy
+  (2 ตัวท้ายเฉพาะ `main`/`develop`) + post `emailext` + `cleanWs` · สลับคำสั่งข้างในได้
+  **ห้ามตัด stage** (`Build` เป็น no-op ก็คงไว้) — org-standards §1
+- **Toolchain ใน docker (มติ M8)** — ทุก stage ที่ใช้ Python เปิด
+  `docker.image('python:3.12-slim').inside` · server ต้องมีปลั๊กอิน `docker-workflow` +
+  Jenkins user อยู่ใน `docker` group — org-standards §2
+- **Branch** — `main` = prod · `develop` = dev (ต่อท้าย `-dev` + คนละไฟล์ compose) ·
+  resolve ใน `script {}` เสมอ — org-standards §3
+- **Quality Gate (New Code)** — `new_violations` = 0 · `new_duplicated_lines_density` ≤ 3% ·
+  `new_coverage` ≥ 60% · `new_security_hotspots_reviewed` = 100% · OWASP **fail** at
+  CRITICAL ≥ 1 · **unstable** at HIGH ≥ 1 · ห้ามลดค่า gate — org-standards §4
+- **Credentials** — `nvd` · `env-<project>` (prod `.env`) · `env-<project>-dev` · SonarQube
+  token ผูกที่ `withSonarQubeEnv` — org-standards §5
+- **Secrets** — ใน `sh` ขยายค่าด้วย shell (`"$VAR"`) ห้าม Groovy interpolation (`"${VAR}"`)
+  · ลบ `dc-nvd.properties` ใน `post { always }` · `NOTIFY_EMAIL`/`SMTP_FROM` = Global env — org-standards §6
+- **Build & deploy** — tag `BUILD_NUMBER` คู่ `latest` · migrate ก่อน deploy · `--no-build` ·
+  `pull_policy: never` — org-standards §7
+- **Health** — `/api/health` ไม่ต้อง login · 200 `healthy` / 503 `degraded` · ไม่มี
+  version/commit · healthcheck ยิง `127.0.0.1:8000` ด้วย `python -c urllib` (slim ไม่มี
+  `wget`/`curl`) · shape `[BATCH]` ไม่มี health — org-standards §8
+- **Persistent data** — bind mount ใต้ `/home/docker02/appdata/<project>/<name>` (dev =
+  `/home/docker02/appdata/<project>-dev/<name>`) เท่านั้น · บรรทัด `for p in` ของบล็อก
+  `[VOLUME]` ต้องมีทุก `<name>` — org-standards §9
+- **CI env** — `CI=true` อย่างเดียว ไม่มีกติกา build-arg แบบ Next.js — org-standards §10
 
 ## 3. อ่าน codebase ก่อนถาม
 
@@ -275,10 +180,10 @@ build context และ Dockerfile ทั้งสอง shape ใช้ `COPY .
 — สามบรรทัด `.env`/`.env.*`/`!.env.example` กัน `.env` จริงที่เผลอเหลือใน
 workspace ไม่ให้ `COPY . .` ฝัง secret ลง image layer ถาวร (Docker layer เป็น
 append-only)
-รายละเอียด → `references/docker-deploy.md` §F
+รายละเอียด → `references/build-gotchas.md`
 
-> **`/api/health` ไม่ใช่ของเลือกได้สำหรับ shape web — กติกาทั้งหมดอยู่ที่ §2.8**
-> (โปรเจคที่มี route นี้อยู่แล้ว → ไม่ copy ทับ แค่ตรวจให้ตรง §2.8)
+> **`/api/health` ไม่ใช่ของเลือกได้สำหรับ shape web — กติกาทั้งหมดอยู่ที่ `references/org-standards.md` §8**
+> (โปรเจคที่มี route นี้อยู่แล้ว → ไม่ copy ทับ แค่ตรวจให้ตรง `references/org-standards.md` §8)
 
 ### 5.2 แทน placeholder (นี่คือรายการครบ)
 
@@ -350,7 +255,7 @@ sonar keys = `<project>`, `<project>-dev`
   ```
 
   `<name>` ที่ไม่อยู่ในบรรทัดนี้ถูก dockerd สร้างเป็น `root:root` ตอน `up -d` แล้ว user
-  `app` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม §2.9 / `references/docker-deploy.md` §D
+  `app` เขียนไม่ได้ทั้งที่ container `healthy` — กลไก chown ตาม `references/org-standards.md` §9 / `references/volumes.md`
 - **shape = web (`[WEB]`)** → ใช้ `Dockerfile.web`, คงบล็อก health poll ท้าย
   สเตจ Deploy ไว้, ลบคอมเมนต์ `[BATCH]` 2 บรรทัดท้ายสเตจทิ้ง
 - **shape = batch (`[BATCH]`)** → ใช้ `Dockerfile.batch` (ไม่มี `EXPOSE`/
@@ -411,7 +316,7 @@ sonar keys = `<project>`, `<project>-dev`
   `whitenoise` ใน `requirements.txt` · middleware ถัดจาก `SecurityMiddleware`
   ทันที + `STATIC_ROOT` ใน `settings.py` · `RUN python manage.py collectstatic
   --noinput` ใน `Dockerfile.web` หลัง `COPY . .` ก่อน `USER app`
-  (→ `references/docker-deploy.md` §I สำหรับโค้ดเต็มและกับดักตอน build)
+  (→ `references/django-static.md` สำหรับโค้ดเต็มและกับดักตอน build)
 
 ### 5.5 ไฟล์ env ในเครื่อง + `.gitignore`
 
@@ -524,110 +429,19 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 node <skill-dir>/scripts/verify.mjs
 ```
 
-ครอบฝั่ง repo ให้ทั้งหมด (placeholder ตกค้าง, ครบ 10 stages + `emailext` ×4,
-brace balance หลังลบบล็อก, shape `[WEB]`/`[BATCH]` ตรงกันทั้ง Dockerfile /
-Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path ใน
-`sonar.sources` มีจริง, compose, tooling, health, ไฟล์ที่ §5.1 copy มาครบ) —
-ฝั่ง server ยังต้องให้ admin ยืนยันเอง
+script ครอบฝั่ง repo ให้ทั้งหมด (อ่านเฉพาะบรรทัดที่ยังทำงานจริง — ตัดคอมเมนต์ออกก่อน)
+ส่วนที่เหลือไล่ตาม **`references/verification.md`** ซึ่งมีรายการเต็ม: สิ่งที่ script
+ไม่ตรวจโดยตั้งใจ · ไฟล์ในโปรเจค · ฝั่ง server (admin ยืนยัน) · รันจริง. ขั้นต่ำที่ห้ามข้าม:
 
-> **ทุก check ที่อ่าน Jenkinsfile / Dockerfile / compose อ่านเฉพาะบรรทัดที่ยัง
-> ทำงานจริง** (ตัดคอมเมนต์ออกก่อน) — ไฟล์ template พก legend + บล็อกทางเลือกของ
-> อีก shape ไว้เป็นคอมเมนต์ถาวร ถ้าอ่านดิบ ๆ ป้าย `[DB]`/`[WEB]`/`volumes:` และ
-> ชื่อ volume ตัวอย่างจะทำให้ check ผ่านฟรีทั้งที่ไม่ได้ตั้งค่าอะไรเลย
-
-**ไม่ตรวจโดยตั้งใจ (out of scope ของ script — ต้องตรวจเอง):**
-
-- **พฤติกรรมตอนรันจริงของ `/api/health`** — script พิสูจน์แค่ว่า route/ไฟล์มีจริง
-  และไม่ส่ง version/commit; ส่วน "เข้าได้โดยไม่ต้อง login" กับ "200 healthy /
-  503 degraded" ต้องยิงจริงตามหัวข้อ **รันจริง** ท้ายหน้านี้
-- **[subpath] เปิดผ่าน URL เต็มหลัง proxy** — script ตรวจได้แค่ว่า
-  `ROOT_PATH`/`SCRIPT_NAME`/`FORCE_SCRIPT_NAME` ตั้งครบทั้ง 2 compose หรือไม่ตั้ง
-  เลย (ตั้งข้างเดียว = fail) ตัวค่าที่ถูกต้องพิสูจน์ได้ทางเดียวคือเปิดจริง
-- **§5.6 toolchain ในเครื่อง** (`ruff` / `mypy` / `pytest`) — ต้องมี `.venv`
-  จริงถึงจะรู้ผล script ไม่รันแทนให้
-- **ค่าใน `.env` / `.env.dev`** — เช็คแค่ว่ามีไฟล์และมี `APP_PORT` (เตือน ไม่
-  fail เพราะ clone ใหม่ยังไม่มีทั้งคู่ตามปกติ) · **ไม่อ่านค่า secret ใด ๆ**
-- **ฝั่ง server ทั้งหมด** (Jenkins tools/credentials/global env, docker group,
-  SonarQube projects + gate, webhook, host cron ของตาราง cron `[CRON]`) — อยู่นอก repo
-
-**ไฟล์ในโปรเจค:**
-
-- [ ] `Jenkinsfile` ครบ 10 stages + post (emailext ×4 + `cleanWs`) — ไม่มี
-      `__*__` ค้าง
-- [ ] บล็อก `[DB]` / `[VOLUME]` / `[WEB]` / `[BATCH]` คงหรือถูกลบตรงตามคำตอบ
-      interview — และ Groovy ยัง parse ผ่านหลังลบ (brace ครบ)
-- [ ] `Dockerfile` มาจาก shape ที่ถูก (`Dockerfile.web` = มี `EXPOSE 8000` +
-      `HEALTHCHECK` · `Dockerfile.batch` = ไม่มีทั้งคู่) · `CMD` เป็น JSON array
-      จริง ไม่ใช่ `__START_CMD_JSON__` ค้าง
-- [ ] health endpoint (shape web): `/api/health` มีจริงในซอร์ส · เข้าได้โดยไม่
-      ต้อง login · 200 healthy / 503 degraded · ไม่มี version/commit ใน response
-- [ ] [subpath] เปิดแอป**ผ่าน URL เต็มหลัง reverse proxy** ได้จริง (ตั้ง
-      `root_path`/`SCRIPT_NAME`/`FORCE_SCRIPT_NAME` ตาม §5.3 แล้ว) — ทดสอบแค่
-      `localhost:port` ตรง ๆ ผ่านเสมอแม้ config ผิด จึงพิสูจน์อะไรไม่ได้
-- [ ] `sonar-project.properties`: `sonar.projectKey`/`projectName` แทนค่าแล้ว ·
-      **ทุก path ใน `sonar.sources`/`sonar.tests` มีอยู่จริงในโปรเจค** ·
-      `sonar.python.coverage.reportPaths=coverage.xml`
-- [ ] `owasp-suppressions.xml` (skeleton ว่าง) อยู่ที่ root
-- [ ] compose ทั้ง 2 ไฟล์: `pull_policy: never` · `APP_PORT` override ได้ ·
-      healthcheck ยิง `127.0.0.1:8000` · volume (ถ้ามี) อยู่ใต้ `/home/docker02/appdata/`
-- [ ] มี volume → ทุก `<name>` ที่ compose bind **ปรากฏในบรรทัด `for p in` ของ
-      บล็อก `[VOLUME]`** ในสเตจ Deploy ด้วย (ไม่ใช่แค่ระดับ `<project>`)
-- [ ] `.env` + `.env.dev` มีในเครื่อง ตั้ง `APP_PORT` แล้ว และถูก gitignore จริง
-      (`git check-ignore .env .env.dev` → exit 0) · `.env.example` commit แล้ว
-      และ **ไม่** ถูก ignore
-- [ ] `.venv/bin/ruff format --check .` · `ruff check .` · `mypy .` · `pytest`
-      ผ่านครบในเครื่องก่อน push แรก (§5.6) — baseline ที่มีระบุ rule+path+เหตุผล
-      ไม่ใช่ปิดยกโปรเจค
-- [ ] `pyproject.toml` มี `[tool.ruff]` + `[tool.pytest.ini_options]` ที่ออก
-      `test-results/junit.xml` + `coverage.xml`
-- [ ] `requirements.txt` + `requirements-dev.txt` อยู่ที่ root คนละไฟล์ ·
-      **server ที่ `CMD` เรียก (`gunicorn`/`uvicorn`) อยู่ใน `requirements.txt`
-      จริง** (ไม่มี = image build ผ่านแล้วตายตอนรัน — §5.4)
-- [ ] shape = django: `whitenoise` อยู่ใน `requirements.txt` · middleware อยู่
-      ถัดจาก `SecurityMiddleware` · `STATIC_ROOT` ตั้งแล้ว · `Dockerfile` มี
-      `collectstatic --noinput` (ไม่มี = `DEBUG=False` แล้วหน้า admin/CSS โล่ง
-      โดยไม่มี error และ health ยังเขียว — §5.4)
-- [ ] `tests/` มีอย่างน้อย 1 ไฟล์ `test_*.py` และ `tests/test_smoke.py` import
-      `__APP_MODULE__` ตัวจริงได้ (`.venv/bin/pytest` ผ่านในเครื่อง)
-- [ ] `.dockerignore` มี `.venv`, `coverage`, `dc-report`, `test-results`,
-      `.env`, `.env.*` (+ `!.env.example`)
-- [ ] `.claude/rules/ugt-python-ci.md` อยู่ในที่ของมัน
-- [ ] `docs/admin-handoff.md` ถูก render แล้ว (ไม่มี `__*__` ค้าง, หัวข้อที่ไม่
-      ใช้ถูกลบ)
-
-**ฝั่ง server (admin ยืนยัน) — `docs/admin-handoff.md` ที่ส่งไปครอบรายการนี้
-ด้วยชื่อจริงของโปรเจคแล้ว:**
-
-- [ ] Jenkins tool ชื่อตรงเป๊ะ: `SonarQube-Scanner`, `Dependency-Check` ·
-      SonarQube server entry ชื่อ `SonarQube`
-- [ ] **ปลั๊กอิน Docker Pipeline (`docker-workflow`) ติดตั้งแล้ว** (มติ M8 ใช้
-      `docker.image().inside{}`) — ขาดแล้วตายตั้งแต่ Install ด้วย
-      `MissingPropertyException: No such property: docker` · คนละเรื่องกับการมี
-      Docker CLI บนเครื่อง
-- [ ] **Jenkins user อยู่ใน `docker` group** (มติ M8 — ไม่มีข้อนี้ทุก stage พัง
-      ตั้งแต่ Install)
-- [ ] Credentials ครบ: `nvd`, `env-<project>`, `env-<project>-dev`
-- [ ] Global env vars: `NOTIFY_EMAIL`, `SMTP_FROM`
-- [ ] webhook ทั้งคู่: GitHub → Jenkins (`/github-webhook/`) และ
-      SonarQube → Jenkins (`/sonarqube-webhook/`)
-- [ ] SonarQube projects prod+dev สร้างแล้ว + assign Quality Gate ตาม §2.4
-      ให้ทั้งสอง
-- [ ] ปิด Lightweight checkout ใน job config
-- [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server)
-- [ ] มี job ตามรอบ: ตั้ง host cron (ตาราง cron ของ handoff) — batch เรียก `docker compose run --rm job` แล้ว
-      + ทดสอบรันมือ 1 รอบผ่าน
-- [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)
-
-**รันจริง:**
-
-- [ ] push `develop` → pipeline เขียวครบ 10 stages · coverage report + DC report
-      ขึ้นบนหน้า build
-- [ ] shape web: container `healthy` ภายใน 4 นาที · เข้าแอปผ่าน reverse proxy ได้
-- [ ] shape batch: สเตจ Deploy import โมดูลหลักจาก image จริงผ่าน · host cron
-      รันมือ 1 รอบได้ผลตามคาด
-- [ ] อีเมลผลลัพธ์ถึง `NOTIFY_EMAIL`
-- [ ] พิสูจน์ว่า gate บล็อกจริง: ใส่ violation เข้าไป 1 จุด → pipeline ต้อง abort
-      ที่สเตจ Quality Gate
+- [ ] `verify.mjs` ไม่มี fail · ไม่มี `__*__` ค้างทั้งในไฟล์โปรเจคและ `docs/admin-handoff.md`
+- [ ] toolchain §5.6 ผ่านในเครื่อง (`ruff format --check` · `ruff check` · `mypy` · `pytest`)
+      และได้ `coverage.xml` + `test-results/junit.xml` จริง
+- [ ] shape web: ยิง `/api/health` จริง — ไม่ต้อง login · 200 healthy / 503 degraded ·
+      ไม่มี version/commit · [subpath] เปิดผ่าน **URL เต็มหลัง proxy** ไม่ใช่ `localhost:port`
+- [ ] admin ยืนยันฝั่ง server ครบตาม `docs/admin-handoff.md` (ปลั๊กอิน `docker-workflow`,
+      `docker` group, credentials `nvd` / `env-<project>` / `env-<project>-dev`, webhook ทั้งคู่,
+      Quality Gate ตาม §2)
+- [ ] push `develop` → เขียวครบ 10 stages · ใส่ violation 1 จุดแล้ว pipeline abort ที่ Quality Gate
 
 ## 8. หลังจากนี้ (optional)
 

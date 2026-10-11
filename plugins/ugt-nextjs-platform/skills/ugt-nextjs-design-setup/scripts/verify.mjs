@@ -211,7 +211,7 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
   check(`components/ui/${f}.tsx installed`, () => {
     if (hasIn('components', 'ui', `${f}.tsx`)) return { ok: true };
     return SHADCN_ADD_FILES.has(f)
-      ? { ok: false, msg: `not installed — run npx shadcn@latest add ${f} (SKILL.md Step 3 primitive list)` }
+      ? { ok: false, msg: `not installed — run npx shadcn@latest add ${f} (SKILL.md Step 3.4 primitive list)` }
       : { ok: false, msg: 'Kit file missing' };
   });
 }
@@ -330,7 +330,7 @@ check('Tailwind is v4 (the kit token file is v4-only)', () => {
   return problems.length
     ? {
         ok: false,
-        msg: `${problems.join(' · ')} — @theme inline / @custom-variant / @utility in globals.css are ignored on v3, so no token reaches a utility and every kit component renders unstyled; run npx @tailwindcss/upgrade first (SKILL Step 3.2)`,
+        msg: `${problems.join(' · ')} — @theme inline / @custom-variant / @utility in globals.css are ignored on v3, so no token reaches a utility and every kit component renders unstyled; run npx @tailwindcss/upgrade first (references/shadcn-init.md §Tailwind first)`,
       }
     : { ok: true };
 });
@@ -566,7 +566,7 @@ check('Root layout shows the DEV bar + "[DEV] " title on the dev deployment', ()
     problems.push('app/layout.tsx does not render {isDevEnvironment() && <DevEnvironmentBar />} — mount it in the ROOT layout, above the shell, so the login page gets it too');
   }
   if (!/\[DEV\] /.test(code)) {
-    problems.push('metadata title has no "[DEV] " prefix (an old " (DEV)" suffix does not count — SKILL Step 3.3)');
+    problems.push('metadata title has no "[DEV] " prefix (an old " (DEV)" suffix does not count — references/root-layout.md §DEV environment indicator)');
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
@@ -611,7 +611,7 @@ check('next-intl wired end to end (plugin · request config · provider · catal
     const cfg = read(configFile);
     if (!/next-intl\/plugin/.test(cfg)) {
       problems.push(
-        `${configFile} never imports next-intl/plugin — i18n/request.ts is then never loaded and every t()/getLocale() throws at render (SKILL §Step 3)`
+        `${configFile} never imports next-intl/plugin — i18n/request.ts is then never loaded and every t()/getLocale() throws at render (references/root-layout.md §next-intl plugin)`
       );
     } else if (!/withNextIntl\s*\(/.test(cfg)) {
       problems.push(`${configFile} creates the plugin but never wraps the config with it (export default withNextIntl(nextConfig))`);

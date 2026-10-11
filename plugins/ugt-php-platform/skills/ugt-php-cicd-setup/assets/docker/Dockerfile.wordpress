@@ -4,7 +4,7 @@ FROM wordpress:php8.3-apache
 # (`wordpress:*` สืบทอดจาก `php:*-apache` ที่ลง curl เป็น persistent dep และไม่ purge ทิ้ง)
 # จึงไม่ต้อง apt-get install เพิ่ม — แต่ห้าม purge ทิ้งเองภายหลัง
 # (`wget` ไม่มีจริง · เดิมใช้ `php -r file_get_contents` ซึ่งพังเงียบเมื่อตั้ง
-# `allow_url_fopen = Off` — ดู references §D)
+# `allow_url_fopen = Off` — ดู references/healthcheck.md)
 #
 # [DB] ไฟล์ health ที่เปิดบล็อกเช็ค DB ต้องใช้ `mysqli` (มากับ image)
 # **ไม่ใช่ PDO** — `wordpress:*` ไม่มี `pdo_mysql` · อยากใช้ PDO ให้ปลดคอมเมนต์:
@@ -15,6 +15,6 @@ COPY api/health/index.php /var/www/html/api/health/index.php
 RUN chown -R www-data:www-data /var/www/html/api
 # `-L` ห้ามตัดทิ้ง — WordPress เสิร์ฟ health เป็นไฟล์ `api/health/index.php`
 # Apache จึง 301 เติม `/` ท้ายเข้ามา และ `curl -f` ที่ไม่มี `-L` นับ 301 ว่าสำเร็จ
-# → เขียวหลอกทั้งที่ข้างใต้อาจ 503 (ดูตารางเทียบทุก shape ใน references §D)
+# → เขียวหลอกทั้งที่ข้างใต้อาจ 503 (ดูตารางเทียบทุก shape ใน references/healthcheck.md)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -fsS -L http://127.0.0.1:80/api/health || exit 1

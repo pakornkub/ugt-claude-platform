@@ -39,25 +39,27 @@ appears.
 | Data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต"), stale list until reload | React Query invalidated with a specific key instead of a prefix | data-fetching |
 | A fetch that 404s only in production | client fetch missing the basePath | data-fetching |
 | "Maximum update depth exceeded" pointing at a UI-primitive component (Base UI now, Radix in legacy projects) | `useEffect` + `setState` reset pattern | data-fetching |
-| Pagination shows "หน้า 1 จาก 0" | `getPageCount()` / `totalPages` rendered raw on empty data | data-fetching |
-| Select crashes on an empty value | `<SelectItem value="">` — empty is the "not selected" sentinel | form-validation |
+| Pagination shows "หน้า 1 จาก 0" | `getPageCount()` / `totalPages` rendered raw on empty data | Quick Rules (below) |
+| Select crashes on an empty value | `<SelectItem value="">` — empty is the "not selected" sentinel | Quick Rules (below) |
 | Select shows an id / `__none__` instead of the label after choosing | Base UI `<SelectValue>` renders the raw value unless the root gets `items` | form-validation |
 | Ticking one table row selects a different one ("ติ๊กแถวนึงได้อีกแถว") | selection riding on row index, no `getRowId` | data-fetching |
 | Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
-| Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy"): `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; refresh fixes it, a long form loses the typed text | Action ids change per build and the open page's old bundle calls the previous ids; deploy half = `deploymentId` (cicd-setup `docker-deploy.md` §I), client half = catch `unstable_isUnrecognizedActionError`, keep a read-once sessionStorage draft, offer a reload that restores it | data-fetching |
-| Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | hardening |
+| A page open across a deploy fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy", `UnrecognizedActionError` + `POST … 409`); refresh fixes it but loses the typed form | action ids change per build; catch `unstable_isUnrecognizedActionError`, keep a read-once draft, offer a reload (deploy half: cicd-setup `version-skew.md`) | version-skew |
+| Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | Quick Rules (below) |
 
 ## Which reference, when
 
 | You are about to… | Read |
 | --- | --- |
 | Bind a date/time into `$queryRaw`/an SP, format a DB date, show a Thai year | `references/dates-timezones.md` |
-| Fetch or mutate data shown in a table/list, add a filter, call an API or a Server Action from the client (incl. a page left open across a deploy) | `references/data-fetching.md` |
+| Fetch or mutate data shown in a table/list, add a filter, call an API or a Server Action from the client | `references/data-fetching.md` |
+| Write a form's submit handler / Server Action error path (a page left open across a deploy) | `references/version-skew.md` |
 | Guard a route/action, build a batch/cron job, shape a DTO, pre-fill an edit form | `references/hardening.md` |
 | Build or change a form, add a validation rule, write the Server Action it submits to | `references/form-validation.md` |
 
 Symptom → likely file: date wrong by 1 day / hours → dates-timezones · stale UI
-after save, infinite render loop, prod-only 404 → data-fetching · a user seeing
+after save, infinite render loop, prod-only 404 → data-fetching · save fails
+only on a tab opened before a deploy → version-skew · a user seeing
 another user's rows, a cron wiping data early → hardening.
 
 ## Quick Rules — DO / DON'T

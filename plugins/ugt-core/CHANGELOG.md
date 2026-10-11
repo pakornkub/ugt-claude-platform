@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.14.3 (2026-10-11)
+
+- `ugt-contribute`: รายการ reference ของ pitfalls รวม `version-skew` · repo: `scripts/check-skill-size.mjs` (SKILL.md ≤ 500 บรรทัด, เตือน reference > 200) + README ขั้นหลัง merge: code-review + eval + ขนาด
+
 ## 2.14.2 (2026-10-11)
 
 - contract Scheduled jobs: crontab ของ user `jenkins` · Next.js เรียกด้วย `node` `fetch` (secret ไม่อยู่ใน argv) · ugt-handoff ไม่พูดถึง "version bumped" แล้ว (contribute เขียนใต้ `## Unreleased`)

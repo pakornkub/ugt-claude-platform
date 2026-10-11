@@ -7,7 +7,7 @@
 // can't be found is a FAIL, never a pass.
 // Only the repo side is checkable here; the server side (Jenkins
 // tools/credentials, docker group membership, SonarQube projects, webhooks)
-// needs admin confirmation — see §7 (server side) in SKILL.md.
+// needs admin confirmation — see references/verification.md (server side).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -113,7 +113,7 @@ function listPyFiles(dir, skip = new Set(['.venv', '.git', '__pycache__', 'node_
 
 check('/api/health exists', () => {
   // Only web shapes carry a health-poll block in the Deploy stage — batch
-  // shape has no long-running process to poll (SKILL.md §2.8).
+  // shape has no long-running process to poll (references/org-standards.md §8).
   if (!isWebShape) return { ok: true };
   const hits = listPyFiles(ROOT).filter((f) => readFileSync(f, 'utf8').includes('/api/health'));
   if (!hits.length) {
@@ -207,7 +207,7 @@ check('Quality Gate actually blocks the pipeline', () => {
 check('post block complete (emailext ×4 + cleanWs)', () => {
   if (!jf) return { ok: false, msg: 'No Jenkinsfile' };
   const problems = [];
-  // §7 declares emailext ×4 — one per outcome. A pipeline missing `failure`
+  // references/verification.md declares emailext ×4 — one per outcome. A pipeline missing `failure`
   // is the expensive one: it goes red and nobody is told.
   const missingOutcome = ['success', 'unstable', 'failure', 'aborted'].filter(
     (o) => !new RegExp(String.raw`\b${o}\s*\{[\s\S]{0,200}?emailext`).test(jfActive)
@@ -253,7 +253,7 @@ check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
   // $PWD/$WORKSPACE is a path INSIDE the agent — the host docker daemon that
   // `docker run -v` talks to over docker.sock has never heard of it and tries
   // to mkdir it on the host, hitting a read-only filesystem (confirmed
-  // incident: ugt-bd-forecast, 2026-09-03; see docker-deploy.md §J). This is a
+  // incident: ugt-bd-forecast, 2026-09-03; see references/volumes.md, DooD section). This is a
   // plain per-line grep, not a real block-scope parse, so it can false-positive
   // inside a `.inside{}` block that legitimately builds its own `sh` string —
   // warn only, never fail the build on it.
@@ -265,7 +265,7 @@ check('No `docker run -v` bind-mount on a workspace path (DooD-unsafe)', () => {
   return hits.length
     ? {
         ok: 'warn',
-        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (docker-deploy.md §J)`,
+        msg: `docker run -v referencing $PWD/$WORKSPACE at line(s) ${hits.map(([n]) => n).join(', ')} — use docker.image().inside{} or a stdin pipe instead (references/volumes.md, DooD section)`,
       }
     : { ok: true };
 });
@@ -503,7 +503,7 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
 
 check('docs/admin-handoff.md rendered', () => {
   // Content (leftover __*__) is covered by the placeholder scan above; this is
-  // the existence half of the same §7 line.
+  // the existence half of the same references/verification.md line.
   return has('docs/admin-handoff.md')
     ? { ok: true }
     : { ok: 'warn', msg: 'docs/admin-handoff.md missing — §5.7 renders it; the admin gets a chat snippet instead of a file' };

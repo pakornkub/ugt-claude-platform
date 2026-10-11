@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.2 (2026-10-11)
+
+- แตกเอกสารตามเรื่อง: `SKILL.md` 638 → 452 (§2 → `org-standards.md` · §7 → `verification.md`) · `docker-deploy.md` 432 → 100 + `volumes.md` · `compose.md` · `django-static.md` · `build-gotchas.md` · `db-dns.md` · `healthcheck.md` (ตารางเทียบหัวข้อเดิม A–K ใน docker-deploy.md)
+
 ## 0.9.1 (2026-10-11)
 
 - Post-merge review: verify ตรวจ scheduler จับ PEP 621 บรรทัดเดียว (`dependencies = ["…", "apscheduler"]`) และไม่ fail `schedule-utils` · interview ข้อ 9 (job ตามรอบ + ชื่อ DB/login) · crontab ของ user `jenkins` · ตัวอักษรหัวข้อ handoff คงที่ · ข้อความ `[BATCH]` เก่าใน docker-deploy/SKILL

@@ -299,7 +299,7 @@ pipeline {
                         // เป็น anonymous volume ที่ compose ยกของเดิมจาก container ก่อนหน้ามาใช้ต่อ
                         // แปลว่าไฟล์ที่เปลี่ยนใน image ใหม่ (รวม api/health/index.php) ไม่มีวันขึ้นถึง
                         // container ตั้งแต่ deploy รอบที่ 2 · flag นี้แตะเฉพาะ anonymous volume —
-                        // `wp-content` เป็น bind mount ที่ตั้งชื่อไว้ จึงไม่โดนแตะ (→ references §B)
+                        // `wp-content` เป็น bind mount ที่ตั้งชื่อไว้ จึงไม่โดนแตะ (→ references/wordpress-deploy.md)
                         sh "docker compose -f ${composeFile} up -d --no-build"
 
                         // [WEB] Wait until container is healthy (max 4 minutes = 24 × 10s).

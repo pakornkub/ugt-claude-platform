@@ -22,3 +22,10 @@
 - **`env.example`/`.env.local`/`.env` ต้องแทน token ด้วยค่าจริงเหมือนกัน** —
   ตัวตรวจ (`scripts/verify.mjs` §"No `__*__` placeholders left") สแกนทั้งสาม
   ไฟล์นี้ด้วย ไม่ได้จำกัดแค่ `.ts` / `.tsx` / `.prisma`
+
+## App title — no placeholder
+
+`login-form.tsx`'s `<h1>` app title has no placeholder to substitute — it
+reads `NEXT_PUBLIC_APP_NAME` at runtime and falls back to the generic
+`auth.login.appName` catalog string (`t('appName')`) when that env var isn't
+set, so it never needs the interview's project name hand-substituted in.

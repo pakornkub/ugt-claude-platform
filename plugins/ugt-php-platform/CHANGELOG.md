@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## 0.8.2 (2026-10-11)
+
+- แตกเอกสารตามเรื่อง: `SKILL.md` 830 → 496 (§2 → `org-standards.md` · §5.3 → `shapes.md` · §7 → `verification.md`) · `docker-deploy.md` 704 → 56 + `wordpress-deploy.md` · `sqlserver.md` · `healthcheck.md` · `build-gotchas.md` · `compose.md` · `subpath.md` · `volumes.md` (ตารางเทียบหัวข้อเดิม B–J)
+
 ## 0.8.1 (2026-10-11)
 
 - Post-merge review: verify ตรวจ Laravel schedule ไม่นับ comment (`// $schedule->…` ของ Kernel.php เดิมทุกโปรเจค ≤10 fail ผิด) และจับ Laravel 11 `Artisan::command(…)->daily()` · cron ทุกแบบเป็น `docker exec -u www-data …` (image ไม่มี USER → root สร้างไฟล์แล้ว apache เขียนไม่ได้) · WordPress: compose `WORDPRESS_CONFIG_EXTRA` ปิด WP-Cron + ตาราง cron มีเสมอ · interview ข้อ 9 · crontab ของ user `jenkins` · ตัวอักษรหัวข้อ handoff คงที่

@@ -85,16 +85,9 @@ Historical failure modes this prevents:
 
 ## SSO login flow (Keycloak)
 
-**Migration note (why the version is pinned `^1.7.1`):** better-auth 1.7.0
-deleted `genericOAuthClient` from `better-auth/client/plugins` in a MINOR bump
-— present through 1.6.14, gone in 1.7.0, so a caret range like `^1.6.0` floats
-straight into the broken line. This was a deliberate rewrite, not a
-regression: generic OAuth (the Keycloak SSO button) became a first-class
-social provider — `authClient.signIn.social({ provider: 'keycloak' })`
-replaces the removed `signIn.oauth2()`, no client plugin needed, and the
-callback route moved from `/api/auth/oauth2/callback/:id` to
-`/api/auth/callback/:id`. Every asset in this skill is already written for
-≥1.7 — never pin below 1.7.1.
+Written for better-auth ≥1.7 (generic OAuth is a first-class social provider;
+why 1.7.0 broke older installs → `troubleshooting-upgrades.md` §better-auth 1.7
+migration note).
 
 1. Client: `authClient.signIn.social({ provider: 'keycloak', callbackURL: `${basePath}${from}` })`
    (better-auth ≥1.7 — generic OAuth is a first-class social provider now, no
@@ -327,26 +320,11 @@ full-app outage.
   chunks, returns an HTML redirect, and the browser throws
   `Uncaught SyntaxError: Unexpected token '<'`.
 
-## Gotcha quick table
+## Troubleshooting
 
-| Symptom | Root cause | Fix |
-| --- | --- | --- |
-| Every page redirects to `/login` after LDAP login | Wrong cookie name (missing `__Secure-`/app prefix) or unsigned token | `SESSION_COOKIE_NAME` derivation + `signSessionToken()` |
-| Redirect loop only in production | `https://` switched cookie to `__Secure-` name | Same derivation, driven by `BETTER_AUTH_URL` |
-| `ERR_TOO_MANY_REDIRECTS` with two apps on one domain | Identical cookie names at `path=/` | `advanced.cookiePrefix` from basePath, mirrored in proxy + actions |
-| Logout doesn't stick in production | `cookieStore.delete()` omits `Secure` flag | `set(name, '', { maxAge: 0, secure: true })` |
-| Login lands on 404 after local login | Double URL-encoding of cookie value | `decodeURIComponent` before `cookieStore.set` |
-| Logout doesn't delete DB session | Deleting by signed token; DB stores raw token | Strip signature via `lastIndexOf('.')` |
-| Build crashes with `SKIP_ENV_VALIDATION=1` | `keycloak()` helper runs `.replace()` on undefined issuer | Conditional plugin registration guard |
-| `Unknown argument 'id'` from Better Auth rate limit | `rateLimit` model used `key` as `@id` | `id String @id` + nullable `key` (see schema template) |
-| SSO shows "Invalid OAuth configuration", or server log has `fetch failed` / `UNABLE_TO_VERIFY_LEAF_SIGNATURE` | Node can't verify internal CA cert on Keycloak host | `NODE_TLS_REJECT_UNAUTHORIZED=0` missing — it is org standard in compose and `.env.local` section 1; put it back |
-| authClient hits `…/__BASE_PATH__/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
-| `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
-| SSO fails `unable_to_create_user` for users that already exist | AD email drifted from stored email (e.g. `@company.com` in AD vs `@company.co.th` in the row) → Better Auth "creates" and hits a unique constraint | Resolve the existing row by `ldapUsername` in `mapProfileToUser`; its email wins — **shipped in `lib/auth.ts` since 4.21.0** |
-| SSO fails `unable_to_create_user` on a genuinely new user | Keycloak profile has no email (client missing the `email` scope, or the AD account has no mail attribute) — or the DB write itself failed | `mapProfileToUser` throws a findable message for the no-email case (4.21.0); for the rest, the real cause is in `onAPIError.onError`'s log — read `docker logs <container>` first, never guess |
-| SSO fails `account_not_linked` despite `trustedProviders` | Local user has `emailVerified: false` (created by sync/upsert) — better-auth ≥1.6.11 blocks implicit linking into unverified rows (nOAuth fix) | `accountLinking.requireLocalEmailVerified: false` — safe here only because self-registration is closed (มติ 2026-08-11); shipped in `lib/auth.ts` since 4.21.0 |
-| Auth error shows a bare proxy 404 (`/api/auth/error` Not Found) instead of any message | Better Auth's default error page URL is computed WITHOUT the Next.js basePath — same trap as redirectURI and the reset link | `onAPIError.errorURL: `${NEXT_PUBLIC_BASE_PATH}/login`` — the login page maps `?error=<code>` to a Thai toast; shipped in `lib/auth.ts` since 4.21.0 |
-| LDAP always "Invalid username or password" on prod, works in dev | An `ldaps://`-only guard throws before the bind attempt | Allow plain `ldap://` for private-network AD; let the bind itself decide |
-| Email OTP (twoFactor plugin) always fails right after a `better-auth` bump — the login form says "expired" although the code is fresh; `verify-otp` returns 400 `TWO_FACTOR_NOT_ENABLED`; the `2fa-otp-*` rows in `Verification` are never consumed | better-auth ≥1.6.24 added account lockout: `verifyTwoFactorOTP` does `findOne twoFactor where userId` **before** consuming the OTP and throws when no row exists, and it writes `verified` / `failedVerificationCount` / `lockedUntil` on every attempt. Projects that enable 2FA by flagging `user.twoFactorEnabled` directly (admin-created users, no `enableTwoFactor` endpoint) never had that row, and the plugin schema change ships with no migration | Add the three columns to `twoFactor`, backfill a placeholder row (`secret ''`, `backupCodes ''`, `verified false`) for every `twoFactorEnabled` user, and create/upsert that row wherever the flag is set. Map OTP errors by `error.code`, never by HTTP status — 400 now covers three different codes. **After every better-auth bump, diff `node_modules/better-auth/dist/plugins/*/schema.mjs` against `prisma/schema.prisma`** — Better Auth never generates migrations and the failure surfaces as an unrelated 400/500. Seen in ugt-customer-portal 2026-09-15 (fix `d551298`) |
-| Endless 307 between `/` and `/login` (`ERR_TOO_MANY_REDIRECTS`) for a browser that still holds an expired / revoked session cookie — a fresh browser or cleared cookies works | `proxy.ts` sent `/login` → `/` whenever `getSessionCookie()` returned something, but the protected layout sends `/` → `/login` when `auth.api.getSession()` is null. A cookie proves nothing (the session row may be expired, revoked, or deleted by logout elsewhere), so the two redirects chase each other | `proxy.ts` no longer redirects auth-only paths on cookie presence (the `AUTH_ONLY_PATHS` list only means "no cookie required"). The login page — an `async` Server Component — checks the real session and `redirect('/')`s only when `auth.api.getSession({ headers: await headers() })` is non-null (SKILL.md §5.5 step 1); a stale cookie then renders the form and the next login overwrites it. Seen in ugt-voice-platform 2026-10-09 |
-| SSO login ends with "เข้าสู่ระบบไม่สำเร็จ (internal_server_error)" (Keycloak redirects back fine, no session is created); the server log shows a Prisma error mentioning `issuer` / `Issuer` on `Account` | better-auth **1.7.0–1.7.2** scoped account identity by issuer and read/wrote `account.issuer`; **1.7.4+ removed it again** (`@better-auth/core` `schema-diff` now warns that a required `issuer` column "Better Auth never writes … every insert fails"). So: a project on 1.7.0–1.7.2 without the column fails, and a project that added a NOT NULL `Issuer` and then upgraded fails too | Upgrade to `better-auth@^1.7.4` and keep the kit schema (no `issuer`). If an `Issuer` column was already migrated: `ALTER COLUMN [Issuer] NVARCHAR(450) NULL` (or drop it and its unique index) per the [1.7 upgrade guide](https://www.better-auth.com/docs/guides/1-7-upgrade-guide). Seen in ugt-voice-platform 2026-10-09 on 1.7.2; platform 4.74.0 shipped the column by mistake and 4.77.0 removed it |
+The symptom → root cause → fix tables that used to close this file are split
+by topic:
+
+- `troubleshooting-session.md` — cookies, redirect loops, logout, basePath, `proxy.ts`
+- `troubleshooting-sso.md` — Keycloak / genericOAuth / discovery / redirect URI / TLS, LDAP bind
+- `troubleshooting-upgrades.md` — better-auth bumps (1.7 migration, twoFactor schema, `Account.issuer`), peer deps, kit re-syncs

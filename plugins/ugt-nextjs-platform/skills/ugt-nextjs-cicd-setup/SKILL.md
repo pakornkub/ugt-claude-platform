@@ -33,7 +33,7 @@ description: >
 | `npm ci` fails with `ERESOLVE` in Install or the Docker deps stage | `.npmrc` (`legacy-peer-deps=true`, auth-setup §5.1) missing from the repo or not copied by the Dockerfile | `assets/Dockerfile` deps stage · auth-setup §5.1 |
 | OWASP Dependency Check stays UNSTABLE (yellow) on every build — HIGH `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`) via `eslint-config-next`, moderate `sprintf-js@1.1.3` (`GHSA-hp3w-g68c-fv3c`) via `@prisma/adapter-mssql` → tedious; `npm audit fix` offers a downgrade of `eslint-config-next` to 14.x | no fixed release of either package exists; both were reviewed (CI-lint-only / literal format strings) — do **not** take the audit downgrade (cannot run Next 16); suppress pinned to exact version + advisory after `npm ls braces sprintf-js` confirms the same path | `references/sonarqube-setup.md` §E "OWASP: two reviewed findings" |
 | Two quick pushes → two builds of the same job run at once; the second `prisma migrate deploy` / `docker compose up` collides with the first still deploying (flaky Deploy, container recreated mid-health-poll) | `options {}` had no `disableConcurrentBuilds()` — Jenkins runs same-job builds in parallel by default | `assets/Jenkinsfile` `options {}` · `references/docker-deploy.md` §C |
-| Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy") — console `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; a refresh fixes it | Server Action ids change every build and the old client bundle calls the previous ids; no `deploymentId` is set, so Next.js cannot detect the skew and reload — `next.config` `deploymentId` ← Docker `ARG NEXT_DEPLOYMENT_ID` ← Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${deployId}` on both builds | `references/docker-deploy.md` §I · pitfalls `data-fetching.md` §6 (client half) |
+| Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy") — console `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; a refresh fixes it | Server Action ids change every build and the old client bundle calls the previous ids; no `deploymentId` is set, so Next.js cannot detect the skew and reload — `next.config` `deploymentId` ← Docker `ARG NEXT_DEPLOYMENT_ID` ← Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${deployId}` on both builds | `references/version-skew.md` · pitfalls `version-skew.md` (client half) |
 | Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview
@@ -54,7 +54,9 @@ Skill layout:
 | `assets/` | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml, api-health-route.ts — copy and substitute placeholders |
 | `references/jenkins-one-time-setup.md` | what the admin prepares on the Jenkins server (plugins/tools/credentials/webhook/snap-Docker gotcha) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
-| `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule |
+| `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule, compose, reverse proxy |
+| `references/scheduled-jobs.md` | host cron → `POST /api/cron/<job>` + `CRON_SECRET` (route shape, crontab line) |
+| `references/version-skew.md` | `deploymentId` ← `NEXT_DEPLOYMENT_ID` build arg — a tab left open across a deploy |
 | `references/external-config-handoff.md` | the three docs above, pulled into **one table** with this project's real substituted names — what actually gets handed to the admin |
 
 ## 2. Org Standards
@@ -80,7 +82,7 @@ post: emailext (success/unstable/failure/aborted) + cleanWs
 | `develop` | dev | everything suffixed `-dev` + separate compose file |
 
 The `-dev` basePath suffix is also what the app reads to show its **DEV
-environment bar** and `[DEV] ` tab title (`ugt-nextjs-design-setup` Step 3.3,
+environment bar** and `[DEV] ` tab title (`ugt-nextjs-design-setup` Step 3.3 → `references/root-layout.md`,
 `isDevEnvironment()`) — keep `__BASE_PATH_DEV__` ending in `-dev`; a project deployed
 without a basePath has no dev/prod signal and gets no bar.
 
@@ -153,7 +155,7 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
    รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี → ลบบล็อก `[VOLUME]`
 8. **Scheduled jobs?** (งานที่ต้องรันตามเวลา: ชื่อ · ทำอะไร · ทุกเมื่อ) — มี →
    `[CRON]` (route ต่อ job, `CRON_SECRET`, แถวในตาราง cron ของ handoff,
-   `references/docker-deploy.md` §H) · ไม่มี → ลบทุกอย่างที่ติด `[CRON]`
+   `references/scheduled-jobs.md`) · ไม่มี → ลบทุกอย่างที่ติด `[CRON]`
 
 ## 4. Setup Steps
 
@@ -208,7 +210,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__VOLUME__` | ชื่อ volume ใน compose (`uploads`, `storage`, …) — หนึ่งคู่แถว prod/dev ต่อ volume |
 | `__REALM__` | realm Keycloak ขององค์กร (ค่าเดียวกับ auth-setup) |
 | `__UPLOAD_MAX_MB__` | `UPLOAD_MAX_BYTES` ÷ 1 048 576 ปัดขึ้น (upload-setup) |
-| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` | ต่อ job หนึ่งแถว: ชื่อ route ใต้ `app/api/cron/` · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) — `references/docker-deploy.md` §H |
+| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` | ต่อ job หนึ่งแถว: ชื่อ route ใต้ `app/api/cron/` · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) — `references/scheduled-jobs.md` |
 
 ### 4.3 Adjust per interview answers
 
@@ -230,7 +232,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `.env.example` section 1 (real value ≥ 32 chars in `.env`/`.env.dev`, different per env) ·
   `lib/env.ts`: `CRON_SECRET: z.string().min(32).optional()` in `server` **and**
   `CRON_SECRET: process.env.CRON_SECRET` in `runtimeEnv` · one `app/api/cron/<job>/route.ts`
-  per job (§H shape) · one row per job in the handoff cron table
+  per job (`references/scheduled-jobs.md` shape) · one row per job in the handoff cron table
 - No basePath → basePath = empty, health path = `/api/health`
 - Check `package.json` has the scripts the pipeline calls: `lint`,
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
@@ -252,7 +254,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   the Dockerfile `ARG NEXT_DEPLOYMENT_ID` and the Jenkinsfile
   `--build-arg NEXT_DEPLOYMENT_ID=${deployId}` (both builds) feed it; without it
   a tab left open across a deploy fails every Server Action
-  (`references/docker-deploy.md` §I). Unset locally and in the CI build stage
+  (`references/version-skew.md`). Unset locally and in the CI build stage
 - If deploying under a basePath (interview answer 3) → also wire
   `basePath: process.env.NEXT_PUBLIC_BASE_PATH` in next.config
 
@@ -323,9 +325,9 @@ Checklist §6
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
-| Scheduled jobs = host cron → `docker exec` `node -e "fetch(…)"` → `POST /api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table (`references/docker-deploy.md` §H) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
+| Scheduled jobs = host cron → `docker exec` `node -e "fetch(…)"` → `POST /api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table (`references/scheduled-jobs.md`) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
-| `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`docker-deploy.md` §I) | Ship without it — every redeploy breaks forms already open in a browser tab |
+| `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`references/version-skew.md`) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
 

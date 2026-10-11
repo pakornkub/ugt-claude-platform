@@ -67,7 +67,7 @@ What lands in the project:
    Every instance passes a **unique `id`** (prefs persist), and page-level
    filters live in the toolbar row via `toolbarFilters` — right after the
    search box, widest→narrowest (มติ 2026-08-11) — per-page config is part
-   of the agreement, not a free choice.
+   of the agreement, not a free choice (`references/datatable.md`).
 5. **`lib/format.ts` only** for dates and numbers — `DD/MM/YYYY` Gregorian
    (ค.ศ.) on screen, ISO `yyyy-MM-dd` in exported files, wall-clock dates
    read as UTC parts, instants shown in Asia/Bangkok.
@@ -137,190 +137,34 @@ different size — is the field bug this step exists to prevent.
 1. `docs/DESIGN.md` from the template — fill every `__...__`, including the
    ugt-core contract version in the header; seed the decision log (ส่วน 10)
    with today's มติ. Create `docs/design-questions.md` (empty skeleton).
-2. shadcn init if none yet — **the org preset (canonical, มติ 2026-08-04;
-   verified: produces `base-mira` + `lucide` + `rtl:false` +
-   menu default/solid/subtle + neutral)**:
-
-   **Existing-project branch only — check for Tailwind first.** `shadcn init`
-   requires Tailwind already configured; it does not install it. The
-   `--template next` branch below gets it for free (create-next-app's
-   default), but a project that arrived here via the documented
-   database → design → auth order has no Tailwind yet — `ugt-nextjs-database-setup`
-   never touches CSS. No `tailwindcss` in `package.json` and no
-   `@import "tailwindcss"` in any CSS file → install it before running init,
-   or `shadcn init` fails outright with "No Tailwind CSS configuration found":
-
-   ```bash
-   npm install -D tailwindcss @tailwindcss/postcss postcss
-   ```
-
-   ```js
-   // postcss.config.mjs
-   export default {
-     plugins: { '@tailwindcss/postcss': {} },
-   };
-   ```
-
-   A bare `app/globals.css` containing just `@import "tailwindcss";` is
-   enough — step 4 below replaces its token blocks anyway.
-
-   **Tailwind v3 present** (`tailwind.config.{js,ts}` + `@tailwind base;` —
-   the usual shape of AI Studio / v0 exports): upgrade to v4 **before** init
-   (`npx @tailwindcss/upgrade`, then check the result). The kit's token file
-   is v4-only — `@theme inline`, `@custom-variant dark`, `@utility
-   scroll-thin` — merged into a v3 project it parses as noise: no color,
-   radius or font ever reaches a utility class and everything the kit
-   renders (including the auth admin pages) comes out unstyled or
-   misaligned. `scripts/verify.mjs` fails on any `@tailwind base` directive
-   or a `tailwindcss` major below 4.
-
-   ```bash
-   # โปรเจคใหม่ล้วน — scaffolds the Next app too (no separate create-next-app):
-   printf '<project-name>\n' | npx shadcn@latest init --preset b1ZzrZbs0 --template next --pointer --yes
-   # โปรเจคเดิมที่มี Next.js แล้ว:
-   npx shadcn@latest init --preset b1ZzrZbs0 --pointer --yes
-   ```
-
-   (a custom preset code from the shadcn configurator: mira family on
-   **Base UI** — a deliberate มติ 2026-08-04 superseding the earlier
-   radix-mira choice — single-repo, no RTL, pointer on buttons. **Do NOT
-   pass `-b radix`**: it would flip the style to `radix-mira` and the kit
-   is Base UI now. The `printf` pipe answers `--template next`'s
-   project-name prompt, which `--yes` does not cover. Fallback if the code
-   ever stops resolving: `npx shadcn@latest init --preset mira` — there is
-   NO `--style base-mira` flag.)
-   **After init**: rename `package.json`'s `"name"` (the template writes
-   `next-app`) to the project slug. **Keep the `cn` npm package the preset
-   adds** — the registry's `lib/utils.ts` and every `components/ui/*` file
-   import `{ cn } from 'cn'`; it only *looks* stray. An installer removed it
-   as unrelated and the build survived by accident
-   (hoisted through the `shadcn` package) — `npm ci` on Jenkins would not.
-   Then **run the gate instead of eyeballing it**: `node <skill-dir>/scripts/verify.mjs` fails on any `components.json`
-   that is not `style: base-mira` · `iconLibrary: lucide` · `rtl: false` ·
-   `baseColor: neutral`, and separately fails on any Radix that reached the
-   project — a `radix-ui`/`@radix-ui/*` dependency, a missing
-   `@base-ui/react`, or a source file using `asChild` / `onSelect` on a menu
-   item / `checked="indeterminate"` / `delayDuration`. Both checks are
-   re-runnable at any time, so a wrong init cannot survive close-out. (mira
-   presets can default to `hugeicons` — fix and uninstall any `@hugeicons/*`
-   deps; `menuColor: "default"` is expected but not gated.) If the org preset
-   ever writes a different `style` string than `base-mira`, update
-   `scripts/verify.mjs`'s expectation in the same change — never leave the two
-   disagreeing.
-   If the init dies mid-install (postinstall spawn errors happen in
-   sandboxes) it can leave a scaffold **without `components.json`** — run
-   `npm install`, then re-run the init in existing-project mode (no
-   `--template`).
-   **Windows: work from a short path as the primary flow, not a fallback**
-   — deep paths (~>180 chars) break BOTH the shadcn CLI (misleading
-   `ERR_PACKAGE_IMPORT_NOT_DEFINED` chalk error) AND `next build`
-   (Turbopack filesystem MAX_PATH; junctions don't help). Scaffold, run
-   every CLI/build step at a short real path, then move the project. Never
-   a `subst` drive (realpath guard misfires).
-   Merge `assets/globals.tokens.css` into `app/globals.css` (replace the
-   `:root`/`.dark` token blocks; keep any project/preset `@layer` rules —
-   e.g. the preset's button `cursor: pointer` — and keep preset `@theme`
-   vars: re-point `--font-heading` at the font-sans variables).
-   **Radius is the preset's, not ours (มติ 2026-08-09)** — when replacing the
-   `:root` block you MUST carry over the preset's `--radius` line
-   (`base-mira` ships `0.45rem`), and leave its `@theme` radius scale
-   (`--radius-sm/md/lg/xl/2xl/3xl/4xl` as `calc()` of `--radius`) untouched.
-   Our token file deliberately declares no radius; dropping the preset's line
-   too leaves `--radius` undefined and every card/button goes square.
-   `scripts/verify.mjs` fails if it is missing.
-   · substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers
-   (dark ring tokens derive from `__PRIMARY_DARK__` automatically).
-3. Fonts + providers in `app/layout.tsx` — the exact wiring (**preserve mode
-   with ข้อ 10 = คงฟ้อนต์เดิม**: keep the project's existing `next/font` import
-   instead of Inter, point `--font-sans` in `@theme inline` at its variable —
-   keep Noto Sans Thai as the Thai fallback when that font has no Thai glyphs —
-   and write the มติ sentence `ฟ้อนต์: คงของเดิม (<ชื่อ>)` into DESIGN.md §10;
-   `verify.mjs` reads that sentence and stops demanding Inter/Noto):
-
-   ```tsx
-   import { Geist_Mono, Inter, Noto_Sans_Thai } from 'next/font/google';
-   const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-   const notoSansThai = Noto_Sans_Thai({ subsets: ['thai'], variable: '--font-noto-sans-thai' });
-   const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
-   // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
-   ```
-
-   `<html lang="th">` → `<html lang={locale}>` เมื่อ ภาษา = th+en (อ่าน locale
-   ด้วย `getLocale()` จาก `next-intl/server` ใน RootLayout ซึ่งเป็น Server
-   Component อยู่แล้ว) — `lang` ที่ไม่ตรงภาษาจริงทำให้ screen reader อ่านผิดภาษา
-   และ `:lang()` ใน CSS เลือกฟอนต์ผิด
-
-   Body wraps: **`NextIntlClientProvider` (นอกสุด — provider อื่นและ children
-   ทุกตัวต้องอยู่ข้างใน ไม่งั้น `useTranslations` โยน error ตอน render)** →
-   **`QueryProvider` (from `assets/components/query-provider.tsx`
-   — the app's single QueryClient; also copy `assets/lib/http-error.ts`, and
-   `assets/ui/query-progress.tsx` + its CSS block rendered just inside the
-   provider)** → `ThemeProvider` (from `assets/components/theme-provider.tsx`,
-   when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
-   Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
-   without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
-
-   **dev ต้องมองออกทันทีว่าไม่ใช่ prod** — สองตัวอยู่ host เดียวกัน ต่างกันแค่ basePath
-   (`/<project>` vs `/<project>-dev`, ตาม `ugt-nextjs-cicd-setup`) · ผู้ใช้จึงกรอกข้อมูลจริงลง
-   dev หรือทดสอบบน prod โดยไม่รู้ตัว · มี 2 จุด ใช้ `isDevEnvironment()` ตัวเดียวกัน:
-   **(1) แถบเหลืองเต็มความกว้างบนสุดของทุกหน้า** (รวมหน้า login ที่อยู่นอก shell — จึงต้อง
-   mount ที่ root layout ไม่ใช่ใน site-header) และ **(2) แท็บ browser ขึ้นต้น `[DEV] `**
-   (prefix ไม่ใช่ suffix: แท็บแคบตัดท้ายทิ้ง — และตรงกับ `[DEV] ` ที่หัวเรื่องอีเมลของ
-   mail-setup)
-
-   **ก่อนอื่นให้ `lib/env.ts` รู้จัก basePath** (design-setup รันก่อน auth-setup จึงอาจยังไม่มี):
-   `NEXT_PUBLIC_BASE_PATH: z.string().default('')` ใน `client` block **และ**
-   `NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH` ใน `runtimeEnv` — มีอยู่แล้วก็อย่า
-   ซ้ำ (auth-setup §5.4 ประกาศตัวเดียวกัน) · แล้ว copy `assets/lib/environment.ts`
-   (+ `environment.test.ts`) → `lib/` และ `assets/components/dev-environment-bar.tsx`
-   → `components/`:
-
-   ```tsx
-   import { DevEnvironmentBar } from '@/components/dev-environment-bar';
-   import { isDevEnvironment } from '@/lib/environment';
-
-   const DEV_PREFIX = isDevEnvironment() ? '[DEV] ' : '';
-   export const metadata: Metadata = { title: `${DEV_PREFIX}<App name>`, ... };
-
-   // <NextIntlClientProvider> ... — แถบเป็นลูกคนแรก อยู่เหนือ provider/shell ทั้งหมด (ไม่ sticky)
-   //   {isDevEnvironment() && <DevEnvironmentBar />}
-   //   <QueryProvider> ...{children}... </QueryProvider>
-   ```
-
-   ถ้าหน้าไหนตั้ง `title` เอง ให้ root ใช้
-   `title: { template: `${DEV_PREFIX}%s · <App name>`, default: `${DEV_PREFIX}<App name>` }`
-   แทน ไม่งั้นหน้านั้นทับ prefix หาย · **โปรเจคที่ลง 4.71.0–4.75.0 มา** ใช้ suffix ` (DEV)` →
-   เปลี่ยนเป็น prefix ตามนี้ (ป้าย `DEV` ใน site-header คงไว้เป็นตัวเตือนเล็กตอนแถบเลื่อนพ้นจอ)
-
-   - `isDevEnvironment()` เป็น **server-only** (ใช้ `env` จาก `@/lib/env`) — Client Component
-     ห้าม import · `?? ''` ข้างในห้ามตัด (CI build ตั้ง `SKIP_ENV_VALIDATION` → ค่าเป็น
-     `undefined` → ไม่มี `?? ''` = Jenkins stage Build พัง `Cannot read properties of
-     undefined (reading 'endsWith')` ที่ `app/layout.tsx` · เจอจริงตอนทำ 4.71.0)
-   - โปรเจคที่ deploy **ไม่มี basePath** (cicd interview ข้อ 3 = ไม่มี) ไม่มีอะไรแยก dev/prod —
-     `isDevEnvironment()` เป็น false เสมอ แถบไม่ขึ้น · แจ้งเจ้าของ ไม่ต้องเดา
-   - ข้อความมาตรฐานเป็นกลาง ("DEV environment — test data only" / "สภาพแวดล้อมทดสอบ (DEV) —
-     ข้อมูลในระบบนี้ไม่ใช่ข้อมูลจริง") ใน `kit.devEnvironment` · โปรเจคที่ลง **dev mode ของ
-     mail-setup** ต่อประโยคเรื่องอีเมลได้ผ่าน `note` — เขียนใน `messages/app.*.ts` ของโปรเจค
-     (ไม่ใช่ namespace kit): `<DevEnvironmentBar note={tApp('devMailNote')} />` เช่น "every email
-     goes back to the person who triggered it" · ประโยคนี้จริงเฉพาะเมื่อ dev mode เปิดอยู่
-
-   **แล้วลงทะเบียน plugin ของ next-intl ใน `next.config.ts` — ไม่ใช่ของเสริม**:
-
-   ```ts
-   import createNextIntlPlugin from 'next-intl/plugin';
-   const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
-   // ...existing nextConfig...
-   export default withNextIntl(nextConfig);
-   ```
-
-   next-intl หา `getRequestConfig` ผ่าน alias ที่ plugin ตัวนี้สร้างให้ตอน build
-   เท่านั้น ไม่ลงทะเบียน = `i18n/request.ts` ไม่เคยถูกโหลดเลยสักครั้ง แล้ว
-   `getLocale()` ใน RootLayout กับ `t()` ทุกตัวโยน error ตอน render —
-   **แอปไม่ขึ้นทั้งแอป ไม่ใช่แค่ประสบการณ์ที่แย่ลง** และตั้งแต่ 4.46.0 คิต 5 ตัว
-   เรียก `useTranslations` โดย `next-intl` เป็น dependency ของทุกโปรเจค
-   จึงพังทุกโปรเจค ไม่ใช่เฉพาะที่ตอบ th+en · ต้องส่ง path `'./i18n/request.ts'`
-   ให้ชัด เพราะเรา copy ไฟล์ไปไว้ที่ `i18n/` ไม่ใช่ตำแหน่ง default ของ next-intl ·
-   `scripts/verify.mjs` fail ถ้าไม่มีบรรทัดนี้
+2. shadcn init if none yet with **the org preset** (canonical, มติ 2026-08-04 —
+   `base-mira` + `lucide` + `rtl:false` + neutral), then merge the tokens.
+   Full detail, traps and fallbacks: **`references/shadcn-init.md`**. Must-not-miss:
+   - **Existing project: Tailwind v4 before init** — none → install
+     `tailwindcss @tailwindcss/postcss postcss`; **v3** → `npx @tailwindcss/upgrade`
+     first (the token file is v4-only; `verify.mjs` fails on v3).
+   - `npx shadcn@latest init --preset b1ZzrZbs0 --pointer --yes` (fresh project:
+     `printf '<project-name>\n' |` … `--template next`) · **never `-b radix`** ·
+     rename `package.json` `"name"` · **keep the `cn` npm package**.
+   - Run `verify.mjs` right after init (gates preset + no Radix). Windows: run
+     every CLI/build step from a **short path**.
+   - Merge `assets/globals.tokens.css` into `app/globals.css` — **carry over the
+     preset's `--radius` line** (verify fails without it) · substitute
+     `__PRIMARY__`/`__PRIMARY_DARK__`.
+3. Root layout + `next.config.ts` — exact wiring in **`references/root-layout.md`**.
+   Must-not-miss:
+   - Fonts Inter + Noto Sans Thai + Geist Mono via `next/font` (preserve mode ข้อ 10
+     = คงฟ้อนต์เดิม → keep it, record `ฟ้อนต์: คงของเดิม (<ชื่อ>)` in §10) ·
+     `<html lang={locale}>` when th+en.
+   - Provider order: **`NextIntlClientProvider` outermost** → `QueryProvider`
+     (+ `QueryProgress`) → `ThemeProvider` (dark = มี) → **`TooltipProvider`
+     (required)** → children + `<Toaster richColors />`.
+   - **DEV bar in the ROOT layout** (not site-header — the login page needs it
+     too): `NEXT_PUBLIC_BASE_PATH` in `lib/env.ts`, `{isDevEnvironment() &&
+     <DevEnvironmentBar />}` as the first child, and the title **prefixed**
+     `[DEV] ` (prefix, not suffix).
+   - **Register `createNextIntlPlugin('./i18n/request.ts')` in `next.config.ts`**
+     — without it every `t()` throws and the whole app fails to render.
 4. Install the base component set with `npx shadcn@latest add` (the CLI
    resolves `components.json` → base-mira, so it installs the right style).
    **อ่าน API จริงของ component จาก registry ของ base-mira เท่านั้น**:
@@ -351,7 +195,7 @@ different size — is the field bug this step exists to prevent.
    catalog) · `exceljs` only when
    the project exports Excel/CSV (`lib/export.ts` + `ui/export-menu.tsx` —
    skip both files otherwise; route shape and traps in
-   `references/conventions.md` §Export) · `npx shadcn@latest add chart`
+   `references/export.md`) · `npx shadcn@latest add chart`
    (recharts) only when the project has charts — copy `ui/chart-example.tsx`
    as the color-rule reference · the `@tiptap/*` ^3 set + `ui/tiptap-editor.tsx`
    only when rich text exists · `motion` + `lib/motion.ts` only when custom
@@ -380,10 +224,10 @@ different size — is the field bug this step exists to prevent.
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
    th+en only; **`site-header` + `site-header.test.ts` คู่กันเสมอ
    (ทุกโปรเจคที่มี sidebar shell)**, `lib/environment.ts` + `environment.test.ts` +
-   `components/dev-environment-bar.tsx` (ทุกโปรเจค — wiring อยู่ Step 3.3),
+   `components/dev-environment-bar.tsx` (ทุกโปรเจค — wiring อยู่ Step 3.3 → `references/root-layout.md`),
    `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
-   `references/conventions.md` §Kit; copying the two toggles without
+   `references/kit-inventory.md`; copying the two toggles without
    mounting them in site-header's `actions` slot is an incomplete install).
    **Then the select width edit (sanctioned, มติ 4.58.0)**: base-mira's
    `SelectTrigger` defaults to `w-fit`, so a form Select shrinks to its
@@ -470,8 +314,8 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
    into §9 / pick per file. Font is asked separately (keep or move to
    Inter + Noto Sans Thai) — the org default is not assumed.
 3. **Apply**: tokens back to the org values in `globals.css` (Step 3.2 token
-   merge), un-rebase `components/ui/*` per §Scale bridge in reverse, fonts per
-   Step 3.3 when moving, migrate the files chosen in step 2. The shell stays
+   merge — `references/shadcn-init.md` §Token merge), un-rebase `components/ui/*` per §Scale bridge in reverse, fonts per
+   Step 3.3 (`references/root-layout.md` §Fonts) when moving, migrate the files chosen in step 2. The shell stays
    unless the user asks for the org shell (then Step 3.5).
 4. **Record — append, never rewrite**: §10 gains
    `ยึด org (re-align) — แทนมติ <date ของมติ preserve>` and the font row
@@ -487,9 +331,17 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
   existing-project scan checklist (the interview step reads it — question bank, defaults, scan checklist)
 - `references/layout-shells.md` — shell answer → shadcn block mapping + nav
   highlight rule + overflow rule
-- `references/conventions.md` — component-usage rules in depth (Dialog
-  ladder, Badge vs StatusBadge, icon mapping, TONE_STYLES exception,
-  DataTable modes, Excel/CSV export) + the kit inventory with provenance
+- `references/shadcn-init.md` — Step 3.2 in full: Tailwind v4 check/upgrade,
+  org-preset init command, after-init gate, Windows short path, token merge
+- `references/root-layout.md` — Step 3.3 in full: fonts + `lang`, provider
+  stack, DEV environment bar + `[DEV] ` title, next-intl plugin
+- `references/conventions.md` — component-usage rules in depth (ถูก/ผิด,
+  control ladder, Base UI API check, Dialog ladder, Badge vs StatusBadge,
+  icon mapping + IconAction tone, feedback, i18n)
+- `references/datatable.md` — page-level filter bar + DataTable modes,
+  toolbar, pagination, consistency obligations
+- `references/export.md` — Excel/CSV export route shape and traps
+- `references/kit-inventory.md` — every kit file with provenance and when to ship it
 
 ## 5. Quick Rules
 

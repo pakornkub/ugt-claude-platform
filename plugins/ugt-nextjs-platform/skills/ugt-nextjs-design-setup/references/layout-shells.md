@@ -95,7 +95,7 @@ installs shipped empty top bars). Composition, left→right:
    without it nothing but the URL says which one a user is typing into. No new env
    var — the basePath already tells the two apart. It is the **compact** signal:
    the primary one is the full-width amber `<DevEnvironmentBar />` mounted in
-   `app/layout.tsx` above the whole shell (SKILL.md step 3.3) — it also covers the
+   `app/layout.tsx` above the whole shell (SKILL.md step 3.3 → `root-layout.md` §DEV environment indicator) — it also covers the
    login page, which has no header — plus the `[DEV] ` title prefix so the browser
    tab differs too. The bar is non-sticky by design (it scrolls away rather than
    cover a sticky top bar), which is why the badge stays. The sidebar block's

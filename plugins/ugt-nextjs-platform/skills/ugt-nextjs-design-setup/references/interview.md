@@ -65,7 +65,7 @@ failing pair, never silently darken the dark primary below the light one.
 ข้อ 10 — ใส่ชื่อฟ้อนต์จริงจาก scan (`app/layout.tsx` `next/font`) ลงในคำถาม ·
 **คงฟ้อนต์เดิม** → เก็บ `next/font` เดิมไว้ใน `layout.tsx`, ชี้ `--font-sans` ใน
 `@theme inline` ไปที่ตัวแปรของฟ้อนต์นั้น (ยังเติม Noto Sans Thai เป็น fallback ไทย
-ถ้าฟ้อนต์เดิมไม่มี glyph ไทย), ไม่ import Inter · **เปลี่ยน** → ทำตาม Step 3.3 ปกติ ·
+ถ้าฟ้อนต์เดิมไม่มี glyph ไทย), ไม่ import Inter · **เปลี่ยน** → ทำตาม Step 3.3 ปกติ (`root-layout.md` §Fonts + `lang`) ·
 ทั้งสองทางเขียนมติส่วน 10 ด้วยประโยคตรงตัว **"ฟ้อนต์: คงของเดิม (<ชื่อ>)"** หรือ
 **"ฟ้อนต์: เปลี่ยนเป็น Inter + Noto Sans Thai"** — `verify.mjs` อ่านประโยคนี้เพื่อ
 เลือกว่าจะเรียกหา Inter/Noto หรือฟ้อนต์เดิม · โปรเจคใหม่และโปรเจคเดิมที่ไม่ใช่
@@ -95,7 +95,7 @@ Read these before drafting; the draft agreement states what the code
 | อ่าน | หาอะไร | ไปตอบคำถาม |
 | --- | --- | --- |
 | `components.json` | style (`base-mira` = ตรงมาตรฐาน · `radix-*` = conflict), baseColor, icon lib | preset conflict → Deviations |
-| `package.json` `tailwindcss` + CSS entry | **v4** (`@import "tailwindcss"`) · **v3** (`tailwind.config.*` + `@tailwind base/components/utilities`) · CDN `<script src="cdn.tailwindcss.com">` | v3/CDN → upgrade to v4 **before** shadcn init (SKILL Step 3.2) — `globals.tokens.css` is v4-only (`@theme inline`, `@custom-variant`, `@utility`); on v3 those blocks are ignored, no token reaches a utility, every kit component renders unstyled/misaligned |
+| `package.json` `tailwindcss` + CSS entry | **v4** (`@import "tailwindcss"`) · **v3** (`tailwind.config.*` + `@tailwind base/components/utilities`) · CDN `<script src="cdn.tailwindcss.com">` | v3/CDN → upgrade to v4 **before** shadcn init (SKILL Step 3.2 → `shadcn-init.md` §Tailwind first) — `globals.tokens.css` is v4-only (`@theme inline`, `@custom-variant`, `@utility`); on v3 those blocks are ignored, no token reaches a utility, every kit component renders unstyled/misaligned |
 | `package.json` (เมื่อไม่มี `components.json` — โปรเจคเดิมที่ไม่เคยใช้ shadcn) | UI lib เดิม (MUI, Ant Design, Bootstrap, Chakra, styled-components, ...) และเวอร์ชัน | ข้อ 8 — grandfather (อยู่ร่วมกับ shadcn ช่วงเปลี่ยนผ่าน) หรือ migrate หน้าเดิมมาที่ shadcn |
 | `app/globals.css` | palette จริง (`--primary`, status tokens มีไหม), radius, font vars | ข้อ 1–2 · token gaps |
 | `app/layout.tsx` | ฟ้อนต์จริง (`next/font`), `lang` | font conflict |

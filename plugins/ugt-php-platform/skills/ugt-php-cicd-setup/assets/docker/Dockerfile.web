@@ -7,7 +7,7 @@
 # — โปรเจค pilot 2026-08) · เรื่อง key ใช้ `gpg --dearmor` + `signed-by` เสมอ
 # (apt รับ ASCII-armored ได้ตั้งแต่ 1.4 ถ้าตั้งนามสกุล `.asc` — สิ่งที่ trixie
 # ถอดออกคือคำสั่ง `apt-key` ไม่ใช่รูปแบบ key; `signed-by` ยังดีกว่าเพราะจำกัด
-# ความไว้ใจของ key ไว้กับ repo เดียว — ดู references §C)
+# ความไว้ใจของ key ไว้กับ repo เดียว — ดู references/sqlserver.md)
 # หมายเหตุ: SQL Server ต้องการ PHP >= 8.3 เป็นเพดานแข็ง — PECL sqlsrv/pdo_sqlsrv
 # รุ่นปัจจุบันตัดการรองรับ 8.2 ไปแล้ว ("pecl/sqlsrv requires PHP >= 8.3.0")
 FROM php:8.3-apache-bookworm
@@ -15,7 +15,7 @@ WORKDIR /var/www/html
 
 # [DB] เปิด extension ตาม DB ของโปรเจค — เลือกบรรทัดเดียว ลบที่เหลือ:
 # RUN docker-php-ext-install pdo_mysql
-# RUN pecl install sqlsrv pdo_sqlsrv && docker-php-ext-enable sqlsrv pdo_sqlsrv   # SQL Server (ต้องมี msodbcsql — ดู references/docker-deploy.md)
+# RUN pecl install sqlsrv pdo_sqlsrv && docker-php-ext-enable sqlsrv pdo_sqlsrv   # SQL Server (ต้องมี msodbcsql — ดู references/sqlserver.md)
 
 # HEALTHCHECK ท้ายไฟล์ใช้ `curl` ซึ่ง **ติดมากับ base image อยู่แล้ว** (image
 # ทางการฝั่ง Debian ลง `$PHPIZE_DEPS ca-certificates curl xz-utils` เป็น
@@ -24,7 +24,7 @@ WORKDIR /var/www/html
 # curl ไปด้วย ไม่งั้น healthcheck ตายด้วย `curl: not found`
 # (`wget` ไม่มีมาให้จริง — อย่าเปลี่ยนไปใช้ · เดิมเคยใช้
 # `php -r file_get_contents` ซึ่งพังเงียบเมื่อตั้ง `allow_url_fopen = Off`
-# ตาม OWASP — ดู references §D)
+# ตาม OWASP — ดู references/healthcheck.md)
 RUN a2enmod rewrite
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

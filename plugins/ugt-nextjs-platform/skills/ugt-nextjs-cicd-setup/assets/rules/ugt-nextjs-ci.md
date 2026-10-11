@@ -60,7 +60,7 @@ global `environment {}` block (global = one value for every branch).
 
 - Every scheduled/recurring job = one **host cron** line in the admin handoff
   cron table → `docker exec <container> node -e "fetch(…)"` the app's `/api/cron/<job>` route (secret read inside the container, never in argv)
-  (`references/docker-deploy.md` §H). **No in-app scheduler**: no `node-cron`,
+  (`references/scheduled-jobs.md`). **No in-app scheduler**: no `node-cron`,
   `node-schedule`, `setInterval` loops, no SQL Agent job, no Jenkins timer
 - `/api/cron/*` routes: `POST` only · `Authorization: Bearer ${CRON_SECRET}`
   checked first (401 otherwise) · idempotent · destructive jobs keep the
@@ -84,7 +84,7 @@ global `environment {}` block (global = one value for every branch).
 - Version-skew protection: `next.config` `deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined`
   + Dockerfile `ARG`/`ENV NEXT_DEPLOYMENT_ID` + Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${deployId}`
   on **both** `docker build` commands — without it a tab left open across a deploy
-  fails every Server Action (`references/docker-deploy.md` §I)
+  fails every Server Action (`references/version-skew.md`)
 
 ## SonarQube config
 
