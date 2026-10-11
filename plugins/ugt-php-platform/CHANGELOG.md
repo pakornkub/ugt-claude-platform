@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## 0.8.1 (2026-10-11)
+
+- Post-merge review: verify ตรวจ Laravel schedule ไม่นับ comment (`// $schedule->…` ของ Kernel.php เดิมทุกโปรเจค ≤10 fail ผิด) และจับ Laravel 11 `Artisan::command(…)->daily()` · cron ทุกแบบเป็น `docker exec -u www-data …` (image ไม่มี USER → root สร้างไฟล์แล้ว apache เขียนไม่ได้) · WordPress: compose `WORDPRESS_CONFIG_EXTRA` ปิด WP-Cron + ตาราง cron มีเสมอ · interview ข้อ 9 · crontab ของ user `jenkins` · ตัวอักษรหัวข้อ handoff คงที่
+
 ## 0.8.0 (2026-10-09)
 
 - **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — `docker exec <container> php artisan <command>` หนึ่งบรรทัดต่อ job (เลิก `Schedule::` + `schedule:run` ทุกนาที) · legacy `php jobs/<name>.php` · WordPress `DISABLE_WP_CRON` + `wp-cron.php` จาก cron · admin-handoff ตาราง G cron ใหม่ · rules + `docker-deploy.md` §A · verify.mjs +1: เจอ Laravel schedule = fail

@@ -79,7 +79,7 @@ the atomic unit of "what this chunk did and what it taught us".
 | --- | --- | --- |
 | Work state (ค้างไหน คิวอะไร คำถามอะไร) | `handoff.md` | Let it rot in chat history |
 | True only for this project | the matching `docs/project-context/` file, or `.claude/rules/<project>-*.md` if path-bound | — |
-| True for every project on this stack | **`/ugt-contribute`** — opens the PR against the platform repo (a proven `troubleshooting.md` entry graduates into the owning platform skill, version bumped, then deleted here) | Edit installed skill files (plugin cache is disposable) |
+| True for every project on this stack | **`/ugt-contribute`** — opens the PR against the platform repo (a proven `troubleshooting.md` entry graduates into the owning platform skill under the CHANGELOG `## Unreleased` heading, then deleted here) | Edit installed skill files (plugin cache is disposable) |
 | Personal preference of the current user | auto memory | Force it into committed files |
 
 **Never create `.claude/skills/ugt-<same-name>/`** shadowing a platform skill —

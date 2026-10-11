@@ -1,5 +1,17 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.77.0 (2026-10-11)
+
+**Post-merge code review ของ 4.64.0–4.76.0** (กติกาใหม่: merge แล้วต้อง review + eval) — reviewer 4 ตัวขนานกัน แก้ที่ยืนยันแล้ว:
+
+- **auth: ถอน `Account.issuer` ของ 4.74.0** — คอลัมน์นี้มีแค่ better-auth **1.7.0–1.7.2** (ตรวจ `@better-auth/core` 1.7.2 vs 1.7.7: 1.7.4+ เอาออกและเตือนว่า required column ที่ไม่มีใครเขียน = insert พังทุกครั้ง) → `^1.7.1` ได้ 1.7.7 แล้ว SSO login แรกพังทุกคน · asset `schema-auth.prisma`/`admin-users.ts`/`create-first-user.ts` กลับเป็นก่อน 4.74.0 · ขั้นต่ำ `better-auth@^1.7.4` · verify กลับทิศ: fail ถ้า `issuer` เป็น NOT NULL · โปรเจคที่ migrate คอลัมน์ไปแล้ว: ทำ nullable หรือ drop (auth-flows.md)
+- auth: `.npmrc` เติมท้ายไม่เขียนทับ (registry/auth เดิมไม่หาย) · หัวหน้า users เป็นกลาง (local account ไม่ได้ "เกิดเองตอน login") · `lib/auth.ts` comment บอกตรง ๆ ว่า fallback endpoint ข้ามการตรวจ id_token · verify หน้า login ไม่นับ comment + รองรับ `[locale]` · audit checklist ตรงกับ cron retention
+- **cicd: cron ไม่ให้ secret อยู่ใน argv** — `docker exec … node -e "fetch(…)"` อ่าน `CRON_SECRET` ในตัว container (เดิม `sh -c 'wget --header=…$CRON_SECRET'` → `ps` บน host เห็น) · nginx `deny` `/api/cron/` (ตาราง H) · route ต้อง export `POST` · crontab ของ user `jenkins` + `sudo -u jenkins mkdir` (เดิม root สร้าง folder แล้ว Deploy เขียนไม่ได้) · interview ข้อ 8 Scheduled jobs + §4.3 `[CRON]` (compose, `.env.example`, `lib/env.ts` server + runtimeEnv)
+- cicd: `deploymentId` = build number + commit 8 ตัว (`BUILD_NUMBER` เริ่ม 1 ใหม่เมื่อสร้าง job ใหม่) · verify ไม่นับ comment (`CRON_SECRET`, `deploymentId`) · admin-handoff: ตัวอักษรหัวข้อ/anchor **คงที่** (เดิมสั่งเรียงใหม่ → skill อื่นที่อ้าง "ตาราง B/H" ชี้ผิด) · นิยาม `[AUTH]`
+- upload verify: ไม่นับ comment ใน asset (`'clean'`, `CLAMAV_HOST`, `/app/storage`) — เดิม install default (scan off) fail 2–3 ข้อ และ storage ที่ไม่ได้ mount กลับผ่าน · design verify: `NEXT_PUBLIC_BASE_PATH` ใน comment ไม่นับ + ต้องมี `lib/env.ts`
+- design: DatePicker `ariaLabel` — `hideLabels` ยังมีชื่อให้ screen reader · pitfalls `form-validation.md` §4 Select `items` (ตาราง SKILL ชี้มาแต่ไม่มีเนื้อหา) · full-setup ระบุตาราง cron
+- **โปรเจคเดิม**: ลง 4.74.0–4.76.0 แล้วมีคอลัมน์ `Issuer` NOT NULL → ALTER เป็น NULL ก่อนขึ้น better-auth 1.7.4+ · kit-sync เสนอ `date-picker`/`date-range-picker`/`auth.*.ts`/`lib/auth.ts`/asset issuer ที่ย้อนกลับ
+
 ## 4.76.0 (2026-10-11)
 
 **design-setup: dev กับ prod หน้าตาเหมือนกัน — ผู้ใช้เผลอกรอกข้อมูลจริงลง dev หรือทดสอบบน prod** — 4.71.0 ใส่ป้าย `DEV` ไว้ใน `site-header` แต่หน้า login อยู่นอก shell (ไม่มี header) จึงไม่มีสัญญาณอะไรเลยตั้งแต่หน้าแรก และ title แท็บเป็น suffix ` (DEV)` ที่แท็บแคบตัดทิ้ง · ทั้งสองตัวใช้ `process.env` กระจายคนละที่ ไม่มีจุดตัดสิน "นี่คือ dev" ที่เดียว

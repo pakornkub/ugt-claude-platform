@@ -19,6 +19,8 @@ const p = (...s) => {
 };
 const has = (...s) => existsSync(p(...s));
 const read = (...s) => readFileSync(p(...s), 'utf8');
+// code without comments — shipped assets mention 'clean' / CLAMAV_HOST / /app/storage in comments
+const code = (...s) => read(...s).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1').replace(/^\s*#[^\n]*/gm, '');
 
 function check(name, fn) {
   try {
@@ -39,7 +41,7 @@ const DOWNLOAD = join('app', 'api', 'files', '[id]', 'route.ts');
 // ยังนับเป็นการติดตั้งพัง
 const SCAN_ON =
   has('lib/virus-scan.ts') ||
-  ['lib/env.ts', 'env.ts', '.env.example'].some((f) => has(f) && /CLAMAV_HOST/.test(read(f)));
+  ['lib/env.ts', 'env.ts', '.env.example'].some((f) => has(f) && /^\s*CLAMAV_HOST\s*[=:]/m.test(code(f)));
 const SCAN_OFF = !SCAN_ON;
 
 // messages/ catalogs are REQUIRED, not optional: file-upload.tsx calls
@@ -67,13 +69,13 @@ if (SCAN_OFF) {
     const problems = [];
     const notes = [];
     if (has(UPLOAD)) {
-      const up = read(UPLOAD);
+      const up = code(UPLOAD);
       if (/\bscanBuffer\s*\(/.test(up))
         problems.push('upload route calls scanBuffer but there is no lib/virus-scan.ts / CLAMAV_HOST — copy the [SCAN] parts (SKILL.md §3 Q5) or drop the call');
       if (/scanStatus:\s*'clean'/.test(up))
         problems.push("upload route stores scanStatus 'clean' with no scanner installed — nothing was scanned; use 'unscanned' (SKILL.md §3 Q5)");
     }
-    if (has(DOWNLOAD) && /scanStatus\s*!==\s*'clean'/.test(read(DOWNLOAD)))
+    if (has(DOWNLOAD) && /scanStatus\s*!==\s*'clean'/.test(code(DOWNLOAD)))
       problems.push("download guard still requires 'clean' — every 'unscanned' row answers 409; use === 'infected' (SKILL.md §3 Q5)");
     for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
       if (/clamav/i.test(read(f))) notes.push(`${f}: clamav service present although virus scan is off — ~2 GB RAM for nothing (remove it, or opt in properly: SKILL.md §3 Q5)`);
@@ -243,7 +245,7 @@ check('Compose mounts a storage volume (and the scanner, when scan is on)', () =
   const problems = [];
   for (const f of files) {
     const body = read(f);
-    if (!/\/app\/storage/.test(body)) problems.push(`${f}: no volume mounted at /app/storage — uploads vanish on redeploy`);
+    if (!/^\s*-\s*['"]?\S+:\/app\/storage\b/m.test(body)) problems.push(`${f}: no volume mounted at /app/storage — uploads vanish on redeploy`);
     if (!SCAN_OFF && !/clamav/.test(body)) problems.push(`${f}: no clamav service — uploads will fail closed`);
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };

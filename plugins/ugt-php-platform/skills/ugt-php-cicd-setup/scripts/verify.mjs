@@ -729,7 +729,10 @@ check('.claude/rules/ugt-php-ci.md in place', () => {
 check('Scheduled jobs go through host cron, not the Laravel scheduler', () => {
   // มติ 2026-10-09 (rules/ugt-php-ci.md): หนึ่ง artisan command = หนึ่งบรรทัด host cron
   const files = ['routes/console.php', 'app/Console/Kernel.php', 'bootstrap/app.php'].filter((f) => has(f));
-  const hit = files.find((f) => /\bSchedule::|\$schedule->|->withSchedule\(/.test(read(f)));
+  const code = (f) => read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1').replace(/^\s*#[^\n]*/gm, '');
+  const hit = files.find((f) =>
+    /\bSchedule::|\$schedule->|->withSchedule\(|Artisan::command\([\s\S]*?\)\s*->\s*(?:hourly|daily\w*|weekly\w*|monthly\w*|yearly|every\w+|cron|twiceDaily\w*|weekdays|weekends)\s*\(/.test(code(f))
+  );
   return hit
     ? { ok: false, msg: `${hit} defines a Laravel schedule — org rule: each job is an artisan command with its own host-cron line in the admin handoff cron table (references/docker-deploy.md §A), never schedule:run` }
     : { ok: true };

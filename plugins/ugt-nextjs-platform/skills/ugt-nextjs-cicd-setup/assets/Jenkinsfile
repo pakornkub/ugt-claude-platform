@@ -217,6 +217,9 @@ pipeline {
                     def appUrl    = isProd ? '__APP_URL_PROD__'   : '__APP_URL_DEV__'
                     def imageName = isProd ? '__PROJECT_NAME__'   : '__PROJECT_NAME__-dev'
                     def buildNum  = env.BUILD_NUMBER
+                    // deploymentId: build number + commit — BUILD_NUMBER alone restarts at 1 when the
+                    // job is recreated, and an old open tab could then match a new build (docker-deploy.md §I)
+                    def deployId  = "${buildNum}-${(env.GIT_COMMIT ?: 'nogit').take(8)}"
                     // [SENTRY] DSN comes from a Jenkins Secret Text credential — never hardcoded.
                     // [SENTRY] If the project has no Sentry, delete ONLY the [SENTRY]-marked lines:
                     // [SENTRY]   this comment block, the withCredentials(...) { line below, its
@@ -229,7 +232,7 @@ pipeline {
                         //          [DB] If no database: this builder image build can be deleted.
                         // Image 2: runner (production image deployed by docker-compose)
                         // --network host: npm run build needs internet (e.g. Google Fonts fetch)
-                        // NEXT_DEPLOYMENT_ID = BUILD_NUMBER on BOTH builds (same id in both images) —
+                        // NEXT_DEPLOYMENT_ID = deployId (build number + commit) on BOTH builds (same id in both images) —
                         //   next.config deploymentId; lets Next.js detect a tab left open across a
                         //   deploy instead of failing every Server Action (docker-deploy.md §I)
                         sh """
@@ -239,7 +242,7 @@ pipeline {
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
                                 --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
-                                --build-arg NEXT_DEPLOYMENT_ID=${buildNum} \\
+                                --build-arg NEXT_DEPLOYMENT_ID=${deployId} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:${buildNum}-builder \\
                                 .
@@ -248,7 +251,7 @@ pipeline {
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
                                 --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
-                                --build-arg NEXT_DEPLOYMENT_ID=${buildNum} \\
+                                --build-arg NEXT_DEPLOYMENT_ID=${deployId} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:latest \\
                                 -t ${imageName}:${buildNum} \\

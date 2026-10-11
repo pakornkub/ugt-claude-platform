@@ -28,13 +28,14 @@ web-service deploy shape ... the only deploy shape PHP projects use") ทุก
 web ที่ยืนอยู่ หนึ่งบรรทัดต่อ job (ตาราง cron `[CRON]` ใน admin handoff):
 
 ```
-0 2 * * * docker exec __PROJECT_NAME__ php artisan reports:daily >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
+0 2 * * * docker exec -u www-data __PROJECT_NAME__ php artisan reports:daily >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
 ```
 
 - Laravel: เขียน job เป็น artisan command แล้วตั้ง cron ทีละ command — **ไม่ใช้**
   `Schedule::` + `schedule:run` ทุกนาที (ตารางเวลาไปซ่อนในโค้ด admin ไม่เห็น)
-- CodeIgniter/legacy: `docker exec <container> php jobs/<name>.php` (หรือ `php index.php <controller> <method>`)
-- WordPress: `define('DISABLE_WP_CRON', true)` แล้วตั้ง `docker exec <container> php /var/www/html/wp-cron.php` ทุก 5–15 นาที
+- CodeIgniter/legacy: `docker exec -u www-data <container> php jobs/<name>.php` (หรือ `php index.php <controller> <method>`)
+- **`-u www-data` ห้ามตัด**: image ไม่มี `USER` → `docker exec` รันเป็น root → log/ไฟล์ที่ job สร้างเป็นของ root แล้ว apache (www-data) เขียนต่อไม่ได้ = 500
+- WordPress: **ตาราง cron มีเสมอ** — compose ตั้ง `WORDPRESS_CONFIG_EXTRA: define('DISABLE_WP_CRON', true);` แล้ว cron `*/10 * * * * docker exec -u www-data <container> php /var/www/html/wp-cron.php`
 - job ต้อง idempotent · ตั้งเฉพาะ prod (dev รันมือ)
 
 ## B. WordPress — wp-content เป็น volume บังคับ + core upgrade path

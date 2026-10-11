@@ -67,7 +67,7 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 ## Scheduled jobs — host cron เท่านั้น (มติ 2026-10-09)
 
 - job ตามรอบทุกตัว = **host cron** หนึ่งบรรทัดต่อ job ในตาราง cron ของ admin handoff:
-  `docker exec <container> php artisan <command>` (Laravel) · `docker exec <container> php <script>.php`
+  `docker exec -u www-data <container> php artisan <command>` (Laravel) · `docker exec -u www-data <container> php <script>.php`
   (CodeIgniter/legacy) · **ห้าม in-app scheduler**: Laravel `Schedule::` / `schedule:run`
   ทุกนาที, WP-Cron (`DISABLE_WP_CRON` = true แล้วตั้ง `wp-cron.php` เป็นบรรทัด cron) ·
   ห้าม SQL Agent job / Jenkins timer สำหรับงานของแอป

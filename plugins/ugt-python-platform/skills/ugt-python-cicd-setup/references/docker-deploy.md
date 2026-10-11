@@ -39,11 +39,11 @@ CI (`importlib.import_module("__APP_MODULE__")`) — แต่รันกับ
 ## C. [BATCH] shape — host cron รัน job
 
 Jenkins deploy image เสร็จแล้ว**จบหน้าที่** — ไม่มี process ไหนเรียก job ให้เอง
-ต่อ. คนตั้ง cron คือ **host admin**, ไม่ใช่ Jenkins pipeline — เป็นรายการ
-`[BATCH]` ใน `admin-handoff.template.md` (§ ภาพรวม 1 นาที + เช็คก่อนปิดงาน)
-ที่ชี้กลับมาที่ตัวอย่าง crontab นี้:
+ต่อ. คนตั้ง cron คือ **host admin**, ไม่ใช่ Jenkins pipeline — เป็นแถวในตาราง
+cron `[CRON]` (ตาราง G) ของ `admin-handoff.template.md` ตามตัวอย่าง crontab นี้:
 
 ```
+# sudo crontab -u jenkins -e   (user jenkins: owns /home/docker02/appdata, in group docker)
 0 2 * * * cd /opt/apps/__PROJECT_NAME__ && docker compose run --rm job >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1
 ```
 

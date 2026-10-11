@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.72.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: bbadd23d3503
+// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: b3bb2cfff403
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -24,7 +24,10 @@ const cookiePrefix = (env.NEXT_PUBLIC_BASE_PATH || '').replace(/^\//, '') || 'be
 // discovery document returns). genericOAuth fetches discovery ONCE in init and, if that fetch
 // fails (Keycloak/proxy blip while the container starts), SKIPS the provider for the life of
 // the process — every login then answers 404 PROVIDER_NOT_FOUND until a restart. Passing the
-// endpoints keeps the provider registered; when discovery succeeds, id_token JWKS checks still apply.
+// endpoints keeps the provider registered. Trade-off: on a run where discovery FAILED, genericOAuth
+// has no issuer/JWKS, so id_token signature/nonce/iss checks are skipped and identity comes from the
+// token response alone (closed intranet + NODE_TLS_REJECT_UNAUTHORIZED=0 — accepted, see auth-flows.md).
+// Restart the container once Keycloak is reachable to get the verified path back.
 function keycloakEndpoints(issuer: string) {
   const base = `${issuer.replace(/\/$/, '')}/protocol/openid-connect`;
   return {

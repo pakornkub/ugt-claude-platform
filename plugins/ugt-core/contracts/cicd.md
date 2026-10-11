@@ -95,7 +95,8 @@ org path, never a named or anonymous Docker volume:
 ## Scheduled jobs = host cron (มติผู้ดูแล 2026-10-09)
 
 Every scheduled job / recurring task runs from the **host crontab** of the
-Docker host — one crontab line per job, set by the server admin from the
+Docker host (the `jenkins` user's crontab — it owns `/home/docker02/appdata`
+and is in group `docker`) — one crontab line per job, set by the server admin from the
 project's admin handoff (cron table). Nothing else schedules:
 
 - **No in-app scheduler** — no `node-cron` / `node-schedule` / `setInterval`
@@ -104,7 +105,7 @@ project's admin handoff (cron table). Nothing else schedules:
 - **No SQL Agent job** and no Jenkins timed build for application work
   (Jenkins timers stay for CI upkeep only, e.g. the NVD update job)
 - Each stack defines how the crontab line reaches the code (Next.js: `docker
-  exec` → `wget` the app's `/api/cron/<job>` route with `CRON_SECRET` · Python
+  exec` → `node` `fetch` POST to the app's `/api/cron/<job>` route with `CRON_SECRET` · Python
   web/PHP: `docker exec <container> <command>` · Python batch: `docker compose
   run --rm job`) — jobs are idempotent, log to
   `/home/docker02/appdata/<project>/logs/cron.log`, and run on **prod only**

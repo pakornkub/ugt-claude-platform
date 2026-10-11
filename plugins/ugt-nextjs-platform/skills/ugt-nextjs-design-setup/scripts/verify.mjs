@@ -553,9 +553,11 @@ check('Root layout shows the DEV bar + "[DEV] " title on the dev deployment', ()
   if (!hasIn('components', 'dev-environment-bar.tsx')) {
     problems.push('components/dev-environment-bar.tsx missing (copy assets/components/dev-environment-bar.tsx)');
   }
-  if (hasIn('lib', 'env.ts')) {
+  if (!hasIn('lib', 'env.ts')) problems.push('lib/env.ts missing — lib/environment.ts imports env from @/lib/env (database-setup ships it)');
+  else {
     // isDevEnvironment() reads env.NEXT_PUBLIC_BASE_PATH — declared in the client block AND runtimeEnv
-    const n = (readIn('lib', 'env.ts').match(/NEXT_PUBLIC_BASE_PATH/g) ?? []).length;
+    const envCode = readIn('lib', 'env.ts').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    const n = (envCode.match(/NEXT_PUBLIC_BASE_PATH/g) ?? []).length;
     if (n < 2) problems.push('lib/env.ts must declare NEXT_PUBLIC_BASE_PATH in both the client block and runtimeEnv');
   }
   const code = readIn('app', 'layout.tsx').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');

@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.1 (2026-10-11)
+
+- Post-merge review: verify ตรวจ scheduler จับ PEP 621 บรรทัดเดียว (`dependencies = ["…", "apscheduler"]`) และไม่ fail `schedule-utils` · interview ข้อ 9 (job ตามรอบ + ชื่อ DB/login) · crontab ของ user `jenkins` · ตัวอักษรหัวข้อ handoff คงที่ · ข้อความ `[BATCH]` เก่าใน docker-deploy/SKILL
+
 ## 0.9.0 (2026-10-09)
 
 - **Scheduled jobs = host cron เท่านั้น** (มติผู้ดูแล 2026-10-09) — shape web ที่มี job: `docker exec <container> python -m <module>` (ไม่ต้องแยก shape batch) · batch ใช้ `docker compose run --rm job` ตามเดิม · admin-handoff ตาราง G cron ใช้ได้ทั้งสอง shape (`[CRON]` แทน `[BATCH]`, `__JOB_CMD__`) · rules + `docker-deploy.md` §C · verify.mjs +1: ห้าม APScheduler / schedule / django-celery-beat / rq-scheduler / django-q / huey

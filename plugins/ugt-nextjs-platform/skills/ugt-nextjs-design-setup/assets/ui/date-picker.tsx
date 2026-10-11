@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.68.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: cef8fb8a0141
+// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: e629c839841b
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -42,6 +42,8 @@ interface DatePickerProps {
    * ทางเดียวในการโชว์วันหยุดใน date picker; อย่า hand-wire modifiers เอง.
    */
   holidays?: string[];
+  /** ชื่อปุ่มสำหรับ screen reader เมื่อไม่มี label ที่มองเห็น (เช่น DateRangePicker `hideLabels`) */
+  ariaLabel?: string;
 }
 
 export function DatePicker({
@@ -58,6 +60,7 @@ export function DatePicker({
   footer,
   triggerSuffix,
   holidays,
+  ariaLabel,
 }: Readonly<DatePickerProps>) {
   // ปิด popover ทันทีที่เลือกวัน — ปล่อยค้างไว้จะบังช่องถัดไป (เจ็บจริงตอนใช้คู่ใน
   // DateRangePicker: เลือก "จาก" แล้วปฏิทินบังช่อง "ถึง")
@@ -81,6 +84,7 @@ export function DatePicker({
         render={
           <Button
             variant="field"
+            aria-label={ariaLabel ? `${ariaLabel} ${value ? formatLabel(value) : ''}`.trim() : undefined}
             className={cn(
               'w-36 justify-start text-left font-normal',
               !value && 'text-muted-foreground',

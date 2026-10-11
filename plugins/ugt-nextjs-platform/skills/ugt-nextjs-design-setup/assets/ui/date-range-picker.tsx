@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
-// kit-hash: 7fa01ff70df3
+// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
+// kit-hash: 38b45fe2d6d8
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -64,6 +64,7 @@ export function DateRangePicker({
           value={from}
           onSelect={onFromChange}
           placeholder={fromLabel}
+          ariaLabel={hideLabels ? fromLabel : undefined}
           disabled={(d) => afterTo(d) || (disabled?.(d) ?? false)}
           className={pickerClassName}
         />
@@ -78,6 +79,7 @@ export function DateRangePicker({
           value={to}
           onSelect={onToChange}
           placeholder={toLabel}
+          ariaLabel={hideLabels ? toLabel : undefined}
           disabled={(d) => beforeFrom(d) || (disabled?.(d) ?? false)}
           className={pickerClassName}
         />

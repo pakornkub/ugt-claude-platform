@@ -75,6 +75,21 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
   } catch {}
   const pending = /^## (.*)$/m.exec(changelog)?.[1].trim() === 'Unreleased';
 
+  // Release gate: `## Unreleased` must be the FIRST heading when present (a version
+  // heading written above it strands its bullets), and the released plugin.json
+  // version must have its own heading — otherwise `unreleased` stamps ship.
+  if (CHECK && changelog) {
+    const unreleasedAt = changelog.search(/^## Unreleased\s*$/m);
+    const firstAt = changelog.search(/^## /m);
+    if (unreleasedAt > -1 && unreleasedAt !== firstAt) {
+      problems.push(`${manifest.name}: CHANGELOG has "## Unreleased" below a version heading — move its bullets into a release`);
+    }
+    const esc = manifest.version.replace(/\./g, '\\.');
+    if (!new RegExp(`^## ${esc}\\b`, 'm').test(changelog)) {
+      problems.push(`${manifest.name}: plugin.json is ${manifest.version} but CHANGELOG has no "## ${manifest.version}" heading`);
+    }
+  }
+
   const skillsDir = join(ROOT, 'plugins', pluginDir, 'skills');
   let skills = [];
   try {

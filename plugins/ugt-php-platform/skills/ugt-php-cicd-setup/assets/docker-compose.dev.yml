@@ -27,6 +27,8 @@ services:
       #   DATABASE_URL  → separate dev DB (never point dev at prod data)
       #   auth secret   → never share secrets between environments
       DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database
+      # [WP] WP-Cron off — the host cron runs wp-cron.php instead (admin handoff cron table, rules/ugt-php-ci.md)
+      WORDPRESS_CONFIG_EXTRA: "define('DISABLE_WP_CRON', true);" # [WP]
       # [DB][LARAVEL] Laravel: uncomment these and delete DATABASE_URL — Laravel
       # reads DB_* (or DB_URL), never DATABASE_URL
       # DB_CONNECTION: ${DB_CONNECTION} # [DB][LARAVEL]

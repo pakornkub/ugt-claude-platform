@@ -495,7 +495,7 @@ check('.claude/rules/ugt-python-ci.md in place', () => {
 check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
   // มติ 2026-10-09 (rules/ugt-python-ci.md): job ตามรอบ = host cron เท่านั้น
   const deps = ['requirements.txt', 'requirements-dev.txt'].filter((f) => has(f)).map((f) => read(f)).join('\n') + '\n' + pyproject;
-  const hit = deps.match(/^\s*["']?(apscheduler|schedule|django-celery-beat|rq-scheduler|django-q2?|huey)\b/im);
+  const hit = deps.match(/(?:^|[\s"'\[,])(apscheduler|schedule|django-celery-beat|rq-scheduler|django-q2?|huey)(?![\w.-])/im);
   return hit
     ? { ok: false, msg: `${hit[1]} in the dependencies — org rule: scheduled jobs run from host cron (docker exec / docker compose run --rm job), never an in-app scheduler (references/docker-deploy.md §C)` }
     : { ok: true };

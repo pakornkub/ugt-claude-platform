@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.74.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
-// kit-hash: 6c139797f93e
+// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
+// kit-hash: 498e187d8723
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL], run once
 //
 //   npx tsx scripts/create-first-user.ts "ชื่อ" you@company.co.th 'InitialPass1'
@@ -48,8 +48,7 @@ await prisma.$transaction([
     data: { id: userId, name, email, emailVerified: true, authType: 'local', roleId: null },
   }),
   prisma.account.create({
-    // issuer: better-auth >= 1.7 requires it; credential rows use 'local:credential'
-    data: { id: generateId(24), accountId: email, providerId: 'credential', issuer: 'local:credential', userId, password: hashed },
+    data: { id: generateId(24), accountId: email, providerId: 'credential', userId, password: hashed },
   }),
 ]);
 

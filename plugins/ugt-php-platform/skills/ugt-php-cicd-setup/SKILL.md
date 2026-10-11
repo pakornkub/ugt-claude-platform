@@ -227,7 +227,7 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
 บอกผู้ใช้ว่าไปแตะอะไรบ้าง; ยกเว้นไฟล์เดียวคือ `.claude/rules/ugt-php-ci.md`
 ที่ทับทั้งไฟล์ได้ (plugin เป็นเจ้าของ)
 
-## 4. Interview — ถามชุดเดียว (8 ข้อ)
+## 4. Interview — ถามชุดเดียว (9 ข้อ)
 
 1. **ชื่อโปรเจค** (kebab-case) → กลายเป็นชื่อ image/container/credential/sonar
    key + display name
@@ -256,6 +256,10 @@ subdir** (`for p in …`) จึงสร้าง volume ที่เพิ่�
    (สร้างแค่ `tests/SmokeTest.php` พอให้สเตจ Unit Tests รันผ่านจริงโดยไม่แตะ
    โค้ดเดิม) ถ้าตอบใช่ → **ทำใน session แยกหลัง pipeline เขียวแล้ว** ตาม
    `references/legacy-test-generation.md` อย่าทำปนใน session นี้
+9. **Job ตามรอบ + ชื่อ DB** — มีงานที่ต้องรันตามเวลาไหม (ชื่อ · ทำอะไร · ทุกเมื่อ)
+   → แถวในตาราง cron `[CRON]` ของ admin handoff (WordPress มีแถว `wp-cron.php` เสมอ) · ไม่มี = ลบตาราง ·
+   และ (ถ้ามี DB) ชื่อ database + login ของ prod/dev → `__DB_NAME_*__` / `__DB_LOGIN_*__`
+   — ไม่รู้ให้เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` และ `<project>_app` / `<project>_dev`
 
 ## 5. Setup Steps
 
@@ -349,7 +353,7 @@ render เอกสารส่ง admin (§5.7):
 | `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database prod/dev — จากคำตอบ interview; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` |
 | `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | login ของ DB — ไม่รู้ → เสนอ `<project>_app` / `<project>_dev` |
 | `__VOLUME__` | ชื่อ volume ใน compose — หนึ่งคู่แถว prod/dev ต่อ volume |
-| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` / `__JOB_CMD__` | ต่อ job หนึ่งแถวในตาราง cron: ชื่อ job · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) · คำสั่ง — `docker exec <project> php artisan <command>` · legacy `php jobs/<name>.php` · WordPress `php /var/www/html/wp-cron.php` (`references/docker-deploy.md`) |
+| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` / `__JOB_CMD__` | ต่อ job หนึ่งแถวในตาราง cron: ชื่อ job · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) · คำสั่ง — `docker exec -u www-data <project> php artisan <command>` · legacy `docker exec -u www-data <project> php jobs/<name>.php` · WordPress `docker exec -u www-data <project> php /var/www/html/wp-cron.php` (ทุก 10 นาที) (`references/docker-deploy.md`) |
 
 > **`__DIR__` ไม่ใช่ placeholder** — เป็น magic constant ของภาษา PHP ที่โผล่ใน
 > `tooling/.php-cs-fixer.php` และ `tooling/SmokeTest.php` **ห้ามแทนค่า** (แทน
@@ -647,8 +651,8 @@ vendor/bin/phpunit
 **Render `assets/admin-handoff.template.md` → เขียนลงโปรเจคเป็น
 `docs/admin-handoff.md`** ตาม RENDER RULES ที่หัวไฟล์: แทน `__...__` ทุกตัว ·
 ลบแถว/หัวข้อที่ติดป้าย `[TAG]` ที่โปรเจคไม่มี (ไม่มี DB → ไม่มีตาราง A · ไม่มี
-volume → ไม่มีตาราง B · ไม่มี job ตามรอบ → ไม่มีตาราง G cron · ไม่ใช่โปรเจคแรกของ
-server → ไม่มีภาคผนวก) · เรียงตัวอักษรหัวข้อและเลขในตารางขั้นตอนรวมใหม่ · ลบ
+volume → ไม่มีตาราง B · ไม่มี job ตามรอบ → ไม่มีตาราง G cron (WordPress มีเสมอ — แถว `wp-cron.php`) · ไม่ใช่โปรเจคแรกของ
+server → ไม่มีภาคผนวก) · เรียงเลข # ในตารางขั้นตอนรวมใหม่ (ตัวอักษรหัวข้อ/anchor คงที่ ข้ามได้) · ลบ
 comment กติกาและ comment ป้ายออก · **รูปแบบตายตัว**: ตารางขั้นตอนรวม → ตารางแยก
 ต่อระบบ → ตาราง "ส่งกลับ" ห้ามเพิ่มย่อหน้าอธิบาย
 

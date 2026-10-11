@@ -346,7 +346,7 @@ How:
    message**: if CI was installed, `ugt-nextjs-cicd-setup` has already
    written `docs/admin-handoff.md` (from its
    `assets/admin-handoff.template.md` — overview table + one table per system
-   (DB, server folders, Jenkins, GitHub, SonarQube, Keycloak, nginx) + one "ส่งกลับ" table); confirm
+   (DB, server folders, Jenkins, GitHub, SonarQube, Keycloak, nginx, cron) + one "ส่งกลับ" table); confirm
    it exists, has no `__...__` left, and tell the user to forward that file
    to the admin/DevOps team and wait for the returned values to fill
    `.env.local`. If CI was NOT installed but Auth was, render the same

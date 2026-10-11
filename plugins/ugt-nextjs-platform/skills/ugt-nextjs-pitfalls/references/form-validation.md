@@ -77,6 +77,24 @@ schema consumed by the reset form, the change-password dialog **and** the
 admin create-user action — three surfaces, one definition, drift impossible.
 `lib/actions/admin-users.ts` shows the boundary side consuming it.
 
+## 4. Select shows an id / `__none__` after choosing — give the root `items`
+
+Base UI `<SelectValue>` renders the selected **value** unless the `Select` root
+knows the labels. Any Select whose value is not the visible text (a cuid, a
+role id, the `__none__` / `__all__` sentinel) needs `items`:
+
+```tsx
+<Select
+  items={[{ value: NO_ROLE, label: t('noRole') }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
+  value={field.value}
+  onValueChange={field.onChange}
+>
+```
+
+The `<SelectItem>` children stay as they are — `items` only feeds the trigger's
+text. Shipped in the auth kit (`user-role-select`, `admin-user-actions`,
+`audit-logs-table`) since 4.67.0.
+
 ## Quick table
 
 | DO ✅ | DON'T ❌ |

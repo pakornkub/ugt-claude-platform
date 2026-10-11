@@ -204,7 +204,7 @@ admin เตรียม `/home/docker02/appdata` ให้เขียนได
 บอกผู้ใช้ว่าไปแตะอะไรบ้าง; ยกเว้นไฟล์เดียวคือ `.claude/rules/ugt-python-ci.md`
 ที่ทับทั้งไฟล์ได้ (plugin เป็นเจ้าของ)
 
-## 4. Interview — ถามชุดเดียว (8 ข้อ)
+## 4. Interview — ถามชุดเดียว (9 ข้อ)
 
 1. **ชื่อโปรเจค** (kebab-case) → กลายเป็นชื่อ image/container/credential/sonar
    key + display name
@@ -229,6 +229,10 @@ admin เตรียม `/home/docker02/appdata` ให้เขียนได
    (สร้างแค่ `tests/test_smoke.py` พอให้สเตจ Unit Tests รันผ่านจริงโดยไม่แตะ
    โค้ดเดิม) ถ้าตอบใช่ → **ทำใน session แยกหลัง pipeline เขียวแล้ว** ตาม
    `references/legacy-test-generation.md` อย่าทำปนใน session นี้
+9. **Job ตามรอบ + ชื่อ DB** — มีงานที่ต้องรันตามเวลาไหม (ชื่อ · ทำอะไร · ทุกเมื่อ)
+   → แถวในตาราง cron `[CRON]` ของ admin handoff (batch มีอย่างน้อย 1 แถวเสมอ) · ไม่มี = ลบตาราง ·
+   และ (ถ้ามี DB) ชื่อ database + login ของ prod/dev → `__DB_NAME_*__` / `__DB_LOGIN_*__`
+   — ไม่รู้ให้เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` และ `<project>_app` / `<project>_dev`
 
 ## 5. Setup Steps
 
@@ -482,7 +486,7 @@ python -m venv .venv
 `docs/admin-handoff.md`** ตาม RENDER RULES ที่หัวไฟล์: แทน `__...__` ทุกตัว ·
 ลบแถว/หัวข้อที่ติดป้าย `[TAG]` ที่โปรเจคไม่มี (ไม่มี DB → ไม่มีตาราง A · ไม่มี
 volume → ไม่มีตาราง B · ไม่มี job ตามรอบ → ไม่มีตาราง G cron (shape batch มีเสมอ) · ไม่ใช่โปรเจคแรกของ
-server → ไม่มีภาคผนวก) · เรียงตัวอักษรหัวข้อและเลขในตารางขั้นตอนรวมใหม่ · ลบ
+server → ไม่มีภาคผนวก) · เรียงเลข # ในตารางขั้นตอนรวมใหม่ (ตัวอักษรหัวข้อ/anchor คงที่ ข้ามได้) · ลบ
 comment กติกาและ comment ป้ายออก · **รูปแบบตายตัว**: ตารางขั้นตอนรวม → ตารางแยก
 ต่อระบบ → ตาราง "ส่งกลับ" ห้ามเพิ่มย่อหน้าอธิบาย
 
@@ -544,7 +548,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
 - **ค่าใน `.env` / `.env.dev`** — เช็คแค่ว่ามีไฟล์และมี `APP_PORT` (เตือน ไม่
   fail เพราะ clone ใหม่ยังไม่มีทั้งคู่ตามปกติ) · **ไม่อ่านค่า secret ใด ๆ**
 - **ฝั่ง server ทั้งหมด** (Jenkins tools/credentials/global env, docker group,
-  SonarQube projects + gate, webhook, host cron ของ `[BATCH]`) — อยู่นอก repo
+  SonarQube projects + gate, webhook, host cron ของตาราง cron `[CRON]`) — อยู่นอก repo
 
 **ไฟล์ในโปรเจค:**
 

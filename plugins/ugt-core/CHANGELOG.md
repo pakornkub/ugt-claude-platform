@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.14.2 (2026-10-11)
+
+- contract Scheduled jobs: crontab ของ user `jenkins` · Next.js เรียกด้วย `node` `fetch` (secret ไม่อยู่ใน argv) · ugt-handoff ไม่พูดถึง "version bumped" แล้ว (contribute เขียนใต้ `## Unreleased`)
+
 ## 2.14.1 (2026-10-09)
 
 - **ugt-contribute ไม่เลือกเลขรุ่นอีกต่อไป** — ที่มา: PR #3–#15 (2026-10-08) และ #16–#20 (2026-10-09) เปิดขนานกันจาก `main` เดียวกัน ทุกตัวจองเลขรุ่นถัดไปเลขเดียวกัน (เช่นสามตัวเป็น 4.74.0) → merge ทีไร conflict ใน plugin.json / README / index.html / CHANGELOG และผู้ดูแลต้องไล่เลขใหม่มือ · ตอนนี้ PR เขียนแค่ bullet ใต้ `## Unreleased` (สร้างถ้ายังไม่มี ต่อท้าย bullet เดิมถ้ามี) ไม่แตะ plugin.json / README / index.html · ชื่อ PR ไม่มีเลขรุ่น (`feat(nextjs): pitfall <slug>`) · bullet ลงท้าย `· asset: <path>` เมื่อแก้ asset ที่โปรเจค copy ไป เป็นสัญญาณให้ release เป็น minor · ตรวจด้วยสคริปต์ 4 ตัว (เพิ่ม `lint-kit-assets` + `stamp-kit-assets --check`)

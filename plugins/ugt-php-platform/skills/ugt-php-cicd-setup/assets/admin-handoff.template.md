@@ -2,8 +2,9 @@
 RENDER RULES (delete this comment block in the rendered file):
 - Substitute every __...__ (table in SKILL.md). `grep __ docs/admin-handoff.md` must find nothing.
 - A row/section tagged [X] exists only when the project has X — delete the whole
-  row/section otherwise, then renumber the overview table and the section letters
-  so they stay A, B, C… with no gaps. Never leave an empty table or "N/A" rows.
+  row/section otherwise and renumber only the overview table's # column. Section
+  letters and anchors stay FIXED (gaps are fine) — other skills and the overview links
+  point at them by letter. Never leave an empty table or "N/A" rows.
   [DB] = has a database · [VOLUME] = compose has an /home/docker02/appdata bind ·
   [CRON] = has scheduled jobs (one cron-table row per job) · [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
@@ -99,14 +100,14 @@ RENDER RULES (delete this comment block in the rendered file):
 <!-- [CRON] -->
 ### G. Server — Cron
 
-ที่: **Docker host prod → `crontab -e`** (job ทุกตัวของระบบตั้งที่นี่ที่เดียว — dev ไม่ต้องตั้ง)
+ที่: **Docker host prod → `sudo crontab -u jenkins -e`** (crontab ของ user `jenkins` — เจ้าของ `/home/docker02/appdata` และอยู่ใน group `docker`) (job ทุกตัวของระบบตั้งที่นี่ที่เดียว — dev ไม่ต้องตั้ง)
 
 | Job | รอบเวลา | บรรทัดที่เพิ่มใน crontab |
 | --- | --- | --- |
-| (ครั้งแรก) สร้าง folder log | — | `mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` (รันมือ 1 ครั้ง) |
+| (ครั้งแรก) สร้าง folder log | — | `sudo -u jenkins mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` (รันมือ 1 ครั้ง) |
 | `__JOB_NAME__` | __JOB_WHEN__ | `__CRON_SCHEDULE__ __JOB_CMD__ >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1` |
 
-<!-- one row per job · __JOB_CMD__: docker exec __PROJECT_NAME__ php artisan <command> · php <script>.php · WordPress: php /var/www/html/wp-cron.php · after adding: run the command once by hand -->
+<!-- one row per job · __JOB_CMD__: docker exec -u www-data __PROJECT_NAME__ php artisan <command> · docker exec -u www-data __PROJECT_NAME__ php jobs/<name>.php · WordPress: docker exec -u www-data __PROJECT_NAME__ php /var/www/html/wp-cron.php · after adding: run the command once by hand -->
 
 ---
 

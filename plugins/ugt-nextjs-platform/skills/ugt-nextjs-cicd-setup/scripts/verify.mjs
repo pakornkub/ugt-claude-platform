@@ -133,8 +133,13 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
     }
   };
   walk(cronDir);
-  const open = routes.filter((r) => !/CRON_SECRET/.test(read(r)));
-  const problems = open.map((r) => `${r} never checks CRON_SECRET — proxy.ts lets /api/cron/ through without a session`);
+  const code = (r) => read(r).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const problems = [];
+  for (const r of routes) {
+    const src = code(r);
+    if (!/CRON_SECRET/.test(src)) problems.push(`${r} never checks CRON_SECRET — proxy.ts lets /api/cron/ through without a session`);
+    if (!/export\s+(async\s+)?function\s+POST\b|export\s+const\s+POST\b/.test(src)) problems.push(`${r} exports no POST — the cron call is a POST, every run would get 405`);
+  }
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
     if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
   }
@@ -268,7 +273,7 @@ check('Version-skew protection: deploymentId wired through next.config, Dockerfi
   const problems = [];
   const cfg = ['next.config.ts', 'next.config.mjs', 'next.config.js'].find((f) => has(f));
   if (!cfg) problems.push('no next.config.*');
-  else if (!/deploymentId\s*:/.test(read(cfg))) {
+  else if (!/^\s*deploymentId\s*:/m.test(read(cfg).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''))) {
     problems.push(`${cfg} sets no deploymentId (deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined)`);
   }
   if (!has('Dockerfile')) problems.push('no Dockerfile');

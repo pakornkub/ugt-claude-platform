@@ -299,5 +299,5 @@ const where = { createdAt: { gte: fromDate ? new Date(fromDate) : undefined } };
 - [ ] Every action comes from a constant in `lib/audit-actions.ts` — no raw strings
 - [ ] `detail` is structured JSON · no passwords/secrets/tokens · no over-broad PII
 - [ ] Viewer query: guarded by `audit-logs:read` · username search resolves to userIds (sentinel only needed on raw-SQL paths) · batch name enrichment · pageSize clamped · retention floor added once the project fixes its window
-- [ ] No code UPDATEs or DELETEs `ActivityLogs`
+- [ ] No code UPDATEs `ActivityLogs`; the only DELETE is `usp_PurgeActivityLogs`, called by the retention cron route
 - [ ] A scheduled cleanup job exists and the retention window is documented in the project
