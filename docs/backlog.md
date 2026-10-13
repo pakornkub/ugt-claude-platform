@@ -45,11 +45,11 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` สกั�
 (default: ไม่เอา) เปิดเฉพาะโปรเจคที่มี flow เสี่ยงสูงและแพงถ้าต้อง manual re-test
 ทุกครั้ง (auth/SSO, approval workflow, payment) → ย้ายไปตารางรอเงื่อนไขด้านล่าง
 
-### 3. Cron / background job — รอมติองค์กร
+### 3. Cron / background job — **มติแล้ว 2026-10-09: host cron เท่านั้น** (core 2.14.0 · nextjs 4.75.0)
 
-ต้องตอบก่อนว่ารันที่ไหน: in-app scheduler / SQL Server Agent / Jenkins ตั้งเวลา
-(แบบเดียวกับที่ upload เคยรอ 3 มติ) — **retention sweep ของ upload-setup รอ
-ข้อนี้อยู่**: ตอนนี้ soft delete แล้วไม่มีใครกวาด bytes จริง และ pattern A
+เหลือแค่ลงมือ: **retention sweep ของ upload-setup** ทำเป็น `app/api/cron/<job>` ตาม
+cicd `references/scheduled-jobs.md` ได้แล้ว (เดิมรอมติว่ารันที่ไหน — in-app scheduler /
+SQL Server Agent / Jenkins ตัดทิ้งหมด) — ปัญหาเดิม: ตอนนี้ soft delete แล้วไม่มีใครกวาด bytes จริง และ pattern A
 (polymorphic) ต้องการ orphan sweep ด้วย · คำตอบ infra ข้อ 3 ของ post-deploy
 อาจตอบข้อนี้ไปพร้อมกัน
 
@@ -324,6 +324,14 @@ Dialog (focus-trap, Escape+return-focus) ที่เป็นของคิต
 **เงื่อนไขที่จะกลับมาทำจริง:** มี custom component ของคิตเองที่พบ
 keyboard/focus bug จริงในสนาม หรือมีลูกค้า (เช่นหน่วยงานราชการ) เรียกร้อง
 WCAG compliance เป็นทางการ — ตอนนั้นมีหลักฐาน/ความจำเป็นเจาะจงรองรับการลงทุน
+
+### 13. eval `vague-answers-upfront-run-through` ใหญ่เกินกรอบ (2026-10-13)
+
+รอบ 2 หลัง 4.77.2 agent ลงครบทุก module จริงผ่าน Skill 7 ครั้ง (129 Write) → ชน
+`timeout_seconds` 3600 (เพดานของ `claude plugin eval`) + งบ $29 ก่อนถึง CI → grader
+ที่จ่ายเงินถูกข้าม ใช้เป็นเกณฑ์ไม่ได้ · ทางแก้: แตกเป็น case ย่อยต่อ module (fixture ที่ลง
+module ก่อนหน้าไว้แล้ว) หรือ fixture เล็กลง · grader ของ case นี้แก้แล้วใน 4.77.2–4.77.3
+(`run-order` regex บน trace เต็ม, `no-pipeline-skills` ดูชื่อ skill)
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 

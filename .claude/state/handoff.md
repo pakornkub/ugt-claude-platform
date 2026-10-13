@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-09
+Last updated: 2026-10-13
 
 ## In progress
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
@@ -10,7 +10,7 @@ Last updated: 2026-10-09
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
-- ugt-python-platform 0.9.0 / ugt-php-platform 0.8.0 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
+- ugt-python-platform 0.9.4 / ugt-php-platform 0.8.4 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
 - E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
@@ -21,6 +21,16 @@ Last updated: 2026-10-09
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-11..13 **post-merge review + eval ตามมติใหม่** (merge PR #21/#22 = 4.76.0 ก่อน) —
+  nextjs **4.77.0→4.77.3** · core **2.14.1→2.14.3** · python **0.9.4** · php **0.8.4**:
+  review 4 ตัวขนาน → bug จริง: `Account.issuer` ของ #17 ใช้ได้แค่ better-auth 1.7.0–1.7.2 (ตรวจ
+  package จริง) ถอนแล้ว ขั้นต่ำ `^1.7.4` · cron secret อยู่ใน argv → `node fetch` · verify หลายตัวนับ
+  comment · php cron ต้อง `-u www-data` · `[VOLUME]` mkdir รันบน Jenkins agent ผิดเครื่อง → container
+  บน Docker host · แตกไฟล์ยาว: ทุก SKILL.md ≤ 500 (auth 554→496, design 552→404, python 638→454,
+  php 830→498) + reference ตามเรื่อง · ใหม่ `scripts/check-skill-size.mjs` + README ขั้นหลัง merge ·
+  eval 3 รอบ (grader subagent ตรวจทุก FAIL — ส่วนใหญ่ grader พัง): python 1.00 · php 1.00 ·
+  config-change 1.00 · small-bugfix 1.00 · interview-batch 1.00 · run-through ใหญ่เกิน 3600 s
+  (backlog §13) · ค่า eval รวม ~$60 · ugt-contribute เลิก bump เวอร์ชัน → `## Unreleased`
 - 2026-10-09 **มติ: scheduled job ทุกตัว = host cron** — core **2.14.0** · nextjs **4.75.0** ·
   python **0.9.0** · php **0.8.0** (9ae878c): contract `cicd.md` หัวข้อ Scheduled jobs · Next.js
   `docker exec` → `wget /api/cron/<job>` + `CRON_SECRET` (proxy.ts ปล่อย `/api/cron/`) · Python web/PHP
