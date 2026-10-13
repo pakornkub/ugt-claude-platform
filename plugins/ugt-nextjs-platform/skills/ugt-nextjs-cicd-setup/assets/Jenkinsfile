@@ -320,12 +320,13 @@ pipeline {
                         // ไม่มี volume → ลบบล็อกนี้ทั้งหมด (เหมือน [DB] / [SENTRY])
                         sh """
                           APP_UID=\$(docker run --rm ${imageName}:${buildNum} id -u)
-                          for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
-                            if [ ! -d "\$p" ]; then
-                              mkdir -p "\$p"
-                              docker run --rm -v "\$p":/d alpine chown -R "\$APP_UID" /d
-                            fi
-                          done
+                          # Runs INSIDE a throwaway container on the Docker host (same path mounted) —
+                          # never on the Jenkins agent's own disk, so it is right even when Jenkins is
+                          # another machine that only mounts the docker socket.
+                          docker run --rm -e APP_UID="\$APP_UID" -v /home/docker02/appdata:/home/docker02/appdata alpine sh -c '
+                            for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
+                              if [ ! -d "\$p" ]; then mkdir -p "\$p" && chown -R "\$APP_UID" "\$p"; fi
+                            done'
                         """
 
                         // --no-build: reuse the image from Docker Build stage.

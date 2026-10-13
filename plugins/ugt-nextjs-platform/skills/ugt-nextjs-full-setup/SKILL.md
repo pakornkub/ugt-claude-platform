@@ -354,6 +354,11 @@ How:
    (SSO needs a client either way).
 3. Attach a **smoke-test checklist** — the Verification Checklist below,
    trimmed to what was actually installed.
+
+   **Items 2–3 go in the closing chat message itself**, even when you also wrote a
+   finish-guide doc (e.g. because nothing could be run here): the env-var list, the
+   `/admin/setup` first-admin sentence (when Auth was installed) and the smoke-test
+   checklist. "See docs/…" alone does not satisfy this — the user reads the message.
 4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
    themselves next (it is user-invoked only — this skill cannot run it, and
    §2.5 forbids trying). It writes `docs/agents/*.md` and its own

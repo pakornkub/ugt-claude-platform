@@ -28,12 +28,12 @@ subdir ที่มีอยู่แล้วถูกข้าม ไม่ ch
 
 ```sh
 APP_UID=$(docker run --rm ${imageName}:${buildNum} id -u)
-for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
-  if [ ! -d "$p" ]; then
-    mkdir -p "$p"
-    docker run --rm -v "$p":/d alpine chown -R "$APP_UID" /d
-  fi
-done
+# runs in a container ON THE DOCKER HOST (same path mounted) — never on the Jenkins
+# agent's disk: Jenkins may be another machine that only mounts the docker socket
+docker run --rm -e APP_UID="$APP_UID" -v /home/docker02/appdata:/home/docker02/appdata alpine sh -c '
+  for p in /home/docker02/appdata/${containerName}/uploads /home/docker02/appdata/${containerName}/reports; do
+    if [ ! -d "$p" ]; then mkdir -p "$p" && chown -R "$APP_UID" "$p"; fi
+  done'
 ```
 
 ตอนกรอกรายชื่อ volume จาก interview ข้อ 6 ให้แทน `uploads`/`reports` ในบรรทัด

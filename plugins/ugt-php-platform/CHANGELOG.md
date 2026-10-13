@@ -1,5 +1,11 @@
 # Changelog — ugt-php-platform
 
+## 0.8.3 (2026-10-13)
+
+- **Jenkinsfile `[VOLUME]` สร้าง folder บน Docker host จริง** — เดิม `[ ! -d ]` + `mkdir -p` รันบนดิสก์ของ Jenkins agent: ถ้า Jenkins อยู่คนละเครื่อง (mount แค่ docker socket) folder ไปเกิดผิดเครื่องหรือ mkdir ล้ม → ตอนนี้ทำใน `docker run … -v /home/docker02/appdata:/home/docker02/appdata alpine` ที่รันบน Docker host เสมอ (verify เดิมยังใช้ได้ — path เต็มอยู่ใน `for p in` เหมือนเดิม) · Jenkinsfile ไม่อยู่ใน kit-sync: โปรเจคเดิมแก้บล็อกนี้เอง
+- `references/verification.md`: ไม่มี shell = รายงาน "ยังไม่ได้รัน" ห้ามบอกว่าผ่านจากการอ่านไฟล์ / "ติดตั้งครบ" ทั้งที่มีไฟล์เขียนไม่สำเร็จ (eval: ปิดท้ายว่า "ไล่เช็คด้วยตาแล้วผ่านหมด")
+- evals: grader rules แก้ regex · `dockerfile-laravel-docroot` จับ `\n` แบบ JSONL · `compose-prod` รับ `…/storage/uploads` ตามคำตอบ · `health-and-trace` แยกเป็น `health-route` + `honest-close-out`
+
 ## 0.8.2 (2026-10-11)
 
 - แตกเอกสารตามเรื่อง: `SKILL.md` 830 → 496 (§2 → `org-standards.md` · §5.3 → `shapes.md` · §7 → `verification.md`) · `docker-deploy.md` 704 → 56 + `wordpress-deploy.md` · `sqlserver.md` · `healthcheck.md` · `build-gotchas.md` · `compose.md` · `subpath.md` · `volumes.md` (ตารางเทียบหัวข้อเดิม B–J)

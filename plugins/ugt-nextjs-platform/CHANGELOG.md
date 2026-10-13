@@ -1,5 +1,13 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.77.2 (2026-10-13)
+
+**ผล eval หลัง merge** (6 ชุด · grader subagent ตรวจทุก FAIL บน workspace จริง — ส่วนใหญ่เป็น grader พัง ไม่ใช่ skill):
+
+- **Jenkinsfile `[VOLUME]` สร้าง folder บน Docker host จริง** — เดิม `[ ! -d ]` + `mkdir -p` รันบนดิสก์ของ Jenkins agent: ถ้า Jenkins อยู่คนละเครื่อง (mount แค่ docker socket) folder ไปเกิดผิดเครื่องหรือ mkdir ล้ม → ตอนนี้ทำใน `docker run … -v /home/docker02/appdata:/home/docker02/appdata alpine` ที่รันบน Docker host เสมอ (verify เดิมยังใช้ได้ — path เต็มอยู่ใน `for p in` เหมือนเดิม) · Jenkinsfile ไม่อยู่ใน kit-sync: โปรเจคเดิมแก้บล็อกนี้เอง
+- full-setup §5: env vars ที่ต้องเติม · ประโยค `/admin/setup` · smoke-test checklist ต้องอยู่**ในข้อความปิดท้าย** แม้จะเขียนไฟล์ finish-guide แยก (eval: agent ย้ายไปไว้แต่ในไฟล์)
+- evals: `title-changed` เป็น regex (judge โหวต FAIL ไฟล์ที่ถูก) · `claude-block` ไม่ fail บรรทัด `docs/adr/` ของ template · `run-order-and-shape` แยกเป็น regex ลำดับบน trace เต็ม + `no-pipeline-skills` + llm บน last_message (judge เห็นแค่หัว-ท้ายของ trace)
+
 ## 4.77.1 (2026-10-11)
 
 **แตก pitfall / เอกสารยาวเป็นไฟล์ตามเรื่อง** (มติผู้ดูแล 2026-10-11: `SKILL.md` ≤ 500 บรรทัด · ตารางอาการเป็นดัชนีบรรทัดเดียว · reference หลายเรื่อง → แยกไฟล์) — ย้ายเนื้อหา ไม่ตัดข้อเท็จจริง:

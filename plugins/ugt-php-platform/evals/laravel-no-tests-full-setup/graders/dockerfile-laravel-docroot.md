@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: "\\nRUN sed -ri[^\\n]*000-default\\.conf"
+pattern: "\\\\nRUN sed -ri[^\\\\]*000-default\\.conf"
 flags: "m"
 match: contains
 target: trace
