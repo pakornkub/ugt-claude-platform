@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: module-design-after-db
+plugins: ["../..", "../../../ugt-core"]
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,90 @@
+'use client';
+// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: c55d4a88ea6a
+
+// source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
+// dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
+// สำเร็จ → toast แล้วปิดตัวเอง · error/throw → toast แล้ว "ค้างไว้" ให้ผู้ใช้อ่านเหตุผล
+// (ข้อความอย่าง "ลบไม่ได้ — ยังมีข้อมูลผูกอยู่ ..." ยาวเกินกว่าจะอ่านทันใน toast ที่หายเอง)
+// ไม่มี onSuccess — server action เรียก revalidatePath อยู่แล้ว หน้ารีเฟรชเอง
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+export function ConfirmActionDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  successMessage,
+  action,
+  confirmVariant = 'destructive',
+}: Readonly<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: React.ReactNode;
+  confirmLabel: string;
+  successMessage: string;
+  action: () => Promise<{ ok: true } | { error: string }>;
+  /** สีปุ่มยืนยัน — dialog นี้ใช้กับ destructive เป็นหลัก (ลบ=แดง DESIGN.md §1)
+      งานยืนยันที่ไม่ทำลายข้อมูล ส่ง 'default' หรือ 'success' มาแทน */
+  confirmVariant?: 'destructive' | 'default' | 'success';
+}>) {
+  const [pending, setPending] = useState(false);
+  const t = useTranslations('kit.confirmDialog');
+
+  const confirm = async (): Promise<void> => {
+    setPending(true);
+    try {
+      const result = await action();
+      if ('error' in result) {
+        toast.error(result.error); // ไม่ปิด — ให้ผู้ใช้อ่านเหตุผลใน dialog ต่อได้
+        return;
+      }
+      toast.success(successMessage);
+      onOpenChange(false); // parent เคลียร์ target ของตัวเองใน handler นี้
+    } catch (error) {
+      // throw = ข้อผิดพลาดที่ action ไม่ได้ดักเอง (network / bug) — toast บอกผู้ใช้แค่
+      // "เกิดข้อผิดพลาด" ถ้าไม่ log ไว้ด้วยจะไม่เหลือร่องรอยให้ตามเลย
+      console.error('ConfirmActionDialog action failed', error);
+      toast.error(t('genericError')); // throw ก็ค้าง dialog ไว้เช่นกัน
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>{t('cancel')}</AlertDialogCancel>
+          {/* base-mira: AlertDialogAction = ComponentProps<typeof Button> จึงส่ง
+              variant ตรงได้ (ยืนยันกับ registry base-mira/alert-dialog) */}
+          <AlertDialogAction
+            variant={confirmVariant}
+            disabled={pending}
+            onClick={() => void confirm()}
+          >
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

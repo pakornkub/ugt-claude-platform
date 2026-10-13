@@ -1,0 +1,47 @@
+// ─── Naming Convention ───────────────────────────────────────────────────────
+// All table names MUST use PascalCase plural and be set via @@map().
+// MS SQL Server standard: PascalCase, plural, no reserved words.
+//   ✅  @@map("Items")          ✅  @@map("HolidayLists")
+//   ❌  @@map("item")           ❌  @@map("holiday_lists")
+// EXCEPTION: the auth/RBAC tables pasted in by ugt-nextjs-auth-setup map
+// SINGULAR as a set — User, Session, Account, Verification, RateLimit, Role,
+// Permission, RolePermission — per Better Auth's own convention; do not
+// pluralize them (ActivityLogs is the one plural in that set).
+// Column names in the DB are PascalCase via @map(); Prisma fields and
+// relation names stay camelCase (Prisma convention).
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  // Org choice, not a Prisma limitation: "prisma-client" is upstream's
+  // recommended default (and works with the MSSQL adapter too), but every kit
+  // asset imports from "@prisma/client", which only this generator emits.
+  // "prisma-client-js" is deprecated upstream — a coordinated migration for the
+  // whole kit is planned; do not switch one project on its own.
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver" // NO url here — the url lives only in prisma.config.ts
+}
+
+// ─── Domain ──────────────────────────────────────────────────────────────────
+
+/// คำขอลา — migrated from the prototype's hard-coded REQUESTS array
+/// (app/page.tsx), see docs/project-context/decisions.md 2026-10-13.
+model leaveRequest {
+  id           Int      @id @default(autoincrement())      @map("Id")
+  employeeName String                                      @map("EmployeeName") @db.NVarChar(200) // Thai text → NVarChar always
+  totalDays    Int                                         @map("TotalDays") // DAY is a T-SQL keyword → TotalDays
+  status       String   @default("pending")                @map("Status")    @db.NVarChar(20) // zod enum in lib/leave-requests.ts — MSSQL has no enum type
+
+  // Standard audit columns — required on every app-owned master/transaction table
+  isActive     Boolean  @default(true)                     @map("IsActive")
+  isDeleted    Boolean  @default(false)                    @map("IsDeleted") // soft delete — never hard delete audited data
+  createdBy    String                                      @map("CreatedBy")
+  createdAt    DateTime @default(now())                    @map("CreatedAt")
+  updatedBy    String?                                     @map("UpdatedBy")
+  updatedAt    DateTime @updatedAt                         @map("UpdatedAt")
+
+  @@index([status, isDeleted])
+  @@map("LeaveRequests")
+}

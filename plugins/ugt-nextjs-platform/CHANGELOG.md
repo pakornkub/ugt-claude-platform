@@ -9,6 +9,13 @@
 - verify: `[SWEEP] retention sweep route is cron-guarded` — route ต้องเช็ค `CRON_SECRET`, export `POST`, `RETENTION_DAYS` ≥ 7, compose เปิด `CRON_SECRET`, handoff มีแถว job · handoff มี job แต่ไม่มี route = fail · ไม่มีทั้งคู่ = warn ("เก็บตลอด")
 - **โปรเจคเดิม**: kit-sync ไม่เสนอเอง (ไฟล์ใหม่) — copy route + ทำ §4.7 ถ้าต้องการกวาดไฟล์
 
+**evals: แตก `vague-answers-upfront-run-through` (3600 s / $29 ยังไม่จบ) เป็น 4 case** (backlog §13):
+
+- `run-through-plan` — คำตอบครบ + "ขอแผนก่อน": ไม่เขียนไฟล์ ไม่เรียก child skill · ลำดับ database → test-lint → design → auth → CI เป็น regex บน last_message (judge โหวต FAIL ตารางลำดับที่ถูก) · ไม่ถามซ้ำ/ไม่แตก chunk/ไม่ถาม admin คนแรก · ~$0.5 / 2 นาที
+- `run-through-db-quality-ci` (ย้ายมาจาก case เดิม) — full-setup เลือก database + test-lint + CI รันจริงถึง harness: `run-order` ดูเฉพาะ input ของ Skill call (pattern เดิมจับชื่อ skill ในเนื้อ full-setup SKILL.md ที่โหลดเข้า trace — ไม่มีทาง fail) · module ที่ไม่ได้เลือกไม่ถูกเรียก · `claude-block` เป็น regex (judge โหวต FAIL block ที่ถูกทุกข้อ) · `admin-handoff` ไม่เหลือ `__X__` · prompt ระบุชื่อ DB dev / repo / Jenkins host (เดิมกำกวม → agent ตัดสินใจแทนแล้ว judge นับเป็นถามซ้ำ) · ~$7 / 15 นาที
+- `module-design-after-db` / `module-auth-after-design` — fixture = สถานะจริงหลัง module ก่อนหน้า (replay Write/Edit จาก trace รอบ 2026-10-13) · ตรวจ DESIGN.md (regex บน label ของ template), indigo, แถบ DEV + `[DEV] `, rule file, login-form SSO ล้วน, redirect URI + `/admin/setup` ใน admin-handoff · design $11 / auth $17 บน opus เกินเพดาน $10 → llm grader ตัวเดียวของแต่ละ case ถูกข้าม (ค้าง backlog §13)
+- **grader bug ที่มีมาตั้งแต่ 4.77.2**: `tool_used` ที่ใส่แค่ `max: 0` ได้ `min` = 1 โดย default → "expected 1..0" fail เสมอ (`no-pipeline-skills` ของ case เดิมไม่เคยผ่าน) — ทุกตัวใส่ `min: 0` แล้ว
+
 ## 4.77.3 (2026-10-13)
 
 - evals: `no-pipeline-skills` ดูเฉพาะชื่อ skill (เดิมเจอคำว่า mattpocock ใน args ของ ugt-context ที่เขียนว่า "ไม่ใช่ mattpocock") · `vague-answers-upfront-run-through` ใหญ่เกินกรอบ eval (รอบ 2 ลงครบทุก module จริงผ่าน Skill 7 ครั้ง → 3600 s / $29 ยังไม่จบ) — ต้องแตก case ก่อนใช้เป็นเกณฑ์ (backlog)

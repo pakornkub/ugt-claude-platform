@@ -319,13 +319,20 @@ Dialog (focus-trap, Escape+return-focus) ที่เป็นของคิต
 keyboard/focus bug จริงในสนาม หรือมีลูกค้า (เช่นหน่วยงานราชการ) เรียกร้อง
 WCAG compliance เป็นทางการ — ตอนนั้นมีหลักฐาน/ความจำเป็นเจาะจงรองรับการลงทุน
 
-### 13. eval `vague-answers-upfront-run-through` ใหญ่เกินกรอบ (2026-10-13)
+### 13. ค้างจากการแตก eval run-through (2026-10-14)
 
-รอบ 2 หลัง 4.77.2 agent ลงครบทุก module จริงผ่าน Skill 7 ครั้ง (129 Write) → ชน
-`timeout_seconds` 3600 (เพดานของ `claude plugin eval`) + งบ $29 ก่อนถึง CI → grader
-ที่จ่ายเงินถูกข้าม ใช้เป็นเกณฑ์ไม่ได้ · ทางแก้: แตกเป็น case ย่อยต่อ module (fixture ที่ลง
-module ก่อนหน้าไว้แล้ว) หรือ fixture เล็กลง · grader ของ case นี้แก้แล้วใน 4.77.2–4.77.3
-(`run-order` regex บน trace เต็ม, `no-pipeline-skills` ดูชื่อ skill)
+แตก `vague-answers-upfront-run-through` เป็น 4 case แล้ว (ดู "ปิดแล้ว") เหลือ 2 เรื่อง:
+
+- **case ต่อ module ของ design / auth ยังเกิน ~$8 บน opus** — design $11.1 / 23 นาที
+  (51 Write ≈ 200K ตัวอักษร: คิตทั้งชุดอ่าน asset แล้วเขียนทีละไฟล์) · auth $16.6 / 24 นาที
+  (90 ข้อความ × context เฉลี่ย ~226K) — เวลาผ่านแต่ `--max-cost-usd 10` ข้าม llm grader
+  ตัวเดียวของแต่ละ case (ตัวอื่นเป็น regex/tool_used จึงยังให้คะแนน) · ทางเลือก: รัน 2 case
+  นี้ด้วย `--max-cost-usd 20` · หรือ `model: sonnet` เฉพาะ case module (วัดคนละ model) ·
+  หรือยอมรับว่าตรวจ llm grader ด้วยมือ — ต้องการมติผู้ดูแล
+- **cicd `admin-handoff.template.md`: `__REPO_URL__` / `__JENKINS_HOST__` ไม่มีที่มา** —
+  ไม่อยู่ใน interview §3 และไม่มี default ใน §4.2 → agent แทนด้วย `<ใส่ URL repo ของโปรเจค>`
+  / `<jenkins-host>` เอง (ผ่านกฎ "ไม่เหลือ `__…__`" แต่ไฟล์ส่ง admin ยังมีช่องว่าง) · ควรถาม
+  ใน interview หรือกำหนด default (Jenkins host ขององค์กรเป็นค่าคงที่)
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
@@ -342,6 +349,8 @@ module ก่อนหน้าไว้แล้ว) หรือ fixture เ�
 | `ugt-nextjs-e2e-setup` (Playwright, opt-in module แบบ Mail/Upload — มติ 2026-09-12) | โปรเจคที่มี flow เสี่ยงสูงจริง (auth/SSO, approval, payment) มาขอจริง — ยังไม่มีการร้องขอ | §2 ข้างบน |
 
 ## ปิดแล้ว (ย้ายมาจากรายการบน — ชี้รุ่นที่ปิด)
+
+- ~~eval `vague-answers-upfront-run-through` ใหญ่เกินกรอบ (3600 s / $29 ยังไม่จบ)~~ → แตกเป็น `run-through-plan` · `run-through-db-quality-ci` · `module-design-after-db` · `module-auth-after-design` (nextjs CHANGELOG `## Unreleased`) — ที่ค้างอยู่ §13
 
 - ~~Cron / background job + retention sweep ของไฟล์แนบ (soft delete ไม่มีใครกวาด bytes, orphan ของ pattern A)~~ → host cron (core 2.14.0 · nextjs 4.75.0) + upload-setup `app/api/cron/attachments-sweep` (nextjs CHANGELOG `## Unreleased`)
 - ~~React Query provider + เกณฑ์ RQ vs RSC~~ → 4.12.0
