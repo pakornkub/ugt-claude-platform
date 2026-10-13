@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+**upload-setup: retention sweep — ไฟล์ที่ soft delete แล้วไม่มีใครลบจริง** (backlog §3 รอมติ "job รันที่ไหน" — มติ 2026-10-09: host cron)
+
+- asset ใหม่ `app/api/cron/attachments-sweep/route.ts` ตาม cicd `scheduled-jobs.md` (POST only · `CRON_SECRET` + `timingSafeEqual` · idempotent): แถวที่ owner หาย (pattern A/C, ตาม `OWNERS` extension point — type ที่ไม่ลงทะเบียน = ไม่แตะ) → soft delete · แถวที่ soft-delete เกิน `RETENTION_DAYS` → ลบไฟล์แล้วลบแถว (ทางเดียวที่ hard-delete `Attachments`; ประวัติอยู่ใน ActivityLogs) · ไฟล์บน volume ที่ไม่มีแถว อายุ > 1 วัน → ลบ · `?dryRun=1` นับอย่างเดียว · date guard ในโค้ดปฏิเสธ window < 7 วัน (pitfalls `hardening.md` §4)
+- SKILL.md: §3 Q4 ถามจำนวนวัน (default 90) + รอบเวลา แทน "ยังไม่มี job" · §4.7 ใหม่ · `[SWEEP]` ใน §4.1/§4.2 (`CRON_SECRET` ถ้า cicd ยังไม่ใส่)/§4.4 (uncomment compose `[CRON]`)/§4.5 (แถว `attachments-sweep` ในตาราง I) · checklist dry run
+- verify: `[SWEEP] retention sweep route is cron-guarded` — route ต้องเช็ค `CRON_SECRET`, export `POST`, `RETENTION_DAYS` ≥ 7, compose เปิด `CRON_SECRET`, handoff มีแถว job · handoff มี job แต่ไม่มี route = fail · ไม่มีทั้งคู่ = warn ("เก็บตลอด")
+- **โปรเจคเดิม**: kit-sync ไม่เสนอเอง (ไฟล์ใหม่) — copy route + ทำ §4.7 ถ้าต้องการกวาดไฟล์
+
 ## 4.77.3 (2026-10-13)
 
 - evals: `no-pipeline-skills` ดูเฉพาะชื่อ skill (เดิมเจอคำว่า mattpocock ใน args ของ ugt-context ที่เขียนว่า "ไม่ใช่ mattpocock") · `vague-answers-upfront-run-through` ใหญ่เกินกรอบ eval (รอบ 2 ลงครบทุก module จริงผ่าน Skill 7 ครั้ง → 3600 s / $29 ยังไม่จบ) — ต้องแตก case ก่อนใช้เป็นเกณฑ์ (backlog)

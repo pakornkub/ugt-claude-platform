@@ -18,7 +18,7 @@ paths:
 | **ดาวน์โหลดผ่าน route ที่ guard เท่านั้น** — session → permission → ขอบเขตของ record → เช็ค `scanStatus !== 'infected'` (เปิด virus scan แล้วเข้มขึ้นเป็น `=== 'clean'`) | ไฟล์อยู่บน volume ก็เพื่อให้ไม่มีทางลัดข้าม guard |
 | **ส่งกลับเป็น `application/octet-stream` + `Content-Disposition: attachment` เสมอ** | ไฟล์ `.svg`/`.html` ที่ไม่มีไวรัสก็ยังเป็น stored XSS ได้ถ้าเปิด inline บนโดเมนเรา |
 | ไม่เจอไฟล์ กับ ไม่มีสิทธิ์ ตอบ **404 เหมือนกัน** | 403 เป็นการยืนยันว่า id นั้นมีอยู่จริง |
-| ลบ = `IsDeleted = 1` ไม่ลบไฟล์ทันที | กู้คืนได้ · ไบต์จริงลบด้วย retention job |
+| ลบ = `IsDeleted = 1` ไม่ลบไฟล์ทันที | กู้คืนได้ · ไบต์จริงลบด้วย retention sweep (`app/api/cron/attachments-sweep`) · entityType ใหม่ (pattern A/C) = เพิ่ม entry ใน `OWNERS` ของ route นั้นด้วย |
 | อัปโหลดใช้ **Route Handler ไม่ใช่ Server Action** | Server Action จำกัด body ที่ `bodySizeLimit` (ค่าเริ่มต้น 1 MB) แล้ว error กำกวม |
 | `canReadAttachment` ต้องเขียนจากตัวตน session | `!canSeeAll` คือ bug ที่ให้สิทธิ์กว้างกับ role แคบ |
 

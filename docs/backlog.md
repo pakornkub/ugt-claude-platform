@@ -45,13 +45,7 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` สกั�
 (default: ไม่เอา) เปิดเฉพาะโปรเจคที่มี flow เสี่ยงสูงและแพงถ้าต้อง manual re-test
 ทุกครั้ง (auth/SSO, approval workflow, payment) → ย้ายไปตารางรอเงื่อนไขด้านล่าง
 
-### 3. Cron / background job — **มติแล้ว 2026-10-09: host cron เท่านั้น** (core 2.14.0 · nextjs 4.75.0)
-
-เหลือแค่ลงมือ: **retention sweep ของ upload-setup** ทำเป็น `app/api/cron/<job>` ตาม
-cicd `references/scheduled-jobs.md` ได้แล้ว (เดิมรอมติว่ารันที่ไหน — in-app scheduler /
-SQL Server Agent / Jenkins ตัดทิ้งหมด) — ปัญหาเดิม: ตอนนี้ soft delete แล้วไม่มีใครกวาด bytes จริง และ pattern A
-(polymorphic) ต้องการ orphan sweep ด้วย · คำตอบ infra ข้อ 3 ของ post-deploy
-อาจตอบข้อนี้ไปพร้อมกัน
+### ~~3. Cron / background job~~ — ปิดแล้ว: host cron (มติ 2026-10-09) + retention sweep ของ upload-setup → nextjs CHANGELOG `## Unreleased`
 
 ### 4. ~~Security headers~~ + rate limiting ชุดเต็ม
 
@@ -349,6 +343,7 @@ module ก่อนหน้าไว้แล้ว) หรือ fixture เ�
 
 ## ปิดแล้ว (ย้ายมาจากรายการบน — ชี้รุ่นที่ปิด)
 
+- ~~Cron / background job + retention sweep ของไฟล์แนบ (soft delete ไม่มีใครกวาด bytes, orphan ของ pattern A)~~ → host cron (core 2.14.0 · nextjs 4.75.0) + upload-setup `app/api/cron/attachments-sweep` (nextjs CHANGELOG `## Unreleased`)
 - ~~React Query provider + เกณฑ์ RQ vs RSC~~ → 4.12.0
 - ~~zustand ยังไม่ converge~~ → ปฏิเสธ + client-state ladder, 4.15.0
 - ~~RHF schema/resolver + zod ที่ boundary~~ → form-validation.md, 4.16.0

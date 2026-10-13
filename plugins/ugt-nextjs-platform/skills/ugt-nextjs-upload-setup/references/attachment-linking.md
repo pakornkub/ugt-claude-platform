@@ -74,5 +74,8 @@ not fine is leaving it unstated — the next person reads the skeleton's
   session identity. With pattern B or C, that function reads the FK instead of
   switching on `entityType`; the guard order does not change.
 - **Orphan sweep**: patterns A and C have no FK protecting them, so the
-  retention job should also delete attachment rows whose owning record is gone.
-  Pattern B gets this from the database for free.
+  retention sweep (`app/api/cron/attachments-sweep/route.ts`, SKILL.md §4.7)
+  soft-deletes attachment rows whose owning record is gone — but only for the
+  `entityType`s listed in its `OWNERS` map: add one entry per owning type when
+  you add a `canReadAttachment` case. Pattern B gets this from the database for
+  free and leaves `OWNERS` empty.

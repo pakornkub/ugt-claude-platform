@@ -268,6 +268,29 @@ check('Storage binds under /home/docker02/appdata (no named volume) + no __*__ l
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+// [SWEEP] opt-out (SKILL.md §3 Q4 "เก็บตลอด"): installed = the route exists, or
+// the handoff already schedules it (then a missing route is the bug).
+const SWEEP = join('app', 'api', 'cron', 'attachments-sweep', 'route.ts');
+check('[SWEEP] retention sweep route is cron-guarded', () => {
+  const scheduled = has('docs/admin-handoff.md') && /attachments-sweep/.test(read('docs/admin-handoff.md'));
+  if (!has(SWEEP)) {
+    return scheduled
+      ? { ok: false, msg: `docs/admin-handoff.md schedules attachments-sweep but ${SWEEP} is missing — every cron run 404s` }
+      : { ok: 'warn', msg: 'no retention sweep — soft-deleted files are never removed (fine only if §3 Q4 = "เก็บตลอด", recorded in decisions)' };
+  }
+  const src = code(SWEEP);
+  const problems = [];
+  if (!/CRON_SECRET/.test(src) || !/timingSafeEqual/.test(src)) problems.push('route does not check CRON_SECRET with timingSafeEqual — proxy.ts lets /api/cron/ through without a session');
+  if (!/export\s+(async\s+)?function\s+POST\b/.test(src)) problems.push('route exports no POST — the cron call would get 405');
+  const days = Number(src.match(/RETENTION_DAYS\s*=\s*(\d+)/)?.[1]);
+  if (!(days >= 7)) problems.push('RETENTION_DAYS missing or < 7 — the date guard will refuse every run');
+  for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
+    if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — every cron call answers 401`);
+  }
+  if (!scheduled) problems.push('docs/admin-handoff.md table I has no attachments-sweep row — nobody will add the crontab line');
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
 check('Admin handoff covers the storage-dir backup', () => {
   if (!has('docs/admin-handoff.md')) {
     return { ok: false, msg: 'docs/admin-handoff.md missing the upload section — §4.5 appends it; the storage dir will have no backup job' };

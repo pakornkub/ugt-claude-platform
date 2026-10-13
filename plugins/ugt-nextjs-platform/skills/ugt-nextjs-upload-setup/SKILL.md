@@ -66,8 +66,9 @@ as a starting point that the first real project will sharpen.
 6. **Always `application/octet-stream` + `Content-Disposition: attachment` +
    `nosniff`.** A virus-free `.svg` or `.html` served inline is stored XSS on
    your own domain. "All types allowed" makes this rule non-negotiable.
-7. **Soft delete.** `IsDeleted = 1` on the row; the bytes go later, via
-   retention — an accidental delete stays recoverable.
+7. **Soft delete.** `IsDeleted = 1` on the row; the bytes go later, via the
+   retention sweep (`app/api/cron/attachments-sweep`, §4.7) — an accidental
+   delete stays recoverable for the whole window.
 8. **Upload through a Route Handler**, never a Server Action (`bodySizeLimit`
    defaults to 1 MB and fails opaquely above it).
 
@@ -85,11 +86,12 @@ as a starting point that the first real project will sharpen.
    `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs).
 3. **Who may upload / download** — two permissions are added
    (`files:create`, `files:read`); decide which roles get them.
-4. **Retention** — how long a soft-deleted attachment's bytes should be kept.
-   **บอกตรง ๆ ตอนถาม**: ยังไม่มี cleanup job ให้ติดตั้ง (รอมติองค์กรว่า
-   background job รันที่ไหน — `docs/backlog.md` ข้อ 3 ของ platform) — คำตอบนี้
-   ถูก**บันทึกไว้ใน `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)** เพื่อให้ job ที่จะมา
-   ทีหลังใช้ ไม่ใช่ config ที่มีผลวันนี้ อย่าสัญญาว่าไฟล์จะถูกกวาดอัตโนมัติ
+4. **Retention** — ไฟล์ที่ถูกลบ (soft delete) เก็บไว้กี่**วัน**ก่อนลบจริง
+   (default **90**, ขั้นต่ำ 7 — route ปฏิเสธค่าที่ต่ำกว่า) และ sweep รันเวลาไหน
+   (default ทุกวัน 02:00) → ติดตั้ง retention sweep §4.7 (host cron →
+   `app/api/cron/attachments-sweep`) · ตอบ "เก็บตลอด" = ไม่ติดตั้ง sweep แต่บอกตรง ๆ
+   ว่าไฟล์ที่ลบแล้วกินดิสก์ตลอดไป และแถว orphan ของ pattern A/C จะไม่มีใครกวาด —
+   บันทึกคำตอบไว้ใน `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)
 5. **Virus scan — เอาไหม** (default: **ไม่เอา** — opt-in)
    — ถามพร้อมเงื่อนไข infra ที่ทำให้การ "เอา" มีต้นทุนจริง ไม่ใช่แค่ติ๊กถูก:
    clamav กิน **RAM ~2 GB** และ boot แรกต้อง**ดาวน์โหลด signature DB ~1 GB จาก
@@ -114,6 +116,7 @@ as a starting point that the first real project will sharpen.
 | `assets/lib/attachment-access.ts` | `lib/attachment-access.ts` — **must be implemented**, it denies everything by default |
 | `assets/app/api/files/route.ts` | `app/api/files/route.ts` (upload) |
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
+| `assets/app/api/cron/attachments-sweep/route.ts` | `app/api/cron/attachments-sweep/route.ts` — **[SWEEP]** copy เว้นแต่ §3 Q4 = "เก็บตลอด" · ใส่คำตอบ §3 Q4 ที่ `RETENTION_DAYS` · เติม `OWNERS` ตาม linking pattern (§4.7) |
 | `assets/components/file-upload.tsx` | `components/file-upload.tsx` |
 | `assets/prisma/schema-attachment.prisma` | paste INTO `prisma/schema.prisma` |
 | `assets/env.example` | fill section **5. Upload** of `.env.example` in place (+ real values in `.env.local`; canonical layout, never append at the bottom) — **substitute the interviewed max size** into `UPLOAD_MAX_BYTES` here and in the compose default (§3 Q1's answer has no other landing spot) |
@@ -163,6 +166,11 @@ CLAMAV_PORT: z.string().default('3310'),
 CLAMAV_TIMEOUT_MS: z.string().default('30000'),
 ```
 
+**[SWEEP]** needs `CRON_SECRET` — if cicd-setup did not add it (its interview
+Q8 = no jobs), do cicd's `[CRON]` env step now: `CRON_SECRET: z.string().min(32).optional()`
+in `server` **and** `CRON_SECRET: process.env.CRON_SECRET` in `runtimeEnv`, and
+uncomment it in `.env.example` section 1 (real value ≥ 32 chars, different in prod/dev).
+
 ### 4.3 Permissions
 
 In `lib/permissions.ts`, plus their `ALL_PERMISSIONS` entries (group: `ไฟล์แนบ`):
@@ -180,6 +188,9 @@ mounts (never a named volume — cicd contract §2.8). ส่วนที่ม�
 snippet (clamav service, `start_period` 5 นาที, persisted signature DB,
 `clamav-db` ใน Jenkinsfile `[VOLUME]` `mkdir -p`) — **เพิ่ม**เฉพาะเมื่อเลือก
 เปิด virus scan ตาม §3 Q5 (default: ไม่เอา).
+**[SWEEP]** uncomment `# CRON_SECRET: ${CRON_SECRET}  # [CRON]` in **both**
+compose files (fixed list, section 1 — never move it or add a key), or every
+cron call answers 401.
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
 
@@ -191,6 +202,11 @@ gets the `storage` prod/dev row pair (backup job · ห้ามลบ), table H
 `client_max_body_size` row with `__UPLOAD_MAX_MB__`, and **[SCAN]** table B gets
 one more row for `clamav-db` whose "Admin ต้องทำ" cell reads
 `เผื่อ RAM ~2 GB ให้ container clamav`. The checklist below fails without it.
+**[SWEEP]** table I gets the `attachments-sweep` row (`__JOB_NAME__` =
+`attachments-sweep`, schedule = §3 Q4, default `ทุกวัน 02:00` / `0 2 * * *`) plus
+its one-off "สร้าง folder log" row, and table H keeps the `[CRON]`
+`location ^~ …/api/cron/ { deny all; }` row — if cicd-setup removed the `[CRON]`
+parts (no jobs back then), restore them from `admin-handoff.template.md`.
 
 ### 4.6 Health + migrate
 
@@ -200,6 +216,27 @@ default (ไม่เอา scan) ข้ามขั้นนี้ — แล�
 
 ```bash
 npx prisma migrate dev --name add-attachments && npx prisma generate
+```
+
+### 4.7 [SWEEP] Retention sweep (§3 Q4)
+
+`app/api/cron/attachments-sweep/route.ts` (host cron, cicd
+`references/scheduled-jobs.md`) does three things per run, idempotently:
+rows whose owner is gone → **soft**-deleted (they wait out the window like any
+delete) · rows soft-deleted longer than `RETENTION_DAYS` → file, then row,
+hard-deleted (the only code path that does) · files on the volume with no row,
+older than a day → deleted.
+
+- `RETENTION_DAYS` = the §3 Q4 answer. The in-code date guard refuses < 7 days
+  (pitfalls `hardening.md` §4) — safety never depends on the cron schedule
+- `OWNERS` is the extension point: pattern A/C add one entry per `entityType`
+  returning the entityIds whose owner still exists · pattern B leaves it empty ·
+  a type with no entry is never touched (`references/attachment-linking.md`)
+- Before the first scheduled run, dry-run it by hand on dev and read the counts
+  — `?dryRun=1` counts and deletes nothing:
+
+```bash
+docker exec <container> node -e "fetch('http://127.0.0.1:3000<basePath>/api/cron/attachments-sweep?dryRun=1',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(async r=>console.log(r.status,await r.text()))"
 ```
 
 ## 5. Quick Rules
@@ -226,7 +263,9 @@ only when the project opted in (`lib/virus-scan.ts` exists or `lib/env.ts` /
 `.env.example` declares `CLAMAV_HOST`); otherwise it checks that the scan-off
 state is consistent instead (no `scanBuffer` call, rows stored `'unscanned'`,
 download guard `=== 'infected'`) and warns about a leftover clamav service.
-Paths resolve at the root first, then under `src/`.
+Paths resolve at the root first, then under `src/`. The `[SWEEP]` check fails
+when the route skips `CRON_SECRET`/`POST`, `RETENTION_DAYS` < 7, compose still
+comments `CRON_SECRET`, or handoff and route disagree; no route at all only warns.
 
 Then by hand — these are the ones that catch real breakage:
 
@@ -240,6 +279,9 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] Upload something just over `UPLOAD_MAX_BYTES` → clean 413 from the app
       (if the proxy answers instead, raise its limit)
 - [ ] `canReadAttachment` no longer returns `false` for every case
+- [ ] [SWEEP] the dry run (§4.7) answers 200 with `"dryRun":true` and counts that
+      make sense; the same call without the bearer header → 401 · `OWNERS` has an
+      entry for every pattern A/C `entityType`
 - [ ] `docs/admin-handoff.md` mentions the storage-dir backup and that
       deleting the host dir deletes every attachment (verify.mjs greps this)
 - [ ] The attachment→record linking pattern is recorded in
