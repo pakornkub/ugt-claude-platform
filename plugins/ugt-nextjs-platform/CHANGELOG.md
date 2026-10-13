@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.77.3 (2026-10-13)
+
+- evals: `no-pipeline-skills` ดูเฉพาะชื่อ skill (เดิมเจอคำว่า mattpocock ใน args ของ ugt-context ที่เขียนว่า "ไม่ใช่ mattpocock") · `vague-answers-upfront-run-through` ใหญ่เกินกรอบ eval (รอบ 2 ลงครบทุก module จริงผ่าน Skill 7 ครั้ง → 3600 s / $29 ยังไม่จบ) — ต้องแตก case ก่อนใช้เป็นเกณฑ์ (backlog)
+
 ## 4.77.2 (2026-10-13)
 
 **ผล eval หลัง merge** (6 ชุด · grader subagent ตรวจทุก FAIL บน workspace จริง — ส่วนใหญ่เป็น grader พัง ไม่ใช่ skill):

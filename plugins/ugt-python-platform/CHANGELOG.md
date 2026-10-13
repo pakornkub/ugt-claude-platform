@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.4 (2026-10-13)
+
+- SKILL.md §7: กฎ "รันไม่ได้ = ยังไม่ได้รัน" ขึ้นมาอยู่ใน SKILL.md เอง (eval รอบ 2: agent ไม่เปิด verification.md ตอนปิดงาน ยังเขียน "ไล่เช็คด้วยตาแล้วผ่าน") · grader rules จับ path Windows ใน JSON (`\` ซ้อน)
+
 ## 0.9.3 (2026-10-13)
 
 - **Jenkinsfile `[VOLUME]` สร้าง folder บน Docker host จริง** — เดิม `[ ! -d ]` + `mkdir -p` รันบนดิสก์ของ Jenkins agent: ถ้า Jenkins อยู่คนละเครื่อง (mount แค่ docker socket) folder ไปเกิดผิดเครื่องหรือ mkdir ล้ม → ตอนนี้ทำใน `docker run … -v /home/docker02/appdata:/home/docker02/appdata alpine` ที่รันบน Docker host เสมอ (verify เดิมยังใช้ได้ — path เต็มอยู่ใน `for p in` เหมือนเดิม) · Jenkinsfile ไม่อยู่ใน kit-sync: โปรเจคเดิมแก้บล็อกนี้เอง
