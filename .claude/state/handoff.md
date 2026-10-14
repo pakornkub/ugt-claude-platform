@@ -21,6 +21,12 @@ Last updated: 2026-10-14
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-14 **merge PR #23** nextjs **4.79.0** · core **2.14.4** (8410fba): ตั้ง role ล่วงหน้าจาก HR,
+  แท็บ "ยังไม่มีบทบาท", `ORG_EMAIL_DOMAINS`, กัน SSO/LDAP→Local, login hero · **review ก่อน merge เจอช่องโหว่**
+  (SSO เดา AD login จากอีเมล → ได้ role คนอื่น · AD 2 ตัวอีเมลเดียวกันผูกบัญชีเดียว · race · role กลับมาเอง ·
+  LDAP ใช้ชื่อที่พิมพ์) แก้ 2 รอบ + security re-review 2 รอบ — ldapUsername มาจาก `preferred_username` ใน
+  idToken ที่ verify แล้ว · eval auth 1.00 · contract auth.md มีหัวข้อ Accounts · โปรเจคเดิมต้องทำ
+  org-identity.md §7 ก่อน deploy (filtered unique index `LdapUsername` จำเป็นทุกโปรเจคที่ไม่ใช่ LDAP ล้วน)
 - 2026-10-14 nextjs **4.78.0** · python **0.9.5** · php **0.8.5** (1b94963): upload retention sweep ผ่าน host cron
   (review เจอลบเกินขอบเขต → กรอง key + เบรก 10% แก้แล้ว) · eval run-through แตกเป็น 4 ชุด ผ่าน 1.00 ทุกชุด
   (design/auth รันงบ $20 ตามมติผู้ดูแล) · full-setup ห้ามเปิดคำตอบซ้ำ + ข้อความปิดท้าย 6 หัวข้อ ·
