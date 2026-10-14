@@ -272,7 +272,7 @@ check('Storage binds under /home/docker02/appdata (no named volume) + no __*__ l
 // the handoff already schedules it (then a missing route is the bug).
 const SWEEP = join('app', 'api', 'cron', 'attachments-sweep', 'route.ts');
 check('[SWEEP] retention sweep route is cron-guarded', () => {
-  const scheduled = has('docs/admin-handoff.md') && /attachments-sweep/.test(read('docs/admin-handoff.md'));
+  const scheduled = has('docs/admin-handoff.md') && /api\/cron\/attachments-sweep['"]/.test(read('docs/admin-handoff.md').replace(/<!--[\s\S]*?-->/g, ''));
   if (!has(SWEEP)) {
     return scheduled
       ? { ok: false, msg: `docs/admin-handoff.md schedules attachments-sweep but ${SWEEP} is missing — every cron run 404s` }
@@ -282,8 +282,9 @@ check('[SWEEP] retention sweep route is cron-guarded', () => {
   const problems = [];
   if (!/CRON_SECRET/.test(src) || !/timingSafeEqual/.test(src)) problems.push('route does not check CRON_SECRET with timingSafeEqual — proxy.ts lets /api/cron/ through without a session');
   if (!/export\s+(async\s+)?function\s+POST\b/.test(src)) problems.push('route exports no POST — the cron call would get 405');
-  const days = Number(src.match(/RETENTION_DAYS\s*=\s*(\d+)/)?.[1]);
+  const days = Number(src.match(/\bconst\s+RETENTION_DAYS\b[^=]*=\s*(\d+)/)?.[1]);
   if (!(days >= 7)) problems.push('RETENTION_DAYS missing or < 7 — the date guard will refuse every run');
+  if (!has('lib/jobs/retention-cutoff.ts')) problems.push('lib/jobs/retention-cutoff.ts missing — the route imports its date guard from there (copy it with its .test.ts)');
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
     if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — every cron call answers 401`);
   }

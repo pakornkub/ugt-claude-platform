@@ -155,7 +155,10 @@ the summary + `docs/admin-handoff.md` instead.
 
 ### 2.5 Choose the run shape — one proposal, confirmed once
 
-Every answer is now on file, so nothing below re-asks the user anything.
+Every answer is now on file, so nothing below re-asks the user anything — and nothing
+**reopens** them either: no "ถ้าไม่โอเคบอกได้" / "if this does not suit you, tell me" about an
+answered item, no "I'll let you choose X later" halfway through the install. An item the user
+left open gets the documented default; state that default once, in the close-out.
 Judge the load and propose ONE way to run the install:
 
 | Signal | Proposal |
@@ -356,9 +359,13 @@ How:
    trimmed to what was actually installed.
 
    **Items 2–3 go in the closing chat message itself**, even when you also wrote a
-   finish-guide doc (e.g. because nothing could be run here): the env-var list, the
-   `/admin/setup` first-admin sentence (when Auth was installed) and the smoke-test
-   checklist. "See docs/…" alone does not satisfy this — the user reads the message.
+   finish-guide doc (e.g. because nothing could be run here). "See docs/…" alone does
+   not satisfy this — the user reads the message. The closing message always has these
+   sections, in this order (drop only one whose module was not installed):
+   1. ไฟล์ที่เพิ่ม/แก้ (by module) · 2. env vars ที่ต้องเติมค่าจริง · 3. ส่งต่อ admin
+   (`docs/admin-handoff.md`) · 4. ผู้ดูแลคนแรก — `/admin/setup` sentence (Auth) ·
+   5. **Smoke test** — the trimmed checklist · 6. ยังไม่ได้รัน — every command this
+   session could not run, as commands for the user
 4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
    themselves next (it is user-invoked only — this skill cannot run it, and
    §2.5 forbids trying). It writes `docs/agents/*.md` and its own

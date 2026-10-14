@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '\bdatabase\W+(test-lint|quality)\W+design\W+auth\W+(cicd|ci)\b|(^|\n)\W*1\W+database[^\n]*\n\W*2\W+(test|quality)[^\n]*\n\W*3\W+design[^\n]*\n\W*4\W+auth[^\n]*\n\W*5\W+(cicd|ci\b|jenkins)'
+pattern: '\b(ugt-nextjs-)?database(-setup)?\W+(ugt-nextjs-)?(test-lint|quality)(-setup)?\W+(ugt-nextjs-)?design(-setup)?\W+(ugt-nextjs-)?auth(-setup)?\W+(ugt-nextjs-)?(cicd|ci)(-setup)?\b|(^|\n)\W*1\W+(ugt-nextjs-)?database(-setup)?[^\n]*\n\W*2\W+(ugt-nextjs-)?(test|quality)(-setup)?[^\n]*\n\W*3\W+(ugt-nextjs-)?design(-setup)?[^\n]*\n\W*4\W+(ugt-nextjs-)?auth(-setup)?[^\n]*\n\W*5\W+(ugt-nextjs-)?(cicd|ci\b|jenkins)'
 flags: i
 match: contains
 target: last_message

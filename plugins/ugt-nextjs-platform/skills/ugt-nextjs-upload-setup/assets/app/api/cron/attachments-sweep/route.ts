@@ -6,6 +6,7 @@ import { join, resolve, sep } from 'node:path';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { deleteStoredFile } from '@/lib/storage';
+import { retentionCutoff } from '@/lib/jobs/retention-cutoff';
 
 /**
  * Attachment retention sweep — called by host cron, never by a user
@@ -32,13 +33,16 @@ export const dynamic = 'force-dynamic';
 
 /** §3 Q4 answer — substitute the interviewed window (days) at install. */
 const RETENTION_DAYS = 90;
-/** Floor for the date guard below: a smaller window is treated as a typo. */
-const MIN_RETENTION_DAYS = 7;
 /** Orphans younger than this are left alone — an upload may be mid-flight. */
 const ORPHAN_GRACE_MS = 86_400_000;
 // ponytail: the purge takes one batch per run, so a backlog drains over several
 // nights (`more: true` in the result). Loop the purge if that is too slow.
 const BATCH = 500;
+/** lib/storage newStorageKey() shape — anything else on the volume is not ours. */
+const KEY_SHAPE = /^\d{4}\/\d{2}\/[0-9a-f-]{36}$/;
+/** Step 3 refuses to delete when more than this share of files has no row — a
+ *  wrong DATABASE_URL or an old restore looks exactly like that. */
+const MAX_ORPHAN_SHARE = 0.1;
 
 /**
  * EXTENSION POINT — orphan rows (references/attachment-linking.md "Orphan
@@ -59,18 +63,6 @@ function authorized(request: Request) {
   const want = Buffer.from(`Bearer ${env.CRON_SECRET}`);
   const got = Buffer.from(request.headers.get('authorization') ?? '');
   return got.length === want.length && timingSafeEqual(got, want);
-}
-
-/**
- * In-code date guard (pitfalls hardening.md §4): the cutoff is decided here,
- * not by how often cron fires. A window edited to 0, negative or a non-integer
- * would purge files deleted a minute ago — refuse instead of running.
- */
-function retentionCutoff(now: Date, days: number): Date {
-  if (!Number.isInteger(days) || days < MIN_RETENTION_DAYS) {
-    throw new Error(`RETENTION_DAYS=${days} is below the ${MIN_RETENTION_DAYS}-day floor — refusing to sweep`);
-  }
-  return new Date(now.getTime() - days * 86_400_000);
 }
 
 async function softDeleteOrphanRows(now: Date, dryRun: boolean) {
@@ -105,6 +97,9 @@ async function softDeleteOrphanRows(now: Date, dryRun: boolean) {
 async function purgeExpired(cutoff: Date, dryRun: boolean) {
   // No DeletedAt column: `updatedAt` is stamped by the soft delete. A later
   // edit to a deleted row only pushes it further out — the safe direction.
+  // A soft delete done OUTSIDE Prisma (raw SQL, usp_*, SSMS) must set
+  // UpdatedAt = SYSUTCDATETIME() too, or the row is purged on the next run
+  // (rules/ugt-nextjs-upload.md).
   // Rows soft-deleted by step 1 of this run are newer than any cutoff.
   const rows = await prisma.attachment.findMany({
     where: { isDeleted: true, updatedAt: { lt: cutoff } },
@@ -115,8 +110,13 @@ async function purgeExpired(cutoff: Date, dryRun: boolean) {
   if (!dryRun) {
     for (const row of rows) {
       try {
-        await deleteStoredFile(row.storageKey); // file first: a crash leaves the row, so the next run retries
-        await prisma.attachment.delete({ where: { id: row.id } });
+        // Row first, re-checked in the same statement: a row restored since the
+        // findMany is left alone. A crash before the unlink leaves an orphan
+        // file, which step 3 removes on a later run.
+        const { count } = await prisma.attachment.deleteMany({
+          where: { id: row.id, isDeleted: true, updatedAt: { lt: cutoff } },
+        });
+        if (count === 1) await deleteStoredFile(row.storageKey);
       } catch (error) {
         failed++;
         console.error(`[cron] attachments-sweep purge ${row.id}`, error);
@@ -137,9 +137,11 @@ async function deleteOrphanFiles(now: Date, dryRun: boolean) {
   const files = entries
     .filter((e) => e.isFile())
     .map((e) => join(e.parentPath, e.name))
-    .map((full) => ({ full, key: full.slice(root.length + 1).split(sep).join('/') }));
+    .map((full) => ({ full, key: full.slice(root.length + 1).split(sep).join('/') }))
+    .filter((f) => KEY_SHAPE.test(f.key));
 
-  let removed = 0;
+  // First pass only finds orphans; nothing is deleted until the brake below passes.
+  const orphans: { full: string; key: string }[] = [];
   // ≤ 2100 parameters per SQL Server statement — stay well under it
   for (let i = 0; i < files.length; i += BATCH) {
     const chunk = files.slice(i, i + BATCH);
@@ -155,11 +157,16 @@ async function deleteOrphanFiles(now: Date, dryRun: boolean) {
       if (known.has(f.key)) continue;
       const mtime = (await stat(f.full).catch(() => null))?.mtimeMs; // gone since readdir = nothing to do
       if (mtime === undefined || now.getTime() - mtime < ORPHAN_GRACE_MS) continue;
-      if (!dryRun) await deleteStoredFile(f.key);
-      removed++;
+      orphans.push(f);
     }
   }
-  return { orphanFiles: removed };
+  // Brake: the table is empty while files exist, or too many files lack a row.
+  if (orphans.length && (orphans.length === files.length || orphans.length > files.length * MAX_ORPHAN_SHARE)) {
+    console.error(`[cron] attachments-sweep: ${orphans.length}/${files.length} files have no row — wrong DATABASE_URL? deleting nothing`);
+    return { orphanFiles: orphans.length, orphanFilesBlocked: true };
+  }
+  if (!dryRun) for (const f of orphans) await deleteStoredFile(f.key);
+  return { orphanFiles: orphans.length, orphanFilesBlocked: false };
 }
 
 export async function POST(request: Request) {
@@ -175,5 +182,6 @@ export async function POST(request: Request) {
 
   const result = { dryRun, cutoff: cutoff.toISOString(), ...rows, ...expired, ...files };
   console.log(`[cron] attachments-sweep ${JSON.stringify(result)}`);
-  return Response.json({ ok: expired.failed === 0, ...result }, { status: expired.failed === 0 ? 200 : 500 });
+  const ok = expired.failed === 0 && !files.orphanFilesBlocked;
+  return Response.json({ ok, ...result }, { status: ok ? 200 : 500 });
 }

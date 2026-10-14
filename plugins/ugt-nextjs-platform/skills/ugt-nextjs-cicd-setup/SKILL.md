@@ -150,7 +150,9 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
    builder image); absent → cut them
 5. **Sentry?** — absent → cut the [SENTRY] sections + credential
 6. **Deploy target** — which Docker host, is Jenkins on the same machine as the
-   Docker daemon or socket-mounted, `docker-compose` v1 or v2
+   Docker daemon or socket-mounted, `docker-compose` v1 or v2 · **Jenkins host**
+   (`__JENKINS_HOST__`, for the webhook URLs) · repo URL = `git remote get-url origin`
+   (`__REPO_URL__` — ask only when there is no remote)
 7. **Volume?** — มี path ที่ต้อง persist ข้าม deploy ไหม (เช่น uploads) →
    รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี → ลบบล็อก `[VOLUME]`
 8. **Scheduled jobs?** (งานที่ต้องรันตามเวลา: ชื่อ · ทำอะไร · ทุกเมื่อ) — มี →

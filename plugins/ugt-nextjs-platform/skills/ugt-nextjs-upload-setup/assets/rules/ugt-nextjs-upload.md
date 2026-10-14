@@ -30,3 +30,6 @@ await writeStoredFile(key, bytes);                   // ค่อยเขีย
 await prisma.attachment.create({ data: { /* … */ } });
 await writeAuditLog({ action: 'file.upload', /* … */ });
 ```
+- Soft delete an attachment through Prisma (`isDeleted: true` — `@updatedAt` stamps the
+  retention clock). Outside Prisma (raw SQL, `usp_*`, SSMS) also set
+  `UpdatedAt = SYSUTCDATETIME()`, or the retention sweep purges the file on its next run

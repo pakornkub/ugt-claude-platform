@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+**Post-merge review ของ sweep + eval split** (reviewer ยืนยันแล้ว):
+
+- **sweep ขั้น 3 ลบเกินขอบเขต** — เดิมลบทุกไฟล์บน volume ที่ไม่มี row (รวมไฟล์อื่นของโปรเจค และทั้งหมดถ้า prod ชี้ DB ว่าง/ผิดตัว) → ลบเฉพาะ key รูปแบบ `yyyy/mm/<uuid>` ของ `newStorageKey()` + **เบรก**: ไฟล์ไม่มี row เกิน 10% หรือตารางว่าง = ไม่ลบอะไร คืน 500 `orphanFilesBlocked`
+- sweep purge: ลบ row ก่อนด้วย `deleteMany` ที่เช็ค `isDeleted`+cutoff ซ้ำ แล้วค่อยลบไฟล์ (row ที่ถูก restore ระหว่างทางไม่โดน) · date guard แยกเป็น `lib/jobs/retention-cutoff.ts` + test · rules: soft delete นอก Prisma ต้อง set `UpdatedAt` · verify ไม่หลงกับ `RETENTION_DAYS: number` และแถวใน comment
+- **full-setup**: ห้ามเปิดคำตอบที่ตอบแล้วกลับมาถาม ("ถ้าไม่โอเคบอกได้") · ข้อความปิดท้ายมี 6 หัวข้อตายตัว (ไฟล์ · env · ส่ง admin · `/admin/setup` · smoke test · ยังไม่ได้รัน) — eval: 2/4 รอบเปิดคำตอบซ้ำ, 1/3 ไม่มี smoke test
+- cicd interview (ทั้ง 3 stack): ถาม Jenkins host + repo URL จาก `git remote` (`__JENKINS_HOST__`/`__REPO_URL__` เคยไม่มีที่มา → `<jenkins-host>` ค้าง)
+- evals: `design-md-answers` รับ `ไทยอย่างเดียว`/`th` · `plan-order` รับชื่อ skill เต็ม · ชุด design/auth รันด้วย `--max-cost-usd 20` (มติผู้ดูแล 2026-10-14: เกินเป้าได้)
+
 **upload-setup: retention sweep — ไฟล์ที่ soft delete แล้วไม่มีใครลบจริง** (backlog §3 รอมติ "job รันที่ไหน" — มติ 2026-10-09: host cron)
 
 - asset ใหม่ `app/api/cron/attachments-sweep/route.ts` ตาม cicd `scheduled-jobs.md` (POST only · `CRON_SECRET` + `timingSafeEqual` · idempotent): แถวที่ owner หาย (pattern A/C, ตาม `OWNERS` extension point — type ที่ไม่ลงทะเบียน = ไม่แตะ) → soft delete · แถวที่ soft-delete เกิน `RETENTION_DAYS` → ลบไฟล์แล้วลบแถว (ทางเดียวที่ hard-delete `Attachments`; ประวัติอยู่ใน ActivityLogs) · ไฟล์บน volume ที่ไม่มีแถว อายุ > 1 วัน → ลบ · `?dryRun=1` นับอย่างเดียว · date guard ในโค้ดปฏิเสธ window < 7 วัน (pitfalls `hardening.md` §4)

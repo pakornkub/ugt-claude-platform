@@ -117,6 +117,7 @@ as a starting point that the first real project will sharpen.
 | `assets/app/api/files/route.ts` | `app/api/files/route.ts` (upload) |
 | `assets/app/api/files/[id]/route.ts` | `app/api/files/[id]/route.ts` (download) |
 | `assets/app/api/cron/attachments-sweep/route.ts` | `app/api/cron/attachments-sweep/route.ts` — **[SWEEP]** copy เว้นแต่ §3 Q4 = "เก็บตลอด" · ใส่คำตอบ §3 Q4 ที่ `RETENTION_DAYS` · เติม `OWNERS` ตาม linking pattern (§4.7) |
+| `assets/lib/jobs/retention-cutoff.ts` + `.test.ts` | `lib/jobs/` — **[SWEEP]** คู่กับ route เสมอ (date guard แยกเป็น pure helper ให้ test ได้ — pitfalls hardening.md §4) |
 | `assets/components/file-upload.tsx` | `components/file-upload.tsx` |
 | `assets/prisma/schema-attachment.prisma` | paste INTO `prisma/schema.prisma` |
 | `assets/env.example` | fill section **5. Upload** of `.env.example` in place (+ real values in `.env.local`; canonical layout, never append at the bottom) — **substitute the interviewed max size** into `UPLOAD_MAX_BYTES` here and in the compose default (§3 Q1's answer has no other landing spot) |
@@ -236,7 +237,7 @@ older than a day → deleted.
   — `?dryRun=1` counts and deletes nothing:
 
 ```bash
-docker exec <container> node -e "fetch('http://127.0.0.1:3000<basePath>/api/cron/attachments-sweep?dryRun=1',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(async r=>console.log(r.status,await r.text()))"
+docker exec __PROJECT_NAME__-dev node -e "fetch('http://127.0.0.1:3000__BASE_PATH_DEV__/api/cron/attachments-sweep?dryRun=1',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(async r=>console.log(r.status,await r.text()))"
 ```
 
 ## 5. Quick Rules

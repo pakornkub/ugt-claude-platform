@@ -139,6 +139,7 @@ contract ร่วมที่ **ทุกโปรเจคทำเหมื�
    daemon หรือ mount socket, `docker compose` (v2, ไม่มีขีด) หรือ
    `docker-compose` (v1, มีขีด) — **Jenkinsfile ที่ให้มาใช้ v2** ซึ่งเป็น
    ค่ามาตรฐาน ต้องแก้กลับเฉพาะ host เก่าที่มีแต่ v1 (v1 EOL ตั้งแต่กลางปี 2023)
+   **Jenkins host** (`__JENKINS_HOST__`) · repo URL = `git remote get-url origin` (`__REPO_URL__` — ถามเฉพาะเมื่อไม่มี remote)
 8. **(optional) สร้าง test ครอบคลุมโค้ดเดิมไหม** — **default: ไม่**
    (สร้างแค่ `tests/SmokeTest.php` พอให้สเตจ Unit Tests รันผ่านจริงโดยไม่แตะ
    โค้ดเดิม) ถ้าตอบใช่ → **ทำใน session แยกหลัง pipeline เขียวแล้ว** ตาม
