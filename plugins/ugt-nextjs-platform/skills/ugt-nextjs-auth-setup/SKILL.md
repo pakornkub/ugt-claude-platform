@@ -315,14 +315,14 @@ requiredness and the reason for each: `references/schema-and-env.md` §Env schem
 
 ### 5.5 Wire the login page + guards
 
-1. Create `app/(auth)/login/page.tsx` rendering
+1. Create `app/(auth)/login/page.tsx`: the two-column hero `<LoginShell hero={…}>`
+   (copy from the project's `app` catalog, optional photo — page + recipe in
+   `references/login-page.md`) wrapping
    `<LoginForm sessionExpired={reason === 'session_expired'} ssoError={error} from={from} />`
-   — `reason`, `error`, and `from` all come from `searchParams`; `from` is the
-   return-to-page path (basePath-relative) that `proxy.ts`, the layout guard
-   (step 2), and `SessionExpiredDialog` attach — the form validates it
-   (same-origin relative path only, open-redirect guard) then sends every login
-   method back there: SSO via `callbackURL`, LDAP/local via `router.push`
-   (convention in `references/auth-flows.md` §Return-to-page). `error` is the code
+   — all three from `searchParams`; `from` is the basePath-relative return-to-page
+   path `proxy.ts`, the layout guard and `SessionExpiredDialog` attach; the form
+   validates it (open-redirect guard) and every method returns there
+   (`references/auth-flows.md` §Return-to-page). `error` is the code
    Better Auth appends when `onAPIError.errorURL` (lib/auth.ts) redirects a
    failed flow back here (e.g. `unable_to_create_user`), mapped to a Thai
    message — without it a failed SSO login shows nothing. **"Already signed in

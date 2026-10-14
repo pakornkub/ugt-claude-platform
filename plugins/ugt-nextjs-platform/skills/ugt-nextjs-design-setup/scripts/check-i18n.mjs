@@ -120,6 +120,7 @@ const OPTIONAL_CONVERTED_FILES = [
   // ugt-nextjs-auth-setup (phase 2, 2026-08-24) — optional because a th+en
   // project may not have auth-setup installed at all.
   'components/login-form.tsx',
+  'components/login-shell.tsx',
   'components/roles-manager.tsx',
   'components/admin-user-actions.tsx',
   'components/audit-logs-table.tsx',

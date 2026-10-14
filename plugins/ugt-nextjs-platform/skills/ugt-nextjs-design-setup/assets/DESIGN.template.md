@@ -167,6 +167,11 @@
   ระหว่างที่แถบขึ้นให้**ซ่อนปุ่มสั่งงานรายแถว** ไม่ให้มีสองทางสั่งงานพร้อมกัน ·
   ล้างการเลือกผ่าน `resetSelectionKey` ของ `DataTable` ไม่ใช่ remount ทั้งตาราง
 - Mobile เป็นระบบ: ตาราง→การ์ด (DataTable จัดให้) · dialog→bottom-sheet
+- **หน้า login = สองคอลัมน์** (`components/login-shell.tsx` จาก auth-setup): ซ้าย =
+  hero ตั้งแต่ `lg` ขึ้นไป (`bg-primary` + รูป `public/login-hero.webp` ถ้ามี ใต้ overlay
+  `bg-primary/65`) เรียง 3 แถว — `ube-logo-long.svg` · ชื่อระบบ + คำอธิบาย 1 บรรทัด +
+  ฟีเจอร์ 3–4 แถว (ไอคอนใน tile `size-10` + หัวข้อ + บรรทัดรอง) · footer · ขวา = ฟอร์มกลาง
+  `bg-muted/30` · มือถือเห็นฟอร์มอย่างเดียว · ข้อความมาจาก `messages/app.*` ของโปรเจค
 - Landing page: __LANDING__
 
 ## 4. Components

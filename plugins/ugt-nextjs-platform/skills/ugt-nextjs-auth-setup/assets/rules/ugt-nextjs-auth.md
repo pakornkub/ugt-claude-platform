@@ -13,6 +13,8 @@ paths:
   - "app/(admin)/**"
   - "app/(admin-setup)/**"
   - "components/login-form.tsx"
+  - "components/login-shell.tsx"
+  - "app/(auth)/**"
   - "components/nav-user.tsx"
   - "components/admin-nav.tsx"
   - "components/roles-manager.tsx"
@@ -197,6 +199,14 @@ employee view over a linked server — `lib/directory.ts`.
   the clash checks in `mapProfileToUser` and `ldapLoginAction`. Prisma's
   `NOT { ldapUsername }` silently drops NULL rows (the Local ones); spell out
   `OR: [{ ldapUsername: null }, { ldapUsername: { not } }]`.
+
+## Login page
+
+- `app/(auth)/login/page.tsx` = `<LoginShell hero={…}>` around the form
+  (`references/login-page.md`). Hero copy comes from the project's `app`
+  catalog — never literals in `login-shell.tsx` (kit file, overwritten on
+  update) and no Thai in the page. Photo optional: `public/login-hero.webp`,
+  ~1440 px, ≤ 400 KB. No `<main>` in the page — the root layout has it.
 
 ## proxy.ts
 

@@ -327,6 +327,30 @@ check('proxy does not bounce auth pages on cookie presence (stale-cookie redirec
   return problems.length ? { ok: bounce ? false : 'warn', msg: problems.join(' · ') } : { ok: true };
 });
 
+check('Login page: two-column hero, copy from the project catalog (DESIGN.md §3)', () => {
+  const loginPage = ['app/(auth)/login/page.tsx', 'app/login/page.tsx', 'app/[locale]/(auth)/login/page.tsx', 'app/[locale]/login/page.tsx'].find((f) => has(f));
+  if (!loginPage) return { ok: 'warn', msg: 'no login page found (SKILL.md §5.5 step 1)' };
+  const page = stripComments(read(loginPage));
+  const problems = [];
+  if (!/<LoginShell\b/.test(page)) {
+    problems.push(`${loginPage} does not render <LoginShell> — no two-column login hero (references/login-page.md; a project keeping its own page records the deviation in DESIGN.md §10)`);
+  } else {
+    if (!/hero=\{/.test(page)) problems.push('<LoginShell> has no hero={…} — the page renders as the plain centred form');
+    // hero copy belongs to messages/app.*.ts — a literal in the page is untranslatable and drifts
+    if (/[฀-๿]/.test(page)) problems.push(`${loginPage} holds Thai text in code — build the hero from getTranslations('app.loginHero')`);
+  }
+  if (/<main\b/.test(page)) problems.push(`${loginPage} renders <main> — the root layout already wraps the route in one (nested landmarks)`);
+  if (has('components/login-shell.tsx')) {
+    const shell = stripComments(read('components/login-shell.tsx'));
+    if (!/\bhidden\b[^"'`]*\blg:flex\b/.test(shell)) problems.push('components/login-shell.tsx: the hero is not `hidden … lg:flex` — mobile would get the panel above the form');
+  }
+  if (has('public/login-hero.webp')) {
+    const kb = Math.round(statSync(p('public/login-hero.webp')).size / 1024);
+    if (kb > 400) problems.push(`public/login-hero.webp is ${kb} KB — re-encode ~1440 px wide, webp q≈78 (≈150 KB)`);
+  }
+  return problems.length ? { ok: 'warn', msg: problems.join(' · ') } : { ok: true };
+});
+
 check('proxy bypasses /_next/ and /api/health', () => {
   if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
   const body = read(GUARD_FILE);

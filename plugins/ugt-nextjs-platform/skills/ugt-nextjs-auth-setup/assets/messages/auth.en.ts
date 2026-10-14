@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 48f346a94f4d
+// kit-hash: 3b74c6a198fb
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -99,6 +99,8 @@ export const authEn: AuthCatalog = {
     loginAgain: 'Sign in again',
   },
   login: {
+    // aria-label of the long org logo on the login hero (components/login-shell.tsx) — brand name, same in every locale
+    orgLogoLabel: 'UBE',
     // Generic fallback for the <h1> app title when NEXT_PUBLIC_APP_NAME isn't
     // set — the real name always comes from that env var (set by full-setup);
     // this is only what renders before it's configured.

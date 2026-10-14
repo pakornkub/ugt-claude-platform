@@ -45,6 +45,9 @@ a demo, not an app shell; both eval runs independently needed these steps):
    (The inline `style` is the sanctioned dynamic-value exception — the URL
    carries the runtime basePath.) The short logo is wide (≈3.7 : 1), so size
    it by width; `size-5` squeezes it to an unreadable sliver.
+   The **long** logo (with tagline) belongs to the login hero — same mask
+   pattern, already wired in auth-setup's `components/login-shell.tsx`
+   (two-column login page: `ugt-nextjs-auth-setup` → `references/login-page.md`).
 3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
    `/` — remove/redirect the root one.
 4. Rebuild `app-sidebar.tsx` per the org rules below (Thai menu, app-name
