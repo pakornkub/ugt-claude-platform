@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-upload-setup/lib/jobs/retention-cutoff.ts
+// kit-hash: 544d75a93033
 // lib/jobs/retention-cutoff.ts — the in-code date guard for destructive cron jobs
 // (pitfalls hardening.md §4): the cutoff is decided here, not by how often cron
 // fires. A window edited to 0, negative or a non-integer would purge data deleted

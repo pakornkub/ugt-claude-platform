@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-upload-setup/app/api/cron/attachments-sweep/route.ts
-// kit-hash: f8e03d241227
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-upload-setup/app/api/cron/attachments-sweep/route.ts
+// kit-hash: 2b986fa3b1da
 import { timingSafeEqual } from 'node:crypto';
 import { readdir, stat } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';

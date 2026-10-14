@@ -1,6 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.78.0 (2026-10-14)
+
+- auth-setup §8: ข้อความปิดท้ายต้องมีประโยค `/admin/setup` เอง (eval: มีแค่ใน admin-handoff.md) · evals: `plan-order` รับ bullet ระหว่างข้อ · php `sonar` เป็น regex
+- **ผล eval ก่อนออกรุ่น** (grader ตรวจทุก FAIL บน workspace): plan 1.00* · db-quality-ci 1.00 · design 1.00 ($10.7) · auth 1.00 ($12.5) · python 1.00 · php 1.00* — *FAIL ที่เหลือเป็น grader แก้แล้วในรุ่นนี้
 
 **Post-merge review ของ sweep + eval split** (reviewer ยืนยันแล้ว):
 

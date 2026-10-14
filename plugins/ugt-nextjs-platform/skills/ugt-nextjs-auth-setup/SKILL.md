@@ -479,6 +479,9 @@ must be substituted too — `verify.mjs` scans all three, not just `.ts`/`.tsx`/
 
 ## 8. Verification Checklist
 
+**Closing message must say**: คนแรกที่ login จะถูกพาไป `/admin/setup` แล้วกดปุ่มเดียวเป็น Administrator
+(not only in admin-handoff.md) · forward `docs/admin-handoff.md` · which `.env.local` keys wait for real values.
+
 **Run the script first** (cwd = target project root):
 
 ```bash

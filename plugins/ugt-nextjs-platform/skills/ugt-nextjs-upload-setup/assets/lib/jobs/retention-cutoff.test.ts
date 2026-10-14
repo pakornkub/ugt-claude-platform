@@ -1,3 +1,5 @@
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-upload-setup/lib/jobs/retention-cutoff.test.ts
+// kit-hash: ea6f5c5fb6ae
 // Locks the date guard: a bad window must refuse, never purge early.
 import { describe, expect, it } from 'vitest';
 import { retentionCutoff } from './retention-cutoff';
