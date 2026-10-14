@@ -1,5 +1,11 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.79.1 (2026-10-15)
+
+- full-setup §4: ถ้าเขียนใต้ `.claude/`/`.husky/` ไม่ได้ ให้วาง path + เนื้อหาเต็มของทุกไฟล์ที่ถูกปฏิเสธใน `docs/setup-finish.md` แล้วทำต่อ — ห้ามปิดงานด้วย "อนุญาตแล้วรัน setup อีกรอบ" (eval หลัง merge 4.79.0: judge นับเป็นการเสนอรันภายหลัง)
+- eval `run-through-db-quality-ci`: `harness-layer` ตรวจไฟล์ `docs/setup-finish.md` แบบ regex แทน llm บนข้อความแชท
+- ผล eval หลัง merge 4.79.0: plan 1.00 · db-quality-ci 1.00* · design 1.00 · auth 1.00 — *หลังแก้ข้อแรก (0.88 → 0.94, ข้อที่เหลือเป็น grader)
+
 ## 4.79.0 (2026-10-14)
 
 **auth: ตั้ง role ล่วงหน้าจาก HR · แท็บ "ยังไม่มีบทบาท" · เมลแจ้งแอดมิน · `ORG_EMAIL_DOMAINS`** (คำขอผู้ดูแลระหว่างตั้ง trn-invoice-tracking — **แก้มติ 2026-08-11**: ยังห้ามสมัครเองและห้ามสร้างบัญชี SSO/LDAP ล่วงหน้า แต่ **ตั้ง role ล่วงหน้าได้** เพราะไม่มีแถว `User`/`Account` ให้ Better Auth link เข้า และไม่มีช่องพิมพ์ username ให้เกิดผู้ใช้ซ้ำ — เหตุผลเต็ม `references/org-identity.md` §1):

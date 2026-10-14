@@ -236,6 +236,11 @@ session that installed it — this step is what makes it persist. Every file her
 is **owned by the skill and may be overwritten on `/plugin update`**, except
 where noted.
 
+**A write under `.claude/` (or `.husky/`) refused by the environment** is not a
+reason to stop or to tell the user to "re-run setup later": put every refused
+file's path + full content into `docs/setup-finish.md` (enabledPlugins written
+out explicitly), keep going, and name that file in the close-out's "ยังไม่ได้รัน".
+
 | Asset | Destination | Overwritable? |
 | --- | --- | --- |
 | `assets/CLAUDE-block.md` | inserted into root `CLAUDE.md` | **only between `<!-- ugt:start -->` … `<!-- ugt:end -->`** |
