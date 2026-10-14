@@ -22,7 +22,46 @@ cascade from `User`, so a soft-deleted user would keep working sessions.
 `docs/project-context/architecture.md` — `contracts/database.md` requires
 that line for every audit-column / soft-delete exemption, e.g.
 *⚠ deviation: ตาราง auth ทั้ง 8 ไม่มี audit columns และใช้ hard delete —
-Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)*
+Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)* — and, when the HR view
+is installed, one more for `PendingRoleAssignments` (plural, app-owned, has
+`CreatedBy`/`UpdatedBy` but no `IsActive`/`IsDeleted`: a pending row is consumed
+on login and its history is the `users.preassign-*` audit trail):
+*⚠ deviation: PendingRoleAssignments ไม่มี IsActive/IsDeleted และลบจริงเมื่อใช้ role
+แล้วหรือแอดมินลบ — ประวัติอยู่ใน ActivityLogs (ugt-nextjs-auth-setup org-identity.md)*
+
+## SQL Server: one NULL per unique column
+
+`User.ldapUsername String? @unique` becomes `CONSTRAINT [User_LdapUsername_key]
+UNIQUE NONCLUSTERED ([LdapUsername])` — and a SQL Server unique constraint
+treats NULL as a value: **only one row may have it NULL**. Every Local account
+has `LdapUsername = NULL`, and an SSO row is created with NULL too (the session
+hook fills it a moment later — and leaves it NULL when another row holds the
+AD login), so the second such row fails with P2002 (`createLocalUserAction`,
+`create-first-user.ts`, or a first SSO login → `unable_to_create_user`).
+**Every project needs the filtered index** — only an LDAP-only project, whose
+upsert always writes the AD login, is safe without it. Prisma cannot express it (database-setup
+`references/migrations.md` §4, option A) — hand-edit the migration:
+
+- **New install**: `npx prisma migrate dev --name auth-rbac --create-only`, then
+  in `migration.sql` delete the `CONSTRAINT [User_LdapUsername_key] UNIQUE …`
+  line from `CREATE TABLE [dbo].[User]` (mind the trailing comma) and append the
+  index below; then `npx prisma migrate dev` + `npx prisma generate`.
+- **Existing database**: `npx prisma migrate dev --name ldap-username-filtered --create-only`
+  (empty migration), paste:
+
+  ```sql
+  ALTER TABLE [dbo].[User] DROP CONSTRAINT [User_LdapUsername_key];
+  -- Prisma's own name on purpose: the next migrate diff finds the unique it
+  -- expects and does not re-create it (Prisma does not read the filter)
+  CREATE UNIQUE NONCLUSTERED INDEX [User_LdapUsername_key]
+    ON [dbo].[User]([LdapUsername]) WHERE [LdapUsername] IS NOT NULL;
+  ```
+
+  Check the constraint name in your first auth migration before running it.
+  The name deviates from `UX_<Table>_<Columns>_<condition>` for that reason —
+  note it next to the auth-table `⚠ deviation` line. Inspect every later
+  `migrate dev` diff: if it ever proposes dropping/re-creating
+  `User_LdapUsername_key`, delete those lines from the generated SQL.
 
 ## Env schema
 
@@ -37,6 +76,9 @@ What `lib/env.ts` (or equivalent) declares for auth:
 - `KEYCLOAK_ISSUER/CLIENT_ID/CLIENT_SECRET` → required only when SSO is on
   (the code in `lib/auth.ts` already guards `undefined` to survive `SKIP_ENV_VALIDATION=1`)
 - `LDAP_URL/LDAP_BASE_DN/LDAP_DOMAIN` → required only when LDAP is on
+- `ORG_EMAIL_DOMAINS` → `z.string().optional()` (server block + `runtimeEnv`) —
+  comma list, first = canonical; empty turns normalization and the Local-account
+  refusal off (`org-identity.md` §5)
 - `NEXT_PUBLIC_BASE_PATH` → `z.string().default('')` — **must** live in the
   t3-env `client` block **and** be listed in `runtimeEnv` (otherwise undefined at
   runtime). That declaration is what **server** files import from `@/lib/env`;

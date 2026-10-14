@@ -97,14 +97,26 @@ migration note).
 2. Better Auth redirects the browser to Keycloak (OIDC Authorization Code + PKCE)
 3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak`
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
-4. `mapProfileToUser` maps `preferred_username` → `ldapUsername`, sets `authType: 'sso'`
+4. `mapProfileToUser` resolves the existing row by `preferred_username` (=
+   `ldapUsername`) and returns only the email — Better Auth stores no custom
+   field from a provider profile (`input: false` fields are skipped too). No
+   `preferred_username`/`sub` (Keycloak 25+: `sub` comes from the `basic`
+   scope) → refused with `APIError('FOUND')` to `/login?error=sso_refused` — a
+   plain `Error` here is a bare 500 on the callback
 5. `accountLinking: { enabled: true, trustedProviders: ['keycloak'] }` links the SSO
-   account to an existing LDAP/local user with the same email (safe: the org
-   Keycloak has already verified the email against the directory)
+   account to the existing row **of the same AD username** (an LDAP-first user).
+   `mapProfileToUser` refuses when the email belongs to any other row not linked
+   to this Keycloak subject (`accountId: profile.sub`) — a Local account on an org
+   email, or another AD identity sharing the mail, is never linked into
+   (`org-identity.md` §5)
 6. `databaseHooks.session.create.after` runs — the **reliable** place to persist
-   custom user fields and write the `login.success` audit log. Do NOT rely on
-   `mapProfileToUser` for custom fields: only standard fields (name, email, image)
-   propagate via `overrideUserInfo`.
+   the directory fields and write the `login.success` audit log. It takes the AD
+   login from `preferred_username` in the keycloak account's stored `idToken`
+   (verified by Better Auth, rewritten on every SSO sign-in) and writes it onto
+   `User.ldapUsername` when it differs — first login, AD rename and legacy
+   email-derived values all converge. Never from the email. Missing, or already
+   held by another row (P2002, logged) → `loginName: null`: no directory lookup,
+   no pending role; the login itself continues.
 
 **Identity is the AD username, not the email.** Better Auth matches the
 existing user by the email `mapProfileToUser` returns — but the AD email and
@@ -119,13 +131,18 @@ const existing = await prisma.user.findUnique({ where: { ldapUsername } });
 return { email: existing?.email ?? profile.email, ldapUsername, ... };
 ```
 
+The returned email goes through `toCanonicalEmail` (`ORG_EMAIL_DOMAINS`) for a new
+identity; an existing row keeps its stored email for the lookup and the session
+hook rewrites it canonical afterwards.
+
 It pairs with `accountLinking.requireLocalEmailVerified: false` (also shipped
 since 4.21.0) — users created by upsert/sync have `emailVerified: false`, and
 Better Auth ≥1.6.11 silently blocks linking into unverified users even for
 trusted providers (the failure just moves from `unable_to_create_user` to
 `account_not_linked`). Relaxing it is safe in this kit only because
-self-registration is closed (มติ 2026-08-11) — no attacker can pre-create an
-unverified row.
+self-registration is closed and nothing pre-creates rows (มติ 2026-08-11 — the
+2026-10-14 amendment pre-assigns roles in a separate table, not `User`), and
+`mapProfileToUser` links only into the row of the same AD username.
 
 **Conditional plugin registration**: the `keycloak()` helper calls `.replace()`
 on the issuer string internally. During `SKIP_ENV_VALIDATION=1` builds the env
@@ -150,17 +167,26 @@ of the same commit minutes earlier was fine — it is timing, not code.
 
 1. Rate-limit by IP (10 attempts / 15 min)
 2. `ldapBind(username, password)` via `ldapts` — binds as **UPN**
-   (`username@LDAP_DOMAIN`), then searches `LDAP_BASE_DN` by `sAMAccountName`
-   with **RFC-4515-escaped** filter value (backslash first!)
+   (`username@LDAP_DOMAIN`), then looks up **the account the bind authenticated**:
+   `userPrincipalName=<that UPN>` first, `sAMAccountName=<typed>` only when no
+   explicit UPN matches (AD's own resolution order) — exactly one entry or the
+   login fails. Every later step keys on the directory's `sAMAccountName`, never
+   the typed text. Filter values are **RFC-4515-escaped** (backslash first!)
    — do **not** enforce `ldaps://` in production: org AD servers on private
    networks (`ldap://10.x.x.x`) often support plain LDAP only, and a
    protocol check that throws **before** the bind surfaces as a misleading
    "Invalid username or password"
-3. `prisma.user.upsert({ where: { ldapUsername } })`
+3. `prisma.user.upsert({ where: { ldapUsername: ldapUser.sAMAccountName } })`
 4. `prisma.session.create({ token: generateId(32), userId, expiresAt })` —
    expiry MUST match `session.expiresIn` in `lib/auth.ts` (8h)
 5. `signSessionToken()` → `cookieStore.set(SESSION_COOKIE_NAME, signedToken, …)`
 6. Audit log `login.success` (and `login.failed` on bind failure)
+
+Between 2 and 3: the AD email is moved onto the canonical org domain, and a row
+holding that mailbox under another (or no) `ldapUsername` refuses the login with
+`ORG_ACCOUNT_CONFLICT` instead of letting the upsert throw. After 3,
+`afterOrgLogin()` applies a pre-assigned role / sends the no-role notice
+(`org-identity.md`).
 
 ## Local login flow (localLoginAction)
 

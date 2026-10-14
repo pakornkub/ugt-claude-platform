@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: bdb3d75afb89
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: 6c99a625c531
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -11,10 +11,12 @@
 //
 // บัญชีเกิดได้สามทางเท่านั้น:
 //   local → createLocalUserAction (สิทธิ์ USERS_CREATE) — ตั้งรหัสผ่านตั้งต้นให้เลย
+//           ห้ามใช้อีเมลโดเมนองค์กร (ORG_EMAIL_DOMAINS) — โดเมนนั้นเป็นของ SSO/LDAP
 //   ldap  → เกิดเองตอน bind สำเร็จครั้งแรก — ไม่ต้องเพิ่มที่นี่ (มติ 2026-08-11:
-//           ไม่มีการตั้งบัญชี AD ล่วงหน้า ข้อมูลอยู่ใน directory อยู่แล้วเหมือน SSO
-//           กำหนด role ให้หลังจากเขา login ครั้งแรกจากหน้านี้)
+//           ไม่สร้างบัญชี AD ล่วงหน้า ข้อมูลอยู่ใน directory อยู่แล้วเหมือน SSO)
 //   sso   → เกิดเองตอน login ผ่าน Keycloak ครั้งแรก
+// role ของคนที่ยังไม่เคย login ตั้งไว้ก่อนได้ (แก้มติ 2026-10-14) ผ่านแถวรอใน
+// lib/actions/admin-preassign.ts — คีย์ด้วยตัวตนจาก view HR ไม่ได้สร้างบัญชี
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod'; // [METHOD: LOCAL]
@@ -26,6 +28,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
+import { isOrgEmail } from '@/lib/org-email'; // [METHOD: LOCAL]
 
 type ActionResult = { success: true } | { success: false; code: string; field?: string };
 
@@ -48,7 +51,34 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
   if (userId === session.user.id) {
     return { success: false, code: 'CANNOT_CHANGE_OWN_ROLE' };
   }
-  await prisma.user.update({ where: { id: userId }, data: { roleId } });
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { empCode: true, ldapUsername: true, roleId: true },
+  });
+  if (!target) return { success: false, code: 'USER_NOT_FOUND' };
+
+  // [DIRECTORY] An admin's explicit choice here — including "no role" — is final:
+  // a pending pre-assignment for the same person would otherwise be applied at
+  // their next login and undo it (after-login only checks roleId IS NULL).
+  // Same HR keys after-login matches on; never email.
+  const pendingKeys = [
+    ...(target.empCode ? [{ empCode: target.empCode }] : []),
+    ...(target.ldapUsername ? [{ loginName: target.ldapUsername }] : []),
+  ];
+  const superseded = pendingKeys.length
+    ? await prisma.pendingRoleAssignment.findMany({
+        where: { OR: pendingKeys },
+        select: { id: true, empCode: true, roleId: true },
+      })
+    : [];
+
+  // Pending rows first, then the user — the same lock order as after-login's
+  // apply (pending → user), so a login racing this click cannot deadlock it.
+  await prisma.$transaction([
+    // [DIRECTORY]
+    prisma.pendingRoleAssignment.deleteMany({ where: { id: { in: superseded.map((p) => p.id) } } }),
+    prisma.user.update({ where: { id: userId }, data: { roleId } }),
+  ]);
 
   // 4. Audit log (non-blocking)
   await prisma.activityLog
@@ -56,10 +86,23 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
       data: {
         userId: session.user.id,
         action: AUDIT_ACTIONS.USERS_ROLE_ASSIGN,
-        detail: JSON.stringify({ targetId: userId, roleId }),
+        detail: JSON.stringify({ targetId: userId, previousRoleId: target.roleId, roleId }),
       },
     })
     .catch(() => {});
+  // [DIRECTORY] each removed pending row gets the same audit as a delete on the
+  // pending tab, with the reason — the users.preassign-* trail stays complete
+  for (const { id, ...row } of superseded) {
+    await prisma.activityLog
+      .create({
+        data: {
+          userId: session.user.id,
+          action: AUDIT_ACTIONS.USERS_PREASSIGN_DELETE,
+          detail: JSON.stringify({ pendingId: id, ...row, reason: 'superseded-by-role-assign', targetId: userId }),
+        },
+      })
+      .catch(() => {});
+  }
 
   revalidatePath('/admin/users');
   return { success: true };
@@ -101,6 +144,12 @@ export async function createLocalUserAction(values: {
     return { success: false, code: issue?.message ?? 'INVALID_INPUT', field: issue?.path[0]?.toString() };
   }
   const { name, email, password, roleId } = parsed.data;
+
+  // อีเมลองค์กร = ของพนักงาน ซึ่งเข้าด้วย SSO/LDAP — บัญชี local บนอีเมลนั้นคือ
+  // บัญชีที่สองคนใช้ร่วมกันได้ (คนถือรหัส local + เจ้าของตัวจริง) จึงห้ามตั้งแต่ตอนสร้าง
+  if (isOrgEmail(email)) {
+    return { success: false, code: 'ORG_EMAIL_NOT_LOCAL', field: 'email' };
+  }
 
   if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) {
     return { success: false, code: 'EMAIL_IN_USE', field: 'email' };

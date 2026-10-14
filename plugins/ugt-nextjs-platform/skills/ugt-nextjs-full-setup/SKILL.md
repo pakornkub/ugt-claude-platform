@@ -147,9 +147,10 @@ every selected child skill and fold its questions into this same batch**
 (example topics, not the full list: DB: server, database name, existing or new,
 stored procedures needed · Design: prototype/brand to match?, primary color,
 shell sidebar/topbar, dark mode, ภาษา UI · Auth: Keycloak client exists yet,
-AD details, directory view, scope/approval · CI: Sentry?, deploy target).
+AD details, org email domains, directory view, scope/approval · CI: Sentry?, deploy target).
 **Never ask "who is the first admin"** — auth-setup §3 Q5 forbids it (the
-answer cannot be used: no pre-registration, มติ 2026-08-11); the first person
+answer cannot be used: no pre-created accounts, มติ 2026-08-11 — roles can be
+pre-assigned from the HR view only once the app runs and has an admin); the first person
 to log in becomes Administrator via `/admin/setup`, and that sentence goes in
 the summary + `docs/admin-handoff.md` instead.
 

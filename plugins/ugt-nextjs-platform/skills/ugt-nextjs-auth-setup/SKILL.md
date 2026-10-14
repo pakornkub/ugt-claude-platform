@@ -57,9 +57,9 @@ methods**:
 
 Every method lands in **the same Better Auth + Prisma session**, with RBAC
 (role → permission), a first-admin bootstrap page (`/admin/setup`), and the
-ongoing admin pages to manage it afterward: `/admin/users` (list + assign
-role), `/admin/roles` (CRUD + permission checkboxes), `/admin/audit-logs`
-(read-only viewer).
+ongoing admin pages to manage it afterward: `/admin/users` (tabs ทั้งหมด ·
+ยังไม่มีบทบาท · ตั้งล่วงหน้า; assign or pre-assign a role), `/admin/roles` (CRUD +
+permission checkboxes), `/admin/audit-logs` (read-only viewer).
 
 Real code lives in `assets/` — adjust placeholders and copy straight into the
 project. Deep detail lives in `references/`:
@@ -74,6 +74,8 @@ project. Deep detail lives in `references/`:
 - `references/directory-enrichment.md` — filling employee code / department /
   position / supervisor from the org's employee view over a linked server,
   because SSO and LDAP only answer "who are you"
+- `references/org-identity.md` — pre-assigned roles, the "ยังไม่มีบทบาท" tab/badge/admin
+  mail, `ORG_EMAIL_DOMAINS` and the shared-account hole (§2 items 10–11) + kit-sync steps
 - `references/data-scope.md` — "may they?" vs "**whose data?**": the row-level
   scope layer, and the approval-chain view (**read before writing any route
   that accepts an empCode from the client**)
@@ -119,12 +121,15 @@ The org-wide contract:
    position and supervisor come from the central view over a linked server,
    refreshed on every login by one shared helper — read-only, and never
    allowed to break login (`references/directory-enrichment.md`)
-10. **No self-registration, and no pre-registration** (มติ 2026-08-11). SSO and
-   LDAP accounts appear on their first successful login — their data already
-   lives in the directory, so nobody creates them by hand; the role is assigned
-   from `/admin/users` after that first login. Local accounts are the only kind
-   created manually (`users:create` on `/admin/users`), and
-   `disableSignUp: true` closes the endpoint Better Auth would otherwise publish
+10. **No self-registration, no pre-created SSO/LDAP accounts — pre-assigned roles
+   are fine** (มติ 2026-08-11, amended 2026-10-14): accounts appear on first
+   login only; an admin may pre-assign a role keyed to HR EmpCode/AD login (never
+   email); `disableSignUp: true`. Why and how: `references/org-identity.md` §1–3
+11. **Org mailboxes belong to SSO/LDAP.** `ORG_EMAIL_DOMAINS` (first =
+   canonical) normalizes every email from SSO/LDAP/HR before it is stored,
+   shown or mailed; a Local account can neither be created nor sign in on those
+   domains; SSO/LDAP never link into a row that is not the same AD username —
+   so no Local password can share an employee's identity or role
 
 ## 3. Interview — ask the installer first (one batch)
 
@@ -144,8 +149,11 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
    (internal-CA TLS is not a question — `NODE_TLS_REJECT_UNAUTHORIZED=0` is org
    standard, already in env section 1 and both compose files)
+4b. **[SSO or LDAP] Org email domains?** → `ORG_EMAIL_DOMAINS`, comma list,
+   canonical first (§2 item 11) — every domain the org's mailboxes use
 5. **First admin — not a question.** SSO/LDAP rows can't be pre-created
-   (มติ 2026-08-11), so nothing could be seeded from a name given here; the
+   (มติ 2026-08-11) and pre-assigning needs a running app with an admin, so
+   nothing could be seeded from a name given here; the
    first login claims admin via `/admin/setup`. Full
    mechanism (layout gate + the exact `docs/admin-handoff.md` wording) is in
    §5.5 step 5.
@@ -154,8 +162,9 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
    name. If the app needs employee code, department, position or supervisor,
    ask for the **four-part view name** and which columns carry those fields.
    → `references/directory-enrichment.md`. Answering "no" means deleting
-   `lib/directory.ts`, its three call sites and the directory columns in the
-   schema; say that out loud so it is a decision, not an omission.
+   `lib/directory.ts`, its call sites, the directory columns in the schema and
+   every `[DIRECTORY]` part (no pre-assigned roles — `org-identity.md` §6); say
+   that out loud so it is a decision, not an omission.
    Two follow-ups, both defaulting to yes for org apps:
    - **"เห็นเฉพาะของตัวเองกับทีม" หรือทุกคนเห็นหมด?** → installs `lib/scope.ts`
      and adds a `<resource>:read-all` key per scoped resource
@@ -185,11 +194,10 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
    already renders a menu]** — not a question, a constraint (มติ 2026-09-09,
    level **token + shell**): the admin pages go through §5.6's *merge* branch
    only — never `<AdminNav>` — sit under the project's protected layout, and
-   inherit the design-setup tokens that were rebased onto the project's look;
-   the kit's DataTable/dialogs stay as they are. A prototype login found by
-   full-setup §1 is removed per §5.7. Shipping `/admin/*` as its own shell on
-   org indigo next to the existing app is the failure this line
-   exists for; `scripts/verify.mjs` fails on it.
+   inherit the design-setup tokens rebased onto the project's look (kit
+   DataTable/dialogs unchanged); a prototype login found by full-setup §1 goes
+   per §5.7. `/admin/*` as its own indigo shell beside the app is the failure
+   this exists for — `scripts/verify.mjs` fails on it.
 
 ## 4. Prerequisite
 
@@ -197,26 +205,19 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
 `lib/prisma.ts` singleton + working migrate), because Better Auth stores
 user/session/account in Prisma. If it isn't, stop and do the database first.
 
-**The org UI kit must be installed too, for two separate reasons — the
-DataTable one is narrow, the i18n one is not.** The three admin pages render
-with the kit's `DataTable` plus `ui/date-range-picker`, `lib/pagination.ts`,
-`lib/table-query.ts` and `lib/format.ts`, all installed by
-`ugt-nextjs-design-setup` (the full-setup order design → auth guarantees
-this). Table modes follow DESIGN.md §4 and are fixed per table, not asked in
-the interview — each table's mode is stated on its row in the asset table
-(`references/asset-map.md`, §5.2).
+**The org UI kit must be installed too, for two reasons.** (1) The admin pages
+render with the kit's `DataTable` + `ui/date-range-picker`, `lib/pagination.ts`,
+`lib/table-query.ts`, `lib/format.ts` (`ugt-nextjs-design-setup`; the full-setup
+order design → auth guarantees this). Table modes follow DESIGN.md §4, fixed
+per table on its row in `references/asset-map.md` — not an interview question.
+(2) Far broader: every asset calls `useTranslations()` unconditionally, so it
+needs next-intl's provider chain (`i18n/request.ts`, `NextIntlClientProvider`,
+the `next.config.ts` plugin) whether or not it touches `DataTable`.
 
-Separately — and this covers far more of the skill than the three DataTable
-pages — every converted asset calls `useTranslations()` unconditionally, so
-it needs next-intl's provider chain (`i18n/request.ts`,
-`NextIntlClientProvider`, the plugin registered in `next.config.ts`) whether
-or not a single one of those files touches `DataTable`.
-
-Installing auth standalone without the design kit: **run design-setup first
-— this is the only real path**; dropping `DataTable` alone does nothing about
-the i18n dependency. Plain shadcn `Table` works only for a project that also
-hand-rolls the next-intl scaffolding (or strips every `useTranslations()`
-call) — say which path was taken and record it as a DESIGN.md deviation.
+Standalone without the design kit: **run design-setup first — the only real
+path**; dropping `DataTable` does nothing about i18n. Plain shadcn `Table` works
+only if the project also hand-rolls next-intl (or strips every
+`useTranslations()`) — record that as a DESIGN.md deviation.
 
 ## 5. Setup steps
 
@@ -265,7 +266,8 @@ per table) are in **`references/asset-map.md`** — walk that table while copyin
 The login-method assets (`lib/auth.ts`, `lib/auth-client.ts`,
 `lib/actions/auth.ts`, `components/login-form.tsx`, `env.example`) carry
 `[METHOD: SSO|LDAP|LOCAL]` markers — delete every section (imports included)
-belonging to methods that were not selected. The RBAC/admin assets
+belonging to methods that were not selected. Likewise `[DIRECTORY]` (no HR view)
+and `[MAIL]` (no mail module yet) — the matrix is `references/org-identity.md` §6. The RBAC/admin assets
 (`app/(admin-setup)/**`, `app/(admin)/**`, the admin components, and
 `lib/actions/admin-*.ts`) are method-agnostic — copy them as-is regardless
 of which login methods were chosen, **except the sidebar shell**: a project
@@ -288,37 +290,40 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
 1. Paste `assets/prisma/schema-auth.prisma` into `prisma/schema.prisma`
    (adjust `@db.NVarChar(Max)` if not MSSQL)
    > **Naming-rule exception — 8 singular tables + no audit columns + hard
-   > delete** (Better Auth owns these rows). Do not pluralize them, and **record
+   > delete** (Better Auth owns these rows; `PendingRoleAssignments` is plural
+   > but also hard-deletes). Do not pluralize them, and **record
    > the `⚠ deviation` line during install** — the table list, the reason and the
    > exact line are in `references/schema-and-env.md` §Auth-table exception.
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
-3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately
+3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately.
+   **MSSQL (SSO or Local):** `--create-only` first and swap the `LdapUsername` unique constraint
+   for the filtered index (`schema-and-env.md` §SQL Server: one NULL per unique column)
 
 ### 5.4 Env schema (`lib/env.ts` or equivalent)
 
 Declare `BETTER_AUTH_SECRET` (`min(32)`), `BETTER_AUTH_URL` (**required**
 `z.url()`, never optional — redirect loop otherwise), `BETTER_AUTH_TRUSTED_ORIGINS`,
-`KEYCLOAK_*` (SSO only), `LDAP_*` (LDAP only), and `NEXT_PUBLIC_BASE_PATH` +
+`KEYCLOAK_*` (SSO only), `LDAP_*` (LDAP only), `ORG_EMAIL_DOMAINS` (SSO/LDAP,
+optional), and `NEXT_PUBLIC_BASE_PATH` +
 `NEXT_PUBLIC_APP_NAME` in the t3-env `client` block **and** `runtimeEnv`. Type,
 requiredness and the reason for each: `references/schema-and-env.md` §Env schema.
 
 ### 5.5 Wire the login page + guards
 
-1. Create `app/(auth)/login/page.tsx` rendering
+1. Create `app/(auth)/login/page.tsx`: the two-column hero `<LoginShell hero={…}>`
+   (copy from the project's `app` catalog, optional photo — page + recipe in
+   `references/login-page.md`) wrapping
    `<LoginForm sessionExpired={reason === 'session_expired'} ssoError={error} from={from} />`
-   — `reason`, `error`, and `from` all come from `searchParams`; `from` is the
-   return-to-page path (basePath-relative) that `proxy.ts`, the layout guard
-   (step 2), and `SessionExpiredDialog` attach — the form validates it
-   (same-origin relative path only, open-redirect guard) then sends every login
-   method back there: SSO via `callbackURL`, LDAP/local via `router.push`
-   (convention in `references/auth-flows.md` §Return-to-page). `error` is the code
+   — all three from `searchParams`; `from` is the basePath-relative return-to-page
+   path `proxy.ts`, the layout guard and `SessionExpiredDialog` attach; the form
+   validates it (open-redirect guard) and every method returns there
+   (`references/auth-flows.md` §Return-to-page). `error` is the code
    Better Auth appends when `onAPIError.errorURL` (lib/auth.ts) redirects a
-   failed flow back here (e.g. `unable_to_create_user`), and the form maps it
-   to a Thai message. Without it a failed SSO login shows the user nothing.
-   **The page is also where "already signed in → into the app" lives** — an
-   `async` Server Component that checks the REAL session, never `proxy.ts`
-   (which only sees a cookie, and an expired/stale cookie would make `/` ↔
-   `/login` redirect forever — `references/troubleshooting-session.md` §Stale cookie loop):
+   failed flow back here (e.g. `unable_to_create_user`), mapped to a Thai
+   message — without it a failed SSO login shows nothing. **"Already signed in
+   → into the app" lives here too**, checking the REAL session — never in
+   `proxy.ts`, which sees only a cookie (a stale one loops `/` ↔ `/login`,
+   `references/troubleshooting-session.md` §Stale cookie loop):
 
    ```tsx
    const session = await auth.api.getSession({ headers: await headers() });
@@ -340,27 +345,20 @@ requiredness and the reason for each: `references/schema-and-env.md` §Env schem
    with no hint that `/admin/setup` exists:
 
    ```tsx
-   if (!(await isAdminInitialized())) redirect('/admin/setup');
+   if (!(await isAdminInitialized())) redirect('/admin/setup'); // near-free — caching in references/rbac.md
    ```
 
-   (Safe and near-free for every user — caching details in `references/rbac.md`.)
-
-   Also render `<SessionExpiredDialog />` once at the end of this layout's
-   JSX. It receives the `session-expired` event that `query-provider` (design
-   kit) and `lib/auth-client.ts` dispatch on a mid-page 401 — the case
-   `proxy.ts` can't catch because no navigation happens. Without it the event
-   goes nowhere and an expired session looks like every button silently
-   failing until the user refreshes by luck.
+   Also render `<SessionExpiredDialog />` once at the end of this layout — it
+   receives the `session-expired` event `query-provider` and `lib/auth-client.ts`
+   dispatch on a mid-page 401 (no navigation, so `proxy.ts` can't see it);
+   without it every button just silently fails until a lucky refresh.
 3. Logout buttons use `<form action={logoutAction}>` (SSO uses
    `ssoLogoutAction`) — never `signOut()` from the auth-client
-4. **Identity block in the shell** — render `<NavUser>` in the sidebar footer
-   (or the topbar's right-hand dropdown), fed from the session: `name`,
-   `email`, `roleName` from the user's role, `authType` from `user.authType`.
-   Project-specific profile rows (employee code, position, department) go in
-   through `extraRows` — the component ships only the two rows every app has
-   (email · last login method). DESIGN.md §3 fixes the placement and the two
-   menu items, so users find "who am I / sign out" in the same spot in every
-   app.
+4. **Identity block in the shell** — `<NavUser>` in the sidebar footer (or the
+   topbar's right dropdown) fed from the session: `name`, `email`, `roleName`,
+   `authType`. Project rows (employee code, position, department) go in via
+   `extraRows`; DESIGN.md §3 fixes the placement and the two menu items, so
+   "who am I / sign out" sits in the same spot in every app.
 5. First deployment: log in → the layout gate (step 2) lands on `/admin/setup`
    → one click → Administrator role → redirects to `/admin/users`, which now
    really exists. Keep this line in `docs/admin-handoff.md` ("หลังระบบขึ้นแล้ว", Thai): *คนแรกที่ login จะถูกพาไปหน้า `/admin/setup` และกดปุ่มเดียว
@@ -382,6 +380,12 @@ requiredness and the reason for each: `references/schema-and-env.md` §Env schem
    into the admin section — if you add a permission to `ALL_PERMISSIONS` later,
    it reaches the database the next time anyone opens an admin page, no
    migration step needed (see `references/rbac.md`)
+7. **[SSO/LDAP] `lib/after-login.ts`** is already called from both login paths
+   (SSO session hook, `ldapLoginAction` — after the directory refresh): it
+   applies a pre-assigned role and, with mail installed, mails the
+   `users:update` holders once when someone logs in with no role. It swallows
+   every error — login never fails or waits on it. Without mail yet, delete its
+   `[MAIL]` lines; mail-setup §4.6 restores them (`references/org-identity.md` §4)
 
 ### 5.6 Sidebar: merge into the existing shell, or use the fallback
 
@@ -407,6 +411,8 @@ with a nav exists and `<AdminNav>` is still rendered anywhere):
    component/hook body, so the exported array can't hold pre-translated
    text. Resolve it yourself in whatever component renders the merged
    sidebar (it already has hook context): `const t = useTranslations('auth.adminNav'); t(item.labelKey)`.
+   **Keep the badge**: the layout feeding the nav calls `getAdminNavBadges(perms)`
+   (`lib/admin-badges.ts`); render `<SidebarMenuBadge>` for a count > 0, as `<AdminNav>` does.
 2. In `app/(admin)/layout.tsx`, keep the guard (session →
    `syncPermissionsIfNeeded()` → permission check) but delete the shell —
    render `<PageShell>{children}</PageShell>` (`ui/page-shell`) so the pages sit
@@ -426,36 +432,28 @@ there is exactly one sidebar and one NavUser.
 
 ### 5.7 Remove the prototype login (any project that had one)
 
-Prototype projects (AI Studio, v0, hand-built demos) often ship a fake gate: a
-`useAuth` context with a hard-coded user, a login page that compares against a
-constant, a `token`/`user` key in `localStorage`, an `isLoggedIn` flag in a
-store. Better Auth installed **beside** it changes nothing — the old gate still
-decides who gets in, and the real login is a page nobody reaches. Find it:
+Prototypes (AI Studio, v0, demos) often ship a fake gate — a `useAuth` context
+with a hard-coded user, a login page comparing against a constant, a
+`token`/`user` key in `localStorage`, an `isLoggedIn` flag. Better Auth installed
+**beside** it changes nothing: the old gate still decides who gets in. Find it
+(`scripts/verify.mjs` warns on these patterns until they are gone):
 
 ```bash
 grep -rn "mockUser\|MOCK_USER\|mockSession\|fakeAuth\|DEMO_USER\|isLoggedIn\|localStorage\.\(get\|set\)Item(['\"]\(token\|user\|auth\|session\|currentUser\)" app components lib src 2>/dev/null
 ```
 
-Then, keeping the project's routes and redirect targets (preserve mode):
+Keeping the project's routes and redirect targets (preserve mode): (1) replace
+every read of the fake user with the real session (`auth.api.getSession` server,
+`authClient.useSession()` client) and every role check with
+`getUserPermissions()`; (2) keep the project's login page wired to
+`lib/actions/auth.ts` **or** swap in the kit page — record which in DESIGN.md
+§10; (3) delete the fake gate, its provider and storage keys — two gates is not
+"extra safety", the mock one still lets people through.
 
-1. Replace every read of the fake user with the real session —
-   `auth.api.getSession({ headers })` server-side, `authClient.useSession()`
-   client-side — and every role/permission check with `getUserPermissions()`.
-2. The login **page**: keep the project's own page if it now submits to the
-   real Server Actions (`lib/actions/auth.ts`), or swap it for the kit page
-   (themed by the rebased tokens). Pick one, record it in DESIGN.md §10.
-   After login the user lands where the prototype sent them.
-3. Delete the fake gate, its provider/context and its storage keys. Two gates
-   is not "extra safety" — the mock one still lets people through.
-
-`scripts/verify.mjs` warns on the grep patterns above until they are gone.
-
-**Existing menus under RBAC** (from §3 Q8): for each menu the installer chose,
-declare a `resource:action` key in `ALL_PERMISSIONS` (the §5.5 step-6 sync
-seeds it to the database automatically — it then appears in the `/admin/roles`
-checklist), filter that menu item by the key, and guard its page/Server Action
-behind it. Declaring the key without wiring the check gives a checkbox that
-does nothing — always do both ends or neither.
+**Existing menus under RBAC** (§3 Q8): per chosen menu, declare a
+`resource:action` key in `ALL_PERMISSIONS` (the step-6 sync seeds it into the
+`/admin/roles` checklist), filter the menu item by it, and guard its
+page/Server Action — a key without the check is a checkbox that does nothing.
 
 ## 6. Placeholders used across the assets
 
@@ -489,11 +487,8 @@ node <skill-dir>/scripts/verify.mjs
 ```
 
 It checks leftover placeholders, unremoved `[METHOD: …]` markers, the guard
-file name + its `config` export, the
-cookie prefix across all 3 files, audit actions coming from constants, the
-schema, and the commonly mis-called APIs.
+file name + `config` export, the cookie prefix in all 3 files, audit constants,
+the schema, mis-called APIs, and the org-identity rules (§2 items 10–11).
 
-Everything the script cannot see — login through every selected method, logout,
-the reset-link flows, scope/approval behaviour, the admin pages, security
-headers, i18n — is the by-hand list in **`references/verification.md`**. Walk it
-before calling an install done.
+Everything it cannot see (every login method, logout, reset links, scope/approval,
+admin pages, headers, i18n) is the by-hand list in **`references/verification.md`** — walk it.

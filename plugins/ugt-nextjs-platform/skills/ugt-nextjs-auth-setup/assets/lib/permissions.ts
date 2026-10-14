@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.61.3 · ugt-nextjs-auth-setup/lib/permissions.ts
-// kit-hash: 9dc27dce8f25
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/permissions.ts
+// kit-hash: a7636c19a28c
 /**
  * Permission keys — single source of truth for all permission constants.
  * Naming convention: resource:action (standard RBAC pattern)
@@ -18,7 +18,8 @@
  */
 export const PERMISSIONS = {
   // User management — no `users:delete`: ไม่มี action ลบผู้ใช้ใน kit โดยตั้งใจ
-  // (บัญชี SSO/AD เกิดเองตอน login — มติ 2026-08-11); เพิ่มคีย์เมื่อทำ action จริง
+  // (บัญชี SSO/AD เกิดเองตอน login — มติ 2026-08-11; ตั้ง role ล่วงหน้าใช้
+  // USERS_UPDATE ตัวเดียวกับเปลี่ยน role); เพิ่มคีย์เมื่อทำ action จริง
   // ห้ามประกาศคีย์ล่วงหน้าโดยไม่มีของ — จะกลายเป็น checkbox ที่ติ๊กแล้วไม่ได้อะไร
   USERS_READ: 'users:read',
   USERS_CREATE: 'users:create', // [METHOD: LOCAL] — only createLocalUserAction consumes it; SSO/LDAP accounts are created at first login

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/audit-actions.ts
-// kit-hash: 15c35df58007
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/audit-actions.ts
+// kit-hash: 051abfbd5ed7
 /**
  * Audit action keys — single source of truth for every string written to
  * `ActivityLogs.action`.
@@ -29,6 +29,14 @@ export const AUDIT_ACTIONS = {
   USERS_ROLE_ASSIGN: 'users.role-assign',
   // [METHOD: LOCAL] admin "ตั้งรหัสผ่าน" on a row (NOT the user's own reset)
   USERS_PASSWORD_SET: 'users.password-set', // NOSONAR typescript:S2068 — audit action key, not a password value
+
+  // Role pre-assignment from the HR view — lib/actions/admin-preassign.ts
+  // (create/update/delete, actor = admin) + lib/after-login.ts (apply, actor =
+  // the person logging in). Delete with lib/directory.ts when there is no HR view.
+  USERS_PREASSIGN_CREATE: 'users.preassign-create',
+  USERS_PREASSIGN_UPDATE: 'users.preassign-update',
+  USERS_PREASSIGN_DELETE: 'users.preassign-delete',
+  USERS_PREASSIGN_APPLY: 'users.preassign-apply',
 
   // Role management — written by lib/actions/admin-roles.ts
   ROLES_CREATE: 'roles.create',

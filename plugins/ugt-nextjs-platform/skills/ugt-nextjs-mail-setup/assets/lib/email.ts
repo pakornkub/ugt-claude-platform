@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-mail-setup/lib/email.ts
-// kit-hash: 08631b5c8986
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-mail-setup/lib/email.ts
+// kit-hash: d7d236ac28dc
 // source: ugt-hrms lib/email.ts — installed by ugt-nextjs-mail-setup
 import nodemailer from 'nodemailer';
 import { env } from '@/lib/env';
@@ -61,6 +61,9 @@ export interface SendTemplatedMailOptions {
   to: string | string[];
   cc?: string | string[];
   actor: MailActor;
+  /** Prepended to the rendered subject — e.g. `'[DEV] '` from a system mail
+   *  sent on the dev deployment (no actor, so dev mode cannot mark it). */
+  subjectPrefix?: string;
 }
 
 /**
@@ -79,13 +82,15 @@ export interface SendTemplatedMailOptions {
  */
 export async function sendTemplatedMail(opts: SendTemplatedMailOptions): Promise<void> {
   const template = await getMailTemplate(opts.templateKey);
-  const { subject, html } = renderComposedMail(opts.templateKey, template, opts.vars);
+  const rendered = renderComposedMail(opts.templateKey, template, opts.vars);
+  const subject = (opts.subjectPrefix ?? '') + rendered.subject;
+  const { html } = rendered;
 
   const devMode = opts.actor.hasDevMode && !!opts.actor.email;
   if (devMode) {
     await sendMail({
       to: opts.actor.email as string,
-      subject: `[DEV] ${subject}`,
+      subject: subject.startsWith('[DEV] ') ? subject : `[DEV] ${subject}`,
       html: buildDevBanner({ to: opts.to, cc: opts.cc }) + html,
     });
     return;

@@ -53,7 +53,8 @@ if (!hasPermission(perms, PERMISSIONS.ROLES_DELETE)) { /* forbidden */ }
 
 **Only check keys that exist in `lib/permissions.ts`.** There is no
 `users:delete` key on purpose (nothing in the kit deletes users — SSO/AD rows
-appear on first login, มติ 2026-08-11). `PERMISSIONS.USERS_DELETE` compiles to
+appear on first login, มติ 2026-08-11; a role can be pre-assigned, but no row is
+pre-created). `PERMISSIONS.USERS_DELETE` compiles to
 `undefined`, and `hasPermission(perms, undefined)` is `false` for everybody —
 a permanent 403 with no error message anywhere.
 

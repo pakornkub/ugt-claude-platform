@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.14.4 (2026-10-14)
+
+- contract auth: หัวข้อใหม่ **Accounts** — บัญชี SSO/LDAP เกิดตอน login ครั้งแรกเท่านั้น · ตั้ง role ล่วงหน้าได้โดยคีย์ด้วย EmpCode/AD login จาก HR ไม่ใช่อีเมล · ห้ามบัญชี Local บนโดเมนอีเมลองค์กร · ห้าม SSO/LDAP link เข้าบัญชี Local (ugt-nextjs-platform 4.79.0 คือฉบับ Next.js)
+
 ## 2.14.3 (2026-10-11)
 
 - `ugt-contribute`: รายการ reference ของ pitfalls รวม `version-skew` · repo: `scripts/check-skill-size.mjs` (SKILL.md ≤ 500 บรรทัด, เตือน reference > 200) + README ขั้นหลัง merge: code-review + eval + ขนาด

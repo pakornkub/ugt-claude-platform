@@ -327,6 +327,39 @@ check('proxy does not bounce auth pages on cookie presence (stale-cookie redirec
   return problems.length ? { ok: bounce ? false : 'warn', msg: problems.join(' · ') } : { ok: true };
 });
 
+check('Login page: two-column hero, copy from the project catalog (DESIGN.md §3)', () => {
+  const loginPage = ['app/(auth)/login/page.tsx', 'app/login/page.tsx', 'app/[locale]/(auth)/login/page.tsx', 'app/[locale]/login/page.tsx'].find((f) => has(f));
+  if (!loginPage) return { ok: 'warn', msg: 'no login page found (SKILL.md §5.5 step 1)' };
+  const page = stripComments(read(loginPage));
+  const problems = [];
+  if (!/<LoginShell\b/.test(page)) {
+    problems.push(`${loginPage} does not render <LoginShell> — no two-column login hero (references/login-page.md; a project keeping its own page records the deviation in DESIGN.md §10)`);
+  } else {
+    if (!/hero=\{/.test(page)) problems.push('<LoginShell> has no hero={…} — the page renders as the plain centred form');
+    // hero copy belongs to messages/app.*.ts — a literal in the page is untranslatable and drifts
+    if (/[฀-๿]/.test(page)) problems.push(`${loginPage} holds Thai text in code — build the hero from getTranslations('app.loginHero')`);
+  }
+  // LoginShell renders the form column as the page's <main> (the root layout has none)
+  if (/<LoginShell\b/.test(page) && /<main\b/.test(page)) {
+    problems.push(`${loginPage} renders <main> inside <LoginShell>, which already is the <main> landmark (nested landmarks)`);
+  }
+  if (has('components/login-shell.tsx')) {
+    const shell = stripComments(read('components/login-shell.tsx'));
+    if (!/<main\b/.test(shell)) {
+      problems.push('components/login-shell.tsx: the form column is not <main> — the login page has no main landmark (references/login-page.md §1)');
+    }
+    if (/<h[1-6]\b/.test(shell)) {
+      problems.push("components/login-shell.tsx: the hero holds a heading that comes before the form's <h1> in document order — keep the title as styled text");
+    }
+    if (!/\bhidden\b[^"'`]*\blg:flex\b/.test(shell)) problems.push('components/login-shell.tsx: the hero is not `hidden … lg:flex` — mobile would get the panel above the form');
+  }
+  if (has('public/login-hero.webp')) {
+    const kb = Math.round(statSync(p('public/login-hero.webp')).size / 1024);
+    if (kb > 400) problems.push(`public/login-hero.webp is ${kb} KB — re-encode ~1440 px wide, webp q≈78 (≈150 KB)`);
+  }
+  return problems.length ? { ok: 'warn', msg: problems.join(' · ') } : { ok: true };
+});
+
 check('proxy bypasses /_next/ and /api/health', () => {
   if (!has(GUARD_FILE)) return { ok: false, msg: `No ${GUARD_FILE}` };
   const body = read(GUARD_FILE);
@@ -443,6 +476,160 @@ check('Directory enrichment is wired and fails soft', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
+// ── 4c'. Org identity: email domains, no shared accounts, pre-assigned roles ─
+// (2026-10-14 — SKILL.md §2 items 10–11). Silent on local-only projects.
+const orgLogin = () => {
+  const m = selectedMethods();
+  return m.has('SSO') || m.has('LDAP');
+};
+const code = (f) => (has(f) ? stripComments(read(f)) : '');
+
+check('ORG_EMAIL_DOMAINS: normalized from SSO/LDAP/HR, refused for Local', () => {
+  if (!orgLogin()) return { ok: true, msg: 'no SSO/LDAP — org email domains do not apply' };
+  const problems = [];
+  if (!has('lib/org-email.ts')) problems.push('lib/org-email.ts missing — copy the asset (canonical domain + isOrgEmail)');
+  if (has('lib/env.ts') && !/ORG_EMAIL_DOMAINS/.test(read('lib/env.ts'))) {
+    problems.push('lib/env.ts does not declare ORG_EMAIL_DOMAINS — env.ORG_EMAIL_DOMAINS is undefined and nothing is normalized');
+  }
+  const m = selectedMethods();
+  if (m.has('SSO') && !/toCanonicalEmail/.test(code('lib/auth.ts'))) {
+    problems.push('lib/auth.ts never calls toCanonicalEmail — SSO users keep whatever domain Keycloak sent');
+  }
+  if (m.has('LDAP') && !/toCanonicalEmail/.test(code('lib/actions/auth.ts'))) {
+    problems.push('ldapLoginAction never calls toCanonicalEmail — AD users keep whatever domain AD sent');
+  }
+  if (m.has('LOCAL')) {
+    if (!/isOrgEmail/.test(code('lib/actions/admin-users.ts'))) {
+      problems.push('createLocalUserAction does not refuse org emails — a Local password on an employee mailbox is a shared account');
+    }
+    if (!/sign-in\/email[\s\S]{0,300}isOrgEmail|isOrgEmail[\s\S]{0,300}sign-in\/email/.test(code('lib/auth.ts'))) {
+      problems.push("lib/auth.ts has no hooks.before refusing org emails on '/sign-in/email' — legacy Local rows on org mailboxes still sign in (and direct API calls skip the Server Action)");
+    }
+  }
+  if (problems.length) return { ok: false, msg: problems.join(' · ') };
+  const envFile = ['.env.example', '.env.local'].find((f) => has(f));
+  if (envFile && !/^ORG_EMAIL_DOMAINS=\S/m.test(read(envFile))) {
+    return { ok: 'warn', msg: `${envFile} has no ORG_EMAIL_DOMAINS value — fine only if the org has a single mail domain and no Local accounts on it` };
+  }
+  return { ok: true };
+});
+
+check('SSO/LDAP never link into another account (Local on an org email)', () => {
+  const m = selectedMethods();
+  const problems = [];
+  // SSO: Better Auth links by email; mapProfileToUser must refuse a row that is not this AD identity
+  const authTs = code('lib/auth.ts');
+  if (m.has('SSO') && !/orgEmailVariants[\s\S]{0,400}providerId:\s*'keycloak'/.test(authTs)) {
+    problems.push("mapProfileToUser does not refuse an email held by a row with no Keycloak account — SSO links into a Local account and two people share it (§2 item 11)");
+  } else if (m.has('SSO') && !/providerId:\s*'keycloak',\s*accountId\b/.test(authTs)) {
+    // any Keycloak account is not enough — a different AD identity sharing the mailbox must be refused too
+    problems.push("mapProfileToUser's clash check skips any row with ANY Keycloak account — require the same subject: accounts: { none: { providerId: 'keycloak', accountId: <profile.sub> } }");
+  }
+  if (m.has('SSO')) {
+    // the AD login must come from Keycloak (preferred_username), never from the mailbox local part
+    if (/email\??\.split\(\s*['"]@/.test(authTs)) {
+      problems.push("lib/auth.ts derives the AD login from the email (email.split('@')) — another person's HR record / pending role can match; use the stored ldapUsername (preferred_username) or null");
+    }
+    // Better Auth never stores a custom field from mapProfileToUser (input:false fields are
+    // skipped too) — the session hook must take the AD login from the stored id_token
+    if (!/idToken/.test(authTs) || !/preferred_username/.test(authTs)) {
+      problems.push("lib/auth.ts's session hook does not read preferred_username from the keycloak account's idToken — SSO-first users keep ldapUsername NULL (no HR data, no pending role, LDAP refused)");
+    }
+    // a plain Error thrown in mapProfileToUser is a bare 500 on the callback
+    if (!/APIError\(\s*'FOUND'/.test(authTs) || !/sso_refused/.test(authTs)) {
+      problems.push("SSO refusals are thrown as a plain Error — the OAuth callback answers a bare 500; throw APIError('FOUND', …, { Location: …/login?error=sso_refused })");
+    }
+  }
+  // LDAP: the upsert is keyed on ldapUsername; a clash on email must be refused, NULL rows included
+  if (m.has('LDAP') && !/ldapUsername:\s*null/.test(code('lib/actions/auth.ts'))) {
+    problems.push('ldapLoginAction has no email-clash check that includes ldapUsername: null rows — a Local row on the same mailbox makes the upsert throw mid-login (or, hand-patched, merge into it)');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('Pre-assigned roles: HR identity only, applied at first login, never pre-creates accounts', () => {
+  if (!has('lib', 'directory.ts') || !orgLogin()) {
+    return { ok: true, msg: 'no HR view or no SSO/LDAP — pre-assignment not installed' };
+  }
+  if (!has('lib/actions/admin-preassign.ts')) {
+    return { ok: 'warn', msg: 'lib/directory.ts is installed but lib/actions/admin-preassign.ts is not — admins cannot set a role before first login (SKILL.md §5.2)' };
+  }
+  const problems = [];
+  const actions = code('lib/actions/admin-preassign.ts');
+  // pre-ASSIGNMENT, not pre-REGISTRATION: no user/account row may be born here
+  // (any client — prisma.user.create, tx.user.create, db.account.upsert …)
+  const createsRows = /\.(user|account)\.(create|upsert|createMany)\b/;
+  if (createsRows.test(actions)) {
+    problems.push('admin-preassign.ts creates user/account rows — that is pre-registration (forbidden, มติ 2026-08-11): store a PendingRoleAssignments row only');
+  }
+  if (createsRows.test(code('lib/after-login.ts'))) {
+    problems.push('lib/after-login.ts creates user/account rows — applying a pending role only updates the row the login already made');
+  }
+  if (!/getDirectoryPersonByEmpCode/.test(actions)) {
+    problems.push('createPreassignAction does not re-resolve the person from the HR view — a client-typed loginName is the duplicate-user trap the มติ exists for');
+  }
+  if (!/USERS_UPDATE/.test(actions)) problems.push('pre-assign actions are not guarded by PERMISSIONS.USERS_UPDATE');
+  const audits = ['USERS_PREASSIGN_CREATE', 'USERS_PREASSIGN_UPDATE', 'USERS_PREASSIGN_DELETE'].filter((a) => !actions.includes(a));
+  if (audits.length) problems.push(`no audit log for ${audits.join(', ')}`);
+  if (!has('lib/after-login.ts')) {
+    problems.push('lib/after-login.ts missing — nothing applies the pending role at login');
+  } else {
+    const after = code('lib/after-login.ts');
+    if (!/pendingRoleAssignment/.test(after) || !/USERS_PREASSIGN_APPLY/.test(after)) {
+      problems.push('lib/after-login.ts does not apply + audit (USERS_PREASSIGN_APPLY) the pending role');
+    }
+    // the whole function, not one query shape: any `email:` key in it is a match/filter by email
+    const apply = after.match(/function\s+applyPendingRole\b[\s\S]*?\n\}/)?.[0] ?? '';
+    if (!apply) {
+      problems.push('lib/after-login.ts has no applyPendingRole() — cannot check how the pending role is matched');
+    } else if (/\bemail\s*:/.test(apply)) {
+      problems.push('applyPendingRole uses an `email:` key — the pending role must be matched by EmpCode/ADLoginName only, never email');
+    }
+  }
+  const m = selectedMethods();
+  if (m.has('SSO') && !/afterOrgLogin\s*\(/.test(code('lib/auth.ts'))) problems.push('the SSO session hook never calls afterOrgLogin()');
+  if (m.has('LDAP') && !/afterOrgLogin\s*\(/.test(code('lib/actions/auth.ts'))) problems.push('ldapLoginAction never calls afterOrgLogin()');
+  const model = schema.match(/model\s+pendingRoleAssignment\s*\{([\s\S]*?)\n\}/)?.[1];
+  if (!model) problems.push('schema has no pendingRoleAssignment model (assets/prisma/schema-auth.prisma)');
+  else if (!/empCode[^\n]*@unique/.test(model) || !/loginName[^\n]*@unique/.test(model)) {
+    problems.push('pendingRoleAssignment.empCode / loginName are not @unique — one person can get two competing pending roles');
+  }
+  return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('"ยังไม่มีบทบาท" is visible: users-page tab + nav badge', () => {
+  const files = sourceFiles().map((f) => ({ rel: relative(ROOT, f).replaceAll('\\', '/'), f }));
+  const page = files.find((x) => x.rel.endsWith('admin/users/page.tsx'));
+  if (!page) return { ok: true, msg: 'no /admin/users page (reported above)' };
+  const problems = [];
+  if (!/['"]no-role['"]/.test(stripComments(readFileSync(page.f, 'utf8')))) {
+    problems.push(`${page.rel} has no "no-role" tab — SSO/LDAP users with no role are invisible until someone scrolls the whole list`);
+  }
+  const badged = files.some(
+    (x) => !x.rel.endsWith('lib/admin-badges.ts') && /getAdminNavBadges\s*\(/.test(stripComments(readFileSync(x.f, 'utf8')))
+  );
+  if (!badged) {
+    problems.push('nothing calls getAdminNavBadges() — the users menu item shows no "no role" count (merged sidebars: §5.6 step 1)');
+  }
+  return problems.length ? { ok: 'warn', msg: problems.join(' · ') } : { ok: true };
+});
+
+check('No-role admin mail matches the installed modules', () => {
+  if (!has('lib/after-login.ts')) return { ok: true, msg: 'no lib/after-login.ts' };
+  const after = code('lib/after-login.ts');
+  const importsMail = /from\s+['"]@\/lib\/email['"]/.test(after);
+  if (importsMail && !has('lib/email.ts')) {
+    return { ok: false, msg: 'lib/after-login.ts imports @/lib/email but ugt-nextjs-mail-setup is not installed — the build breaks; delete the [MAIL] parts (SKILL.md §5.5 step 7)' };
+  }
+  if (!importsMail && has('lib/email.ts')) {
+    return { ok: 'warn', msg: "mail is installed but lib/after-login.ts sends no 'auth.user-without-role' notice — restore its [MAIL] parts (mail-setup §4.6)" };
+  }
+  if (importsMail && !/noRoleNotifiedAt/.test(schema)) {
+    return { ok: false, msg: 'user.noRoleNotifiedAt missing from the schema — the once-per-user claim fails and the notice never sends' };
+  }
+  return { ok: true };
+});
+
 // ── 4d. Data scope + approval chain (only when installed) ──────────────────
 check('Data scope is enforced where an owner id is accepted', () => {
   if (!has('lib', 'scope.ts')) return { ok: true, msg: 'no row-level scope in this project' };
@@ -467,6 +654,9 @@ check('Data scope is enforced where an owner id is accepted', () => {
     const norm = rel.replace(/^src\//, '');
     if (!/^app\/|^lib\/actions\//.test(norm)) continue;
     if (norm.startsWith('lib/scope')) continue;
+    // takes an HR empCode to *pre-assign a role* (users:update over the whole
+    // directory) — it reads no owner-scoped rows, so there is no scope to check
+    if (norm === 'lib/actions/admin-preassign.ts') continue;
     const body = stripComments(readFileSync(file, 'utf8'));
     const takesOwnerId = /searchParams[^\n]*empCode|params[^\n]*empCode|body[^\n]*empCode|empCode:\s*z\./.test(body);
     if (!takesOwnerId) continue;
@@ -526,6 +716,8 @@ check('Auth/RBAC tables map singular per convention', () => {
     permission: 'Permission',
     rolePermission: 'RolePermission',
     activityLog: 'ActivityLogs',
+    // app-owned (not Better Auth's) → the normal plural rule
+    pendingRoleAssignment: 'PendingRoleAssignments',
   };
   const wrong = [];
   for (const [model, want] of Object.entries(expect)) {

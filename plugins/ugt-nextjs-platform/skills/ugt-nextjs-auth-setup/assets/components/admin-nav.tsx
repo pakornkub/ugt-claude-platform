@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/admin-nav.tsx
-// kit-hash: 6df19e935b6b
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/admin-nav.tsx
+// kit-hash: 0b5581c5849a
 // components/admin-nav.tsx — admin menu items + fallback sidebar for the (admin) section.
 // Two exports:
 //   ADMIN_NAV_ITEMS — the menu data. A project that ALREADY has its own
@@ -12,6 +12,10 @@
 //     merging these in resolves the display text itself, in whatever
 //     component renders the merged sidebar, via
 //     `useTranslations('auth.adminNav')(item.labelKey)`.
+//     Badges: `getAdminNavBadges(perms)` (lib/admin-badges.ts, server) returns
+//     `{ [href]: count }` — the users item shows how many logged-in users still
+//     have no role. A merged sidebar renders it the same way as below:
+//     `<SidebarMenuBadge>` when > 0, plus the `badgeLabelKey` text as sr-only.
 //   AdminNav — fallback standalone sidebar, only for projects with no shell yet.
 //     Rebuilt on the shadcn Sidebar primitives (4.27.0): the old hand-rolled
 //     <nav> broke the "shadcn component exists → use it" rule, had no active
@@ -32,14 +36,22 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { NavUser, type NavUserProps } from '@/components/nav-user';
 import { PERMISSIONS, type PermissionKey } from '@/lib/permissions';
 
-export const ADMIN_NAV_ITEMS: Array<{ href: string; labelKey: string; icon: typeof Users; perm: PermissionKey }> = [
-  { href: '/admin/users', labelKey: 'users', icon: Users, perm: PERMISSIONS.USERS_READ },
+export const ADMIN_NAV_ITEMS: Array<{
+  href: string;
+  labelKey: string;
+  icon: typeof Users;
+  perm: PermissionKey;
+  /** auth.adminNav key read by screen readers next to the badge count ({count}) */
+  badgeLabelKey?: string;
+}> = [
+  { href: '/admin/users', labelKey: 'users', icon: Users, perm: PERMISSIONS.USERS_READ, badgeLabelKey: 'usersWithoutRole' },
   { href: '/admin/roles', labelKey: 'rolesAndPermissions', icon: Shield, perm: PERMISSIONS.ROLES_READ },
   { href: '/admin/audit-logs', labelKey: 'auditLogs', icon: ScrollText, perm: PERMISSIONS.AUDIT_LOGS_READ },
 ];
@@ -47,10 +59,13 @@ export const ADMIN_NAV_ITEMS: Array<{ href: string; labelKey: string; icon: type
 export function AdminNav({
   perms,
   user,
+  badges = {},
 }: Readonly<{
   perms: string[];
   /** ตัวตนสำหรับ NavUser ท้าย sidebar (DESIGN.md §3) — layout เป็นคนหาให้ */
   user: NavUserProps;
+  /** `getAdminNavBadges(perms)` จาก lib/admin-badges.ts — key = href */
+  badges?: Record<string, number>;
 }>) {
   const t = useTranslations('auth.adminNav');
   const pathname = usePathname();
@@ -75,18 +90,26 @@ export function AdminNav({
           <SidebarGroupLabel>{t('systemGroup')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map(({ href, labelKey, icon: Icon }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton
-                    isActive={href === activeHref}
-                    tooltip={t(labelKey)}
-                    render={<Link href={href} />}
-                  >
-                    <Icon strokeWidth={2} aria-hidden />
-                    <span>{t(labelKey)}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map(({ href, labelKey, icon: Icon, badgeLabelKey }) => {
+                const count = badges[href] ?? 0;
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton
+                      isActive={href === activeHref}
+                      tooltip={t(labelKey)}
+                      render={<Link href={href} />}
+                    >
+                      <Icon strokeWidth={2} aria-hidden />
+                      <span>{t(labelKey)}</span>
+                      {count > 0 && badgeLabelKey && (
+                        <span className="sr-only">{t(badgeLabelKey, { count })}</span>
+                      )}
+                    </SidebarMenuButton>
+                    {/* ตัวเลขอย่างเดียวไม่มีความหมายกับ screen reader — ข้อความเต็มอยู่ใน sr-only ด้านบน */}
+                    {count > 0 && <SidebarMenuBadge aria-hidden>{count}</SidebarMenuBadge>}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

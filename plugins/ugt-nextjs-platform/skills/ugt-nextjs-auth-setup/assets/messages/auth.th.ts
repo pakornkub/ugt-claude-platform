@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 2de38a7c202f
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: 576a5c2d3b97
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -38,6 +38,14 @@ export const authTh = {
     EMAIL_INVALID: 'กรุณากรอกอีเมลให้ถูกต้อง',
     PASSWORD_REQUIRED: 'กรอกรหัสผ่าน',
     AD_USERNAME_REQUIRED: 'กรอกชื่อผู้ใช้ AD',
+    ORG_EMAIL_NOT_LOCAL: 'อีเมลองค์กรเป็นของบัญชี SSO/AD — บัญชี local ต้องใช้อีเมลนอกโดเมนองค์กร',
+    ORG_EMAIL_USE_SSO: 'อีเมลองค์กรต้องเข้าสู่ระบบด้วย SSO/AD ไม่ใช่รหัสผ่าน local',
+    ORG_ACCOUNT_CONFLICT: 'อีเมลนี้ถูกใช้กับบัญชีอื่นในระบบอยู่แล้ว กรุณาแจ้งผู้ดูแลระบบ',
+    USER_ALREADY_EXISTS: 'คนนี้เข้าสู่ระบบแล้ว — กำหนดบทบาทที่แท็บ "ทั้งหมด"',
+    PREASSIGN_EXISTS: 'คนนี้ถูกตั้งบทบาทล่วงหน้าไว้แล้ว',
+    PREASSIGN_NOT_FOUND: 'ไม่พบรายการนี้แล้ว (เจ้าตัวอาจเพิ่งเข้าสู่ระบบ)',
+    HR_PERSON_NOT_FOUND: 'ไม่พบพนักงานในฐานข้อมูล HR',
+    HR_NO_AD_LOGIN: 'พนักงานคนนี้ไม่มีบัญชี AD จึงเข้าสู่ระบบไม่ได้',
   },
   adminSetup: {
     setupFailedTitle: 'ตั้งค่าไม่สำเร็จ',
@@ -85,6 +93,8 @@ export const authTh = {
     loginAgain: 'เข้าสู่ระบบใหม่',
   },
   login: {
+    // aria-label of the long org logo on the login hero (components/login-shell.tsx) — brand name, same in every locale
+    orgLogoLabel: 'UBE',
     // Generic fallback for the <h1> app title when NEXT_PUBLIC_APP_NAME isn't
     // set — the real name always comes from that env var (set by full-setup);
     // this is only what renders before it's configured.
@@ -103,6 +113,8 @@ export const authTh = {
     sessionExpiredBanner: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
     ssoErrorUnableToCreateUser: 'เข้าสู่ระบบสำเร็จ แต่สร้างบัญชีผู้ใช้ไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (unable_to_create_user)',
     ssoErrorAccountNotLinked: 'บัญชีนี้ยังเชื่อมกับระบบไม่ได้ กรุณาแจ้งผู้ดูแลระบบ (account_not_linked)',
+    // lib/auth.ts mapProfileToUser ปฏิเสธ: อีเมลเป็นของบัญชีอื่น หรือ Keycloak ไม่ส่งชื่อผู้ใช้ AD/sub
+    ssoErrorRefused: 'ระบบปฏิเสธการเข้าสู่ระบบด้วย SSO เพราะอีเมลนี้เป็นของบัญชีอื่น หรือข้อมูลตัวตนจาก SSO ไม่ครบ กรุณาแจ้งผู้ดูแลระบบ (sso_refused)',
     ssoErrorGeneric: 'เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ ({code})',
     subtitle: 'เข้าสู่ระบบเพื่อใช้งาน',
     orSeparator: 'หรือ',
@@ -143,7 +155,9 @@ export const authTh = {
   adminUserActions: {
     createSuccess: 'สร้างผู้ใช้แล้ว — แจ้งรหัสผ่านตั้งต้นให้เจ้าตัวและให้เปลี่ยนทันที',
     addLocalUser: 'เพิ่มผู้ใช้ local',
-    addUserHintSso: 'บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก',
+    // [DIRECTORY] — ไม่มี view HR (ไม่มีแท็บ "ตั้งล่วงหน้า") ให้ลบวงเล็บ "(ตั้งบทบาท…)" ออก ทั้ง th และ en
+    addUserHintSso:
+      'บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก (ตั้งบทบาทไว้ก่อนได้ที่แท็บ "ตั้งล่วงหน้า") · บัญชี local ใช้อีเมลโดเมนองค์กรไม่ได้',
     addUserHintRole: 'แล้วค่อยกำหนดบทบาทจากตาราง',
     nameLabel: 'ชื่อ',
     emailLabel: 'อีเมล',
@@ -192,6 +206,7 @@ export const authTh = {
     auditLogs: 'บันทึกกิจกรรม',
     fallbackAppName: 'ผู้ดูแลระบบ',
     systemGroup: 'จัดการระบบ',
+    usersWithoutRole: '— {count} คนเข้าระบบแล้วแต่ยังไม่มีบทบาท',
   },
   userRoleSelect: {
     changeFailedTitle: 'เปลี่ยนบทบาทไม่สำเร็จ',
@@ -200,6 +215,43 @@ export const authTh = {
   adminUsersPage: {
     title: 'ผู้ใช้งาน',
     description: 'ผู้ใช้งานทั้งหมดของระบบ — กำหนดบทบาทให้แต่ละคนได้ที่นี่',
+    tabAll: 'ทั้งหมด',
+    tabNoRole: 'ยังไม่มีบทบาท',
+    // [DIRECTORY] — แท็บนี้มีเฉพาะโปรเจคที่ต่อ view HR
+    tabPending: 'ตั้งล่วงหน้า (รอเข้าระบบ)',
+  },
+  preassign: {
+    hint: 'ตั้งบทบาทให้คนที่ยังไม่เคยเข้าระบบ — ไม่ได้สร้างบัญชี บทบาทจะถูกใส่ให้เมื่อเจ้าตัวเข้าด้วย SSO/AD ครั้งแรก',
+    addFromHr: 'เพิ่มจาก HR',
+    addDescription: 'ค้นจากฐานข้อมูลพนักงาน เลือกคน แล้วเลือกบทบาท — บัญชีจริงยังเกิดตอนเจ้าตัวเข้าสู่ระบบครั้งแรก',
+    searchLabel: 'ค้นหาพนักงาน',
+    searchHrPlaceholder: 'ชื่อ รหัสพนักงาน หรือชื่อผู้ใช้ AD (อย่างน้อย 2 ตัวอักษร)',
+    searchButton: 'ค้นหา',
+    resultsLabel: 'ผลการค้นหา',
+    noResults: 'ไม่พบพนักงาน',
+    statusHasAccount: 'เข้าระบบแล้ว',
+    statusPending: 'ตั้งไว้แล้ว',
+    statusNoAd: 'ไม่มีบัญชี AD',
+    roleLabel: 'บทบาท',
+    rolePlaceholder: 'เลือกบทบาท',
+    pickBoth: 'เลือกพนักงานและบทบาทก่อน',
+    cancel: 'ยกเลิก',
+    save: 'บันทึก',
+    createSuccess: 'ตั้งบทบาทให้ {name} แล้ว — จะมีผลเมื่อเข้าสู่ระบบครั้งแรก',
+    updateFailed: 'เปลี่ยนบทบาทไม่สำเร็จ',
+    colName: 'ชื่อ',
+    colEmpCode: 'รหัสพนักงาน',
+    colLoginName: 'ชื่อผู้ใช้ AD',
+    colEmail: 'อีเมล',
+    colRole: 'บทบาท',
+    colCreatedAt: 'ตั้งเมื่อ',
+    colCreatedBy: 'ตั้งโดย',
+    colActions: 'จัดการ',
+    searchPlaceholder: 'ค้นหาชื่อ รหัส หรือชื่อผู้ใช้...',
+    delete: 'ลบ',
+    deleteTitle: 'ลบรายการตั้งล่วงหน้าของ "{name}"',
+    deleteDescription: 'เจ้าตัวยังเข้าระบบได้ตามปกติ แค่จะยังไม่มีบทบาทจนกว่าแอดมินจะกำหนดให้',
+    deleteSuccess: 'ลบรายการตั้งล่วงหน้าแล้ว',
   },
   adminAuditLogsPage: {
     title: 'บันทึกกิจกรรม',

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/messages/mail.en.ts
-// kit-hash: 59100785843f
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-mail-setup/messages/mail.en.ts
+// kit-hash: 21ede4de743d
 // English catalog for ugt-nextjs-mail-setup's admin UI. Keys must match
 // mail.th.ts exactly — scripts/check-i18n.mjs fails the build when they drift.
 export const mailEn = {
@@ -25,6 +25,9 @@ export const mailEn = {
     passwordResetLabel: 'Password reset link',
     passwordResetDescription:
       'Sent when a user clicks "Forgot password" — the link is single-use and expires per resetPasswordTokenExpiresIn in lib/auth.ts',
+    userWithoutRoleLabel: 'Admins: someone signed in without a role',
+    userWithoutRoleDescription:
+      'Sent to everyone holding users:update when an SSO/AD user signs in for the first time with no role · once per user',
   },
   page: {
     title: 'Email templates',
