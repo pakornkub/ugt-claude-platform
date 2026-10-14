@@ -184,6 +184,23 @@ check('Every key has a definition and a default', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true, msg: `${keys.length} template key(s) wired` };
 });
 
+// §4.6 — auth-setup installs before mail (two-pass order), so its lib/after-login.ts
+// arrives without the [MAIL] notice; installing mail is the moment to put it back.
+check("auth's \"signed in without a role\" notice is wired (§4.6)", () => {
+  if (!has('lib/after-login.ts')) return { ok: true, msg: 'no lib/after-login.ts (auth-setup without SSO/LDAP) — nothing to wire' };
+  const after = read('lib/after-login.ts').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const usesKey = /['"]auth\.user-without-role['"]/.test(after);
+  const keyDefined =
+    has('lib/types/mail-templates.ts') && /['"]auth\.user-without-role['"]/.test(read('lib/types/mail-templates.ts'));
+  if (usesKey && !keyDefined) {
+    return { ok: false, msg: "lib/after-login.ts sends 'auth.user-without-role' but MAIL_TEMPLATE_KEYS has no such key — copy its definition + default from the asset" };
+  }
+  if (!usesKey || !/sendTemplatedMail\s*\(/.test(after)) {
+    return { ok: 'warn', msg: "lib/after-login.ts sends no 'auth.user-without-role' mail — restore its [MAIL] parts from the auth-setup asset so admins hear about users with no role" };
+  }
+  return { ok: true };
+});
+
 check('AppSettings model exists for template overrides', () => {
   if (!has('prisma/schema.prisma')) return { ok: false, msg: 'No prisma/schema.prisma' };
   const schema = read('prisma/schema.prisma');

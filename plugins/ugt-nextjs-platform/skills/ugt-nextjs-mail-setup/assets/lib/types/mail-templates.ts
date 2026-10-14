@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
-// kit-hash: ca1ea760d015
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
+// kit-hash: 02d2927ffd92
 // source: ugt-hrms lib/types/mail-templates.ts — generalized by ugt-nextjs-mail-setup
 // (HR workflows removed; the three keys below are a working approval example —
 // rename them to your domain and add more.)
@@ -27,6 +27,9 @@ export const MAIL_TEMPLATE_KEYS = [
   // อย่าใส่วงเล็บเหลี่ยมในคอมเมนต์ในอาร์เรย์นี้ — verify.mjs อ่านคีย์ด้วย regex
   // ที่หยุดที่ ] ตัวแรก คีย์ที่อยู่ถัดจากนั้นจะหายไปจากการตรวจเงียบ ๆ
   'auth.password-reset',
+  // ใช้โดย lib/after-login.ts (ugt-nextjs-auth-setup) — แจ้งแอดมินเมื่อมีคน SSO/LDAP
+  // login แล้วยังไม่มี role ครั้งเดียวต่อคน · ลบได้เมื่อโปรเจคมีแต่ local login
+  'auth.user-without-role',
 ] as const;
 
 export type MailTemplateKey = (typeof MAIL_TEMPLATE_KEYS)[number];
@@ -137,6 +140,23 @@ export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
     variables: ['appName', 'recipientName', 'resetUrl', 'expiresInMinutes'],
     previewSample: { resetUrl: '__APP_URL_PROD__/reset-password?token=…', expiresInMinutes: '60' },
     cta: { label: 'ตั้งรหัสผ่านใหม่ →', urlToken: 'resetUrl' },
+  },
+  {
+    key: 'auth.user-without-role',
+    menuKey: 'menuAccount',
+    labelKey: 'userWithoutRoleLabel',
+    descriptionKey: 'userWithoutRoleDescription',
+    heading: 'มีผู้ใช้ใหม่ยังไม่มีบทบาท',
+    variables: ['appName', 'recipientName', 'userName', 'userEmail', 'empCode', 'department', 'usersUrl'],
+    previewSample: {
+      recipientName: 'ผู้ดูแลระบบ',
+      userName: 'สมหญิง ตั้งใจ',
+      userEmail: 'somying.t@example.com',
+      empCode: 'E01234',
+      department: 'ฝ่ายบัญชี',
+      usersUrl: '__APP_URL_PROD__/admin/users?tab=no-role',
+    },
+    cta: { label: 'กำหนดบทบาท →', urlToken: 'usersUrl' },
   },
   // EXTENSION POINT: add this project's templates here, then add the matching
   // key to MAIL_TEMPLATE_KEYS, a default to DEFAULT_MAIL_TEMPLATES, and the
@@ -261,6 +281,17 @@ export const DEFAULT_MAIL_TEMPLATES: Record<MailTemplateKey, MailTemplate> = {
       '<p>คำขอของคุณได้รับการพิจารณาแล้ว</p>',
       '<p><strong>รายการ:</strong> {{itemName}}</p>',
       '<p><strong>เหตุผล:</strong> {{rejectReason}}</p>',
+    ].join(''),
+  },
+
+  // ส่งจาก lib/after-login.ts ถึงทุกคนที่ถือ users:update — ปุ่มไปแท็บ "ยังไม่มี role" เป็น chrome
+  'auth.user-without-role': {
+    subject: '[{{appName}}] {{userName}} เข้าระบบแล้วแต่ยังไม่มีบทบาท',
+    html: [
+      '<p>มีผู้ใช้เข้าสู่ระบบเป็นครั้งแรกและยังไม่ได้รับบทบาท จึงยังใช้งานได้เฉพาะหน้าทั่วไป</p>',
+      '<p><strong>ชื่อ:</strong> {{userName}}<br><strong>อีเมล:</strong> {{userEmail}}<br>',
+      '<strong>รหัสพนักงาน:</strong> {{empCode}}<br><strong>หน่วยงาน:</strong> {{department}}</p>',
+      '<p>อีเมลนี้ส่งครั้งเดียวต่อผู้ใช้ — ครั้งหน้าตั้งบทบาทล่วงหน้าได้ที่แท็บ "ตั้งล่วงหน้า" ก่อนเจ้าตัวเข้าระบบ</p>',
     ].join(''),
   },
 

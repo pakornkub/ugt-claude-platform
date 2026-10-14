@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/messages/mail.th.ts
-// kit-hash: 4e08c4809b4e
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-mail-setup/messages/mail.th.ts
+// kit-hash: 5061b2891dc5
 // Thai catalog for ugt-nextjs-mail-setup's admin UI. Keys must match
 // mail.en.ts exactly — scripts/check-i18n.mjs fails the build when they drift.
 // Email BODY content (GREETING, EMAIL_FOOTER, every `heading`, every
@@ -28,6 +28,9 @@ export const mailTh = {
     passwordResetLabel: 'ลิงก์ตั้งรหัสผ่านใหม่',
     passwordResetDescription:
       'ส่งเมื่อผู้ใช้กด "ลืมรหัสผ่าน" · ลิงก์ใช้ได้ครั้งเดียวและหมดอายุตาม resetPasswordTokenExpiresIn ใน lib/auth.ts',
+    userWithoutRoleLabel: 'แจ้งแอดมิน: มีคนเข้าระบบแต่ยังไม่มีบทบาท',
+    userWithoutRoleDescription:
+      'ส่งถึงทุกคนที่มีสิทธิ์ users:update เมื่อผู้ใช้ SSO/AD เข้าระบบครั้งแรกโดยยังไม่มีบทบาท · ครั้งเดียวต่อคน',
   },
   page: {
     title: 'เทมเพลตอีเมล',
