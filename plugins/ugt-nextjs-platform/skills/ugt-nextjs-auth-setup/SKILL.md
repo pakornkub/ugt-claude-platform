@@ -296,7 +296,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    > exact line are in `references/schema-and-env.md` §Auth-table exception.
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
 3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately.
-   **[Local] on MSSQL:** `--create-only` first and swap the `LdapUsername` unique constraint
+   **MSSQL (SSO or Local):** `--create-only` first and swap the `LdapUsername` unique constraint
    for the filtered index (`schema-and-env.md` §SQL Server: one NULL per unique column)
 
 ### 5.4 Env schema (`lib/env.ts` or equivalent)

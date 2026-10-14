@@ -1,9 +1,11 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 744f6697b77e
+// kit-hash: 76e5985a6216
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
-import { APIError, createAuthMiddleware } from 'better-auth/api'; // [METHOD: LOCAL] — the org-email sign-in guard below
+// [METHOD: SSO|LOCAL] — APIError: the SSO refusal redirect (SSO) + the org-email sign-in guard (LOCAL);
+// createAuthMiddleware: that guard only
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { AUDIT_ACTIONS } from '@/lib/audit-actions';
@@ -31,6 +33,32 @@ const cookiePrefix = (env.NEXT_PUBLIC_BASE_PATH || '').replace(/^\//, '') || 'be
 // has no issuer/JWKS, so id_token signature/nonce/iss checks are skipped and identity comes from the
 // token response alone (closed intranet + NODE_TLS_REJECT_UNAUTHORIZED=0 — accepted, see auth-flows.md).
 // Restart the container once Keycloak is reachable to get the verified path back.
+// [METHOD: SSO] — refusing an SSO login. A plain Error thrown from mapProfileToUser
+// escapes the OAuth callback as a bare 500 (the callback has no try/catch and
+// onAPIError.errorURL is not used for it); a 302 APIError lands the user on the
+// login page, which shows sso_refused. The real reason is only in this log.
+function refuseSso(reason: string): never {
+  console.error(`[auth] SSO login refused: ${reason}`); // NOSONAR typescript:S106 — server-side log only
+  throw new APIError('FOUND', undefined, {
+    Location: `${env.BETTER_AUTH_URL}${env.NEXT_PUBLIC_BASE_PATH || ''}/login?error=sso_refused`,
+  });
+}
+
+// [METHOD: SSO] — the AD login (preferred_username) from the Keycloak id_token
+// Better Auth stored on the account. Better Auth verified it at sign-in (JWKS)
+// and rewrites it on every SSO sign-in, so this is the value Keycloak vouched
+// for THIS login. Decoding only — the signature was already checked.
+function preferredUsernameFromIdToken(idToken: string | null | undefined): string | null {
+  const payload = idToken?.split('.')[1];
+  if (!payload) return null;
+  try {
+    const claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<string, unknown>;
+    return typeof claims.preferred_username === 'string' && claims.preferred_username ? claims.preferred_username : null;
+  } catch {
+    return null;
+  }
+}
+
 function keycloakEndpoints(issuer: string) {
   const base = `${issuer.replace(/\/$/, '')}/protocol/openid-connect`;
   return {
@@ -158,16 +186,6 @@ export const auth = betterAuth({
     expiresIn: 8 * 60 * 60, // 8 hours — org standard
     updateAge: 30 * 60, // refresh if 30 min remaining — org standard
   },
-  // [METHOD: SSO] — declared so the value mapProfileToUser returns is STORED on
-  // the row Better Auth creates at the first SSO login (undeclared fields are
-  // dropped). It is the AD login Keycloak vouched for (preferred_username) and
-  // the key every later step uses: directory refresh, pre-assigned role, LDAP
-  // upsert. `input: false` — no client request can set it.
-  user: {
-    additionalFields: {
-      ldapUsername: { type: 'string', required: false, input: false },
-    },
-  },
   // [METHOD: SSO] — allow Keycloak SSO to link into the existing row of the SAME
   // AD identity (an LDAP-first user) by email. Linking is scoped by
   // mapProfileToUser below: it hands Better Auth the email of the row whose
@@ -224,8 +242,8 @@ export const auth = betterAuth({
                     // No AD login = no identity to resolve and nothing to check the
                     // email clash against — refuse (fail closed, same path as the
                     // clash below) instead of handing Better Auth an email to link by.
-                    throw new Error(
-                      'SSO login refused: the Keycloak profile has no preferred_username/sub — check the "profile" scope of the Keycloak client',
+                    refuseSso(
+                      'the Keycloak profile has no preferred_username/sub — the client needs the "profile" scope (and, on Keycloak 25+, "basic", which carries sub)',
                     );
                   }
 
@@ -273,17 +291,16 @@ export const auth = betterAuth({
                       select: { id: true },
                     });
                     if (clash) {
-                      throw new Error(
-                        `SSO login for "${loginName}" refused: ${email} already belongs to user ${clash.id}, which is not this AD identity — linking would share one account between two people`,
+                      refuseSso(
+                        `"${loginName}": ${email} already belongs to user ${clash.id}, which is not this AD identity — linking would share one account between two people`,
                       );
                     }
                   }
 
-                  // ldapUsername is stored because user.additionalFields declares it.
-                  // Any other custom field returned here is dropped — persist those in
-                  // the databaseHooks.session.create.after hook below (where the
-                  // directory fields are written).
-                  return { email, ldapUsername: loginName };
+                  // Custom fields returned here are NOT stored (Better Auth keeps
+                  // only standard fields from a provider profile) — ldapUsername and
+                  // the directory fields are written by the session hook below.
+                  return { email };
                 },
               },
             ],
@@ -301,15 +318,11 @@ export const auth = betterAuth({
           const keycloakAccount = await prisma.account
             .findFirst({
               where: { userId: session.userId, providerId: 'keycloak' },
-              select: { id: true },
+              select: { id: true, idToken: true },
             })
             .catch(() => null);
 
           if (keycloakAccount) {
-            // ldapUsername = the AD login Keycloak sent (stored at the first SSO
-            // login via user.additionalFields) or a prior LDAP login. NEVER derived
-            // from the email: a mailbox local part is not an AD login, and matching
-            // on it hands one person another's HR record and pending role.
             const userData = await prisma.user
               .findUnique({
                 where: { id: session.userId },
@@ -317,7 +330,31 @@ export const auth = betterAuth({
               })
               .catch(() => null);
 
-            const loginName = userData?.ldapUsername ?? null; // null → no directory lookup, no pending role
+            // The AD login comes from THIS sign-in's id_token (preferred_username),
+            // never from the email (a mailbox local part is not an AD login — it
+            // would hand one person another's HR record and pending role) and
+            // never from a value stored earlier that the token contradicts.
+            // Written onto User.ldapUsername here: first SSO login, an AD rename,
+            // and legacy rows filled from the email all converge on the IdP value.
+            // Unknown, or held by another row (P2002) → loginName null: no HR
+            // lookup, no pending role (fail closed); the login itself goes on.
+            let loginName = preferredUsernameFromIdToken(keycloakAccount.idToken);
+            if (!loginName) {
+              console.error('[auth] SSO session without preferred_username in the id_token:', session.userId); // NOSONAR typescript:S106 — server-side log only
+            } else if (loginName !== userData?.ldapUsername) {
+              try {
+                await prisma.user.update({ where: { id: session.userId }, data: { ldapUsername: loginName } });
+              } catch (error) {
+                const taken = (error as { code?: string }).code === 'P2002';
+                console.error(
+                  taken
+                    ? `[auth] AD login "${loginName}" is already held by another user — ldapUsername of ${session.userId} left unchanged`
+                    : `[auth] could not store ldapUsername for ${session.userId}`,
+                  taken ? '' : error,
+                ); // NOSONAR typescript:S106 — server-side log only
+                loginName = null;
+              }
+            }
 
             // This hook runs on every SSO session creation — the reliable place to
             // refresh the directory fields (Better Auth does NOT persist custom

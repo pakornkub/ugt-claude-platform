@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: 99fa683c4f3c
+// kit-hash: 6c99a625c531
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -53,7 +53,7 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
   }
   const target = await prisma.user.findUnique({
     where: { id: userId },
-    select: { empCode: true, ldapUsername: true },
+    select: { empCode: true, ldapUsername: true, roleId: true },
   });
   if (!target) return { success: false, code: 'USER_NOT_FOUND' };
 
@@ -72,10 +72,12 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
       })
     : [];
 
+  // Pending rows first, then the user — the same lock order as after-login's
+  // apply (pending → user), so a login racing this click cannot deadlock it.
   await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { roleId } }),
     // [DIRECTORY]
     prisma.pendingRoleAssignment.deleteMany({ where: { id: { in: superseded.map((p) => p.id) } } }),
+    prisma.user.update({ where: { id: userId }, data: { roleId } }),
   ]);
 
   // 4. Audit log (non-blocking)
@@ -84,7 +86,7 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
       data: {
         userId: session.user.id,
         action: AUDIT_ACTIONS.USERS_ROLE_ASSIGN,
-        detail: JSON.stringify({ targetId: userId, roleId }),
+        detail: JSON.stringify({ targetId: userId, previousRoleId: target.roleId, roleId }),
       },
     })
     .catch(() => {});

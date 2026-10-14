@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.63.1 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: dad2576b8983
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: c63bb8f86891
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -296,6 +296,7 @@ export function LoginForm({
           text:
             ssoError === 'unable_to_create_user' ? t('ssoErrorUnableToCreateUser') :
             ssoError === 'account_not_linked' ? t('ssoErrorAccountNotLinked') :
+            ssoError === 'sso_refused' ? t('ssoErrorRefused') :
             t('ssoErrorGeneric', { code: ssoError }),
         }
       : null;

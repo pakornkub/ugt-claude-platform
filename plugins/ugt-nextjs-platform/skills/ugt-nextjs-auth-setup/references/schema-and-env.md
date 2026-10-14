@@ -34,10 +34,12 @@ on login and its history is the `users.preassign-*` audit trail):
 `User.ldapUsername String? @unique` becomes `CONSTRAINT [User_LdapUsername_key]
 UNIQUE NONCLUSTERED ([LdapUsername])` — and a SQL Server unique constraint
 treats NULL as a value: **only one row may have it NULL**. Every Local account
-has `LdapUsername = NULL`, so the second Local user fails with P2002
-(`createLocalUserAction` / `create-first-user.ts`). SSO/LDAP rows always carry
-the AD login, so SSO/LDAP-only projects never hit it; **any project with Local
-login needs the filtered index**. Prisma cannot express it (database-setup
+has `LdapUsername = NULL`, and an SSO row is created with NULL too (the session
+hook fills it a moment later — and leaves it NULL when another row holds the
+AD login), so the second such row fails with P2002 (`createLocalUserAction`,
+`create-first-user.ts`, or a first SSO login → `unable_to_create_user`).
+**Every project needs the filtered index** — only an LDAP-only project, whose
+upsert always writes the AD login, is safe without it. Prisma cannot express it (database-setup
 `references/migrations.md` §4, option A) — hand-edit the migration:
 
 - **New install**: `npx prisma migrate dev --name auth-rbac --create-only`, then

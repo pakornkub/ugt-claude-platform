@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 75ffafc6350f
+// kit-hash: de61c03b7107
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -117,6 +117,8 @@ export const authEn: AuthCatalog = {
     sessionExpiredBanner: 'Your session has expired. Please sign in again.',
     ssoErrorUnableToCreateUser: 'Signed in, but the account could not be created. Please contact your administrator. (unable_to_create_user)',
     ssoErrorAccountNotLinked: "This account isn't linked yet. Please contact your administrator. (account_not_linked)",
+    // lib/auth.ts mapProfileToUser refused: the email belongs to another account, or Keycloak sent no AD login/sub
+    ssoErrorRefused: 'SSO sign-in was refused: this email belongs to another account, or the SSO identity is incomplete. Please contact your administrator. (sso_refused)',
     ssoErrorGeneric: 'Sign-in failed. Please contact your administrator. ({code})',
     subtitle: 'Sign in to continue',
     orSeparator: 'or',

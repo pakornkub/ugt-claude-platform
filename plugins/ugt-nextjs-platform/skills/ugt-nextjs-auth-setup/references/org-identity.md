@@ -53,8 +53,9 @@ its first login.
      → audit users.preassign-create
 
 first SSO/LDAP login → directory refresh → afterOrgLogin({ userId, loginName, person })
-  loginName: SSO = preferred_username (stored as User.ldapUsername at the first
-             login via user.additionalFields) · LDAP = the directory's
+  loginName: SSO = preferred_username from the stored id_token (written onto
+             User.ldapUsername by the session hook; held by another row →
+             null) · LDAP = the directory's
              sAMAccountName of the bound account — never the typed text, never
              the email; unknown → null (no lookup, no pending role)
   match:   person.empCode when the directory answered · loginName when it is down
@@ -144,13 +145,15 @@ Someone holding a **Local password on an employee's org mailbox** shares that
 row with the employee once SSO links into it: two people, one identity, one
 role. Closed on every path:
 
-- **SSO** — no `preferred_username`/`sub` in the profile → refused (throws).
+- **SSO** — no `preferred_username`/`sub` in the profile → refused. Every SSO
+  refusal is `APIError('FOUND')` → `/login?error=sso_refused` (reason in the
+  server log); a plain `Error` would be a bare 500 on the OAuth callback.
   `mapProfileToUser` resolves the row by `ldapUsername` first. When none
   exists, any other row holding the mailbox (all domain spellings, via
   `orgEmailVariants`) that is **not linked to this Keycloak subject**
   (`accounts: { none: { providerId: 'keycloak', accountId: sub } }` — a Local
   row, or another AD identity sharing the mail) is not this identity → the
-  login is refused (throws; fail closed — no `.catch`). Better Auth is
+  login is refused (fail closed — no `.catch`). Better Auth is
   never handed an email it could link into a Local row.
 - **LDAP** — `ldapBind` looks up the account the bind authenticated
   (`userPrincipalName` first, then the implicit `sAMAccountName` form) and

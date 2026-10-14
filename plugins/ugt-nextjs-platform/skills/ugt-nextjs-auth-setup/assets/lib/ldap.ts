@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/ldap.ts
-// kit-hash: 923e72c109af
+// kit-hash: 8e0c19832960
 // [METHOD: LDAP] — delete this file if LDAP login is not enabled.
 import { Client } from 'ldapts';
 import { env } from '@/lib/env';
@@ -46,7 +46,7 @@ export async function ldapBind(username: string, password: string): Promise<LDAP
     const attributes = ['displayName', 'mail', 'sAMAccountName'];
     const byUpn = await client.search(env.LDAP_BASE_DN, {
       scope: 'sub',
-      filter: `(userPrincipalName=${escapeLdapFilterValue(userDN)})`,
+      filter: `(&(objectCategory=person)(userPrincipalName=${escapeLdapFilterValue(userDN)}))`,
       attributes,
     });
     const entries =
@@ -55,7 +55,7 @@ export async function ldapBind(username: string, password: string): Promise<LDAP
         : (
             await client.search(env.LDAP_BASE_DN, {
               scope: 'sub',
-              filter: `(sAMAccountName=${escapeLdapFilterValue(username)})`,
+              filter: `(&(objectCategory=person)(sAMAccountName=${escapeLdapFilterValue(username)}))`,
               attributes,
             })
           ).searchEntries;

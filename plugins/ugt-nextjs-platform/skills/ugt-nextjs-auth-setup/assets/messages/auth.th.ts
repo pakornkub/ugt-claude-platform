@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 2253d583d749
+// kit-hash: 576a5c2d3b97
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -113,6 +113,8 @@ export const authTh = {
     sessionExpiredBanner: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
     ssoErrorUnableToCreateUser: 'เข้าสู่ระบบสำเร็จ แต่สร้างบัญชีผู้ใช้ไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ (unable_to_create_user)',
     ssoErrorAccountNotLinked: 'บัญชีนี้ยังเชื่อมกับระบบไม่ได้ กรุณาแจ้งผู้ดูแลระบบ (account_not_linked)',
+    // lib/auth.ts mapProfileToUser ปฏิเสธ: อีเมลเป็นของบัญชีอื่น หรือ Keycloak ไม่ส่งชื่อผู้ใช้ AD/sub
+    ssoErrorRefused: 'ระบบปฏิเสธการเข้าสู่ระบบด้วย SSO เพราะอีเมลนี้เป็นของบัญชีอื่น หรือข้อมูลตัวตนจาก SSO ไม่ครบ กรุณาแจ้งผู้ดูแลระบบ (sso_refused)',
     ssoErrorGeneric: 'เข้าสู่ระบบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบ ({code})',
     subtitle: 'เข้าสู่ระบบเพื่อใช้งาน',
     orSeparator: 'หรือ',

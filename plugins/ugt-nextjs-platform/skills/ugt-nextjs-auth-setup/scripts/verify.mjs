@@ -530,8 +530,14 @@ check('SSO/LDAP never link into another account (Local on an org email)', () => 
     if (/email\??\.split\(\s*['"]@/.test(authTs)) {
       problems.push("lib/auth.ts derives the AD login from the email (email.split('@')) — another person's HR record / pending role can match; use the stored ldapUsername (preferred_username) or null");
     }
-    if (!/additionalFields[\s\S]{0,300}ldapUsername/.test(authTs)) {
-      problems.push('lib/auth.ts does not declare user.additionalFields.ldapUsername — Better Auth drops it from mapProfileToUser, so a first SSO login has no AD login to key the directory and pending role on');
+    // Better Auth never stores a custom field from mapProfileToUser (input:false fields are
+    // skipped too) — the session hook must take the AD login from the stored id_token
+    if (!/idToken/.test(authTs) || !/preferred_username/.test(authTs)) {
+      problems.push("lib/auth.ts's session hook does not read preferred_username from the keycloak account's idToken — SSO-first users keep ldapUsername NULL (no HR data, no pending role, LDAP refused)");
+    }
+    // a plain Error thrown in mapProfileToUser is a bare 500 on the callback
+    if (!/APIError\(\s*'FOUND'/.test(authTs) || !/sso_refused/.test(authTs)) {
+      problems.push("SSO refusals are thrown as a plain Error — the OAuth callback answers a bare 500; throw APIError('FOUND', …, { Location: …/login?error=sso_refused })");
     }
   }
   // LDAP: the upsert is keyed on ldapUsername; a clash on email must be refused, NULL rows included

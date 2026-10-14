@@ -26,8 +26,8 @@ model user {
 
   // Directory username (sAMAccountName / preferred_username) — used as the LDAP
   // upsert key and to link SSO logins back to the directory identity.
-  // MSSQL: @unique on a nullable column allows ONE NULL row — with Local login
-  // (LdapUsername NULL) swap it for a filtered index (schema-and-env.md §SQL Server).
+  // MSSQL: @unique on a nullable column allows ONE NULL row — Local rows and
+  // just-created SSO rows are NULL: swap it for a filtered index (schema-and-env.md §SQL Server).
   ldapUsername String?  @unique                              @map("LdapUsername")
 
   // ─── Directory fields (จากฐานพนักงานกลางผ่าน linked server) ──────────────

@@ -97,9 +97,12 @@ migration note).
 2. Better Auth redirects the browser to Keycloak (OIDC Authorization Code + PKCE)
 3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak`
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
-4. `mapProfileToUser` maps `preferred_username` → `ldapUsername` — **stored** on a
-   new row because `user.additionalFields.ldapUsername` declares it (`input: false`);
-   no `preferred_username`/`sub` → the login is refused
+4. `mapProfileToUser` resolves the existing row by `preferred_username` (=
+   `ldapUsername`) and returns only the email — Better Auth stores no custom
+   field from a provider profile (`input: false` fields are skipped too). No
+   `preferred_username`/`sub` (Keycloak 25+: `sub` comes from the `basic`
+   scope) → refused with `APIError('FOUND')` to `/login?error=sso_refused` — a
+   plain `Error` here is a bare 500 on the callback
 5. `accountLinking: { enabled: true, trustedProviders: ['keycloak'] }` links the SSO
    account to the existing row **of the same AD username** (an LDAP-first user).
    `mapProfileToUser` refuses when the email belongs to any other row not linked
@@ -107,10 +110,13 @@ migration note).
    email, or another AD identity sharing the mail, is never linked into
    (`org-identity.md` §5)
 6. `databaseHooks.session.create.after` runs — the **reliable** place to persist
-   the directory fields and write the `login.success` audit log. It reads the AD
-   login from the stored `ldapUsername` — never from the email; unknown → no
-   directory lookup and no pending role. Custom fields returned from
-   `mapProfileToUser` are dropped unless declared in `user.additionalFields`.
+   the directory fields and write the `login.success` audit log. It takes the AD
+   login from `preferred_username` in the keycloak account's stored `idToken`
+   (verified by Better Auth, rewritten on every SSO sign-in) and writes it onto
+   `User.ldapUsername` when it differs — first login, AD rename and legacy
+   email-derived values all converge. Never from the email. Missing, or already
+   held by another row (P2002, logged) → `loginName: null`: no directory lookup,
+   no pending role; the login itself continues.
 
 **Identity is the AD username, not the email.** Better Auth matches the
 existing user by the email `mapProfileToUser` returns — but the AD email and
