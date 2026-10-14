@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 76e5985a6216
+// kit-hash: 1249dde70440
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -318,6 +318,8 @@ export const auth = betterAuth({
           const keycloakAccount = await prisma.account
             .findFirst({
               where: { userId: session.userId, providerId: 'keycloak' },
+              // newest first: a re-created Keycloak user links a second account row by email
+              orderBy: { updatedAt: 'desc' },
               select: { id: true, idToken: true },
             })
             .catch(() => null);
