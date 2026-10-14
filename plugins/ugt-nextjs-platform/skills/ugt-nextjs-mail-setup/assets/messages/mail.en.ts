@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-mail-setup/messages/mail.en.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-mail-setup/messages/mail.en.ts
 // kit-hash: 21ede4de743d
 // English catalog for ugt-nextjs-mail-setup's admin UI. Keys must match
 // mail.th.ts exactly — scripts/check-i18n.mjs fails the build when they drift.

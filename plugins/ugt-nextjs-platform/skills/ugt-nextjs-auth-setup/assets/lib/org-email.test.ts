@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/org-email.test.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/org-email.test.ts
 // kit-hash: 69b32e07768d
 // installed by ugt-nextjs-auth-setup alongside lib/org-email.ts
 import { describe, expect, it } from 'vitest';

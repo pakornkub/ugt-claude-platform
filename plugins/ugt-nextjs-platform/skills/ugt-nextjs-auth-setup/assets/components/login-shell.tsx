@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/login-shell.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/login-shell.tsx
 // kit-hash: cc79574750d2
 // components/login-shell.tsx — two-column login page (DESIGN.md §3 "หน้า login")
 // installed by ugt-nextjs-auth-setup · Server Component (reads the filesystem + env)

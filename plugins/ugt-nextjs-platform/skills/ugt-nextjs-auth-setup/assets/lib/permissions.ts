@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/permissions.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/permissions.ts
 // kit-hash: a7636c19a28c
 /**
  * Permission keys — single source of truth for all permission constants.

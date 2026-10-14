@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
 // kit-hash: 498b5acc5d10
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL], run once
 //

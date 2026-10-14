@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/users-table.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/users-table.tsx
 // kit-hash: ba68df884916
 // components/users-table.tsx — client half of /admin/users: column defs ต้องเป็น
 // client code จึงแยกจาก page ที่ทำ guard + fetch · DataTable โหมด client

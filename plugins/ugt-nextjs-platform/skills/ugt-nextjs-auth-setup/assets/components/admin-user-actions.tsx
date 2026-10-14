@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
 // kit-hash: 04323c1ca75e
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]

@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/admin-users-tabs.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/admin-users-tabs.tsx
 // kit-hash: 3f79c92f6c10
 // components/admin-users-tabs.tsx — แท็บหลักของ /admin/users เก็บสถานะใน `?tab=`
 // (DESIGN.md: tab หลักของหน้า = URL — refresh/แชร์ลิงก์แล้วอยู่แท็บเดิม; ลิงก์ในเมล

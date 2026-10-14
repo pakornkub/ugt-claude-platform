@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/audit-actions.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/audit-actions.ts
 // kit-hash: 051abfbd5ed7
 /**
  * Audit action keys — single source of truth for every string written to

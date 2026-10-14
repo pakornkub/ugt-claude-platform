@@ -482,6 +482,9 @@ must be substituted too — `verify.mjs` scans all three, not just `.ts`/`.tsx`/
 
 ## 8. Verification Checklist
 
+**Closing message must say**: คนแรกที่ login จะถูกพาไป `/admin/setup` แล้วกดปุ่มเดียวเป็น Administrator
+(not only in admin-handoff.md) · forward `docs/admin-handoff.md` · which `.env.local` keys wait for real values.
+
 **Run the script first** (cwd = target project root):
 
 ```bash
@@ -492,7 +495,5 @@ It checks leftover placeholders, unremoved `[METHOD: …]` markers, the guard
 file name + `config` export, the cookie prefix in all 3 files, audit constants,
 the schema, mis-called APIs, and the org-identity rules (§2 items 10–11).
 
-Everything the script cannot see — login through every selected method, logout,
-the reset-link flows, scope/approval behaviour, the admin pages, security
-headers, i18n — is the by-hand list in **`references/verification.md`**. Walk it
-before calling an install done.
+Everything it cannot see (every login method, logout, reset links, scope/approval,
+admin pages, headers, i18n) is the by-hand list in **`references/verification.md`** — walk it.

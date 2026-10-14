@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
 // kit-hash: 0ea8d0780914
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the tables live in client components.
 // แท็บ: ทั้งหมด · ยังไม่มี role · ตั้งล่วงหน้า (รอ login) — `?tab=no-role|pending` เปิดแท็บนั้น

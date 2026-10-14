@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/admin-nav.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/admin-nav.tsx
 // kit-hash: 0b5581c5849a
 // components/admin-nav.tsx — admin menu items + fallback sidebar for the (admin) section.
 // Two exports:

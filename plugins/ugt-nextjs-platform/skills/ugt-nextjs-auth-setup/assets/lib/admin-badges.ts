@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/admin-badges.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/admin-badges.ts
 // kit-hash: da48770a0b4b
 // installed by ugt-nextjs-auth-setup — server only (Prisma)
 //

@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## 0.8.5 (2026-10-14)
+
+- interview ข้อ 7: ถาม Jenkins host + repo URL จาก `git remote` (เหมือน python 0.9.5) · eval `sonar` เป็น regex (llm โหวตแตกบนไฟล์ที่ถูก)
+
 ## 0.8.4 (2026-10-13)
 
 - SKILL.md §7: กฎ "รันไม่ได้ = ยังไม่ได้รัน" ขึ้นมาอยู่ใน SKILL.md เอง (eval รอบ 2: "ไล่ตรวจด้วยมือแล้วตรงหมด") · grader rules จับ path Windows ใน JSON

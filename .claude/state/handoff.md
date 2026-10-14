@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-13
+Last updated: 2026-10-14
 
 ## In progress
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
@@ -10,7 +10,7 @@ Last updated: 2026-10-13
 
 ## Next
 - Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
-- ugt-python-platform 0.9.4 / ugt-php-platform 0.8.4 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
+- ugt-python-platform 0.9.5 / ugt-php-platform 0.8.5 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
 - E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
@@ -21,6 +21,10 @@ Last updated: 2026-10-13
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-14 nextjs **4.78.0** · python **0.9.5** · php **0.8.5** (1b94963): upload retention sweep ผ่าน host cron
+  (review เจอลบเกินขอบเขต → กรอง key + เบรก 10% แก้แล้ว) · eval run-through แตกเป็น 4 ชุด ผ่าน 1.00 ทุกชุด
+  (design/auth รันงบ $20 ตามมติผู้ดูแล) · full-setup ห้ามเปิดคำตอบซ้ำ + ข้อความปิดท้าย 6 หัวข้อ ·
+  interview cicd ถาม Jenkins host/repo URL · plugin เครื่องนี้ update แล้ว
 - 2026-10-11..13 **post-merge review + eval ตามมติใหม่** (merge PR #21/#22 = 4.76.0 ก่อน) —
   nextjs **4.77.0→4.77.3** · core **2.14.1→2.14.3** · python **0.9.4** · php **0.8.4**:
   review 4 ตัวขนาน → bug จริง: `Account.issuer` ของ #17 ใช้ได้แค่ better-auth 1.7.0–1.7.2 (ตรวจ

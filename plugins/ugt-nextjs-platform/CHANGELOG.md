@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## 4.78.0 (2026-10-14)
+## 4.79.0 (2026-10-14)
 
 **auth: ตั้ง role ล่วงหน้าจาก HR · แท็บ "ยังไม่มี role" · เมลแจ้งแอดมิน · `ORG_EMAIL_DOMAINS`** (คำขอผู้ดูแลระหว่างตั้ง trn-invoice-tracking — **แก้มติ 2026-08-11**: ยังห้ามสมัครเองและห้ามสร้างบัญชี SSO/LDAP ล่วงหน้า แต่ **ตั้ง role ล่วงหน้าได้** เพราะไม่มีแถว `User`/`Account` ให้ Better Auth link เข้า และไม่มีช่องพิมพ์ username ให้เกิดผู้ใช้ซ้ำ — เหตุผลเต็ม `references/org-identity.md` §1):
 
@@ -15,6 +15,11 @@
 - เอกสาร: SKILL.md §2 ข้อ 10 (แก้มติ) + ข้อ 11 ใหม่, §3 Q4/Q5/Q6, §5.2 `[DIRECTORY]`/`[MAIL]`, §5.5 ข้อ 7, §5.6 badge · reference ใหม่ `org-identity.md` · แก้ถ้อยคำมติใน auth-flows / rbac / audit-logging / directory-enrichment / troubleshooting-sso / asset-map / schema-and-env (+ deviation line ของ `PendingRoleAssignments`) / verification / rules · full-setup ถามโดเมนอีเมล · design-preview: แท็บ + badge + อีเมลโดเมนหลัก
 - **login สองคอลัมน์ (login hero)** — ยกจาก trn-invoice-tracking: asset ใหม่ `components/login-shell.tsx` (Server Component) = hero ซ้ายเฉพาะ `lg`+ (`bg-primary` · รูป `public/login-hero.webp` ถ้ามีไฟล์ — `existsSync` ไม่มีรูป = พื้นเรียบ ไม่มีไอคอนรูปแตก · overlay `bg-primary/65` · `ube-logo-long.svg` ผ่าน CSS mask + basePath · ชื่อระบบ/คำอธิบาย/ฟีเจอร์ 3–4 แถว/footer) + ฟอร์มขวาบน `bg-muted/30` · **ไม่มีข้อความในไฟล์ kit** — หน้า login ของโปรเจคสร้าง `hero` จาก catalog `app.loginHero` ของตัวเอง (kit มีแค่ `auth.login.orgLogoLabel`) · preserve mode ห่อฟอร์มเดิมของโปรเจคด้วย `<LoginShell>` ได้ · reference ใหม่ `login-page.md` (หน้าเต็ม · catalog · สูตรรูป: gemini-image MCP ถ้ามี, 4:5 ไม่มีตัวอักษร/โลโก้/หน้าคน, webp ~1440 px q≈78) · SKILL §5.5 ข้อ 1 · rules · asset-map · DESIGN template §3 + layout-shells + design-preview · check-i18n ครอบ `login-shell.tsx` · verify ใหม่ (warn): หน้า login ใช้ `<LoginShell hero>` · ไม่มีภาษาไทยในโค้ดหน้า · ไม่ซ้อน `<main>` · hero เป็น `hidden … lg:flex` · รูป ≤ 400 KB
 - **โปรเจคเดิม** (ลง auth แล้ว): ทำตาม `org-identity.md` §7 — migrate schema (`NoRoleNotifiedAt`, `@@index([roleId])`, `pendingRoleAssignment` + `role.preassigns`) · เติม `ORG_EMAIL_DOMAINS` ใน `lib/env.ts`/`.env*`/Jenkins secret/compose · copy ไฟล์ใหม่ 6 ตัว (kit-sync ไม่เสนอไฟล์ใหม่) · merge ไฟล์ที่ kit-sync เสนอ · **ก่อน deploy รัน SQL หาบัญชี local บนโดเมนองค์กร + แถวที่มีทั้งรหัส local และตัวตน SSO/AD** — คนเหล่านั้นจะ login ไม่ได้จนแอดมินจัดการ
+
+## 4.78.0 (2026-10-14)
+
+- auth-setup §8: ข้อความปิดท้ายต้องมีประโยค `/admin/setup` เอง (eval: มีแค่ใน admin-handoff.md) · evals: `plan-order` รับ bullet ระหว่างข้อ · php `sonar` เป็น regex
+- **ผล eval ก่อนออกรุ่น** (grader ตรวจทุก FAIL บน workspace): plan 1.00* · db-quality-ci 1.00 · design 1.00 ($10.7) · auth 1.00 ($12.5) · python 1.00 · php 1.00* — *FAIL ที่เหลือเป็น grader แก้แล้วในรุ่นนี้
 
 **Post-merge review ของ sweep + eval split** (reviewer ยืนยันแล้ว):
 

@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.5 (2026-10-14)
+
+- interview ข้อ 7: ถาม Jenkins host (`__JENKINS_HOST__`) + repo URL จาก `git remote get-url origin` (`__REPO_URL__`) — เดิมไม่มีที่มา agent ใส่ `<jenkins-host>` ค้าง
+
 ## 0.9.4 (2026-10-13)
 
 - SKILL.md §7: กฎ "รันไม่ได้ = ยังไม่ได้รัน" ขึ้นมาอยู่ใน SKILL.md เอง (eval รอบ 2: agent ไม่เปิด verification.md ตอนปิดงาน ยังเขียน "ไล่เช็คด้วยตาแล้วผ่าน") · grader rules จับ path Windows ใน JSON (`\` ซ้อน)

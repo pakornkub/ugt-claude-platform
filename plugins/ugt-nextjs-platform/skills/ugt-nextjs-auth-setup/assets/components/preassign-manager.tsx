@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/preassign-manager.tsx
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/preassign-manager.tsx
 // kit-hash: ec2ea96719c6
 // components/preassign-manager.tsx — แท็บ "ตั้งล่วงหน้า (รอ login)" ของ /admin/users
 // installed by ugt-nextjs-auth-setup — [DIRECTORY]: ลบไฟล์นี้เมื่อไม่มี view พนักงาน

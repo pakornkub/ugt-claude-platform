@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/after-login.ts
+// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/after-login.ts
 // kit-hash: 390b815cbdb6
 // installed by ugt-nextjs-auth-setup — projects with SSO and/or LDAP
 //
