@@ -214,8 +214,9 @@ check('No __*__ placeholders left', () => {
 function selectedMethods() {
   const selected = new Set();
   if (has('lib/ldap.ts')) selected.add('LDAP');
-  if (has('lib/actions/auth.ts') && /localLoginAction/.test(read('lib/actions/auth.ts'))) selected.add('LOCAL');
-  if (has('lib/auth.ts') && /\bkeycloak\(/.test(read('lib/auth.ts'))) selected.add('SSO');
+  // comments stripped: an SSO-only file noting "the kit's localLoginAction was removed" is not Local
+  if (has('lib/actions/auth.ts') && /localLoginAction/.test(stripComments(read('lib/actions/auth.ts')))) selected.add('LOCAL');
+  if (has('lib/auth.ts') && /\bkeycloak\(/.test(stripComments(read('lib/auth.ts')))) selected.add('SSO');
   return selected;
 }
 
@@ -397,8 +398,16 @@ check('Password reset wired correctly', () => {
     return { ok: true, msg: 'no local password flows installed — nothing to check' };
   }
   const problems = [];
-  const authTs = has('lib/auth.ts') ? read('lib/auth.ts') : '';
+  // comments stripped: a "sendResetPassword is not installed yet" note is not the handler
+  const authTs = has('lib/auth.ts') ? stripComments(read('lib/auth.ts')) : '';
   const actions = read('lib/actions/password.ts');
+
+  // Pass one of the two-pass order (§3 Q7): Local without mail installs no
+  // reset pieces at all — a legal state, not a dead form, while nothing offers reset.
+  const resetUi = ['components/forgot-password-dialog.tsx', 'components/reset-password-form.tsx'].filter((f) => has(f));
+  if (!/sendResetPassword/.test(authTs) && !has('lib/email.ts') && resetUi.length === 0) {
+    return { ok: true, msg: 'reset deferred until ugt-nextjs-mail-setup (§3 Q7 pass one) — an admin "ตั้งรหัสผ่าน" is the only recovery meanwhile' };
+  }
 
   // The 1.5.x rename: the old name compiles (any-typed api) and fails at runtime.
   if (/auth\.api\.forgetPassword/.test(stripComments(actions))) {
@@ -443,7 +452,9 @@ check('Local accounts: no self-signup, but a way in', () => {
   if (/auth\.api\.signUpEmail/.test(stripComments(adminUsers))) {
     problems.push('admin-users.ts calls auth.api.signUpEmail — disableSignUp blocks it too; write the user + credential rows with hashPassword instead');
   }
-  if (!has('scripts/create-first-user.ts')) {
+  // only local-only projects need it (§5.5 step 5) — SSO/LDAP accounts appear on first login
+  const m = selectedMethods();
+  if (!m.has('SSO') && !m.has('LDAP') && !has('scripts/create-first-user.ts')) {
     problems.push('scripts/create-first-user.ts missing — a local-only project cannot bootstrap its first login');
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };

@@ -147,6 +147,7 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
      file, not a chat snippet. If the file already exists (e.g. cicd-setup
      wrote it), update its Keycloak section instead of overwriting.
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
+   = UPN suffix in DNS form (`ube.co.th`, not NetBIOS `UBE` — bind is `user@LDAP_DOMAIN`)
    (internal-CA TLS is not a question — `NODE_TLS_REJECT_UNAUTHORIZED=0` is org
    standard, already in env section 1 and both compose files)
 4b. **[SSO or LDAP] Org email domains?** → `ORG_EMAIL_DOMAINS`, comma list,

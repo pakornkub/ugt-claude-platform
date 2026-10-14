@@ -1,5 +1,15 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+**evals: ครอบฟีเจอร์ org identity ของ 4.79.0 และ mail-setup** (เดิม eval เดียวที่รันคือ `module-auth-after-design` ซึ่งไม่แตะฟีเจอร์ใหม่ และ mail ไม่มี case เลย):
+
+- `module-auth-org-identity` — fixture ของ `module-auth-after-design` (scaffold copy ข้าม case) · SSO + LDAP + Local + view HR + `ORG_EMAIL_DOMAINS` + ยังไม่มี mail · grader 31 ตัว ส่วนใหญ่เป็น regex บนไฟล์: `PendingRoleAssignments` (EmpCode/LoginName `@unique`) + บรรทัด ⚠ deviation (Write/Edit ใน trace — run จริงเขียนเป็น comment ใน schema) · `applyPendingRole` ไม่มี `email:` · เช็คชน SSO ใช้ `accountId` · ldapUsername จาก `idToken` · `APIError('FOUND')` + `sso_refused` · LDAP เช็คแถว `ldapUsername: null` · Local สร้าง/login บนโดเมนองค์กรไม่ได้ · ตัด `[MAIL]` + ส่วน reset · `<LoginShell hero>` + `app.loginHero` · แท็บ + badge · `LDAP_DOMAIN` แบบ UPN · judge ปิดท้าย: filtered index ของ LdapUsername + reset รอ mail · opus ดิบ 0.90 → 1.00 หลังแก้ grader 3 ตัว (ไทยใน comment · `sendResetPassword` ใน comment · deviation ลงด้วย Edit) · $9.5 / 23 นาที · 149 turns → `max_turns` 200
+- `module-mail-after-auth` — fixture = fixture ฐาน + overlay ผลจริงของ auth case ข้างบน (auth verify 46/0) + compose ของ cicd + `createLeaveRequestAction` · grader: SMTP ใน section 4 (ไม่ต่อท้าย) · compose `[MAIL]` เปิดทั้งสองไฟล์ · `auth.user-without-role` / `auth.password-reset` คงอยู่ ตัวอย่าง `request.*` ถูกลบ · ส่งหลัง create ใน try/catch นอก `$transaction` + actor dev mode · §4.6 คืน `[MAIL]` ของ `after-login.ts` + ส่วน reset · catalog · เมนู · permission seed · ดิบ 0.96 → 1.00 (judge ปิดท้ายโหวต FAIL ×3 กับข้อความไทยที่ครบทุกข้อ → regex 3 ตัว) · $3.6 / 9 นาที
+- **auth verify — false fail 3 ข้อ**: การหา method ที่เลือก (`selectedMethods`) อ่าน comment ด้วย — โปรเจค SSO ล้วนที่ comment ว่า "ตัด `localLoginAction` ของ kit ออก" ถูกนับเป็น Local แล้ว fail ข้อ `ORG_EMAIL_DOMAINS` (workspace ของ `module-auth-after-design` 4.79.0) → ตัด comment ก่อน · "Password reset wired correctly" อ่าน comment ที่มีคำว่า `sendResetPassword` เป็นตัว handler และ fail สถานะ pass แรกของ §3 Q7 (Local ยังไม่มี mail) ทั้งที่ถูก → ตัด comment ก่อนเช็ค + ผ่านเมื่อไม่มี reset UI และไม่มี `lib/email.ts` · `scripts/create-first-user.ts` บังคับเฉพาะโปรเจค Local ล้วน (§5.5 ข้อ 5) เดิมบังคับทุกโปรเจคที่มี Local
+- **mail verify**: เช็ค `__X__` ใน `.env.example` ดูเฉพาะบรรทัด `SMTP_*` — เดิม fail ทุกโปรเจคเพราะ `__DB_USER__` / `__DB_PASSWORD__` ที่ database-setup เหลือไว้โดยตั้งใจ
+- auth §3 Q4 + `env.example`: `LDAP_DOMAIN` คือ UPN suffix แบบ DNS (`ube.co.th`) ไม่ใช่ชื่อ NetBIOS (`UBE`) เพราะ bind เป็น `user@LDAP_DOMAIN` (ใน eval ผู้ใช้ตอบ `UBE` แล้ว agent ต้องแก้เองและแจ้งไว้)
+
 ## 4.79.1 (2026-10-15)
 
 - full-setup §4: ถ้าเขียนใต้ `.claude/`/`.husky/` ไม่ได้ ให้วาง path + เนื้อหาเต็มของทุกไฟล์ที่ถูกปฏิเสธใน `docs/setup-finish.md` แล้วทำต่อ — ห้ามปิดงานด้วย "อนุญาตแล้วรัน setup อีกรอบ" (eval หลัง merge 4.79.0: judge นับเป็นการเสนอรันภายหลัง)

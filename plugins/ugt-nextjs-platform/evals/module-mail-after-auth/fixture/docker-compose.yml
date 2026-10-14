@@ -1,0 +1,87 @@
+# Production compose — deployed by Jenkins on the `main` branch.
+# Jenkins always runs `docker compose up -d --no-build`, so the build: section
+# is never used at deploy time; NEXT_PUBLIC_* are passed via --build-arg in the
+# Jenkinsfile Docker Build stage.
+#
+# Placeholders: leave-request, 3000, /leave-request
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    image: leave-request:latest
+    # Image is built locally by Jenkins — never pull from Docker Hub
+    pull_policy: never
+    container_name: leave-request
+    restart: unless-stopped
+    ports:
+      # Host port comes from .env (APP_PORT) with a default; container port is
+      # always 3000
+      - '${APP_PORT:-3000}:3000'
+    # [VOLUME] persistent data — uncomment + rename per interview; path must be
+    # [VOLUME] under /home/docker02/appdata (org contract). Delete block if nothing persists.
+    # volumes:
+    #   - /home/docker02/appdata/leave-request/uploads:/app/uploads
+    networks:
+      - proxy-network
+    environment:
+      # FIXED LIST — same keys, same order in every org project (= .env.example
+      # sections 1–5, ugt-nextjs-database-setup/assets/env.example). Values come
+      # from .env (the Jenkins Secret File copied at deploy). A module not
+      # installed keeps its lines commented; its setup skill uncomments them.
+      # NEVER put NEXT_PUBLIC_* here (build args — no effect at runtime) and
+      # NEVER bake secrets into image layers.
+      # 1. runtime
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
+      # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] host cron → /api/cron/<job>
+      # 2. database
+      DATABASE_URL: ${DATABASE_URL} # [DB]
+      # 3. auth
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}                   # [AUTH]
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}                         # [AUTH]
+      BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS} # [AUTH]
+      ORG_EMAIL_DOMAINS: ${ORG_EMAIL_DOMAINS:-}                 # [AUTH] first = canonical, e.g. ube.com,ube.co.th
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}                         # [AUTH: SSO]
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}                   # [AUTH: SSO]
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}           # [AUTH: SSO]
+      LDAP_URL: ${LDAP_URL}                                       # [AUTH: LDAP]
+      LDAP_BASE_DN: ${LDAP_BASE_DN}                               # [AUTH: LDAP]
+      LDAP_DOMAIN: ${LDAP_DOMAIN}                                 # [AUTH: LDAP]
+      # 4. mail
+      # SMTP_HOST: ${SMTP_HOST}                                     # [MAIL]
+      # SMTP_PORT: ${SMTP_PORT:-25}                                 # [MAIL]
+      # SMTP_SECURE: ${SMTP_SECURE:-false}                          # [MAIL]
+      # SMTP_USER: ${SMTP_USER:-}                                   # [MAIL]
+      # SMTP_PASS: ${SMTP_PASS:-}                                   # [MAIL]
+      # SMTP_FROM: ${SMTP_FROM}                                     # [MAIL]
+      # 5. upload
+      # STORAGE_ROOT: /app/storage                                  # [UPLOAD]
+      # UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-26214400}             # [UPLOAD]
+      # 6. project-specific — add below, same order as .env.example section 6
+    healthcheck:
+      # Always 127.0.0.1 (NOT localhost — Alpine resolves it to IPv6 ::1) and
+      # always internal port 3000 (container-internal, not the host port)
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/leave-request/api/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  # Shared reverse-proxy network on the Docker host (created once, externally)
+  proxy-network:
+    external: true

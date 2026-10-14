@@ -59,7 +59,9 @@ check('No __*__ placeholders left', () => {
   const found = [];
   for (const f of [...REQUIRED, '.env.example']) {
     if (!has(f)) continue;
-    const hits = [...new Set([...read(f).matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
+    // .env.example: SMTP_* lines only — database-setup keeps __DB_USER__/__DB_PASSWORD__ there on purpose
+    const body = f === '.env.example' ? read(f).split('\n').filter((l) => /^\s*SMTP_/.test(l)).join('\n') : read(f);
+    const hits = [...new Set([...body.matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
     if (hits.length) found.push(`${f}: ${hits.join(', ')}`);
   }
   return found.length ? { ok: false, msg: found.join(' · ') } : { ok: true };
