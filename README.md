@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.79.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.9.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.5 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.14.3 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.14.4 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`

@@ -29,6 +29,38 @@ on login and its history is the `users.preassign-*` audit trail):
 *⚠ deviation: PendingRoleAssignments ไม่มี IsActive/IsDeleted และลบจริงเมื่อใช้ role
 แล้วหรือแอดมินลบ — ประวัติอยู่ใน ActivityLogs (ugt-nextjs-auth-setup org-identity.md)*
 
+## SQL Server: one NULL per unique column
+
+`User.ldapUsername String? @unique` becomes `CONSTRAINT [User_LdapUsername_key]
+UNIQUE NONCLUSTERED ([LdapUsername])` — and a SQL Server unique constraint
+treats NULL as a value: **only one row may have it NULL**. Every Local account
+has `LdapUsername = NULL`, so the second Local user fails with P2002
+(`createLocalUserAction` / `create-first-user.ts`). SSO/LDAP rows always carry
+the AD login, so SSO/LDAP-only projects never hit it; **any project with Local
+login needs the filtered index**. Prisma cannot express it (database-setup
+`references/migrations.md` §4, option A) — hand-edit the migration:
+
+- **New install**: `npx prisma migrate dev --name auth-rbac --create-only`, then
+  in `migration.sql` delete the `CONSTRAINT [User_LdapUsername_key] UNIQUE …`
+  line from `CREATE TABLE [dbo].[User]` (mind the trailing comma) and append the
+  index below; then `npx prisma migrate dev` + `npx prisma generate`.
+- **Existing database**: `npx prisma migrate dev --name ldap-username-filtered --create-only`
+  (empty migration), paste:
+
+  ```sql
+  ALTER TABLE [dbo].[User] DROP CONSTRAINT [User_LdapUsername_key];
+  -- Prisma's own name on purpose: the next migrate diff finds the unique it
+  -- expects and does not re-create it (Prisma does not read the filter)
+  CREATE UNIQUE NONCLUSTERED INDEX [User_LdapUsername_key]
+    ON [dbo].[User]([LdapUsername]) WHERE [LdapUsername] IS NOT NULL;
+  ```
+
+  Check the constraint name in your first auth migration before running it.
+  The name deviates from `UX_<Table>_<Columns>_<condition>` for that reason —
+  note it next to the auth-table `⚠ deviation` line. Inspect every later
+  `migrate dev` diff: if it ever proposes dropping/re-creating
+  `User_LdapUsername_key`, delete those lines from the generated SQL.
+
 ## Env schema
 
 What `lib/env.ts` (or equivalent) declares for auth:

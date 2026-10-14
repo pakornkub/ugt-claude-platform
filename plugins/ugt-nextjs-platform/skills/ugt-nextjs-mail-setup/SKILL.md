@@ -202,13 +202,13 @@ switched off and are switched on now that `lib/email.ts` exists:
 | Key | Sent from | When the project has… | Do now |
 | --- | --- | --- | --- |
 | `auth.password-reset` | `lib/auth.ts` (`sendResetPassword`) | Local login | install the reset pieces — auth SKILL.md §5.5 |
-| `auth.user-without-role` | `lib/after-login.ts` (`notifyAdminsIfNoRole`) | SSO or LDAP | restore the `[MAIL]` lines of that file from the auth asset (import of `sendTemplatedMail`/`env`/`PERMISSIONS`, the `void notifyAdminsIfNoRole(…)` call, the function) |
+| `auth.user-without-role` | `lib/after-login.ts` (`notifyAdminsIfNoRole`) | SSO or LDAP | restore the `[MAIL]` lines of that file from the auth asset (imports of `sendTemplatedMail`/`env`/`PERMISSIONS`/`ADMIN_RECIPIENT_NAME`/`isDevEnvironment`, the `void notifyAdminsIfNoRole(…)` call, the function) |
 
 `auth.user-without-role` mails everyone holding `users:update` the first time an
 SSO/LDAP user signs in with no role — **once per user** (`User.NoRoleNotifiedAt`
 claims it before sending, released if the send fails), fire-and-forget so a
-slow relay never holds up a login, `actor` with no dev mode (a login is nobody's
-test click). The `ยังไม่มี role` tab and the menu badge work without mail; only
+slow relay never holds up a login, `[DEV] ` on the subject on the dev deployment (`subjectPrefix`), `actor` with no dev mode (a login is nobody's
+test click). The `ยังไม่มีบทบาท` tab and the menu badge work without mail; only
 the email needs this module. Delete each key (+ definition + default) whose
 row above does not apply. `scripts/verify.mjs` warns when `lib/after-login.ts`
 exists but sends nothing.

@@ -8,7 +8,7 @@ lg and up                                        < lg (mobile)
 ┌──────────────────────┬──────────────────┐      ┌──────────────┐
 │ ▓ ube-logo-long      │                  │      │              │
 │ ▓                    │   ┌──────────┐   │      │  login form  │
-│ ▓ App name (h2)      │   │  login   │   │      │  alone,      │
+│ ▓ App name (big text)│   │  login   │   │      │  alone,      │
 │ ▓ one-line purpose   │   │  form    │   │      │  centred     │
 │ ▓ [icon] feature × 3–4│   └──────────┘   │      │              │
 │ ▓ footer line        │   bg-muted/30    │      └──────────────┘
@@ -63,8 +63,11 @@ export default async function LoginPage({
 }
 ```
 
-No `<main>` here — the root layout already wraps the route in one. `useSearchParams`
-inside the form needs no `<Suspense>` because the page passes the values as props.
+No `<main>` in the page — `LoginShell` renders the form column as the page's
+`<main>` (the root layout has none; only the `(admin)` shell renders its own).
+The form keeps the page's single `<h1>`; the hero title is large text, not a
+heading, so nothing outranks it in document order. `useSearchParams` inside the
+form needs no `<Suspense>` because the page passes the values as props.
 
 ## 2. The copy (project catalog)
 
@@ -80,7 +83,7 @@ export const appTh = {
     description: 'ระบบติดตามใบแจ้งหนี้ค่าขนส่ง ตั้งแต่ vendor ส่งเอกสาร จนถึงส่งต่อฝ่ายบัญชี',
     f1Title: 'ส่ง invoice ออนไลน์', f1Text: 'กรอกข้อมูลและแนบเอกสารได้ในที่เดียว',
     // … f2–f4
-    footer: '© {year} UBE · Develop by SW',
+    footer: '© {year} UBE · Developed by SW',
   },
 } as const;
 ```
@@ -119,3 +122,21 @@ instead (`<LoginShell hero={hero}><ProjectLoginForm /></LoginShell>`), keep its
 routes and redirect targets, and record "login hero adopted, own form kept" in
 DESIGN.md §10. A project that keeps its whole page (no hero) records that as a
 deviation instead; `verify.mjs` warns, it does not fail.
+
+## 5. Existing installs (kit-sync)
+
+`components/login-shell.tsx` is a **new** file — kit-sync only lists files the
+project already has, so a project that installed auth before 4.79.0 gets it by
+hand:
+
+1. Copy `assets/components/login-shell.tsx` → `components/login-shell.tsx`.
+2. Add `auth.login.orgLogoLabel` to `messages/auth.th.ts` / `auth.en.ts` (or
+   merge the two catalogs kit-sync lists) and the `app.loginHero` keys of §2 to
+   the project's own `messages/app.*.ts` (register `app` if it is new).
+3. Rewrite `app/(auth)/login/page.tsx` per §1. If the old page (or a project
+   layout around `/login`) rendered its own `<main>`, remove it — the shell
+   now provides the landmark.
+4. Check `public/brand/ube-logo-long.svg` exists (design-setup ships it); add
+   `public/login-hero.webp` only if wanted (§3).
+5. Run `node <auth-skill>/scripts/verify.mjs` — the login-page check warns on
+   anything left over.

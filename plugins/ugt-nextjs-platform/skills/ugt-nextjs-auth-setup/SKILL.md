@@ -58,7 +58,7 @@ methods**:
 Every method lands in **the same Better Auth + Prisma session**, with RBAC
 (role → permission), a first-admin bootstrap page (`/admin/setup`), and the
 ongoing admin pages to manage it afterward: `/admin/users` (tabs ทั้งหมด ·
-ยังไม่มี role · ตั้งล่วงหน้า; assign or pre-assign a role), `/admin/roles` (CRUD +
+ยังไม่มีบทบาท · ตั้งล่วงหน้า; assign or pre-assign a role), `/admin/roles` (CRUD +
 permission checkboxes), `/admin/audit-logs` (read-only viewer).
 
 Real code lives in `assets/` — adjust placeholders and copy straight into the
@@ -74,7 +74,7 @@ project. Deep detail lives in `references/`:
 - `references/directory-enrichment.md` — filling employee code / department /
   position / supervisor from the org's employee view over a linked server,
   because SSO and LDAP only answer "who are you"
-- `references/org-identity.md` — pre-assigned roles, the "ยังไม่มี role" tab/badge/admin
+- `references/org-identity.md` — pre-assigned roles, the "ยังไม่มีบทบาท" tab/badge/admin
   mail, `ORG_EMAIL_DOMAINS` and the shared-account hole (§2 items 10–11) + kit-sync steps
 - `references/data-scope.md` — "may they?" vs "**whose data?**": the row-level
   scope layer, and the approval-chain view (**read before writing any route
@@ -121,18 +121,10 @@ The org-wide contract:
    position and supervisor come from the central view over a linked server,
    refreshed on every login by one shared helper — read-only, and never
    allowed to break login (`references/directory-enrichment.md`)
-10. **No self-registration, no pre-created accounts — pre-assigned roles are
-   fine** (มติ 2026-08-11, amended 2026-10-14). SSO/LDAP accounts appear only on
-   their first successful login; nobody creates them by hand. An admin may
-   **pre-assign a role** from the HR view (tab ตั้งล่วงหน้า): a
-   `PendingRoleAssignments` row keyed by EmpCode + ADLoginName that the server
-   resolves from the view — no `User`/`Account` row, so nothing for Better Auth
-   to link into, and nothing typed, so no duplicate user; the first login
-   applies it (`lib/after-login.ts`). Users who log in with no role show in the
-   ยังไม่มี role tab, the menu badge, and (with mail) one admin email. Local
-   accounts are the only kind created manually (`users:create`), and
-   `disableSignUp: true` closes Better Auth's sign-up endpoint
-   (`references/org-identity.md`)
+10. **No self-registration, no pre-created SSO/LDAP accounts — pre-assigned roles
+   are fine** (มติ 2026-08-11, amended 2026-10-14): accounts appear on first
+   login only; an admin may pre-assign a role keyed to HR EmpCode/AD login (never
+   email); `disableSignUp: true`. Why and how: `references/org-identity.md` §1–3
 11. **Org mailboxes belong to SSO/LDAP.** `ORG_EMAIL_DOMAINS` (first =
    canonical) normalizes every email from SSO/LDAP/HR before it is stored,
    shown or mailed; a Local account can neither be created nor sign in on those
@@ -157,7 +149,8 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
 4. **[If LDAP] AD server details?** `LDAP_URL` (ldaps:// or not), `LDAP_BASE_DN`, `LDAP_DOMAIN`
    (internal-CA TLS is not a question — `NODE_TLS_REJECT_UNAUTHORIZED=0` is org
    standard, already in env section 1 and both compose files)
-   **[SSO/LDAP] Org email domains?** → `ORG_EMAIL_DOMAINS`, canonical first (§2 item 11)
+4b. **[SSO or LDAP] Org email domains?** → `ORG_EMAIL_DOMAINS`, comma list,
+   canonical first (§2 item 11) — every domain the org's mailboxes use
 5. **First admin — not a question.** SSO/LDAP rows can't be pre-created
    (มติ 2026-08-11) and pre-assigning needs a running app with an admin, so
    nothing could be seeded from a name given here; the
@@ -302,7 +295,9 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    > the `⚠ deviation` line during install** — the table list, the reason and the
    > exact line are in `references/schema-and-env.md` §Auth-table exception.
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
-3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately
+3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately.
+   **[Local] on MSSQL:** `--create-only` first and swap the `LdapUsername` unique constraint
+   for the filtered index (`schema-and-env.md` §SQL Server: one NULL per unique column)
 
 ### 5.4 Env schema (`lib/env.ts` or equivalent)
 

@@ -29,7 +29,7 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
 - [ ] [Local] Admin "ตั้งรหัสผ่าน" on a row → that user's open sessions die and
       the new password works; the button is absent on SSO/LDAP rows
 - [ ] [LDAP/SSO] A brand-new AD user logs in for the first time → their row
-      appears with directory fields filled and in the **ยังไม่มี role** tab, the
+      appears with directory fields filled and in the **ยังไม่มีบทบาท** tab, the
       users menu shows a badge; assign the role there → the row leaves the tab,
       the badge drops, and the role sticks on the next login
 - [ ] [Directory] Tab ตั้งล่วงหน้า → เพิ่มจาก HR: someone who has never logged in

@@ -1405,7 +1405,7 @@
       <strong>บัญชี SSO/AD ไม่ต้องเพิ่มด้วยมือ</strong> — เกิดเองตอน login ครั้งแรก
       แล้วกำหนดบทบาทจากตาราง หรือ<strong>ตั้งบทบาทล่วงหน้า</strong>จากฐาน HR ก่อนเจ้าตัว login
       (มติ 2026-08-11 แก้ 2026-10-14 — ตั้ง role ไม่ใช่สร้างบัญชี) · คนที่เข้าแล้วแต่ยังไม่มีบทบาท
-      อยู่แท็บ <em>ยังไม่มี role</em> + ตัวเลขบนเมนู · บัญชี local มีแต่ที่แอดมินสร้าง
+      อยู่แท็บ <em>ยังไม่มีบทบาท</em> + ตัวเลขบนเมนู · บัญชี local มีแต่ที่แอดมินสร้าง
       และใช้อีเมลโดเมนองค์กรไม่ได้ ·
       <strong>สิทธิ์ไม่มีหน้าแยก</strong>: key มาจากโค้ดแล้ว sync เข้า DB เอง
       หน้าบทบาทคือที่จับคู่สิทธิ์เข้ากับบทบาท · ตารางทั้งสามหน้าใช้ <code>DataTable</code>
@@ -1414,7 +1414,7 @@
 
     <div class="specimen">
       <div class="specimen-bar">
-        <span>/admin/users — แท็บ ทั้งหมด · ยังไม่มี role · ตั้งล่วงหน้า · เพิ่มผู้ใช้ local · ตั้งรหัสผ่าน</span>
+        <span>/admin/users — แท็บ ทั้งหมด · ยังไม่มีบทบาท · ตั้งล่วงหน้า · เพิ่มผู้ใช้ local · ตั้งรหัสผ่าน</span>
         <span class="toggle" role="group" aria-label="สลับธีม">
           <button type="button" data-theme="light" aria-pressed="true">Light</button>
           <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
@@ -1454,7 +1454,7 @@
               <button class="btn btn-primary" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-plus"/></svg>เพิ่มผู้ใช้ local</button>
             </div>
-            <div class="tabs" style="margin-bottom:10px"><span class="tab on">ทั้งหมด 4</span><span class="tab">ยังไม่มี role 1</span><span class="tab">ตั้งล่วงหน้า (รอ login) 2</span></div>
+            <div class="tabs" style="margin-bottom:10px"><span class="tab on">ทั้งหมด 4</span><span class="tab">ยังไม่มีบทบาท 1</span><span class="tab">ตั้งล่วงหน้า (รอเข้าระบบ) 2</span></div>
             <div class="card" style="padding:0;overflow:hidden">
               <div style="padding:12px 14px;border-bottom:1px solid var(--border-c);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
                 <span class="field muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><use href="#i-search"/></svg>ค้นหาชื่อหรืออีเมล…</span>

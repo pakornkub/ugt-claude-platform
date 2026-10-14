@@ -60,6 +60,25 @@ contains passwords, secrets, tokens, or PII broader than its readers should
 see; a retention window is defined per project and enforced both by a
 scheduled cleanup job and in the viewer query.
 
+## Accounts
+
+- **SSO/LDAP accounts are created at first login only** — by the identity
+  provider vouching for the person, never by an admin, an import or
+  self-registration. No user/account row exists for anyone who has not yet
+  signed in.
+- **Roles may be pre-assigned** before that first login, as an intent keyed to
+  the HR employee code and/or the AD login name resolved server-side from the
+  directory — **never keyed to an email address**. It is applied when the
+  matching identity first signs in; an admin's explicit role choice on an
+  existing user wins over (and removes) a pending one.
+- **No Local (password) accounts on the org email domains** — those mailboxes
+  belong to SSO/LDAP. Local accounts can be neither created nor signed in on
+  them.
+- **No SSO/LDAP → Local linking** — a federated login never attaches to a row
+  that is not the same directory identity (same AD login / same IdP subject);
+  an email held by any other row is refused, fail closed, until an admin
+  resolves it.
+
 ## First-admin bootstrap
 
 Every project ships a first-run bootstrap page: the first authenticated user

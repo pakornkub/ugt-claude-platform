@@ -97,16 +97,20 @@ migration note).
 2. Better Auth redirects the browser to Keycloak (OIDC Authorization Code + PKCE)
 3. Keycloak redirects back to `${BETTER_AUTH_URL}${BASE_PATH}/api/auth/callback/keycloak`
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
-4. `mapProfileToUser` maps `preferred_username` → `ldapUsername`, sets `authType: 'sso'`
+4. `mapProfileToUser` maps `preferred_username` → `ldapUsername` — **stored** on a
+   new row because `user.additionalFields.ldapUsername` declares it (`input: false`);
+   no `preferred_username`/`sub` → the login is refused
 5. `accountLinking: { enabled: true, trustedProviders: ['keycloak'] }` links the SSO
    account to the existing row **of the same AD username** (an LDAP-first user).
-   `mapProfileToUser` refuses when the email belongs to any other row without a
-   Keycloak account — a Local account on an org email is never linked into
+   `mapProfileToUser` refuses when the email belongs to any other row not linked
+   to this Keycloak subject (`accountId: profile.sub`) — a Local account on an org
+   email, or another AD identity sharing the mail, is never linked into
    (`org-identity.md` §5)
 6. `databaseHooks.session.create.after` runs — the **reliable** place to persist
-   custom user fields and write the `login.success` audit log. Do NOT rely on
-   `mapProfileToUser` for custom fields: only standard fields (name, email, image)
-   propagate via `overrideUserInfo`.
+   the directory fields and write the `login.success` audit log. It reads the AD
+   login from the stored `ldapUsername` — never from the email; unknown → no
+   directory lookup and no pending role. Custom fields returned from
+   `mapProfileToUser` are dropped unless declared in `user.additionalFields`.
 
 **Identity is the AD username, not the email.** Better Auth matches the
 existing user by the email `mapProfileToUser` returns — but the AD email and
@@ -157,13 +161,16 @@ of the same commit minutes earlier was fine — it is timing, not code.
 
 1. Rate-limit by IP (10 attempts / 15 min)
 2. `ldapBind(username, password)` via `ldapts` — binds as **UPN**
-   (`username@LDAP_DOMAIN`), then searches `LDAP_BASE_DN` by `sAMAccountName`
-   with **RFC-4515-escaped** filter value (backslash first!)
+   (`username@LDAP_DOMAIN`), then looks up **the account the bind authenticated**:
+   `userPrincipalName=<that UPN>` first, `sAMAccountName=<typed>` only when no
+   explicit UPN matches (AD's own resolution order) — exactly one entry or the
+   login fails. Every later step keys on the directory's `sAMAccountName`, never
+   the typed text. Filter values are **RFC-4515-escaped** (backslash first!)
    — do **not** enforce `ldaps://` in production: org AD servers on private
    networks (`ldap://10.x.x.x`) often support plain LDAP only, and a
    protocol check that throws **before** the bind surfaces as a misleading
    "Invalid username or password"
-3. `prisma.user.upsert({ where: { ldapUsername } })`
+3. `prisma.user.upsert({ where: { ldapUsername: ldapUser.sAMAccountName } })`
 4. `prisma.session.create({ token: generateId(32), userId, expiresAt })` —
    expiry MUST match `session.expiresIn` in `lib/auth.ts` (8h)
 5. `signSessionToken()` → `cookieStore.set(SESSION_COOKIE_NAME, signedToken, …)`
