@@ -1,6 +1,8 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.79.2 (2026-10-15)
+
+- review ของชุดนี้: auth verify — กรณี Local ยังไม่มี mail (§3 Q7 รอบแรก) ไม่ข้ามการตรวจ `lib/password-policy.ts` อีก · evals mail: grader compose ยึดต้นไฟล์ (เดิม `^` ใต้ flag m ทำให้บรรทัด SMTP ที่ยัง comment ค้างผ่านได้) · grader เมนู mail-templates รับ `\"` ใน JSON
 
 **evals: ครอบฟีเจอร์ org identity ของ 4.79.0 และ mail-setup** (เดิม eval เดียวที่รันคือ `module-auth-after-design` ซึ่งไม่แตะฟีเจอร์ใหม่ และ mail ไม่มี case เลย):
 

@@ -406,7 +406,10 @@ check('Password reset wired correctly', () => {
   // reset pieces at all — a legal state, not a dead form, while nothing offers reset.
   const resetUi = ['components/forgot-password-dialog.tsx', 'components/reset-password-form.tsx'].filter((f) => has(f));
   if (!/sendResetPassword/.test(authTs) && !has('lib/email.ts') && resetUi.length === 0) {
-    return { ok: true, msg: 'reset deferred until ugt-nextjs-mail-setup (§3 Q7 pass one) — an admin "ตั้งรหัสผ่าน" is the only recovery meanwhile' };
+    // the policy is still used in pass one (change-password + admin create) — check it before leaving
+    return has('lib/password-policy.ts')
+      ? { ok: true, msg: 'reset deferred until ugt-nextjs-mail-setup (§3 Q7 pass one) — an admin "ตั้งรหัสผ่าน" is the only recovery meanwhile' }
+      : { ok: false, msg: 'lib/password-policy.ts missing — change-password and admin create each grow their own rules and the loosest one wins' };
   }
 
   // The 1.5.x rename: the old name compiles (any-typed api) and fails at runtime.
