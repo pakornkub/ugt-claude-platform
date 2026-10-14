@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/org-email.test.ts
-// kit-hash: 69b32e07768d
+// kit-hash: c2f57aac2809
 // installed by ugt-nextjs-auth-setup alongside lib/org-email.ts
 import { describe, expect, it } from 'vitest';
 import { isOrgEmail, orgEmailVariants, parseOrgDomains, toCanonicalEmail } from './org-email';
@@ -9,6 +9,19 @@ const domains = parseOrgDomains(' ube.com, @UBE.co.th ,');
 describe('org email domains', () => {
   it('parses the env list — first entry is canonical', () => {
     expect(domains).toEqual(['ube.com', 'ube.co.th']);
+  });
+
+  it('treats an unset/empty list as "off"', () => {
+    expect(parseOrgDomains(undefined)).toEqual([]);
+    expect(parseOrgDomains('  ')).toEqual([]);
+  });
+
+  it('refuses a malformed list instead of silently disabling the protection', () => {
+    expect(() => parseOrgDomains('ube.com;ube.co.th')).toThrow(/ORG_EMAIL_DOMAINS/);
+    expect(() => parseOrgDomains('ube.com ube.co.th')).toThrow(/ORG_EMAIL_DOMAINS/);
+    expect(() => parseOrgDomains('ube.com,user@ube.co.th')).toThrow(/ORG_EMAIL_DOMAINS/);
+    expect(() => parseOrgDomains('ube')).toThrow(/ORG_EMAIL_DOMAINS/);
+    expect(() => parseOrgDomains('-ube.com')).toThrow(/ORG_EMAIL_DOMAINS/);
   });
 
   it('recognises every org domain, case-insensitively', () => {

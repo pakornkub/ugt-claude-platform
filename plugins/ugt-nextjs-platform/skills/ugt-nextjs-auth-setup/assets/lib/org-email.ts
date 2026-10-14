@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/org-email.ts
-// kit-hash: a16426e1563a
+// kit-hash: 89aa10627b1e
 // installed by ugt-nextjs-auth-setup — every project with SSO or LDAP
 //
 // องค์กรเดียวมีโดเมนอีเมลมากกว่าหนึ่งตัวที่หมายถึงกล่องเดียวกัน (เช่น ube.com กับ
@@ -13,12 +13,27 @@
 // ฟังก์ชันรับ `domains` เป็นพารามิเตอร์ (ค่าเริ่มต้นมาจาก env) เพื่อให้ test ส่งค่าเองได้
 import { env } from '@/lib/env';
 
-/** "ube.com, @UBE.co.th" → ['ube.com', 'ube.co.th'] — ตัวแรกคือโดเมนหลัก */
+// hostname: labels of a-z 0-9 - (not starting/ending with -), at least one dot
+const HOSTNAME = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+/**
+ * "ube.com, @UBE.co.th" → ['ube.com', 'ube.co.th'] — ตัวแรกคือโดเมนหลัก
+ * ค่าที่ไม่ใช่ hostname (คั่นด้วย `;`/เว้นวรรค, มี `@` กลางคำ …) → throw ตอน start
+ * เพราะถ้าปล่อยผ่าน ทุกโดเมนจะไม่ match เงียบ ๆ = การป้องกันบัญชี local บนอีเมล
+ * องค์กรปิดไปเองโดยไม่มีใครรู้
+ */
 export function parseOrgDomains(raw: string | undefined): string[] {
-  return (raw ?? '')
+  const domains = (raw ?? '')
     .split(',')
     .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
     .filter(Boolean);
+  const invalid = domains.filter((d) => !HOSTNAME.test(d));
+  if (invalid.length > 0) {
+    throw new Error(
+      `ORG_EMAIL_DOMAINS has invalid entries ${JSON.stringify(invalid)} — expected comma-separated domains, canonical first (e.g. ube.com,ube.co.th)`
+    );
+  }
+  return domains;
 }
 
 const ORG_DOMAINS = parseOrgDomains(env.ORG_EMAIL_DOMAINS);

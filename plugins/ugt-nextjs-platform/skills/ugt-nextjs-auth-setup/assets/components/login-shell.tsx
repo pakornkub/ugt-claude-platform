@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/login-shell.tsx
-// kit-hash: cc79574750d2
+// kit-hash: f017508fb531
 // components/login-shell.tsx — two-column login page (DESIGN.md §3 "หน้า login")
 // installed by ugt-nextjs-auth-setup · Server Component (reads the filesystem + env)
 //
@@ -7,7 +7,7 @@
 //           primary panel · optional photo (public/login-hero.webp) under a
 //           bg-primary/65 overlay · 3 rows: long logo → app name + description +
 //           feature rows → footer line
-//   RIGHT = whatever form the page passes as children (kit <LoginForm>, or the
+//   RIGHT = <main>: whatever form the page passes as children (kit <LoginForm>, or the
 //           project's own form in preserve mode — §5.7), centred on bg-muted/30
 //
 // **No copy lives here** — every visible string comes from the project through
@@ -15,7 +15,10 @@
 // are overwritten on update; a project's wording must not be. Omit `hero` and the
 // page is the plain centred form.
 //
-// Do not wrap in <main>: the root layout already gives the login route one.
+// The form column IS the page's <main> landmark — the root layout renders none
+// (only the (admin) shell does), so the login page must not add another.
+// Headings: the form carries the page's single <h1>; the hero title is styled
+// text, not a heading, so no <h2> comes before the <h1> in document order.
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import Image from 'next/image';
@@ -25,13 +28,13 @@ import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 
 export type LoginHeroContent = {
-  /** App name — the hero heading (the form keeps the page's single <h1>) */
+  /** App name — large hero text; deliberately not a heading (the form owns the <h1>) */
   title: string;
   /** One line under the heading */
   description: string;
   /** 3–4 rows: lucide icon + short title + one muted line */
   features: ReadonlyArray<{ icon: LucideIcon; title: string; text: string }>;
-  /** Small line at the bottom, e.g. "© 2026 UBE · Develop by SW" */
+  /** Small line at the bottom, e.g. "© 2026 UBE · Developed by SW" */
   footer?: string;
 };
 
@@ -47,14 +50,16 @@ export async function LoginShell({
   const t = await getTranslations('auth.login');
   // next/image does NOT prefix /public paths with the basePath — and neither
   // does a CSS mask url(); both carry it explicitly
-  const basePath = env.NEXT_PUBLIC_BASE_PATH;
+  const basePath = env.NEXT_PUBLIC_BASE_PATH || '';
 
   return (
     <div className={cn('min-h-svh', hero && 'lg:grid lg:grid-cols-2')}>
       {hero && (
         <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
           {HAS_PHOTO && (
-            <Image src={`${basePath}/login-hero.webp`} alt="" fill priority sizes="50vw" className="object-cover" />
+            // no `priority`: the panel is display:none below lg — preloading it would
+            // spend a phone's first bytes on an image it never shows
+            <Image src={`${basePath}/login-hero.webp`} alt="" fill sizes="50vw" className="object-cover" />
           )}
           <div aria-hidden className="absolute inset-0 bg-primary/65" />
 
@@ -71,7 +76,7 @@ export async function LoginShell({
 
           <div className="relative max-w-lg space-y-8">
             <div className="space-y-3">
-              <h2 className="text-4xl font-semibold tracking-tight">{hero.title}</h2>
+              <p className="text-4xl font-semibold tracking-tight">{hero.title}</p>
               <p className="text-lg text-primary-foreground/80">{hero.description}</p>
             </div>
             <ul className="space-y-5">
@@ -93,14 +98,14 @@ export async function LoginShell({
         </aside>
       )}
 
-      <section
+      <main
         className={cn(
           'flex min-h-svh items-center justify-center bg-muted/30 px-4 py-10',
           hero && 'lg:min-h-0'
         )}
       >
         <div className="w-full max-w-sm">{children}</div>
-      </section>
+      </main>
     </div>
   );
 }

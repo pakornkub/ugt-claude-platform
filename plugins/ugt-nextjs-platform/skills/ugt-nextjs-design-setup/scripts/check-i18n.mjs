@@ -141,6 +141,12 @@ const OPTIONAL_CONVERTED_FILES = [
   'lib/actions/password.ts',
   'app/(admin)/admin/users/page.tsx',
   'app/(admin)/admin/audit-logs/page.tsx',
+  // org identity (4.79.0) — pre-assigned roles ([DIRECTORY] only), users-page tabs,
+  // the after-login hook (SSO/LDAP only)
+  'components/preassign-manager.tsx',
+  'components/admin-users-tabs.tsx',
+  'lib/actions/admin-preassign.ts',
+  'lib/after-login.ts',
   // ugt-nextjs-mail-setup (phase 3, 2026-08-24) — optional, same reason.
   // lib/types/mail-templates.ts is intentionally NOT listed here: it holds
   // email BODY content (GREETING, EMAIL_FOOTER, heading, previewSample,

@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 673b5cc2f248
+// kit-hash: 2253d583d749
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -39,7 +39,7 @@ export const authTh = {
     PASSWORD_REQUIRED: 'กรอกรหัสผ่าน',
     AD_USERNAME_REQUIRED: 'กรอกชื่อผู้ใช้ AD',
     ORG_EMAIL_NOT_LOCAL: 'อีเมลองค์กรเป็นของบัญชี SSO/AD — บัญชี local ต้องใช้อีเมลนอกโดเมนองค์กร',
-    ORG_EMAIL_USE_SSO: 'อีเมลองค์กรเข้าสู่ระบบด้วย SSO/AD ไม่ใช่รหัสผ่าน local',
+    ORG_EMAIL_USE_SSO: 'อีเมลองค์กรต้องเข้าสู่ระบบด้วย SSO/AD ไม่ใช่รหัสผ่าน local',
     ORG_ACCOUNT_CONFLICT: 'อีเมลนี้ถูกใช้กับบัญชีอื่นในระบบอยู่แล้ว กรุณาแจ้งผู้ดูแลระบบ',
     USER_ALREADY_EXISTS: 'คนนี้เข้าสู่ระบบแล้ว — กำหนดบทบาทที่แท็บ "ทั้งหมด"',
     PREASSIGN_EXISTS: 'คนนี้ถูกตั้งบทบาทล่วงหน้าไว้แล้ว',
@@ -153,6 +153,7 @@ export const authTh = {
   adminUserActions: {
     createSuccess: 'สร้างผู้ใช้แล้ว — แจ้งรหัสผ่านตั้งต้นให้เจ้าตัวและให้เปลี่ยนทันที',
     addLocalUser: 'เพิ่มผู้ใช้ local',
+    // [DIRECTORY] — ไม่มี view HR (ไม่มีแท็บ "ตั้งล่วงหน้า") ให้ลบวงเล็บ "(ตั้งบทบาท…)" ออก ทั้ง th และ en
     addUserHintSso:
       'บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก (ตั้งบทบาทไว้ก่อนได้ที่แท็บ "ตั้งล่วงหน้า") · บัญชี local ใช้อีเมลโดเมนองค์กรไม่ได้',
     addUserHintRole: 'แล้วค่อยกำหนดบทบาทจากตาราง',
@@ -213,8 +214,9 @@ export const authTh = {
     title: 'ผู้ใช้งาน',
     description: 'ผู้ใช้งานทั้งหมดของระบบ — กำหนดบทบาทให้แต่ละคนได้ที่นี่',
     tabAll: 'ทั้งหมด',
-    tabNoRole: 'ยังไม่มี role',
-    tabPending: 'ตั้งล่วงหน้า (รอ login)',
+    tabNoRole: 'ยังไม่มีบทบาท',
+    // [DIRECTORY] — แท็บนี้มีเฉพาะโปรเจคที่ต่อ view HR
+    tabPending: 'ตั้งล่วงหน้า (รอเข้าระบบ)',
   },
   preassign: {
     hint: 'ตั้งบทบาทให้คนที่ยังไม่เคยเข้าระบบ — ไม่ได้สร้างบัญชี บทบาทจะถูกใส่ให้เมื่อเจ้าตัวเข้าด้วย SSO/AD ครั้งแรก',

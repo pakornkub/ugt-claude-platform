@@ -206,7 +206,8 @@ employee view over a linked server — `lib/directory.ts`.
   (`references/login-page.md`). Hero copy comes from the project's `app`
   catalog — never literals in `login-shell.tsx` (kit file, overwritten on
   update) and no Thai in the page. Photo optional: `public/login-hero.webp`,
-  ~1440 px, ≤ 400 KB. No `<main>` in the page — the root layout has it.
+  ~1440 px, ≤ 400 KB. No `<main>` in the page — `LoginShell` renders the
+  form column as `<main>` (the root layout has none).
 
 ## proxy.ts
 

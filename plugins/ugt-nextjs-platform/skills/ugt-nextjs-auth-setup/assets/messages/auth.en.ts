@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 3b74c6a198fb
+// kit-hash: 75ffafc6350f
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -45,7 +45,7 @@ export const authEn: AuthCatalog = {
     PASSWORD_REQUIRED: 'Please enter a password.',
     AD_USERNAME_REQUIRED: 'Please enter your AD username.',
     ORG_EMAIL_NOT_LOCAL: 'Company email addresses belong to SSO/AD accounts — a local account needs an email outside the company domains',
-    ORG_EMAIL_USE_SSO: 'Company email addresses sign in with SSO/AD, not a local password',
+    ORG_EMAIL_USE_SSO: 'Company email addresses must sign in with SSO/AD, not a local password',
     ORG_ACCOUNT_CONFLICT: 'This email is already used by another account in the system — please contact the administrator',
     USER_ALREADY_EXISTS: 'This person has already signed in — assign the role on the All tab',
     PREASSIGN_EXISTS: 'A role is already pre-assigned to this person',
@@ -157,6 +157,7 @@ export const authEn: AuthCatalog = {
   adminUserActions: {
     createSuccess: 'User created — tell them the initial password and have them change it right away',
     addLocalUser: 'Add local user',
+    // [DIRECTORY] — no HR view (no Pre-assigned tab): drop the "(pre-assign … tab)" clause, th and en
     addUserHintSso:
       "SSO/AD accounts don't need to be added — they're created automatically on first sign-in (pre-assign their role on the Pre-assigned tab). Local accounts can't use a company email domain.",
     addUserHintRole: 'Assign a role from the table afterward',
@@ -218,6 +219,7 @@ export const authEn: AuthCatalog = {
     description: 'Everyone who can use the system — assign each person a role here',
     tabAll: 'All',
     tabNoRole: 'No role yet',
+    // [DIRECTORY] — this tab exists only in projects with the HR view
     tabPending: 'Pre-assigned (awaiting sign-in)',
   },
   preassign: {

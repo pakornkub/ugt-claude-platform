@@ -1,8 +1,8 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/actions/admin-preassign.ts
-// kit-hash: 72dee537e169
+// kit-hash: 42363d084c04
 'use server';
 
-// lib/actions/admin-preassign.ts — tab "ตั้งล่วงหน้า (รอ login)" ของ /admin/users
+// lib/actions/admin-preassign.ts — tab "ตั้งล่วงหน้า (รอเข้าระบบ)" ของ /admin/users
 // installed by ugt-nextjs-auth-setup — [DIRECTORY]: ลบไฟล์นี้เมื่อไม่มี view พนักงาน
 //
 // **ตั้ง role ล่วงหน้า ไม่ใช่สร้างบัญชีล่วงหน้า** (มติ 2026-08-11 แก้ 2026-10-14):
@@ -177,6 +177,10 @@ export async function updatePreassignAction(id: string, roleId: string): Promise
     return { success: false, code: 'ROLE_NOT_FOUND' };
   }
 
+  // ค่าเดิมไว้ลง audit — ประวัติของแถวรออยู่ใน ActivityLogs อย่างเดียว (ไม่มี soft delete)
+  const before = await prisma.pendingRoleAssignment.findUnique({ where: { id }, select: { roleId: true } });
+  if (!before) return { success: false, code: 'PREASSIGN_NOT_FOUND' };
+
   // updateMany: แถวที่เพิ่งถูกใช้ไปตอนเจ้าตัว login ไม่ throw แค่นับได้ 0
   const updated = await prisma.pendingRoleAssignment.updateMany({
     where: { id },
@@ -184,7 +188,11 @@ export async function updatePreassignAction(id: string, roleId: string): Promise
   });
   if (updated.count === 0) return { success: false, code: 'PREASSIGN_NOT_FOUND' };
 
-  await audit(gate.actorId, AUDIT_ACTIONS.USERS_PREASSIGN_UPDATE, { pendingId: id, roleId });
+  await audit(gate.actorId, AUDIT_ACTIONS.USERS_PREASSIGN_UPDATE, {
+    pendingId: id,
+    previousRoleId: before.roleId,
+    roleId,
+  });
   revalidatePath('/admin/users');
   return { success: true };
 }

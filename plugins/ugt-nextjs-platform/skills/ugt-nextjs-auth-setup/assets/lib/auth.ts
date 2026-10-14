@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: 2ff0fc5ede0e
+// kit-hash: 744f6697b77e
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
@@ -158,12 +158,22 @@ export const auth = betterAuth({
     expiresIn: 8 * 60 * 60, // 8 hours — org standard
     updateAge: 30 * 60, // refresh if 30 min remaining — org standard
   },
+  // [METHOD: SSO] — declared so the value mapProfileToUser returns is STORED on
+  // the row Better Auth creates at the first SSO login (undeclared fields are
+  // dropped). It is the AD login Keycloak vouched for (preferred_username) and
+  // the key every later step uses: directory refresh, pre-assigned role, LDAP
+  // upsert. `input: false` — no client request can set it.
+  user: {
+    additionalFields: {
+      ldapUsername: { type: 'string', required: false, input: false },
+    },
+  },
   // [METHOD: SSO] — allow Keycloak SSO to link into the existing row of the SAME
   // AD identity (an LDAP-first user) by email. Linking is scoped by
   // mapProfileToUser below: it hands Better Auth the email of the row whose
   // ldapUsername matches, and refuses when the email belongs to any other row
-  // with no Keycloak account (a Local account, a different AD user) — so SSO can
-  // never be linked into a Local account.
+  // not linked to this Keycloak subject (a Local account, a different AD user)
+  // — so SSO can never be linked into a Local account.
   account: {
     accountLinking: {
       enabled: true,
@@ -208,8 +218,16 @@ export const auth = betterAuth({
                 }),
                 ...keycloakEndpoints(env.KEYCLOAK_ISSUER), // survives a failed discovery — see above
                 mapProfileToUser: async (profile: Record<string, unknown>) => {
-                  const loginName = profile.preferred_username as string | undefined;
-                  if (!loginName) return {};
+                  const loginName = typeof profile.preferred_username === 'string' ? profile.preferred_username : '';
+                  const subject = typeof profile.sub === 'string' ? profile.sub : '';
+                  if (!loginName || !subject) {
+                    // No AD login = no identity to resolve and nothing to check the
+                    // email clash against — refuse (fail closed, same path as the
+                    // clash below) instead of handing Better Auth an email to link by.
+                    throw new Error(
+                      'SSO login refused: the Keycloak profile has no preferred_username/sub — check the "profile" scope of the Keycloak client',
+                    );
+                  }
 
                   // Identity is the AD username, not the email. The AD email and the
                   // stored email can drift apart (e.g. user@company.com in AD vs
@@ -242,12 +260,15 @@ export const auth = betterAuth({
                     // (a Local account on an org email, another AD user, a row from
                     // before ORG_EMAIL_DOMAINS) would be handed to whoever logs in here —
                     // and its password holder keeps signing in as the employee. Refuse
-                    // (fail closed — no .catch); an admin resolves the other row
-                    // (references/troubleshooting-sso.md §Org email held by another account).
+                    // (fail closed — no .catch). Only a row already linked to THIS
+                    // Keycloak subject is the same person; a row carrying another AD
+                    // identity's Keycloak account is refused too. An admin resolves the
+                    // other row — references/troubleshooting-sso.md, the row starting
+                    // "SSO ends in an error and the log says `SSO login for …refused`".
                     const clash = await prisma.user.findFirst({
                       where: {
                         email: { in: orgEmailVariants(email) },
-                        accounts: { none: { providerId: 'keycloak' } },
+                        accounts: { none: { providerId: 'keycloak', accountId: subject } },
                       },
                       select: { id: true },
                     });
@@ -258,13 +279,11 @@ export const auth = betterAuth({
                     }
                   }
 
-                  // EXTENSION POINT: enrich the user from your own directory / HR source here
-                  // (e.g. look up employee master data by loginName and return extra custom
-                  // user fields). NOTE: Better Auth does NOT reliably persist custom fields
-                  // returned from mapProfileToUser — only standard fields (name, email, image)
-                  // propagate via overrideUserInfo. Persist custom fields in the
-                  // databaseHooks.session.create.after hook below instead.
-                  return { email, ldapUsername: loginName, authType: 'sso' };
+                  // ldapUsername is stored because user.additionalFields declares it.
+                  // Any other custom field returned here is dropped — persist those in
+                  // the databaseHooks.session.create.after hook below (where the
+                  // directory fields are written).
+                  return { email, ldapUsername: loginName };
                 },
               },
             ],
@@ -287,8 +306,10 @@ export const auth = betterAuth({
             .catch(() => null);
 
           if (keycloakAccount) {
-            // Fetch user's ldapUsername (set by a prior LDAP login) and email
-            // (fallback: derive directory username from email prefix, user@domain → user)
+            // ldapUsername = the AD login Keycloak sent (stored at the first SSO
+            // login via user.additionalFields) or a prior LDAP login. NEVER derived
+            // from the email: a mailbox local part is not an AD login, and matching
+            // on it hands one person another's HR record and pending role.
             const userData = await prisma.user
               .findUnique({
                 where: { id: session.userId },
@@ -296,7 +317,7 @@ export const auth = betterAuth({
               })
               .catch(() => null);
 
-            const loginName = userData?.ldapUsername ?? userData?.email?.split('@')[0] ?? null;
+            const loginName = userData?.ldapUsername ?? null; // null → no directory lookup, no pending role
 
             // This hook runs on every SSO session creation — the reliable place to
             // refresh the directory fields (Better Auth does NOT persist custom
@@ -310,8 +331,6 @@ export const auth = betterAuth({
                 where: { id: session.userId },
                 data: {
                   authType: 'sso',
-                  // Set ldapUsername if not already stored (SSO-first users)
-                  ...(loginName && !userData?.ldapUsername ? { ldapUsername: loginName } : {}),
                   ...directoryUserFields(person),
                 },
               })

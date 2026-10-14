@@ -1,8 +1,9 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
-// kit-hash: 498b5acc5d10
+// kit-hash: 72ff3a996a4b
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL], run once
 //
-//   npx tsx scripts/create-first-user.ts "ชื่อ" you@company.co.th 'InitialPass1'
+//   npx tsx scripts/create-first-user.ts "ชื่อ" app-admin@example.com 'InitialPass1'
+//   (อีเมลนอกโดเมนองค์กรเท่านั้น — ORG_EMAIL_DOMAINS ถูกปฏิเสธ ดูด้านล่าง)
 //
 // แก้ปัญหาไก่กับไข่ของโปรเจคที่มีแต่ local login: บัญชี local สร้างได้จาก
 // /admin/users เท่านั้น แต่หน้านั้นต้อง login ก่อน และยังไม่มีใครให้ login

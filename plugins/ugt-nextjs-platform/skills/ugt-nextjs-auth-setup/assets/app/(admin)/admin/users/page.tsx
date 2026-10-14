@@ -1,7 +1,7 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: 0ea8d0780914
+// kit-hash: 80bec346463e
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the tables live in client components.
-// แท็บ: ทั้งหมด · ยังไม่มี role · ตั้งล่วงหน้า (รอ login) — `?tab=no-role|pending` เปิดแท็บนั้น
+// แท็บ: ทั้งหมด · ยังไม่มีบทบาท · ตั้งล่วงหน้า (รอเข้าระบบ) — `?tab=no-role|pending` เปิดแท็บนั้น
 // ตรง ๆ (ลิงก์ในเมลแจ้งแอดมินชี้ ?tab=no-role)
 // DataTable โหมด client (DESIGN.md §4): master data ดึงทั้งชุดแล้ว sort/filter/paginate
 // ในหน่วยความจำ — ponytail: ผู้ใช้หลักพันคนขึ้นไปค่อยย้ายเป็นโหมด server แบบ audit-logs
@@ -101,22 +101,27 @@ export default async function AdminUsersPage({
         )}
       </PageHeader>
 
-      <AdminUsersTabs defaultValue={activeTab}>
-        <TabsList>
-          <TabsTrigger value="all">
-            {t('tabAll')}
-            <Badge variant="outline">{rows.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="no-role">
-            {t('tabNoRole')}
-            <Badge variant="outline">{noRole.length}</Badge>
-          </TabsTrigger>
-          {/* [DIRECTORY] */}
-          <TabsTrigger value="pending">
-            {t('tabPending')}
-            <Badge variant="outline">{pendingRows.length}</Badge>
-          </TabsTrigger>
-        </TabsList>
+      {/* key: a soft navigation to another ?tab= (the admin mail link, a menu
+          click) re-mounts the tabs so the URL wins over the previous local state */}
+      <AdminUsersTabs key={activeTab} defaultValue={activeTab}>
+        {/* three labels + counts overflow a 375 px screen — scroll the strip, not the page */}
+        <div className="-mx-1 overflow-x-auto px-1">
+          <TabsList>
+            <TabsTrigger value="all">
+              {t('tabAll')}
+              <Badge variant="outline">{rows.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="no-role">
+              {t('tabNoRole')}
+              <Badge variant="outline">{noRole.length}</Badge>
+            </TabsTrigger>
+            {/* [DIRECTORY] */}
+            <TabsTrigger value="pending">
+              {t('tabPending')}
+              <Badge variant="outline">{pendingRows.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="all" className="pt-2">
           <UsersTable tableId="admin-users" users={rows} {...tableProps} />
         </TabsContent>

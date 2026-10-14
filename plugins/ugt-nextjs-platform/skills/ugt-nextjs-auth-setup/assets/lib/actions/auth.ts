@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
-// kit-hash: 5f1b681b709b
+// kit-hash: a31813d47215
 'use server';
 
 import { cookies, headers } from 'next/headers';
@@ -149,11 +149,17 @@ export async function ldapLoginAction(values: {
     return { code: 'INVALID_AD_CREDENTIALS' };
   }
 
+  // From here on the identity is the directory's sAMAccountName for the account
+  // the bind authenticated (lib/ldap.ts) — never the typed username: case,
+  // a UPN prefix that differs from the sAMAccountName, or stray input would
+  // otherwise key a second row or another person's HR record / pending role.
+  const adLogin = ldapUser.sAMAccountName;
+
   // 2. Upsert user in DB, enriched from the central employee directory.
   // AD ให้แค่ displayName กับอีเมล — รหัสพนักงาน หน่วยงาน ตำแหน่ง หัวหน้า
   // อยู่ในฐานพนักงานกลาง เติมทุกครั้งที่ login สำเนาในตารางจะได้ไม่ค้างเก่า
   // (คืน null เมื่อ linked server ล่ม — login ต้องไม่พังตามไปด้วย)
-  const person = await getDirectoryPerson(username);
+  const person = await getDirectoryPerson(adLogin);
   const directoryFields = directoryUserFields(person);
   // AD's spelling of the org domain → the canonical one (ORG_EMAIL_DOMAINS)
   const email = toCanonicalEmail(ldapUser.email);
@@ -167,14 +173,14 @@ export async function ldapLoginAction(values: {
       email: { in: orgEmailVariants(email) },
       // spelled out: `NOT { ldapUsername }` is SQL `NOT (col = @p)`, which drops
       // the NULL rows — exactly the Local accounts this check exists for
-      OR: [{ ldapUsername: null }, { ldapUsername: { not: username } }],
+      OR: [{ ldapUsername: null }, { ldapUsername: { not: adLogin } }],
     },
     select: { id: true },
   });
   if (clash) {
     await logAuthEvent(AUDIT_ACTIONS.LOGIN_FAILED, 'anonymous', {
       authType: 'ldap',
-      username,
+      username: adLogin,
       reason: 'ORG_ACCOUNT_CONFLICT',
       conflictUserId: clash.id,
       ip,
@@ -184,7 +190,7 @@ export async function ldapLoginAction(values: {
   }
 
   const user = await prisma.user.upsert({
-    where: { ldapUsername: username },
+    where: { ldapUsername: adLogin },
     update: {
       authType: 'ldap', // always update — reflects last login method
       name: ldapUser.displayName,
@@ -192,7 +198,7 @@ export async function ldapLoginAction(values: {
       ...directoryFields,
     },
     create: {
-      ldapUsername: username,
+      ldapUsername: adLogin,
       authType: 'ldap',
       name: ldapUser.displayName,
       email,
@@ -202,7 +208,7 @@ export async function ldapLoginAction(values: {
   });
 
   // Pre-assigned role + "no role yet" admin notice — never throws.
-  await afterOrgLogin({ userId: user.id, loginName: username, person });
+  await afterOrgLogin({ userId: user.id, loginName: adLogin, person });
 
   // 3. Create session directly in DB (Better Auth compatible)
   // MUST match auth.ts session.expiresIn (8 hours)

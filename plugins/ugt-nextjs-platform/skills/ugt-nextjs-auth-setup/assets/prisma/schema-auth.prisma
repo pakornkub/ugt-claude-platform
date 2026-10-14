@@ -26,6 +26,8 @@ model user {
 
   // Directory username (sAMAccountName / preferred_username) — used as the LDAP
   // upsert key and to link SSO logins back to the directory identity.
+  // MSSQL: @unique on a nullable column allows ONE NULL row — with Local login
+  // (LdapUsername NULL) swap it for a filtered index (schema-and-env.md §SQL Server).
   ldapUsername String?  @unique                              @map("LdapUsername")
 
   // ─── Directory fields (จากฐานพนักงานกลางผ่าน linked server) ──────────────
@@ -45,12 +47,12 @@ model user {
   /// รหัสพนักงานของหัวหน้า — ฐานของสายอนุมัติ
   superEmpCode String?  @db.NVarChar(50)                       @map("SuperEmpCode")
 
-  /// เมลแจ้งแอดมิน "login แล้วยังไม่มี role" ส่งไปเมื่อไร — ครั้งเดียวต่อคน
+  /// เมลแจ้งแอดมิน "login แล้วยังไม่มีบทบาท" ส่งไปเมื่อไร — ครั้งเดียวต่อคน
   /// (lib/after-login.ts · ต้องมี ugt-nextjs-mail-setup ถ้าไม่มีจะว่างตลอด)
   noRoleNotifiedAt DateTime?                                   @map("NoRoleNotifiedAt")
 
   @@index([empCode])
-  @@index([roleId]) // badge "ยังไม่มี role" นับ roleId IS NULL ทุกครั้งที่เปิดหน้า admin
+  @@index([roleId]) // badge "ยังไม่มีบทบาท" นับ roleId IS NULL ทุกครั้งที่เปิดหน้า admin
 
   sessions session[]
   accounts account[]

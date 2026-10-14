@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: 18cdfaa51220
+// kit-hash: 99fa683c4f3c
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -51,7 +51,32 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
   if (userId === session.user.id) {
     return { success: false, code: 'CANNOT_CHANGE_OWN_ROLE' };
   }
-  await prisma.user.update({ where: { id: userId }, data: { roleId } });
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { empCode: true, ldapUsername: true },
+  });
+  if (!target) return { success: false, code: 'USER_NOT_FOUND' };
+
+  // [DIRECTORY] An admin's explicit choice here — including "no role" — is final:
+  // a pending pre-assignment for the same person would otherwise be applied at
+  // their next login and undo it (after-login only checks roleId IS NULL).
+  // Same HR keys after-login matches on; never email.
+  const pendingKeys = [
+    ...(target.empCode ? [{ empCode: target.empCode }] : []),
+    ...(target.ldapUsername ? [{ loginName: target.ldapUsername }] : []),
+  ];
+  const superseded = pendingKeys.length
+    ? await prisma.pendingRoleAssignment.findMany({
+        where: { OR: pendingKeys },
+        select: { id: true, empCode: true, roleId: true },
+      })
+    : [];
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: userId }, data: { roleId } }),
+    // [DIRECTORY]
+    prisma.pendingRoleAssignment.deleteMany({ where: { id: { in: superseded.map((p) => p.id) } } }),
+  ]);
 
   // 4. Audit log (non-blocking)
   await prisma.activityLog
@@ -63,6 +88,19 @@ export async function assignUserRoleAction(userId: string, roleId: string | null
       },
     })
     .catch(() => {});
+  // [DIRECTORY] each removed pending row gets the same audit as a delete on the
+  // pending tab, with the reason — the users.preassign-* trail stays complete
+  for (const { id, ...row } of superseded) {
+    await prisma.activityLog
+      .create({
+        data: {
+          userId: session.user.id,
+          action: AUDIT_ACTIONS.USERS_PREASSIGN_DELETE,
+          detail: JSON.stringify({ pendingId: id, ...row, reason: 'superseded-by-role-assign', targetId: userId }),
+        },
+      })
+      .catch(() => {});
+  }
 
   revalidatePath('/admin/users');
   return { success: true };

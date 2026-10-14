@@ -339,9 +339,18 @@ check('Login page: two-column hero, copy from the project catalog (DESIGN.md §3
     // hero copy belongs to messages/app.*.ts — a literal in the page is untranslatable and drifts
     if (/[฀-๿]/.test(page)) problems.push(`${loginPage} holds Thai text in code — build the hero from getTranslations('app.loginHero')`);
   }
-  if (/<main\b/.test(page)) problems.push(`${loginPage} renders <main> — the root layout already wraps the route in one (nested landmarks)`);
+  // LoginShell renders the form column as the page's <main> (the root layout has none)
+  if (/<LoginShell\b/.test(page) && /<main\b/.test(page)) {
+    problems.push(`${loginPage} renders <main> inside <LoginShell>, which already is the <main> landmark (nested landmarks)`);
+  }
   if (has('components/login-shell.tsx')) {
     const shell = stripComments(read('components/login-shell.tsx'));
+    if (!/<main\b/.test(shell)) {
+      problems.push('components/login-shell.tsx: the form column is not <main> — the login page has no main landmark (references/login-page.md §1)');
+    }
+    if (/<h[1-6]\b/.test(shell)) {
+      problems.push("components/login-shell.tsx: the hero holds a heading that comes before the form's <h1> in document order — keep the title as styled text");
+    }
     if (!/\bhidden\b[^"'`]*\blg:flex\b/.test(shell)) problems.push('components/login-shell.tsx: the hero is not `hidden … lg:flex` — mobile would get the panel above the form');
   }
   if (has('public/login-hero.webp')) {
@@ -509,8 +518,21 @@ check('SSO/LDAP never link into another account (Local on an org email)', () => 
   const m = selectedMethods();
   const problems = [];
   // SSO: Better Auth links by email; mapProfileToUser must refuse a row that is not this AD identity
-  if (m.has('SSO') && !/orgEmailVariants[\s\S]{0,400}providerId:\s*'keycloak'/.test(code('lib/auth.ts'))) {
+  const authTs = code('lib/auth.ts');
+  if (m.has('SSO') && !/orgEmailVariants[\s\S]{0,400}providerId:\s*'keycloak'/.test(authTs)) {
     problems.push("mapProfileToUser does not refuse an email held by a row with no Keycloak account — SSO links into a Local account and two people share it (§2 item 11)");
+  } else if (m.has('SSO') && !/providerId:\s*'keycloak',\s*accountId\b/.test(authTs)) {
+    // any Keycloak account is not enough — a different AD identity sharing the mailbox must be refused too
+    problems.push("mapProfileToUser's clash check skips any row with ANY Keycloak account — require the same subject: accounts: { none: { providerId: 'keycloak', accountId: <profile.sub> } }");
+  }
+  if (m.has('SSO')) {
+    // the AD login must come from Keycloak (preferred_username), never from the mailbox local part
+    if (/email\??\.split\(\s*['"]@/.test(authTs)) {
+      problems.push("lib/auth.ts derives the AD login from the email (email.split('@')) — another person's HR record / pending role can match; use the stored ldapUsername (preferred_username) or null");
+    }
+    if (!/additionalFields[\s\S]{0,300}ldapUsername/.test(authTs)) {
+      problems.push('lib/auth.ts does not declare user.additionalFields.ldapUsername — Better Auth drops it from mapProfileToUser, so a first SSO login has no AD login to key the directory and pending role on');
+    }
   }
   // LDAP: the upsert is keyed on ldapUsername; a clash on email must be refused, NULL rows included
   if (m.has('LDAP') && !/ldapUsername:\s*null/.test(code('lib/actions/auth.ts'))) {
@@ -529,8 +551,13 @@ check('Pre-assigned roles: HR identity only, applied at first login, never pre-c
   const problems = [];
   const actions = code('lib/actions/admin-preassign.ts');
   // pre-ASSIGNMENT, not pre-REGISTRATION: no user/account row may be born here
-  if (/prisma\.(user|account)\.(create|upsert|createMany)\b/.test(actions)) {
+  // (any client — prisma.user.create, tx.user.create, db.account.upsert …)
+  const createsRows = /\.(user|account)\.(create|upsert|createMany)\b/;
+  if (createsRows.test(actions)) {
     problems.push('admin-preassign.ts creates user/account rows — that is pre-registration (forbidden, มติ 2026-08-11): store a PendingRoleAssignments row only');
+  }
+  if (createsRows.test(code('lib/after-login.ts'))) {
+    problems.push('lib/after-login.ts creates user/account rows — applying a pending role only updates the row the login already made');
   }
   if (!/getDirectoryPersonByEmpCode/.test(actions)) {
     problems.push('createPreassignAction does not re-resolve the person from the HR view — a client-typed loginName is the duplicate-user trap the มติ exists for');
@@ -545,8 +572,12 @@ check('Pre-assigned roles: HR identity only, applied at first login, never pre-c
     if (!/pendingRoleAssignment/.test(after) || !/USERS_PREASSIGN_APPLY/.test(after)) {
       problems.push('lib/after-login.ts does not apply + audit (USERS_PREASSIGN_APPLY) the pending role');
     }
-    if (/\.email\b[^\n]*pendingRoleAssignment|pendingRoleAssignment[\s\S]{0,200}where:\s*\{\s*email/.test(after)) {
-      problems.push('the pending role is matched by email — match by EmpCode/ADLoginName only');
+    // the whole function, not one query shape: any `email:` key in it is a match/filter by email
+    const apply = after.match(/function\s+applyPendingRole\b[\s\S]*?\n\}/)?.[0] ?? '';
+    if (!apply) {
+      problems.push('lib/after-login.ts has no applyPendingRole() — cannot check how the pending role is matched');
+    } else if (/\bemail\s*:/.test(apply)) {
+      problems.push('applyPendingRole uses an `email:` key — the pending role must be matched by EmpCode/ADLoginName only, never email');
     }
   }
   const m = selectedMethods();
@@ -560,7 +591,7 @@ check('Pre-assigned roles: HR identity only, applied at first login, never pre-c
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('"ยังไม่มี role" is visible: users-page tab + nav badge', () => {
+check('"ยังไม่มีบทบาท" is visible: users-page tab + nav badge', () => {
   const files = sourceFiles().map((f) => ({ rel: relative(ROOT, f).replaceAll('\\', '/'), f }));
   const page = files.find((x) => x.rel.endsWith('admin/users/page.tsx'));
   if (!page) return { ok: true, msg: 'no /admin/users page (reported above)' };

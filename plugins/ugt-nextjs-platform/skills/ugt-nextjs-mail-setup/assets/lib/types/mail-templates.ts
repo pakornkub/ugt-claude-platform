@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-mail-setup/lib/types/mail-templates.ts
-// kit-hash: 02d2927ffd92
+// kit-hash: 1e2c60395cd8
 // source: ugt-hrms lib/types/mail-templates.ts — generalized by ugt-nextjs-mail-setup
 // (HR workflows removed; the three keys below are a working approval example —
 // rename them to your domain and add more.)
@@ -28,7 +28,7 @@ export const MAIL_TEMPLATE_KEYS = [
   // ที่หยุดที่ ] ตัวแรก คีย์ที่อยู่ถัดจากนั้นจะหายไปจากการตรวจเงียบ ๆ
   'auth.password-reset',
   // ใช้โดย lib/after-login.ts (ugt-nextjs-auth-setup) — แจ้งแอดมินเมื่อมีคน SSO/LDAP
-  // login แล้วยังไม่มี role ครั้งเดียวต่อคน · ลบได้เมื่อโปรเจคมีแต่ local login
+  // login แล้วยังไม่มีบทบาท ครั้งเดียวต่อคน · ลบได้เมื่อโปรเจคมีแต่ local login
   'auth.user-without-role',
 ] as const;
 
@@ -99,6 +99,11 @@ export interface MailTemplateDefinition {
   cta?: MailCtaSpec;
 }
 
+/** `{{recipientName}}` of a mail sent to every admin at once (`auth.user-without-role`,
+ *  from lib/after-login.ts) — email body wording, so it lives here with the defaults
+ *  and not in the auth kit file. */
+export const ADMIN_RECIPIENT_NAME = 'ผู้ดูแลระบบ';
+
 export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
   {
     key: 'request.submitted',
@@ -149,7 +154,7 @@ export const MAIL_TEMPLATE_DEFINITIONS: MailTemplateDefinition[] = [
     heading: 'มีผู้ใช้ใหม่ยังไม่มีบทบาท',
     variables: ['appName', 'recipientName', 'userName', 'userEmail', 'empCode', 'department', 'usersUrl'],
     previewSample: {
-      recipientName: 'ผู้ดูแลระบบ',
+      recipientName: ADMIN_RECIPIENT_NAME,
       userName: 'สมหญิง ตั้งใจ',
       userEmail: 'somying.t@example.com',
       empCode: 'E01234',
@@ -284,14 +289,17 @@ export const DEFAULT_MAIL_TEMPLATES: Record<MailTemplateKey, MailTemplate> = {
     ].join(''),
   },
 
-  // ส่งจาก lib/after-login.ts ถึงทุกคนที่ถือ users:update — ปุ่มไปแท็บ "ยังไม่มี role" เป็น chrome
+  // ส่งจาก lib/after-login.ts ถึงทุกคนที่ถือ users:update — ปุ่มไปแท็บ "ยังไม่มีบทบาท" เป็น chrome
   'auth.user-without-role': {
     subject: '[{{appName}}] {{userName}} เข้าระบบแล้วแต่ยังไม่มีบทบาท',
     html: [
       '<p>มีผู้ใช้เข้าสู่ระบบเป็นครั้งแรกและยังไม่ได้รับบทบาท จึงยังใช้งานได้เฉพาะหน้าทั่วไป</p>',
       '<p><strong>ชื่อ:</strong> {{userName}}<br><strong>อีเมล:</strong> {{userEmail}}<br>',
       '<strong>รหัสพนักงาน:</strong> {{empCode}}<br><strong>หน่วยงาน:</strong> {{department}}</p>',
-      '<p>อีเมลนี้ส่งครั้งเดียวต่อผู้ใช้ — ครั้งหน้าตั้งบทบาทล่วงหน้าได้ที่แท็บ "ตั้งล่วงหน้า" ก่อนเจ้าตัวเข้าระบบ</p>',
+      '<p>อีเมลนี้ส่งครั้งเดียวต่อผู้ใช้',
+      // [DIRECTORY] — แท็บ "ตั้งล่วงหน้า" มีเฉพาะโปรเจคที่ต่อ view HR: ไม่มีให้ลบบรรทัดนี้
+      ' — ครั้งหน้าตั้งบทบาทล่วงหน้าได้ที่แท็บ "ตั้งล่วงหน้า" ก่อนเจ้าตัวเข้าระบบ',
+      '</p>',
     ].join(''),
   },
 

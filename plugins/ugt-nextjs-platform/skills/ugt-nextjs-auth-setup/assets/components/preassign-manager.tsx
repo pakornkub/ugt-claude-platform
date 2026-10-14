@@ -1,7 +1,7 @@
 'use client';
 // kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/preassign-manager.tsx
-// kit-hash: ec2ea96719c6
-// components/preassign-manager.tsx — แท็บ "ตั้งล่วงหน้า (รอ login)" ของ /admin/users
+// kit-hash: 0c2019f71f9a
+// components/preassign-manager.tsx — แท็บ "ตั้งล่วงหน้า (รอเข้าระบบ)" ของ /admin/users
 // installed by ugt-nextjs-auth-setup — [DIRECTORY]: ลบไฟล์นี้เมื่อไม่มี view พนักงาน
 //
 // ตั้ง role ให้คนที่ยังไม่เคย login: ค้น view HR → เลือกคน → เลือก role → บันทึก
@@ -329,7 +329,15 @@ function AddFromHrDialog({ roles }: Readonly<{ roles: RoleOption[] }>) {
           </FormDialogBody>
 
           <FormDialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                // setOpen(false) alone skips onOpenChange — clear the search/pick too
+                setOpen(false);
+                reset();
+              }}
+            >
               {t('cancel')}
             </Button>
             <Button type="submit" form={ADD_FORM_ID} disabled={isSaving || !picked || !roleId}>
