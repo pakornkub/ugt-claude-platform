@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
-// kit-hash: 498e187d8723
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/scripts/create-first-user.ts
+// kit-hash: 498b5acc5d10
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL], run once
 //
 //   npx tsx scripts/create-first-user.ts "ชื่อ" you@company.co.th 'InitialPass1'
@@ -16,6 +16,7 @@ import { generateId } from 'better-auth';
 import { hashPassword } from 'better-auth/crypto';
 import { prisma } from '../lib/prisma';
 import { passwordSchema } from '../lib/password-policy';
+import { isOrgEmail } from '../lib/org-email';
 
 const [name, email, password] = process.argv.slice(2);
 
@@ -28,6 +29,12 @@ if (!name || !email || !password) {
 const parsed = passwordSchema.safeParse(password);
 if (!parsed.success) {
   console.error(`รหัสผ่านไม่ผ่านกฎ: ${parsed.error.issues[0]?.message}`);
+  process.exit(1);
+}
+
+// โดเมนองค์กร (ORG_EMAIL_DOMAINS) เป็นของ SSO/LDAP — บัญชี local บนนั้น login ไม่ได้อยู่ดี
+if (isOrgEmail(email)) {
+  console.error(`${email} อยู่บนโดเมนองค์กร (ORG_EMAIL_DOMAINS) — บัญชี local ใช้อีเมลนอกองค์กรเท่านั้น`);
   process.exit(1);
 }
 

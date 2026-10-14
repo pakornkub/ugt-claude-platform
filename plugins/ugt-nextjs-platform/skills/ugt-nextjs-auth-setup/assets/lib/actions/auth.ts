@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
-// kit-hash: a14271bec1e8
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/actions/auth.ts
+// kit-hash: 5f1b681b709b
 'use server';
 
 import { cookies, headers } from 'next/headers';
@@ -12,6 +12,8 @@ import { ldapBind } from '@/lib/ldap'; // [METHOD: LDAP] — remove if LDAP not 
 // [METHOD: LDAP] — remove with the enrichment below when the project has no
 // central employee directory to read from
 import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
+import { afterOrgLogin } from '@/lib/after-login'; // [METHOD: LDAP]
+import { isOrgEmail, orgEmailVariants, toCanonicalEmail } from '@/lib/org-email';
 import { AUDIT_ACTIONS, type AuditAction } from '@/lib/audit-actions';
 import { env } from '@/lib/env';
 
@@ -153,24 +155,54 @@ export async function ldapLoginAction(values: {
   // (คืน null เมื่อ linked server ล่ม — login ต้องไม่พังตามไปด้วย)
   const person = await getDirectoryPerson(username);
   const directoryFields = directoryUserFields(person);
+  // AD's spelling of the org domain → the canonical one (ORG_EMAIL_DOMAINS)
+  const email = toCanonicalEmail(ldapUser.email);
+
+  // The upsert is keyed on the AD username, so a row holding this mailbox but
+  // belonging to someone else (a Local account on an org email, another AD
+  // user) is never merged into — refuse instead of letting the unique email
+  // constraint throw mid-login (SKILL.md §2 item 10).
+  const clash = await prisma.user.findFirst({
+    where: {
+      email: { in: orgEmailVariants(email) },
+      // spelled out: `NOT { ldapUsername }` is SQL `NOT (col = @p)`, which drops
+      // the NULL rows — exactly the Local accounts this check exists for
+      OR: [{ ldapUsername: null }, { ldapUsername: { not: username } }],
+    },
+    select: { id: true },
+  });
+  if (clash) {
+    await logAuthEvent(AUDIT_ACTIONS.LOGIN_FAILED, 'anonymous', {
+      authType: 'ldap',
+      username,
+      reason: 'ORG_ACCOUNT_CONFLICT',
+      conflictUserId: clash.id,
+      ip,
+      userAgent,
+    });
+    return { code: 'ORG_ACCOUNT_CONFLICT' };
+  }
 
   const user = await prisma.user.upsert({
     where: { ldapUsername: username },
     update: {
       authType: 'ldap', // always update — reflects last login method
       name: ldapUser.displayName,
-      email: ldapUser.email,
+      email,
       ...directoryFields,
     },
     create: {
       ldapUsername: username,
       authType: 'ldap',
       name: ldapUser.displayName,
-      email: ldapUser.email,
+      email,
       emailVerified: true,
       ...directoryFields,
     },
   });
+
+  // Pre-assigned role + "no role yet" admin notice — never throws.
+  await afterOrgLogin({ userId: user.id, loginName: username, person });
 
   // 3. Create session directly in DB (Better Auth compatible)
   // MUST match auth.ts session.expiresIn (8 hours)
@@ -218,6 +250,13 @@ export async function localLoginAction(values: {
   const { ip, userAgent } = await getRequestMeta();
   if (!checkRateLimit(`local:${ip}`, 10, 15 * 60 * 1000)) {
     return { code: 'TOO_MANY_ATTEMPTS' };
+  }
+
+  // Org mailboxes sign in through SSO/LDAP only — lib/auth.ts refuses them at
+  // /sign-in/email too; checking here first gives the user the real reason
+  // (the domain is public knowledge, so this reveals nothing about accounts).
+  if (isOrgEmail(parsed.data.email)) {
+    return { code: 'ORG_EMAIL_USE_SSO' };
   }
 
   // NOTE: the method is auth.api.signInEmail(...) — auth.api.signIn.email(...) does NOT exist.

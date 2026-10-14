@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.66.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
-// kit-hash: 772c7e9f24c7
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/app/(admin)/layout.tsx
+// kit-hash: 4b0013945ef1
 // app/(admin)/layout.tsx — the ongoing admin section (users/roles/audit-logs).
 // Different route group from (admin-setup): that one only requires a session
 // (permissions don't exist pre-bootstrap); this one requires an actual
@@ -20,6 +20,7 @@ import { syncPermissionsIfNeeded } from '@/lib/permissions-sync';
 import { PERMISSIONS } from '@/lib/permissions';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminNav } from '@/components/admin-nav';
+import { getAdminNavBadges } from '@/lib/admin-badges';
 
 // Section-level guard: derived from sub-permissions, no separate "admin:read"
 // key (see references/rbac.md). Add new admin pages' read permission here too.
@@ -49,15 +50,20 @@ export default async function AdminLayout({
   // footer) calls useSidebar() and throws without it.
   // ข้อมูลตัวตนสำหรับ NavUser — query เดียวเฉพาะ fallback shell; โปรเจคที่มี
   // shell ของตัวเองส่งข้อมูลนี้จาก layout ของตัวเองอยู่แล้ว (SKILL.md §5.5 ข้อ 4)
-  const navUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { authType: true, userRole: { select: { name: true } } },
-  });
+  // badges = ตัวเลข "ยังไม่มี role" บนเมนูผู้ใช้งาน — sidebar ของโปรเจคเองเรียกตัวเดียวกัน (§5.6)
+  const [navUser, badges] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { authType: true, userRole: { select: { name: true } } },
+    }),
+    getAdminNavBadges(perms),
+  ]);
 
   return (
     <SidebarProvider>
       <AdminNav
         perms={perms}
+        badges={badges}
         user={{
           name: session.user.name,
           email: session.user.email,

@@ -29,8 +29,23 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
 - [ ] [Local] Admin "ตั้งรหัสผ่าน" on a row → that user's open sessions die and
       the new password works; the button is absent on SSO/LDAP rows
 - [ ] [LDAP/SSO] A brand-new AD user logs in for the first time → their row
-      appears with directory fields filled; assign the role from `/admin/users`
-      and it sticks on the next login
+      appears with directory fields filled and in the **ยังไม่มี role** tab, the
+      users menu shows a badge; assign the role there → the row leaves the tab,
+      the badge drops, and the role sticks on the next login
+- [ ] [Directory] Tab ตั้งล่วงหน้า → เพิ่มจาก HR: someone who has never logged in
+      is selectable, someone who has is marked "เข้าระบบแล้ว"; save with a role →
+      no `User` row appears; that person's first SSO/LDAP login lands **with**
+      the role, the pending row is gone, ActivityLogs has `users.preassign-create`
+      then `users.preassign-apply`; edit/delete a pending row write their own rows
+- [ ] [Mail + SSO/LDAP] A first login with no role mails every `users:update`
+      holder once; a second login sends nothing; with SMTP down the login is
+      still instant
+- [ ] [SSO/LDAP] With `ORG_EMAIL_DOMAINS=ube.com,ube.co.th`: a user whose AD
+      mail is `x@ube.co.th` is stored and shown as `x@ube.com`; "เพิ่มผู้ใช้
+      local" with `y@ube.co.th` → refused on the email field; a Local row made
+      earlier on an org email can no longer sign in (`ORG_EMAIL_USE_SSO`), and an
+      SSO/LDAP login of the employee holding that mailbox is refused instead of
+      linked (log names the row) — `org-identity.md` §7 has the clean-up
 - [ ] [Directory] Log in and check the `User` row: employee code, department,
       position, supervisor are filled — and by **both** SSO and LDAP, not one
 - [ ] [Directory] Change someone's department in the HR view, log in again →

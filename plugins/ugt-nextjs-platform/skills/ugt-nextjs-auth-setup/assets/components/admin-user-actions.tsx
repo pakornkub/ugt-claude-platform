@@ -1,11 +1,13 @@
 'use client';
-// kit: ugt-nextjs-platform 4.67.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
-// kit-hash: 8006946be2db
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/admin-user-actions.tsx
+// kit-hash: 04323c1ca75e
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ทางเดียวที่บัญชี local ถูกสร้าง — ไม่มีหน้าสมัครสมาชิก
 // บัญชี SSO/AD ไม่ต้องเพิ่มที่นี่: เกิดเองตอน login ครั้งแรก (มติ 2026-08-11)
-// แล้วค่อยกำหนด role จาก dropdown ในตาราง — ลบไฟล์นี้เมื่อไม่ได้เปิด local login
+// role กำหนดจาก dropdown ในตาราง หรือตั้งไว้ก่อนที่แท็บ "ตั้งล่วงหน้า" (แก้มติ
+// 2026-10-14 — ตั้ง role ไม่ใช่สร้างบัญชี) — ลบไฟล์นี้เมื่อไม่ได้เปิด local login
+// อีเมลโดเมนองค์กร (ORG_EMAIL_DOMAINS) ถูกปฏิเสธที่ createLocalUserAction
 // ฟอร์ม = react-hook-form + zodResolver + ui/field (DESIGN.md §4) · กฎรหัสผ่าน
 // มาจาก lib/password-policy.ts ที่เดียว ห้ามประกาศซ้ำที่นี่
 

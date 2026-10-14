@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 2de38a7c202f
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: b2b0b955a063
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -38,6 +38,14 @@ export const authTh = {
     EMAIL_INVALID: 'กรุณากรอกอีเมลให้ถูกต้อง',
     PASSWORD_REQUIRED: 'กรอกรหัสผ่าน',
     AD_USERNAME_REQUIRED: 'กรอกชื่อผู้ใช้ AD',
+    ORG_EMAIL_NOT_LOCAL: 'อีเมลองค์กรเป็นของบัญชี SSO/AD — บัญชี local ต้องใช้อีเมลนอกโดเมนองค์กร',
+    ORG_EMAIL_USE_SSO: 'อีเมลองค์กรเข้าสู่ระบบด้วย SSO/AD ไม่ใช่รหัสผ่าน local',
+    ORG_ACCOUNT_CONFLICT: 'อีเมลนี้ถูกใช้กับบัญชีอื่นในระบบอยู่แล้ว กรุณาแจ้งผู้ดูแลระบบ',
+    USER_ALREADY_EXISTS: 'คนนี้เข้าสู่ระบบแล้ว — กำหนดบทบาทที่แท็บ "ทั้งหมด"',
+    PREASSIGN_EXISTS: 'คนนี้ถูกตั้งบทบาทล่วงหน้าไว้แล้ว',
+    PREASSIGN_NOT_FOUND: 'ไม่พบรายการนี้แล้ว (เจ้าตัวอาจเพิ่งเข้าสู่ระบบ)',
+    HR_PERSON_NOT_FOUND: 'ไม่พบพนักงานในฐานข้อมูล HR',
+    HR_NO_AD_LOGIN: 'พนักงานคนนี้ไม่มีบัญชี AD จึงเข้าสู่ระบบไม่ได้',
   },
   adminSetup: {
     setupFailedTitle: 'ตั้งค่าไม่สำเร็จ',
@@ -143,7 +151,8 @@ export const authTh = {
   adminUserActions: {
     createSuccess: 'สร้างผู้ใช้แล้ว — แจ้งรหัสผ่านตั้งต้นให้เจ้าตัวและให้เปลี่ยนทันที',
     addLocalUser: 'เพิ่มผู้ใช้ local',
-    addUserHintSso: 'บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก',
+    addUserHintSso:
+      'บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก (ตั้งบทบาทไว้ก่อนได้ที่แท็บ "ตั้งล่วงหน้า") · บัญชี local ใช้อีเมลโดเมนองค์กรไม่ได้',
     addUserHintRole: 'แล้วค่อยกำหนดบทบาทจากตาราง',
     nameLabel: 'ชื่อ',
     emailLabel: 'อีเมล',
@@ -192,6 +201,7 @@ export const authTh = {
     auditLogs: 'บันทึกกิจกรรม',
     fallbackAppName: 'ผู้ดูแลระบบ',
     systemGroup: 'จัดการระบบ',
+    usersWithoutRole: '— {count} คนเข้าระบบแล้วแต่ยังไม่มีบทบาท',
   },
   userRoleSelect: {
     changeFailedTitle: 'เปลี่ยนบทบาทไม่สำเร็จ',
@@ -200,6 +210,42 @@ export const authTh = {
   adminUsersPage: {
     title: 'ผู้ใช้งาน',
     description: 'ผู้ใช้งานทั้งหมดของระบบ — กำหนดบทบาทให้แต่ละคนได้ที่นี่',
+    tabAll: 'ทั้งหมด',
+    tabNoRole: 'ยังไม่มี role',
+    tabPending: 'ตั้งล่วงหน้า (รอ login)',
+  },
+  preassign: {
+    hint: 'ตั้งบทบาทให้คนที่ยังไม่เคยเข้าระบบ — ไม่ได้สร้างบัญชี บทบาทจะถูกใส่ให้เมื่อเจ้าตัวเข้าด้วย SSO/AD ครั้งแรก',
+    addFromHr: 'เพิ่มจาก HR',
+    addDescription: 'ค้นจากฐานข้อมูลพนักงาน เลือกคน แล้วเลือกบทบาท — บัญชีจริงยังเกิดตอนเจ้าตัวเข้าสู่ระบบครั้งแรก',
+    searchLabel: 'ค้นหาพนักงาน',
+    searchHrPlaceholder: 'ชื่อ รหัสพนักงาน หรือชื่อผู้ใช้ AD (อย่างน้อย 2 ตัวอักษร)',
+    searchButton: 'ค้นหา',
+    resultsLabel: 'ผลการค้นหา',
+    noResults: 'ไม่พบพนักงาน',
+    statusHasAccount: 'เข้าระบบแล้ว',
+    statusPending: 'ตั้งไว้แล้ว',
+    statusNoAd: 'ไม่มีบัญชี AD',
+    roleLabel: 'บทบาท',
+    rolePlaceholder: 'เลือกบทบาท',
+    pickBoth: 'เลือกพนักงานและบทบาทก่อน',
+    cancel: 'ยกเลิก',
+    save: 'บันทึก',
+    createSuccess: 'ตั้งบทบาทให้ {name} แล้ว — จะมีผลเมื่อเข้าสู่ระบบครั้งแรก',
+    updateFailed: 'เปลี่ยนบทบาทไม่สำเร็จ',
+    colName: 'ชื่อ',
+    colEmpCode: 'รหัสพนักงาน',
+    colLoginName: 'ชื่อผู้ใช้ AD',
+    colEmail: 'อีเมล',
+    colRole: 'บทบาท',
+    colCreatedAt: 'ตั้งเมื่อ',
+    colCreatedBy: 'ตั้งโดย',
+    colActions: 'จัดการ',
+    searchPlaceholder: 'ค้นหาชื่อ รหัส หรือชื่อผู้ใช้...',
+    delete: 'ลบ',
+    deleteTitle: 'ลบรายการตั้งล่วงหน้าของ "{name}"',
+    deleteDescription: 'เจ้าตัวยังเข้าระบบได้ตามปกติ แค่จะยังไม่มีบทบาทจนกว่าแอดมินจะกำหนดให้',
+    deleteSuccess: 'ลบรายการตั้งล่วงหน้าแล้ว',
   },
   adminAuditLogsPage: {
     title: 'บันทึกกิจกรรม',

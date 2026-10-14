@@ -1,15 +1,18 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-auth-setup/lib/auth.ts
-// kit-hash: b3bb2cfff403
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/auth.ts
+// kit-hash: 2ff0fc5ede0e
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { genericOAuth, keycloak } from 'better-auth/plugins'; // [METHOD: SSO] — remove import if SSO not enabled
+import { APIError, createAuthMiddleware } from 'better-auth/api'; // [METHOD: LOCAL] — the org-email sign-in guard below
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { AUDIT_ACTIONS } from '@/lib/audit-actions';
+import { isOrgEmail, orgEmailVariants, toCanonicalEmail } from '@/lib/org-email';
 import { sendTemplatedMail } from '@/lib/email'; // [METHOD: LOCAL] — needs ugt-nextjs-mail-setup; remove with sendResetPassword
 // [METHOD: SSO] — remove with the enrichment in the session hook below when the
 // project has no central employee directory to read from
 import { directoryUserFields, getDirectoryPerson } from '@/lib/directory';
+import { afterOrgLogin } from '@/lib/after-login'; // [METHOD: SSO]
 
 // Derive a unique cookie prefix from NEXT_PUBLIC_BASE_PATH (e.g. '/expense-portal' → 'expense-portal').
 // This prevents cross-app cookie collisions when multiple apps share the same domain
@@ -121,6 +124,21 @@ export const auth = betterAuth({
         .catch(() => {});
     },
   },
+  // [METHOD: LOCAL] — org mailboxes (ORG_EMAIL_DOMAINS) sign in through SSO/LDAP
+  // only. A local password on an org email is the shared-account hole: whoever
+  // holds it gets the employee's row — and, once SSO links into it, their role.
+  // createLocalUserAction refuses to create one; this refuses to sign one in
+  // (covers rows made before the rule, and direct calls that skip the Server
+  // Action). localLoginAction checks first so the user sees ORG_EMAIL_USE_SSO.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== '/sign-in/email') return;
+      const email: unknown = ctx.body?.email;
+      if (typeof email === 'string' && isOrgEmail(email)) {
+        throw new APIError('FORBIDDEN', { message: 'ORG_EMAIL_USE_SSO' });
+      }
+    }),
+  },
   rateLimit: {
     storage: 'database', // requires the rateLimit model (see schema-auth.prisma)
     // Keys are the endpoint path RELATIVE to Better Auth's own basePath — the
@@ -140,8 +158,12 @@ export const auth = betterAuth({
     expiresIn: 8 * 60 * 60, // 8 hours — org standard
     updateAge: 30 * 60, // refresh if 30 min remaining — org standard
   },
-  // [METHOD: SSO] — allow Keycloak SSO to link with existing accounts (LDAP/local) by email.
-  // Safe because the org Keycloak has already verified the email against the directory.
+  // [METHOD: SSO] — allow Keycloak SSO to link into the existing row of the SAME
+  // AD identity (an LDAP-first user) by email. Linking is scoped by
+  // mapProfileToUser below: it hands Better Auth the email of the row whose
+  // ldapUsername matches, and refuses when the email belongs to any other row
+  // with no Keycloak account (a Local account, a different AD user) — so SSO can
+  // never be linked into a Local account.
   account: {
     accountLinking: {
       enabled: true,
@@ -150,9 +172,11 @@ export const auth = betterAuth({
       // emailVerified is true (nOAuth fix). Our LDAP upsert / admin-create DO
       // set emailVerified: true, but the flag stays relaxed so linking never
       // hinges on that invariant holding across every code path (e.g. a row
-      // written before that fix, or a future writer that forgets). Safe HERE ONLY because
-      // self-registration is closed (มติ 2026-08-11): every local row is
-      // admin- or directory-created, never attacker-controlled.
+      // written before that fix, or a future writer that forgets). Safe HERE ONLY
+      // because (1) self-registration is closed and pre-assignment creates no
+      // rows (มติ 2026-08-11, amended 2026-10-14) — every row is admin- or
+      // directory-created — and (2) mapProfileToUser only ever links into the
+      // row of the same AD username.
       requireLocalEmailVerified: false,
     },
   },
@@ -197,7 +221,12 @@ export const auth = betterAuth({
                   const existing = await prisma.user
                     .findUnique({ where: { ldapUsername: loginName }, select: { email: true } })
                     .catch(() => null);
-                  const email = existing?.email ?? (profile.email as string | undefined);
+                  // A new identity's email goes onto the canonical org domain
+                  // (ORG_EMAIL_DOMAINS) before it is stored; an existing row keeps
+                  // its stored email here (Better Auth finds the row by it) and the
+                  // session hook below canonicalizes it.
+                  const profileEmail = profile.email as string | undefined;
+                  const email = existing?.email ?? (profileEmail ? toCanonicalEmail(profileEmail) : undefined);
                   if (!email) {
                     // No stored row AND Keycloak sent no email (client missing the
                     // "email" scope, or the AD account has no mail attribute) —
@@ -206,6 +235,27 @@ export const auth = betterAuth({
                     throw new Error(
                       `SSO profile for "${loginName}" has no email — check the Keycloak client's "email" scope and the AD account's mail attribute`,
                     );
+                  }
+                  if (!existing) {
+                    // First SSO login of this AD identity. Better Auth links by email,
+                    // so a row that already holds this mailbox but is NOT this identity
+                    // (a Local account on an org email, another AD user, a row from
+                    // before ORG_EMAIL_DOMAINS) would be handed to whoever logs in here —
+                    // and its password holder keeps signing in as the employee. Refuse
+                    // (fail closed — no .catch); an admin resolves the other row
+                    // (references/troubleshooting-sso.md §Org email held by another account).
+                    const clash = await prisma.user.findFirst({
+                      where: {
+                        email: { in: orgEmailVariants(email) },
+                        accounts: { none: { providerId: 'keycloak' } },
+                      },
+                      select: { id: true },
+                    });
+                    if (clash) {
+                      throw new Error(
+                        `SSO login for "${loginName}" refused: ${email} already belongs to user ${clash.id}, which is not this AD identity — linking would share one account between two people`,
+                      );
+                    }
                   }
 
                   // EXTENSION POINT: enrich the user from your own directory / HR source here
@@ -266,6 +316,19 @@ export const auth = betterAuth({
                 },
               })
               .catch(() => {});
+
+            // Stored email onto the canonical org domain — its own update so a
+            // unique clash (a legacy row on the other spelling) cannot take the
+            // directory refresh above down with it.
+            const canonicalEmail = userData?.email ? toCanonicalEmail(userData.email) : null;
+            if (canonicalEmail && canonicalEmail !== userData?.email) {
+              await prisma.user
+                .update({ where: { id: session.userId }, data: { email: canonicalEmail } })
+                .catch(() => {});
+            }
+
+            // Pre-assigned role + "no role yet" admin notice — never throws.
+            await afterOrgLogin({ userId: session.userId, loginName, person });
 
             await prisma.activityLog
               .create({

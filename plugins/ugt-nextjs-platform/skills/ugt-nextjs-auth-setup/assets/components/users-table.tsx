@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/users-table.tsx
-// kit-hash: be9b9046a7db
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/components/users-table.tsx
+// kit-hash: ba68df884916
 // components/users-table.tsx — client half of /admin/users: column defs ต้องเป็น
 // client code จึงแยกจาก page ที่ทำ guard + fetch · DataTable โหมด client
 // (master data ทั้งชุด — DESIGN.md §4) · ต้องมี org UI kit จาก
@@ -23,12 +23,15 @@ type UserRow = {
 };
 
 export function UsersTable({
+  tableId = 'admin-users',
   users,
   roles,
   currentUserId,
   canUpdate,
   canResetPassword,
 }: Readonly<{
+  /** DataTable id (เก็บคอลัมน์/ขนาดหน้าแยกกัน) — แต่ละแท็บของ /admin/users ใช้ id ของตัวเอง */
+  tableId?: string;
   users: UserRow[];
   roles: RoleOption[];
   currentUserId: string;
@@ -79,7 +82,7 @@ export function UsersTable({
 
   return (
     <DataTable
-      id="admin-users"
+      id={tableId}
       columns={columns}
       data={users}
       globalSearch

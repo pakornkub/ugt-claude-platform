@@ -29,6 +29,11 @@ paths:
   - "lib/directory.ts"
   - "lib/scope.ts"
   - "lib/approval-chain.ts"
+  - "lib/org-email.ts"
+  - "lib/after-login.ts"
+  - "lib/admin-badges.ts"
+  - "components/preassign-manager.tsx"
+  - "components/admin-users-tabs.tsx"
 ---
 
 <!-- Owned by ugt-nextjs-auth-setup — may be overwritten wholesale on /plugin update. -->
@@ -173,6 +178,25 @@ employee view over a linked server — `lib/directory.ts`.
   become "nobody can log in".
 - SELECT only. `Prisma.raw` is for the view name and column list (constants)
   — never for anything a user supplied.
+
+## Org identity — accounts, roles, org email (มติ 2026-08-11, amended 2026-10-14)
+
+- **No self-registration and no pre-created SSO/LDAP accounts** — they appear
+  on first login. Pre-**assigning a role** is allowed: a `PendingRoleAssignments`
+  row keyed by EmpCode + ADLoginName, resolved server-side from the HR view
+  (`lib/actions/admin-preassign.ts`). Never write a `user`/`account` row there,
+  never accept a typed username, never match a pending row by email.
+- `lib/after-login.ts` runs on every SSO/LDAP login after the directory refresh:
+  applies the pending role only where `roleId IS NULL`, mails admins once about
+  a user with no role. Everything in it swallows errors; the mail is
+  fire-and-forget — a login never fails or waits on it.
+- `ORG_EMAIL_DOMAINS` (first = canonical): emails from SSO/LDAP/HR go through
+  `toCanonicalEmail` before they are stored, shown or mailed. A Local account
+  may never be created on, or sign in with, an org domain (`isOrgEmail`).
+- SSO/LDAP must never link into a row that is not the same AD username — keep
+  the clash checks in `mapProfileToUser` and `ldapLoginAction`. Prisma's
+  `NOT { ldapUsername }` silently drops NULL rows (the Local ones); spell out
+  `OR: [{ ldapUsername: null }, { ldapUsername: { not } }]`.
 
 ## proxy.ts
 

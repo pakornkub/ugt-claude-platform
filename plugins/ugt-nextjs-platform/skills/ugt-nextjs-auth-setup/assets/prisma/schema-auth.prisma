@@ -45,7 +45,12 @@ model user {
   /// รหัสพนักงานของหัวหน้า — ฐานของสายอนุมัติ
   superEmpCode String?  @db.NVarChar(50)                       @map("SuperEmpCode")
 
+  /// เมลแจ้งแอดมิน "login แล้วยังไม่มี role" ส่งไปเมื่อไร — ครั้งเดียวต่อคน
+  /// (lib/after-login.ts · ต้องมี ugt-nextjs-mail-setup ถ้าไม่มีจะว่างตลอด)
+  noRoleNotifiedAt DateTime?                                   @map("NoRoleNotifiedAt")
+
   @@index([empCode])
+  @@index([roleId]) // badge "ยังไม่มี role" นับ roleId IS NULL ทุกครั้งที่เปิดหน้า admin
 
   sessions session[]
   accounts account[]
@@ -139,6 +144,7 @@ model role {
 
   users       user[]
   permissions rolePermission[]
+  preassigns  pendingRoleAssignment[]
 
   @@map("Role")
 }
@@ -163,6 +169,33 @@ model rolePermission {
 
   @@id([roleId, permissionId])
   @@map("RolePermission")
+}
+
+// ─── Role pre-assignment (รอ login ครั้งแรก) ─────────────────────────────────
+// แอดมินเลือกคนจาก view HR แล้วตั้ง role ไว้ก่อน — ไม่ใช่การสร้างบัญชีล่วงหน้า:
+// ไม่มีแถว user/account เกิดที่นี่ (มติ 2026-08-11 แก้ 2026-10-14 — SKILL.md §2 ข้อ 10)
+// คีย์คือตัวตนฝั่ง HR ที่เลือกจากผลค้น ไม่ได้พิมพ์เอง: EmpCode + ADLoginName
+// (= preferred_username ของ Keycloak = username ที่ bind AD). lib/after-login.ts
+// ใช้ role นี้ตอน login สำเร็จครั้งแรกแล้วลบแถวทิ้ง — ประวัติอยู่ใน ActivityLogs
+// (users.preassign-*) จึงไม่มี IsActive/IsDeleted: ⚠ deviation เดียวกับตาราง auth
+// (references/schema-and-env.md). Role ถูกลบ → แถวที่อ้างถึงหายไปด้วย (Cascade)
+// ลบทั้ง model นี้เมื่อโปรเจคไม่มี view พนักงาน (ไม่มี lib/directory.ts)
+
+model pendingRoleAssignment {
+  id        String   @id @default(cuid())      @map("Id")
+  empCode   String   @unique @db.NVarChar(50)  @map("EmpCode")
+  loginName String   @unique @db.NVarChar(100) @map("LoginName")
+  /// สำเนาจาก HR ตอนตั้ง ไว้แสดงในรายการเท่านั้น — login จริงเติมใหม่จาก directory
+  fullName  String   @db.NVarChar(200)         @map("FullName")
+  email     String?  @db.NVarChar(255)         @map("Email")
+  roleId    String                             @map("RoleId")
+  role      role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())           @map("CreatedAt")
+  createdBy String                             @map("CreatedBy")
+  updatedAt DateTime @updatedAt                @map("UpdatedAt")
+  updatedBy String?                            @map("UpdatedBy")
+
+  @@map("PendingRoleAssignments")
 }
 
 // ─── Rate Limiting ───────────────────────────────────────────────────────────

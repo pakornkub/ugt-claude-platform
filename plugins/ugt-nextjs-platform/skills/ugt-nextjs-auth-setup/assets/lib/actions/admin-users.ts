@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.51.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
-// kit-hash: bdb3d75afb89
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/actions/admin-users.ts
+// kit-hash: 18cdfaa51220
 'use server';
 
 // lib/actions/admin-users.ts — role assignment + account creation for the
@@ -11,10 +11,12 @@
 //
 // บัญชีเกิดได้สามทางเท่านั้น:
 //   local → createLocalUserAction (สิทธิ์ USERS_CREATE) — ตั้งรหัสผ่านตั้งต้นให้เลย
+//           ห้ามใช้อีเมลโดเมนองค์กร (ORG_EMAIL_DOMAINS) — โดเมนนั้นเป็นของ SSO/LDAP
 //   ldap  → เกิดเองตอน bind สำเร็จครั้งแรก — ไม่ต้องเพิ่มที่นี่ (มติ 2026-08-11:
-//           ไม่มีการตั้งบัญชี AD ล่วงหน้า ข้อมูลอยู่ใน directory อยู่แล้วเหมือน SSO
-//           กำหนด role ให้หลังจากเขา login ครั้งแรกจากหน้านี้)
+//           ไม่สร้างบัญชี AD ล่วงหน้า ข้อมูลอยู่ใน directory อยู่แล้วเหมือน SSO)
 //   sso   → เกิดเองตอน login ผ่าน Keycloak ครั้งแรก
+// role ของคนที่ยังไม่เคย login ตั้งไว้ก่อนได้ (แก้มติ 2026-10-14) ผ่านแถวรอใน
+// lib/actions/admin-preassign.ts — คีย์ด้วยตัวตนจาก view HR ไม่ได้สร้างบัญชี
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod'; // [METHOD: LOCAL]
@@ -26,6 +28,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 import { passwordSchema } from '@/lib/password-policy'; // [METHOD: LOCAL]
+import { isOrgEmail } from '@/lib/org-email'; // [METHOD: LOCAL]
 
 type ActionResult = { success: true } | { success: false; code: string; field?: string };
 
@@ -101,6 +104,12 @@ export async function createLocalUserAction(values: {
     return { success: false, code: issue?.message ?? 'INVALID_INPUT', field: issue?.path[0]?.toString() };
   }
   const { name, email, password, roleId } = parsed.data;
+
+  // อีเมลองค์กร = ของพนักงาน ซึ่งเข้าด้วย SSO/LDAP — บัญชี local บนอีเมลนั้นคือ
+  // บัญชีที่สองคนใช้ร่วมกันได้ (คนถือรหัส local + เจ้าของตัวจริง) จึงห้ามตั้งแต่ตอนสร้าง
+  if (isOrgEmail(email)) {
+    return { success: false, code: 'ORG_EMAIL_NOT_LOCAL', field: 'email' };
+  }
 
   if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) {
     return { success: false, code: 'EMAIL_IN_USE', field: 'email' };

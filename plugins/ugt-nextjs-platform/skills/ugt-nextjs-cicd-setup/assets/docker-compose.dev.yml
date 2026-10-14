@@ -40,6 +40,7 @@ services:
       # BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}                   # [AUTH]
       # BETTER_AUTH_URL: ${BETTER_AUTH_URL}                         # [AUTH]
       # BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS} # [AUTH]
+      # ORG_EMAIL_DOMAINS: ${ORG_EMAIL_DOMAINS:-}                 # [AUTH] first = canonical, e.g. ube.com,ube.co.th
       # KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}                         # [AUTH: SSO]
       # KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}                   # [AUTH: SSO]
       # KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}           # [AUTH: SSO]

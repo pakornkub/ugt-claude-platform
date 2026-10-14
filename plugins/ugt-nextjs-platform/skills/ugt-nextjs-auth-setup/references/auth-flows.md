@@ -99,8 +99,10 @@ migration note).
    — the `redirectURI` in `lib/auth.ts` must include the basePath explicitly
 4. `mapProfileToUser` maps `preferred_username` → `ldapUsername`, sets `authType: 'sso'`
 5. `accountLinking: { enabled: true, trustedProviders: ['keycloak'] }` links the SSO
-   account to an existing LDAP/local user with the same email (safe: the org
-   Keycloak has already verified the email against the directory)
+   account to the existing row **of the same AD username** (an LDAP-first user).
+   `mapProfileToUser` refuses when the email belongs to any other row without a
+   Keycloak account — a Local account on an org email is never linked into
+   (`org-identity.md` §5)
 6. `databaseHooks.session.create.after` runs — the **reliable** place to persist
    custom user fields and write the `login.success` audit log. Do NOT rely on
    `mapProfileToUser` for custom fields: only standard fields (name, email, image)
@@ -119,13 +121,18 @@ const existing = await prisma.user.findUnique({ where: { ldapUsername } });
 return { email: existing?.email ?? profile.email, ldapUsername, ... };
 ```
 
+The returned email goes through `toCanonicalEmail` (`ORG_EMAIL_DOMAINS`) for a new
+identity; an existing row keeps its stored email for the lookup and the session
+hook rewrites it canonical afterwards.
+
 It pairs with `accountLinking.requireLocalEmailVerified: false` (also shipped
 since 4.21.0) — users created by upsert/sync have `emailVerified: false`, and
 Better Auth ≥1.6.11 silently blocks linking into unverified users even for
 trusted providers (the failure just moves from `unable_to_create_user` to
 `account_not_linked`). Relaxing it is safe in this kit only because
-self-registration is closed (มติ 2026-08-11) — no attacker can pre-create an
-unverified row.
+self-registration is closed and nothing pre-creates rows (มติ 2026-08-11 — the
+2026-10-14 amendment pre-assigns roles in a separate table, not `User`), and
+`mapProfileToUser` links only into the row of the same AD username.
 
 **Conditional plugin registration**: the `keycloak()` helper calls `.replace()`
 on the issuer string internally. During `SKIP_ENV_VALIDATION=1` builds the env
@@ -161,6 +168,12 @@ of the same commit minutes earlier was fine — it is timing, not code.
    expiry MUST match `session.expiresIn` in `lib/auth.ts` (8h)
 5. `signSessionToken()` → `cookieStore.set(SESSION_COOKIE_NAME, signedToken, …)`
 6. Audit log `login.success` (and `login.failed` on bind failure)
+
+Between 2 and 3: the AD email is moved onto the canonical org domain, and a row
+holding that mailbox under another (or no) `ldapUsername` refuses the login with
+`ORG_ACCOUNT_CONFLICT` instead of letting the upsert throw. After 3,
+`afterOrgLogin()` applies a pre-assigned role / sends the no-role notice
+(`org-identity.md`).
 
 ## Local login flow (localLoginAction)
 

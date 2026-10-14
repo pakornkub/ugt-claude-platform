@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-auth-setup/lib/directory.ts
-// kit-hash: bfe1ad6c11c1
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/lib/directory.ts
+// kit-hash: 7a91cb52b807
 // source: ugt-hrms lib/hr-lookup.ts — generalized by ugt-nextjs-auth-setup
 // (HR-domain helpers removed: work-group/shift rules, leave quota, approval
 //  chains, subordinate BFS — those are feature code, not identity)
@@ -15,6 +15,7 @@
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { toCanonicalEmail } from '@/lib/org-email';
 
 /** ข้อมูลพนักงานหนึ่งคนจากฐานกลาง — ปรับชื่อฟิลด์/คอลัมน์ให้ตรง view ขององค์กร */
 export interface DirectoryPerson {
@@ -34,6 +35,13 @@ export interface DirectoryPerson {
 // ตัวระบุตัวตนที่รับได้ ตรวจก่อนส่งเข้า query เสมอ แม้ค่าจะถูกส่งเป็น parameter —
 // ค่าที่หลุด format เข้ามาแปลว่ามีที่ไหนสักแห่งข้าม validation มา ให้รู้ตั้งแต่ตรงนี้
 const IDENTIFIER = /^[a-zA-Z0-9_.@-]+$/;
+
+// อีเมลจาก HR ย้ายไปโดเมนหลักก่อนออกจากไฟล์นี้ (ORG_EMAIL_DOMAINS — lib/org-email.ts)
+// ทุกที่ที่เก็บ/แสดง/ส่งเมลจากผลของ directory จึงได้รูปเดียวกัน
+const canonical = (p: DirectoryPerson): DirectoryPerson => ({
+  ...p,
+  email: p.email ? toCanonicalEmail(p.email) : null,
+});
 
 // ⚠️ PLACEHOLDER: เปลี่ยนเป็น view จริงขององค์กร (ชื่อสี่ส่วน) แล้วแม็ปชื่อคอลัมน์
 // ด้านล่างให้ตรงของจริง
@@ -68,7 +76,7 @@ export async function getDirectoryPerson(loginName: string): Promise<DirectoryPe
     const rows = await prisma.$queryRaw<DirectoryPerson[]>`
       SELECT TOP 1 ${COLUMNS} FROM ${VIEW} AS u WHERE u.ADLoginName = ${loginName}
     `;
-    return rows[0] ?? null;
+    return rows[0] ? canonical(rows[0]) : null;
   } catch (error) {
     console.error('[directory] lookup failed:', loginName, error); // NOSONAR typescript:S106 — server-side error log only
     return null;
@@ -84,7 +92,7 @@ export async function getDirectoryPersonByEmpCode(
     const rows = await prisma.$queryRaw<DirectoryPerson[]>`
       SELECT TOP 1 ${COLUMNS} FROM ${VIEW} AS u WHERE u.EmpCode = ${empCode}
     `;
-    return rows[0] ?? null;
+    return rows[0] ? canonical(rows[0]) : null;
   } catch (error) {
     console.error('[directory] lookup by empCode failed:', empCode, error); // NOSONAR typescript:S106 — server-side error log only
     return null;
@@ -92,8 +100,9 @@ export async function getDirectoryPersonByEmpCode(
 }
 
 /**
- * ค้นพนักงานด้วยชื่อ/รหัส/ชื่อผู้ใช้ AD — ใช้ในกล่องค้นหาตอนแอดมินตั้งบัญชี AD
- * ล่วงหน้า และในตัวเลือก "ผู้รับผิดชอบ" ของฟีเจอร์ต่าง ๆ
+ * ค้นพนักงานด้วยชื่อ/รหัส/ชื่อผู้ใช้ AD — ใช้ในกล่อง "เพิ่มจาก HR" ตอนแอดมินตั้ง role
+ * ล่วงหน้า (lib/actions/admin-preassign.ts — ไม่สร้างบัญชี) และในตัวเลือก
+ * "ผู้รับผิดชอบ" ของฟีเจอร์ต่าง ๆ
  *
  * จำกัดผลไว้ 50 แถวเสมอ และไม่ค้นจากอักษรเดียว: view นี้อยู่อีกเซิร์ฟเวอร์
  * ผลลัพธ์หลายพันแถวคือค่าใช้จ่ายที่จ่ายข้ามเครือข่ายทุกครั้งที่มีคนพิมพ์
@@ -103,7 +112,7 @@ export async function searchDirectory(query: string): Promise<DirectoryPerson[]>
   if (trimmed.length < 2) return [];
   const term = `%${trimmed}%`;
   try {
-    return await prisma.$queryRaw<DirectoryPerson[]>`
+    const rows = await prisma.$queryRaw<DirectoryPerson[]>`
       SELECT TOP 50 ${COLUMNS}
       FROM ${VIEW} AS u
       WHERE u.ADLoginName  LIKE ${term}
@@ -112,6 +121,7 @@ export async function searchDirectory(query: string): Promise<DirectoryPerson[]>
          OR u.FullNameThai LIKE ${term}
       ORDER BY u.FullNameEng
     `;
+    return rows.map(canonical);
   } catch (error) {
     console.error('[directory] search failed:', error); // NOSONAR typescript:S106 — server-side error log only
     return [];

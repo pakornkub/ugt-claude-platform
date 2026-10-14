@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 43b8c00f8f5a
+// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: 48f346a94f4d
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -44,6 +44,14 @@ export const authEn: AuthCatalog = {
     EMAIL_INVALID: 'Please enter a valid email.',
     PASSWORD_REQUIRED: 'Please enter a password.',
     AD_USERNAME_REQUIRED: 'Please enter your AD username.',
+    ORG_EMAIL_NOT_LOCAL: 'Company email addresses belong to SSO/AD accounts — a local account needs an email outside the company domains',
+    ORG_EMAIL_USE_SSO: 'Company email addresses sign in with SSO/AD, not a local password',
+    ORG_ACCOUNT_CONFLICT: 'This email is already used by another account in the system — please contact the administrator',
+    USER_ALREADY_EXISTS: 'This person has already signed in — assign the role on the All tab',
+    PREASSIGN_EXISTS: 'A role is already pre-assigned to this person',
+    PREASSIGN_NOT_FOUND: 'This pre-assignment no longer exists (the person may have just signed in)',
+    HR_PERSON_NOT_FOUND: 'Employee not found in the HR database',
+    HR_NO_AD_LOGIN: 'This employee has no AD account, so they cannot sign in',
   },
   adminSetup: {
     setupFailedTitle: 'Setup failed',
@@ -147,7 +155,8 @@ export const authEn: AuthCatalog = {
   adminUserActions: {
     createSuccess: 'User created — tell them the initial password and have them change it right away',
     addLocalUser: 'Add local user',
-    addUserHintSso: "SSO/AD accounts don't need to be added — they're created automatically on first sign-in",
+    addUserHintSso:
+      "SSO/AD accounts don't need to be added — they're created automatically on first sign-in (pre-assign their role on the Pre-assigned tab). Local accounts can't use a company email domain.",
     addUserHintRole: 'Assign a role from the table afterward',
     nameLabel: 'Name',
     emailLabel: 'Email',
@@ -196,6 +205,7 @@ export const authEn: AuthCatalog = {
     auditLogs: 'Activity Log',
     fallbackAppName: 'Administration',
     systemGroup: 'System',
+    usersWithoutRole: '— {count} signed in without a role',
   },
   userRoleSelect: {
     changeFailedTitle: 'Could not change role',
@@ -204,6 +214,43 @@ export const authEn: AuthCatalog = {
   adminUsersPage: {
     title: 'Users',
     description: 'Everyone who can use the system — assign each person a role here',
+    tabAll: 'All',
+    tabNoRole: 'No role yet',
+    tabPending: 'Pre-assigned (awaiting sign-in)',
+  },
+  preassign: {
+    hint: "Set a role before someone's first sign-in — no account is created; the role is applied when they sign in with SSO/AD.",
+    addFromHr: 'Add from HR',
+    addDescription:
+      'Search the HR employee database, pick the person, then the role. Their account still appears only on their first sign-in.',
+    searchLabel: 'Search employees',
+    searchHrPlaceholder: 'Name, employee code or AD username (2+ characters)',
+    searchButton: 'Search',
+    resultsLabel: 'Search results',
+    noResults: 'No employees found',
+    statusHasAccount: 'Already signed in',
+    statusPending: 'Already pre-assigned',
+    statusNoAd: 'No AD account',
+    roleLabel: 'Role',
+    rolePlaceholder: 'Choose a role',
+    pickBoth: 'Pick a person and a role',
+    cancel: 'Cancel',
+    save: 'Save',
+    createSuccess: 'Role pre-assigned to {name} — applied on their first sign-in',
+    updateFailed: 'Could not change the role',
+    colName: 'Name',
+    colEmpCode: 'Employee code',
+    colLoginName: 'AD username',
+    colEmail: 'Email',
+    colRole: 'Role',
+    colCreatedAt: 'Set at',
+    colCreatedBy: 'Set by',
+    colActions: 'Actions',
+    searchPlaceholder: 'Search name, code or username...',
+    delete: 'Delete',
+    deleteTitle: 'Delete the pre-assignment for "{name}"',
+    deleteDescription: 'They can still sign in — they will just have no role until an admin assigns one.',
+    deleteSuccess: 'Pre-assignment deleted',
   },
   adminAuditLogsPage: {
     title: 'Activity Log',

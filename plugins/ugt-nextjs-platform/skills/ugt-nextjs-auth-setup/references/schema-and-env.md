@@ -22,7 +22,12 @@ cascade from `User`, so a soft-deleted user would keep working sessions.
 `docs/project-context/architecture.md` — `contracts/database.md` requires
 that line for every audit-column / soft-delete exemption, e.g.
 *⚠ deviation: ตาราง auth ทั้ง 8 ไม่มี audit columns และใช้ hard delete —
-Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)*
+Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)* — and, when the HR view
+is installed, one more for `PendingRoleAssignments` (plural, app-owned, has
+`CreatedBy`/`UpdatedBy` but no `IsActive`/`IsDeleted`: a pending row is consumed
+on login and its history is the `users.preassign-*` audit trail):
+*⚠ deviation: PendingRoleAssignments ไม่มี IsActive/IsDeleted และลบจริงเมื่อใช้ role
+แล้วหรือแอดมินลบ — ประวัติอยู่ใน ActivityLogs (ugt-nextjs-auth-setup org-identity.md)*
 
 ## Env schema
 
@@ -37,6 +42,9 @@ What `lib/env.ts` (or equivalent) declares for auth:
 - `KEYCLOAK_ISSUER/CLIENT_ID/CLIENT_SECRET` → required only when SSO is on
   (the code in `lib/auth.ts` already guards `undefined` to survive `SKIP_ENV_VALIDATION=1`)
 - `LDAP_URL/LDAP_BASE_DN/LDAP_DOMAIN` → required only when LDAP is on
+- `ORG_EMAIL_DOMAINS` → `z.string().optional()` (server block + `runtimeEnv`) —
+  comma list, first = canonical; empty turns normalization and the Local-account
+  refusal off (`org-identity.md` §5)
 - `NEXT_PUBLIC_BASE_PATH` → `z.string().default('')` — **must** live in the
   t3-env `client` block **and** be listed in `runtimeEnv` (otherwise undefined at
   runtime). That declaration is what **server** files import from `@/lib/env`;

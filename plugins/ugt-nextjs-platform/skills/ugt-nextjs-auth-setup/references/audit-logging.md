@@ -72,7 +72,10 @@ these): `login.success` · `login.failed` · `logout` · `logout.sso` ·
 `users.create` · `users.role-assign` · `roles.create` · `roles.update` ·
 `roles.delete`, plus for local accounts `password.reset.requested` ·
 `password.reset` · `password.reset.refused` · `password.change` ·
-`password.change.failed` · `users.password-set`.
+`password.change.failed` · `users.password-set`, and with an HR view
+`users.preassign-create` · `users.preassign-update` · `users.preassign-delete`
+· `users.preassign-apply` (the last written with the logging-in person as actor,
+`detail.setBy` = the admin — `org-identity.md` §2).
 Add the rest per the project's domain.
 
 Every helper that writes a log takes `action: AuditAction`, never `string` — that
@@ -87,7 +90,8 @@ is what makes "no raw strings" enforceable instead of merely requested.
 ```
 
 There is **no `users.delete`** in the kit: nothing deletes users (SSO/AD rows
-appear on first login — มติ 2026-08-11). Add the constant only alongside a real
+appear on first login — มติ 2026-08-11; pre-assignment deletes only its own
+pending row). Add the constant only alongside a real
 action that writes it.
 
 ## Write pattern
