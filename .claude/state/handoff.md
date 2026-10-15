@@ -15,12 +15,12 @@ Last updated: 2026-10-15
 - Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
 
 ## Open Questions
-- remote branch `claude/wizardly-albattani-ywvn6s` (วิดีโอโปรโมต/explainer/sizzle 11 commit, 2026-09-30) ยังไม่ merge ไม่มี PR — ผู้ดูแลสั่งเก็บไว้ก่อน 2026-10-09 ยังไม่ตัดสินว่าเข้า main ไหม
 - เช็คความพร้อม infra 8 ข้อของ post-deploy standard — เจ้าของระบบเป็นคนตอบ (รายการอยู่ docs/backlog.md §1)
 - โปรเจค ugt-customer-request: root cause ของ `SCANNER_UNAVAILABLE` ยังไม่ได้ diagnose จบ (ถอด scan ออกชั่วคราวแล้ว — ยังไม่เห็นบรรทัด `virus scan unavailable <สาเหตุ>` ใน log แอป) ตอน retrofit ให้ไล่ตาม SKILL.md upload-setup §7
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-15 ลบ branch วิดีโอ `claude/wizardly-albattani-ywvn6s` ทิ้ง (ผู้ดูแลตัดสินไม่เอา — ไม่ merge)
 - 2026-10-15 nextjs **4.79.3** + core **2.14.5** (9504ed4, tag ครบ): กฎ No shell ใน full-setup §3, ที่พัก deviation ก่อนมี project-context (ugt-context §3b), แตก reference >200 บรรทัด 5 ไฟล์, fixture eval มี shadcn base-mira, `.gitattributes` CHANGELOG merge=union, mail `hasDevMode` = permission อย่างเดียว, §2.5 รายการ default ห้ามมีข้อที่ตอบแล้ว · eval 6 case ผ่าน (run-through-plan judge แกว่ง 1–2 เสียง ตรวจ plan แล้วผ่านจริง) · ร่างประกาศ 4.79 ส่งผู้ดูแลแล้ว ยังไม่ได้ประกาศ
 - 2026-10-15 nextjs **4.79.1** (full-setup วางไฟล์ `.claude/` ที่เขียนไม่ได้ใน `docs/setup-finish.md`) · **4.79.2**
   (eval ใหม่ `module-auth-org-identity` + `module-mail-after-auth` 1.00 · verify auth/mail false-fail 4 ข้อ ·
