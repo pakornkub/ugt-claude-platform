@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-14
+Last updated: 2026-10-15
 
 ## In progress
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
@@ -21,6 +21,11 @@ Last updated: 2026-10-14
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-15 nextjs **4.79.1** (full-setup วางไฟล์ `.claude/` ที่เขียนไม่ได้ใน `docs/setup-finish.md`) · **4.79.2**
+  (eval ใหม่ `module-auth-org-identity` + `module-mail-after-auth` 1.00 · verify auth/mail false-fail 4 ข้อ ·
+  review เจอ policy check ถูกข้าม + grader 2 ตัว แก้แล้ว) · eval หลัง merge 4.79.0 ครบ: plan/design/auth 1.00,
+  db-quality-ci 0.94→grader แก้ · ค้าง: package.json ไม่ได้เพิ่ม dep เมื่อไม่มี shell, ที่บันทึก deviation เมื่อยังไม่มี
+  docs/project-context/, fixture ไม่มี shadcn base components · ลบ branch contribute/* + PR #23 บน GitHub แล้ว
 - 2026-10-14 **merge PR #23** nextjs **4.79.0** · core **2.14.4** (8410fba): ตั้ง role ล่วงหน้าจาก HR,
   แท็บ "ยังไม่มีบทบาท", `ORG_EMAIL_DOMAINS`, กัน SSO/LDAP→Local, login hero · **review ก่อน merge เจอช่องโหว่**
   (SSO เดา AD login จากอีเมล → ได้ role คนอื่น · AD 2 ตัวอีเมลเดียวกันผูกบัญชีเดียว · race · role กลับมาเอง ·
