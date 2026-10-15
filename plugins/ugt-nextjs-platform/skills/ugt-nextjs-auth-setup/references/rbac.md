@@ -145,7 +145,7 @@ Everything after bootstrap — managing who has what, day to day:
 | --- | --- | --- |
 | `/admin/users` | List users (kit `DataTable`, client mode), assign/unassign a role inline (`UserRoleSelect`) | view: `USERS_READ` · change: `USERS_UPDATE` |
 | `/admin/roles` | Create/edit/delete roles (kit `DataTable`, client mode) with a permission-checkbox grid, grouped by `permission.group` | `ROLES_READ` / `_CREATE` / `_UPDATE` / `_DELETE` |
-| `/admin/audit-logs` | Read-only `ActivityLogs` viewer — kit `DataTable` **server mode**: filter/sort/page ทั้งหมดผ่าน URL, query ใน page ตรง ๆ ไม่มี API route (ดู `audit-logging.md`) | `AUDIT_LOGS_READ` |
+| `/admin/audit-logs` | Read-only `ActivityLogs` viewer — kit `DataTable` **server mode**: filter/sort/page ทั้งหมดผ่าน URL, query ใน page ตรง ๆ ไม่มี API route (ดู `audit-viewer-retention.md` §Viewer) | `AUDIT_LOGS_READ` |
 
 `app/(admin)/layout.tsx` is the section-level guard (same derived-permission
 pattern as the example in "UI-level guards" above) plus the sidebar

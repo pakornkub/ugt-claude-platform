@@ -159,7 +159,10 @@ the summary + `docs/admin-handoff.md` instead.
 Every answer is now on file, so nothing below re-asks the user anything — and nothing
 **reopens** them either: no "ถ้าไม่โอเคบอกได้" / "if this does not suit you, tell me" about an
 answered item, no "I'll let you choose X later" halfway through the install. An item the user
-left open gets the documented default; state that default once, in the close-out.
+left open gets the documented default; state that default once, in the close-out. If the
+plan lists defaults under a "tell me if not" line, that list holds **only** items the user
+left open — an answered item (deploy target, scheduled jobs, the `/admin/setup` sentence …)
+inside it reopens it; state answered items as decisions elsewhere in the plan.
 Judge the load and propose ONE way to run the install:
 
 | Signal | Proposal |
@@ -228,6 +231,27 @@ Database → Quality → Design → Auth → [Mail] → [Upload] → CI
   `ugt-nextjs-cicd-setup`) and follow its
   SKILL.md — pass down the interview answers already collected, never re-ask
   the user.
+- **No shell** (this session cannot run commands — e.g. an eval sandbox):
+  never skip an install line silently. For each `npm i` / `npm install` line a
+  step would run, add every package to `package.json` by editing the file —
+  `devDependencies` for `-D`/`--save-dev`, else `dependencies` — at the range
+  that line uses (`better-auth@^1.7.4` → `"better-auth": "^1.7.4"`,
+  `prisma@7.9.1` → `"7.9.1"`; no version on the line → `^<current major>` — the kit
+  is version-coupled, never `"latest"`; only re-running that exact `npm i <pkg>` line
+  re-pins it, a bare `npm i` keeps what you wrote). A command whose only effect is a
+  file (`.npmrc`, `.husky/pre-commit`, `components.json`) is done by writing that file. List under the close-out's "ยังไม่ได้รัน" (§5)
+  every command not run: each `npm i` line verbatim (it also writes the
+  lockfile), each `npx shadcn@latest init/add …` with its component list,
+  `prisma migrate`/`generate`, `npx husky init`. A `components/ui/*` file a copied
+  asset imports stays missing until that `add` runs — say so; never hand-write
+  a primitive from memory (Radix, not base-mira). A child skill run on its
+  own applies the same rule in its own summary.
+- **`⚠ deviation` before `docs/project-context/` exists**: that folder is
+  created only at §4 step 5 (never in a standalone child-skill run). Until
+  then, a step that says to record a `⚠ deviation` line in
+  `docs/project-context/architecture.md` appends the same line to
+  `docs/setup-finish.md` under `## Deviations (to move into architecture.md)`
+  (create the file/heading if missing); §4 step 5 moves them in.
 
 ### 4. Install the harness layer (always, regardless of module selection)
 
@@ -323,7 +347,10 @@ How:
    `project-notes.md`) → stop and migrate first per the v3.0.0 CHANGELOG.
 5. **`docs/project-context/`** — invoke the **`ugt-context`** skill (ugt-core):
    fresh project → skeleton files; existing codebase → its scan path (draft →
-   user review → write). Skip only if the folder already exists. Tell it
+   user review → write). Skip only if the folder already exists. If
+   `docs/setup-finish.md` has a `## Deviations (to move into architecture.md)`
+   section (§3), say so — `ugt-context` moves those lines into
+   `architecture.md` and removes the section. Tell it
    which pipeline step 3 detected — on **mattpocock** it skips `decisions.md`
    (decisions live in `docs/adr/`, written by `domain-modeling`) and points
    `00-index.md` at `docs/adr/` instead; one decision home, never two.
@@ -371,7 +398,8 @@ How:
    1. ไฟล์ที่เพิ่ม/แก้ (by module) · 2. env vars ที่ต้องเติมค่าจริง · 3. ส่งต่อ admin
    (`docs/admin-handoff.md`) · 4. ผู้ดูแลคนแรก — `/admin/setup` sentence (Auth) ·
    5. **Smoke test** — the trimmed checklist · 6. ยังไม่ได้รัน — every command this
-   session could not run, as commands for the user
+   session could not run, as commands for the user (No shell: §3 — incl. the
+   packages added to `package.json` by hand and every `npx shadcn` component list)
 4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
    themselves next (it is user-invoked only — this skill cannot run it, and
    §2.5 forbids trying). It writes `docs/agents/*.md` and its own

@@ -19,7 +19,9 @@ instead of `IsDeleted = 1` — Better Auth owns these rows (it writes and
 deletes them itself and never reads our columns), and `Session`/`Account`
 cascade from `User`, so a soft-deleted user would keep working sessions.
 **Record it during install** as a `⚠ deviation` line in
-`docs/project-context/architecture.md` — `contracts/database.md` requires
+`docs/project-context/architecture.md` (folder not created yet → append it to
+`docs/setup-finish.md` under `## Deviations (to move into architecture.md)` —
+`ugt-nextjs-full-setup` §3) — `contracts/database.md` requires
 that line for every audit-column / soft-delete exemption, e.g.
 *⚠ deviation: ตาราง auth ทั้ง 8 ไม่มี audit columns และใช้ hard delete —
 Better Auth เป็นเจ้าของแถว (ugt-nextjs-auth-setup §5.3)* — and, when the HR view

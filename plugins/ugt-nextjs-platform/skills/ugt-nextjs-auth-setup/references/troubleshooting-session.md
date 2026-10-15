@@ -2,9 +2,9 @@
 
 Symptom → root cause → fix for anything that shows up as a redirect loop, a
 logout that does not stick, or a 404 caused by the basePath. The mechanisms
-behind every row (cookie signing, cookie naming, Return-to-page, the Server
+behind every row (cookie signing, cookie naming, the Server
 Component session check, `proxy.ts` basePath rules) are explained in
-`auth-flows.md`; SSO/LDAP sign-in failures are in `troubleshooting-sso.md`,
+`auth-flows.md` (Return-to-page: `login-flows.md`); SSO/LDAP sign-in failures are in `troubleshooting-sso.md`,
 version-bump and schema failures in `troubleshooting-upgrades.md`.
 
 ## Cookies and redirect loops
@@ -45,4 +45,4 @@ it. Seen in ugt-voice-platform 2026-10-09.
 | Static assets return `Unexpected token '<'` | The route guard in `proxy.ts` matches `_next/static` and serves the login page instead | Keep the `/_next/` early return (`auth-flows.md` §proxy.ts basePath rules) |
 | authClient hits `…/__BASE_PATH__/get-session` 404 | `baseURL` passed to `createAuthClient` with a path | No `baseURL`; pass `basePath: `${BASE_PATH}/api/auth`` |
 | `NEXT_PUBLIC_BASE_PATH` empty in client bundle | Read through a `createEnv()` wrapper under Turbopack | Read `process.env.NEXT_PUBLIC_BASE_PATH` directly in client files |
-| Mailed reset link 404s (production only) | Link built without the basePath — Better Auth's `url` is computed without it (needs ugt-nextjs-mail-setup) | Build the link yourself from `token` (`auth-flows.md` §Password reset flow) |
+| Mailed reset link 404s (production only) | Link built without the basePath — Better Auth's `url` is computed without it (needs ugt-nextjs-mail-setup) | Build the link yourself from `token` (`password-reset.md`) |

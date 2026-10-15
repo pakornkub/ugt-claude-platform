@@ -157,7 +157,7 @@ check('SSO resolves existing users by ldapUsername before create (email drift)',
     ? { ok: true }
     : {
         ok: 'warn',
-        msg: "mapProfileToUser doesn't look up the existing row by ldapUsername — when the AD email drifts from the stored email, SSO dies with unable_to_create_user (auth-flows.md §SSO)",
+        msg: "mapProfileToUser doesn't look up the existing row by ldapUsername — when the AD email drifts from the stored email, SSO dies with unable_to_create_user (login-flows.md §SSO)",
       };
 });
 
@@ -850,7 +850,7 @@ check('ldapts, not ldapjs', () => {
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   if (deps.ldapjs) return { ok: false, msg: 'ldapjs in use (deprecated, no types) — switch to ldapts' };
   const usesLdap = has('lib/ldap.ts');
-  if (usesLdap && !deps.ldapts) return { ok: false, msg: 'lib/ldap.ts exists but ldapts is not installed' };
+  if (usesLdap && !deps.ldapts) return { ok: false, msg: 'lib/ldap.ts exists but ldapts is not installed (no shell? add it to package.json by hand — ugt-nextjs-full-setup SKILL.md §3 No shell)' };
   return { ok: true };
 });
 

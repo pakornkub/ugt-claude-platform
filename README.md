@@ -20,10 +20,10 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.79.2 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.79.3 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.9.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.5 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.14.4 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.14.5 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -251,8 +251,9 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
 
 1. รับ PR → merge เข้า `main` — PR จาก `/ugt-contribute` **ไม่เลือกเลขรุ่น** เขียนแค่
    bullet ใต้ `## Unreleased` ใน CHANGELOG (ไม่แตะ plugin.json / README / index.html)
-   PR หลายตัวที่เปิดพร้อมกันจึงชนกันได้แค่ใน `## Unreleased` — แก้ conflict โดย
-   เก็บ bullet ทุกตัวไว้ใต้หัวข้อเดียว
+   PR หลายตัวที่เปิดพร้อมกันจึงชนกันได้แค่ใน `## Unreleased` — **merge ในเครื่อง**
+   (`git merge --no-ff origin/<branch>` แล้ว push) ให้ `.gitattributes` `merge=union`
+   รวม bullet ให้เอง (ปุ่ม merge บน GitHub ไม่ใช้ merge driver) แล้วตรวจว่าไม่มีบรรทัดซ้ำ
    **หลัง merge ทุกครั้ง (มติผู้ดูแล 2026-10-11) — ก่อนออกรุ่น:**
    - **code-review** ช่วง commit ที่ merge (ทุก skill ที่ PR แตะ — bug ใน asset,
      regex ของ `verify.mjs` ที่ผ่าน/ล้มผิด, ข้อความที่ขัดกันเองหลังหลาย PR แก้ที่เดียวกัน)

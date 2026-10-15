@@ -22,9 +22,9 @@ rows below. Full checklist: `jenkins-one-time-setup.md` §A.
 | 1 | Jenkins | Credential — prod env | `env-__PROJECT_NAME__` (Secret file) | Upload the prod `.env` contents. Deploy stage `cp`s it to `.env` in the workspace. |
 | 2 | Jenkins | Credential — dev env | `env-__PROJECT_NAME__-dev` (Secret file) | Separate `DATABASE_URL` + fresh secrets — never share with prod. |
 | 3 | Jenkins | Credential — Sentry DSN | `sentry-dsn-__PROJECT_NAME__` (Secret text) | Only if the project uses Sentry — delete this row otherwise. |
-| 4 | Jenkins | Pipeline job | Multibranch Pipeline on `main` + `develop`, **Lightweight checkout disabled** | See `jenkins-one-time-setup.md` §B2. |
-| 5 | Jenkins | GitHub webhook | `http://<jenkins-host>:8080/github-webhook/`, event: push only | See §B3. |
-| 6 | Jenkins | Reverse proxy (dev) | `location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; ... }` | Only if a basePath is used. Full nginx block: §B4. `__PORT_DEV__` here is only a proposed default (`3000`/`3001`) — if the port assigned in row 7 differs, use that instead. |
+| 4 | Jenkins | Pipeline job | Multibranch Pipeline on `main` + `develop`, **Lightweight checkout disabled** | See `jenkins-project-setup.md` §B2. |
+| 5 | Jenkins | GitHub webhook | `http://<jenkins-host>:8080/github-webhook/`, event: push only | See `jenkins-project-setup.md` §B3. |
+| 6 | Jenkins | Reverse proxy (dev) | `location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; ... }` | Only if a basePath is used. Full nginx block: `jenkins-project-setup.md` §B4. `__PORT_DEV__` here is only a proposed default (`3000`/`3001`) — if the port assigned in row 7 differs, use that instead. |
 | 7 | Jenkins | **→ Return to dev team:** `APP_PORT` (prod + dev) | Host ports actually assigned for this project's containers | **Required — dev team is holding `3000`/`3001` as a placeholder until this comes back.** Feeds `APP_PORT` in `.env`/`.env.dev` (§4.2) and the reverse-proxy block above (row 6). |
 | 8 | SonarQube | Project — prod | Key `__PROJECT_NAME__`, name `__PROJECT_DISPLAY_NAME__` | |
 | 9 | SonarQube | Project — dev | Key `__PROJECT_NAME__-dev`, name `__PROJECT_DISPLAY_NAME__ (Dev)` | |

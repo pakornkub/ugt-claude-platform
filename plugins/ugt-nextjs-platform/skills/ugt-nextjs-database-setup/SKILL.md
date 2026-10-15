@@ -97,6 +97,8 @@ npm install @prisma/client@7.9.1 @prisma/adapter-mssql@7.9.1 @t3-oss/env-nextjs 
 npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 ```
 
+**No shell?** Add these packages to `package.json` by hand at the same ranges and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
+
 ### 2. Copy assets and substitute placeholders
 
 | Asset | Destination |

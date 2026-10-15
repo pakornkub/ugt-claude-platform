@@ -7,7 +7,7 @@ Block names drift, so confirm the one below still resolves before installing:
 `curl -s -o /dev/null -w '%{http_code}' https://ui.shadcn.com/r/styles/base-mira/sidebar-07.json`
 must print `200`. (The registry index at `/r/index.json` lists components
 only, not blocks, and the shadcn MCP that used to list them is no longer
-declared by this plugin — see `conventions.md` §ตรวจ API.)
+declared by this plugin — see `base-ui-api.md`.)
 
 ## Shell mapping
 

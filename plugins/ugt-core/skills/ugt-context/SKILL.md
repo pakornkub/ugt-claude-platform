@@ -48,7 +48,8 @@ decision logs in one repo is the one thing this folder must never cause.
 
 - `docs/project-context/` already exists → report what is there and **stop**
   unless the user explicitly asks to regenerate a specific file. Never
-  overwrite silently — these files are the team's knowledge.
+  overwrite silently — these files are the team's knowledge. (Parked
+  deviations still move — §3b.)
 - Fresh project (no meaningful source yet) → **skeleton path**: copy every
   template from `assets/` to `docs/project-context/`, substitute nothing,
   done. The files fill up as work happens (via `/ugt-handoff`).
@@ -99,6 +100,17 @@ Present the drafts to the user for correction **before** committing — the
 scan can misread intent, and a wrong context file misleads every future
 session. After approval: write the files, then remind the user to commit.
 
+### 3b. Move deviations a setup run parked
+
+Both paths (skeleton and scan), and also when §1 stops because the folder
+already exists: if `docs/setup-finish.md` has a
+`## Deviations (to move into architecture.md)` section (a stack setup skill
+recorded `⚠ deviation` lines before this folder existed), append each line
+unchanged to `architecture.md` under the heading it concerns — **skip a line
+already there** (a re-run after an interrupted move must not duplicate it) —
+then delete that section from `setup-finish.md` (the rest of the file stays;
+delete the file when nothing remains).
+
 ### 4. Hand off ownership
 
 Close by stating: from now on `/ugt-handoff` maintains every file here at the
@@ -123,6 +135,8 @@ project (except to regenerate after a major restructure, on explicit request).
 - [ ] `00-index.md` table rows match the files that actually exist
 - [ ] Every architecture/api/business-rules entry points at a real file path
 - [ ] No unmarked assumptions in scanned drafts
+- [ ] `docs/setup-finish.md` (if any) has no `## Deviations (to move into
+      architecture.md)` section left — its lines are in `architecture.md` (§3b)
 - [ ] CLAUDE.md imports `@docs/project-context/00-index.md` (installed by the
       stack's full-setup — if missing, tell the user to re-run its harness step)
 - [ ] The folder is committed (it is the team's knowledge, like `.claude/state/`)

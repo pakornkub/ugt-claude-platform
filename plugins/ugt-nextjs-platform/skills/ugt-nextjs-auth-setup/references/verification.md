@@ -45,7 +45,7 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
       local" with `y@ube.co.th` → refused on the email field; a Local row made
       earlier on an org email can no longer sign in (`ORG_EMAIL_USE_SSO`), and an
       SSO/LDAP login of the employee holding that mailbox is refused instead of
-      linked (log names the row) — `org-identity.md` §7 has the clean-up
+      linked (log names the row) — `org-identity-migration.md` has the clean-up
 - [ ] [Directory] Log in and check the `User` row: employee code, department,
       position, supervisor are filled — and by **both** SSO and LDAP, not one
 - [ ] [Directory] Change someone's department in the HR view, log in again →
@@ -101,7 +101,8 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
 - [ ] `grep -rn "action: '" lib app` finds nothing — every `ActivityLogs.action`
       comes from `AUDIT_ACTIONS` in `lib/audit-actions.ts`
 - [ ] `docs/project-context/architecture.md` has the `⚠ deviation` line for the
-      auth tables (no audit columns + hard delete) — §5.3
+      auth tables (no audit columns + hard delete) — §5.3 (or `docs/setup-finish.md`
+      §Deviations while the folder does not exist yet)
 - [ ] With a basePath: the cookie name in DevTools starts with your basePath (e.g. `expense-portal.`, or `__Secure-expense-portal.` on https)
 - [ ] Security headers reach **every** response, not just HTML pages —
       `curl -sI http://localhost:3000/login` and

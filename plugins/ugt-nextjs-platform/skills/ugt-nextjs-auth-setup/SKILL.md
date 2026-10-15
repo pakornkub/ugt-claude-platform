@@ -22,7 +22,7 @@ description: >
 
 Every row below was debugged in a real org project. This is an index only — the
 cause and fix live in the file named (all under `references/`); read it when a
-symptom appears, and `auth-flows.md` before changing a flow.
+symptom appears, and `auth-flows.md` / `login-flows.md` before changing a flow.
 
 | Symptom | Cause + fix in |
 | --- | --- |
@@ -64,18 +64,19 @@ permission checkboxes), `/admin/audit-logs` (read-only viewer).
 Real code lives in `assets/` — adjust placeholders and copy straight into the
 project. Deep detail lives in `references/`:
 
-- `references/auth-flows.md` — how every flow works (read it before changing a login flow or cookie/guard setting)
+- `references/auth-flows.md` — cookie/session mechanics: signing, naming, logout, guards (read it before changing a cookie/guard setting)
+- `references/login-flows.md` · `references/password-reset.md` — how each sign-in flow (SSO/LDAP/Local, `?from=`) and the reset flow work (read before changing one)
 - `references/troubleshooting-{session,sso,upgrades}.md` — every debugged symptom → cause → fix,
   split by topic (cookies/loops/basePath · Keycloak/LDAP · better-auth bumps/peer deps/re-syncs)
 - `references/asset-map.md` · `references/schema-and-env.md` — per-asset table (§5.2), auth-table + env-var detail (§5.3–5.4)
 - `references/rbac.md` — data model, guard pattern, bootstrap, adding permissions later
-- `references/audit-logging.md` — action naming, write pattern, payload rules (PDPA), retention, viewer API
+- `references/audit-logging.md` — action naming, payload rules (PDPA), checklist · `audit-write-pattern.md` — write pattern · `audit-viewer-retention.md` — viewer, retention
 - `references/keycloak-client.md` — requesting/creating a Keycloak client for a new project
 - `references/directory-enrichment.md` — filling employee code / department /
   position / supervisor from the org's employee view over a linked server,
   because SSO and LDAP only answer "who are you"
 - `references/org-identity.md` — pre-assigned roles, the "ยังไม่มีบทบาท" tab/badge/admin
-  mail, `ORG_EMAIL_DOMAINS` and the shared-account hole (§2 items 10–11) + kit-sync steps
+  mail, `ORG_EMAIL_DOMAINS` and the shared-account hole (§2 items 10–11); kit-sync steps → `org-identity-migration.md`
 - `references/data-scope.md` — "may they?" vs "**whose data?**": the row-level
   scope layer, and the approval-chain view (**read before writing any route
   that accepts an empCode from the client**)
@@ -99,7 +100,7 @@ The org-wide contract:
    events for local accounts) and every privileged mutation writes to the
    ActivityLogs table after success — non-blocking, must never throw and
    break login. The mandated action catalog + full rules (naming, forbidden
-   payloads, retention) in `references/audit-logging.md`
+   payloads) in `references/audit-logging.md`, retention in `audit-viewer-retention.md`
 5. **RBAC shape**: `user (1)──(0..1) role (1)──(M:N) permission` — permission
    keys are `resource:action`, roles with `isSystem: true` cannot be deleted,
    every mutation guarded in the order **session → permission → action → audit log**
@@ -239,7 +240,7 @@ npx shadcn@latest add table select checkbox badge dialog alert-dialog sheet avat
 > **After the `add` lines:** `git diff components/ui/button.tsx input.tsx`
 > (the `sidebar` block can revert a rebased control scale) · `TooltipProvider`
 > must already wrap the root layout · never a plain `npx shadcn@latest init`
-> (Radix, not base-mira) — why for each: `references/asset-map.md` §shadcn caveats.
+> (Radix, not base-mira) — why for each: `references/asset-map.md` §shadcn caveats. **No shell?** Add every package above (`ldapts` only with LDAP) to `package.json` by hand at the same ranges, write `.npmrc` (`legacy-peer-deps=true`) by hand, and list both `add` lines + the `npm i` lines under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
 
 Then mount `<Toaster richColors />` (from sonner) in the root layout
 (`app/layout.tsx`) — otherwise `toast.*()` in the login form renders nothing.
@@ -294,7 +295,7 @@ text — see that file for why. Run design-setup's `verify.mjs` (delegates to
    > delete** (Better Auth owns these rows; `PendingRoleAssignments` is plural
    > but also hard-deletes). Do not pluralize them, and **record
    > the `⚠ deviation` line during install** — the table list, the reason and the
-   > exact line are in `references/schema-and-env.md` §Auth-table exception.
+   > exact line are in `references/schema-and-env.md` §Auth-table exception (no `docs/project-context/` yet → `docs/setup-finish.md`, `ugt-nextjs-full-setup` §3).
 2. Add project-specific custom fields on the `user` model at `// EXTENSION POINT:`
 3. `npx prisma migrate dev --name auth-rbac`, then **must** run `npx prisma generate` immediately.
    **MSSQL (SSO or Local):** `--create-only` first and swap the `LdapUsername` unique constraint
@@ -318,7 +319,7 @@ requiredness and the reason for each: `references/schema-and-env.md` §Env schem
    — all three from `searchParams`; `from` is the basePath-relative return-to-page
    path `proxy.ts`, the layout guard and `SessionExpiredDialog` attach; the form
    validates it (open-redirect guard) and every method returns there
-   (`references/auth-flows.md` §Return-to-page). `error` is the code
+   (`references/login-flows.md` §Return-to-page). `error` is the code
    Better Auth appends when `onAPIError.errorURL` (lib/auth.ts) redirects a
    failed flow back here (e.g. `unable_to_create_user`), mapped to a Thai
    message — without it a failed SSO login shows nothing. **"Already signed in

@@ -54,7 +54,10 @@ assembled in code at send time; only the inner prose is stored and editable.
 2. **Dev mode is mandatory, not optional.** Every call passes `actor`
    (`email` + `hasDevMode`). A tester with `dev-mode:enable` gets the mail
    themselves, CC dropped, `[DEV] ` on the subject, and a banner naming the real
-   recipients. (The DEV bar that `ugt-nextjs-design-setup` puts on the dev deployment
+   recipients. `hasDevMode` is that permission check and nothing else — never
+   `isDevEnvironment() || …`: "testers on dev must not mail real people" is answered
+   by granting their role `dev-mode:enable` on the dev DB (say so in the close-out),
+   not by code — the kit's own sends and the `dev-mode` tests assume the permission. (The DEV bar that `ugt-nextjs-design-setup` puts on the dev deployment
    can carry a "mail goes back to the tester" clause via its `note` prop — add it only
    if every dev user really has dev mode on; the clause must stay true.)
 3. **Mail must never fail the work.** Send after the transaction commits, inside
@@ -90,6 +93,8 @@ assembled in code at send time; only the inner prose is stored and editable.
 npm install nodemailer
 npm install -D @types/nodemailer
 ```
+
+**No shell?** Add these packages to `package.json` by hand at the same ranges and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
 
 ### 4.2 Copy assets
 

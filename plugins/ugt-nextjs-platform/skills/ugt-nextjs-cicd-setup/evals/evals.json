@@ -46,7 +46,7 @@
         "Identifies the cause as the unconfigured SonarQube → Jenkins webhook at /sonarqube-webhook/",
         "Does not suggest deleting the Quality Gate stage or removing abortPipeline: true to get the pipeline through",
         "Recommends a timeout wrapping waitForQualityGate",
-        "Points at references/sonarqube-setup.md or references/jenkins-one-time-setup.md as admin-side work"
+        "Points at references/sonarqube-setup.md, references/jenkins-one-time-setup.md or references/jenkins-project-setup.md as admin-side work"
       ],
       "files": []
     }

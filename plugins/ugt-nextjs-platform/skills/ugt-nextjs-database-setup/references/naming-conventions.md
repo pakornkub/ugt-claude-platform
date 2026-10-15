@@ -81,7 +81,7 @@ that only ever get edited) may trim to the meaningful subset
 **Every trim is recorded, not just decided.** `contracts/database.md` allows the
 exemption only when the project writes a `⚠ deviation` line for that table in
 `docs/project-context/architecture.md` (which table, which columns were dropped,
-why) — otherwise the next person reads it as a table that simply forgot its audit
+why; folder not created yet → `docs/setup-finish.md`, `ugt-nextjs-full-setup` §3) — otherwise the next person reads it as a table that simply forgot its audit
 columns. Append-only log tables (`ActivityLogs`) are exempt by nature and need no
 line.
 

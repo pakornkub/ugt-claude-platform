@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.14.5 (2026-10-15)
+
+- `ugt-context` §3b: ย้ายบรรทัด `⚠ deviation` ที่ setup skill จอดไว้ใน `docs/setup-finish.md` หัวข้อ `## Deviations (to move into architecture.md)` (บันทึกตอนที่ `docs/project-context/` ยังไม่เกิด) เข้า `architecture.md` แล้วลบหัวข้อนั้น (ข้ามบรรทัดที่มีอยู่แล้ว · ลบไฟล์ถ้าไม่เหลืออะไร) — ทำทั้ง skeleton/scan และตอนโฟลเดอร์มีอยู่แล้ว + ข้อใน checklist (ugt-nextjs-platform full-setup §3 คือฝั่งที่จอด)
+
 ## 2.14.4 (2026-10-14)
 
 - contract auth: หัวข้อใหม่ **Accounts** — บัญชี SSO/LDAP เกิดตอน login ครั้งแรกเท่านั้น · ตั้ง role ล่วงหน้าได้โดยคีย์ด้วย EmpCode/AD login จาก HR ไม่ใช่อีเมล · ห้ามบัญชี Local บนโดเมนอีเมลองค์กร · ห้าม SSO/LDAP link เข้าบัญชี Local (ugt-nextjs-platform 4.79.0 คือฉบับ Next.js)

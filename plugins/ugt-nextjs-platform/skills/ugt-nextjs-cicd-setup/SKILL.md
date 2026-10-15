@@ -52,7 +52,8 @@ Skill layout:
 | Where | Contents |
 | --- | --- |
 | `assets/` | Jenkinsfile, sonar-project.properties, Dockerfile, compose ×2, owasp-suppressions.xml, api-health-route.ts — copy and substitute placeholders |
-| `references/jenkins-one-time-setup.md` | what the admin prepares on the Jenkins server (plugins/tools/credentials/webhook/snap-Docker gotcha) |
+| `references/jenkins-one-time-setup.md` | what the admin prepares on the Jenkins server once (plugins/tools/snap-Docker gotcha/NVD) + frequent pitfalls |
+| `references/jenkins-project-setup.md` | what the admin repeats per project (credentials/job config/webhook/dev reverse proxy) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule, compose, reverse proxy |
 | `references/scheduled-jobs.md` | host cron → `POST /api/cron/<job>` + `CRON_SECRET` (route shape, crontab line) |
@@ -290,7 +291,8 @@ not a style nit.
 - Jenkins: plugins, tools (`NodeJS-22` / `SonarQube-Scanner` /
   `Dependency-Check` — names must match exactly), credentials, global env vars,
   webhook, disable Lightweight checkout →
-  **`references/jenkins-one-time-setup.md`**
+  **`references/jenkins-one-time-setup.md`** (server) ·
+  **`references/jenkins-project-setup.md`** (per project)
 - SonarQube: projects ×2 (prod/dev), Global Analysis Token, Quality Gate per
   §2.3, webhook back to Jenkins → **`references/sonarqube-setup.md`**
 - **Render `assets/admin-handoff.template.md` → write it to the project as

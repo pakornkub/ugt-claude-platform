@@ -12,3 +12,10 @@
 *.ico binary
 *.woff binary
 *.woff2 binary
+
+# Contribute PRs append bullets under `## Unreleased` in parallel — the built-in
+# union driver keeps both sides on a LOCAL merge instead of a conflict. GitHub's
+# web merge ignores merge drivers, so merge contribute PRs locally (README,
+# "สำหรับทีมดูแล platform"). Check the result: union never drops lines, but it
+# can duplicate a line both sides added.
+plugins/*/CHANGELOG.md merge=union

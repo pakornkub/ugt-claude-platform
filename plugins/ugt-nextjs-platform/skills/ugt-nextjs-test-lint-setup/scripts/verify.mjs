@@ -67,7 +67,7 @@ check('Required devDependencies installed', () => {
   const dev = { ...(pkg.devDependencies ?? {}), ...(pkg.dependencies ?? {}) };
   const need = ['vitest', '@vitest/coverage-v8', 'eslint', 'prettier', 'husky', 'lint-staged'];
   const missing = need.filter((d) => !dev[d]);
-  return missing.length ? { ok: false, msg: `Not installed: ${missing.join(', ')}` } : { ok: true };
+  return missing.length ? { ok: false, msg: `Not installed: ${missing.join(', ')} (no shell? add it to package.json by hand — ugt-nextjs-full-setup SKILL.md §3 No shell)` } : { ok: true };
 });
 
 // ── 3. vitest config — the pipeline's dependencies ─────────────────────────

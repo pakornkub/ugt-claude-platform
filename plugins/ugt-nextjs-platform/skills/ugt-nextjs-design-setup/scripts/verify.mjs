@@ -107,7 +107,7 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
     const radix = Object.keys(deps).filter((d) => d === 'radix-ui' || d.startsWith('@radix-ui/'));
     if (radix.length) problems.push('package.json depends on ' + radix.join(', ') + ' — uninstall');
-    if (!deps['@base-ui/react']) problems.push('@base-ui/react is missing — the base-mira primitives are not installed');
+    if (!deps['@base-ui/react']) problems.push('@base-ui/react is missing — the base-mira primitives are not installed (no shell? add it to package.json by hand — ugt-nextjs-full-setup SKILL.md §3 No shell)');
   }
 
   // Base UI ignores Radix idioms silently: the component renders and the
@@ -211,7 +211,7 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
   check(`components/ui/${f}.tsx installed`, () => {
     if (hasIn('components', 'ui', `${f}.tsx`)) return { ok: true };
     return SHADCN_ADD_FILES.has(f)
-      ? { ok: false, msg: `not installed — run npx shadcn@latest add ${f} (SKILL.md Step 3.4 primitive list)` }
+      ? { ok: false, msg: `not installed — run npx shadcn@latest add ${f} (SKILL.md Step 3.4 primitive list; no shell → list it under ยังไม่ได้รัน, ugt-nextjs-full-setup §3)` }
       : { ok: false, msg: 'Kit file missing' };
   });
 }
@@ -595,7 +595,7 @@ check('next-intl wired end to end (plugin · request config · provider · catal
       // useTranslations() unconditionally; without next-intl the app does not
       // boot. A warn here contradicted the doc's own severity.
       ok: false,
-      msg: 'next-intl is not a dependency — since 4.46.0 the whole kit reads its strings through the catalog; every t() throws at render (มติ 2.2)',
+      msg: 'next-intl is not a dependency — since 4.46.0 the whole kit reads its strings through the catalog; every t() throws at render (มติ 2.2) (no shell? add it to package.json by hand — ugt-nextjs-full-setup SKILL.md §3 No shell)',
     };
   }
 

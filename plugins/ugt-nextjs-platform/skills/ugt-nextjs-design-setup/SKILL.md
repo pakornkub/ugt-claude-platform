@@ -171,7 +171,7 @@ different size — is the field bug this step exists to prevent.
    `curl -s https://ui.shadcn.com/r/styles/base-mira/<name>.json` ·
    ⚠️ **shadcn MCP ตอบ style default ที่เป็น Radix** และไม่มี parameter สั่งให้
    ตอบ base-mira — ถ้าเครื่องไหนต่อ MCP ตัวนี้อยู่ **ห้ามลอกโค้ดจากมัน** · ลำดับแหล่งอ้างอิงเต็ม +
-   ตารางความต่าง Radix↔Base UI อยู่ที่ `references/conventions.md` §ตรวจ API:
+   ตารางความต่าง Radix↔Base UI อยู่ที่ `references/base-ui-api.md`:
    `button input label select checkbox radio-group field dialog alert-dialog
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea
@@ -200,6 +200,10 @@ different size — is the field bug this step exists to prevent.
    as the color-rule reference · the `@tiptap/*` ^3 set + `ui/tiptap-editor.tsx`
    only when rich text exists · `motion` + `lib/motion.ts` only when custom
    motion = มี (pairs with `docs/MOTION.md`).
+   **No shell?** (init + `add` + `npm i` cannot run) add the npm deps above (+ `@base-ui/react`,
+   which init installs) to `package.json` by
+   hand at the same ranges and list `init`, every `add` component list and the `npm i` lines under
+   "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
 5. **App shell FIRST, then variants** — **preserve mode: skip the block.**
    The project's existing layout IS the shell (ข้อ 5 recorded as "เดิม"): do
    not install `sidebar-*`, no `<Sidebar>`/`<SidebarInset>`; later skills
@@ -336,8 +340,10 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
 - `references/root-layout.md` — Step 3.3 in full: fonts + `lang`, provider
   stack, DEV environment bar + `[DEV] ` title, next-intl plugin
 - `references/conventions.md` — component-usage rules in depth (ถูก/ผิด,
-  control ladder, Base UI API check, Dialog ladder, Badge vs StatusBadge,
+  control ladder, Dialog ladder, Badge vs StatusBadge,
   icon mapping + IconAction tone, feedback, i18n)
+- `references/base-ui-api.md` — check a primitive's API against the base-mira
+  registry before writing; the Radix↔Base UI difference table
 - `references/datatable.md` — page-level filter bar + DataTable modes,
   toolbar, pagination, consistency obligations
 - `references/export.md` — Excel/CSV export route shape and traps

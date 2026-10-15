@@ -59,7 +59,7 @@ npm i -D vitest @vitest/coverage-v8 @vitejs/plugin-react jsdom \
   husky lint-staged
 ```
 
-(No Tailwind → drop `prettier-plugin-tailwindcss`.)
+(No Tailwind → drop `prettier-plugin-tailwindcss`.) **No shell?** Add these packages to `package.json` by hand at the same ranges and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
 
 ### 2. Copy assets
 
