@@ -35,9 +35,9 @@ if (!existsSync(DOCS)) {
   process.exit(0);
 }
 
-// Walk docs/ recursively so proposals/ and archive/ stay covered — but skip
-// docs/superpowers/**: plans/specs there follow the superpowers pipeline's own
-// lifecycle, not this status convention (documented in README §สำหรับทีมดูแล).
+// Walk docs/ recursively — but skip docs/superpowers/** if a pipeline run
+// recreates it: plans/specs there follow the superpowers pipeline's own
+// lifecycle, not this status convention.
 const SKIP_DIRS = new Set(['superpowers']);
 const walk = (dir, prefix = '') =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

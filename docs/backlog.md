@@ -109,7 +109,7 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` สกั�
   inline redirect เติม trailing slash สกัดจากตัวแก้จริงใน pilot `ugt-mscpl-ana`)
 
 **Container hardening — ออกแบบไว้แล้ว พักเป็น backlog ตามที่คุยกัน 2026-08-23:**
-spec เต็มอยู่ที่ `docs/superpowers/specs/2026-08-23-php-container-hardening-design.md`
+spec เต็ม (ลบจาก repo 2026-10-15): `git show a13c2f5:docs/superpowers/specs/2026-08-23-php-container-hardening-design.md`
 (ตรวจกับ Docker จริงแล้ว ไม่ใช่แค่ทฤษฎี) — non-root ผ่าน `setcap`+`cap_add`,
 ปิด banner, security headers พื้นฐาน, ห้าม `no-new-privileges` (พังบน docker02)
 · **ไม่ใช่ของที่ทำให้ deploy ไม่ได้** — ไม่มีใครในองค์กรร้องขอ พักไว้จนกว่าจะมี
@@ -158,7 +158,7 @@ HRMS (`D:\Project_2026\ugt-hrms`) เป็น production reference ของ i1
   (`'you cannot delete your own account': 'errorCannotDeleteSelf'`), unknown
   value หลุดเป็นอังกฤษเงียบ ๆ — ยืนยันมติเดิมว่าเฟส 2 ต้องเปิดด้วย
   error-code contract (code-based ไม่ใช่ prose-based) ก่อนแตะสตริงสักตัว ดู
-  `docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md` §7
+  `git show a13c2f5:docs/superpowers/specs/2026-08-24-org-kit-i18n-design.md` §7
 
 ### 8. จาก review เฟส 2 (2026-08-24, หลังปิดช่อง registration ใน 4.47.1)
 
@@ -343,7 +343,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 | Behavior evals ของ `ugt-nextjs-kit-sync` (ยังไม่เคยเขียน — เป็นตัวเดียวที่ไม่มี `evals.json`) | โปรเจคจริงที่มีไฟล์ kit ถูกแก้เอง เพื่อวัดการตัดสิน merge vs overwrite | แถวนี้ |
 | Trigger baseline ของ php/python (ประกาศ `date: null` แล้ว 2026-08-23) | pilot จริงของสอง stack นี้ | `evals/trigger-evals.json` ของแต่ละตัว |
 | Pilot `ugt-python-platform` / `ugt-php-platform` 0.6.0 → tag | โปรเจค pilot จริง | README ตาราง plugin |
-| Multi-stack ต่อ (React SPA ฯลฯ) | มีโปรเจค stack นั้นจริง | `docs/proposals/multi-stack-proposal.md` |
+| Multi-stack ต่อ: database/auth/design ของ Python/PHP (ตอนนี้มีแค่ cicd) · React SPA (Vite) | มีโปรเจค stack นั้นจริง | ข้อเสนอเดิม (ลบจาก repo 2026-10-15): `git show a13c2f5:docs/proposals/multi-stack-proposal.md` |
 | axe-core / focus-trap / keyboard-operability render gate ใน `verify.mjs` | incident จริงในสนาม หรือลูกค้าเรียกร้อง WCAG compliance เป็นทางการ | §12 ข้างบน |
 | คำถาม interview.md แยก "สี sidebar" ออกจาก primary (ข้อ 2) | โปรเจคที่สองที่ขอ sidebar คนละสีจาก primary จริง (ตอนนี้มีเคสเดียว) — ระหว่างนี้ตอบผ่าน "อื่นๆ" ของข้อ 2 ได้อยู่แล้ว, 2026-09-11 | บทสนทนานี้ (`ugt-nextjs-design-setup` references/interview.md) |
 | `ugt-nextjs-e2e-setup` (Playwright, opt-in module แบบ Mail/Upload — มติ 2026-09-12) | โปรเจคที่มี flow เสี่ยงสูงจริง (auth/SSO, approval, payment) มาขอจริง — ยังไม่มีการร้องขอ | §2 ข้างบน |

@@ -298,10 +298,9 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
      ขนาดปุ่มด้วย className และไม่มี native `title=` บนปุ่ม
    - `check-contract-drift` เช็คว่าค่ามาตรฐานกลางที่ถูกก๊อปไปอยู่ในหลายตัวช่วย
      ยังตรงกัน
-   - `check-doc-status` เช็คว่า `.md` ทุกไฟล์ใต้ `docs/` (recurse ลง
-     `proposals/` / `archive/` ด้วย) ประกาศสถานะตัวเองครบ — ยกเว้น
-     `docs/superpowers/**` โดยตั้งใจ และไม่อ่านไฟล์ `.html` (หน้าใน
-     `docs/web/` กับ `docs/training/` จึงต้องดูด้วยตา — สีของ
+   - `check-doc-status` เช็คว่า `.md` ทุกไฟล์ใต้ `docs/` (recurse ลง subfolder)
+     ประกาศสถานะตัวเองครบ — ไม่อ่านไฟล์ `.html` (หน้าใน `docs/web/`
+     จึงต้องดูด้วยตา — สีของ
      design-preview ตรวจด้วยสคริปต์ถัดไป)
    - `check-preview-tokens` เช็คว่า**สี**ใน design-preview ยังตรงกับ token ที่
      ติดตั้งจริง — โครงหน้าและข้อความยังต้องดูด้วยตาตามข้อ 4
@@ -368,25 +367,14 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 - ตัวอย่างหน้าตา UI ที่ได้ → [`docs/web/design-preview.html`](docs/web/design-preview.html)
 - หน้าภาพรวมแบบเปิดใน browser (สำเนาของ README นี้ — sync มือตอน release) →
   [`docs/web/index.html`](docs/web/index.html)
-- สอนทีม "คุยกับ AI ให้ได้งาน" → [`docs/training/landing.html`](docs/training/landing.html)
-  (ฉบับเต็ม) · [`docs/training/cheatsheet.html`](docs/training/cheatsheet.html) (1 หน้า)
 - ให้ทีม IT ตั้ง hard boundary → `plugins/ugt-core/contracts/org-managed-settings.md`
 - ขั้นตอนออกรุ่น → หัวข้อ "สำหรับทีมดูแล platform" ด้านบน
 
 **งานค้างของ platform** — [`docs/backlog.md`](docs/backlog.md) ที่เดียว:
 รอลงมือ / รอเงื่อนไข / ปิดแล้วชี้รุ่น (post-deploy, E2E, cron, evals ที่ค้าง ฯลฯ)
 
-**บันทึกย้อนหลัง** (เก็บไว้ตอบว่า "ทำไมตอนนั้นถึงเลือกแบบนี้" —
-⚠️ **ไม่ใช่มาตรฐานปัจจุบัน อย่าทำตาม**):
-
-- [`docs/proposals/multi-stack-proposal.md`](docs/proposals/multi-stack-proposal.md) — ข้อเสนอรองรับ stack อื่น
-  (Python / PHP / React SPA) · **ทำแล้วบางส่วน**: ส่วน cicd ของ Python/PHP
-  ทำแล้ว (สถานะ pilot/รุ่นล่าสุดดูตารางด้านบน) ส่วน database/auth/design
-  ของสอง stack นี้ และ React SPA ยังไม่มี plugin
-- [`docs/archive/app-patterns-audit.md`](docs/archive/app-patterns-audit.md) — บันทึกการคัดความรู้เข้า
-  `ugt-nextjs-pitfalls` + เหตุผลที่ตัดแต่ละข้อทิ้ง · งานค้างของไฟล์นี้ปิดครบแล้ว
-  — อ่านก่อนเสนอเพิ่มเนื้อหาเข้า pitfalls
-- [`docs/archive/design-skill-draft.md`](docs/archive/design-skill-draft.md) — ร่างตอนออกแบบ design skill
-  (2026-08-03) · **เนื้อหาถูก supersede แล้ว** (เช่นยังพูดถึง `radix-mira` ทั้งที่มติ
-  2026-08-04 เปลี่ยนเป็น `base-mira`) — มาตรฐานดีไซน์ปัจจุบันอยู่ที่
-  `plugins/ugt-core/contracts/design.md`
+**บันทึกย้อนหลัง** — ข้อเสนอ multi-stack, spec/plan ของ superpowers, ร่าง design skill,
+บันทึกคัดความรู้เข้า pitfalls และหลักสูตร "คุยกับ AI" เดิม ลบออกจาก repo แล้ว (2026-10-15)
+ยังเปิดดูได้จาก git: `git show a13c2f5:docs/<path>` (เช่น
+`docs/archive/app-patterns-audit.md` = เหตุผลที่ตัดแต่ละข้อทิ้งตอนคัดเข้า
+`ugt-nextjs-pitfalls` อ่านก่อนเสนอเพิ่มเนื้อหาเข้า pitfalls)

@@ -3,7 +3,7 @@
   "name": "ugt-php-platform",
   "displayName": "UGT PHP Platform",
   "version": "0.8.5",
-  "description": "Org standards for PHP projects (deploy-only scope for now): Jenkins + SonarQube + OWASP + Docker deploy for Laravel / CodeIgniter / plain PHP / WordPress, including the minimal php-cs-fixer/phpstan/PHPUnit tooling the org Quality Gate needs. Database/auth/design skills come later — see docs/proposals/multi-stack-proposal.md.",
+  "description": "Org standards for PHP projects (deploy-only scope for now): Jenkins + SonarQube + OWASP + Docker deploy for Laravel / CodeIgniter / plain PHP / WordPress, including the minimal php-cs-fixer/phpstan/PHPUnit tooling the org Quality Gate needs. Database/auth/design skills come later (docs/backlog.md, Multi-stack row).",
   "author": { "name": "UGT DX Team" },
   "keywords": ["php", "laravel", "codeigniter", "wordpress", "jenkins", "sonarqube", "org-standard"],
   "dependencies": ["ugt-core"]

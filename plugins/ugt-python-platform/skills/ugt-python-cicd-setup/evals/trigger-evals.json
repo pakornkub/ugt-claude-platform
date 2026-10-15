@@ -44,7 +44,7 @@
     },
     "N4": {
       "prompt": "ตั้ง keycloak login ให้แอป python",
-      "expected": "(none — ยังไม่มี auth skill; ดู multi-stack-proposal)"
+      "expected": "(none — ยังไม่มี auth skill; ดู docs/backlog.md แถว Multi-stack)"
     }
   }
 }
