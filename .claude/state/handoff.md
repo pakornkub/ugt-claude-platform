@@ -21,6 +21,7 @@ Last updated: 2026-10-15
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-15 nextjs **4.79.3** + core **2.14.5** (9504ed4, tag ครบ): กฎ No shell ใน full-setup §3, ที่พัก deviation ก่อนมี project-context (ugt-context §3b), แตก reference >200 บรรทัด 5 ไฟล์, fixture eval มี shadcn base-mira, `.gitattributes` CHANGELOG merge=union, mail `hasDevMode` = permission อย่างเดียว, §2.5 รายการ default ห้ามมีข้อที่ตอบแล้ว · eval 6 case ผ่าน (run-through-plan judge แกว่ง 1–2 เสียง ตรวจ plan แล้วผ่านจริง) · ร่างประกาศ 4.79 ส่งผู้ดูแลแล้ว ยังไม่ได้ประกาศ
 - 2026-10-15 nextjs **4.79.1** (full-setup วางไฟล์ `.claude/` ที่เขียนไม่ได้ใน `docs/setup-finish.md`) · **4.79.2**
   (eval ใหม่ `module-auth-org-identity` + `module-mail-after-auth` 1.00 · verify auth/mail false-fail 4 ข้อ ·
   review เจอ policy check ถูกข้าม + grader 2 ตัว แก้แล้ว) · eval หลัง merge 4.79.0 ครบ: plan/design/auth 1.00,
