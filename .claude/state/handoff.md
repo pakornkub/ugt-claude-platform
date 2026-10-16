@@ -3,6 +3,12 @@
 Last updated: 2026-10-15
 
 ## In progress
+- **ยก UI จาก ugt-hrms เข้า kit** (มติ 35/35 2026-10-16, `docs/backlog.md` §14 — 4 รุ่น) ·
+  รุ่น 1 ออกแล้ว = nextjs 4.80.0 + core 2.15.0 (934cc20: token, contract, template) ·
+  **ถัดไป รุ่น 2 primitive** (ปุ่ม cta/soft/success/destructive, CardHeading, dialog 3 โซน,
+  table, PageShell 96rem + back-link, sidebar/breadcrumb, DataTable footer/sortable/มือถือ,
+  StatusBadge violet) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
   = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
