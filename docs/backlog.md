@@ -334,6 +334,20 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
   / `<jenkins-host>` เอง (ผ่านกฎ "ไม่เหลือ `__…__`" แต่ไฟล์ส่ง admin ยังมีช่องว่าง) · ควรถาม
   ใน interview หรือกำหนด default (Jenkins host ขององค์กรเป็นค่าคงที่)
 
+### 14. ยก UI จาก ugt-hrms เข้า kit — มติผู้ดูแล 2026-10-16 (35/35 ข้อ, ตัดสินจากหน้าเทียบ `.scratch/hrms-vs-plugin.html`)
+
+ทำ 4 รุ่นตามลำดับ แต่ละรุ่น review + eval แล้วออกรุ่น · ทุก component ต้อง port Radix → Base UI (`asChild`→`render`,
+`data-[state=open]`→`data-open`, `form.tsx`→`field`) แล้วตรวจกับ registry · ต้นทาง = `ugt-hrms/docs/DESIGN.md` §10 + โค้ดจริง
+
+| รุ่น | รหัส (มติ) |
+| --- | --- |
+| 1 · token + contract + DESIGN template | TK-BG `--background` light hrms · TK-SB sidebar ขาว · TK-CAT `--cat-1..8` · TK-VIO `--status-violet`(+fg) เป็นสถานะตัวที่ 7 · TK-RAD **ผสม: การ์ดใช้ radius ของ plugin ที่เหลือแบบ hrms (0.75rem)** · TK-RING ring dark แยก · TK-MOT reduced-motion กลาง · D3 elevation (พื้น #f5f7fb + sidebar ขาว + Card shadow-xs ring-1) · D9 gradient เฉพาะ hero/banner · B12 สี avatar ตามชื่อ + `getInitials` ข้ามสระนำไทย · ข้อความ contract ของ A7/B10/A11/D4/D6/D8/D12 |
+| 2 · primitive | A7 ปุ่ม `cta` · A3 ปุ่ม toolbar ขนาดเดียว · D6 อนุมัติ = primary + `destructive` แดงทึบ + variant `soft` แบบ hrms · B8 ViewToggle · A8 dialog 3 โซน · B2 CardHeading · B10 ตาราง `text-xs 2xl:text-sm` · A1 PageShell `max-w-[96rem]` · A10 back-link · B11 PageEyebrow + แถบปุ่มมือถือ · D7 sidebar active ทึบ + ค้นหาเมนู + จุดสีกลุ่ม + breadcrumb บ้าน (เอาหน้าตา คงการ derive จาก nav config) · B3 DataTable footer + `sortable` + shadow-xs · D8/A12 DataTable มือถือ = list ในการ์ดเดียว |
+| 3 · component ใหม่ | B1 StatCard · B4 FilterPopover · B5 ReasonDialog · B6 detail dialog anatomy · B7 TimeInput · A6 PeriodNavigator/YearSelect/ViewToggle 3 ทาง · A5 settings form ใน Sheet (**พื้นแบบ plugin ที่เหลือแบบ hrms**) · A12 ResponsivePopover · D4 form page คอลัมน์เดียวการ์ดต่อ section · D12 dashboard pattern · A11 บันไดเลือกฟอร์ม |
+| 4 · login + pitfalls + docs | A4 login (แผงเข้มสีตายตัว + การ์ดกระจก + kenburns, มือถือภาพเต็มจอ) · pitfalls A2 ไทยใน font-mono · A13 RT-042 flex-1 บีบความสูง + RT-044 cache ไฟล์ public · B13 RT-045 useIsMobile #418 · design-preview + docs/web ตามของจริง |
+
+ไม่เอา: ภาษาช่องวัน/กะ, HERO_GRADIENT hex, view-as, เนื้อหา dashboard โดเมน HR, โลโก้ PNG, สีกลุ่มเมนูจากสีสถานะ, `DecisionButtons` สูงรายจุด
+
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)
 
 | งาน | รออะไร | บันทึกตัวเองไว้ที่ |
