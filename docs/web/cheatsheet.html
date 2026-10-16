@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheat sheet — UGT Claude Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css"><script src="site.js"></script>
+<style>
+  @page{size:A4;margin:10mm}
+  .cs-head{padding:28px 0 18px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+  .cs-head h1{font-size:clamp(24px,3.4vw,32px)}
+  .cs-head .meta{color:var(--ink-faint);font-size:14px}
+  .sheet{column-width:320px;column-gap:16px;padding-bottom:40px;font-size:14.5px;line-height:1.55}
+  .box{break-inside:avoid;-webkit-column-break-inside:avoid;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin:0 0 14px;overflow:hidden}
+  .box>h2{font-size:15px;line-height:1.4;font-weight:700;margin:0;padding:7px 12px;background:var(--accent-soft);color:var(--accent-text)}
+  .box.warn>h2{background:var(--bad-soft);color:var(--bad)}
+  .box .in{padding:8px 12px 10px}
+  .box p,.box ul,.box ol{margin:0 0 6px}
+  .box ul,.box ol{padding-left:1.15em}
+  .box li{margin:2px 0}
+  .box :last-child{margin-bottom:0}
+  .box pre.code{font-size:12.5px;padding:8px 10px;margin:0 0 6px;line-height:1.6;border-radius:8px;white-space:pre-wrap;word-break:normal;overflow-wrap:anywhere}
+  .box pre .k{color:var(--code-key)}
+  .box .note{color:var(--ink-soft);font-size:.93em}
+  .box table{font-size:inherit}
+  .box th,.box td{padding:3px 6px 3px 0;border-bottom:1px solid var(--line)}
+  .box th{background:none;color:var(--ink-faint);font-weight:600;font-size:.88em}
+  .box table code{word-break:normal;overflow-wrap:normal}
+  .box td.q{font-style:normal}
+  .box td.q::before{content:"“"}.box td.q::after{content:"”"}
+  .chain{display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin:0 0 6px;font-weight:600;font-size:.95em}
+  .chain span{background:var(--accent-soft);color:var(--accent-text);border-radius:6px;padding:1px 7px}
+  .chain span.opt{background:transparent;border:1px dashed var(--accent)}
+  .chain i{font-style:normal;color:var(--ink-faint)}
+  .rules li{margin:3px 0}
+  .linkrow a{display:inline-block;margin:0 10px 2px 0}
+
+  @media print{
+    :root:root:root{
+      --bg:#ffffff;--bg-soft:#f8f9fc;--bg-tint:#eef2ff;--ink:#1e2436;--ink-soft:#4b5268;--ink-faint:#6d7590;
+      --line:#d9dce6;--accent:#4f46e5;--accent-deep:#4338ca;--accent-soft:#e0e7ff;--accent-text:#3730a3;
+      --ok:#047857;--ok-soft:#ecfdf5;--warn:#b45309;--warn-soft:#fffbeb;--bad:#b91c1c;--bad-soft:#fef2f2;--code-bg:#1e2436;
+    }
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:7.7pt;line-height:1.34}
+    .wrap{max-width:none;padding:0}
+    .cs-head{padding:0 0 2mm}
+    .cs-head h1{font-size:13pt}
+    .cs-head .meta{font-size:7pt}
+    .sheet{column-count:3;column-width:auto;column-gap:3mm;font-size:7.7pt;line-height:1.34;padding:0}
+    .box{margin:0 0 2.2mm;border-radius:2mm}
+    .box>h2{font-size:8.6pt;padding:.8mm 2mm}
+    .box .in{padding:1.2mm 2mm 1.5mm}
+    .box p,.box ul,.box ol{margin:0 0 1mm}
+    .box li{margin:0}
+    .rules li{margin:0 0 .4mm}
+    .box pre.code{font-size:7pt;padding:1.2mm 1.6mm;margin:0 0 1mm;line-height:1.4;border-radius:1.5mm}
+    .box th,.box td{padding:.35mm 1mm .35mm 0}
+    :not(pre)>code{font-size:.92em;padding:0 .25em}
+    .chain{margin:0 0 1mm}
+    .chain span{padding:0 1.2mm}
+    .linkrow a{color:var(--accent-text)}
+  }
+</style>
+</head>
+<body>
+<nav class="site-nav"><div class="wrap">
+  <a class="brand" href="index.html"><b>UGT</b> Claude Platform</a>
+  <a class="link" href="index.html">หน้าแรก</a>
+  <a class="link" href="guide.html">คู่มือ</a>
+  <a class="link" href="reference.html">รายละเอียดตัวช่วย</a>
+  <a class="link" href="design-preview.html">Design system</a>
+  <a class="link" href="slides.html">สไลด์</a>
+  <a class="link" href="cheatsheet.html">Cheat sheet</a>
+  <span class="spacer"></span><button class="theme-btn" type="button">☾ มืด</button>
+</div></nav>
+
+<main class="wrap">
+  <header class="cs-head">
+    <h1>Cheat sheet — UGT Claude Platform</h1>
+    <span class="meta">ugt-nextjs-platform 4.79.4 · ugt-core 2.14.5 · พิมพ์ได้ 1 หน้า A4 (Ctrl+P)</span>
+  </header>
+
+  <div class="sheet">
+
+    <section class="box">
+      <h2>ติดตั้ง — ครั้งเดียวต่อเครื่อง</h2>
+      <div class="in">
+        <pre class="code"><span class="k">/plugin marketplace add</span> pakornkub/ugt-claude-platform
+<span class="k">/plugin install</span> ugt-nextjs-standard-superpowers@ugt
+<span class="k">/reload-plugins</span></pre>
+        <ul class="note">
+          <li>เลือก mattpocock → บรรทัด 2 ใช้ <code>ugt-nextjs-standard-mattpocock@ugt</code></li>
+          <li>scope <b>project</b> = เพื่อนที่ clone ได้ด้วย · <b>user</b> = ใช้เองทุกโปรเจค</li>
+          <li>เช็ค: พิมพ์ <code>/ugt</code> ต้องเห็นรายการตัวช่วย</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>อัปเดต — เมื่อมีประกาศรุ่นใหม่</h2>
+      <div class="in">
+        <pre class="code"><span class="k">/plugin marketplace update</span> ugt
+<span class="k">/plugin update</span> ugt-nextjs-standard-superpowers
+<span class="k">/reload-plugins</span></pre>
+        <p>แล้วพิมพ์ <b>"sync kit"</b> — เช็คไฟล์ kit (ชุดไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค) ที่ตกรุ่น: ไม่เคยแก้ → ทับให้ · แก้เอง → merge</p>
+        <p class="note">ใช้ mattpocock → สลับชื่อในบรรทัด 2 · ดูรุ่นที่ใช้อยู่: <code>/plugin</code></p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>พิมพ์แบบนี้ → ตัวช่วยที่ทำงาน</h2>
+      <div class="in">
+        <table>
+          <tr><th>พิมพ์</th><th>ตัวช่วย</th></tr>
+          <tr><td class="q">ทำให้โปรเจคนี้ deploy ได้</td><td><code>ugt-nextjs-full-setup</code></td></tr>
+          <tr><td class="q">อ่าน requirement แล้วสรุป</td><td><code>ugt-requirements</code></td></tr>
+          <tr><td class="q">ทำข้อตกลง design</td><td><code>ugt-nextjs-design-setup</code></td></tr>
+          <tr><td class="q">ต่อ database</td><td><code>ugt-nextjs-database-setup</code></td></tr>
+          <tr><td class="q">ใส่ระบบ login</td><td><code>ugt-nextjs-auth-setup</code></td></tr>
+          <tr><td class="q">ตั้ง test</td><td><code>ugt-nextjs-test-lint-setup</code></td></tr>
+          <tr><td class="q">ทำ CI/CD</td><td><code>ugt-nextjs-cicd-setup</code></td></tr>
+          <tr><td class="q">ส่งอีเมลแจ้งเตือน</td><td><code>ugt-nextjs-mail-setup</code></td></tr>
+          <tr><td class="q">แนบเอกสาร</td><td><code>ugt-nextjs-upload-setup</code></td></tr>
+          <tr><td class="q">sync kit</td><td><code>ugt-nextjs-kit-sync</code></td></tr>
+          <tr><td class="q">sonar ไม่ผ่าน</td><td><code>ugt-nextjs-clean-code</code></td></tr>
+          <tr><td class="q">วันที่เลื่อน −1</td><td><code>ugt-nextjs-pitfalls</code></td></tr>
+          <tr><td class="q">สร้าง project context</td><td><code>ugt-context</code></td></tr>
+          <tr><td class="q">จบงานแล้ว</td><td><code>ugt-handoff</code></td></tr>
+          <tr><td class="q">อันนี้น่าจะเจอทุกโปรเจค</td><td><code>ugt-contribute</code></td></tr>
+          <tr><td class="q">โหมดประหยัด</td><td><code>ugt-model-mode</code></td></tr>
+        </table>
+        <p class="note">หรือเรียกตรง ๆ ด้วย <code>/ชื่อตัวช่วย</code> เช่น <code>/ugt-handoff</code></p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>ลำดับ full-setup — ห้ามสลับ</h2>
+      <div class="in">
+        <div class="chain"><span>Database</span><i>→</i><span>Quality</span><i>→</i><span>Design</span><i>→</i><span>Auth</span><i>→</i><span class="opt">Mail</span><i>→</i><span class="opt">Upload</span><i>→</i><span>CI</span></div>
+        <ol>
+          <li>ตรวจของเดิมก่อน (ไม่ทับเงียบ ๆ)</li>
+          <li>ถามคำถามชุดเดียว</li>
+          <li>เสนอวิธีรันให้เคาะครั้งเดียว</li>
+          <li>ติดตั้งตามลำดับ (Mail / Upload เฉพาะเมื่อต้องใช้)</li>
+          <li>รัน <code>verify.mjs</code> ทุกโมดูลจนเขียว + สรุป</li>
+        </ol>
+        <p>ได้ <code>docs/admin-handoff.md</code> → ส่งทีม admin/DevOps · ผู้ดูแลคนแรก: login แล้วเข้า <code>/admin/setup</code></p>
+        <p class="note">bundle mattpocock: จบแล้วรัน <code>/setup-matt-pocock-skills</code> เอง</p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>ทำ feature — bundle superpowers (เดินเอง)</h2>
+      <div class="in">
+        <div class="chain"><span>อ่าน project-context</span><i>→</i><span>คิดก่อน</span><i>→</i><span>วางแผน</span><i>→</i><span>เขียนเทสต์ก่อน</span><i>→</i><span>review</span></div>
+        <ul>
+          <li>เริ่มจาก requirement: <code>/ugt-requirements</code> → "สร้าง feature X ตาม docs/requirements-brief/NN.md"</li>
+          <li>งานเล็ก (ไม่กำกวม · ~1–3 ไฟล์ · ไม่ใช่ auth/เงิน/concurrency) → light version: ข้ามคิด-วางแผน แต่ยังเขียนเทสต์ + review · ตอบ "full" ถ้าอยากได้เต็ม</li>
+          <li>1 feature = 1 session ใหม่</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>ทำ feature — bundle mattpocock (5 คำสั่ง)</h2>
+      <div class="in">
+        <p>ครั้งแรกต่อโปรเจค: <code>/setup-matt-pocock-skills</code></p>
+        <ol>
+          <li><code>/grill-with-docs</code> — ไล่ถามจนไม่มีจุดต้องเดา</li>
+          <li><code>/to-spec</code> — บทสนทนา → spec</li>
+          <li><code>/to-tickets</code> — แตกงานย่อย + ลำดับ</li>
+          <li><code>/implement</code> — เขียนโค้ด (ขับ <code>/tdd</code> + ปิดด้วย <code>/code-review</code> เอง)</li>
+          <li><code>/code-review</code> — ตรง spec ไหม + ผ่านมาตรฐานไหม</li>
+        </ol>
+        <p class="note">ไม่มี review อัตโนมัติ → เรียก <code>/code-review</code> ก่อน merge เสมอ · ชื่อชน → <code>/mattpocock-skills:code-review</code> · ลำดับเต็ม: <code>/ask-matt</code></p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>จบงาน — <code>/ugt-handoff</code> แล้ว commit</h2>
+      <div class="in">
+        <ul>
+          <li><code>.claude/state/handoff.md</code> — ค้างตรงไหน · คิวถัดไป · คำถามรอคำตอบ</li>
+          <li><code>board.md</code> — สถานะ feature</li>
+          <li>ไฟล์ใน <code>docs/project-context/</code> ที่ความรู้เปลี่ยน + มติลง <code>decisions.md</code></li>
+        </ul>
+        <p class="note">commit ทั้งชุดพร้อมกัน · โปรเจคที่ยังไม่มี <code>docs/project-context/</code> → <code>/ugt-context</code> ครั้งแรก</p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>ความแรงของ AI — <code>/ugt-model-mode</code></h2>
+      <div class="in">
+        <table>
+          <tr><td><code>auto</code></td><td>ค่าเริ่มต้น — เลือก model ตามงาน (กำกวมไหม · แตะกี่ไฟล์ · เสี่ยงไหม)</td></tr>
+          <tr><td><code>easy</code></td><td>ประหยัด ("โหมดประหยัด")</td></tr>
+          <tr><td><code>default</code></td><td>ตารางกลาง</td></tr>
+          <tr><td><code>god</code></td><td>อัดคุณภาพเต็มที่</td></tr>
+        </table>
+        <p class="note">ไม่ใส่ชื่อโหมด = ดูโหมดปัจจุบัน · มีผลกับ subagent เท่านั้น — model หลักเปลี่ยนด้วย <code>/model</code> · ไฟล์ <code>.claude/state/model-mode.md</code> ถูก commit ทั้งทีมได้โหมดเดียวกัน</p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>เจอความรู้ใหม่ ไปไว้ไหน</h2>
+      <div class="in">
+        <table>
+          <tr><td>งานค้าง · คิว · คำถามรอคำตอบ</td><td><code>.claude/state/handoff.md</code></td></tr>
+          <tr><td>จริงเฉพาะโปรเจคนี้</td><td><code>docs/project-context/</code> (บั๊ก → <code>troubleshooting.md</code>)</td></tr>
+          <tr><td>มติดีไซน์</td><td><code>docs/DESIGN.md</code> §10</td></tr>
+          <tr><td>มติอื่น</td><td><code>decisions.md</code> (mattpocock: <code>docs/adr/</code>)</td></tr>
+          <tr><td>จริงกับทุกโปรเจค</td><td><code>/ugt-contribute</code> → PR เข้า platform</td></tr>
+          <tr><td>ความชอบส่วนตัว</td><td>memory ของ Claude</td></tr>
+        </table>
+        <p class="note"><b>ห้าม</b>แก้ไฟล์ตัวช่วยที่ติดตั้งมา (หายตอน update) · <b>ห้าม</b>สร้างตัวช่วยชื่อ <code>ugt-*</code> ซ้ำของเดิม</p>
+      </div>
+    </section>
+
+    <section class="box warn">
+      <h2>ห้ามพลาด — กติกาที่ทำ build/ข้อมูลพัง</h2>
+      <div class="in">
+        <ul class="rules">
+          <li><b>งานตั้งเวลา = host cron เท่านั้น</b> — ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · cron เรียก <code>/api/cron/&lt;job&gt;</code> พร้อม <code>CRON_SECRET</code></li>
+          <li><b>ลบข้อมูล = <code>IsDeleted = 1</code></b> (soft delete) ห้าม hard delete</li>
+          <li><b>ตารางใหม่มี audit columns ครบ</b>: <code>Id CreatedAt UpdatedAt CreatedBy UpdatedBy IsActive IsDeleted</code> · ชื่อตาราง PascalCase พหูพจน์</li>
+          <li>ห้ามใช้ reserved word เป็นชื่อคอลัมน์ (<code>key</code> <code>value</code> <code>group</code> <code>count</code> <code>order</code>) — เติมคำขยาย</li>
+          <li>แก้ <code>schema.prisma</code> → <code>npx prisma migrate dev</code> แล้ว <code>npx prisma generate</code> ทุกครั้ง</li>
+          <li>Server Action สิทธิ์สูง: <b>session → permission → action → audit log</b></li>
+          <li>ห้ามอ่าน <code>process.env</code> ตรง → <code>import { env } from '@/lib/env'</code></li>
+          <li>ห้าม <code>$queryRawUnsafe</code> กับ input ผู้ใช้ — ใช้ tagged template</li>
+          <li>ไฟล์ที่ต้องรอดหลัง deploy → bind mount ใต้ <code>/home/docker02/appdata/&lt;project&gt;/</code> ห้าม named volume</li>
+          <li>Quality Gate (โค้ดใหม่): violations = 0 · coverage ≥ 60% · ซ้ำ ≤ 3%</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>หน้าอื่น</h2>
+      <div class="in linkrow">
+        <a href="index.html">หน้าแรก</a><a href="guide.html">คู่มือ</a><a href="reference.html">รายละเอียดตัวช่วย</a><a href="design-preview.html">Design system</a><a href="slides.html">สไลด์</a>
+        <p class="note">รีโป: github.com/pakornkub/ugt-claude-platform</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.79.4</span></div></footer>
+</body>
+</html>

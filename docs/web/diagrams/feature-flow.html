@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flow การทำ feature: superpowers เทียบ mattpocock</title>
+  <!-- diagram-design source (editable). Skin: docs/web/site.css light tokens. Type: names 24px, all other text >= 18px in the 1280x720 viewBox. Export: scripts/export_svg.py -> feature-flow.svg -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600&amp;family=Noto+Sans+Thai:wght@400;500;600&amp;family=Noto+Serif+Thai:wght@400&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1320px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--color-ink);
+      margin-bottom: 0.4rem;
+    }
+    .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    svg .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+    svg .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+    svg .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+    svg .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+    svg .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+    svg .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Swimlane · bundle superpowers vs mattpocock</p>
+    <h1>ทำ feature หนึ่งตัว — สองสายของสอง bundle</h1>
+    <p class="sub">superpowers เดินเองทั้งสาย · mattpocock ต้องพิมพ์คำสั่งเองทีละขั้น และไม่มีอะไร review ให้อัตโนมัติ</p>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="feature-flow-title feature-flow-desc">
+        <title id="feature-flow-title">Flow การทำ feature: superpowers เทียบ mattpocock</title>
+        <desc id="feature-flow-desc">สองเลน: bundle superpowers เดินเองจาก brainstorming ไป plan, TDD และ code review (งานเล็กข้ามไป TDD ได้) ส่วน bundle mattpocock ผู้ใช้เรียกเองตามลำดับ /grill-with-docs, /to-spec, /to-tickets, /implement (ซึ่งขับ /tdd และ /code-review ในตัว) และ /code-review ก่อน merge หลังตั้งค่าครั้งแรกด้วย /setup-matt-pocock-skills</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="40" y1="64" x2="1240" y2="64" stroke="rgba(30,36,54,0.30)" stroke-width="1.2"/><line x1="40" y1="352" x2="1240" y2="352" stroke="rgba(30,36,54,0.30)" stroke-width="1.2"/><text x="40" y="104" class="dd-name">superpowers</text><text x="220" y="104" class="dd-th">เดินเองอัตโนมัติ · แนะนำ</text><text x="40" y="392" class="dd-name">mattpocock-skills</text><text x="300" y="392" class="dd-th">สั่งเองทีละคำสั่ง</text><text x="924" y="392" class="dd-th" text-anchor="end">ครั้งแรก:</text><text x="1240" y="392" class="dd-mono" text-anchor="end" style="fill:#1e2436">/setup-matt-pocock-skills</text><circle cx="64" cy="260" r="7" fill="#1e2436"/><path d="M 71,260 H 103" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 352,260 H 399" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 648,260 H 695" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 944,260 H 991" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 64,252 V 168 Q 64,160 72,160 H 812 Q 820,160 820,168 V 191" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="282" y="128" width="236" height="24" rx="3" fill="#ffffff"/><text x="400" y="146" class="dd-lblth" text-anchor="middle" fill="#6d7590">งานเล็ก: ข้ามไปเทสต์เลย</text></g><path d="M 248,508 H 287" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 496,508 H 535" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 744,508 H 783" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 992,508 H 1031" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g data-node="sp0"><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="128" y="248" class="dd-name">คิดก่อน</text><text x="128" y="288" class="dd-mono" style="fill:#1e2436">brainstorming</text></g><g data-node="sp1"><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="424" y="248" class="dd-name">วางแผน</text><text x="424" y="288" class="dd-mono" style="fill:#1e2436">plan</text></g><g data-node="sp2"><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="720" y="248" class="dd-name">เทสต์ก่อนโค้ด</text><text x="720" y="288" class="dd-mono" style="fill:#1e2436">TDD</text></g><g data-node="sp3"><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="1016" y="248" class="dd-name">ตรวจโค้ด</text><text x="1016" y="288" class="dd-mono" style="fill:#1e2436">code review</text></g><g data-node="mp0"><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="56" y="484" class="dd-name">ไล่ถาม</text><text x="56" y="522" class="dd-mono" style="fill:#1e2436">/grill-with-docs</text></g><g data-node="mp1"><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="304" y="484" class="dd-name">สเปก</text><text x="304" y="522" class="dd-mono" style="fill:#1e2436">/to-spec</text></g><g data-node="mp2"><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="552" y="484" class="dd-name">แตกงาน</text><text x="552" y="522" class="dd-mono" style="fill:#1e2436">/to-tickets</text></g><g data-node="mp3"><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="800" y="484" class="dd-name">ลงมือ</text><text x="800" y="522" class="dd-mono" style="fill:#1e2436">/implement</text><text x="800" y="558" class="dd-th" style="fill:#4b5268">ขับ /tdd เอง</text></g><g data-node="mp4"><rect x="1032" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="1032" y="432" width="208" height="152" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="1048" y="484" class="dd-name">ตรวจโค้ด</text><text x="1048" y="522" class="dd-mono" style="fill:#4f46e5">/code-review</text><text x="1048" y="558" class="dd-th" style="fill:#4f46e5">ก่อน merge เสมอ</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><text x="96" y="690" class="dd-th">ขั้นถัดไป</text><path d="M 200,684 H 240" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#arrow)"/><text x="256" y="690" class="dd-th">ทางลัดงานเล็ก</text><rect x="412" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="460" y="690" class="dd-th">ห้ามข้ามก่อน merge</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สไลด์แนะนำ — UGT Claude Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Instrument+Serif&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css"><script src="site.js"></script>
+<style>
+  @page{size:1280px 720px;margin:0}
+  html,body{height:100%}
+  body.deck-page{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+  .deck-shell{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg-soft)}
+  .deck-progress{height:4px;background:var(--line)}
+  .deck-progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+  .deck-view{flex:1;min-height:0;position:relative;overflow:hidden;cursor:pointer;user-select:none}
+  .stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform:translate(-50%,-50%)}
+  .deck-bar{display:flex;align-items:center;gap:8px;padding:6px 16px;border-top:1px solid var(--line);background:var(--bg);font-size:14px;color:var(--ink-faint)}
+  .deck-bar button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 12px;cursor:pointer;white-space:nowrap}
+  .deck-count{font-variant-numeric:tabular-nums;min-width:4.5em;text-align:center;color:var(--ink)}
+  .deck-bar .hint{margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .deck-shell:fullscreen{background:var(--bg)}
+  .deck-shell:fullscreen .slide{border:0;border-radius:0;box-shadow:none}
+  @media (prefers-reduced-motion:reduce){.deck-progress i{transition:none}}
+  .deck-bar .rot{display:none}
+  @media (max-width:640px){.deck-bar .hint .keys{display:none}}
+  @media (max-width:640px) and (orientation:portrait){.deck-bar .rot{display:inline}.deck-bar .tap{display:none}}
+  @media (max-height:500px) and (orientation:landscape){.site-nav{display:none}.deck-bar{padding:3px 12px}}
+
+  /* ---- slide canvas: every size below is in 1280×720 stage pixels ---- */
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;background:var(--bg);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 40px -18px rgba(30,36,54,.25);padding:56px 80px;overflow:hidden;line-height:1.4}
+  .slide.on{display:flex}
+  .slide .eyebrow{font-size:24px;padding:6px 18px;align-self:flex-start}
+  .slide h2{font-size:60px;line-height:1.3;font-weight:800;margin:14px 0 40px;letter-spacing:-.01em}
+  .slide p{font-size:30px}
+  .slide .sub{font-size:30px;color:var(--ink-soft);margin:32px 0 0}
+  .slide code{font-size:.9em}
+  .slide .center{text-align:center}
+  .cc{text-align:center;align-items:center}
+  .cc .eyebrow{align-self:center}
+
+  /* icons + logos (sprite symbols, coloured by currentColor) */
+  .ic{width:1em;height:1em;flex:none;display:inline-block;vertical-align:-.14em}
+  .lg{width:1em;height:1em;flex:none;display:inline-block;color:var(--b);fill:currentColor}
+  .lg.dk{color:var(--ink)}
+
+  /* tiles: big icon box + label */
+  .tiles{display:flex;gap:28px;justify-content:center;align-items:flex-start}
+  .tile{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}
+  .ibox{--tb:var(--accent-soft);--tf:var(--accent);width:132px;height:132px;border-radius:30px;background:var(--tb);color:var(--tf);display:grid;place-items:center;font-size:72px}
+  .tile b{font-size:32px;line-height:1.3}
+  .tile .cap{font-family:var(--mono);font-size:26px;color:var(--ink-soft);margin-top:-8px;line-height:1.35}
+  .tile .capt{font-size:28px;color:var(--ink-soft);margin-top:-8px;line-height:1.35}
+  .t-ok{--tb:var(--ok-soft);--tf:var(--ok)} .t-bad{--tb:var(--bad-soft);--tf:var(--bad)} .t-warn{--tb:var(--warn-soft);--tf:var(--warn)} .t-plain{--tb:var(--bg-soft);--tf:var(--ink-soft)}
+  .ibox.sm{width:104px;height:104px;border-radius:24px;font-size:56px}
+  .ibox.lgx{width:180px;height:180px;border-radius:40px;font-size:100px}
+
+  /* horizontal flow: tiles joined by arrows */
+  .flow{display:flex;align-items:flex-start;justify-content:center;gap:12px}
+  .flow .tile{flex:1 1 0}
+  .arr{flex:none;color:var(--ink-faint);font-size:48px;height:132px;display:grid;place-items:center}
+  .flow.sm .arr{height:104px}
+
+  /* big number / statement */
+  .big{font-size:220px;line-height:1;font-weight:800;color:var(--accent);letter-spacing:-.04em}
+  .big small{font-size:72px;color:var(--ink);letter-spacing:0;margin-left:.15em}
+  .slide .stmt{font-size:76px;line-height:1.3;font-weight:800}
+  .slide .stmt em{font-style:normal;color:var(--accent)}
+
+  /* chat bubble + terminal, sized for the room */
+  .slide .say{font-size:40px;font-weight:700;padding:26px 36px;margin:0;border-left-width:8px;border-radius:0 20px 20px 0;color:var(--ink);background:var(--bg-tint)}
+  .slide .say::before{font-size:30px;font-weight:400}
+  .slide .term{padding:30px 38px;border-radius:20px;border:1px solid var(--line)}
+  .slide .term .dots{margin-bottom:16px}.slide .term .dots i{width:14px;height:14px}
+  .slide .term pre{font-size:30px;line-height:1.75;white-space:pre}
+  .mono{font-family:var(--mono)}
+
+  /* two big choice cards */
+  .pair{display:flex;gap:36px;align-items:stretch}
+  .pick{flex:1;min-width:0;border:2px solid var(--line);border-radius:28px;padding:36px 36px 34px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+  .pick.hi{border-color:var(--accent);border-width:4px;background:var(--bg-tint)}
+  .pick .row1{display:flex;align-items:center;gap:22px}
+  .pick .row1 .ibox{width:104px;height:104px;border-radius:24px;font-size:56px}
+  .pick h3{font-size:40px;line-height:1.25}
+  .pick p{font-size:30px;color:var(--ink-soft)}
+  .slide .badge{font-size:24px;padding:4px 16px;font-weight:700;vertical-align:middle}
+
+  /* version stack */
+  .vstack{display:flex;flex-direction:column;gap:14px}
+  .vrow{display:flex;align-items:center;gap:24px;border-radius:20px;padding:16px 30px;border:1px solid var(--line);background:var(--bg-soft)}
+  .vrow.hi{background:var(--accent-soft);border-color:transparent}
+  .vrow .mono{font-size:30px}
+  .vrow .v{margin-left:auto;font-size:44px;font-weight:800;color:var(--accent-text);font-variant-numeric:tabular-nums}
+
+  /* logo grid */
+  .logos{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:30px 20px}
+  .logo{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+  .logo .lbox{width:124px;height:124px;border-radius:28px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:72px}
+  .logo b{font-size:28px;line-height:1.25}
+  .logo .lbox .ic{color:var(--ink-soft)}
+
+  /* stack cards (python/php) */
+  .stack{flex:1;min-width:0;border:2px solid var(--line);border-radius:28px;padding:32px 36px;display:flex;flex-direction:column;gap:16px}
+  .stack .lrow{display:flex;gap:22px;font-size:84px}
+  .stack h3{font-size:40px}
+  .stack p{font-size:28px;color:var(--ink-soft)}
+  .stack .mono{font-size:26px;color:var(--ink)}
+
+  /* diagram slides: full-bleed inlined SVG under the title */
+  .slide.diag{padding:30px 40px 30px;justify-content:flex-start}
+  /* zones: header pinned top with a rule, body takes the rest and centres its content */
+  .slide:has(> .s-head){justify-content:flex-start;padding:40px 72px 76px}
+  .s-head{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:16px;border-bottom:2px solid var(--line)}
+  .s-head .eyebrow{margin:0}
+  .s-head h2{margin:0;font-size:50px;line-height:1.3}
+  .s-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:safe center;gap:26px;padding-top:24px}
+  .tiles.six{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 56px;align-items:center;max-width:1000px;margin:0 auto;width:100%}
+  .tiles.six .tile{flex-direction:row;text-align:left;align-items:center;gap:20px}
+  .tiles.six .tile .ibox{width:96px;height:96px;border-radius:24px;font-size:52px;flex:none}
+  .tiles.six .tile b{display:block}
+  .tiles.six .tile .cap{display:block;margin-top:4px}
+  .tiles.six .tt{display:flex;flex-direction:column;min-width:0}
+  .s-body > *{margin-top:0;margin-bottom:0}
+  .slide.diag:has(> .s-head){padding:30px 40px 30px}
+  .slide.diag .s-head{padding:0 8px 14px}
+  .slide.diag .s-head h2{font-size:46px}
+  .slide.diag .s-body{padding-top:16px;justify-content:center}
+  .slide.diag h2{font-size:56px;margin:0 0 18px;padding-left:8px}
+  .dg{flex:1;min-height:0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px;display:flex}
+  .dg .dgsvg{width:100%;height:100%;max-width:none;display:block}
+
+  /* title + closing */
+  .title-slide{justify-content:center}
+  .title-slide h1{font-size:96px;line-height:1.15;margin:24px 0 24px;letter-spacing:-.02em}
+  .title-slide .lead{font-size:38px;line-height:1.45;max-width:none;color:var(--ink-soft)}
+  .hero{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:300px;height:300px;border-radius:50%;background:var(--bg-tint);display:grid;place-items:center;font-size:170px}
+  .s-foot{position:absolute;left:80px;right:80px;bottom:34px;font-size:24px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:24px}
+  .links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+  .links a{display:flex;flex-direction:column;align-items:center;gap:14px;text-decoration:none;color:var(--ink);border:2px solid var(--line);border-radius:24px;padding:28px 12px;background:var(--bg-soft);font-size:30px;font-weight:700;text-align:center}
+  .links a .ic{font-size:60px;color:var(--accent)}
+  .slide .credit{font-size:24px;color:var(--ink-faint);margin-top:36px;text-align:center}
+
+  @media print{
+    :root:root:root{
+      --bg:#ffffff;--bg-soft:#f8f9fc;--bg-tint:#eef2ff;--ink:#1e2436;--ink-soft:#4b5268;--ink-faint:#6d7590;
+      --line:#e5e8f0;--accent:#4f46e5;--accent-deep:#4338ca;--accent-soft:#e0e7ff;--accent-text:#3730a3;
+      --ok:#047857;--ok-soft:#ecfdf5;--warn:#b45309;--warn-soft:#fffbeb;--bad:#b91c1c;--bad-soft:#fef2f2;--code-bg:#1e2436;
+    }
+    html,body,body.deck-page{display:block;height:auto;overflow:visible;font-size:16px}
+    .site-nav,.deck-bar,.deck-progress{display:none}
+    .deck-shell,.deck-view{display:block;overflow:visible;background:none;cursor:auto}
+    .stage{position:static;transform:none !important;width:1280px;height:auto}
+    .slide{display:flex !important;position:relative;inset:auto;width:1280px;height:720px;border:0;border-radius:0;box-shadow:none;break-after:page;page-break-after:always}
+    .slide:last-child{break-after:auto;page-break-after:auto}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="deck-page">
+<nav class="site-nav"><div class="wrap">
+  <a class="brand" href="index.html"><b>UGT</b> Claude Platform</a>
+  <a class="link" href="index.html">หน้าแรก</a>
+  <a class="link" href="guide.html">คู่มือ</a>
+  <a class="link" href="reference.html">รายละเอียดตัวช่วย</a>
+  <a class="link" href="design-preview.html">Design system</a>
+  <a class="link" href="slides.html">สไลด์</a>
+  <a class="link" href="cheatsheet.html">Cheat sheet</a>
+  <span class="spacer"></span><button class="theme-btn" type="button">☾ มืด</button>
+</div></nav>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></symbol>
+<symbol id="i-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+<symbol id="i-pkg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+<symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-listcheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol>
+<symbol id="i-click" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.1 12 6"/><path d="m5.1 8-2.9-.8"/><path d="m6 12-1.9 2"/><path d="M7.2 2.2 8 5.1"/><path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/></symbol>
+<symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></symbol>
+<symbol id="i-merge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></symbol>
+<symbol id="i-filecode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+<symbol id="i-commit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="3" x2="9" y1="12" y2="12"/><line x1="15" x2="21" y1="12" y2="12"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+<symbol id="i-pr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/></symbol>
+<symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="l-claude" viewBox="0 0 24 24"><path fill="currentColor" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></symbol>
+<symbol id="l-jenkins" viewBox="0 0 24 24"><path fill="currentColor" d="M2.872 24h-.975a3.866 3.866 0 01-.07-.197c-.215-.666-.594-1.49-.692-2.154-.146-.984.78-1.039 1.374-1.465.915-.66 1.635-1.025 2.627-1.62.295-.179 1.182-.624 1.281-.829.201-.408-.345-.982-.49-1.3-.225-.507-.345-.937-.376-1.435-.824-.13-1.455-.627-1.844-1.185-.63-.925-1.066-2.635-.525-3.936.045-.103.254-.305.285-.463.06-.308-.105-.72-.12-1.048-.06-1.692.284-3.15 1.425-3.66.463-1.84 2.113-2.453 3.673-3.367.58-.342 1.224-.562 1.89-.807 2.372-.877 6.027-.712 7.994.783.836.633 2.176 1.97 2.656 2.939 1.262 2.555 1.17 6.825.287 9.934-.12.421-.29 1.032-.533 1.533-.168.35-.689 1.05-.625 1.36.064.314 1.19 1.17 1.432 1.395.434.422 1.26.975 1.324 1.5.07.557-.248 1.336-.41 1.875-.217.721-.436 1.441-.654 2.131H2.87zm11.104-3.54c-.545-.3-1.361-.622-2.065-.757-.87-.164-.78 1.188-.75 1.994.03.643.36 1.316.51 1.744.076.197.09.41.256.449.3.068 1.29-.326 1.575-.479.6-.328 1.064-.844 1.574-1.189.016-.17.016-.34.03-.508a2.648 2.648 0 00-1.095-.277c.314-.15.75-.15 1.035-.332l.016-.193c-.496-.03-.69-.254-1.021-.436zm7.454 2.935a17.78 17.78 0 00.465-1.752c.06-.287.215-.918.178-1.176-.059-.459-.684-.799-1.004-1.086-.584-.525-.95-.975-1.56-1.469-.249.375-.78.615-.983.914 1.447-.689 1.71 2.625 1.141 3.69.09.329.391.45.514.735l-.086.166h1.29c.013 0 .03 0 .044.014zm-6.634-.012c-.05-.074-.1-.135-.15-.209l-.301.195h.45zm2.77 0c.008-.209.018-.404.03-.598-.53.029-.825-.48-1.196-.527-.324-.045-.6.361-1.02.195-.095.105-.183.227-.284.316.154.18.295.375.424.584h.815c.014-.164.135-.285.3-.285.165 0 .284.121.284.27h.66zm2.116 0c-.314-.479-.947-.898-1.68-.555l-.03.541h1.71zm-8.51 0l-.104-.344c-.225-.72-.36-1.26-.405-1.68-.914-.436-1.875-.87-2.654-1.426-.15-.105-1.109-1.35-1.23-1.305-1.739.676-3.359 1.86-4.814 2.984.256.557.48 1.141.69 1.74h8.505zm8.265-2.113c-.029-.512-.164-1.56-.48-1.74-.66-.39-1.846.78-2.34.943.045.15.135.271.15.48.285-.074.645-.029.898.092-.299.03-.629.03-.824.164-.074.195.016.48-.029.764.69.197 1.5.303 2.385.332.164-.227.225-.645.211-1.082zm-4.08-.36c-.044.375.046.51.12.943 1.26.391 1.034-1.74-.135-.959zM8.76 19.5c-.45.457 1.27 1.082 1.814 1.115 0-.29.165-.564.135-.77-.65-.118-1.502-.042-1.945-.347zm5.565.215c0 .043-.061.03-.068.064.58.451 1.014.545 1.802.51.354-.262.67-.563 1.043-.807-.855.074-1.931.607-2.774.23zm3.42-17.726c-1.606-.906-4.35-1.591-6.076-.731-1.38.692-3.27 1.84-3.899 3.292.6 1.402-.166 2.686-.226 4.109-.018.757.36 1.42.391 2.242-.2.338-.825.38-1.26.356-.146-.729-.4-1.549-1.155-1.63-1.064-.116-1.845.764-1.89 1.683-.06 1.08.833 2.864 2.085 2.745.488-.046.608-.54 1.139-.54.285.57-.445.75-.523 1.154-.016.105.06.511.104.705.233.944.744 2.16 1.245 2.88.635.9 1.884 1.051 3.229 1.141.24-.525 1.125-.48 1.706-.346-.691-.27-1.336-.945-1.875-1.529-.615-.676-1.23-1.41-1.261-2.28 1.155 1.604 2.1 3 4.2 3.704 1.59.525 3.45-.254 4.664-1.109.51-.359.811-.93 1.17-1.439 1.35-1.936 1.98-4.71 1.846-7.394-.06-1.111-.06-2.221-.436-2.955-.389-.781-1.695-1.471-2.475-.781-.15-.764.63-1.23 1.545-.96-.66-.854-1.336-1.858-2.266-2.384zM13.58 14.896c.615 1.544 2.724 1.363 4.505 1.323-.084.194-.256.435-.465.515-.57.232-2.145.408-2.937-.012-.506-.27-.824-.873-1.102-1.227-.137-.172-.795-.608-.012-.609zm.164-.87c.893.464 2.52.517 3.731.48.066.267.066.593.068.913-1.55.08-3.386-.304-3.794-1.395h-.005zm6.675-.586c-.473.9-1.145 1.897-2.539 1.928-.023-.284-.045-.735 0-.904 1.064-.103 1.727-.646 2.543-1.017zm-.649-.667c-1.02.66-2.154 1.375-3.824 1.21-.351-.31-.485-1-.14-1.458.181.313.06.885.57.97.944.165 2.038-.579 2.73-.84.42-.713-.046-.976-.42-1.433-.782-.93-1.83-2.1-1.802-3.51.314-.224.346.346.391.45.404.96 1.424 2.175 2.174 3 .18.21.48.39.51.524.092.39-.254.854-.209 1.11zm-13.439-.675c-.314-.184-.393-.99-.768-1.01-.535-.03-.438 1.05-.436 1.68-.37-.33-.435-1.365-.164-1.89-.308-.15-.445.164-.618.284.22-1.59 2.34-.734 1.99.96zM4.713 5.995c-.685.756-.54 2.174-.459 3.188 1.244-.785 2.898.06 2.883 1.394.595-.016.223-.744.115-1.215-.353-1.528.592-3.187.041-4.59-1.064.084-1.939.52-2.578 1.215zm9.12 1.113c.307.562.404 1.148.84 1.57.195.19.574.424.387.95-.045.121-.365.391-.551.45-.674.195-2.254.03-1.721-.81.563.015 1.314.36 1.732-.045-.314-.524-.885-1.53-.674-2.13zm6.198-.013h.068c.33.668.6 1.375 1.004 1.965-.27.628-2.053 1.19-2.023.057.39-.17 1.05-.035 1.395-.25-.193-.556-.48-1.006-.434-1.771zm-6.927-1.617c-1.422-.33-2.131.592-2.56 1.553-.384-.094-.231-.615-.135-.883.255-.701 1.28-1.633 2.119-1.506.359.057.848.386.576.834zM9.642 1.593c-1.56.44-3.56 1.574-4.2 2.974.495-.07.84-.321 1.33-.351.186-.016.428.074.641.015.424-.104.78-1.065 1.102-1.41.31-.345.685-.496.94-.81.167-.09.409-.074.42-.33-.073-.075-.15-.135-.232-.105v.017z"/></symbol>
+<symbol id="l-docker" viewBox="0 0 24 24"><path fill="currentColor" d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></symbol>
+<symbol id="l-sonarqubeserver" viewBox="0 0 24 24"><path fill="currentColor" d="M12 0a.774.774 0 0 0-.775.775c0 .43.346.776.775.776 5.762 0 10.45 4.687 10.45 10.449 0 .43.345.775.775.775A.774.774 0 0 0 24 12c0-6.616-5.384-12-12-12zm0 3.932a.774.774 0 0 0-.775.775c0 .43.346.775.775.775A6.524 6.524 0 0 1 18.518 12c0 .43.346.775.775.775.43 0 .775-.346.775-.775 0-4.448-3.62-8.068-8.068-8.068zm0 3.925a.774.774 0 0 0-.775.776c0 .43.346.775.775.775A2.597 2.597 0 0 1 14.592 12c0 .43.346.775.775.775.43 0 .776-.346.776-.775A4.145 4.145 0 0 0 12 7.857zM.775 11.225A.774.774 0 0 0 0 12c0 6.616 5.384 12 12 12 .43 0 .775-.346.775-.775a.774.774 0 0 0-.775-.776C6.238 22.45 1.55 17.762 1.55 12a.774.774 0 0 0-.775-.775zm3.932 0a.774.774 0 0 0-.775.775c0 4.448 3.62 8.068 8.068 8.068.43 0 .775-.346.775-.775a.774.774 0 0 0-.775-.775A6.524 6.524 0 0 1 5.482 12a.774.774 0 0 0-.775-.775zm3.926 0a.774.774 0 0 0-.776.775A4.145 4.145 0 0 0 12 16.143c.43 0 .775-.347.775-.776a.774.774 0 0 0-.775-.775A2.597 2.597 0 0 1 9.408 12a.774.774 0 0 0-.775-.775z"/></symbol>
+<symbol id="l-nextdotjs" viewBox="0 0 24 24"><path fill="currentColor" d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z"/></symbol>
+<symbol id="l-react" viewBox="0 0 24 24"><path fill="currentColor" d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></symbol>
+<symbol id="l-typescript" viewBox="0 0 24 24"><path fill="currentColor" d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></symbol>
+<symbol id="l-prisma" viewBox="0 0 24 24"><path fill="currentColor" d="M21.8068 18.2848L13.5528.7565c-.207-.4382-.639-.7273-1.1286-.7541-.5023-.0293-.9523.213-1.2062.6253L2.266 15.1271c-.2773.4518-.2718 1.0091.0158 1.4555l4.3759 6.7786c.2608.4046.7127.6388 1.1823.6388.1332 0 .267-.0188.3987-.0577l12.7019-3.7568c.3891-.1151.7072-.3904.8737-.7553s.1633-.7828-.0075-1.1454zm-1.8481.7519L9.1814 22.2242c-.3292.0975-.6448-.1873-.5756-.5194l3.8501-18.4386c.072-.3448.5486-.3996.699-.0803l7.1288 15.138c.1344.2856-.019.6224-.325.7128z"/></symbol>
+<symbol id="l-keycloak" viewBox="0 0 24 24"><path fill="currentColor" d="m18.742 1.182-12.493.002C4.155 4.784 2.079 8.393 0 12.002c2.071 3.612 4.162 7.214 6.252 10.816l12.49-.004 3.089-5.404h2.158v-.002H24L23.996 6.59h-2.168zM8.327 4.792h2.081l1.04 1.8-3.12 5.413 3.117 5.403-1.035 1.81H8.327a2047.566 2047.566 0 0 0-4.168-7.204C5.547 9.606 6.937 7.2 8.327 4.792Zm6.241 0 2.086.003c1.393 2.405 2.78 4.813 4.166 7.222l-4.167 7.2h-2.08c-.382-.562-1.038-1.808-1.038-1.808l3.123-5.405-3.124-5.413z"/></symbol>
+<symbol id="l-nginx" viewBox="0 0 24 24"><path fill="currentColor" d="M12 0L1.605 6v12L12 24l10.395-6V6L12 0zm6 16.59c0 .705-.646 1.29-1.529 1.29-.631 0-1.351-.255-1.801-.81l-6-7.141v6.66c0 .721-.57 1.29-1.274 1.29H7.32c-.721 0-1.29-.6-1.29-1.29V7.41c0-.705.63-1.29 1.5-1.29.646 0 1.38.255 1.83.81l5.97 7.141V7.41c0-.721.6-1.29 1.29-1.29h.075c.72 0 1.29.6 1.29 1.29v9.18H18z"/></symbol>
+<symbol id="l-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+<symbol id="l-python" viewBox="0 0 24 24"><path fill="currentColor" d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></symbol>
+<symbol id="l-fastapi" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .0387C5.3729.0384.0003 5.3931 0 11.9988c-.001 6.6066 5.372 11.9628 12 11.9625 6.628.0003 12.001-5.3559 12-11.9625-.0003-6.6057-5.3729-11.9604-12-11.96m-.829 5.4153h7.55l-7.5805 5.3284h5.1828L5.279 18.5436q2.9466-6.5444 5.892-13.0896"/></symbol>
+<symbol id="l-php" viewBox="0 0 24 24"><path fill="currentColor" d="M7.01 10.207h-.944l-.515 2.648h.838c.556 0 .97-.105 1.242-.314.272-.21.455-.559.55-1.049.092-.47.05-.802-.124-.995-.175-.193-.523-.29-1.047-.29zM12 5.688C5.373 5.688 0 8.514 0 12s5.373 6.313 12 6.313S24 15.486 24 12c0-3.486-5.373-6.312-12-6.312zm-3.26 7.451c-.261.25-.575.438-.917.551-.336.108-.765.164-1.285.164H5.357l-.327 1.681H3.652l1.23-6.326h2.65c.797 0 1.378.209 1.744.628.366.418.476 1.002.33 1.752a2.836 2.836 0 0 1-.305.847c-.143.255-.33.49-.561.703zm4.024.715l.543-2.799c.063-.318.039-.536-.068-.651-.107-.116-.336-.174-.687-.174H11.46l-.704 3.625H9.388l1.23-6.327h1.367l-.327 1.682h1.218c.767 0 1.295.134 1.586.401s.378.7.263 1.299l-.572 2.944h-1.389zm7.597-2.265a2.782 2.782 0 0 1-.305.847c-.143.255-.33.49-.561.703a2.44 2.44 0 0 1-.917.551c-.336.108-.765.164-1.286.164h-1.18l-.327 1.682h-1.378l1.23-6.326h2.649c.797 0 1.378.209 1.744.628.366.417.477 1.001.331 1.751zM17.766 10.207h-.943l-.516 2.648h.838c.557 0 .971-.105 1.242-.314.272-.21.455-.559.551-1.049.092-.47.049-.802-.125-.995s-.524-.29-1.047-.29z"/></symbol>
+<symbol id="l-laravel" viewBox="0 0 24 24"><path fill="currentColor" d="M23.642 5.43a.364.364 0 01.014.1v5.149c0 .135-.073.26-.189.326l-4.323 2.49v4.934a.378.378 0 01-.188.326L9.93 23.949a.316.316 0 01-.066.027c-.008.002-.016.008-.024.01a.348.348 0 01-.192 0c-.011-.002-.02-.008-.03-.012-.02-.008-.042-.014-.062-.025L.533 18.755a.376.376 0 01-.189-.326V2.974c0-.033.005-.066.014-.098.003-.012.01-.02.014-.032a.369.369 0 01.023-.058c.004-.013.015-.022.023-.033l.033-.045c.012-.01.025-.018.037-.027.014-.012.027-.024.041-.034H.53L5.043.05a.375.375 0 01.375 0L9.93 2.647h.002c.015.01.027.021.04.033l.038.027c.013.014.02.03.033.045.008.011.02.021.025.033.01.02.017.038.024.058.003.011.01.021.013.032.01.031.014.064.014.098v9.652l3.76-2.164V5.527c0-.033.004-.066.013-.098.003-.01.01-.02.013-.032a.487.487 0 01.024-.059c.007-.012.018-.02.025-.033.012-.015.021-.03.033-.043.012-.012.025-.02.037-.028.014-.01.026-.023.041-.032h.001l4.513-2.598a.375.375 0 01.375 0l4.513 2.598c.016.01.027.021.042.031.012.01.025.018.036.028.013.014.022.03.034.044.008.012.019.021.024.033.011.02.018.04.024.06.006.01.012.021.015.032zm-.74 5.032V6.179l-1.578.908-2.182 1.256v4.283zm-4.51 7.75v-4.287l-2.147 1.225-6.126 3.498v4.325zM1.093 3.624v14.588l8.273 4.761v-4.325l-4.322-2.445-.002-.003H5.04c-.014-.01-.025-.021-.04-.031-.011-.01-.024-.018-.035-.027l-.001-.002c-.013-.012-.021-.025-.031-.04-.01-.011-.021-.022-.028-.036h-.002c-.008-.014-.013-.031-.02-.047-.006-.016-.014-.027-.018-.043a.49.49 0 01-.008-.057c-.002-.014-.006-.027-.006-.041V5.789l-2.18-1.257zM5.23.81L1.47 2.974l3.76 2.164 3.758-2.164zm1.956 13.505l2.182-1.256V3.624l-1.58.91-2.182 1.255v9.435zm11.581-10.95l-3.76 2.163 3.76 2.163 3.759-2.164zm-.376 4.978L16.21 7.087 14.63 6.18v4.283l2.182 1.256 1.58.908zm-8.65 9.654l5.514-3.148 2.756-1.572-3.757-2.163-4.323 2.489-3.941 2.27z"/></symbol>
+</defs></svg>
+
+<main class="deck-shell" id="deck">
+  <div class="deck-progress" aria-hidden="true"><i></i></div>
+  <div class="deck-view" id="deck-view">
+    <div class="stage" id="stage">
+
+<!-- ===== เปิด ===== -->
+<section class="slide title-slide">
+  <span class="eyebrow">ประชุมทีม · แนะนำการใช้งาน</span>
+  <h1>UGT Claude<br>Platform</h1>
+  <p class="lead">ติดตั้งครั้งเดียว<br>ทุกโปรเจค Next.js ทำตามมาตรฐานบริษัทเอง</p>
+  <div class="hero"><svg class="lg" role="img" aria-label="Claude" style="--b:#D97757"><use href="#l-claude"/></svg></div>
+  <div class="s-foot"><span>UGT Claude Platform · IT Application</span><span>→ หรือ Space = ไปต่อ · F = เต็มจอ</span></div>
+</section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ปัญหาที่เจอ</span>
+  <h2>AI สร้างแอปเร็ว<br>แต่ขึ้นใช้งานจริงไม่ได้</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg></div><b>สร้างเสร็จเร็ว</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></div><b>deploy ไม่ได้</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><b>คนรับช่วง<br>ต้องอ่านใหม่หมด</b></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ปัญหาที่เจอ</span>
+  <h2>แต่ละโปรเจคขาดอะไรบ่อย</h2></header><div class="s-body"><div class="tiles">
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg></div><b>ฐานข้อมูลจริง</b></div>
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></div><b>login จริง</b></div>
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg></div><b>ระบบทดสอบ</b></div>
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-rocket"/></svg></div><b>CI / deploy</b></div>
+  </div>
+  <p class="sub center">ทำคนละแบบ — ไม่มีมาตรฐานเดียวกัน</p></div></section>
+
+<!-- ===== คืออะไร ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">Platform คืออะไร</span>
+  <h2>ตัวช่วยของ Claude Code<br>ที่รู้มาตรฐานบริษัทแล้ว</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></div><b>ความรู้จาก<br>โปรเจคที่ใช้จริง</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-pkg"/></svg></div><b>plugin<br>(ชุดตัวช่วย)</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><b>ทุกโปรเจคในทีม<br>มาตรฐานเดียวกัน</b></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">skill = คู่มือที่ Claude เปิดอ่านเอง</span>
+  <h2>เรียกตัวช่วยได้ 2 แบบ</h2></header><div class="s-body"><div class="pair">
+    <div class="pick"><div class="row1"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-term"/></svg></div><h3>พิมพ์คำสั่ง</h3></div><p class="mono" style="font-size:36px;color:var(--accent-text)">/ugt-…</p></div>
+    <div class="pick"><div class="row1"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg></div><h3>พิมพ์ภาษาไทย</h3></div><p style="font-size:32px">"ทำข้อตกลง design ให้โปรเจคนี้หน่อย"</p></div>
+  </div></div></section>
+
+<section class="slide diag"><header class="s-head"><h2>ติด bundle ตัวเดียว ได้ครบทุกชั้น</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="plugin-layers-title plugin-layers-desc" id="plugin-layers-root">
+        <title id="plugin-layers-title">ชั้นของ plugin ใน UGT Claude Platform</title>
+        <desc id="plugin-layers-desc">Layer stack: bundle ugt-nextjs-standard (superpowers หรือ mattpocock) ดึง ugt-nextjs-platform ที่มีตัวช่วย 11 ตัว ซึ่งพึ่ง ugt-core (contracts และความจำของทีม); ugt-python-platform และ ugt-php-platform เป็น plugin แยกสำหรับ deploy อย่างเดียวที่พึ่ง ugt-core เช่นกัน</desc>
+        <defs>
+      <style>#plugin-layers-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #plugin-layers-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #plugin-layers-root .diagram-container { width: 100%; overflow-x: auto; }
+      #plugin-layers-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #plugin-layers-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #plugin-layers-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #plugin-layers-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #plugin-layers-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #plugin-layers-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #plugin-layers-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #plugin-layers-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="plugin-layers-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="plugin-layers-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="128" class="dd-th" style="fill:#1e2436">ติดตั้ง</text><text x="40" y="152" class="dd-th">ชั้นบน</text><line x1="72" y1="172" x2="72" y2="476" stroke="#6d7590" stroke-width="1.5" marker-end="url(#plugin-layers-arrow)"/><text x="40" y="512" class="dd-th" style="fill:#1e2436">ชั้นล่าง</text><text x="40" y="536" class="dd-th">มาเอง</text><rect x="216" y="248" width="664" height="152" fill="#ffffff" stroke="#4b5268" stroke-width="1.5"/><rect x="216" y="400" width="1024" height="152" fill="#f8f9fc" stroke="#4b5268" stroke-width="1.5"/><rect x="216" y="96" width="664" height="152" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="244" y="156" class="dd-name">Bundle — ติดตั้งตัวเดียวจบ</text><text x="244" y="196" class="dd-mono" style="fill:#1e2436">ugt-nextjs-standard-*</text><text x="244" y="224" class="dd-th">-superpowers (แนะนำ) หรือ -mattpocock</text><text x="244" y="308" class="dd-name">ตัวช่วย Next.js 11 ตัว</text><text x="244" y="348" class="dd-mono" style="fill:#1e2436">ugt-nextjs-platform</text><text x="244" y="376" class="dd-th">DB · login · ดีไซน์ · ทดสอบ · deploy</text><text x="244" y="460" class="dd-name">มาตรฐานกลาง + ความจำทีม</text><text x="244" y="500" class="dd-mono" style="fill:#1e2436">ugt-core</text><text x="244" y="528" class="dd-th">contracts · handoff · context · contribute</text><g data-node="pyphp"><rect x="904" y="96" width="336" height="288" rx="8" fill="#ffffff"/><rect x="904" y="96" width="336" height="288" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="928" y="156" class="dd-name">Python · PHP</text><text x="928" y="192" class="dd-th">deploy อย่างเดียว · ยังไม่ tag</text><text x="928" y="244" class="dd-mono" style="fill:#1e2436">ugt-python-platform</text><text x="928" y="276" class="dd-mono" style="fill:#1e2436">ugt-php-platform</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="88" y="690" class="dd-th">ติดตั้งเอง (เลือก 1 bundle)</text><rect x="376" y="672" width="36" height="24" rx="5" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="424" y="690" class="dd-th">มาเองตาม dependency</text><rect x="668" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="716" y="690" class="dd-th">plugin แยก · deploy อย่างเดียว</text>
+      </svg></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">รุ่นปัจจุบัน · จาก plugin.json</span>
+  <h2>plugin ในชุด Next.js</h2></header><div class="s-body"><div class="vstack">
+    <div class="vrow hi"><span class="mono">ugt-nextjs-standard-superpowers</span><span class="badge ok">แนะนำ</span><span class="v">3.0.0</span></div>
+    <div class="vrow"><span class="mono">ugt-nextjs-standard-mattpocock</span><span class="v">1.0.0</span></div>
+    <div class="vrow"><span class="mono">ugt-nextjs-platform</span><span class="v">4.79.4</span></div>
+    <div class="vrow"><span class="mono">ugt-core</span><span class="badge">มาเอง</span><span class="v">2.14.5</span></div>
+  </div></div></section>
+
+<!-- ===== ติดตั้ง ===== -->
+<section class="slide cc">
+  <span class="eyebrow">ติดตั้ง</span>
+  <div class="big" style="margin-top:20px">3<small>บรรทัด</small></div>
+  <p class="stmt" style="font-size:56px;margin-top:24px">ครั้งเดียวต่อเครื่อง</p>
+  <p class="sub"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg> รีโปเป็น public — ไม่ต้องขอสิทธิ์</p>
+</section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ติดตั้ง · พิมพ์ใน Claude Code</span>
+  <h2>3 บรรทัดนี้</h2></header><div class="s-body"><div class="term"><div class="dots"><i></i><i></i><i></i></div><pre><span class="k">/plugin marketplace add</span> pakornkub/ugt-claude-platform
+<span class="k">/plugin install</span> ugt-nextjs-standard-superpowers@ugt
+<span class="k">/reload-plugins</span></pre></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ติดตั้ง · ตอน install</span>
+  <h2>เลือก scope ให้ถูก</h2></header><div class="s-body"><div class="pair">
+    <div class="pick hi"><div class="row1"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><h3 class="mono">project</h3></div><p>เพื่อนที่ clone โปรเจค<br>ได้ตัวช่วยด้วย</p></div>
+    <div class="pick"><div class="row1"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></div><h3 class="mono">user</h3></div><p>ใช้เองทุกโปรเจค<br>ในเครื่องนี้</p></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ติดตั้ง · เช็ค</span>
+  <h2>เช็คว่าติดแล้ว: พิมพ์ <code>/ugt</code></h2></header><div class="s-body"><div class="term"><pre><span class="k">/ugt</span>
+<span class="c">  ugt-nextjs-full-setup</span>
+<span class="c">  ugt-nextjs-database-setup</span>
+<span class="c">  ugt-handoff  …</span></pre></div>
+  <p class="sub">ต้องเห็นรายการตัวช่วย</p></div></section>
+
+<!-- ===== เลือก bundle ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">เลือก bundle</span>
+  <h2>ให้ระบบเดินเอง หรือสั่งเองทีละขั้น?</h2></header><div class="s-body"><div class="pair">
+    <div class="pick hi"><div class="row1"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg></div><h3>superpowers<br><span class="badge ok">แนะนำ</span></h3></div><p>เดินเองอัตโนมัติ<br>มี review ให้ทุก task</p></div>
+    <div class="pick"><div class="row1"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></div><h3>mattpocock<br><span class="badge">ทางเลือก</span></h3></div><p>สั่งเองทีละขั้น<br>ใช้ token น้อยกว่า</p></div>
+  </div></div></section>
+
+<section class="slide cc">
+  <span class="eyebrow">เลือก bundle</span>
+  <p class="stmt" style="margin-top:28px">ไม่แน่ใจ?<br>เลือก <em>superpowers</em></p>
+  <p class="sub">เปลี่ยนทีหลังได้: uninstall ตัวเดิม แล้ว install อีกตัว</p>
+</section>
+
+<!-- ===== full-setup ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">ugt-nextjs-full-setup</span>
+  <h2>พิมพ์ประโยคเดียว<br>ได้มาตรฐานครบชุด</h2></header><div class="s-body"><p class="say">ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย</p></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ugt-nextjs-full-setup</span>
+  <h2>ทำงาน 5 ขั้น</h2></header><div class="s-body"><div class="flow sm">
+    <div class="tile"><div class="ibox sm t-plain"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></div><b>ตรวจ<br>ของเดิม</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm t-plain"><svg class="ic" aria-hidden="true"><use href="#i-ask"/></svg></div><b>ถาม<br>ชุดเดียว</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm t-plain"><svg class="ic" aria-hidden="true"><use href="#i-listcheck"/></svg></div><b>เสนอแผน<br>ให้เคาะ</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg></div><b>ติดตั้ง<br>ตามลำดับ</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm t-ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div><b>ตรวจ<br>จนเขียว</b></div>
+  </div>
+  <p class="sub center">ของเดิมมีอยู่แล้ว → ถามก่อน ไม่ทับเงียบ ๆ</p></div></section>
+
+<section class="slide diag"><header class="s-head"><h2>ลำดับติดตั้ง: ข้ามได้ ห้ามสลับ</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="install-order-title install-order-desc" id="install-order-root">
+        <title id="install-order-title">ลำดับการติดตั้งของ ugt-nextjs-full-setup</title>
+        <desc id="install-order-desc">ลำดับติดตั้ง Database, Test-Lint, Design, Auth, Mail (เลือกได้), Upload (เลือกได้), CI/CD แล้วจบด้วยไฟล์ harness พร้อมเหตุผลสั้น ๆ ว่าแต่ละขั้นพึ่งอะไรจากขั้นก่อนหน้า</desc>
+        <defs>
+      <style>#install-order-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #install-order-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #install-order-root .diagram-container { width: 100%; overflow-x: auto; }
+      #install-order-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #install-order-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #install-order-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #install-order-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #install-order-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #install-order-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #install-order-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #install-order-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="install-order-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="install-order-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M 304,184 H 351" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 616,184 H 663" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 928,184 H 975" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 304,472 H 351" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 616,472 H 663" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 928,472 H 975" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 1108,264 V 320 Q 1108,328 1100,328 H 180 Q 172,328 172,336 V 391" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><g data-node="1"><rect x="40" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="40" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="64" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="82" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">1</text><text x="116" y="153" class="dd-name">ฐานข้อมูล</text><text x="64" y="204" class="dd-th" style="fill:#1e2436">login เก็บ user</text><text x="64" y="232" class="dd-th" style="fill:#4b5268">ไว้ใน Prisma</text></g><g data-node="2"><rect x="352" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="352" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="376" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="394" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">2</text><text x="428" y="153" class="dd-name">Test + Lint</text><text x="376" y="204" class="dd-th" style="fill:#1e2436">CI เรียก lint, test</text><text x="376" y="232" class="dd-th" style="fill:#4b5268">ตามชื่อสคริปต์</text></g><g data-node="3"><rect x="664" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="664" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="688" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="706" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">3</text><text x="740" y="153" class="dd-name">ดีไซน์</text><text x="688" y="204" class="dd-th" style="fill:#1e2436">หน้า login</text><text x="688" y="232" class="dd-th" style="fill:#4b5268">ต้องใช้ธีมนี้</text></g><g data-node="4"><rect x="976" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="976" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="1000" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="1018" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">4</text><text x="1052" y="153" class="dd-name">Login</text><text x="1000" y="204" class="dd-th" style="fill:#1e2436">ให้ตัวตน สิทธิ์</text><text x="1000" y="232" class="dd-th" style="fill:#4b5268">และ audit log</text></g><g data-node="5"><rect x="40" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="40" y="392" width="264" height="160" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><rect x="64" y="416" width="36" height="32" rx="5" fill="#ffffff" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="4,3"/><text x="82" y="439" class="dd-mono" text-anchor="middle" style="fill:#1e2436;font-weight:600">5</text><text x="116" y="441" class="dd-name">อีเมล</text><text x="284" y="439" class="dd-th" text-anchor="end" style="fill:#6d7590">เลือกได้</text><text x="64" y="492" class="dd-th" style="fill:#1e2436">ใช้ตัวตน</text><text x="64" y="520" class="dd-th" style="fill:#4b5268">จาก Login</text></g><g data-node="6"><rect x="352" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="352" y="392" width="264" height="160" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><rect x="376" y="416" width="36" height="32" rx="5" fill="#ffffff" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="4,3"/><text x="394" y="439" class="dd-mono" text-anchor="middle" style="fill:#1e2436;font-weight:600">6</text><text x="428" y="441" class="dd-name">แนบไฟล์</text><text x="596" y="439" class="dd-th" text-anchor="end" style="fill:#6d7590">เลือกได้</text><text x="376" y="492" class="dd-th" style="fill:#1e2436">ใช้สิทธิ์</text><text x="376" y="520" class="dd-th" style="fill:#4b5268">จาก Login</text></g><g data-node="7"><rect x="664" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="664" y="392" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="688" y="416" width="36" height="32" rx="5" fill="#1e2436"/><text x="706" y="439" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">7</text><text x="740" y="441" class="dd-name">CI/CD</text><text x="688" y="492" class="dd-th" style="fill:#1e2436">ต้องรู้ว่ามี DB</text><text x="688" y="520" class="dd-th" style="fill:#4b5268">และ build ผ่าน</text></g><g data-node="8"><rect x="976" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="976" y="392" width="264" height="160" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><rect x="1000" y="416" width="36" height="32" rx="5" fill="#4f46e5"/><text x="1018" y="439" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">8</text><text x="1052" y="441" class="dd-name">Harness</text><text x="1000" y="492" class="dd-th" style="fill:#1e2436">ติดตั้งเสมอ</text><text x="1000" y="520" class="dd-th" style="fill:#4b5268">ความรู้ไม่หาย</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="88" y="690" class="dd-th">ติดตั้งเมื่อเลือก</text><rect x="244" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="292" y="690" class="dd-th">ถามก่อน (ค่าเริ่มต้น: ไม่)</text><rect x="548" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="596" y="690" class="dd-th">ติดตั้งเสมอ</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ข้ามได้ แต่ห้ามสลับลำดับ</text>
+      </svg></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ปลายทางของ full-setup</span>
+  <h2>ได้เอกสารส่งทีม admin ทันที</h2></header><div class="s-body"><div class="flow">
+    <div class="tile" style="flex:1.6"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></div><b class="mono" style="font-size:30px">docs/admin-handoff.md</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><b>admin / DevOps</b></div>
+  </div>
+  <p class="sub center">ภาษาไทย · มีช่องให้ admin กรอกค่าตอบกลับ</p></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">สิ่งที่ได้ในโปรเจค</span>
+  <h2>ได้โค้ด + กติกาที่อยู่ต่อหลังจบ session</h2></header><div class="s-body"><div class="tiles six">
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></div><div class="tt"><b>กติกาของ AI</b><span class="cap">CLAUDE.md · .claude/rules/</span></div></div>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg></div><div class="tt"><b>งานค้างของทีม</b><span class="cap">.claude/state/</span></div></div>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></div><div class="tt"><b>ความรู้ของโปรเจค</b><span class="cap">docs/project-context/</span></div></div>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg></div><div class="tt"><b>ข้อตกลงดีไซน์</b><span class="cap">docs/DESIGN.md</span></div></div>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></div><div class="tt"><b>login + หน้า admin</b><span class="cap">/admin/*</span></div></div>
+    <div class="tile"><div class="ibox sm t-plain" style="gap:6px;display:flex;font-size:44px"><svg class="lg" role="img" aria-label="Jenkins" style="--b:#D24939"><use href="#l-jenkins"/></svg><svg class="lg" role="img" aria-label="Docker" style="--b:#2496ED"><use href="#l-docker"/></svg></div><div class="tt"><b>CI/CD</b><span class="cap">Jenkinsfile · Dockerfile</span></div></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ระบบ login</span>
+  <h2>หน้า admin มาพร้อมใช้</h2></header><div class="s-body"><div class="tiles">
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><b>ผู้ใช้</b><span class="cap">/admin/users</span></div>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></div><b>บทบาท-สิทธิ์</b><span class="cap">/admin/roles</span></div>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></div><b>ประวัติการใช้งาน</b><span class="cap">/admin/audit-logs</span></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ระบบ login</span>
+  <h2>ผู้ดูแลคนแรก: กดครั้งเดียว</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></div><b>คนแรกที่ login</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-click"/></svg></div><b class="mono" style="font-size:30px">/admin/setup</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg></div><b>Administrator</b></div>
+  </div></div></section>
+
+<!-- ===== ทำ feature ===== -->
+<section class="slide diag"><header class="s-head"><h2>ทำ feature: สองทางตาม bundle</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="feature-flow-title feature-flow-desc" id="feature-flow-root">
+        <title id="feature-flow-title">Flow การทำ feature: superpowers เทียบ mattpocock</title>
+        <desc id="feature-flow-desc">สองเลน: bundle superpowers เดินเองจาก brainstorming ไป plan, TDD และ code review (งานเล็กข้ามไป TDD ได้) ส่วน bundle mattpocock ผู้ใช้เรียกเองตามลำดับ /grill-with-docs, /to-spec, /to-tickets, /implement (ซึ่งขับ /tdd และ /code-review ในตัว) และ /code-review ก่อน merge หลังตั้งค่าครั้งแรกด้วย /setup-matt-pocock-skills</desc>
+        <defs>
+      <style>#feature-flow-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #feature-flow-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #feature-flow-root .diagram-container { width: 100%; overflow-x: auto; }
+      #feature-flow-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #feature-flow-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #feature-flow-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #feature-flow-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #feature-flow-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #feature-flow-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #feature-flow-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #feature-flow-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="feature-flow-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="feature-flow-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="40" y1="64" x2="1240" y2="64" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.30"/><line x1="40" y1="352" x2="1240" y2="352" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.30"/><text x="40" y="104" class="dd-name">superpowers</text><text x="220" y="104" class="dd-th">เดินเองอัตโนมัติ · แนะนำ</text><text x="40" y="392" class="dd-name">mattpocock-skills</text><text x="300" y="392" class="dd-th">สั่งเองทีละคำสั่ง</text><text x="924" y="392" class="dd-th" text-anchor="end">ครั้งแรก:</text><text x="1240" y="392" class="dd-mono" text-anchor="end" style="fill:#1e2436">/setup-matt-pocock-skills</text><circle cx="64" cy="260" r="7" fill="#1e2436"/><path d="M 71,260 H 103" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 352,260 H 399" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 648,260 H 695" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 944,260 H 991" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 64,252 V 168 Q 64,160 72,160 H 812 Q 820,160 820,168 V 191" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#feature-flow-arrow)"/><g class="dd-lbl"><rect x="282" y="128" width="236" height="24" rx="3" fill="#ffffff"/><text x="400" y="146" class="dd-lblth" text-anchor="middle" fill="#6d7590">งานเล็ก: ข้ามไปเทสต์เลย</text></g><path d="M 248,508 H 287" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 496,508 H 535" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 744,508 H 783" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 992,508 H 1031" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><g data-node="sp0"><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="128" y="248" class="dd-name">คิดก่อน</text><text x="128" y="288" class="dd-mono" style="fill:#1e2436">brainstorming</text></g><g data-node="sp1"><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="424" y="248" class="dd-name">วางแผน</text><text x="424" y="288" class="dd-mono" style="fill:#1e2436">plan</text></g><g data-node="sp2"><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="720" y="248" class="dd-name">เทสต์ก่อนโค้ด</text><text x="720" y="288" class="dd-mono" style="fill:#1e2436">TDD</text></g><g data-node="sp3"><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="1016" y="248" class="dd-name">ตรวจโค้ด</text><text x="1016" y="288" class="dd-mono" style="fill:#1e2436">code review</text></g><g data-node="mp0"><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="56" y="484" class="dd-name">ไล่ถาม</text><text x="56" y="522" class="dd-mono" style="fill:#1e2436">/grill-with-docs</text></g><g data-node="mp1"><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="304" y="484" class="dd-name">สเปก</text><text x="304" y="522" class="dd-mono" style="fill:#1e2436">/to-spec</text></g><g data-node="mp2"><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="552" y="484" class="dd-name">แตกงาน</text><text x="552" y="522" class="dd-mono" style="fill:#1e2436">/to-tickets</text></g><g data-node="mp3"><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="800" y="484" class="dd-name">ลงมือ</text><text x="800" y="522" class="dd-mono" style="fill:#1e2436">/implement</text><text x="800" y="558" class="dd-th" style="fill:#4b5268">ขับ /tdd เอง</text></g><g data-node="mp4"><rect x="1032" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="1032" y="432" width="208" height="152" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="1048" y="484" class="dd-name">ตรวจโค้ด</text><text x="1048" y="522" class="dd-mono" style="fill:#4f46e5">/code-review</text><text x="1048" y="558" class="dd-th" style="fill:#4f46e5">ก่อน merge เสมอ</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><text x="96" y="690" class="dd-th">ขั้นถัดไป</text><path d="M 200,684 H 240" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#feature-flow-arrow)"/><text x="256" y="690" class="dd-th">ทางลัดงานเล็ก</text><rect x="412" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="460" y="690" class="dd-th">ห้ามข้ามก่อน merge</text>
+      </svg></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">superpowers · งานเล็ก</span>
+  <h2>งานเล็ก: ข้ามขั้นคิด-วางแผน</h2></header><div class="s-body"><div class="tiles">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div><b>โจทย์ไม่กำกวม</b></div>
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></div><b>~1–3 ไฟล์</b></div>
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg></div><b>ไม่แตะ auth<br>เงิน · concurrency</b></div>
+  </div>
+  <p class="sub center" style="color:var(--ok);font-weight:700">ยังเขียนเทสต์ + review เสมอ</p></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">mattpocock</span>
+  <h2>ไม่มี review อัตโนมัติ</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg></div><b>โค้ดเสร็จ</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></div><b class="mono" style="font-size:32px">/code-review</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-merge"/></svg></div><b>merge</b></div>
+  </div>
+  <p class="sub center">เรียกเองก่อน merge ทุกครั้ง</p></div></section>
+
+<!-- ===== ตัวช่วยที่ทำงานเอง ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">ตัวช่วยที่ทำงานเอง</span>
+  <h2>แตะไฟล์ไหน กฎของไฟล์นั้นโหลดเอง</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-filecode"/></svg></div><b class="mono" style="font-size:30px">.ts / .tsx</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox" style="--tf:#126ED3"><svg class="lg" role="img" aria-label="SonarQube" style="--b:#126ED3"><use href="#l-sonarqubeserver"/></svg></div><b>clean-code</b><span class="capt">ผ่าน SonarQube รอบแรก</span></div>
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg></div><b>pitfalls</b><span class="capt">กับดักบน production</span></div>
+  </div></div></section>
+
+<section class="slide cc">
+  <span class="eyebrow">SonarQube Quality Gate</span>
+  <p class="mono" style="font-size:96px;font-weight:700;color:var(--accent);margin:40px 0 20px">new_violations = 0</p>
+  <p class="stmt" style="font-size:48px">ผิดตัวเดียว build แดงทั้งทีม</p>
+</section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ugt-nextjs-pitfalls</span>
+  <h2>กับดักที่เคยพังบน production</h2></header><div class="s-body"><div class="tiles">
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></div><b>วันที่เลื่อน −1</b></div>
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></div><b>บันทึกแล้ว<br>หน้าไม่อัปเดต</b></div>
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></div><b>fetch 404<br>เฉพาะ production</b></div>
+  </div></div></section>
+
+<section class="slide diag"><header class="s-head"><h2>push แล้ว Jenkins ส่งขึ้น server เอง</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="delivery-pipeline-title delivery-pipeline-desc" id="delivery-pipeline-root">
+        <title id="delivery-pipeline-title">Delivery pipeline: GitHub → Jenkins → Docker</title>
+        <desc id="delivery-pipeline-desc">การ push ขึ้น GitHub ปลุก Jenkins ให้รัน 10 stage (1–5 ตรวจโค้ดและ build, 6–8 OWASP และ SonarQube Quality Gate, 9–10 Docker Build และ Deploy เฉพาะ main/develop) จากนั้น docker compose รัน image บน Docker host (ข้อมูลถาวรใต้ /home/docker02/appdata) และ nginx เปิดแอปที่ URL แบบ subpath</desc>
+        <defs>
+      <style>#delivery-pipeline-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #delivery-pipeline-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #delivery-pipeline-root .diagram-container { width: 100%; overflow-x: auto; }
+      #delivery-pipeline-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #delivery-pipeline-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #delivery-pipeline-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #delivery-pipeline-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #delivery-pipeline-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #delivery-pipeline-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #delivery-pipeline-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #delivery-pipeline-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="delivery-pipeline-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="delivery-pipeline-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="232" y="72" width="1008" height="288" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="248" y="60" width="304" height="24" rx="3" fill="#ffffff"/><text x="256" y="78" class="dd-lblth" fill="#6d7590">CI · Jenkins + SonarQube</text><rect x="232" y="416" width="1008" height="216" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="248" y="404" width="148" height="24" rx="3" fill="#ffffff"/><text x="256" y="422" class="dd-lblth" fill="#6d7590">Docker host</text><path d="M 184,216 H 255" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="188" y="184" width="64" height="24" rx="3" fill="#ffffff"/><text x="220" y="202" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">PUSH</text></g><path d="M 928,176 H 999" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="932" y="144" width="64" height="24" rx="3" fill="#ffffff"/><text x="964" y="162" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">SCAN</text></g><path d="M 1000,280 H 929" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#delivery-pipeline-arrow-accent)"/><g class="dd-lbl"><rect x="944" y="248" width="40" height="24" rx="3" fill="#ffffff"/><text x="964" y="266" class="dd-lblth" text-anchor="middle" fill="#4f46e5">ผล</text></g><path d="M 808,336 V 376 Q 808,384 816,384 H 1104 Q 1112,384 1112,392 V 455" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="884" y="352" width="160" height="24" rx="3" fill="#ffffff"/><text x="964" y="370" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">DOCKER BUILD</text></g><path d="M 1000,532 H 929" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="938" y="500" width="52" height="24" rx="3" fill="#ffffff"/><text x="964" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">RUN</text></g><path d="M 512,532 H 591" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="514" y="500" width="76" height="24" rx="3" fill="#ffffff"/><text x="552" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">PROXY</text></g><path d="M 176,532 H 255" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="178" y="500" width="76" height="24" rx="3" fill="#ffffff"/><text x="216" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">HTTPS</text></g><g data-node="github"><rect x="40" y="160" width="144" height="112" rx="8" fill="#ffffff"/><rect x="40" y="160" width="144" height="112" rx="8" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="60" y="210" class="dd-name">GitHub</text><text x="60" y="244" class="dd-mono">git push</text></g><g data-node="jenkins"><rect x="256" y="104" width="672" height="232" rx="8" fill="#ffffff"/><rect x="256" y="104" width="672" height="232" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="276" y="148" class="dd-name">Jenkins · 10 stage</text><rect x="276" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="292" y="216" class="dd-th" style="fill:#1e2436">ตรวจ + build</text><text x="292" y="252" class="dd-mono" style="fill:#4b5268">stage 1–5</text><rect x="492" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="508" y="216" class="dd-th" style="fill:#1e2436">OWASP + Sonar</text><text x="508" y="252" class="dd-mono" style="fill:#4b5268">stage 6–8</text><rect x="708" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="724" y="216" class="dd-th" style="fill:#1e2436">Docker + Deploy</text><text x="724" y="252" class="dd-mono" style="fill:#4b5268">stage 9–10</text><text x="724" y="288" class="dd-th">main · develop</text></g><g data-node="sonar"><rect x="1000" y="120" width="224" height="200" rx="8" fill="#ffffff"/><rect x="1000" y="120" width="224" height="200" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="1020" y="168" class="dd-name">Quality Gate</text><text x="1020" y="208" class="dd-mono" style="fill:#1e2436">coverage ≥ 60%</text><text x="1020" y="240" class="dd-mono" style="fill:#1e2436">violations = 0</text><text x="1020" y="288" class="dd-th" style="fill:#4f46e5">ไม่ผ่าน = หยุด</text></g><g data-node="user"><rect x="40" y="480" width="136" height="104" rx="8" fill="#ffffff"/><rect x="40" y="480" width="136" height="104" rx="8" fill="#4b5268" stroke="#6d7590" stroke-width="1.5" fill-opacity="0.10"/><text x="60" y="526" class="dd-name">ผู้ใช้</text><text x="60" y="560" class="dd-th">browser</text></g><g data-node="nginx"><rect x="256" y="456" width="256" height="152" rx="8" fill="#ffffff"/><rect x="256" y="456" width="256" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="276" y="504" class="dd-name">nginx</text><text x="276" y="544" class="dd-th">ถอด TLS · แยก path</text><text x="276" y="580" class="dd-mono" style="fill:#1e2436">/&lt;basePath&gt;</text></g><g data-node="container"><rect x="592" y="456" width="336" height="152" rx="8" fill="#ffffff"/><rect x="592" y="456" width="336" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="612" y="504" class="dd-name">แอปใน container</text><text x="612" y="544" class="dd-mono" style="fill:#1e2436">:3000 · /api/health</text><text x="612" y="580" class="dd-mono">/home/docker02/appdata</text></g><g data-node="image"><rect x="1000" y="456" width="224" height="152" rx="8" fill="#ffffff"/><rect x="1000" y="456" width="224" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="1020" y="504" class="dd-name">Docker image</text><text x="1020" y="544" class="dd-mono" style="fill:#1e2436">:&lt;BUILD_NUMBER&gt;</text><text x="1020" y="580" class="dd-th">ย้อนรุ่นได้</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><text x="96" y="690" class="dd-th">ลำดับงาน</text><path d="M 208,684 H 248" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#delivery-pipeline-arrow-accent)"/><text x="264" y="690" class="dd-th">Sonar ส่งผลกลับ</text><rect x="444" y="672" width="36" height="24" rx="5" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" stroke-opacity="0.35"/><text x="492" y="690" class="dd-th">โซนเครื่อง</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ไม่ผ่าน Quality Gate = ไม่ deploy</text>
+      </svg></div></div></section>
+
+<!-- ===== ความจำของทีม ===== -->
+<section class="slide diag"><header class="s-head"><h2>โปรเจคจำเอง — อยู่ใน repo</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="team-memory-title team-memory-desc" id="team-memory-root">
+        <title id="team-memory-title">ความจำของทีมในโปรเจค</title>
+        <desc id="team-memory-desc">Session ของ Claude อ่าน .claude/state/handoff.md ทุกครั้ง, docs/project-context/ เมื่อเกี่ยว และ CONTEXT.md กับ docs/adr/ บน bundle mattpocock; /ugt-context สร้าง docs/project-context/ ครั้งเดียว และ /ugt-handoff เขียน handoff.md กับ project-context ทุกครั้งที่จบงาน ทั้งหมด commit ใน git ให้ทั้งทีมใช้ร่วมกัน ส่วน memory ส่วนตัวไม่ commit และถ้าขัดกัน ไฟล์ใน git ชนะ</desc>
+        <defs>
+      <style>#team-memory-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #team-memory-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #team-memory-root .diagram-container { width: 100%; overflow-x: auto; }
+      #team-memory-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #team-memory-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #team-memory-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #team-memory-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #team-memory-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #team-memory-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #team-memory-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #team-memory-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="team-memory-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="team-memory-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="416" y="80" width="480" height="504" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="432" y="68" width="300" height="24" rx="3" fill="#ffffff"/><text x="440" y="86" class="dd-lblth" fill="#6d7590">git repo · ทั้งทีมเห็นชุดเดียวกัน</text><path d="M 448,176 H 392 Q 384,176 384,184 V 280 Q 384,288 376,288 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 448,328 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 448,496 H 392 Q 384,496 384,488 V 376 Q 384,368 376,368 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><path d="M 164,464 V 409" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><path d="M 960,160 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 960,208 H 936 Q 928,208 928,216 V 304 Q 928,312 920,312 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 960,360 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><g data-node="session"><rect x="40" y="248" width="248" height="160" rx="8" fill="#ffffff"/><rect x="40" y="248" width="248" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="64" y="300" class="dd-name">Session</text><text x="64" y="340" class="dd-th">คุณ หรือเพื่อนในทีม</text><text x="64" y="372" class="dd-th">อ่านก่อนเริ่มงาน</text></g><g data-node="memory"><rect x="40" y="464" width="248" height="152" rx="8" fill="#ffffff"/><rect x="40" y="464" width="248" height="152" rx="8" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="64" y="512" class="dd-name">memory ส่วนตัว</text><text x="64" y="552" class="dd-th">ไม่ commit</text><text x="64" y="584" class="dd-th" style="fill:#1e2436">ขัดกัน → git ชนะ</text></g><g data-node="handoff"><rect x="448" y="112" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="112" width="416" height="128" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="472" y="158" class="dd-name">งานค้าง · คิวถัดไป</text><text x="472" y="194" class="dd-mono" style="fill:#1e2436">.claude/state/handoff.md</text><text x="472" y="224" class="dd-th">อ่านทุก session</text></g><g data-node="context"><rect x="448" y="272" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="272" width="416" height="128" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="472" y="318" class="dd-name">ความรู้ของระบบ</text><text x="472" y="354" class="dd-mono" style="fill:#1e2436">docs/project-context/</text><text x="472" y="384" class="dd-th">อ่านเฉพาะที่เกี่ยว</text></g><g data-node="adr"><rect x="448" y="432" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="432" width="416" height="128" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="472" y="478" class="dd-name">ศัพท์ + มติ (ADR)</text><text x="472" y="514" class="dd-mono" style="fill:#1e2436">CONTEXT.md · docs/adr/</text><text x="472" y="544" class="dd-th">เฉพาะ bundle mattpocock</text></g><g data-node="ugt-handoff"><rect x="960" y="112" width="280" height="128" rx="8" fill="#ffffff"/><rect x="960" y="112" width="280" height="128" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="984" y="158" class="dd-name">ปิดงาน</text><text x="984" y="194" class="dd-mono" style="fill:#4f46e5">/ugt-handoff</text><text x="984" y="224" class="dd-th">ทุกครั้งที่จบงาน</text></g><g data-node="ugt-context"><rect x="960" y="296" width="280" height="128" rx="8" fill="#ffffff"/><rect x="960" y="296" width="280" height="128" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="984" y="342" class="dd-name">สร้างสารบัญ</text><text x="984" y="378" class="dd-mono">/ugt-context</text><text x="984" y="408" class="dd-th">ครั้งเดียวต่อโปรเจค</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><text x="96" y="690" class="dd-th">ทิศลูกศร = ทางข้อมูล</text><path d="M 308,684 H 348" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><text x="364" y="690" class="dd-th">อ่านเมื่อมี</text><rect x="476" y="672" width="36" height="24" rx="5" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" stroke-opacity="0.35"/><text x="524" y="690" class="dd-th">commit ใน git</text>
+      </svg></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ความจำของทีม</span>
+  <h2>จบงานทุกครั้ง: <code>/ugt-handoff</code></h2></header><div class="s-body"><div class="flow sm">
+    <div class="tile"><div class="ibox sm t-plain"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg></div><b>ทำงาน</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg></div><b class="mono" style="font-size:28px">/ugt-handoff</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm t-plain"><svg class="ic" aria-hidden="true"><use href="#i-commit"/></svg></div><b>commit</b></div><span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox sm t-ok"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><b>พรุ่งนี้ / เพื่อน<br>เปิดต่อได้ทันที</b></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ความจำของทีม · โปรเจคเดิม</span>
+  <h2>ยังไม่มีสารบัญความรู้?</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-plain"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg></div><b>โปรเจคเดิม</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></div><b class="mono" style="font-size:32px">/ugt-context</b><span class="capt">สแกนโค้ดครั้งเดียว</span></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></div><b class="mono" style="font-size:26px">docs/<br>project-context/</b></div>
+  </div></div></section>
+
+<!-- ===== อัปเดต ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">มีรุ่นใหม่</span>
+  <h2>อัปเดต plugin: 3 บรรทัด</h2></header><div class="s-body"><div class="term"><pre><span class="k">/plugin marketplace update</span> ugt
+<span class="k">/plugin update</span> ugt-nextjs-standard-superpowers
+<span class="k">/reload-plugins</span></pre></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">หลังอัปเดต</span>
+  <h2>แล้วพิมพ์ประโยคนี้</h2></header><div class="s-body"><p class="say">sync kit</p>
+  <p class="sub"><b style="color:var(--ink)">kit</b> = ไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค<br>(ตาราง · ฟอร์ม · หน้า login)</p></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">sync kit</span>
+  <h2>ถามก่อนทุกไฟล์ ไม่ทับเงียบ ๆ</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-warn"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></div><b>ไฟล์ kit<br>ตกรุ่น</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></div><b>ไม่เคยแก้<br>→ ทับให้</b></div>
+    <div class="tile"><div class="ibox"><svg class="ic" aria-hidden="true"><use href="#i-merge"/></svg></div><b>แก้เอง<br>→ merge</b></div>
+  </div></div></section>
+
+<!-- ===== ความรู้ใหม่ ===== -->
+<section class="slide diag"><header class="s-head"><h2>เจอความรู้ใหม่ — เก็บให้ถูกที่</h2></header><div class="s-body"><div class="dg"><svg viewBox="0 0 1280 720" class="dgsvg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="knowledge-triage-title knowledge-triage-desc" id="knowledge-triage-root">
+        <title id="knowledge-triage-title">คัดความรู้ใหม่ไปเก็บให้ถูกที่</title>
+        <desc id="knowledge-triage-desc">Flowchart: ถ้าเป็นมติดีไซน์ไป docs/DESIGN.md §10, มติอื่นไป decisions.md (หรือ docs/adr/ บน bundle mattpocock); ถ้าเป็นบั๊กที่จริงกับทุกโปรเจคบน stack (เหตุอยู่ที่ stack, โปรเจคอื่นก็เจอ, แก้ได้จริงแล้ว) ให้เปิด PR ด้วย /ugt-contribute ไม่อย่างนั้นเก็บใน docs/project-context/troubleshooting.md; งานค้างไป handoff.md และความชอบส่วนตัวไป memory</desc>
+        <defs>
+      <style>#knowledge-triage-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #knowledge-triage-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #knowledge-triage-root .diagram-container { width: 100%; overflow-x: auto; }
+      #knowledge-triage-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #knowledge-triage-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #knowledge-triage-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #knowledge-triage-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #knowledge-triage-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #knowledge-triage-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #knowledge-triage-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #knowledge-triage-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="knowledge-triage-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="knowledge-triage-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M 640,120 V 151" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><path d="M 496,216 H 332 Q 324,216 324,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="350" y="184" width="116" height="24" rx="3" fill="#ffffff"/><text x="408" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่ · บั๊ก</text></g><path d="M 784,216 H 948 Q 956,216 956,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="852" y="184" width="40" height="24" rx="3" fill="#ffffff"/><text x="872" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><path d="M 180,384 H 180 Q 172,384 172,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="104" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="134" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 468,384 H 468 Q 476,384 476,392 V 495" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#knowledge-triage-arrow-accent)"/><g class="dd-lbl"><rect x="484" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="504" y="450" class="dd-lblth" text-anchor="middle" fill="#4f46e5">ใช่</text></g><path d="M 812,384 H 812 Q 804,384 804,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="736" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="766" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 1100,384 H 1100 Q 1108,384 1108,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="1116" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="1136" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><g data-node="start"><rect x="536" y="56" width="208" height="64" rx="32" fill="#ffffff"/><rect x="536" y="56" width="208" height="64" rx="32" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="640" y="97" class="dd-name" text-anchor="middle">เจอเรื่องใหม่</text></g><g data-node="d"><polygon points="640,152 784,216 640,280 496,216" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="640" y="225" class="dd-name" text-anchor="middle">เป็นมติแล้ว?</text></g><g data-node="d"><polygon points="324,320 468,384 324,448 180,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="324" y="393" class="dd-name" text-anchor="middle">ทุกโปรเจคเจอ?</text></g><g data-node="d"><polygon points="956,320 1100,384 956,448 812,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="956" y="393" class="dd-name" text-anchor="middle">เรื่องดีไซน์?</text></g><g data-node="leaf0"><rect x="40" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="40" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="64" y="542" class="dd-name">บั๊กเฉพาะโปรเจค</text><text x="64" y="580" class="dd-mono" style="fill:#1e2436">troubleshooting.md</text></g><g data-node="leaf1"><rect x="344" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="344" y="496" width="264" height="136" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="368" y="542" class="dd-name">PR เข้า platform</text><text x="368" y="580" class="dd-mono" style="fill:#4f46e5">/ugt-contribute</text></g><g data-node="leaf2"><rect x="672" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="672" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="696" y="542" class="dd-name">บันทึกมติ</text><text x="696" y="580" class="dd-mono" style="fill:#1e2436">decisions.md</text><text x="696" y="610" class="dd-mono">matt: docs/adr/</text></g><g data-node="leaf3"><rect x="976" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="976" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="1000" y="542" class="dd-name">มติดีไซน์</text><text x="1000" y="580" class="dd-mono" style="fill:#1e2436">DESIGN.md §10</text></g><text x="40" y="80" class="dd-call">งานค้าง → handoff.md</text><text x="40" y="108" class="dd-call">ชอบส่วนตัว → memory</text><path d="M 300,74 Q 440,60 532,86" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="4,3" stroke-opacity="0.45"/><circle cx="534" cy="87" r="3" fill="#1e2436"/><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="88" y="690" class="dd-th">ไฟล์ในโปรเจค</text><rect x="244" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="292" y="690" class="dd-th">ส่งให้ทุกทีม</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ทุกโปรเจคเจอ = เหตุอยู่ที่ stack และแก้ได้จริงแล้ว</text>
+      </svg></div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">ส่งความรู้กลับ</span>
+  <h2>อย่าแก้ไฟล์ตัวช่วยที่ติดตั้งมา</h2></header><div class="s-body"><div class="flow">
+    <div class="tile"><div class="ibox t-bad"><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg></div><b>แก้ในเครื่อง<br>หายตอน update</b></div>
+    <span class="arr" aria-hidden="true"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <div class="tile"><div class="ibox t-ok"><svg class="ic" aria-hidden="true"><use href="#i-pr"/></svg></div><b class="mono" style="font-size:32px">/ugt-contribute</b><span class="capt">โชว์ diff ให้ยืนยันก่อนเปิด PR</span></div>
+  </div></div></section>
+
+<!-- ===== stack ===== -->
+<section class="slide"><header class="s-head"><span class="eyebrow">stack ที่รองรับ</span>
+  <h2>ชุด Next.js ใช้อะไรบ้าง</h2></header><div class="s-body"><div class="logos">
+    <div class="logo"><div class="lbox"><svg class="lg dk" role="img" aria-label="Next.js" style="--b:#000000"><use href="#l-nextdotjs"/></svg></div><b>Next.js</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="React" style="--b:#61DAFB"><use href="#l-react"/></svg></div><b>React</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="TypeScript" style="--b:#3178C6"><use href="#l-typescript"/></svg></div><b>TypeScript</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg dk" role="img" aria-label="Prisma" style="--b:#2D3748"><use href="#l-prisma"/></svg></div><b>Prisma</b></div>
+    <div class="logo"><div class="lbox"><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg></div><b>SQL Server</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg dk" role="img" aria-label="Keycloak" style="--b:#4D4D4D"><use href="#l-keycloak"/></svg></div><b>Keycloak</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="Jenkins" style="--b:#D24939"><use href="#l-jenkins"/></svg></div><b>Jenkins</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="SonarQube" style="--b:#126ED3"><use href="#l-sonarqubeserver"/></svg></div><b>SonarQube</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="Docker" style="--b:#2496ED"><use href="#l-docker"/></svg></div><b>Docker</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="nginx" style="--b:#009639"><use href="#l-nginx"/></svg></div><b>nginx</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg dk" role="img" aria-label="GitHub" style="--b:#181717"><use href="#l-github"/></svg></div><b>GitHub</b></div>
+    <div class="logo"><div class="lbox"><svg class="lg" role="img" aria-label="Claude" style="--b:#D97757"><use href="#l-claude"/></svg></div><b>Claude Code</b></div>
+  </div></div></section>
+
+<section class="slide"><header class="s-head"><span class="eyebrow">stack ที่รองรับ · ยังไม่มีส่วน database / login</span>
+  <h2>Python · PHP: เฉพาะ deploy</h2></header><div class="s-body"><div class="pair">
+    <div class="stack"><div class="lrow"><svg class="lg" role="img" aria-label="Python" style="--b:#3776AB"><use href="#l-python"/></svg><svg class="lg" role="img" aria-label="FastAPI" style="--b:#009688"><use href="#l-fastapi"/></svg></div><h3>Python <span class="badge warn">ยังไม่ tag</span></h3><p>FastAPI · Flask · Django · batch</p><span class="mono">ugt-python-platform 0.9.5</span></div>
+    <div class="stack"><div class="lrow"><svg class="lg" role="img" aria-label="PHP" style="--b:#777BB4"><use href="#l-php"/></svg><svg class="lg" role="img" aria-label="Laravel" style="--b:#FF2D20"><use href="#l-laravel"/></svg></div><h3>PHP <span class="badge warn">ยังไม่ tag</span></h3><p>Laravel · CodeIgniter · legacy · WordPress</p><span class="mono">ugt-php-platform 0.8.5</span></div>
+  </div></div></section>
+
+<!-- ===== ปิด ===== -->
+<section class="slide cc"><header class="s-head"><span class="eyebrow">ถาม-ตอบ</span>
+  <h2 style="margin-bottom:44px">มีคำถามไหมครับ?</h2></header><div class="s-body"><div class="links" style="width:100%">
+    <a href="guide.html"><svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg>คู่มือ</a>
+    <a href="reference.html"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>ตัวช่วยทั้งหมด</a>
+    <a href="cheatsheet.html"><svg class="ic" aria-hidden="true"><use href="#i-listcheck"/></svg>Cheat sheet</a>
+    <a href="design-preview.html"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg>Design system</a>
+  </div>
+  <p class="credit">รีโป pakornkub/ugt-claude-platform · ugt-nextjs-platform v4.79.4<br>โลโก้: Simple Icons — เครื่องหมายการค้าของเจ้าของ · ไอคอนแบบ Lucide</p></div></section>
+
+    </div>
+  </div>
+  <div class="deck-bar">
+    <button type="button" id="prev" aria-label="สไลด์ก่อนหน้า">←</button>
+    <span class="deck-count" id="count" aria-live="polite">1 / 1</span>
+    <button type="button" id="next" aria-label="สไลด์ถัดไป">→</button>
+    <button type="button" id="fs">เต็มจอ (F)</button>
+    <span class="hint"><span class="keys">← → / Space · F = เต็มจอ · </span><span class="tap">แตะซ้าย-ขวาของสไลด์ก็ได้</span><span class="rot">หมุนจอแนวนอนจะอ่านง่ายขึ้น</span></span>
+  </div>
+</main>
+
+<footer class="site-foot" hidden><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.79.4</span></div></footer>
+
+<script>
+(() => {
+  const shell = document.getElementById('deck');
+  const view = document.getElementById('deck-view');
+  const stage = document.getElementById('stage');
+  const slides = [...stage.querySelectorAll('.slide')];
+  const count = document.getElementById('count');
+  const bar = shell.querySelector('.deck-progress i');
+  const n = slides.length;
+  let cur = 0;
+  slides.forEach((s, j) => s.setAttribute('aria-label', 'สไลด์ ' + (j + 1)));
+
+  const fromHash = () => {
+    const k = parseInt(location.hash.slice(1), 10);
+    return Number.isFinite(k) ? k - 1 : 0;
+  };
+  function show(k) {
+    cur = Math.max(0, Math.min(n - 1, k));
+    slides.forEach((s, j) => s.classList.toggle('on', j === cur));
+    count.textContent = (cur + 1) + ' / ' + n;
+    bar.style.width = ((cur + 1) / n * 100) + '%';
+    const h = '#' + (cur + 1);
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  function fit() {
+    const r = view.getBoundingClientRect();
+    const s = Math.min(r.width / 1280, r.height / 720) * 0.96;
+    stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+  }
+  function toggleFs() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (shell.requestFullscreen) shell.requestFullscreen();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Spacebar') { e.preventDefault(); show(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); show(cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); show(0); }
+    else if (k === 'End') { e.preventDefault(); show(n - 1); }
+    else if (k === 'f' || k === 'F') { e.preventDefault(); toggleFs(); }
+  });
+  view.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;
+    const r = view.getBoundingClientRect();
+    show(e.clientX - r.left < r.width / 2 ? cur - 1 : cur + 1);
+  });
+  document.getElementById('prev').addEventListener('click', () => show(cur - 1));
+  document.getElementById('next').addEventListener('click', () => show(cur + 1));
+  document.getElementById('fs').addEventListener('click', toggleFs);
+  window.addEventListener('hashchange', () => show(fromHash()));
+  document.addEventListener('fullscreenchange', fit);
+  if ('ResizeObserver' in window) new ResizeObserver(fit).observe(view);
+  else window.addEventListener('resize', fit);
+
+  show(fromHash());
+  fit();
+})();
+</script>
+</body>
+</html>

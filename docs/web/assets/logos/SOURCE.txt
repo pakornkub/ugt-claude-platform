@@ -1,0 +1,4 @@
+Brand logos from Simple Icons v16.32.0 (https://simpleicons.org, icons CC0-1.0).
+Each logo is the trademark of its owner and is used here only to name the tool.
+colors.json = each logo's official brand colour from Simple Icons' data file.
+SQL Server is not in Simple Icons (Microsoft logos were removed) — use a generic database icon.

@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คู่มือทีละขั้น · UGT Claude Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css"><script src="site.js"></script>
+<style>
+  /* guide.html only — chapter rhythm + CSS mockups (chat, file tree, install flow) */
+  .with-toc>main{min-width:0} /* keep wide trees/tables from stretching the 1fr column on phones */
+  .chapter{padding:56px 0 60px;border-top:1px solid var(--line)}
+  .chapter:first-child{border-top:0;padding-top:8px}
+  .chapter h2{display:flex;gap:12px;align-items:center}
+  .chapter h2 .no{flex:none;width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-size:17px}
+  .chapter h3{margin:36px 0 10px}
+  .steps>li{padding-bottom:28px}
+  .steps>li h3{margin:2px 0 6px;font-size:16.5px}
+  .steps>li p{margin:0 0 8px}
+  .more{display:inline-block;margin-top:10px;font-weight:600;text-decoration:none}
+  .more:hover{text-decoration:underline}
+  .callout ul{margin:6px 0 0;padding-left:20px}
+
+  /* chat mockup */
+  .chat{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-soft);padding:14px;display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .chat .bar{font-size:12px;color:var(--ink-faint);display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .chat .bar i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .msg{max-width:90%;padding:9px 13px;border-radius:14px;font-size:14.5px;line-height:1.65}
+  .msg .who{display:block;font-size:11.5px;font-weight:700;color:var(--ink-faint);margin-bottom:2px}
+  .msg.me{align-self:flex-end;background:var(--accent-soft);color:var(--accent-text);border-bottom-right-radius:4px}
+  .msg.ai{align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg ul,.msg ol{margin:4px 0 0;padding-left:20px}
+
+  /* file tree mockup (sits on --code-bg, like .term) */
+  .tree{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:14px 18px;font-family:var(--mono);font-size:13.5px;line-height:1.85;overflow-x:auto;margin:14px 0;white-space:pre}
+  .tree .d{color:var(--code-key);font-weight:600}
+  .tree .n{color:var(--code-dim)}
+
+
+  /* "which chapter do I need" cards */
+  .route a{text-decoration:none;color:inherit;display:block;height:100%}
+  .route .card:hover{border-color:var(--accent)}
+  .route .card p{margin:0}
+  .route h3{display:flex;gap:10px;align-items:center}
+  .route h3 .ico{color:var(--accent-text)}
+</style>
+</head>
+<body class="docs">
+<nav class="site-nav"><div class="wrap">
+  <a class="brand" href="index.html"><b>UGT</b> Claude Platform</a>
+  <a class="link" href="index.html">หน้าแรก</a>
+  <a class="link" href="guide.html">คู่มือ</a>
+  <a class="link" href="reference.html">รายละเอียดตัวช่วย</a>
+  <a class="link" href="design-preview.html">Design system</a>
+  <a class="link" href="slides.html">สไลด์</a>
+  <a class="link" href="cheatsheet.html">Cheat sheet</a>
+  <span class="spacer"></span><button class="theme-btn" type="button">☾ มืด</button>
+</div></nav>
+<!-- sprite --><svg class="sprite" aria-hidden="true" focusable="false"><symbol id="i-package" viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.29 7 12 12l8.71-5"/><path d="M12 22V12"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol></svg><!-- /sprite -->
+
+<header class="page-head"><div class="wrap">
+  <span class="eyebrow">คู่มือ step-by-step</span>
+  <h1>เริ่มใช้ UGT Claude Platform ทีละขั้น</h1>
+  <p class="lead">สำหรับคนที่ยังไม่เคยใช้เลย ตั้งแต่ติดตั้ง ทำโปรเจคให้ deploy ได้ ทำ feature ทุกวัน ไปจนถึงปิดงานและอัปเดต</p>
+  <div class="grid g3 route" style="margin-top:24px">
+    <a href="#before"><div class="card"><h3><svg class="ico" aria-hidden="true"><use href="#i-package"/></svg>ยังไม่เคยติดตั้ง</h3><p>อ่านบทที่ 1–2 ก่อน ใช้เวลาไม่กี่นาที</p></div></a>
+    <a href="#existing"><div class="card"><h3><svg class="ico" aria-hidden="true"><use href="#i-wrench"/></svg>มีโปรเจคอยู่แล้ว</h3><p>บทที่ 3 — ทำให้ deploy ได้ตามมาตรฐานบริษัท</p></div></a>
+    <a href="#requirements"><div class="card"><h3><svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>มีแต่เอกสาร requirement</h3><p>บทที่ 4 — สรุปเอกสารก่อน แล้วค่อยสร้าง</p></div></a>
+  </div>
+</div></header>
+
+<div class="wrap with-toc">
+  <aside class="toc" aria-label="สารบัญ">
+    <div class="grp">เริ่มต้น</div>
+    <a href="#before">1. ก่อนเริ่ม</a>
+    <a href="#install">2. ติดตั้ง</a>
+    <div class="grp">ตั้งโปรเจค</div>
+    <a href="#existing">3. โปรเจคที่มีอยู่ → deploy ได้</a>
+    <a href="#requirements">4. เริ่มจาก requirement</a>
+    <div class="grp">ใช้งานทุกวัน</div>
+    <a href="#daily">5. ทำ feature ทุกวัน</a>
+    <a href="#handoff">6. จบงานทุกครั้ง</a>
+    <a href="#update">7. อัปเดต plugin</a>
+    <a href="#contribute">8. เจอบั๊กที่น่าจะเจอทุกโปรเจค</a>
+    <div class="grp">อื่น ๆ</div>
+    <a href="#faq">9. ถามบ่อย</a>
+  </aside>
+
+  <main class="prose">
+
+  <!-- ===================== 1 ===================== -->
+  <section class="chapter" id="before">
+    <h2><span class="no">1</span>ก่อนเริ่ม</h2>
+    <p class="sub">เตรียม 3 อย่างนี้ให้พร้อม แล้วทุกขั้นถัดไปจะลื่น</p>
+
+    <ol class="steps">
+      <li>
+        <h3>Claude Code</h3>
+        <p>ทุกคำสั่งและทุกประโยคในคู่มือนี้พิมพ์ในช่องแชทของ Claude Code</p>
+        <p>รีโปของ platform เป็น public จึงไม่ต้องขอสิทธิ์หรือ login GitHub</p>
+      </li>
+      <li>
+        <h3>โปรเจค Next.js แบบ App Router</h3>
+        <p>ชุดนี้ทำมาเพื่อ TypeScript / React / Next.js (App Router) · SQL Server · Keycloak · Jenkins + SonarQube + Docker</p>
+        <p>ยังไม่มีโปรเจคเลยก็ได้ ตัวช่วยดีไซน์จะสร้างโปรเจค Next.js ให้เอง</p>
+      </li>
+      <li>
+        <h3>ข้อมูลที่จะถูกถาม</h3>
+        <p>ตอนติดตั้ง Claude จะถามคำถามชุดเดียว เตรียมคำตอบเหล่านี้ไว้ก่อน:</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>เรื่อง</th><th>ตัวอย่างสิ่งที่ถูกถาม</th></tr></thead>
+          <tbody>
+            <tr><td>ตัวตนโปรเจค</td><td>ชื่อแบบ kebab-case (เช่น <code>expense-portal</code>) + ชื่อที่แสดง · basePath · port prod/dev · URL เต็มของ prod/dev</td></tr>
+            <tr><td>ฐานข้อมูล</td><td>DB server · ชื่อ database · ของเดิมหรือสร้างใหม่ · ต้องใช้ stored procedure ไหม</td></tr>
+            <tr><td>Login</td><td>SSO / AD (LDAP) / รหัสผ่าน · มี Keycloak client แล้วหรือยัง · ข้อมูล AD · โดเมนอีเมลองค์กร · view ข้อมูลพนักงาน</td></tr>
+            <tr><td>CI/CD</td><td>ใช้ Sentry ไหม · deploy ไปที่ไหน</td></tr>
+            <tr><td>ตัวเลือกเสริม</td><td>ต้องส่งอีเมลแจ้งเตือนไหม (ถ้าใช่ ขอ SMTP host/port, อีเมลผู้ส่ง) · ผู้ใช้ต้องแนบไฟล์ไหม (ถ้าใช่ ขนาดไฟล์สูงสุด)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout tip"><b>ไม่รู้คำตอบบางข้อ ไม่เป็นไร</b>
+          ข้อที่ไม่ได้ตอบ Claude จะใช้ค่ามาตรฐาน แล้วบอกให้รู้ตอนปิดงาน ส่วนค่าที่ต้องขอจาก admin (รหัสผ่าน DB, Keycloak secret) จะรวมไว้ในไฟล์ให้ส่งต่อทีหลัง</div>
+      </li>
+    </ol>
+
+    <div class="callout"><b>ผลที่ควรเห็น</b>
+      มี Claude Code พร้อมใช้ มีโฟลเดอร์โปรเจค (หรือโฟลเดอร์ว่าง) และรู้คร่าว ๆ ว่าจะตอบคำถามข้างบนว่าอะไร</div>
+    <div class="callout warn"><b>ไม่ใช่ Next.js?</b>
+      Claude จะบอกตรง ๆ ว่าใช้ไม่ได้ และจะไม่ดัดแปลงไฟล์ให้เข้ากับ stack อื่นเอง · Python / PHP มีเฉพาะส่วน deploy (ดูบทที่ 9)</div>
+
+    <a class="more" href="reference.html#skill-ugt-nextjs-full-setup">อ่านละเอียด → คำถามทั้งหมดของ full-setup</a>
+  </section>
+
+  <!-- ===================== 2 ===================== -->
+  <section class="chapter" id="install">
+    <h2><span class="no">2</span>ติดตั้ง</h2>
+    <p class="sub">ทำครั้งเดียวต่อเครื่อง (หรือต่อโปรเจค ถ้าเลือก scope project)</p>
+
+    <ol class="steps">
+      <li>
+        <h3>เลือก bundle</h3>
+        <p><b>bundle</b> = plugin ตัวเดียวที่ติดแล้วได้ของครบชุด ต่างกันแค่ "วิธีทำ feature"</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Bundle</th><th>เหมาะกับ</th></tr></thead>
+          <tbody>
+            <tr><td><code>ugt-nextjs-standard-superpowers</code> <span class="badge ok">แนะนำ</span></td><td>ไม่แน่ใจให้เลือกตัวนี้ ระบบเดินเองอัตโนมัติ: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review</td></tr>
+            <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>อยากคุมทุกขั้นเอง และประหยัด token กว่า แต่ต้องเรียกคำสั่งเองทีละขั้น และไม่มีอะไร review ให้อัตโนมัติ</td></tr>
+          </tbody>
+        </table></div>
+        <p>ทั้งสองตัวพา <code>ugt-nextjs-platform</code> และ <code>ugt-core</code> มาให้เอง ไม่ต้องติดแยก</p>
+      </li>
+      <li>
+        <h3>รันคำสั่งทีละบรรทัด</h3>
+        <p>เปิด Claude Code ในโปรเจคไหนก็ได้ แล้วพิมพ์:</p>
+        <div class="term"><div class="dots"><i></i><i></i><i></i></div><pre><span class="k">/plugin marketplace add</span> pakornkub/ugt-claude-platform
+<span class="k">/plugin install</span> ugt-nextjs-standard-superpowers@ugt
+<span class="k">/reload-plugins</span>
+<span class="c"># เลือก mattpocock: บรรทัดที่สองใช้ ugt-nextjs-standard-mattpocock@ugt แทน</span></pre></div>
+      </li>
+      <li>
+        <h3>เลือก scope ตอน install</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Scope</th><th>ผล</th></tr></thead>
+          <tbody>
+            <tr><td><b>project</b></td><td>เพื่อนร่วมทีมที่ clone โปรเจคไปได้ด้วย</td></tr>
+            <tr><td><b>user</b></td><td>ใช้เองได้ทุกโปรเจคในเครื่องนี้</td></tr>
+          </tbody>
+        </table></div>
+      </li>
+      <li>
+        <h3>เช็คว่าติดแล้ว</h3>
+        <div class="say"><code>/ugt</code></div>
+        <p>ต้องเห็นรายการตัวช่วยที่ขึ้นต้นด้วย <code>ugt-</code> เด้งขึ้นมา</p>
+      </li>
+    </ol>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      พิมพ์ <code>/ugt</code> แล้วเห็นตัวช่วยอย่าง <code>ugt-nextjs-full-setup</code>, <code>ugt-handoff</code>, <code>ugt-requirements</code> · ดูรุ่นที่ติดอยู่ได้ด้วย <code>/plugin</code></div>
+    <div class="callout warn"><b>เปลี่ยน bundle ทีหลังได้</b>
+      แต่ต้อง uninstall ตัวเดิมแล้ว install อีกตัวเอง ไม่มีคำสั่งสลับให้</div>
+
+    <a class="more" href="reference.html#bundles">อ่านละเอียด → เทียบสอง bundle</a>
+  </section>
+
+  <!-- ===================== 3 ===================== -->
+  <section class="chapter" id="existing">
+    <h2><span class="no">3</span>ทำโปรเจคที่มีอยู่ให้ deploy ได้</h2>
+    <p class="sub">ใช้ <code>ugt-nextjs-full-setup</code> ตัวแม่ ถามครั้งเดียว แล้วติดตั้งทุกอย่างตามลำดับที่ถูก</p>
+
+    <div class="chat" aria-label="ตัวอย่างบทสนทนา">
+      <div class="bar"><i></i><i></i><i></i> Claude Code · โปรเจค expense-portal</div>
+      <div class="msg me"><span class="who">คุณ</span>ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย</div>
+      <div class="msg ai"><span class="who">Claude</span>ตรวจโปรเจคแล้ว พบหน้าจอที่ใช้งานอยู่, ข้อมูลเก็บใน SQLite และ login จำลอง · ขอถามคำถามชุดเดียว:
+        <ol><li>ของเดิมที่ใช้งานอยู่ คงไว้ไหม? (ค่าเริ่มต้น: คงของเดิม)</li><li>ติดตั้งอะไรบ้าง? (ค่าเริ่มต้น: ทั้ง 5 อย่าง)</li><li>ต้องส่งอีเมลแจ้งเตือนไหม …</li></ol></div>
+      <div class="msg me"><span class="who">คุณ</span>คงของเดิม ติดทั้งหมด ไม่ส่งเมล ไม่แนบไฟล์ login ด้วย SSO …</div>
+      <div class="msg ai"><span class="who">Claude</span>แผน: Database → Quality → Design → Auth → CI รันรวดเดียวใน session นี้ — พิมพ์ "ลุย" เพื่อเริ่ม</div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h3>เปิด Claude Code ที่โฟลเดอร์โปรเจค แล้วพิมพ์ประโยคเดียว</h3>
+        <div class="say">ทำให้โปรเจคนี้ deploy ได้ตามมาตรฐานบริษัทหน่อย</div>
+        <p>หรือเรียกตรง ๆ ด้วย <code>/ugt-nextjs-full-setup</code></p>
+      </li>
+      <li>
+        <h3>Claude ตรวจของเดิมก่อนเสมอ</h3>
+        <p>มันจะรายงานสิ่งที่เจอก่อนถาม เช่น หน้าจอที่ใช้งานอยู่, ที่เก็บข้อมูลชั่วคราว (SQLite, ไฟล์ JSON), login จำลอง</p>
+        <p>อะไรที่มีอยู่แล้วจะถามก่อน ไม่ทับเงียบ ๆ</p>
+      </li>
+      <li>
+        <h3>ตอบคำถามชุดเดียว</h3>
+        <p>ถามรวดเดียวจบ ตัวช่วยย่อยจะไม่ถามซ้ำ ค่าเริ่มต้นที่ควรรู้:</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>คำถาม</th><th>ค่าเริ่มต้น</th></tr></thead>
+          <tbody>
+            <tr><td>คงของเดิมที่ใช้งานอยู่ไหม (preserve mode)</td><td>คงของเดิม: flow, route, หน้าตา และเมนูเดิมอยู่ครบ</td></tr>
+            <tr><td>ย้ายข้อมูลจากที่เก็บชั่วคราวไป SQL Server เลยไหม</td><td>ย้าย</td></tr>
+            <tr><td>ถอด login จำลอง ใส่ login จริงไหม</td><td>ถอด (เก็บไว้คู่กันไม่ได้)</td></tr>
+            <tr><td>ติดตั้งอะไรบ้าง</td><td>ทั้ง 5: Database / Quality / Design / Auth / CI</td></tr>
+            <tr><td>ส่งอีเมล / แนบไฟล์</td><td>ไม่ (ทั้งคู่ต้องขอโครงสร้างจาก admin เพิ่ม)</td></tr>
+            <tr><td>วิธี login</td><td>SSO อย่างเดียว</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout"><b>ไม่ถามว่าใครเป็น admin คนแรก</b>
+          ไม่มีบัญชี admin สร้างไว้ล่วงหน้า คนแรกที่ login จะถูกพาไปหน้า <code>/admin/setup</code> แล้วกดปุ่มเดียวเป็น Administrator</div>
+      </li>
+      <li>
+        <h3>ดูแผน แล้วยืนยันครั้งเดียว</h3>
+        <p>Claude เสนอลำดับและวิธีรันมาหนึ่งแบบ ปกติคือรันรวดเดียวใน session นี้</p>
+        <div class="say">ลุย</div>
+        <p>ถ้าอยาก review ทีละ module ก่อนไปต่อ ให้บอกตอนนี้ Claude จะแบ่งเป็นช่วงละ 1–3 module คั่นด้วย <code>/ugt-handoff</code></p>
+      </li>
+      <li>
+        <h3>Claude ติดตั้งตามลำดับนี้ (สลับไม่ได้)</h3>
+        <figure class="diagram">
+      <div class="canvas" tabindex="0" role="region" aria-label="แผนภาพลำดับการติดตั้ง"><!-- diagram:install-order --><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="install-order-title install-order-desc" id="install-order-root">
+        <title id="install-order-title">ลำดับการติดตั้งของ ugt-nextjs-full-setup</title>
+        <desc id="install-order-desc">ลำดับติดตั้ง Database, Test-Lint, Design, Auth, Mail (เลือกได้), Upload (เลือกได้), CI/CD แล้วจบด้วยไฟล์ harness พร้อมเหตุผลสั้น ๆ ว่าแต่ละขั้นพึ่งอะไรจากขั้นก่อนหน้า</desc>
+        <defs>
+      <style>#install-order-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #install-order-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #install-order-root .diagram-container { width: 100%; overflow-x: auto; }
+      #install-order-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #install-order-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #install-order-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #install-order-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #install-order-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #install-order-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #install-order-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #install-order-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="install-order-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="install-order-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M 304,184 H 351" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 616,184 H 663" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 928,184 H 975" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 304,472 H 351" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 616,472 H 663" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 928,472 H 975" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><path d="M 1108,264 V 320 Q 1108,328 1100,328 H 180 Q 172,328 172,336 V 391" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#install-order-arrow)"/><g data-node="1"><rect x="40" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="40" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="64" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="82" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">1</text><text x="116" y="153" class="dd-name">ฐานข้อมูล</text><text x="64" y="204" class="dd-th" style="fill:#1e2436">login เก็บ user</text><text x="64" y="232" class="dd-th" style="fill:#4b5268">ไว้ใน Prisma</text></g><g data-node="2"><rect x="352" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="352" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="376" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="394" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">2</text><text x="428" y="153" class="dd-name">Test + Lint</text><text x="376" y="204" class="dd-th" style="fill:#1e2436">CI เรียก lint, test</text><text x="376" y="232" class="dd-th" style="fill:#4b5268">ตามชื่อสคริปต์</text></g><g data-node="3"><rect x="664" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="664" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="688" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="706" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">3</text><text x="740" y="153" class="dd-name">ดีไซน์</text><text x="688" y="204" class="dd-th" style="fill:#1e2436">หน้า login</text><text x="688" y="232" class="dd-th" style="fill:#4b5268">ต้องใช้ธีมนี้</text></g><g data-node="4"><rect x="976" y="104" width="264" height="160" rx="8" fill="#ffffff"/><rect x="976" y="104" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="1000" y="128" width="36" height="32" rx="5" fill="#1e2436"/><text x="1018" y="151" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">4</text><text x="1052" y="153" class="dd-name">Login</text><text x="1000" y="204" class="dd-th" style="fill:#1e2436">ให้ตัวตน สิทธิ์</text><text x="1000" y="232" class="dd-th" style="fill:#4b5268">และ audit log</text></g><g data-node="5"><rect x="40" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="40" y="392" width="264" height="160" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><rect x="64" y="416" width="36" height="32" rx="5" fill="#ffffff" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="4,3"/><text x="82" y="439" class="dd-mono" text-anchor="middle" style="fill:#1e2436;font-weight:600">5</text><text x="116" y="441" class="dd-name">อีเมล</text><text x="284" y="439" class="dd-th" text-anchor="end" style="fill:#6d7590">เลือกได้</text><text x="64" y="492" class="dd-th" style="fill:#1e2436">ใช้ตัวตน</text><text x="64" y="520" class="dd-th" style="fill:#4b5268">จาก Login</text></g><g data-node="6"><rect x="352" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="352" y="392" width="264" height="160" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><rect x="376" y="416" width="36" height="32" rx="5" fill="#ffffff" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="4,3"/><text x="394" y="439" class="dd-mono" text-anchor="middle" style="fill:#1e2436;font-weight:600">6</text><text x="428" y="441" class="dd-name">แนบไฟล์</text><text x="596" y="439" class="dd-th" text-anchor="end" style="fill:#6d7590">เลือกได้</text><text x="376" y="492" class="dd-th" style="fill:#1e2436">ใช้สิทธิ์</text><text x="376" y="520" class="dd-th" style="fill:#4b5268">จาก Login</text></g><g data-node="7"><rect x="664" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="664" y="392" width="264" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><rect x="688" y="416" width="36" height="32" rx="5" fill="#1e2436"/><text x="706" y="439" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">7</text><text x="740" y="441" class="dd-name">CI/CD</text><text x="688" y="492" class="dd-th" style="fill:#1e2436">ต้องรู้ว่ามี DB</text><text x="688" y="520" class="dd-th" style="fill:#4b5268">และ build ผ่าน</text></g><g data-node="8"><rect x="976" y="392" width="264" height="160" rx="8" fill="#ffffff"/><rect x="976" y="392" width="264" height="160" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><rect x="1000" y="416" width="36" height="32" rx="5" fill="#4f46e5"/><text x="1018" y="439" class="dd-mono" text-anchor="middle" style="fill:#ffffff;font-weight:600">8</text><text x="1052" y="441" class="dd-name">Harness</text><text x="1000" y="492" class="dd-th" style="fill:#1e2436">ติดตั้งเสมอ</text><text x="1000" y="520" class="dd-th" style="fill:#4b5268">ความรู้ไม่หาย</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="88" y="690" class="dd-th">ติดตั้งเมื่อเลือก</text><rect x="244" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="292" y="690" class="dd-th">ถามก่อน (ค่าเริ่มต้น: ไม่)</text><rect x="548" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="596" y="690" class="dd-th">ติดตั้งเสมอ</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ข้ามได้ แต่ห้ามสลับลำดับ</text>
+      </svg><!-- /diagram:install-order --></div>
+      <figcaption><span>Database → Quality → Design → Auth → [Mail] → [Upload] → CI แล้วปิดด้วยไฟล์ harness · กล่องเส้นประ = เลือกได้</span><span class="hint">เลื่อนซ้าย–ขวาเพื่อดูทั้งภาพ</span><a href="diagrams/install-order.svg" target="_blank" rel="noopener">เปิดภาพเต็ม ↗</a></figcaption>
+    </figure>
+        <div class="table-wrap"><table>
+          <thead><tr><th>ขั้น</th><th>ตัวช่วย</th><th>ได้อะไร</th></tr></thead>
+          <tbody>
+            <tr><td>Database</td><td><code>ugt-nextjs-database-setup</code></td><td>SQL Server ผ่าน Prisma + ตั้งชื่อตาราง/คอลัมน์ตามมาตรฐาน</td></tr>
+            <tr><td>Quality</td><td><code>ugt-nextjs-test-lint-setup</code></td><td>Vitest + ESLint + Prettier + ตรวจก่อน commit</td></tr>
+            <tr><td>Design</td><td><code>ugt-nextjs-design-setup</code></td><td><code>docs/DESIGN.md</code> + ธีม ฟ้อนต์ไทย เมนู + ชุด component สำเร็จรูป</td></tr>
+            <tr><td>Auth</td><td><code>ugt-nextjs-auth-setup</code></td><td>login (SSO / AD / รหัสผ่าน) + สิทธิ์ + หน้า admin</td></tr>
+            <tr><td>Mail <span class="badge">เลือกได้</span></td><td><code>ugt-nextjs-mail-setup</code></td><td>ส่งเมลผ่าน relay บริษัท + template แก้ได้จากหน้า admin</td></tr>
+            <tr><td>Upload <span class="badge">เลือกได้</span></td><td><code>ugt-nextjs-upload-setup</code></td><td>แนบไฟล์บน volume + สแกนไวรัส (เปิดได้) + ดาวน์โหลดผ่านการตรวจสิทธิ์</td></tr>
+            <tr><td>CI</td><td><code>ugt-nextjs-cicd-setup</code></td><td>Jenkinsfile + SonarQube + Docker + <code>/api/health</code> + <code>docs/admin-handoff.md</code></td></tr>
+          </tbody>
+        </table></div>
+        <p>ทำไมต้องเรียงแบบนี้: Auth เก็บ user ในฐานข้อมูล · หน้า login ต้องใช้ธีมจาก Design · CI เรียก script ทดสอบที่ Quality สร้าง</p>
+      </li>
+      <li>
+        <h3>Claude วางไฟล์ "ความจำ" ของโปรเจค</h3>
+        <p>ขั้นนี้ทำเสมอ ไม่ว่าเลือกติดตั้งอะไร เพื่อให้มาตรฐานอยู่ต่อหลังจบ session</p>
+        <div class="tree" aria-label="ไฟล์ที่ได้"><span class="d">your-project/</span>
+├─ CLAUDE.md                   <span class="n"># เพิ่มบล็อก ugt:start … ugt:end (ของเดิมไม่แตะ)</span>
+├─ <span class="d">.claude/</span>
+│  ├─ settings.json            <span class="n"># รวมเฉพาะ key ของ plugin</span>
+│  ├─ <span class="d">rules/</span>                   <span class="n"># กฎแต่ละเรื่อง โหลดเองตามไฟล์ที่แตะ</span>
+│  └─ <span class="d">state/</span>
+│     ├─ handoff.md            <span class="n"># งานค้าง / คิวถัดไป</span>
+│     └─ model-mode.md         <span class="n"># เริ่มที่ auto</span>
+├─ <span class="d">docs/</span>
+│  ├─ DESIGN.md                <span class="n"># ข้อตกลงดีไซน์</span>
+│  ├─ admin-handoff.md         <span class="n"># ส่งให้ admin/DevOps</span>
+│  └─ <span class="d">project-context/</span>         <span class="n"># สารบัญความรู้ของโปรเจค</span>
+└─ CODING_STANDARDS.md         <span class="n"># เฉพาะ bundle mattpocock</span></div>
+      </li>
+      <li>
+        <h3>Claude รันสคริปต์ตรวจจนเขียวทุกตัว</h3>
+        <p>ทุก module มี <code>verify.mjs</code> ของตัวเอง รวมถึงของ full-setup ด้วย ข้อไหนแดง Claude ต้องแก้ก่อนบอกว่าเสร็จ</p>
+      </li>
+    </ol>
+
+    <h3>ข้อความปิดงาน — มี 6 หัวข้อเสมอ</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>หัวข้อ</th><th>คุณต้องทำอะไรกับมัน</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>ไฟล์ที่เพิ่ม/แก้ (แยกตาม module)</td><td>ไล่ดู diff ก่อน commit</td></tr>
+        <tr><td>2</td><td>env vars ที่ต้องเติมค่าจริง</td><td>เติมใน <code>.env.local</code> เมื่อได้ค่าจาก admin</td></tr>
+        <tr><td>3</td><td>ส่งต่อ admin (<code>docs/admin-handoff.md</code>)</td><td>ส่ง<b>ไฟล์</b>นี้ให้ทีม admin/DevOps</td></tr>
+        <tr><td>4</td><td>ผู้ดูแลคนแรก</td><td>ให้คนที่ควรเป็น admin login คนแรก</td></tr>
+        <tr><td>5</td><td>Smoke test</td><td>ทดสอบตามรายการ</td></tr>
+        <tr><td>6</td><td>ยังไม่ได้รัน</td><td>รันคำสั่งที่ Claude รันเองไม่ได้</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>หลัง Claude ทำเสร็จ — งานของคุณ</h3>
+    <ol class="steps">
+      <li>
+        <h3>รันคำสั่งที่ "ยังไม่ได้รัน"</h3>
+        <p>เช่น บรรทัด <code>npm i …</code>, <code>npx shadcn@latest add …</code>, <code>prisma migrate</code> / <code>generate</code>, <code>npx husky init</code> ถ้า session รันเองไม่ได้</p>
+      </li>
+      <li>
+        <h3>ส่ง <code>docs/admin-handoff.md</code> ให้ admin</h3>
+        <p>ในไฟล์มีขั้นตอนรวมและตารางแยกระบบ: SQL Server, folder บน server, Jenkins, GitHub webhook, SonarQube, Keycloak, Nginx, cron (มีเฉพาะที่โปรเจคใช้)</p>
+        <p>ท้ายไฟล์มีตาราง "ส่งกลับ" ให้ admin กรอก รหัสผ่านและ secret ให้ส่งทางช่องทางปลอดภัย ไม่กรอกในไฟล์</p>
+      </li>
+      <li>
+        <h3>เติมค่า env</h3>
+        <p>ได้ค่ากลับจาก admin แล้ว เติมลง <code>.env.local</code> ตามรายการในหัวข้อที่ 2</p>
+      </li>
+      <li>
+        <h3>ผู้ดูแลคนแรก</h3>
+        <p>ให้คนที่ควรเป็น admin login คนแรก ระบบพาไป <code>/admin/setup</code> → กดปุ่มเดียว → ได้ role Administrator</p>
+        <p>โปรเจคที่ใช้รหัสผ่านอย่างเดียว (ไม่มี SSO/AD) ต้องสร้างบัญชีแรกด้วย <code>npx tsx scripts/create-first-user.ts</code> ก่อน แล้วค่อยเข้า <code>/admin/setup</code></p>
+      </li>
+      <li>
+        <h3>Smoke test</h3>
+        <ul class="checklist">
+          <li><code>npm run build</code> ผ่าน</li>
+          <li>login ได้ทุกวิธีที่เปิด → เข้าหน้าที่ต้อง login ได้ → logout แล้ว cookie หาย</li>
+          <li><code>/admin/setup</code> กดครั้งเดียวได้ Administrator</li>
+          <li>push branch <code>develop</code> → pipeline เขียวทุก stage</li>
+        </ul>
+      </li>
+      <li>
+        <h3>bundle mattpocock เท่านั้น</h3>
+        <div class="say"><code>/setup-matt-pocock-skills</code></div>
+        <p>ต้องรันเอง ครั้งเดียวต่อโปรเจค (full-setup รันแทนไม่ได้)</p>
+      </li>
+    </ol>
+
+    <h3>หลัง push: จาก GitHub ถึงหน้าแอป</h3>
+    <p>pipeline ที่ cicd-setup ติดตั้งให้ทำงานแบบนี้ทุกครั้งที่ push</p>
+    <figure class="diagram">
+      <div class="canvas" tabindex="0" role="region" aria-label="แผนภาพ delivery pipeline"><!-- diagram:delivery-pipeline --><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="delivery-pipeline-title delivery-pipeline-desc" id="delivery-pipeline-root">
+        <title id="delivery-pipeline-title">Delivery pipeline: GitHub → Jenkins → Docker</title>
+        <desc id="delivery-pipeline-desc">การ push ขึ้น GitHub ปลุก Jenkins ให้รัน 10 stage (1–5 ตรวจโค้ดและ build, 6–8 OWASP และ SonarQube Quality Gate, 9–10 Docker Build และ Deploy เฉพาะ main/develop) จากนั้น docker compose รัน image บน Docker host (ข้อมูลถาวรใต้ /home/docker02/appdata) และ nginx เปิดแอปที่ URL แบบ subpath</desc>
+        <defs>
+      <style>#delivery-pipeline-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #delivery-pipeline-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #delivery-pipeline-root .diagram-container { width: 100%; overflow-x: auto; }
+      #delivery-pipeline-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #delivery-pipeline-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #delivery-pipeline-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #delivery-pipeline-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #delivery-pipeline-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #delivery-pipeline-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #delivery-pipeline-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #delivery-pipeline-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="delivery-pipeline-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="delivery-pipeline-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="232" y="72" width="1008" height="288" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="248" y="60" width="304" height="24" rx="3" fill="#ffffff"/><text x="256" y="78" class="dd-lblth" fill="#6d7590">CI · Jenkins + SonarQube</text><rect x="232" y="416" width="1008" height="216" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="248" y="404" width="148" height="24" rx="3" fill="#ffffff"/><text x="256" y="422" class="dd-lblth" fill="#6d7590">Docker host</text><path d="M 184,216 H 255" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="188" y="184" width="64" height="24" rx="3" fill="#ffffff"/><text x="220" y="202" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">PUSH</text></g><path d="M 928,176 H 999" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="932" y="144" width="64" height="24" rx="3" fill="#ffffff"/><text x="964" y="162" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">SCAN</text></g><path d="M 1000,280 H 929" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#delivery-pipeline-arrow-accent)"/><g class="dd-lbl"><rect x="944" y="248" width="40" height="24" rx="3" fill="#ffffff"/><text x="964" y="266" class="dd-lblth" text-anchor="middle" fill="#4f46e5">ผล</text></g><path d="M 808,336 V 376 Q 808,384 816,384 H 1104 Q 1112,384 1112,392 V 455" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="884" y="352" width="160" height="24" rx="3" fill="#ffffff"/><text x="964" y="370" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">DOCKER BUILD</text></g><path d="M 1000,532 H 929" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="938" y="500" width="52" height="24" rx="3" fill="#ffffff"/><text x="964" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">RUN</text></g><path d="M 512,532 H 591" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="514" y="500" width="76" height="24" rx="3" fill="#ffffff"/><text x="552" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">PROXY</text></g><path d="M 176,532 H 255" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><g class="dd-lbl"><rect x="178" y="500" width="76" height="24" rx="3" fill="#ffffff"/><text x="216" y="518" class="dd-lbl-t" text-anchor="middle" fill="#6d7590">HTTPS</text></g><g data-node="github"><rect x="40" y="160" width="144" height="112" rx="8" fill="#ffffff"/><rect x="40" y="160" width="144" height="112" rx="8" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="60" y="210" class="dd-name">GitHub</text><text x="60" y="244" class="dd-mono">git push</text></g><g data-node="jenkins"><rect x="256" y="104" width="672" height="232" rx="8" fill="#ffffff"/><rect x="256" y="104" width="672" height="232" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="276" y="148" class="dd-name">Jenkins · 10 stage</text><rect x="276" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="292" y="216" class="dd-th" style="fill:#1e2436">ตรวจ + build</text><text x="292" y="252" class="dd-mono" style="fill:#4b5268">stage 1–5</text><rect x="492" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="508" y="216" class="dd-th" style="fill:#1e2436">OWASP + Sonar</text><text x="508" y="252" class="dd-mono" style="fill:#4b5268">stage 6–8</text><rect x="708" y="176" width="200" height="136" rx="6" fill="#f8f9fc" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.35"/><text x="724" y="216" class="dd-th" style="fill:#1e2436">Docker + Deploy</text><text x="724" y="252" class="dd-mono" style="fill:#4b5268">stage 9–10</text><text x="724" y="288" class="dd-th">main · develop</text></g><g data-node="sonar"><rect x="1000" y="120" width="224" height="200" rx="8" fill="#ffffff"/><rect x="1000" y="120" width="224" height="200" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="1020" y="168" class="dd-name">Quality Gate</text><text x="1020" y="208" class="dd-mono" style="fill:#1e2436">coverage ≥ 60%</text><text x="1020" y="240" class="dd-mono" style="fill:#1e2436">violations = 0</text><text x="1020" y="288" class="dd-th" style="fill:#4f46e5">ไม่ผ่าน = หยุด</text></g><g data-node="user"><rect x="40" y="480" width="136" height="104" rx="8" fill="#ffffff"/><rect x="40" y="480" width="136" height="104" rx="8" fill="#4b5268" stroke="#6d7590" stroke-width="1.5" fill-opacity="0.10"/><text x="60" y="526" class="dd-name">ผู้ใช้</text><text x="60" y="560" class="dd-th">browser</text></g><g data-node="nginx"><rect x="256" y="456" width="256" height="152" rx="8" fill="#ffffff"/><rect x="256" y="456" width="256" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="276" y="504" class="dd-name">nginx</text><text x="276" y="544" class="dd-th">ถอด TLS · แยก path</text><text x="276" y="580" class="dd-mono" style="fill:#1e2436">/&lt;basePath&gt;</text></g><g data-node="container"><rect x="592" y="456" width="336" height="152" rx="8" fill="#ffffff"/><rect x="592" y="456" width="336" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="612" y="504" class="dd-name">แอปใน container</text><text x="612" y="544" class="dd-mono" style="fill:#1e2436">:3000 · /api/health</text><text x="612" y="580" class="dd-mono">/home/docker02/appdata</text></g><g data-node="image"><rect x="1000" y="456" width="224" height="152" rx="8" fill="#ffffff"/><rect x="1000" y="456" width="224" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="1020" y="504" class="dd-name">Docker image</text><text x="1020" y="544" class="dd-mono" style="fill:#1e2436">:&lt;BUILD_NUMBER&gt;</text><text x="1020" y="580" class="dd-th">ย้อนรุ่นได้</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#delivery-pipeline-arrow)"/><text x="96" y="690" class="dd-th">ลำดับงาน</text><path d="M 208,684 H 248" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#delivery-pipeline-arrow-accent)"/><text x="264" y="690" class="dd-th">Sonar ส่งผลกลับ</text><rect x="444" y="672" width="36" height="24" rx="5" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" stroke-opacity="0.35"/><text x="492" y="690" class="dd-th">โซนเครื่อง</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ไม่ผ่าน Quality Gate = ไม่ deploy</text>
+      </svg><!-- /diagram:delivery-pipeline --></div>
+      <figcaption><span>push ขึ้น GitHub → Jenkins รัน 10 stage (ตรวจโค้ด · OWASP · SonarQube Quality Gate · Docker build/deploy) → docker compose รันบน Docker host → nginx เปิดแอปใต้ subpath</span><span class="hint">เลื่อนซ้าย–ขวาเพื่อดูทั้งภาพ</span><a href="diagrams/delivery-pipeline.svg" target="_blank" rel="noopener">เปิดภาพเต็ม ↗</a></figcaption>
+    </figure>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      มี <code>docs/admin-handoff.md</code> ที่ไม่มี <code>__…__</code> ค้าง · <code>verify.mjs</code> ทุกตัวผ่าน · <code>npm run build</code> ผ่าน · หน้าเดิมยังทำงานเหมือนเดิมแต่อ่านข้อมูลจาก SQL Server จริง</div>
+    <div class="callout warn"><b>Login ด้วยรหัสผ่าน + ส่งเมล</b>
+      ปุ่ม "ลืมรหัสผ่าน" ต้องรอให้ Mail ติดตั้งเสร็จก่อน Claude จะย้อนกลับไปต่อให้เอง ถ้ายังไม่มี Mail ทางกู้รหัสผ่านมีทางเดียวคือให้ admin ตั้งให้</div>
+
+    <a class="more" href="reference.html#skill-ugt-nextjs-full-setup">อ่านละเอียด → ugt-nextjs-full-setup</a>
+  </section>
+
+  <!-- ===================== 4 ===================== -->
+  <section class="chapter" id="requirements">
+    <h2><span class="no">4</span>เริ่มจาก requirement</h2>
+    <p class="sub">โปรเจคใหม่ที่มีแต่กองเอกสาร: อ่านให้ครบก่อน อย่าเพิ่งสร้าง</p>
+
+    <ol class="steps">
+      <li>
+        <h3>วางเอกสารไว้ที่ <code>docs/requirements/</code></h3>
+        <p>ถ้าไม่มีโฟลเดอร์นี้ Claude จะถามว่าเอกสารอยู่ที่ไหน</p>
+        <p>ไฟล์ที่อ่านไม่ได้ (เช่น <code>.docx</code>, spreadsheet) จะถูกระบุว่า <code>unread</code> ให้เห็นชัด ไม่ถูกข้ามเงียบ ๆ</p>
+      </li>
+      <li>
+        <h3>สั่งให้อ่านแล้วทำ brief</h3>
+        <div class="say">อ่าน requirement แล้วทำ brief แยกเป็น feature</div>
+        <p>หรือเรียก <code>/ugt-requirements</code></p>
+        <div class="tree"><span class="d">docs/requirements-brief/</span>
+├─ 00-overview.md       <span class="n"># ระบบทำอะไร · ผู้ใช้ · รายการ feature · คำถามค้าง</span>
+├─ 01-&lt;feature&gt;.md      <span class="n"># หนึ่งไฟล์ต่อ feature เรียงตามลำดับที่ต้องทำก่อน</span>
+└─ 02-&lt;feature&gt;.md
+<span class="d">docs/project-context/</span>board.md   <span class="n"># แถวละ feature เริ่มที่ ☐ todo</span></div>
+      </li>
+      <li>
+        <h3>เอา Open Questions ไปถาม stakeholder</h3>
+        <p>ส่วนที่สำคัญที่สุดของ brief คือ "สิ่งที่เอกสารไม่ได้บอก" ถามให้ได้คำตอบก่อนเริ่ม feature ที่ติดคำถามนั้น</p>
+        <p>สิ่งที่ Claude เดาเองจะมีป้าย <code>(assumption)</code> กำกับ</p>
+      </li>
+      <li>
+        <h3>ติดตั้งมาตรฐาน</h3>
+        <div class="say"><code>/ugt-nextjs-full-setup</code></div>
+        <p>ตอบคำถามโดยใช้ข้อมูลจาก brief ทำตามบทที่ 3 ได้เลย</p>
+      </li>
+      <li>
+        <h3>สร้างทีละ feature — feature ละ session ใหม่</h3>
+        <div class="say">สร้าง feature &lt;ชื่อ&gt; ตาม docs/requirements-brief/&lt;file&gt;</div>
+        <p>Claude เสนอแผน build ให้เคาะครั้งเดียว: feature อิสระแยกทำขนานได้ (session + git worktree ละตัว) · feature ที่แชร์ตารางเดียวกันทำเรียงลำดับ</p>
+      </li>
+    </ol>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      มี <code>docs/requirements-brief/</code> ที่ commit แล้ว + board ที่ทุก feature เป็น <code>☐ todo</code> + รายการคำถามที่ต้องไปถามคน</div>
+    <div class="callout"><b>bundle mattpocock: ทำงานแบบย่อ (thin mode)</b>
+      ได้แค่ <code>00-overview.md</code> + แถวบน board ไม่มีไฟล์ต่อ feature · การหาช่องว่างของเอกสารเป็นงานของ <code>/wayfinder</code> (ทั้งโปรเจค) หรือ <code>/grill-with-docs</code> (ทีละ feature)</div>
+    <div class="callout warn"><b>requirement เปลี่ยนกลางทาง</b>
+      feature ที่ <code>✅ done</code> แล้ว ห้ามแก้ brief เดิม ให้เขียน brief ใหม่เป็นไฟล์ <code>NN-&lt;feature&gt;-revision.md</code> แทน</div>
+
+    <a class="more" href="reference.html#skill-ugt-requirements">อ่านละเอียด → ugt-requirements</a>
+  </section>
+
+  <!-- ===================== 5 ===================== -->
+  <section class="chapter" id="daily">
+    <h2><span class="no">5</span>ทำ feature ทุกวัน</h2>
+    <p class="sub">ถามคำถามหรือแก้งานเล็ก Claude ทำตรง ๆ · สร้าง feature/แก้บั๊ก แต่ละ bundle เดินต่างกัน</p>
+    <figure class="diagram">
+      <div class="canvas" tabindex="0" role="region" aria-label="แผนภาพ flow การทำ feature ของสอง bundle"><!-- diagram:feature-flow --><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="feature-flow-title feature-flow-desc" id="feature-flow-root">
+        <title id="feature-flow-title">Flow การทำ feature: superpowers เทียบ mattpocock</title>
+        <desc id="feature-flow-desc">สองเลน: bundle superpowers เดินเองจาก brainstorming ไป plan, TDD และ code review (งานเล็กข้ามไป TDD ได้) ส่วน bundle mattpocock ผู้ใช้เรียกเองตามลำดับ /grill-with-docs, /to-spec, /to-tickets, /implement (ซึ่งขับ /tdd และ /code-review ในตัว) และ /code-review ก่อน merge หลังตั้งค่าครั้งแรกด้วย /setup-matt-pocock-skills</desc>
+        <defs>
+      <style>#feature-flow-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #feature-flow-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #feature-flow-root .diagram-container { width: 100%; overflow-x: auto; }
+      #feature-flow-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #feature-flow-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #feature-flow-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #feature-flow-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #feature-flow-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #feature-flow-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #feature-flow-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #feature-flow-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="feature-flow-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="feature-flow-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="40" y1="64" x2="1240" y2="64" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.30"/><line x1="40" y1="352" x2="1240" y2="352" stroke="#1e2436" stroke-width="1.2" stroke-opacity="0.30"/><text x="40" y="104" class="dd-name">superpowers</text><text x="220" y="104" class="dd-th">เดินเองอัตโนมัติ · แนะนำ</text><text x="40" y="392" class="dd-name">mattpocock-skills</text><text x="300" y="392" class="dd-th">สั่งเองทีละคำสั่ง</text><text x="924" y="392" class="dd-th" text-anchor="end">ครั้งแรก:</text><text x="1240" y="392" class="dd-mono" text-anchor="end" style="fill:#1e2436">/setup-matt-pocock-skills</text><circle cx="64" cy="260" r="7" fill="#1e2436"/><path d="M 71,260 H 103" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 352,260 H 399" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 648,260 H 695" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 944,260 H 991" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 64,252 V 168 Q 64,160 72,160 H 812 Q 820,160 820,168 V 191" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#feature-flow-arrow)"/><g class="dd-lbl"><rect x="282" y="128" width="236" height="24" rx="3" fill="#ffffff"/><text x="400" y="146" class="dd-lblth" text-anchor="middle" fill="#6d7590">งานเล็ก: ข้ามไปเทสต์เลย</text></g><path d="M 248,508 H 287" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 496,508 H 535" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 744,508 H 783" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><path d="M 992,508 H 1031" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><g data-node="sp0"><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="104" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="128" y="248" class="dd-name">คิดก่อน</text><text x="128" y="288" class="dd-mono" style="fill:#1e2436">brainstorming</text></g><g data-node="sp1"><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="400" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="424" y="248" class="dd-name">วางแผน</text><text x="424" y="288" class="dd-mono" style="fill:#1e2436">plan</text></g><g data-node="sp2"><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="696" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="720" y="248" class="dd-name">เทสต์ก่อนโค้ด</text><text x="720" y="288" class="dd-mono" style="fill:#1e2436">TDD</text></g><g data-node="sp3"><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff"/><rect x="992" y="192" width="248" height="136" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="1016" y="248" class="dd-name">ตรวจโค้ด</text><text x="1016" y="288" class="dd-mono" style="fill:#1e2436">code review</text></g><g data-node="mp0"><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="40" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="56" y="484" class="dd-name">ไล่ถาม</text><text x="56" y="522" class="dd-mono" style="fill:#1e2436">/grill-with-docs</text></g><g data-node="mp1"><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="288" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="304" y="484" class="dd-name">สเปก</text><text x="304" y="522" class="dd-mono" style="fill:#1e2436">/to-spec</text></g><g data-node="mp2"><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="536" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="552" y="484" class="dd-name">แตกงาน</text><text x="552" y="522" class="dd-mono" style="fill:#1e2436">/to-tickets</text></g><g data-node="mp3"><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="784" y="432" width="208" height="152" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="800" y="484" class="dd-name">ลงมือ</text><text x="800" y="522" class="dd-mono" style="fill:#1e2436">/implement</text><text x="800" y="558" class="dd-th" style="fill:#4b5268">ขับ /tdd เอง</text></g><g data-node="mp4"><rect x="1032" y="432" width="208" height="152" rx="8" fill="#ffffff"/><rect x="1032" y="432" width="208" height="152" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="1048" y="484" class="dd-name">ตรวจโค้ด</text><text x="1048" y="522" class="dd-mono" style="fill:#4f46e5">/code-review</text><text x="1048" y="558" class="dd-th" style="fill:#4f46e5">ก่อน merge เสมอ</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#feature-flow-arrow)"/><text x="96" y="690" class="dd-th">ขั้นถัดไป</text><path d="M 200,684 H 240" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#feature-flow-arrow)"/><text x="256" y="690" class="dd-th">ทางลัดงานเล็ก</text><rect x="412" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="460" y="690" class="dd-th">ห้ามข้ามก่อน merge</text>
+      </svg><!-- /diagram:feature-flow --></div>
+      <figcaption><span>เลนบน: superpowers เดินเองทั้งสาย (งานเล็กข้ามไปเขียนเทสต์ได้) · เลนล่าง: mattpocock เรียกเองทีละคำสั่ง</span><span class="hint">เลื่อนซ้าย–ขวาเพื่อดูทั้งภาพ</span><a href="diagrams/feature-flow.svg" target="_blank" rel="noopener">เปิดภาพเต็ม ↗</a></figcaption>
+    </figure>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="badge ok">superpowers — เดินเอง</span>
+        <h3 style="margin-top:8px">พิมพ์สิ่งที่อยากได้ แล้วปล่อยให้ทำ</h3>
+        <div class="say">สร้างหน้าอนุมัติคำขอ ตาม docs/requirements-brief/03-approval.md</div>
+        <ol>
+          <li>อ่าน <code>docs/project-context/</code> ที่เกี่ยวก่อน</li>
+          <li>ประเมินขนาดงาน</li>
+          <li>งานเล็ก (ชัด, ~1–3 ไฟล์, ไม่แตะ auth/เงิน): ทำแบบย่อ ข้ามขั้นคิด/วางแผน แต่ยังเขียนเทสต์และ review · ตอบ "full" ถ้าอยากได้เต็ม</li>
+          <li>งานใหญ่: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review อัตโนมัติ</li>
+        </ol>
+      </div>
+      <div class="card">
+        <span class="badge">mattpocock — สั่งเองทีละขั้น</span>
+        <h3 style="margin-top:8px">ครั้งแรก <code>/setup-matt-pocock-skills</code> แล้ววน 5 คำสั่ง</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>/grill-with-docs</code></td><td>ไล่ถามจนไม่เหลือจุดกำกวม</td></tr>
+            <tr><td><code>/to-spec</code></td><td>เปลี่ยนบทสนทนาเป็น spec</td></tr>
+            <tr><td><code>/to-tickets</code></td><td>แตกเป็นงานย่อย</td></tr>
+            <tr><td><code>/implement</code></td><td>เขียนโค้ด (ทำ TDD และปิดด้วย review ให้เอง)</td></tr>
+            <tr><td><code>/code-review</code></td><td>ตรวจ 2 แกน: ตรง spec ไหม + ผ่านมาตรฐานไหม</td></tr>
+          </tbody>
+        </table></div>
+        <p>Claude ไม่เริ่มขั้นถัดไปให้ · ต้องเรียก <code>/code-review</code> ก่อน merge ทุกครั้ง · ได้ review ตัวในของ Claude Code แทน ให้พิมพ์ <code>/mattpocock-skills:code-review</code></p>
+      </div>
+    </div>
+
+    <h3>สิ่งที่ทำงานเองโดยไม่ต้องเรียก</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>เมื่อคุณ…</th><th>สิ่งที่โหลดเอง</th></tr></thead>
+      <tbody>
+        <tr><td>แตะไฟล์ <code>.ts</code>/<code>.tsx</code> ใน <code>app/</code>, <code>components/</code>, <code>lib/</code></td><td><code>ugt-nextjs-clean-code</code> (เขียนให้ผ่าน SonarQube รอบแรก) + <code>ugt-nextjs-pitfalls</code> (กับดักที่เคยพังบน production)</td></tr>
+        <tr><td>แตะไฟล์ฐานข้อมูล / auth / CI / UI</td><td>กฎใน <code>.claude/rules/</code> ของเรื่องนั้น</td></tr>
+        <tr><td>ทำงาน UI</td><td>อ่าน <code>docs/DESIGN.md</code> ก่อนเสมอ</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>เลือกความแรงของ AI (model mode)</h3>
+    <p>โหมดคุมว่า<b>ตัวช่วยย่อย (subagent)</b> แต่ละงานใช้ model อะไร โปรเจคใหม่เริ่มที่ <code>auto</code></p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>พิมพ์</th><th>เมื่อไหร่</th></tr></thead>
+      <tbody>
+        <tr><td><code>/ugt-model-mode auto</code></td><td>ให้ AI เลือกเองตามความกำกวม ขอบเขตไฟล์ และความเสี่ยงของงาน</td></tr>
+        <tr><td><code>/ugt-model-mode god</code></td><td>งานสำคัญ อัดคุณภาพเต็มที่</td></tr>
+        <tr><td><code>/ugt-model-mode easy</code></td><td>งานทั่วไป ประหยัด</td></tr>
+        <tr><td><code>/ugt-model-mode default</code></td><td>ค่ากลาง</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout"><b>ก่อนกระจายงาน Claude จะโชว์ตารางแผนก่อน</b>
+      บอกว่างานไหน · ประเภทอะไร · ใช้ model อะไร · เพราะอะไร ท้วงได้ทันที เช่น "ตัวนี้ใช้ opus แทน" · model ของ session หลักเปลี่ยนด้วย <code>/model</code> เท่านั้น</div>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      feature ใหม่มาพร้อมเทสต์และผ่าน review แล้ว · โค้ดเขียนตามเกณฑ์ SonarQube ตั้งแต่แรก ไม่ต้องรอ pipeline แดงค่อยแก้</div>
+
+    <a class="more" href="reference.html#bundles">อ่านละเอียด → flow ของสอง bundle</a> ·
+    <a class="more" href="reference.html#skill-ugt-model-mode">ugt-model-mode</a>
+  </section>
+
+  <!-- ===================== 6 ===================== -->
+  <section class="chapter" id="handoff">
+    <h2><span class="no">6</span>จบงานทุกครั้ง</h2>
+    <p class="sub">ปิดงานหนึ่งรอบด้วยคำสั่งเดียว พรุ่งนี้ (หรือเพื่อน) เปิดมาทำต่อได้ทันที</p>
+
+    <ol class="steps">
+      <li>
+        <h3>สั่ง handoff</h3>
+        <div class="say"><code>/ugt-handoff</code></div>
+        <p>หรือพิมพ์ "จบงานแล้ว" / "บันทึกไว้" ก็ได้ แม้พรุ่งนี้คนเดิมจะทำต่อก็ควรทำ</p>
+      </li>
+      <li>
+        <h3>Claude เขียนผลลงที่ที่ถูกต้อง</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>เกิดอะไรขึ้นรอบนี้</th><th>เขียนลง</th></tr></thead>
+          <tbody>
+            <tr><td>งานค้าง / คิวถัดไป / คำถามที่รอคำตอบ</td><td><code>.claude/state/handoff.md</code></td></tr>
+            <tr><td>สถานะ feature เปลี่ยน</td><td><code>docs/project-context/board.md</code></td></tr>
+            <tr><td>feature เสร็จ</td><td><code>business-rules.md</code> (กติกาตามที่ทำจริง)</td></tr>
+            <tr><td>โครงสร้างเปลี่ยน / API เปลี่ยน</td><td><code>architecture.md</code> / <code>api.md</code></td></tr>
+            <tr><td>ตัดสินใจเรื่องสำคัญ</td><td><code>decisions.md</code> (ต่อท้ายอย่างเดียว) · bundle mattpocock ใช้ <code>docs/adr/</code> แทน</td></tr>
+            <tr><td>เจอบั๊กที่เสียเวลานาน</td><td><code>troubleshooting.md</code></td></tr>
+            <tr><td>มติเรื่องดีไซน์</td><td><code>docs/DESIGN.md</code> §10 (ไม่ใช่ decisions.md)</td></tr>
+          </tbody>
+        </table></div>
+      </li>
+      <li>
+        <h3>commit ทั้งชุดใน commit เดียว</h3>
+        <p><code>.claude/state/</code> และ <code>docs/project-context/</code> ต้อง commit เสมอ เพราะเป็นความจำของทั้งทีม</p>
+        <p>ที่ไม่ commit มีแค่ <code>.claude/logs/</code> (อยู่ใน <code>.gitignore</code> แล้ว)</p>
+      </li>
+    </ol>
+
+    <figure class="diagram">
+      <div class="canvas" tabindex="0" role="region" aria-label="แผนภาพความจำของทีม"><!-- diagram:team-memory --><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="team-memory-title team-memory-desc" id="team-memory-root">
+        <title id="team-memory-title">ความจำของทีมในโปรเจค</title>
+        <desc id="team-memory-desc">Session ของ Claude อ่าน .claude/state/handoff.md ทุกครั้ง, docs/project-context/ เมื่อเกี่ยว และ CONTEXT.md กับ docs/adr/ บน bundle mattpocock; /ugt-context สร้าง docs/project-context/ ครั้งเดียว และ /ugt-handoff เขียน handoff.md กับ project-context ทุกครั้งที่จบงาน ทั้งหมด commit ใน git ให้ทั้งทีมใช้ร่วมกัน ส่วน memory ส่วนตัวไม่ commit และถ้าขัดกัน ไฟล์ใน git ชนะ</desc>
+        <defs>
+      <style>#team-memory-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #team-memory-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #team-memory-root .diagram-container { width: 100%; overflow-x: auto; }
+      #team-memory-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #team-memory-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #team-memory-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #team-memory-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #team-memory-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #team-memory-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #team-memory-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #team-memory-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="team-memory-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="team-memory-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="416" y="80" width="480" height="504" rx="10" fill="#1e2436" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" fill-opacity="0.015" stroke-opacity="0.35"/><rect x="432" y="68" width="300" height="24" rx="3" fill="#ffffff"/><text x="440" y="86" class="dd-lblth" fill="#6d7590">git repo · ทั้งทีมเห็นชุดเดียวกัน</text><path d="M 448,176 H 392 Q 384,176 384,184 V 280 Q 384,288 376,288 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 448,328 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 448,496 H 392 Q 384,496 384,488 V 376 Q 384,368 376,368 H 289" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><path d="M 164,464 V 409" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><path d="M 960,160 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 960,208 H 936 Q 928,208 928,216 V 304 Q 928,312 920,312 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><path d="M 960,360 H 865" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><g data-node="session"><rect x="40" y="248" width="248" height="160" rx="8" fill="#ffffff"/><rect x="40" y="248" width="248" height="160" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="64" y="300" class="dd-name">Session</text><text x="64" y="340" class="dd-th">คุณ หรือเพื่อนในทีม</text><text x="64" y="372" class="dd-th">อ่านก่อนเริ่มงาน</text></g><g data-node="memory"><rect x="40" y="464" width="248" height="152" rx="8" fill="#ffffff"/><rect x="40" y="464" width="248" height="152" rx="8" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="64" y="512" class="dd-name">memory ส่วนตัว</text><text x="64" y="552" class="dd-th">ไม่ commit</text><text x="64" y="584" class="dd-th" style="fill:#1e2436">ขัดกัน → git ชนะ</text></g><g data-node="handoff"><rect x="448" y="112" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="112" width="416" height="128" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="472" y="158" class="dd-name">งานค้าง · คิวถัดไป</text><text x="472" y="194" class="dd-mono" style="fill:#1e2436">.claude/state/handoff.md</text><text x="472" y="224" class="dd-th">อ่านทุก session</text></g><g data-node="context"><rect x="448" y="272" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="272" width="416" height="128" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="472" y="318" class="dd-name">ความรู้ของระบบ</text><text x="472" y="354" class="dd-mono" style="fill:#1e2436">docs/project-context/</text><text x="472" y="384" class="dd-th">อ่านเฉพาะที่เกี่ยว</text></g><g data-node="adr"><rect x="448" y="432" width="416" height="128" rx="8" fill="#ffffff"/><rect x="448" y="432" width="416" height="128" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="472" y="478" class="dd-name">ศัพท์ + มติ (ADR)</text><text x="472" y="514" class="dd-mono" style="fill:#1e2436">CONTEXT.md · docs/adr/</text><text x="472" y="544" class="dd-th">เฉพาะ bundle mattpocock</text></g><g data-node="ugt-handoff"><rect x="960" y="112" width="280" height="128" rx="8" fill="#ffffff"/><rect x="960" y="112" width="280" height="128" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="984" y="158" class="dd-name">ปิดงาน</text><text x="984" y="194" class="dd-mono" style="fill:#4f46e5">/ugt-handoff</text><text x="984" y="224" class="dd-th">ทุกครั้งที่จบงาน</text></g><g data-node="ugt-context"><rect x="960" y="296" width="280" height="128" rx="8" fill="#ffffff"/><rect x="960" y="296" width="280" height="128" rx="8" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="984" y="342" class="dd-name">สร้างสารบัญ</text><text x="984" y="378" class="dd-mono">/ugt-context</text><text x="984" y="408" class="dd-th">ครั้งเดียวต่อโปรเจค</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><path d="M 40,684 H 80" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#team-memory-arrow)"/><text x="96" y="690" class="dd-th">ทิศลูกศร = ทางข้อมูล</text><path d="M 308,684 H 348" fill="none" stroke="#4b5268" stroke-width="1.5" stroke-dasharray="6,5" marker-end="url(#team-memory-arrow)"/><text x="364" y="690" class="dd-th">อ่านเมื่อมี</text><rect x="476" y="672" width="36" height="24" rx="5" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="6,5" stroke-opacity="0.35"/><text x="524" y="690" class="dd-th">commit ใน git</text>
+      </svg><!-- /diagram:team-memory --></div>
+      <figcaption><span>ไฟล์ทั้งหมด commit ใน git · session ถัดไป (ของคุณหรือเพื่อน) อ่านก่อนเริ่มงาน · memory ส่วนตัวไม่ commit</span><span class="hint">เลื่อนซ้าย–ขวาเพื่อดูทั้งภาพ</span><a href="diagrams/team-memory.svg" target="_blank" rel="noopener">เปิดภาพเต็ม ↗</a></figcaption>
+    </figure>
+
+    <h3>เจอความรู้ใหม่ เอาไปไว้ที่ไหน</h3>
+    <figure class="diagram">
+      <div class="canvas" tabindex="0" role="region" aria-label="แผนภาพคัดความรู้ใหม่ไปเก็บให้ถูกที่"><!-- diagram:knowledge-triage --><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="knowledge-triage-title knowledge-triage-desc" id="knowledge-triage-root">
+        <title id="knowledge-triage-title">คัดความรู้ใหม่ไปเก็บให้ถูกที่</title>
+        <desc id="knowledge-triage-desc">Flowchart: ถ้าเป็นมติดีไซน์ไป docs/DESIGN.md §10, มติอื่นไป decisions.md (หรือ docs/adr/ บน bundle mattpocock); ถ้าเป็นบั๊กที่จริงกับทุกโปรเจคบน stack (เหตุอยู่ที่ stack, โปรเจคอื่นก็เจอ, แก้ได้จริงแล้ว) ให้เปิด PR ด้วย /ugt-contribute ไม่อย่างนั้นเก็บใน docs/project-context/troubleshooting.md; งานค้างไป handoff.md และความชอบส่วนตัวไป memory</desc>
+        <defs>
+      <style>#knowledge-triage-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #knowledge-triage-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #knowledge-triage-root .diagram-container { width: 100%; overflow-x: auto; }
+      #knowledge-triage-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #knowledge-triage-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #knowledge-triage-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #knowledge-triage-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #knowledge-triage-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #knowledge-triage-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #knowledge-triage-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #knowledge-triage-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="knowledge-triage-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="knowledge-triage-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M 640,120 V 151" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><path d="M 496,216 H 332 Q 324,216 324,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="350" y="184" width="116" height="24" rx="3" fill="#ffffff"/><text x="408" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่ · บั๊ก</text></g><path d="M 784,216 H 948 Q 956,216 956,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="852" y="184" width="40" height="24" rx="3" fill="#ffffff"/><text x="872" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><path d="M 180,384 H 180 Q 172,384 172,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="104" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="134" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 468,384 H 468 Q 476,384 476,392 V 495" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#knowledge-triage-arrow-accent)"/><g class="dd-lbl"><rect x="484" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="504" y="450" class="dd-lblth" text-anchor="middle" fill="#4f46e5">ใช่</text></g><path d="M 812,384 H 812 Q 804,384 804,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="736" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="766" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 1100,384 H 1100 Q 1108,384 1108,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#knowledge-triage-arrow)"/><g class="dd-lbl"><rect x="1116" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="1136" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><g data-node="start"><rect x="536" y="56" width="208" height="64" rx="32" fill="#ffffff"/><rect x="536" y="56" width="208" height="64" rx="32" fill="#1e2436" stroke="#1e2436" stroke-width="1.5" fill-opacity="0.03" stroke-opacity="0.45"/><text x="640" y="97" class="dd-name" text-anchor="middle">เจอเรื่องใหม่</text></g><g data-node="d"><polygon points="640,152 784,216 640,280 496,216" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="640" y="225" class="dd-name" text-anchor="middle">เป็นมติแล้ว?</text></g><g data-node="d"><polygon points="324,320 468,384 324,448 180,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="324" y="393" class="dd-name" text-anchor="middle">ทุกโปรเจคเจอ?</text></g><g data-node="d"><polygon points="956,320 1100,384 956,448 812,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="956" y="393" class="dd-name" text-anchor="middle">เรื่องดีไซน์?</text></g><g data-node="leaf0"><rect x="40" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="40" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="64" y="542" class="dd-name">บั๊กเฉพาะโปรเจค</text><text x="64" y="580" class="dd-mono" style="fill:#1e2436">troubleshooting.md</text></g><g data-node="leaf1"><rect x="344" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="344" y="496" width="264" height="136" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="368" y="542" class="dd-name">PR เข้า platform</text><text x="368" y="580" class="dd-mono" style="fill:#4f46e5">/ugt-contribute</text></g><g data-node="leaf2"><rect x="672" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="672" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="696" y="542" class="dd-name">บันทึกมติ</text><text x="696" y="580" class="dd-mono" style="fill:#1e2436">decisions.md</text><text x="696" y="610" class="dd-mono">matt: docs/adr/</text></g><g data-node="leaf3"><rect x="976" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="976" y="496" width="264" height="136" rx="8" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="1000" y="542" class="dd-name">มติดีไซน์</text><text x="1000" y="580" class="dd-mono" style="fill:#1e2436">DESIGN.md §10</text></g><text x="40" y="80" class="dd-call">งานค้าง → handoff.md</text><text x="40" y="108" class="dd-call">ชอบส่วนตัว → memory</text><path d="M 300,74 Q 440,60 532,86" fill="none" stroke="#1e2436" stroke-width="1.2" stroke-dasharray="4,3" stroke-opacity="0.45"/><circle cx="534" cy="87" r="3" fill="#1e2436"/><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#4b5268" stroke-width="1.5" fill-opacity="0.04"/><text x="88" y="690" class="dd-th">ไฟล์ในโปรเจค</text><rect x="244" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="292" y="690" class="dd-th">ส่งให้ทุกทีม</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ทุกโปรเจคเจอ = เหตุอยู่ที่ stack และแก้ได้จริงแล้ว</text>
+      </svg><!-- /diagram:knowledge-triage --></div>
+      <figcaption><span>เริ่มที่กล่องบนสุด แล้วตอบใช่ / ไม่ใช่ไปทีละข้อ · ตารางด้านล่างสรุปซ้ำพร้อมสิ่งที่ห้ามทำ</span><span class="hint">เลื่อนซ้าย–ขวาเพื่อดูทั้งภาพ</span><a href="diagrams/knowledge-triage.svg" target="_blank" rel="noopener">เปิดภาพเต็ม ↗</a></figcaption>
+    </figure>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ความรู้ที่เจอ</th><th>ไปไว้ที่</th><th>ห้ามทำ</th></tr></thead>
+      <tbody>
+        <tr><td>งานค้าง / คิว / คำถามรอคำตอบ</td><td><code>.claude/state/handoff.md</code></td><td>—</td></tr>
+        <tr><td>จริงเฉพาะโปรเจคนี้</td><td>ไฟล์ที่ตรงเรื่องใน <code>docs/project-context/</code></td><td>เก็บเรื่องเดียวกันสองที่</td></tr>
+        <tr><td>จริงกับทุกโปรเจค</td><td><code>/ugt-contribute</code> (บทที่ 8)</td><td>แก้ไฟล์ตัวช่วยที่ติดตั้งมา</td></tr>
+        <tr><td>ความชอบส่วนตัว</td><td>memory ของ Claude</td><td>ยัดลงไฟล์ที่ commit</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout"><b>bundle mattpocock</b>
+      <code>CONTEXT.md</code> และ <code>docs/adr/</code> เป็นของคำสั่ง matt เขียนเอง แยกจาก <code>docs/project-context/</code> โดยตั้งใจ · Claude อ่านทั้งคู่ตอนเริ่มงาน ไม่ต้อง copy ข้ามกัน</div>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      <code>handoff.md</code> มี 4 หัวข้อ (In progress · Next · Open Questions · Done) วันที่เป็นวันนี้ · สถานะบน board ตรงกับ handoff · ทั้งหมดอยู่ใน commit เดียว</div>
+
+    <a class="more" href="reference.html#skill-ugt-handoff">อ่านละเอียด → ugt-handoff</a>
+  </section>
+
+  <!-- ===================== 7 ===================== -->
+  <section class="chapter" id="update">
+    <h2><span class="no">7</span>อัปเดต plugin</h2>
+    <p class="sub">เมื่อมีประกาศรุ่นใหม่: อัปเดตความรู้ก่อน แล้วค่อยตามไฟล์ที่ copy ไว้ในโปรเจค</p>
+
+    <ol class="steps">
+      <li>
+        <h3>อัปเดต plugin</h3>
+        <div class="term"><div class="dots"><i></i><i></i><i></i></div><pre><span class="k">/plugin marketplace update</span> ugt
+<span class="k">/plugin update</span> ugt-nextjs-standard-superpowers
+<span class="k">/reload-plugins</span>
+<span class="c"># ติด mattpocock: ใช้ ugt-nextjs-standard-mattpocock ในบรรทัดที่สอง</span></pre></div>
+      </li>
+      <li>
+        <h3>ตามไฟล์ kit ให้ทัน</h3>
+        <p><b>kit</b> = ชุดไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค (ตาราง ฟอร์ม หน้า login ฯลฯ) อัปเดต plugin แล้วไฟล์พวกนี้ไม่เปลี่ยนตาม</p>
+        <div class="say">sync kit</div>
+        <p>ไฟล์ kit ทุกตัวมี "ตราประทับ" 2 บรรทัดบนหัวไฟล์:</p>
+        <pre class="code"><span style="color:var(--code-dim)">// kit: ugt-nextjs-platform 4.13.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 5bbf4107cc5f</span></pre>
+        <p>เลขรุ่นบอกว่า "ตกรุ่นไหม" · hash บอกว่า "โปรเจคแก้เองไหม" ห้ามแก้สองบรรทัดนี้ด้วยมือ</p>
+      </li>
+      <li>
+        <h3>ดูรายงาน แล้วตอบทีละไฟล์</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>สถานะ</th><th>ความหมาย</th><th>Claude เสนอ</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge ok">✔ CURRENT</span></td><td>ตรงกับรุ่นล่าสุด</td><td>ไม่ทำอะไร</td></tr>
+            <tr><td><span class="badge">↑ UPDATE</span></td><td>ตกรุ่น และโปรเจคไม่เคยแก้</td><td>ทับด้วยของใหม่</td></tr>
+            <tr><td><span class="badge warn">⇄ MERGE</span></td><td>ตกรุ่น และโปรเจคแก้เอง</td><td>รวมสองฝั่ง ของที่โปรเจคแก้ชนะ</td></tr>
+            <tr><td><span class="badge bad">✘ REMOVED</span></td><td>plugin เลิกแจกไฟล์นี้</td><td>ดู CHANGELOG (มักเปลี่ยนชื่อหรือเลิกใช้)</td></tr>
+          </tbody>
+        </table></div>
+        <p>ไม่ตอบ = ไม่เขียน · ตอบ "ทำตามข้อเสนอทั้งหมด" ได้</p>
+      </li>
+      <li>
+        <h3>อ่าน CHANGELOG ของรุ่นที่ข้ามมา</h3>
+        <p>ถ้ารุ่นไหนต้องทำอะไรเพิ่ม CHANGELOG จะเขียนไว้ชัด (เช่น ข้อ "โปรเจคเดิม" ที่บอกให้ migrate schema หรือ copy ไฟล์ใหม่)</p>
+        <p>kit-sync เทียบเฉพาะไฟล์ที่เคย copy ไปแล้ว <b>ไม่เสนอไฟล์ใหม่</b> ไฟล์ใหม่ต้อง copy ตามที่ CHANGELOG บอก</p>
+      </li>
+    </ol>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      รัน sync kit ซ้ำแล้วไฟล์ที่เคย UPDATE กลายเป็น CURRENT · ไฟล์ที่ merge ยังขึ้น MERGE (ปกติ) แต่เป็นรุ่นใหม่ · build และเทสต์ผ่าน · มีบันทึกมติว่าอัปเดตไฟล์ไหนจากรุ่นไหน</div>
+    <div class="callout"><b>สีหรือ DESIGN.md ไม่ตรงรุ่น?</b>
+      นั่นไม่ใช่งานของ kit-sync ให้พิมพ์ "sync ข้อตกลง design" แทน · CHANGELOG บอกว่าแก้บั๊กแล้วแต่ยังเจอ = ไฟล์ในโปรเจคน่าจะเก่า ให้ sync kit</div>
+    <div class="callout warn"><b>ยังติด <code>ugt-nextjs-standard</code> ตัวเดิม (ไม่มีคำต่อท้าย)?</b>
+      <code>/plugin update</code> จะหาไม่เจอแล้ว ให้รัน <code>/plugin install ugt-nextjs-standard-superpowers@ugt</code> เอง</div>
+
+    <a class="more" href="reference.html#skill-ugt-nextjs-kit-sync">อ่านละเอียด → ugt-nextjs-kit-sync</a>
+  </section>
+
+  <!-- ===================== 8 ===================== -->
+  <section class="chapter" id="contribute">
+    <h2><span class="no">8</span>เจอบั๊กที่น่าจะเจอทุกโปรเจค</h2>
+    <p class="sub">ยกขึ้นเป็น PR เข้า platform ทีมอื่นจะได้ไม่ต้องเจอซ้ำ</p>
+
+    <div class="chat">
+      <div class="bar"><i></i><i></i><i></i> Claude Code</div>
+      <div class="msg me"><span class="who">คุณ</span>อันนี้น่าจะเจอทุกโปรเจค ส่ง PR ไป platform ให้หน่อย</div>
+      <div class="msg ai"><span class="who">Claude</span>ตรวจ 3 ข้อแล้วผ่านทั้งหมด · เจ้าของคือ <code>ugt-nextjs-pitfalls</code> · นี่คือ diff และข้อความ PR — ยืนยันให้เปิด PR ไหม?</div>
+      <div class="msg me"><span class="who">คุณ</span>ยืนยัน</div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h3>สั่ง contribute</h3>
+        <div class="say"><code>/ugt-contribute</code></div>
+        <p>เลือกบั๊กหนึ่งข้อจาก <code>troubleshooting.md</code> หรือบั๊กที่เพิ่งแก้ใน session นี้ · หนึ่งรอบ = หนึ่งเรื่อง = หนึ่ง PR</p>
+      </li>
+      <li>
+        <h3>ผ่านด่าน 3 ข้อ</h3>
+        <ul class="checklist">
+          <li>สาเหตุอยู่ที่ stack (Prisma, Keycloak, Jenkins, shadcn…) ไม่ใช่ข้อมูลหรือกติกาของโปรเจคนี้</li>
+          <li>โปรเจคที่สองจะเจอเหมือนกัน ถ้าทำตามตัวช่วยตรง ๆ</li>
+          <li>วิธีแก้พิสูจน์แล้ว (ขึ้น production / เทสต์ผ่าน) ไม่ใช่ "น่าจะ"</li>
+        </ul>
+        <p>ข้อไหนตอบ "ไม่" ก็จบตรงนั้น เรื่องนั้นอยู่ใน <code>troubleshooting.md</code> ของโปรเจคต่อ</p>
+      </li>
+      <li>
+        <h3>Claude เขียน entry ใน clone ชั่วคราว</h3>
+        <p>เลือกตัวช่วยเจ้าของเรื่อง เขียน entry (อาการ → สาเหตุ → วิธีแก้ → ที่มา) + บรรทัด CHANGELOG ใต้ <code>## Unreleased</code></p>
+        <p>ไม่ตั้งเลขรุ่นเอง ผู้ดูแล platform ตั้งตอนออกรุ่น · Claude ใช้ <code>git</code> และ <code>gh</code> (GitHub CLI) ทำขั้นนี้</p>
+      </li>
+      <li>
+        <h3>ดู diff แล้วยืนยัน</h3>
+        <p>Claude โชว์ diff + ข้อความ PR แล้วรอ ต้องตอบยืนยันก่อนถึงจะ push และเปิด PR</p>
+        <p>push ไม่ผ่าน (ไม่ใช่ผู้ดูแล) → ได้ไฟล์ <code>.patch</code> ไปส่งให้ผู้ดูแล platform แทน</p>
+      </li>
+      <li>
+        <h3>ปิดฝั่งโปรเจค</h3>
+        <p>Claude ลบ entry ออกจาก <code>troubleshooting.md</code> แล้วให้คุณรัน <code>/ugt-handoff</code> เพื่อ commit พร้อมลิงก์ PR</p>
+      </li>
+    </ol>
+
+    <div class="callout tip"><b>ผลที่ควรเห็น</b>
+      ได้ลิงก์ PR · entry หายจาก <code>troubleshooting.md</code> ของโปรเจค · ทีมอื่นได้ของใหม่ตอน <code>/plugin update</code> <b>หลัง</b> PR ถูก merge และออกรุ่นแล้ว</div>
+    <div class="callout bad"><b>ห้ามแก้ไฟล์ตัวช่วยที่ติดตั้งมาเอง</b>
+      ไฟล์ใน plugin cache หายตอนอัปเดต และไม่มีใครได้ด้วย · ห้ามสร้างตัวช่วยชื่อ <code>ugt-*</code> ซ้ำของเดิม ถ้าอยากต่อยอดให้ตั้งชื่อใหม่</div>
+
+    <a class="more" href="reference.html#skill-ugt-contribute">อ่านละเอียด → ugt-contribute</a>
+  </section>
+
+  <!-- ===================== 9 ===================== -->
+  <section class="chapter" id="faq">
+    <h2><span class="no">9</span>ถามบ่อย</h2>
+    <p class="sub">คำถามที่ทีมเจอบ่อยตอนเริ่มใช้</p>
+
+    <details class="acc"><summary>ต้องจำชื่อตัวช่วยไหม?</summary><div class="body">
+      <p>ไม่ต้อง พิมพ์ภาษาไทยธรรมดาได้เลย เช่น "ต่อ database", "ใส่ login SSO", "ทำ CI" Claude เลือกตัวช่วยให้เอง</p>
+      <p>อยากเรียกตรง ๆ ก็พิมพ์ <code>/ugt</code> แล้วเลือกจากรายการ</p>
+    </div></details>
+
+    <details class="acc"><summary>อยากทำแค่เรื่องเดียว ต้องผ่าน full-setup ไหม?</summary><div class="body">
+      <p>ไม่ต้อง ถ้าบอกเรื่องเดียวชัด ๆ เช่น "ทำข้อตกลง design" หรือ "ต่อ database" Claude จะไปที่ตัวช่วยนั้นตรง ๆ</p>
+      <p>แต่ลำดับยังสำคัญ: Design ต้องมาก่อน Auth · Quality ต้องมาก่อน CI</p>
+    </div></details>
+
+    <details class="acc"><summary>เลือก bundle ไปแล้ว เปลี่ยนทีหลังได้ไหม?</summary><div class="body">
+      <p>ได้ uninstall ตัวเดิมแล้ว install อีกตัว (ไม่มีคำสั่งสลับ)</p>
+      <p>จากนั้นให้ full-setup ทำขั้นวางไฟล์ harness ใหม่ เพื่อสร้างบล็อกใน <code>CLAUDE.md</code> ให้ตรงกับ bundle ใหม่</p>
+    </div></details>
+
+    <details class="acc"><summary>อยากคงหน้าตาเดิมของโปรเจค จะโดนเปลี่ยนไหม?</summary><div class="body">
+      <p>ตอบ "คงของเดิม" ตอนถูกถาม (เป็นค่าเริ่มต้นอยู่แล้วถ้ามี UI เดิม) flow, route และเมนูเดิมอยู่ครบ</p>
+      <p>ตัวช่วยดีไซน์จะสแกนหน้าเดิม วัดสีหลักและขนาดของเดิม (ฟ้อนต์จะถามก่อน ค่าเริ่มต้นคือคงฟ้อนต์เดิม) แล้วปรับชุด component ให้เข้ากัน หน้า admin ใหม่จึงไม่หลุดธีม</p>
+    </div></details>
+
+    <details class="acc"><summary>Claude บอกว่า "ยังไม่ได้รัน" คืออะไร?</summary><div class="body">
+      <p>บาง session รันคำสั่งไม่ได้ (ไม่มี shell) Claude จะเขียน package ลง <code>package.json</code> เองตามรุ่นที่กำหนด และเขียนไฟล์ที่ทำแทนได้</p>
+      <p>คำสั่งที่เหลือ (<code>npm i …</code>, <code>npx shadcn@latest add …</code>, <code>prisma migrate</code>/<code>generate</code>, <code>npx husky init</code>) จะอยู่ในหัวข้อ "ยังไม่ได้รัน" ให้คุณรันเอง ไม่ถูกข้ามเงียบ ๆ</p>
+    </div></details>
+
+    <details class="acc"><summary>ใครเป็น admin คนแรก? ต้องสร้างบัญชีไว้ก่อนไหม?</summary><div class="body">
+      <p>ไม่มีบัญชี admin ตั้งไว้ล่วงหน้า คนแรกที่ login จะถูกพาไป <code>/admin/setup</code> กดปุ่มเดียวเป็น Administrator ให้คนที่ควรเป็น admin login คนแรก</p>
+      <p>โปรเจคที่ใช้รหัสผ่านอย่างเดียว: รัน <code>npx tsx scripts/create-first-user.ts</code> สร้างบัญชีแรกก่อน</p>
+    </div></details>
+
+    <details class="acc"><summary>กับดักที่เคยพังบน production อ่านได้ที่ไหน?</summary><div class="body">
+      <p>อยู่ในตัวช่วย <code>ugt-nextjs-pitfalls</code> แยกเป็นเรื่อง: วันที่/timezone · การดึงข้อมูล · ฟอร์ม · hardening · หลัง deploy (version skew)</p>
+      <p>มันโหลดเองเมื่อแตะไฟล์โค้ด ไม่ต้องเรียก · อ่านสรุปอาการได้ที่ <a href="reference.html#skill-ugt-nextjs-pitfalls">หน้ารายละเอียดตัวช่วย</a></p>
+    </div></details>
+
+    <details class="acc"><summary>Python / PHP ใช้ได้หรือยัง?</summary><div class="body">
+      <p>ได้เฉพาะส่วน deploy (Jenkins + SonarQube + Docker) ผ่าน <code>ugt-python-cicd-setup</code> และ <code>ugt-php-cicd-setup</code> · ยังไม่มี database/auth</p>
+      <p>ทั้งสองตัวยังไม่ผ่าน pilot ครบและยังไม่ออกรุ่นอย่างเป็นทางการ (ยังไม่ tag)</p>
+    </div></details>
+
+    <details class="acc"><summary><code>/ugt-model-mode</code> เปลี่ยน model ของ session หลักได้ไหม?</summary><div class="body">
+      <p>ไม่ได้ โหมดมีผลกับงานที่ส่งให้ตัวช่วยย่อย (subagent) เท่านั้น · model ของ session หลักเปลี่ยนด้วย <code>/model</code> ซึ่งคุณต้องพิมพ์เอง</p>
+    </div></details>
+
+    <details class="acc"><summary>เจอ error แปลก ๆ ควรเริ่มตรงไหน?</summary><div class="body">
+      <p>เปิด <code>docs/project-context/troubleshooting.md</code> ของโปรเจคก่อน เผื่อเคยมีคนเจอแล้ว</p>
+      <p>ถ้าเป็นอาการของ setup (login วน, pipeline แดง, เมลไม่ถึง) เล่าอาการให้ Claude ฟังตรง ๆ ตัวช่วยของเรื่องนั้นมีตารางอาการพร้อมสาเหตุอยู่แล้ว</p>
+    </div></details>
+
+    <details class="acc"><summary>ไม่อยากใช้ marketplace ทำได้ไหม?</summary><div class="body">
+      <p>ได้ copy โฟลเดอร์ <code>plugins/ugt-core</code> และ <code>plugins/ugt-nextjs-platform</code> ไปไว้ใน <code>&lt;โปรเจค&gt;/.claude/skills/</code> (ต้องกดยอมรับ workspace trust ครั้งแรก)</p>
+      <p>ข้อเสีย: ต้องอัปเดตเองทุกครั้ง</p>
+    </div></details>
+
+    <details class="acc"><summary>ข้อมูลส่วนตัวหรือความชอบของฉันจะถูก commit ไหม?</summary><div class="body">
+      <p>ไม่ ความชอบส่วนตัวอยู่ใน memory ของ Claude ในเครื่องคุณ · ไฟล์ที่ commit มีแต่เรื่องของทีม และห้ามมี secret หรือค่า <code>.env</code></p>
+    </div></details>
+
+    <a class="more" href="reference.html">อ่านละเอียด → รายละเอียดตัวช่วยทุกตัว</a>
+  </section>
+
+  </main>
+</div>
+
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.79.4</span></div></footer>
+
+<script>
+  // highlight the TOC entry of the chapter in view
+  (() => {
+    const links = new Map([...document.querySelectorAll('.toc a')].map((a) => [a.getAttribute('href').slice(1), a]));
+    if (!('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        links.forEach((a) => a.classList.remove('on'));
+        links.get(e.target.id)?.classList.add('on');
+      });
+    }, { rootMargin: '-80px 0px -65% 0px' });
+    document.querySelectorAll('section.chapter[id]').forEach((s) => io.observe(s));
+  })();
+</script>
+</body>
+</html>

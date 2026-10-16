@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คัดความรู้ใหม่ไปเก็บให้ถูกที่</title>
+  <!-- diagram-design source (editable). Skin: docs/web/site.css light tokens. Type: names 24px, all other text >= 18px in the 1280x720 viewBox. Export: scripts/export_svg.py -> knowledge-triage.svg -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600&amp;family=Noto+Sans+Thai:wght@400;500;600&amp;family=Noto+Serif+Thai:wght@400&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1320px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--color-ink);
+      margin-bottom: 0.4rem;
+    }
+    .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    svg .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+    svg .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+    svg .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+    svg .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+    svg .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+    svg .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · /ugt-handoff + /ugt-contribute</p>
+    <h1>เจอความรู้ใหม่ เก็บไว้ที่ไหน</h1>
+    <p class="sub">ถามสองข้อก็รู้ที่เก็บ · เรื่องเดียวกันห้ามเก็บสองที่</p>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="knowledge-triage-title knowledge-triage-desc">
+        <title id="knowledge-triage-title">คัดความรู้ใหม่ไปเก็บให้ถูกที่</title>
+        <desc id="knowledge-triage-desc">Flowchart: ถ้าเป็นมติดีไซน์ไป docs/DESIGN.md §10, มติอื่นไป decisions.md (หรือ docs/adr/ บน bundle mattpocock); ถ้าเป็นบั๊กที่จริงกับทุกโปรเจคบน stack (เหตุอยู่ที่ stack, โปรเจคอื่นก็เจอ, แก้ได้จริงแล้ว) ให้เปิด PR ด้วย /ugt-contribute ไม่อย่างนั้นเก็บใน docs/project-context/troubleshooting.md; งานค้างไป handoff.md และความชอบส่วนตัวไป memory</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M 640,120 V 151" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><path d="M 496,216 H 332 Q 324,216 324,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="350" y="184" width="116" height="24" rx="3" fill="#ffffff"/><text x="408" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่ · บั๊ก</text></g><path d="M 784,216 H 948 Q 956,216 956,224 V 319" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="852" y="184" width="40" height="24" rx="3" fill="#ffffff"/><text x="872" y="202" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><path d="M 180,384 H 180 Q 172,384 172,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="104" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="134" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 468,384 H 468 Q 476,384 476,392 V 495" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#arrow-accent)"/><g class="dd-lbl"><rect x="484" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="504" y="450" class="dd-lblth" text-anchor="middle" fill="#4f46e5">ใช่</text></g><path d="M 812,384 H 812 Q 804,384 804,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="736" y="432" width="60" height="24" rx="3" fill="#ffffff"/><text x="766" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ไม่ใช่</text></g><path d="M 1100,384 H 1100 Q 1108,384 1108,392 V 495" fill="none" stroke="#4b5268" stroke-width="1.5" marker-end="url(#arrow)"/><g class="dd-lbl"><rect x="1116" y="432" width="40" height="24" rx="3" fill="#ffffff"/><text x="1136" y="450" class="dd-lblth" text-anchor="middle" fill="#6d7590">ใช่</text></g><g data-node="start"><rect x="536" y="56" width="208" height="64" rx="32" fill="#ffffff"/><rect x="536" y="56" width="208" height="64" rx="32" fill="rgba(30,36,54,0.03)" stroke="rgba(30,36,54,0.45)" stroke-width="1.5"/><text x="640" y="97" class="dd-name" text-anchor="middle">เจอเรื่องใหม่</text></g><g data-node="d"><polygon points="640,152 784,216 640,280 496,216" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="640" y="225" class="dd-name" text-anchor="middle">เป็นมติแล้ว?</text></g><g data-node="d"><polygon points="324,320 468,384 324,448 180,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="324" y="393" class="dd-name" text-anchor="middle">ทุกโปรเจคเจอ?</text></g><g data-node="d"><polygon points="956,320 1100,384 956,448 812,384" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="956" y="393" class="dd-name" text-anchor="middle">เรื่องดีไซน์?</text></g><g data-node="leaf0"><rect x="40" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="40" y="496" width="264" height="136" rx="8" fill="rgba(30,36,54,0.04)" stroke="#4b5268" stroke-width="1.5"/><text x="64" y="542" class="dd-name">บั๊กเฉพาะโปรเจค</text><text x="64" y="580" class="dd-mono" style="fill:#1e2436">troubleshooting.md</text></g><g data-node="leaf1"><rect x="344" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="344" y="496" width="264" height="136" rx="8" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="368" y="542" class="dd-name">PR เข้า platform</text><text x="368" y="580" class="dd-mono" style="fill:#4f46e5">/ugt-contribute</text></g><g data-node="leaf2"><rect x="672" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="672" y="496" width="264" height="136" rx="8" fill="rgba(30,36,54,0.04)" stroke="#4b5268" stroke-width="1.5"/><text x="696" y="542" class="dd-name">บันทึกมติ</text><text x="696" y="580" class="dd-mono" style="fill:#1e2436">decisions.md</text><text x="696" y="610" class="dd-mono">matt: docs/adr/</text></g><g data-node="leaf3"><rect x="976" y="496" width="264" height="136" rx="8" fill="#ffffff"/><rect x="976" y="496" width="264" height="136" rx="8" fill="rgba(30,36,54,0.04)" stroke="#4b5268" stroke-width="1.5"/><text x="1000" y="542" class="dd-name">มติดีไซน์</text><text x="1000" y="580" class="dd-mono" style="fill:#1e2436">DESIGN.md §10</text></g><text x="40" y="80" class="dd-call">งานค้าง → handoff.md</text><text x="40" y="108" class="dd-call">ชอบส่วนตัว → memory</text><path d="M 300,74 Q 440,60 532,86" fill="none" stroke="rgba(30,36,54,0.45)" stroke-width="1.2" stroke-dasharray="4,3"/><circle cx="534" cy="87" r="3" fill="#1e2436"/><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="rgba(30,36,54,0.04)" stroke="#4b5268" stroke-width="1.5"/><text x="88" y="690" class="dd-th">ไฟล์ในโปรเจค</text><rect x="244" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="292" y="690" class="dd-th">ส่งให้ทุกทีม</text><text x="1240" y="690" class="dd-th" text-anchor="end" style="fill:#1e2436">ทุกโปรเจคเจอ = เหตุอยู่ที่ stack และแก้ได้จริงแล้ว</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

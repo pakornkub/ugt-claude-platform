@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="plugin-layers-title plugin-layers-desc" id="plugin-layers-root">
+        <title id="plugin-layers-title">ชั้นของ plugin ใน UGT Claude Platform</title>
+        <desc id="plugin-layers-desc">Layer stack: bundle ugt-nextjs-standard (superpowers หรือ mattpocock) ดึง ugt-nextjs-platform ที่มีตัวช่วย 11 ตัว ซึ่งพึ่ง ugt-core (contracts และความจำของทีม); ugt-python-platform และ ugt-php-platform เป็น plugin แยกสำหรับ deploy อย่างเดียวที่พึ่ง ugt-core เช่นกัน</desc>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;family=Inter:wght@400;500;600&amp;family=Noto+Sans+Thai:wght@400;500;600&amp;family=Noto+Serif+Thai:wght@400&amp;display=swap');
+      #plugin-layers-root { --color-paper:   #ffffff;
+      --color-paper-2: #f8f9fc;
+      --color-ink:     #1e2436;
+      --color-muted:   #4b5268;
+      --color-soft:    #6d7590;
+      --color-rule:    #e5e8f0;
+      --color-accent:  #4f46e5;
+      --color-accent-tint: #e0e7ff;
+      --font-sans:  'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif Thai', serif;
+      --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace; }
+      #plugin-layers-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #plugin-layers-root .diagram-container { width: 100%; overflow-x: auto; }
+      #plugin-layers-root .sub { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      #plugin-layers-root .dd-name { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 24px; font-weight: 600; fill: #1e2436; }
+      #plugin-layers-root .dd-mono { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 400; fill: #4b5268; }
+      #plugin-layers-root .dd-th { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; fill: #4b5268; }
+      #plugin-layers-root .dd-lbl-t { font-family: 'Geist Mono', ui-monospace, Consolas, monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.04em; }
+      #plugin-layers-root .dd-lblth { font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 18px; font-weight: 500; }
+      #plugin-layers-root .dd-call { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: 20px; font-style: italic; fill: #1e2436; }
+      #plugin-layers-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="plugin-layers-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4b5268"/></marker>
+          <marker id="plugin-layers-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f46e5"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="128" class="dd-th" style="fill:#1e2436">ติดตั้ง</text><text x="40" y="152" class="dd-th">ชั้นบน</text><line x1="72" y1="172" x2="72" y2="476" stroke="#6d7590" stroke-width="1.5" marker-end="url(#plugin-layers-arrow)"/><text x="40" y="512" class="dd-th" style="fill:#1e2436">ชั้นล่าง</text><text x="40" y="536" class="dd-th">มาเอง</text><rect x="216" y="248" width="664" height="152" fill="#ffffff" stroke="#4b5268" stroke-width="1.5"/><rect x="216" y="400" width="1024" height="152" fill="#f8f9fc" stroke="#4b5268" stroke-width="1.5"/><rect x="216" y="96" width="664" height="152" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="244" y="156" class="dd-name">Bundle — ติดตั้งตัวเดียวจบ</text><text x="244" y="196" class="dd-mono" style="fill:#1e2436">ugt-nextjs-standard-*</text><text x="244" y="224" class="dd-th">-superpowers (แนะนำ) หรือ -mattpocock</text><text x="244" y="308" class="dd-name">ตัวช่วย Next.js 11 ตัว</text><text x="244" y="348" class="dd-mono" style="fill:#1e2436">ugt-nextjs-platform</text><text x="244" y="376" class="dd-th">DB · login · ดีไซน์ · ทดสอบ · deploy</text><text x="244" y="460" class="dd-name">มาตรฐานกลาง + ความจำทีม</text><text x="244" y="500" class="dd-mono" style="fill:#1e2436">ugt-core</text><text x="244" y="528" class="dd-th">contracts · handoff · context · contribute</text><g data-node="pyphp"><rect x="904" y="96" width="336" height="288" rx="8" fill="#ffffff"/><rect x="904" y="96" width="336" height="288" rx="8" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="928" y="156" class="dd-name">Python · PHP</text><text x="928" y="192" class="dd-th">deploy อย่างเดียว · ยังไม่ tag</text><text x="928" y="244" class="dd-mono" style="fill:#1e2436">ugt-python-platform</text><text x="928" y="276" class="dd-mono" style="fill:#1e2436">ugt-php-platform</text></g><line x1="40" y1="652" x2="1240" y2="652" stroke="#e5e8f0" stroke-width="1.5"/><rect x="40" y="672" width="36" height="24" rx="5" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="88" y="690" class="dd-th">ติดตั้งเอง (เลือก 1 bundle)</text><rect x="376" y="672" width="36" height="24" rx="5" fill="#ffffff" stroke="#1e2436" stroke-width="1.5"/><text x="424" y="690" class="dd-th">มาเองตาม dependency</text><rect x="668" y="672" width="36" height="24" rx="5" fill="#1e2436" stroke="#6d7590" stroke-width="1.5" stroke-dasharray="6,4" fill-opacity="0.02"/><text x="716" y="690" class="dd-th">plugin แยก · deploy อย่างเดียว</text>
+      </svg>

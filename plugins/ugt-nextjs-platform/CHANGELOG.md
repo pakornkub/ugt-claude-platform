@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.79.4 (2026-10-16)
+
+- design kit `language-switcher.tsx`: ปุ่มแสดงรหัสภาษา **EN / TH** เสมอ (ชื่อเต็ม English / ไทย ย้ายไปเป็น `aria-label` + `aria-pressed` + `lang`) — มติผู้ดูแล 2026-10-16 · auth kit Sheet แก้ไขบทบาท: `SheetHeader` มีเส้นคั่นล่าง (`border-b`) และ footer ของ `role-form.tsx` ติดล่างแบบ sticky มีเส้นคั่นบน — header / เนื้อหา / ปุ่มแยกโซนชัด ปุ่มบันทึกไม่หลุดจอเมื่อสิทธิ์ยาว · docs/web ทำใหม่ทั้งชุด (หน้าแรก คู่มือ รายละเอียดตัวช่วย Design system สไลด์ cheat sheet + diagram 6 ภาพ)
+
 ## 4.79.3 (2026-10-15)
 
 - full-setup §2.5: รายการค่า default ใต้ "ถ้าไม่โอเคบอกได้" ในแผนต้องมีแค่ข้อที่ผู้ใช้ยังไม่ตอบ — ข้อที่ตอบแล้ว (deploy target, scheduled job, ประโยค `/admin/setup`) อยู่ในรายการนั้น = เปิดถามซ้ำ (eval `run-through-plan`) · evals: prompt ของ `run-through-plan` ตอบโดเมนอีเมลองค์กร (คำถามใหม่ของ auth ตั้งแต่ 4.79.0)

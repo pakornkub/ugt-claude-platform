@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/components/role-form.tsx
-// kit-hash: dd8d9fb19060
+// kit: ugt-nextjs-platform 4.79.4 · ugt-nextjs-auth-setup/components/role-form.tsx
+// kit-hash: 086ea02e27dc
 
 // components/role-form.tsx — create/edit a role, with the permission checklist
 // in the HRMS shape (มติ 13.3): bordered groups, a tri-state select-all on each
@@ -193,8 +193,8 @@ export function RoleForm({
         }}
       />
 
-      {/* footer ตามข้อตกลง §4: ยกเลิก (outline) ซ้าย · primary ขวาสุด ปุ่มเดียว */}
-      <div className="flex justify-end gap-2">
+      {/* footer ตามข้อตกลง §4: ยกเลิก (outline) ซ้าย · primary ขวาสุด ปุ่มเดียว · ติดล่าง Sheet มีเส้นคั่นเหมือน header */}
+      <div className="sticky bottom-0 -mx-4 flex justify-end gap-2 border-t bg-background px-4 py-3">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           {t('cancel')}
         </Button>

@@ -20,7 +20,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.79.3 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.79.4 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.9.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.5 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.14.5 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
@@ -367,6 +367,12 @@ context เป็นภาษาอังกฤษ (เว้นประโย�
 - ตัวอย่างหน้าตา UI ที่ได้ → [`docs/web/design-preview.html`](docs/web/design-preview.html)
 - หน้าภาพรวมแบบเปิดใน browser (สำเนาของ README นี้ — sync มือตอน release) →
   [`docs/web/index.html`](docs/web/index.html)
+- คู่มือทีละขั้น → [`docs/web/guide.html`](docs/web/guide.html) · รายละเอียดตัวช่วยทุกตัว
+  (เงื่อนไข · กับดัก · วิธีตรวจ) → [`docs/web/reference.html`](docs/web/reference.html) ·
+  สไลด์ → [`docs/web/slides.html`](docs/web/slides.html) · สรุป 1 หน้า →
+  [`docs/web/cheatsheet.html`](docs/web/cheatsheet.html) — ทุกหน้าใช้ `site.css`/`site.js`
+  ร่วมกัน · diagram ต้นฉบับอยู่ `docs/web/diagrams/<slug>.html` (แก้แล้ว export `.svg`
+  แล้ว inline ใหม่ในหน้าที่ใช้ — หาจาก `<!-- diagram:<slug> -->`)
 - ให้ทีม IT ตั้ง hard boundary → `plugins/ugt-core/contracts/org-managed-settings.md`
 - ขั้นตอนออกรุ่น → หัวข้อ "สำหรับทีมดูแล platform" ด้านบน
 
