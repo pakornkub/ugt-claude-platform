@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 9a8d5edd191f
+// kit: ugt-nextjs-platform 4.83.1 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 46f01b423a1c
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -69,6 +69,7 @@ export function DatePicker({
   // DateRangePicker: เลือก "จาก" แล้วปฏิทินบังช่อง "ถึง")
   const [open, setOpen] = React.useState(false);
   const t = useTranslations('kit.datePicker');
+  const calendarRef = React.useRef<HTMLDivElement>(null);
 
   const holidaySet = React.useMemo(() => new Set(holidays ?? []), [holidays]);
   const hasHolidays = holidaySet.size > 0;
@@ -85,13 +86,21 @@ export function DatePicker({
   return (
     <ResponsivePopover
       flush
+      // โฟกัสแรก = ช่องวันที่ react-day-picker ให้ tab เข้าได้ (วันที่เลือก ไม่มีก็วันนี้) — ค่าเริ่มของ popup
+      // คือปุ่ม "เดือนก่อน" ตัวแรก ซึ่งต้องกด Tab อีกหลายทีกว่าจะถึงวัน
+      initialFocus={() =>
+        calendarRef.current?.querySelector<HTMLElement>('[role=gridcell] button[tabindex="0"]') ??
+        true
+      }
       open={open}
       onOpenChange={setOpen}
       title={ariaLabel ?? placeholder ?? t('placeholder')}
       trigger={
         <Button
           variant="field"
-          aria-label={ariaLabel ? `${ariaLabel} ${value ? formatLabel(value) : ''}`.trim() : undefined}
+          aria-label={
+            ariaLabel ? `${ariaLabel} ${value ? formatLabel(value) : ''}`.trim() : undefined
+          }
           className={cn(
             'w-36 justify-start text-left font-normal',
             !value && 'text-muted-foreground',
@@ -104,24 +113,26 @@ export function DatePicker({
         </Button>
       }
     >
-      <Calendar
-        // ใน bottom sheet: ช่องวัน 40px (นิ้วกดได้) จัดกลาง · popover desktop คงขนาดเดิม
-        className="mx-auto in-data-[slot=sheet-content]:bg-transparent in-data-[slot=sheet-content]:[--cell-size:--spacing(10)]"
-        mode="single"
-        selected={value}
-        onSelect={(date) => {
-          onSelect(date);
-          setOpen(false);
-        }}
-        disabled={disabled}
-        autoFocus
-        // เปิดที่เดือนของค่าที่เลือก — ไม่งั้น react-day-picker เปิดที่เดือนนี้เสมอ
-        defaultMonth={value}
-        weekStartsOn={weekStartsOn}
-        locale={dateFnsLocale}
-        modifiers={allModifiers}
-        modifiersClassNames={allModifierClasses}
-      />
+      <div ref={calendarRef} className="contents">
+        <Calendar
+          // ใน bottom sheet: ช่องวัน 40px (นิ้วกดได้) จัดกลาง · popover desktop คงขนาดเดิม
+          className="mx-auto in-data-[slot=sheet-content]:bg-transparent in-data-[slot=sheet-content]:[--cell-size:--spacing(10)]"
+          mode="single"
+          selected={value}
+          onSelect={(date) => {
+            onSelect(date);
+            setOpen(false);
+          }}
+          disabled={disabled}
+          autoFocus
+          // เปิดที่เดือนของค่าที่เลือก — ไม่งั้น react-day-picker เปิดที่เดือนนี้เสมอ
+          defaultMonth={value}
+          weekStartsOn={weekStartsOn}
+          locale={dateFnsLocale}
+          modifiers={allModifiers}
+          modifiersClassNames={allModifierClasses}
+        />
+      </div>
       {hasHolidays && (
         <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-muted-foreground">
           <span className="size-2 rounded-full bg-status-red" /> {t('holidayLegend')}

@@ -11,8 +11,9 @@ Last updated: 2026-10-15
   FilterPopover, PeriodNavigator/YearSelect/MonthSelect, settings-sheet, `dashboard.md`, `form-pages.md`; eval design/auth/mail ผ่าน) ·
   รุ่น 4 ออกแล้ว = nextjs 4.83.0 + core 2.15.2 (login แผง indigo-950 + การ์ดกระจก · date-picker bottom sheet มือถือ ·
   combobox ไม่ทำโดยตั้งใจ · pitfalls `ui-rendering.md` · design-preview/reference ตามของจริง; eval 4 case ผ่านรอบแรก) ·
-  **§14 ปิดครบ 4 รุ่น** · ค้างเล็ก: โฟกัสแรกของปฏิทินอยู่ปุ่มเดือนก่อน (ต้องมี `initialFocus` ใน ResponsivePopover) ·
-  iOS ซูมเมื่อโฟกัสช่อง 14px · trigger eval 3 judges ของ pitfalls ยังค้าง · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  **§14 ปิดครบ 4 รุ่น** · 4.83.1 เก็บตก: โฟกัสแรกของปฏิทิน = วันที่เลือก · trigger eval pitfalls 3 judges 72/72 ·
+  CLAUDE-block ADR ไม่ขัด handoff แล้ว · python 0.9.6 (log ใน compose.md) · README/guide TDD 4 ขั้น ·
+  **รอผู้ดูแลตัดสิน**: iOS ซูมช่อง 14px (backlog §14) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
   บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน

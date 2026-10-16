@@ -155,7 +155,7 @@ test/lint suite) and update the board via `/ugt-handoff`.
 - มติ (ไม่ใช่ design) → `docs/project-context/decisions.md` (append-only)
 <!-- [/PIPELINE:superpowers|none] -->
 <!-- [PIPELINE:mattpocock] -->
-- มติ (ไม่ใช่ design) → `docs/adr/` (ADR ที่ `domain-modeling` เขียน) — โปรเจคนี้
+- มติ (ไม่ใช่ design) → `docs/adr/` (`domain-modeling` หรือ `/ugt-handoff` เพิ่มไฟล์ใหม่) — โปรเจคนี้
   **ไม่มี `decisions.md`** จะได้ไม่มีบ้านมติสองที่
 <!-- [/PIPELINE:mattpocock] -->
 - True for every project on this stack → **open a PR against the
@@ -170,7 +170,8 @@ test/lint suite) and update the board via `/ugt-handoff`.
   โดยตั้งใจ **ห้าม copy เนื้อหาข้ามกัน**: เริ่มงานอ่านทั้งคู่
   (`docs/project-context/00-index.md` + `CONTEXT.md`/`docs/adr/` ถ้ามี)
   แต่เขียนแค่ที่เจ้าของมันเขียน — `/ugt-handoff` ดูแลเฉพาะ
-  `docs/project-context/` + `handoff.md` เหมือนเดิม ไม่แตะ `CONTEXT.md`/`docs/adr/`
+  `docs/project-context/` + `handoff.md` ไม่แตะ `CONTEXT.md` ไม่แก้ ADR เดิม — มติใหม่ที่ยังไม่มี ADR
+  เพิ่มเป็นไฟล์ใหม่ `docs/adr/NNNN-<slug>.md` ตามรูปแบบเดิมได้ (ugt-handoff ตาราง decisions)
 - `.scratch/<feature>/` (spec + tickets + `Status:` ต่อ ticket) เป็นของ
   `/to-spec`/`/to-tickets`/`/implement` — ระดับ **ticket** · `board.md` +
   `handoff.md` เป็นระดับ **feature** — ห้าม copy เนื้อหาข้ามกัน

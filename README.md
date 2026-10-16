@@ -20,8 +20,8 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.83.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
-| `ugt-python-platform` | 0.9.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
+| `ugt-nextjs-platform` | 4.83.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-python-platform` | 0.9.6 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.5 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-core` | 2.15.2 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
@@ -149,7 +149,7 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 | --- | --- |
 | ถามคำถาม / อ่านโค้ด | ตอบตรง ๆ ไม่มีพิธีรีตอง |
 | แก้งานเล็ก (typo, ค่า config) | ทำตรง ๆ ไม่เสียเวลา |
-| สร้าง feature / แก้บั๊ก | **bundle superpowers**: อ่านความรู้ของโปรเจคก่อน แล้วเข้ากระบวนการเต็มอัตโนมัติ: คิดก่อน → วางแผน → เขียนเทสต์ → เขียนโค้ด → review · **bundle mattpocock**: เรียกเองทีละคำสั่งตามหัวข้อถัดไป — ไม่มีอะไรทำงานเองให้ |
+| สร้าง feature / แก้บั๊ก | **bundle superpowers**: อ่านความรู้ของโปรเจคก่อน แล้วเข้ากระบวนการเต็มอัตโนมัติ: คิดก่อน → วางแผน → เขียนเทสต์ก่อนแล้วเขียนโค้ด (TDD) → review · **bundle mattpocock**: เรียกเองทีละคำสั่งตามหัวข้อถัดไป — ไม่มีอะไรทำงานเองให้ |
 | แตะไฟล์โค้ด / ไฟล์ UI / ไฟล์ฐานข้อมูล | กฎที่เกี่ยวโหลดเอง (มาตรฐานโค้ด, ข้อตกลงดีไซน์, กับดัก production) |
 | จบงาน | `/ugt-handoff` แล้ว commit |
 

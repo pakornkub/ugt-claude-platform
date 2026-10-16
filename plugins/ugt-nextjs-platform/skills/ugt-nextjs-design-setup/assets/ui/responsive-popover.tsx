@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
-// kit-hash: bc87b8dcf683
+// kit: ugt-nextjs-platform 4.83.1 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
+// kit-hash: eb4cfdf91f3e
 // source: ugt-hrms components/ui/responsive-popover.tsx (radix-mira era) — ported to base-mira Popover/Sheet by ugt-nextjs-design-setup
 // มติ 2026-10-16 A12 (platform docs/backlog.md §14) · DESIGN.md §3 Mobile — popover บนมือถือ = bottom sheet
 
@@ -27,6 +27,12 @@ interface ResponsivePopoverProps {
    * (ยังเป็นชื่อ popup สำหรับ screen reader) และกว้างตามเนื้อหา · `DatePicker` ใช้ตัวนี้
    */
   flush?: boolean;
+  /**
+   * โฟกัสแรกเมื่อเปิด (ส่งต่อ `initialFocus` ของ Base UI ทั้งสองแบบ) — ค่าเริ่ม = ตัวแรกที่ tab ได้ ·
+   * ฟังก์ชันคืน element ที่จะโฟกัส (`DatePicker`: ช่องวันที่เลือก ไม่ใช่ปุ่มเดือนก่อน) · `true` = ค่าเริ่ม
+   */
+  initialFocus?:
+    boolean | React.RefObject<HTMLElement | null> | (() => boolean | HTMLElement | null);
   children: React.ReactNode;
 }
 
@@ -60,6 +66,7 @@ export function ResponsivePopover({
   align = 'start',
   className,
   flush = false,
+  initialFocus,
   children,
 }: Readonly<ResponsivePopoverProps>) {
   const isMobile = useIsMobile();
@@ -75,7 +82,7 @@ export function ResponsivePopover({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger render={trigger} />
-        <SheetContent side="bottom">
+        <SheetContent side="bottom" initialFocus={initialFocus}>
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
           </SheetHeader>
@@ -90,6 +97,7 @@ export function ResponsivePopover({
       <PopoverTrigger render={trigger} />
       <PopoverContent
         align={align}
+        initialFocus={initialFocus}
         className={cn(flush ? 'w-auto gap-0 p-0' : 'w-[min(92vw,28rem)] gap-2', className)}
       >
         <PopoverTitle className={flush ? 'sr-only' : 'text-xs font-medium text-muted-foreground'}>

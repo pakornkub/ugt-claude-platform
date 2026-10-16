@@ -22,11 +22,11 @@
   "revalidation_2026-10-17": {
     "date": "2026-10-17",
     "reason": "Release 4 added references/ui-rendering.md (font-mono Thai, flex-1 squeezing a control, stale public/ file, hydration #418) and S11–S14. Description rewritten 1052→1016 chars (it had drifted over the 1024 spec limit) to fit the four new symptoms; 'Loads itself via paths' sentence dropped (paths: does that).",
-    "judges": 1,
-    "judgments": 24,
-    "primary_accuracy": "24/24 (S 14/14, N 10/10)",
-    "method_note": "Smoke check, not a full rerun: one fresh subagent judge, all 24 queries in one seeded shuffle, listing = every repo SKILL.md description (18 ugt skills) + 4 distractors (superpowers:systematic-debugging, mattpocock diagnosing-bugs, impeccable, frontend-design). A 3-judge rerun with the full installed listing is still owed.",
-    "note": "N5 → clean-code (accepted label). New S11–S14 all routed here, each citing its new description phrase."
+    "judges": 3,
+    "judgments": 72,
+    "primary_accuracy": "72/72 (S 42/42, N 30/30)",
+    "method_note": "3 independent judges (sonnet subagents), each with its own seeded shuffle of all 24 queries, listing = every repo SKILL.md frontmatter description (18 ugt skills) + 5 installed distractors (superpowers systematic-debugging + test-driven-development, mattpocock diagnosing-bugs, impeccable, frontend-design). Answer from listing text only, no tools. Replaces the earlier 1-judge smoke check of the same day.",
+    "note": "N5 → clean-code ×2, cicd-setup ×1 (both accepted labels). S11–S14 (release-4 symptoms) routed to pitfalls by all three judges."
   },
   "queries": {
     "S1": {

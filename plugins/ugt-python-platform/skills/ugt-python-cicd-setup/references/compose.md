@@ -23,8 +23,11 @@
 "starting" ไม่ใช่ probe ตรวจแล้วไม่ผ่านจริง) `docker logs` ขึ้น:
 
 ```
-exec /usr/local/bin/docker-php-entrypoint: operation not permitted
+exec /usr/local/bin/python: operation not permitted
 ```
+
+(ชื่อไฟล์หลัง `exec` คือ binary แรกของ `CMD`/`ENTRYPOINT` — `uvicorn`, `gunicorn`, `python` ·
+อินซิเดนต์แรกเป็นโปรเจค PHP จึงขึ้น `docker-php-entrypoint`)
 
 แล้วเข้า restart loop ต่อเนื่องเพราะ `restart: unless-stopped`. ทดสอบบนเครื่อง
 dev เอง (Docker Desktop) ผ่านปกติทุกอย่าง — เจอเฉพาะตอน deploy จริงบน docker02
@@ -32,7 +35,7 @@ dev เอง (Docker Desktop) ผ่านปกติทุกอย่าง 
 
 **สาเหตุ**: `no-new-privileges:true` ปิดความสามารถของ process ในการยก
 privilege ผ่าน setuid/setcap ตอน exec — บน docker02 จริง (Ubuntu 24.04 /
-kernel 6.8 + AppArmor) entrypoint script ของ base image ต้องอาศัยการ
+kernel 6.8 + AppArmor) process แรกของ container (entrypoint/CMD) ต้องอาศัยการ
 transition สิทธิ์แบบนั้นตอน exec ไปยัง process จริง เมื่อ transition ไม่ได้
 kernel ปฏิเสธด้วย `operation not permitted` แล้ว process ตายทันที — Docker
 Desktop (Linux VM คนละ kernel/AppArmor policy) ไม่มีข้อจำกัดเดียวกัน จึงไม่

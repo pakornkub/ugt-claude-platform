@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## 0.9.6 (2026-10-17)
+
+- `references/compose.md` (no-new-privileges): ตัวอย่าง log เดิมเป็นข้อความของ PHP (`docker-php-entrypoint`) — เปลี่ยนเป็นของ python (`exec /usr/local/bin/python`) + บอกว่าชื่อหลัง `exec` คือ binary แรกของ CMD/ENTRYPOINT
+
 ## 0.9.5 (2026-10-14)
 
 - interview ข้อ 7: ถาม Jenkins host (`__JENKINS_HOST__`) + repo URL จาก `git remote get-url origin` (`__REPO_URL__`) — เดิมไม่มีที่มา agent ใส่ `<jenkins-host>` ค้าง

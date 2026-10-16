@@ -1,5 +1,10 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.83.1 (2026-10-17)
+
+- `ui/date-picker.tsx`: เปิดปฏิทินแล้วโฟกัสอยู่ที่**ช่องวันที่เลือก** (ไม่มีค่า = วันนี้) — เดิมโฟกัสปุ่ม "เดือนก่อน" ต้องกด Tab หลายทีกว่าจะถึงวัน · `ui/responsive-popover.tsx` prop ใหม่ `initialFocus` (ส่งต่อ Base UI ทั้ง Popover/Sheet; ค่าเริ่มเหมือนเดิม) · ทดสอบ jsdom ทั้ง desktop/มือถือ
+- full-setup `assets/CLAUDE-block.md` (bundle mattpocock): เลิกขัดกับ `ugt-handoff` เรื่องบ้านมติ — `/ugt-handoff` เพิ่ม ADR **ไฟล์ใหม่** ใน `docs/adr/` ได้ (ไม่แก้ ADR เดิม · ไม่แตะ `CONTEXT.md`) ตามตาราง decisions ของ handoff · เดิม CLAUDE-block บอกว่า handoff ห้ามแตะ `docs/adr/` ทั้งที่ handoff สั่งให้เขียน
+
 ## 4.83.0 (2026-10-17)
 
 **design + auth: ยก UI จาก ugt-hrms รุ่น 4 จาก 4 — login · pitfalls · popover มือถือ · เว็บเอกสาร** (มติผู้ดูแล 2026-10-16, backlog §14)
