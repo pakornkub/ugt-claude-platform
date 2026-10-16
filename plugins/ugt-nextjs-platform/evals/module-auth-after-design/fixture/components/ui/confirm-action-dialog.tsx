@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
-// kit-hash: c55d4a88ea6a
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/confirm-action-dialog.tsx
+// kit-hash: a241e5d7248f
 
 // source: gov-boi-smart (Base UI native) — installed by ugt-nextjs-design-setup (org UI kit)
 // dialog ยืนยัน + เรียก server action + จัดการผลลัพธ์ — ใช้ร่วมทุกหน้ารายการ
@@ -30,6 +30,7 @@ export function ConfirmActionDialog({
   successMessage,
   action,
   confirmVariant = 'destructive',
+  children,
 }: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,6 +42,10 @@ export function ConfirmActionDialog({
   /** สีปุ่มยืนยัน — dialog นี้ใช้กับ destructive เป็นหลัก (ลบ=แดง DESIGN.md §1)
       งานยืนยันที่ไม่ทำลายข้อมูล ส่ง 'default' หรือ 'success' มาแทน */
   confirmVariant?: 'destructive' | 'default' | 'success';
+  /** เนื้อหาเพิ่ม (กล่องสรุป/รายการที่จะโดนผล) — วางต่อจากหัว ไม่ใช่ใน description:
+      ห้ามใส่เนื้อหาใน AlertDialogHeader เพราะหัวเป็น grid ที่บีบกล่องให้แคบ (มติ 2026-10-16 A9)
+      · description คงเป็นข้อความสั้น 1–2 บรรทัด */
+  children?: React.ReactNode;
 }>) {
   const [pending, setPending] = useState(false);
   const t = useTranslations('kit.confirmDialog');
@@ -72,15 +77,13 @@ export function ConfirmActionDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{t('cancel')}</AlertDialogCancel>
           {/* base-mira: AlertDialogAction = ComponentProps<typeof Button> จึงส่ง
-              variant ตรงได้ (ยืนยันกับ registry base-mira/alert-dialog) */}
-          <AlertDialogAction
-            variant={confirmVariant}
-            disabled={pending}
-            onClick={() => void confirm()}
-          >
+              variant ตรงได้ (ยืนยันกับ registry base-mira/alert-dialog) · ขนาด cta และ
+              destructive แดงทึบมาจาก primitive-edits.md / button-variants.md */}
+          <AlertDialogAction variant={confirmVariant} disabled={pending} onClick={() => void confirm()}>
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.39.0 · ugt-nextjs-design-setup/ui/bulk-action-bar.tsx
-// kit-hash: fc66eb403512
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/bulk-action-bar.tsx
+// kit-hash: 4992d7bc4bfa
 // source: ugt-hrms components/ui/bulk-action-bar.tsx (radix-mira era) — ported
 // to Base UI + the org radius scale by ugt-nextjs-design-setup
 import * as React from 'react';
@@ -36,11 +36,16 @@ interface BulkActionBarProps {
  *   clearLabel="ล้างการเลือก"
  *   onClear={() => setClearKey((k) => k + 1)}
  * >
- *   <Button variant="success" onClick={approveAll}>อนุมัติทั้งหมด</Button>
- *   <Button variant="destructive" onClick={rejectAll}>ไม่อนุมัติทั้งหมด</Button>
+ *   <Button variant="outline" className="border-destructive/40 text-destructive" onClick={rejectAll}>
+ *     <X aria-hidden="true" />ไม่อนุมัติทั้งหมด
+ *   </Button>
+ *   <Button variant="success" onClick={approveAll}><Check aria-hidden="true" />อนุมัติทั้งหมด</Button>
  * </BulkActionBar>
  * <DataTable … enableRowSelection onSelectionChange={setSelected} resetSelectionKey={clearKey} />
  * ```
+ *
+ * ปุ่มตัดสิน (มติ 2026-10-16 D6): ปฏิเสธ = `outline` ขอบแดง + `X` (ซ้าย) · อนุมัติ = `success`
+ * เขียวทึบ + `Check` (ขวา) · `destructive` แดงทึบสงวนให้การลบ ไม่ใช่การปฏิเสธ
  *
  * กติกาสองข้อที่มากับแพตเทิร์นนี้ (DESIGN.md §3):
  * - โผล่เมื่อเลือก **มากกว่า 1 แถว** — เลือกแถวเดียวใช้ปุ่มในแถวตามปกติ

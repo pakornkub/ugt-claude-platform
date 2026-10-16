@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/form-dialog.tsx
-// kit-hash: 0f5900073137
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/form-dialog.tsx
+// kit-hash: 5127d84c2494
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -46,7 +46,10 @@ function FormDialogContent({
 }
 
 /**
- * Header section with a bottom border.
+ * Header zone (bottom border). `DialogHeader` carries `-mx-4 … pb-3` for the
+ * plain `p-4` DialogContent (primitive-edits.md) — FormDialogContent is `p-0`,
+ * so this cancels the negative margin and sets its own padding. `border-b` is
+ * repeated on purpose: a project whose dialog.tsx predates the edit keeps its line.
  * The built-in close button from DialogContent is absolute-positioned and will
  * appear over the top-right corner of this header automatically.
  */
@@ -63,11 +66,15 @@ function FormDialogBody({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * Footer section with a top border.
+ * Footer zone — the look (top border + `bg-muted/40` edge to edge + buttons at
+ * size `cta`) comes from the DialogFooter primitive (มติ 2026-10-16 A8,
+ * primitive-edits.md); this only cancels its `-mx-4 -mb-4` (FormDialogContent is
+ * `p-0`) and sets the padding. `border-t` repeated for a pre-edit dialog.tsx.
+ * Read-only dialogs have no footer at all — close with the ✕.
  * Inherits DialogFooter's sm:flex-row sm:justify-end layout.
  */
 function FormDialogFooter({ className, ...props }: React.ComponentProps<typeof DialogFooter>) {
-  return <DialogFooter className={cn('shrink-0 border-t px-6 py-4', className)} {...props} />;
+  return <DialogFooter className={cn('mx-0 mb-0 shrink-0 border-t px-6 py-4', className)} {...props} />;
 }
 
 export { FormDialogContent, FormDialogHeader, FormDialogBody, FormDialogFooter };

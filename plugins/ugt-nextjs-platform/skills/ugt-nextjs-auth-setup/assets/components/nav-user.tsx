@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.69.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
-// kit-hash: 57915b4fed2e
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-auth-setup/components/nav-user.tsx
+// kit-hash: f52fc1408d71
 // source: ugt-hrms components/nav-user.tsx — generalized by ugt-nextjs-auth-setup
 // (HR-only bits removed: employee photo lookup, Thai full name, emp code /
 // position / cost-center rows — those come back through `extraRows`)
@@ -35,6 +35,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { avatarColorClass, getInitials } from '@/lib/avatar';
+import { cn } from '@/lib/utils';
 import { logoutAction, ssoLogoutAction } from '@/lib/actions/auth';
 // [METHOD: LOCAL] — ลบ import + เมนู "เปลี่ยนรหัสผ่าน" ด้านล่างเมื่อไม่ได้เปิด local login
 import { ChangePasswordDialog } from '@/components/change-password-dialog';
@@ -69,15 +71,6 @@ const AUTH_TYPE_LABEL: Record<string, string> = {
   local: 'Local Account',
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase();
-}
-
 function InfoRow({ icon: Icon, label, children }: Readonly<Omit<ProfileRow, 'value'> & { children: React.ReactNode }>) {
   // gap-4 = 16px ตาม §4 (แถว label–ค่า ระยะระหว่างคอลัมน์ ≥16px)
   return (
@@ -107,7 +100,10 @@ export function NavUser({
   const [profileOpen, setProfileOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false); // [METHOD: LOCAL]
   const [isPending, startTransition] = useTransition();
+  // design kit lib/avatar.ts: initials skip Thai leading vowels · colour = --cat-* hashed
+  // from the email (stable — a renamed user keeps their colour) · DESIGN.md §1 (มติ 2026-10-16 B12)
   const initials = getInitials(name);
+  const fallbackColor = cn('text-white', avatarColorClass(email));
   // SSO needs the backchannel logout; the other methods just drop the session
   const signOut = authType === 'sso' ? ssoLogoutAction : logoutAction;
 
@@ -124,7 +120,7 @@ export function NavUser({
             }>
               <Avatar className="size-8 rounded-lg">
                 <AvatarImage src={avatar ?? undefined} alt={name} />
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className={cn('rounded-lg', fallbackColor)}>{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <TruncatedText className="truncate font-medium">{name}</TruncatedText>
@@ -146,7 +142,7 @@ export function NavUser({
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="size-8 rounded-lg">
                       <AvatarImage src={avatar ?? undefined} alt={name} />
-                      <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                      <AvatarFallback className={cn('rounded-lg', fallbackColor)}>{initials}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">{name}</span>
@@ -208,7 +204,7 @@ export function NavUser({
           <div className="-mt-12 flex flex-col items-center px-6">
             <Avatar className="size-24 rounded-full shadow-sm ring-4 ring-background">
               <AvatarImage src={avatar ?? undefined} alt={name} />
-              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+              <AvatarFallback className={cn('text-2xl', fallbackColor)}>{initials}</AvatarFallback>
             </Avatar>
             <p className="mt-3 text-base font-semibold">{name}</p>
             {/* ป้ายชื่อ role = ตัวระบุ → Badge outline (มติ 2026-08-21) */}

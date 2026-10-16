@@ -14,10 +14,8 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 §Badge vs StatusBadge · §Icon mapping (+ IconAction tone) · §Feedback ·
 §Tabs · Tooltip · Chart · Rich text · §i18n. Split out into topic files:
 
-- `base-ui-api.md` — check a primitive's API against the base-mira registry /
-  installed Base UI types before writing; the Radix↔Base UI difference table
-- `datatable.md` — page-level filter bar + DataTable (modes, toolbar,
-  pagination, consistency obligations, kit status)
+- `base-ui-api.md` — primitive API vs the base-mira registry; the Radix↔Base UI table
+- `datatable.md` — page-level filter bar + DataTable (modes, toolbar, pagination, mobile)
 - `export.md` — Excel/CSV export (route order, DO/DON'T, `lib/export.ts` guards)
 - `kit-inventory.md` — every kit file with provenance
 
@@ -59,10 +57,11 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 | > 15 หรือต้องค้นหา | `Combobox` (command + popover) |
 | วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ยกเว้น filter ปี/เดือนใน toolbar ใช้ `Select` ได้ |
 
-Sizes (มติ 2026-10-16 A3/A7): **one toolbar row = one size** (`default` for every button/Select
-in it; `sm` only inside dense panels, never mixed into a row) · `size="cta"` (44px phone / 36px
-≥sm, 14px) **only** for the page's primary action, the form action bar and dialog footers —
-recipe arrives with `button-variants.md` in kit ≥ next release; until then those use `default`.
+Sizes (A3/A7): **one toolbar row = one size** (`default`; `sm` only in dense panels; `ui/view-toggle` = 28px)
+· `size="cta"` (44px phone / 36px ≥sm) **only** in `PageActions`, `PageFormActions` and dialog/sheet
+footers — footers get it from the primitive (`assets/ui/button-variants.md`, `primitive-edits.md`).
+Mobile toolbar (A12): navigation/search → filters → tools + column settings right — the page's
+primary action never joins it; it stays in `PageActions` above the card (full-width `cta`).
 
 ## ตรวจ API ของ primitive กับ registry ก่อนเขียน (อย่าเดาจากความจำ Radix)
 
@@ -74,7 +73,7 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 
 | งาน | ภาชนะ |
 | --- | --- |
-| งานหลักหลายขั้น / ต้องเลือกวันบนปฏิทิน | หน้าแยก — คอลัมน์เดียวถึง cap 96rem · **การ์ดต่อ section** + `CardHeading` · back-link · แถบปุ่ม `cta` ชิดขวา (มติ 2026-10-16 D4 แทน "กึ่งกลาง `max-w-3xl` ไม่ครอบการ์ด" · DESIGN.md §4 ฟอร์มแยกหน้า · `CardHeading` = kit ≥ next release, ระหว่างนั้น `CardHeader`+`CardTitle`) |
+| งานหลักหลายขั้น / ต้องเลือกวันบนปฏิทิน | หน้าแยก — คอลัมน์เดียวถึง cap 96rem · **การ์ดต่อ section** + `CardHeading` · `PageBackLink` · `PageFormActions` ขนาด `cta` ชิดขวา (มือถือ `[1fr_2fr]`) (มติ 2026-10-16 D4 แทน "กึ่งกลาง `max-w-3xl` ไม่ครอบการ์ด" · DESIGN.md §4 ฟอร์มแยกหน้า · `CardHeading` = `ui/card-heading`) |
 | แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `Sheet` — 2 ขนาดเท่านั้น: `sm:max-w-xl` (576px) ฟอร์มล้วน · `sm:max-w-5xl` (1024px) มีตารางย่อย |
 | ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผล) | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
@@ -83,7 +82,10 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 | ยืนยัน destructive | `AlertDialog` ผ่าน `ConfirmActionDialog` — ปุ่มมีข้อความ ไม่ใช่ icon ล้วน |
 | system alert บังคับ action เดียว (session หมดอายุ) | `AlertDialog` ปิดไม่ได้ — **ไม่มีปุ่มยกเลิก** (ข้อยกเว้น footer ข้อเดียวที่อนุญาต เพราะ "ยกเลิก" ไม่มีความหมายเมื่อ session ตายแล้ว) · ตัวจริง: `session-expired-dialog.tsx` ของ auth-setup |
 
-Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
+**3 zones** at the primitive (A8, `primitive-edits.md`): header line · body · footer = top line +
+`bg-muted/40` edge to edge, buttons `cta`. **Read-only = no footer** (✕ closes). **Only title + short
+description in `AlertDialogHeader`** (A9 — its grid squeezes content; put it after, e.g.
+`ConfirmActionDialog` `children`). Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
 dialog**. No dialog-over-dialog except a single AlertDialog confirm on top of
 a form. A dirty form never closes silently on Esc/outside-click — confirm
 first. Mobile: dialog renders as bottom sheet (built into the primitive).
@@ -92,12 +94,10 @@ first. Mobile: dialog renders as bottom sheet (built into the primitive).
 
 - `StatusBadge` (tone + **required** leading icon + label) — any
   single-dimension state: pending/approved/rejected, active/inactive, risk.
-  Formula per tone: `border-status-x/40 bg-status-x/10
-  text-status-x-foreground`. Tones: success=emerald · warning=amber ·
-  danger=red · cancel=coral · info=sky · neutral=gray. **sky ≠ primary**:
-  sky labels information, primary marks interactive — never swap.
-  7th token `status-violet` (มติ 2026-10-16): StatusBadge tone `violet` = kit ≥ next
-  release (`status-badge.tsx` ships 6 today) — until then bars/tiles/dots only.
+  Formula per tone: `border-status-x/40 bg-status-x/10 text-status-x-foreground`. Tones:
+  success=emerald · warning=amber · danger=red · cancel=coral · info=sky · neutral=gray ·
+  violet (7th, TK-VIO — one group the project names in DESIGN.md §10, never a spare color).
+  **sky ≠ primary**: sky labels information, primary marks interactive — never swap.
 - `--cat-1..8` (มติ 2026-10-16) = identity/grouping, white text: avatar via
   `avatarColorClass(stableId)` + `getInitials(name)` (`lib/avatar.ts`, skips
   Thai leading vowels) · group dots · chart series > 5. Never a status, never
@@ -142,9 +142,9 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 (เช่น `ui/tiptap-editor` 8-10 ปุ่ม) — ที่นั่นปุ่มรวมกันเป็นแถบอยู่แล้ว จึงเห็นว่ากดได้
 โดยไม่ต้องมีพื้นทุกใบ · ส่ง `tone` กับ `variant` พร้อมกันไม่ได้
 
-หมายเหตุ "แดง" (มติ 2026-10-16 D6 แทนมติ 2026-08-21): ยืนยันลบ = **แดงทึบ** + variant `soft`
-(primary/10 ขอบ primary/25 = ปุ่มรองในหัวหน้า) — สูตรมากับ `button-variants.md` ของ kit ≥ next
-release · ระหว่างนั้น `destructive` ของ preset ยังพื้นจาง ห้ามแต่ง className รายจุดให้ทึบ.
+หมายเหตุ "แดง" (มติ 2026-10-16 D6 แทนมติ 2026-08-21): ยืนยันลบ = `destructive` **แดงทึบ** · ปฏิเสธ =
+`outline` ขอบแดง · ปุ่มรองหัวหน้า = `soft` (มีพื้น ≠ `soft-primary` โปร่งใส) — ตารางเลือก variant
+อยู่ที่ `assets/ui/button-variants.md` · ห้ามแต่ง className รายจุดให้ปุ่มทึบ/จางเอง.
 
 ## Feedback
 
@@ -161,8 +161,8 @@ release · ระหว่างนั้น `destructive` ของ preset ย�
 
 ## Tabs · Tooltip · Chart · Rich text
 
-- Tabs: sub-views of one thing on one page · main-navigation tabs put state
-  in the URL (`?tab=`) · > ~5 tabs = split pages.
+- Tabs: sub-views of one page · state in `?tab=` · > ~5 = split · each tab's primary action swaps in
+  `PageActions` (none if it creates nothing; page-wide = constant `soft`) — `references/tabbed-pages.md`.
 - Tooltip: `TooltipProvider` delay 0 · never the sole carrier of essential
   info (mobile has no hover).
 - Chart: `ui/chart` (recharts via shadcn — `npx shadcn add chart` when the
@@ -195,5 +195,5 @@ release · ระหว่างนั้น `destructive` ของ preset ย�
 
 **คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action.tsx`,
 `ui/bulk-action-bar.tsx`, `ui/status-badge.tsx`, `ui/page-shell.tsx`,
-`ui/query-state.tsx`, `ui/detail-*.tsx` ออกแบบมาให้ผู้เรียกประกอบข้อความเอง
+`ui/card-heading.tsx`, `ui/view-toggle.tsx`, `ui/query-state.tsx`, `ui/detail-*.tsx` ออกแบบมาให้ผู้เรียกประกอบข้อความเอง
 ตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล

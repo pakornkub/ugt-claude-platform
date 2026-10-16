@@ -1,23 +1,21 @@
-import { AppSidebar } from '@/components/app-sidebar';
-import { NAV_ITEMS } from '@/components/nav-items';
-import { SiteHeader } from '@/components/site-header';
+import { AppShellHeader, AppShellSidebar } from '@/components/app-nav';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 /**
  * Shell ของทุกหน้าที่อยู่หลัง login — หน้า login / setup ของ auth-setup อยู่นอก
  * route group นี้ จึงไม่ถูกครอบด้วย sidebar (ตามที่ตั้งใจ)
  *
- * `SiteHeader` เป็นลูกคนแรกของ `SidebarInset` เสมอ และรับ nav ชุดเดียวกับที่
- * sidebar วาด เพื่อให้ breadcrumb กับเมนูพูดตรงกัน (DESIGN.md §3)
- * ช่อง `actions` ว่างในโปรเจคนี้ — ไทยภาษาเดียว (ไม่มี LanguageSwitcher) และ
- * ไม่มี dark mode (ไม่มี ThemeToggle)
+ * layout นี้เป็น Server Component — เมนู (มี lucide icon) สร้างใน `components/app-nav.tsx`
+ * ฝั่ง client แล้ววาดทั้ง sidebar และ header จากชุดเดียวกัน ห้ามส่ง NAV_ITEMS เป็น prop
+ * จากที่นี่ (RSC serialize component ไม่ได้ — references/nav-config.md ของ design-setup)
+ * `SiteHeader` เป็นลูกคนแรกของ `SidebarInset` เสมอ (DESIGN.md §3)
  */
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppShellSidebar />
       <SidebarInset>
-        <SiteHeader items={NAV_ITEMS} />
+        <AppShellHeader />
         {children}
       </SidebarInset>
     </SidebarProvider>

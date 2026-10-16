@@ -16,7 +16,7 @@
 
 2. **เมนู sidebar มีอะไรบ้างนอกจาก "คำขอลา"** — ถามเมื่อ: 2026-10-13 ·
    ถามใคร: เจ้าของระบบ
-   · **ระหว่างรอ**: `components/app-sidebar.tsx` มีรายการเดียว (คำขอลา) +
+   · **ระหว่างรอ**: `components/app-sidebar.tsx` มีรายการเดียว (คำขอลา — `components/nav-items.ts`) +
    กลุ่ม admin ที่ auth-setup เพิ่มให้ · เพิ่มเมนูแก้ที่ `NAV_ITEMS` ที่เดียว
    (site-header อ่าน config ชุดเดียวกันทำ breadcrumb ให้เอง)
 

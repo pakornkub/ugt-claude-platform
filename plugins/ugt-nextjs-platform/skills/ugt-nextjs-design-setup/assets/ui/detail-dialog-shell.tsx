@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/detail-dialog-shell.tsx
-// kit-hash: 55720c5c3888
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/detail-dialog-shell.tsx
+// kit-hash: 70847a861108
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -26,6 +26,9 @@ interface DetailDialogShellProps {
  * Built on FormDialog so header (border-b), scrollable body, and footer action zone
  * (border-t) match the project's canonical dialog pattern.
  * Content is grouped into <DetailSection> blocks — no per-row dividers.
+ * Pass `footer` only when the dialog carries an action (approve/reject buttons);
+ * a pure read-only view has NO footer zone — the ✕ closes it, never a lone
+ * "ปิด" button (มติ 2026-10-16 A8).
  */
 export function DetailDialogShell({
   open,

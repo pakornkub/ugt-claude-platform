@@ -1,22 +1,19 @@
-// เมนูของแอป — แหล่งเดียว. `AppSidebar` วาดเมนูจากที่นี่ และ `SiteHeader`
-// สร้าง breadcrumb จากชุดเดียวกัน (DESIGN.md §3: ห้าม hardcode label ของ crumb)
-// เพิ่มเมนูใหม่ = เพิ่มแถวที่นี่ที่เดียว · `group` ต้องเป็นข้อความหัวข้อที่ sidebar
-// แสดงจริง ไม่ใช่ชื่อหน้าอื่น
-import { CalendarDays, type LucideIcon } from 'lucide-react';
+// เมนูของแอป — แหล่งเดียว (references/nav-config.md ของ design-setup). `AppSidebar` วาดเมนู
+// และ `SiteHeader` สร้าง breadcrumb จากชุดเดียวกัน (DESIGN.md §3: ห้าม hardcode label ของ crumb)
+// เพิ่มเมนูใหม่ = เพิ่มแถวที่นี่ที่เดียว · `group` ต้องเป็นข้อความหัวข้อที่ sidebar แสดงจริง
+// ไม่ใช่ชื่อหน้าอื่น · ไฟล์นี้มี lucide icon (component) จึง import ได้เฉพาะจาก client
+// component (`components/app-nav.tsx`) — Server Component ส่ง list นี้เป็น prop ไม่ได้
+import { CalendarDays } from 'lucide-react';
 
-export interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  /** หัวข้อกลุ่มใน sidebar — crumb แรกของ breadcrumb ใช้ค่านี้ */
-  group: string;
-  /** สิทธิ์ที่ต้องมีจึงจะเห็นเมนู (auth-setup เป็นคนกรอง — ไม่มี = ทุกคนเห็น) */
-  permission?: string;
-}
+import type { NavGroup, NavItem } from '@/lib/nav';
+
+/** ลำดับกลุ่มใน sidebar: งานหลัก → รายงาน → ตั้งค่า/admin ล่างสุด · color = จุดสี `--cat-*` */
+export const NAV_GROUPS: readonly NavGroup[] = [
+  { label: 'งานหลัก', color: 'cat-1' },
+  { label: 'รายงาน', color: 'cat-6' },
+  { label: 'ตั้งค่า', color: 'cat-8' },
+];
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'คำขอลา', href: '/leave', icon: CalendarDays, group: 'งานหลัก' },
 ];
-
-/** ลำดับกลุ่มใน sidebar: งานหลัก → รายงาน → ตั้งค่า/admin (DESIGN.md §3) */
-export const NAV_GROUP_ORDER: readonly string[] = ['งานหลัก', 'รายงาน', 'ตั้งค่า'];

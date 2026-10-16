@@ -13,7 +13,7 @@ declared by this plugin — see `base-ui-api.md`.)
 
 | คำตอบข้อ 5 | ฐาน | หมายเหตุ |
 | --- | --- | --- |
-| Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) · **ต้องติด `components/site-header.tsx` ด้วยเสมอ** (§Site header) — คำตอบ "Sidebar" ไม่ใช่ข้อยกเว้น |
+| Sidebar (default) | `sidebar-07` (collapsible icon sidebar) — or the closest current `sidebar-*` block; verify in the registry, names drift | Sidebar header = app name/logo · footer = `nav-user` (avatar + ชื่อ + logout) · **ต้องติด `components/site-header.tsx` ด้วยเสมอ** (`nav-config.md` §Site header) — คำตอบ "Sidebar" ไม่ใช่ข้อยกเว้น |
 
 **After installing a `sidebar-*` block — mandatory cleanup** (the block ships
 a demo, not an app shell; both eval runs independently needed these steps):
@@ -50,65 +50,36 @@ a demo, not an app shell; both eval runs independently needed these steps):
    (two-column login page: `ugt-nextjs-auth-setup` → `references/login-page.md`).
 3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
    `/` — remove/redirect the root one.
-4. Rebuild `app-sidebar.tsx` per the org rules below (Thai menu, app-name
-   header, nav-user footer, longest-prefix highlight).
+4. **Replace the block's `app-sidebar.tsx` with the kit's**
+   (`assets/components/app-sidebar.tsx` + `lib/nav.ts` + `lib/nav.test.ts`) —
+   it already carries the logo mask above, the app-name header, the menu
+   search, the group dots, longest-prefix highlight and the `footer` slot for
+   auth-setup's `<NavUser />`. Feed it from the nav config (`nav-config.md`). Then
+   apply the **sidebar active-state edit** to `components/ui/sidebar.tsx`
+   (§Org shell rules → Sidebar active state).
 5. Mount `components/site-header.tsx` (kit) as the first child of
-   `SidebarInset` — §Site header below. A shell whose top bar holds only
+   `SidebarInset` — `nav-config.md` §Site header. A shell whose top bar holds only
    the trigger is an incomplete install (field bug: every screenshot of it
    read as "หน้าเปล่า ๆ ไม่เหมือน HRMS").
 | Topbar | no dedicated block — compose from `navigation-menu` + the org rules; the reference implementation is gov-boi-smart's header (blue navbar) | User menu = `DropdownMenu` มุมขวาสุด |
-| Sidebar + Topbar | `sidebar-07` + `components/site-header.tsx` (kit) | Header = breadcrumb เส้นทางเต็ม + toggles (§Site header) |
+| Sidebar + Topbar | `sidebar-07` + `components/site-header.tsx` (kit) | Header = breadcrumb เส้นทางเต็ม + toggles (`nav-config.md` §Site header) |
 | Landing page (ข้อ 6 = มี) | pick a marketing block/template from the registry at implement time | Landing ใช้ token ชุดเดียวกัน — ห้ามธีมแยก |
 
 Login/setup pages come themed from `ugt-nextjs-auth-setup` — this skill runs
 first so those pages inherit the tokens; do not build login UI here.
 
-## Site header (ทุก shell ที่มี sidebar — ไม่ใช่ของเสริม)
+## Nav config → moved to `nav-config.md`
 
-`components/site-header.tsx` (kit asset, extracted from the HRMS header —
-before 4.58.0 it existed only as words pointing at HRMS code, which is why
-installs shipped empty top bars). Composition, left→right:
+The menu exists once as data (`lib/nav.ts` types, a project-owned `components/nav-items.ts`) and is
+built in a **client** component (`components/app-nav.tsx`) that renders both `<AppSidebar>` and
+`<SiteHeader>` — items carry lucide icons, which a Server Component layout cannot pass as props.
+Full recipe, group colours and the admin merge: `nav-config.md`.
 
-1. `SidebarTrigger` — the collapse button.
-2. Vertical `Separator` — `h-4` **plus `data-vertical:self-center`**: `ui/separator`
-   gives vertical separators `self-stretch`, which overrides the header's
-   `items-center`, so a fixed-height line hugs the top edge instead of sitting
-   in the middle (looked like a broken/missing line next to the trigger).
-3. **Breadcrumb = เส้นทางเต็ม** derived from the SAME nav config the sidebar
-   renders (pass the resolved items in — labels identical to the menu, never
-   hardcoded): `group › หน้า` on a nav page ("งานหลัก › ใบลา"), plus any
-   deeper URL segments appended decoded ("งานหลัก › ใบลา › LV-0241").
-   **The first crumb is the item's group HEADING as the sidebar shows it —
-   never a sibling page's label** (hand-built crumbs shipped
-   "ภาพรวม › ใบลา" where ภาพรวม was another page; the `group` field on each
-   nav item must therefore carry the exact heading text). Active item = the
-   same longest-prefix rule as the nav highlight, so header and sidebar can
-   never disagree — `deriveCrumbs` is exported and locked by
-   `site-header.test.ts` (copy/skip the pair together). Last crumb =
-   current page (no link); earlier crumbs link.
-4. Right slot (`actions` prop) — **the mount point for the toggles**:
-   `<LanguageSwitcher />` (เมื่อ ภาษา = th+en) then `<ThemeToggle />`
-   (เมื่อ dark mode = มี). Copying those two components and rendering them
-   nowhere was the other half of the empty-header bug. Page-specific
-   actions do NOT go here — they stay in `PageActions`.
-5. **ป้าย `DEV`** (built into the asset, left of the toggles) — a warning
-   `StatusBadge` shown when `NEXT_PUBLIC_BASE_PATH` ends with `-dev`, which is
-   exactly the develop deploy (`ugt-nextjs-ci.md`: develop = everything
-   suffixed `-dev`). prod and dev share one host and look identical, so
-   without it nothing but the URL says which one a user is typing into. No new env
-   var — the basePath already tells the two apart. It is the **compact** signal:
-   the primary one is the full-width amber `<DevEnvironmentBar />` mounted in
-   `app/layout.tsx` above the whole shell (SKILL.md step 3.3 → `root-layout.md` §DEV environment indicator) — it also covers the
-   login page, which has no header — plus the `[DEV] ` title prefix so the browser
-   tab differs too. The bar is non-sticky by design (it scrolls away rather than
-   cover a sticky top bar), which is why the badge stays. The sidebar block's
-   panel is `fixed` and overlays the bar's left edge at scroll 0 — keep the bar's
-   text centered (default) and any `note` short.
+## Site header → moved to `nav-config.md` §Site header
 
-The header carries `border-b` — the line separating it from the page. This
-**replaces** the old rule "breadcrumb above the title when depth > 2": the
-breadcrumb now lives in the site-header only; pages render no breadcrumb of
-their own.
+Every sidebar shell mounts `components/site-header.tsx` as the first child of `SidebarInset`:
+trigger · separator · breadcrumb from the same nav config · `actions` slot for the toggles · DEV badge.
+Composition and visuals (D7): `nav-config.md` §Site header.
 
 ## Org shell rules (apply to whichever shell)
 
@@ -120,7 +91,11 @@ their own.
 - **Nav highlight**: current item = the **longest** href among
   `pathname === href || pathname.startsWith(href + '/')` — the `+ '/'` stops
   `/` matching everything, the longest-match stops `/cut` and `/cut-history`
-  both lighting up (bug both projects hit)
+  both lighting up (bug both projects hit) — implemented once as
+  `findActiveHref` in `lib/nav.ts`, which both `<AppSidebar>` and
+  `<SiteHeader>` call — a project-built menu calls it too instead of
+  re-deriving (auth-setup's standalone `<AdminNav>` inlines the same rule
+  because it may run where `lib/nav.ts` was never copied)
 - **Overflow (topbar)**: menu wider than the bar → horizontal scroll, **never wrap**
 - **Overflow (sidebar)**: a menu taller than the viewport must scroll **with a
   visible scrollbar**. The `sidebar-*` block ships `SidebarContent` with
@@ -149,16 +124,51 @@ their own.
   // components/ui/sidebar.tsx — SidebarInset
   'relative flex w-full min-w-0 flex-1 flex-col bg-background ...',
   ```
+- **Sidebar active state = solid** (มติ 2026-10-16 D7 — replaces the preset's
+  "Subtle" `bg-sidebar-accent` tint, which on a white sidebar is a faint gray
+  barely distinguishable from hover). Sanctioned edit, three strings in
+  `components/ui/sidebar.tsx` — the primitive, not a className per menu, so
+  auth-setup's `<AdminNav>` fallback and any project-built menu get it too:
+
+  ```tsx
+  // sidebarMenuButtonVariants (base string) — was: data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground
+  'data-active:bg-sidebar-primary data-active:font-medium data-active:text-sidebar-primary-foreground'
+  // SidebarMenuBadge — was: peer-data-active/menu-button:text-sidebar-accent-foreground
+  'peer-data-active/menu-button:text-sidebar-primary-foreground'
+  // SidebarMenuAction (showOnHover branch) — same swap as the badge
+  'peer-data-active/menu-button:text-sidebar-primary-foreground'
+  ```
+  Keep `hover:bg-sidebar-accent` as is: `data-active:` sorts after `hover:` in
+  Tailwind v4, so the active row stays solid under the pointer. The badge and
+  the row action sit ON the active row, so they must switch to the
+  `-primary-foreground` text with it (dark text on the fill otherwise).
+  `SidebarMenuSubButton` keeps its subtle highlight (depth-2 rows, and its
+  `[&>svg]:text-sidebar-accent-foreground` would turn dark on a solid fill).
+  `scripts/verify.mjs` warns when `sidebarMenuButtonVariants` still carries
+  `data-active:bg-sidebar-accent`.
+- **Menu search** (D7): `<AppSidebar>` renders a search box under the app name
+  (`SidebarInput`, `kit.appSidebar.searchPlaceholder`) — client-side,
+  matches the item label or its group heading, Esc clears, "ไม่พบเมนู" when
+  nothing matches. Hidden — and ignored — while the sidebar is collapsed to
+  icons, so no item disappears behind a search the user cannot see. On by
+  default; `search={false}` only for a menu readable at a glance, with a
+  comment saying so.
+- **Group dots** (D7): `NavGroup.color` (`cat-1..8`) draws a small dot before
+  the group heading; the breadcrumb repeats it. Decorative only — never a
+  `status-*` colour, never the only thing that tells groups apart (the
+  heading text does that). Item icons stay the sidebar foreground colour.
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน
   + content in a card · three page patterns — data / form (single column,
   one card per section) / dashboard — DESIGN.md §3 · content capped at
   `max-w-[96rem]` centred while the site-header stays full width (มติ
-  2026-10-16 A1 — the cap belongs to `PageShell`, kit ≥ next release; never
-  per page) · breadcrumb lives in the site-header only, never above the title
+  2026-10-16 A1 — the cap is built into `PageShell`; never set per page) ·
+  breadcrumb lives in the site-header only, never above the title
 - **Sidebar surface**: white (`--sidebar: oklch(1 0 0)`, มติ 2026-10-16
   TK-SB) on the #f5f7fb page, separated by its border — keep the block's
   `border-r`; don't tint it back
-- **Mobile**: sidebar collapses to the block's built-in sheet/drawer ·
-  content transforms are systematic (DataTable → list rows in one card,
-  dialog/popover → bottom sheet) — never per-page improvisation
+- **Mobile**: sidebar collapses to the block's built-in sheet/drawer (tapping
+  an `<AppSidebar>` item closes it) · breadcrumb → dot + current page ·
+  content transforms are systematic (DataTable → list rows in one card —
+  built into `ui/data-table`, `datatable.md` §Mobile; dialog/popover → bottom
+  sheet) — never per-page improvisation

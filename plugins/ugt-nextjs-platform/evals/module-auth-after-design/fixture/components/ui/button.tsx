@@ -15,10 +15,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          'bg-destructive text-white hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:hover:bg-destructive/70 dark:focus-visible:ring-destructive/40',
         link: "text-primary underline-offset-4 hover:underline",
         // org sanctioned (design-setup assets/ui/button-variants.md)
         success: "bg-status-emerald text-white hover:bg-status-emerald/90",
+        soft: 'border-primary/25 bg-primary/10 text-primary hover:bg-primary/15 aria-expanded:bg-primary/15',
         "soft-primary": "text-primary hover:bg-primary/10 hover:text-primary",
         "soft-destructive": "text-destructive hover:bg-destructive/10 hover:text-destructive",
         "soft-success": "text-status-emerald hover:bg-status-emerald/10 hover:text-status-emerald",
@@ -31,6 +32,7 @@ const buttonVariants = cva(
         xs: "h-5 gap-1 rounded-sm px-2 text-[0.625rem] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-2.5",
         sm: "h-6 gap-1 px-2 text-xs/relaxed has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         lg: "h-8 gap-1 px-2.5 text-xs/relaxed has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4",
+        cta: "h-11 gap-1.5 px-4 text-sm sm:h-9 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&_svg:not([class*='size-'])]:size-4",
         icon: "size-7 [&_svg:not([class*='size-'])]:size-3.5",
         "icon-xs": "size-5 rounded-sm [&_svg:not([class*='size-'])]:size-2.5",
         "icon-sm": "size-6 [&_svg:not([class*='size-'])]:size-3",

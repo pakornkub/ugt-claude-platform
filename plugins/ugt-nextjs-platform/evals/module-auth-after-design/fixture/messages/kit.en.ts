@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.76.0 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: dbc7cb603477
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: 24c9d586de16
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -65,5 +65,15 @@ export const kitEn = {
   devEnvironment: {
     label: 'DEV environment',
     message: 'test data only',
+  },
+  // ── shell (components/app-sidebar.tsx + site-header.tsx — D7) ──
+  // Menu labels and group headings are not here — they belong to the
+  // project's nav config (lib/nav.ts).
+  appSidebar: {
+    searchPlaceholder: 'Search menu',
+    noMatch: 'No menu matches',
+  },
+  siteHeader: {
+    home: 'Home',
   },
 } as const;

@@ -44,8 +44,8 @@ What lands in the project:
 | Fonts (Inter + Noto Sans Thai + Geist Mono via `next/font`) | `app/layout.tsx` |
 | shadcn config (style `base-mira`, neutral, lucide) | `components.json` |
 | Org UI kit | `components/ui/*` + `lib/format.ts` + `lib/avatar.ts` — from `assets/ui/` and `assets/lib/` |
-| App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
-| Site header (breadcrumb เส้นทางเต็ม + จุด mount ของ toggles) | `components/site-header.tsx` — from `assets/components/`, mandatory on every sidebar shell (§Site header in layout-shells.md) |
+| App shell (sidebar or topbar per interview) | `components/app-sidebar.tsx` (kit) + the project's nav config + `app/(app)/layout.tsx` — see `references/layout-shells.md` + `references/nav-config.md` |
+| Site header (breadcrumb เส้นทางเต็ม + จุด mount ของ toggles) | `components/site-header.tsx` — from `assets/components/`, mandatory on every sidebar shell (`references/nav-config.md` §Site header) |
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
 | DEV environment indicator (amber bar on every page + `[DEV] ` tab title, dev deployment only) | `lib/environment.ts` + `components/dev-environment-bar.tsx` + `app/layout.tsx` — from `assets/lib/` + `assets/components/`; strings in `kit.devEnvironment` |
 | Harness rule (read DESIGN.md before UI work) | `.claude/rules/ugt-nextjs-design.md` — from `assets/rules/ugt-nextjs-design.md` |
@@ -61,7 +61,9 @@ What lands in the project:
    DESIGN.md, nowhere else: `size="icon"` for an icon-only button **anywhere**
    as long as it carries an `aria-label` (มติ 2026-08-21 — theme toggle,
    SidebarTrigger, column settings, pagination), **but inside a table row it
-   must go through `IconAction`**; `sm` in dense toolbars.
+   must go through `IconAction`**; one toolbar row = one size (`sm` only inside
+   dense panels); `cta` for the page's header actions, the form action bar and
+   dialog/sheet footers (มติ 2026-10-16 A3/A7).
 4. **DataTable only** for tabular data; server-paginated data must sort and
    filter server-side through URL state — never client-sort a partial page.
    Every instance passes a **unique `id`** (prefs persist), and page-level
@@ -221,16 +223,21 @@ different size — is the field bug this step exists to prevent.
    `button.tsx` — `add <block>` prompts per existing file (even with
    `--yes`; pipe `yes n |` to decline in headless runs) and answering `y`
    would silently wipe just-applied variants. Then prune the block's demo
-   debris per layout-shells.md, **and mount `components/site-header.tsx`
+   debris per layout-shells.md, **replace the block's app-sidebar with the kit's
+   `components/app-sidebar.tsx`** (fed from the nav config — `references/nav-config.md`;
+   the list carries icons, so a client component builds it, never the server
+   layout), apply the sidebar active-state edit to `components/ui/sidebar.tsx`,
+   **and mount `components/site-header.tsx`
    (copied in Step 6) as the first child of `SidebarInset`** — feed it the
-   same resolved nav items the sidebar renders, and put
+   same `items` + `groups` the sidebar gets, and put
    `<LanguageSwitcher />` (th+en) + `<ThemeToggle />` (dark = มี) in its
    `actions` slot. A shell whose top bar is just the trigger is the field
    bug this step closes.
 6. Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
-   th+en only; **`site-header` + `site-header.test.ts` คู่กันเสมอ
-   (ทุกโปรเจคที่มี sidebar shell)**, `lib/environment.ts` + `environment.test.ts` +
+   th+en only; **`app-sidebar` + `site-header` + `site-header.test.ts` + `lib/nav.ts` +
+   `lib/nav.test.ts` ชุดเดียวกันเสมอ (ทุกโปรเจคที่มี sidebar shell — site-header import
+   `lib/nav.ts`)**, `lib/environment.ts` + `environment.test.ts` +
    `components/dev-environment-bar.tsx` (ทุกโปรเจค — wiring อยู่ Step 3.3 → `references/root-layout.md`),
    `theme-toggle` (dark mode = มี) and `language-switcher`
    (th+en) from `assets/components/` — list + provenance in
@@ -248,11 +255,15 @@ different size — is the field bug this step exists to prevent.
    already ships `components/theme-provider.tsx` (a superset of our asset)
    — keep the registry's file; the asset is only a fallback for projects
    that somehow lack it.** Apply `assets/ui/button-variants.md` to the
-   installed `components/ui/button.tsx` — the sanctioned `success` /
-   `soft-*` variants **and the `field` variant (mandatory: the kit's
-   date-picker uses it and today's registry button doesn't ship it — build
-   breaks without it)**. Never overwrite an existing same-name file
-   silently — diff and ask.
+   installed `components/ui/button.tsx` — `success` · solid `destructive`
+   (replaces the preset's tint) · `soft` · `soft-*` · size `cta` **and the
+   `field` variant (mandatory: the kit's date-picker uses it and today's
+   registry button doesn't ship it — build breaks without it)** — then
+   `assets/ui/primitive-edits.md` to `card.tsx` / `table.tsx` / `dialog.tsx` /
+   `sheet.tsx` / `alert-dialog.tsx` (Card elevation + CardHeading pt · table
+   `2xl:text-sm` · dialog 3 zones with `cta` footers — class-string edits only;
+   button first, the footers use `cta`). The two `.md` recipes are not copied.
+   Never overwrite an existing same-name file silently — diff and ask.
    Also copy `assets/brand/` → `public/brand/` (company logos as tintable
    SVGs — `fill="currentColor"`, so CSS `color` sets the brand blue or
    white-on-dark): `ube-logo-short.svg` for the shell header (sidebar/topbar),
@@ -339,6 +350,9 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
   existing-project scan checklist (the interview step reads it — question bank, defaults, scan checklist)
 - `references/layout-shells.md` — shell answer → shadcn block mapping + nav
   highlight rule + overflow rule
+- `references/nav-config.md` — the one nav config feeding `AppSidebar` + `SiteHeader`, and the site header itself
+- `references/tabbed-pages.md` — a tabbed page's primary action: in `PageActions`, swapping with `?tab=`
+  (client-built list, groups/colours, admin merge)
 - `references/shadcn-init.md` — Step 3.2 in full: Tailwind v4 check/upgrade,
   org-preset init command, after-init gate, Windows short path, token merge
 - `references/root-layout.md` — Step 3.3 in full: fonts + `lang`, provider
@@ -391,9 +405,14 @@ node <skill-dir>/scripts/check-contrast.mjs
       same nav config as the sidebar, and the toggles that were copied
       (`LanguageSwitcher`/`ThemeToggle`) actually render in its `actions`
       slot (verify.mjs checks presence/imports; the rendered breadcrumb is
-      by eye)
+      by eye) · sidebar = kit `AppSidebar` (search box, group dots, active row
+      solid primary — verify.mjs warns on the subtle preset row) fed by the same
+      `items` + `groups` as the header
 - [ ] `components/ui/select.tsx` `SelectTrigger` carries `w-full`
       (verify.mjs checks) — a form Select must not shrink to its value
+- [ ] button/card/table/dialog/sheet/alert-dialog carry the sanctioned edits
+      (verify.mjs checks; by eye: a dialog footer is a muted band edge to edge
+      with 44px buttons on a phone, a card sits on the gray page with a hairline shadow)
 - [ ] a page using Button / Input / Table renders with the new tokens, in
       light **and** dark if dark mode was selected
 - [ ] the installed UI matches the platform repo's `docs/web/design-preview.html`

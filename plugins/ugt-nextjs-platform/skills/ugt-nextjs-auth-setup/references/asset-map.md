@@ -11,7 +11,7 @@ the §5.1 install commands.
 | `assets/prisma/schema-auth.prisma` | paste INTO `prisma/schema.prisma` | not a whole-file copy — see SKILL.md §5.3 |
 | `assets/env.example` | fill section **3. Auth** of `.env.example` + `.env.local` in place (canonical layout — never append at the bottom) | drop vars for unselected methods · basePath goes in section 1 `NEXT_PUBLIC_BASE_PATH` · compose already exists → uncomment its `[AUTH]` + `[AUTH: <method>]` lines |
 | `assets/rules/ugt-nextjs-auth.md` | `.claude/rules/ugt-nextjs-auth.md` | whole-file overwritable on plugin update |
-| `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` from the design kit |
+| `assets/components/nav-user.tsx` | `components/nav-user.tsx` | needs `avatar`, `badge`, `dialog`, `dropdown-menu`, `sidebar` from shadcn + `ui/truncated-text` and `lib/avatar.ts` (initials + `--cat-*` colour, kit ≥ 4.80.0) from the design kit |
 | `assets/lib/audit-actions.ts` | `lib/audit-actions.ts` | every project — the only place an `ActivityLogs.action` string may be written; every shipped action imports `AUDIT_ACTIONS` from here (`audit-logging.md`) |
 | `assets/lib/ldap.ts` | `lib/ldap.ts` | copy only when LDAP selected |
 | `assets/lib/directory.ts` | `lib/directory.ts` | only when a central employee view exists — substitute the four-part view name + column map; skipping it means deleting the directory columns from the schema too (SKILL.md §3 Q6) |

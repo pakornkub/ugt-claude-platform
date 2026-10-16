@@ -1,8 +1,8 @@
 # DataTable + page-level filters — the table rules behind DESIGN.md §4–6
 
 Contents: §Page-level filter bar (outside the table) · §DataTable (modes,
-feature set, row selection, header cell, toolbar, pagination, consistency
-obligations, kit status)
+feature set, card · footer · sortable, mobile, row selection, header cell,
+toolbar, pagination, consistency obligations, kit status)
 
 ## Page-level filter bar (outside the table)
 
@@ -42,16 +42,53 @@ Central component, two modes; the mode is decided **per table at build time**
   + paginate ALL through URL state; never half. Client-sorting a partial
   page shows wrong results with no error — the founding bug of this rule.
 
-Standard feature set (each off-switchable per prop, default = on): global
-search (toolbar) · per-column filter (header icon → Popover, active-filter
-chips with per-chip ✕ and clear-all) · sort · pagination (default 10,
-options 10/20/50) · column drag-reorder · column hide/show · user prefs
-(order+hidden) persisted in localStorage · reset-to-default · mobile
-layout · row selection · built-in Empty state. **Mobile target (มติ
-2026-10-16 D8/A12): a list of rows inside the one card**, rows divided by
-hairlines — not a card per row on the gray page (kit ≥ next release; today's
-`data-table.tsx` still renders a card per row below `sm` — don't restyle it
-per page).
+Standard feature set (each off-switchable per prop, default = on unless
+noted): global search (toolbar) · per-column filter (header icon → Popover,
+active-filter chips with per-chip ✕ and clear-all) · sort (server mode:
+via `serverQuery`; client mode: **opt-in `sortable`**, below) · pagination
+(default 10, options 10/20/50) · column drag-reorder · column hide/show ·
+user prefs (order+hidden) persisted in localStorage · reset-to-default ·
+mobile list · row selection · built-in Empty state · `footer` slot.
+
+**Card** (`card`, default on): toolbar + chips → table (or the mobile list) →
+pagination → `footer`, all in ONE card at every breakpoint, with the `Card`
+elevation (`shadow-xs ring-1 ring-border`, มติ D3). `card={false}` only when
+the table already sits on a surface (dialog, sheet, a tab's card) — never a
+shadowed card inside a shadowed card.
+
+**`footer`** (มติ B3): the last row inside the card, under pagination, with
+a `border-t` — legends for the table's symbols/colours, a footnote. A legend
+floating below the card reads as a separate thing.
+
+**`sortable`** (มติ B3): header sort buttons for a **client-mode** table —
+the same button, arrow and `aria-sort` as server mode; turn one column off
+with `enableSorting: false`. Opt-in so a kit update doesn't change existing
+headers. **Ignored when `serverPagination` is passed** (the same guard as
+per-column filters): sorting the one page in hand shows the 10 visible rows
+"sorted" and nothing tells the user the order is wrong. A server table sorts
+through `serverQuery`. `scripts/verify.mjs` fails on a `<DataTable>` that
+passes both.
+
+### Mobile (<sm) — มติ 2026-10-16 D8/A12
+
+Built into the component; never restyle it per page.
+
+- **Rows = a list inside the one card**, divided by hairlines
+  (`data-slot="data-table-mobile-row"`, `border-b` · last row none · selected
+  = `bg-muted` like a selected `TableRow`). The first data column is the row
+  heading, the rest are label/value pairs (`meta.mobileLabel` when the
+  header isn't a string), the `actions` cell sits at the row's foot, the
+  `select` checkbox leads the heading. Replaces the 2026-08-21 card-per-row
+  layout, which put a card inside the card and spent the height on borders.
+- **Toolbar rows go full width, in this order**: navigation (search box →
+  `toolbarFilters`, each control stretched full width) → secondary tools
+  (`toolbarExtra` + the column-settings button) together in one row,
+  right-aligned. The column-settings button is never hidden on mobile.
+- The page's **primary action is not in the toolbar** (contract: a filter row
+  never hosts an action) — it stays in `PageActions` above the card, which
+  on phones is the full-width `cta` button.
+
+### Row selection, header, toolbar, pagination
 
 ติ๊กเลือกแถวใช้ `selectionColumn()` จาก `ui/data-table` เป็นคอลัมน์แรกเสมอ —
 อย่าเขียน header/cell เอง: helper บังคับ `aria-label` ที่ระบุแถวได้ (ไม่งั้น
@@ -68,16 +105,17 @@ issue the same command.
 
 **Header cell anatomy** (left → right inside one cell, only what is enabled):
 drag handle (`GripVertical`, dimmed) → column label as a sort button with a
-direction indicator → per-column filter icon opening a Popover. Per-column
-filter UI is **auto-suppressed** when a table passes `serverPagination`
-without `serverQuery` — client-filtering one page of a server-paginated set
-returns confident nonsense, so the component refuses rather than trusting the
-caller.
+direction indicator (server mode, or client mode with `sortable`) →
+per-column filter icon opening a Popover. Per-column filter UI and client
+sort are **auto-suppressed** when a table passes `serverPagination` without
+`serverQuery` — client-filtering or client-sorting one page of a
+server-paginated set returns confident nonsense, so the component refuses
+rather than trusting the caller.
 
 **Toolbar** — one row, fixed order, matching the component (`data-table.tsx`):
 **search input leftmost** → `toolbarFilters` (page-level filters, wide →
 narrow) → flex spacer → `toolbarExtra` (export menu and friends) and the
-column-settings icon button hugging the **right** edge. The column-settings
+column-settings icon button hugging the **right** edge (phones: §Mobile). The column-settings
 Popover has drag-to-reorder + show/hide checkboxes + reset; prefs persist per
 table `id`. Search never migrates to the right side, and filters never get
 their own row above the toolbar (มติ 2026-08-11).

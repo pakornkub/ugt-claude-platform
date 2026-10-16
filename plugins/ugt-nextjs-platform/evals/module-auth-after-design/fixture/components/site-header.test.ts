@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.58.0 · ugt-nextjs-design-setup/components/site-header.test.ts
-// kit-hash: 3309c835483d
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/components/site-header.test.ts
+// kit-hash: da456d04ad7b
 // installed by ugt-nextjs-design-setup alongside components/site-header.tsx
 // ล็อก derivation ของ breadcrumb — จุดที่พังเงียบ ๆ แล้วเห็นเป็น "header กับ
 // sidebar พูดไม่ตรงกัน" ไม่ใช่ error: crumb แรกต้องเป็น "หัว group" ของเมนู
@@ -47,5 +47,20 @@ describe('deriveCrumbs — breadcrumb ต้องตรงกับ sidebar เ
   it('เมนูไม่มี group = เริ่มที่ชื่อหน้าเลย · path นอกเมนู = ไม่มี crumb', () => {
     expect(deriveCrumbs('/admin/users', NAV)).toEqual([{ label: 'ผู้ใช้', href: '/admin/users' }]);
     expect(deriveCrumbs('/nowhere', NAV)).toEqual([]);
+  });
+
+  it('crumb กลุ่มได้สีจุดจาก groups ชุดเดียวกับ sidebar (--cat-*) · ไม่มีสี = ไม่มี key color', () => {
+    const groups = [{ label: 'งานหลัก', color: 'cat-1' as const }];
+    expect(deriveCrumbs('/leave', NAV, groups)[0]).toStrictEqual({
+      label: 'งานหลัก',
+      color: 'cat-1',
+    });
+    expect(deriveCrumbs('/leave', NAV)[0]).toStrictEqual({ label: 'งานหลัก' });
+    // สีอยู่ที่ crumb กลุ่มเท่านั้น — หน้า/segment ไม่มีสี
+    expect(
+      deriveCrumbs('/leave/LV-1', NAV, groups)
+        .slice(1)
+        .some((c) => 'color' in c)
+    ).toBe(false);
   });
 });

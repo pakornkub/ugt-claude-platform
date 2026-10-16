@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/ui/status-badge.tsx
-// kit-hash: 46db836f9d1a
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/status-badge.tsx
+// kit-hash: 7a340b661de7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 import * as React from 'react';
 import type { LucideIcon } from 'lucide-react';
@@ -8,10 +8,10 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * Semantic tone for a status badge — maps 1:1 to the locked `--status-*`
- * semantic-6 palette (see `docs/DESIGN.md` § Semantic 6 สี). Every tone
- * renders on the `outline` Badge variant; there is no secondary-variant
- * fallback — `neutral` uses `status-gray` for real color, not a gray no-op.
+ * Semantic tone for a status badge — maps 1:1 to the org `--status-*` set of
+ * seven (see `docs/DESIGN.md` §1 สีสถานะ 7 ตัว). Every tone renders on the
+ * `outline` Badge variant; there is no secondary-variant fallback —
+ * `neutral` uses `status-gray` for real color, not a gray no-op.
  *
  * | tone      | token           | meaning                        |
  * | --------- | --------------- | ------------------------------- |
@@ -21,12 +21,13 @@ import { Badge } from '@/components/ui/badge';
  * | `cancel`  | `status-coral`  | ขอยกเลิก                        |
  * | `info`    | `status-sky`    | ระบบ / ข้อมูล / สลับกะ           |
  * | `neutral` | `status-gray`   | ยกเลิก / ร่าง / ปิดใช้งาน        |
+ * | `violet`  | `status-violet` | กลุ่มที่โปรเจคตั้งชื่อเอง — ใช้ได้เมื่อ DESIGN.md §10 มีมติบอกว่ากลุ่มไหน (มติ 2026-10-16 TK-VIO) |
  *
  * Convention: **status / state / severity** badges always pair a tone with a
  * leading icon (color + icon = dual cue, accessible for color-blind users).
  * Plain labels, categories, counts and identifiers stay text-only `<Badge>`.
  */
-export type StatusTone = 'success' | 'warning' | 'danger' | 'cancel' | 'info' | 'neutral';
+export type StatusTone = 'success' | 'warning' | 'danger' | 'cancel' | 'info' | 'neutral' | 'violet';
 
 /**
  * Single source of truth for status colors — each tone maps to its
@@ -35,7 +36,7 @@ export type StatusTone = 'success' | 'warning' | 'danger' | 'cancel' | 'info' | 
  * that must stay icon-free (e.g. raw-log IN/OUT) can reuse the exact same
  * tokens instead of re-declaring them inline.
  *
- * Formula (pattern ส่วน 6): `border-status-x/40 bg-status-x/10 text-status-x-foreground`.
+ * Formula (DESIGN.md §1): `border-status-x/40 bg-status-x/10 text-status-x-foreground`.
  */
 export const TONE_STYLES: Record<StatusTone, string> = {
   success: 'border-status-emerald/40 bg-status-emerald/10 text-status-emerald-foreground',
@@ -44,6 +45,7 @@ export const TONE_STYLES: Record<StatusTone, string> = {
   cancel: 'border-status-coral/40 bg-status-coral/10 text-status-coral-foreground',
   info: 'border-status-sky/40 bg-status-sky/10 text-status-sky-foreground',
   neutral: 'border-status-gray/40 bg-status-gray/10 text-status-gray-foreground',
+  violet: 'border-status-violet/40 bg-status-violet/10 text-status-violet-foreground',
 };
 
 interface StatusBadgeProps {

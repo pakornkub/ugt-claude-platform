@@ -61,6 +61,17 @@
   --color-status-sky-foreground: var(--status-sky-foreground);
   --color-status-gray: var(--status-gray);
   --color-status-gray-foreground: var(--status-gray-foreground);
+  --color-status-violet: var(--status-violet);
+  --color-status-violet-foreground: var(--status-violet-foreground);
+  /* categorical (มติ 2026-10-16 TK-CAT) */
+  --color-cat-1: var(--cat-1);
+  --color-cat-2: var(--cat-2);
+  --color-cat-3: var(--cat-3);
+  --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5);
+  --color-cat-6: var(--cat-6);
+  --color-cat-7: var(--cat-7);
+  --color-cat-8: var(--cat-8);
 
   /* RADIUS — ของ preset `base-mira` ทั้งชุด ไม่ตั้งทับ (มติ 2026-08-09):
      :root ตั้ง --radius: 0.45rem (7.2px) แล้วระดับที่เหลือคำนวณจากตัวนั้น
@@ -122,6 +133,17 @@
   --status-sky-foreground: oklch(0.443 0.11 240.8);
   --status-gray: oklch(0.554 0.041 257.4);
   --status-gray-foreground: oklch(0.372 0.044 257.3);
+  --status-violet: oklch(0.6 0.19 293);
+  --status-violet-foreground: oklch(0.47 0.19 293.5);
+  /* --cat-1..8 — identity/grouping only (avatar · nav group dots · chart > 5 series), white text AA, same in .dark (มติ 2026-10-16 TK-CAT) */
+  --cat-1: oklch(0.557 0.14 250);
+  --cat-2: oklch(0.54 0.11 178);
+  --cat-3: oklch(0.571 0.15 292);
+  --cat-4: oklch(0.574 0.15 32);
+  --cat-5: oklch(0.564 0.13 70);
+  --cat-6: oklch(0.577 0.15 350);
+  --cat-7: oklch(0.544 0.13 145);
+  --cat-8: oklch(0.541 0.12 220);
 }
 
 /* โปรเจคนี้ไม่เปิด dark mode (DESIGN.md §1, มติ 2026-10-13) — ไม่มี ThemeProvider
@@ -173,6 +195,8 @@
   --status-sky-foreground: oklch(0.828 0.111 230.3);
   --status-gray: oklch(0.704 0.04 256.8);
   --status-gray-foreground: oklch(0.869 0.022 252.9);
+  --status-violet: oklch(0.72 0.15 293);
+  --status-violet-foreground: oklch(0.84 0.1 293);
 }
 
 /* พื้นผิวที่เลื่อนได้ต้องเห็น scrollbar เสมอ แต่ไม่ให้หนาแบบของ OS
@@ -262,4 +286,16 @@
     0 0 5px var(--primary);
   opacity: 1;
   transform: rotate(3deg) translate(0, -4px);
+}
+
+/* Reduced motion (มติ 2026-10-16 TK-MOT) — one switch for tw-animate-css + every transition utility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

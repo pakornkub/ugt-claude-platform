@@ -404,6 +404,76 @@ check('Nothing clips content silently (table scrollX · sidebar scrollbar)', () 
   return { ok: true };
 });
 
+// ── shell (มติ 2026-10-16 D7) ─────────────────────────────────────────────
+// Sanctioned edit to components/ui/sidebar.tsx (layout-shells.md §Org shell
+// rules → Sidebar active state): the preset ships the "Subtle" active row
+// (bg-sidebar-accent — a faint gray on the white sidebar, barely different
+// from hover). Warn only: projects installed before this release keep the
+// subtle row until "sync ข้อตกลง design".
+check('Sidebar active item is solid (มติ D7 sanctioned edit)', () => {
+  const sidebar = sourceTsx().find((f) => /[\\/]components[\\/]ui[\\/]sidebar\.tsx$/.test(f));
+  if (!sidebar) return { ok: true, msg: 'no components/ui/sidebar.tsx — nothing to check' };
+  const body = readFileSync(sidebar, 'utf8');
+  const base = /sidebarMenuButtonVariants\s*=\s*cva\(\s*(["'`])([\s\S]*?)\1/.exec(body)?.[2] ?? '';
+  const gaps = [];
+  if (!/data-active:bg-sidebar-primary\b/.test(base)) {
+    gaps.push('SidebarMenuButton active row = data-active:bg-sidebar-primary + data-active:text-sidebar-primary-foreground');
+  }
+  if (/peer-data-active\/menu-button:text-sidebar-accent-foreground/.test(body)) {
+    gaps.push('SidebarMenuBadge/SidebarMenuAction on the active row = peer-data-active/menu-button:text-sidebar-primary-foreground');
+  }
+  return gaps.length
+    ? { ok: 'warn', msg: `${gaps.join(' · ')} — layout-shells.md §Sidebar active state (or "sync ข้อตกลง design")` }
+    : { ok: true };
+});
+
+// `sortable` sorts the rows in hand. With serverPagination those rows are ONE
+// page, so ui/data-table ignores the prop — writing both means the author
+// expected a sort that never happens. Server tables sort through serverQuery.
+// Depth-aware tag scan: serverPagination's object usually holds an arrow
+// (`onChange: (n) => …`) whose `>` would end a naive /<DataTable[^>]*>/ match.
+check('No <DataTable> passes `sortable` together with `serverPagination`', () => {
+  const files = sourceTsx().filter((f) => !/[\\/]components[\\/]ui[\\/]/.test(f));
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const tagsOf = (src) => {
+    const tags = [];
+    const re = /<DataTable(?![A-Za-z0-9])/g;
+    let m;
+    while ((m = re.exec(src))) {
+      let depth = 0;
+      let quote = null;
+      let i = m.index + m[0].length;
+      for (; i < src.length; i++) {
+        const c = src[i];
+        if (quote) {
+          if (c === quote) quote = null;
+        } else if (c === '"' || c === "'" || c === '`') quote = c;
+        else if (c === '{' || c === '(') depth++;
+        else if (c === '}' || c === ')') depth--;
+        else if (c === '>' && depth === 0) break;
+      }
+      tags.push({ at: m.index, text: src.slice(m.index, i) });
+    }
+    return tags;
+  };
+  const hits = [];
+  for (const file of files) {
+    const body = strip(readFileSync(file, 'utf8'));
+    const rel = relative(ROOT, file).split('\\').join('/');
+    for (const { at, text } of tagsOf(body)) {
+      // bare `sortable` or sortable={true} — never `sortable:` inside serverQuery.fields,
+      // never a dynamic value (can't tell statically)
+      const sortableOn = /\ssortable(?:\s*=\s*\{\s*true\s*\})?(?=[\s/]|$)/.test(text);
+      if (sortableOn && /\sserverPagination\s*=/.test(text)) {
+        hits.push(`${rel}:${body.slice(0, at).split('\n').length}`);
+      }
+    }
+  }
+  return hits.length
+    ? { ok: false, msg: `${hits.join(' · ')} — sortable is ignored on a server-paginated table (it would sort one page only); sort through serverQuery instead (datatable.md §sortable)` }
+    : { ok: true };
+});
+
 check('scroll-thin utility is installed', () => {
   if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
   return /@utility\s+scroll-thin/.test(readIn('app', 'globals.css'))
@@ -441,7 +511,7 @@ check('Sidebar shell has the site-header (breadcrumb + toggle mount point)', () 
   if (!hasIn('components', 'site-header.tsx')) {
     return {
       ok: false,
-      msg: 'components/site-header.tsx missing — copy assets/components/site-header.tsx and mount it as the first child of SidebarInset (layout-shells.md §Site header); an empty top bar is the install bug this gate exists for',
+      msg: 'components/site-header.tsx missing — copy assets/components/site-header.tsx and mount it as the first child of SidebarInset (nav-config.md §Site header); an empty top bar is the install bug this gate exists for',
     };
   }
   const used = sourceTsx().some(
@@ -482,6 +552,52 @@ check('SelectTrigger fills its grid cell (w-full)', () => {
         ok: false,
         msg: "base-mira's SelectTrigger defaults to w-fit — a form Select shrinks to its chosen value (field bug). Add `w-full` to the trigger's base classes (sanctioned edit, DESIGN.md §4); toolbar callsites keep overriding with w-44/w-20 via cn",
       };
+});
+
+// ── sanctioned primitive edits (assets/ui/button-variants.md + primitive-edits.md) ──
+// success/field have been mandatory for a long time: the kit's date-picker uses
+// `field`, ConfirmActionDialog types `confirmVariant` against `success` — either
+// missing is a type error, so those two FAIL. Everything from มติ 2026-10-16
+// (backlog §14 release 2) WARNS: an older project gets it through "sync ข้อตกลง
+// design", and a recorded rejection there must not turn the build red.
+check('button.tsx carries the sanctioned variants (button-variants.md)', () => {
+  if (!hasIn('components', 'ui', 'button.tsx')) return { ok: false, msg: 'components/ui/button.tsx missing — npx shadcn@latest add button' };
+  const code = readIn('components', 'ui', 'button.tsx');
+  const key = (name) => new RegExp(`(?:^|[\\s{,])["']?${name}["']?\\s*:`, 'm').test(code);
+  const missing = ['success', 'field'].filter((k) => !key(k));
+  if (missing.length) {
+    return { ok: false, msg: `variant ${missing.join(' + ')} missing — ui/date-picker uses \`field\`, ConfirmActionDialog types against \`success\`; apply assets/ui/button-variants.md` };
+  }
+  const later = [];
+  if (!key('soft')) later.push('variant `soft`');
+  if (!key('cta')) later.push('size `cta`');
+  const destructive = /destructive\s*:\s*(["'`])([\s\S]*?)\1/.exec(code)?.[2] ?? '';
+  if (!/(?:^|\s)bg-destructive(?=\s|$)/.test(destructive)) later.push('solid `destructive` (still the preset tint bg-destructive/10)');
+  return later.length
+    ? { ok: 'warn', msg: `มติ 2026-10-16 D6/A7 not applied: ${later.join(' · ')} — copy from assets/ui/button-variants.md (fresh install) or "sync ข้อตกลง design" (existing project)` }
+    : { ok: true };
+});
+
+check('Card · table · dialog zones carry the มติ 2026-10-16 edits (primitive-edits.md)', () => {
+  const wants = [
+    ['card', [[/shadow-xs/, 'shadow-xs'], [/ring-border/, 'ring-border'], [/data-slot=card-heading\]\]:pt-0/, 'has-[>[data-slot=card-heading]]:pt-0']]],
+    ['table', [[/2xl:text-sm/, '2xl:text-sm on <table>']]],
+    ['dialog', [[/bg-muted\/40/, 'DialogFooter border-t bg-muted/40'], [/\[&_button\]:h-11/, 'footer buttons at cta']]],
+    ['sheet', [[/bg-muted\/40/, 'SheetFooter border-t bg-muted/40']]],
+    ['alert-dialog', [[/bg-muted\/40/, 'AlertDialogFooter border-t bg-muted/40'], [/size\s*=\s*["']cta["']/, 'Action/Cancel default size cta']]],
+  ];
+  const missing = [];
+  for (const [file, rules] of wants) {
+    if (!hasIn('components', 'ui', `${file}.tsx`)) continue; // not installed → nothing to edit yet
+    const code = readIn('components', 'ui', `${file}.tsx`);
+    const gaps = rules.filter(([re]) => !re.test(code)).map(([, what]) => what);
+    if (gaps.length) missing.push(`${file}.tsx: ${gaps.join(', ')}`);
+  }
+  const kit = ['card-heading', 'view-toggle'].filter((f) => !hasIn('components', 'ui', `${f}.tsx`));
+  if (kit.length) missing.push(`kit file(s) not copied: ${kit.map((f) => `ui/${f}.tsx`).join(', ')}`);
+  return missing.length
+    ? { ok: 'warn', msg: `${missing.join(' · ')} — apply assets/ui/primitive-edits.md / copy from assets/ui/ (or "sync ข้อตกลง design")` }
+    : { ok: true };
 });
 
 check('Shell header shows the brand logo, not the block demo icon', () => {

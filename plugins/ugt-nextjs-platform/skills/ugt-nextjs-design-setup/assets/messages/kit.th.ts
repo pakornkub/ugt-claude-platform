@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.76.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: 229ad578047c
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: ad44e9a6e359
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -66,5 +66,14 @@ export const kitTh = {
   devEnvironment: {
     label: 'สภาพแวดล้อมทดสอบ (DEV)',
     message: 'ข้อมูลในระบบนี้ไม่ใช่ข้อมูลจริง',
+  },
+  // ── shell (components/app-sidebar.tsx + site-header.tsx — มติ 2026-10-16 D7) ──
+  // ชื่อเมนู/หัวกลุ่มไม่อยู่ที่นี่ — เป็นของ nav config ของโปรเจค (lib/nav.ts)
+  appSidebar: {
+    searchPlaceholder: 'ค้นหาเมนู',
+    noMatch: 'ไม่พบเมนูที่ค้นหา',
+  },
+  siteHeader: {
+    home: 'หน้าแรก',
   },
 } as const;

@@ -1,11 +1,18 @@
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: d6ee12a2c1bc
+// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 011e0aa6a0c2
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
 // a card inside a card — when taking this file into an existing project, remove
 // that hand-written wrapper (or pass card={false} where the table sits inside a
 // dialog/sheet that is already a surface).
+// MIGRATION (มติ 2026-10-16 D8/A12 · B3): the card now applies on phones too —
+// below `sm` the rows render as a LIST inside that one card (hairline
+// dividers), no longer a card per row on the gray page; the card carries the
+// Card elevation (`shadow-xs ring-1 ring-border`); new `footer` slot (legend
+// etc., inside the card) and client-side `sortable`. A page that styled the
+// old per-row mobile cards (`data-slot="data-table-mobile-card"`) must move
+// that styling to `data-table-mobile-row`.
 'use client';
 
 import * as React from 'react';
@@ -93,7 +100,7 @@ declare module '@tanstack/react-table' {
     width?: string | number;
     headerClassName?: string;
     cellClassName?: string;
-    /** Label for the auto mobile card row (needed when `header` is not a string). */
+    /** Label for the auto mobile list row (needed when `header` is not a string). */
     mobileLabel?: string;
     /**
      * กรองรายคอลัมน์: default = คอลัมน์มี `accessorKey` + header เป็น string +
@@ -195,7 +202,8 @@ function DataTableEmpty({ searchable, title, description }: Readonly<EmptyStateP
 function isInteractiveTarget(target: EventTarget | null): boolean {
   return (
     target instanceof Element &&
-    target.closest('button, a, input, select, textarea, [role="checkbox"], [role="button"]') !== null
+    target.closest('button, a, input, select, textarea, [role="checkbox"], [role="button"]') !==
+      null
   );
 }
 
@@ -245,7 +253,7 @@ function SelectAllHeader<TData>({
  *                resetSelectionKey={clearKey} />
  *
  * `id: "select"` ไม่ใช่ชื่อเล่น — `DataTable` มองหา id นี้ตรง ๆ เพื่อดึง
- * ติ๊กออกมาวางหัวการ์ดตอนจอมือถือ ตั้งชื่ออื่นแล้วมือถือจะไม่มีที่ให้เลือก
+ * ติ๊กออกมาวางหัวแถวตอนจอมือถือ ตั้งชื่ออื่นแล้วมือถือจะไม่มีที่ให้เลือก
  *
  * ทำไมต้องเป็น helper ไม่ปล่อยให้เขียนเอง: `aria-label` ของติ๊กแต่ละแถวต้อง
  * บอกให้ได้ว่าเป็นแถวไหน ไม่งั้น screen reader อ่านทั้งตารางว่า "checkbox" เฉย ๆ
@@ -283,7 +291,13 @@ export function selectionColumn<TData>({
   };
 }
 
-function DataTableMobileCards<TData>({
+/**
+ * จอ <sm: แถวเป็น **list คั่นเส้นในการ์ดใบเดียว** (มติ 2026-10-16 D8/A12 — แทนมติ
+ * kit 2026-08-21 "การ์ดต่อแถว") · การ์ดต่อแถวลอยบนพื้นเทาคือการ์ดซ้อนการ์ดเมื่อ
+ * ตารางอยู่ในการ์ดอยู่แล้ว และกินแนวตั้งไปกับขอบ+ช่องไฟของทุกใบ · กรอบนอกเป็นของ
+ * การ์ด DataTable (หรือ `rounded-lg border` เมื่อ `card={false}`) ไม่ใช่ของแต่ละแถว
+ */
+function DataTableMobileList<TData>({
   table,
   rowClassName,
   onRowClick,
@@ -299,13 +313,13 @@ function DataTableMobileCards<TData>({
   const rows = table.getRowModel().rows;
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border">
+      <div className="p-3">
         <DataTableEmpty {...empty} />
       </div>
     );
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col">
       {rows.map((row) => {
         const cells = row.getVisibleCells();
         const selectCell = cells.find((c) => c.column.id === 'select');
@@ -319,7 +333,7 @@ function DataTableMobileCards<TData>({
           // data-popup-open ส่วนของเราเป็น plain HTML จึงเขียน data-[state=selected] ได้
           <div
             key={row.id}
-            data-slot="data-table-mobile-card"
+            data-slot="data-table-mobile-row"
             data-state={row.getIsSelected() && 'selected'}
             onClick={
               onRowClick
@@ -329,7 +343,8 @@ function DataTableMobileCards<TData>({
                 : undefined
             }
             className={cn(
-              'rounded-lg border bg-card p-3 text-xs/relaxed data-[state=selected]:border-ring',
+              // เส้นคั่นระหว่างแถว ไม่ใช่กรอบรอบแถว · แถวที่เลือก = พื้นแบบเดียวกับ TableRow ที่เลือก
+              'border-b p-3 text-xs/relaxed last:border-b-0 data-[state=selected]:bg-muted',
               onRowClick && 'cursor-pointer',
               rowClassName?.(row.original)
             )}
@@ -353,7 +368,7 @@ function DataTableMobileCards<TData>({
               </dl>
             )}
             {/* `empty:hidden` — a permission-gated actions cell renders `null`, and the
-                cell object still exists, so without it the card grows a stray divider. */}
+                cell object still exists, so without it the row grows a stray divider. */}
             {actionsCell && (
               <div className="mt-2 flex justify-end border-t pt-2 empty:hidden">
                 {flexRender(actionsCell.column.columnDef.cell, actionsCell.getContext())}
@@ -526,12 +541,12 @@ function DataTableColumnSettings({
   );
 }
 
-/** หัวคอลัมน์หนึ่งช่อง: grip ลากจัดลำดับ + (server) ปุ่ม sort + ปุ่มกรองรายคอลัมน์ */
+/** หัวคอลัมน์หนึ่งช่อง: grip ลากจัดลำดับ + ปุ่ม sort (server หรือ client `sortable`) + ปุ่มกรองรายคอลัมน์ */
 function DataTableHeaderCell<TData>({
   header,
   draggable,
   filterable,
-  serverSortable,
+  sortable,
   filterLabel,
   filterValue,
   dragKey,
@@ -544,7 +559,7 @@ function DataTableHeaderCell<TData>({
   header: Header<TData, unknown>;
   draggable: boolean;
   filterable: boolean;
-  serverSortable: boolean;
+  sortable: boolean;
   filterLabel: string;
   filterValue: string;
   dragKey: string | null;
@@ -561,7 +576,7 @@ function DataTableHeaderCell<TData>({
   const content = header.isPlaceholder
     ? null
     : flexRender(header.column.columnDef.header, header.getContext());
-  const plain = !draggable && !filterable && !serverSortable;
+  const plain = !draggable && !filterable && !sortable;
   return (
     <TableHead
       colSpan={header.colSpan}
@@ -596,7 +611,7 @@ function DataTableHeaderCell<TData>({
           {draggable && (
             <GripVertical className="size-3 shrink-0 cursor-grab opacity-40" aria-hidden />
           )}
-          {serverSortable ? (
+          {sortable ? (
             <button
               type="button"
               className="flex items-center gap-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
@@ -609,7 +624,11 @@ function DataTableHeaderCell<TData>({
             content
           )}
           {filterable && (
-            <DataTableFilterPopover label={filterLabel} value={filterValue} onApply={onApplyFilter} />
+            <DataTableFilterPopover
+              label={filterLabel}
+              value={filterValue}
+              onApply={onApplyFilter}
+            />
           )}
         </div>
       )}
@@ -685,6 +704,16 @@ interface DataTableProps<TData> {
     fields?: TableFields;
   };
   /**
+   * ปุ่ม sort ที่หัวคอลัมน์ฝั่ง **client** (ข้อมูลครบอยู่ในมือ) — ปุ่ม/ลูกศร/`aria-sort`
+   * ชุดเดียวกับโหมด server · คอลัมน์ที่ไม่ต้องการ sort ปิดด้วย `enableSorting: false`
+   * ใน column def · default ปิด (opt-in) เพื่อให้อัปเดต kit แล้วหัวตารางเดิมไม่เปลี่ยนเอง
+   *
+   * **ถูกเพิกเฉยเมื่อมี `serverPagination`** (ด่านเดียวกับกรองรายคอลัมน์): `data` คือหน้าเดียว
+   * sort ฝั่ง client = เรียงแค่ 10 แถวที่เห็นแล้วดูเหมือนเรียงทั้งชุด — ผลลวงที่ไม่มี error ·
+   * ตาราง server ที่ต้อง sort ส่ง `serverQuery` (sort อยู่ใน URL) · `verify.mjs` fail เมื่อเขียนคู่กัน
+   */
+  sortable?: boolean;
+  /**
    * ค้นหาอิสระโหมด server (คู่กับ `serverPagination`) — DataTable วาดช่องค้นหา
    * ตัวเดิมที่ซ้ายสุดของ toolbar แต่ไม่กรองฝั่ง client เลย: หน่วงการพิมพ์แล้วส่ง
    * คำค้น (trim แล้ว) กลับให้หน้าแม่ทาง `onChange` ให้หน้าแม่ push ลง URL +
@@ -723,7 +752,7 @@ interface DataTableProps<TData> {
    * highlight matching rows). */
   rowClassName?: (row: TData) => string | undefined;
   /**
-   * Click anywhere on a row (or mobile card). Use for a whole-row affordance like
+   * Click anywhere on a row (or mobile list row). Use for a whole-row affordance like
    * parking a reading-ruler highlight — NOT as the only way to reach an action
    * (keep an explicit button too, for keyboard/a11y). Clicks that originate on a
    * button/link/input/checkbox inside the row are ignored so nested controls win.
@@ -740,10 +769,17 @@ interface DataTableProps<TData> {
    */
   toolbarFilters?: React.ReactNode;
   /**
-   * ห่อทั้งชุด (toolbar + ตาราง + pagination) ในการ์ดเดียว — default ตาม
-   * DESIGN.md §3 "เนื้อหาในการ์ด" (มติ 2026-08-21) · ส่ง `false` เมื่อตาราง
-   * อยู่ในภาชนะที่เป็นการ์ด/พื้นผิวของตัวเองอยู่แล้ว (dialog, sheet, tab card)
-   * · มีผลเฉพาะ ≥sm — มือถือเป็นโหมดการ์ดรายแถวอยู่แล้ว ไม่ซ้อนการ์ดอีกชั้น
+   * แถวล่างสุด **ในการ์ดเดียวกับตาราง** (ใต้ pagination, คั่น `border-t`) — เช่น legend
+   * อธิบายสัญลักษณ์/สีในตาราง (มติ 2026-10-16 B3) · legend ที่วางลอยใต้การ์ดอ่านเป็นของ
+   * คนละชิ้นกับตาราง · ตัวอักษรตั้งต้น `text-xs text-muted-foreground`
+   */
+  footer?: React.ReactNode;
+  /**
+   * ห่อทั้งชุด (toolbar + ตาราง/list + pagination + footer) ในการ์ดเดียว — default ตาม
+   * DESIGN.md §3 "เนื้อหาในการ์ด" (มติ 2026-08-21) · elevation เดียวกับ `Card`
+   * (`shadow-xs ring-1 ring-border`, มติ D3) · มีผลทุกขนาดจอ: มือถือเป็น list แถวคั่นเส้น
+   * ในการ์ดใบนี้ (มติ D8/A12) · ส่ง `false` เมื่อตารางอยู่ในภาชนะที่เป็นการ์ด/พื้นผิว
+   * ของตัวเองอยู่แล้ว (dialog, sheet, tab card) — ห้ามซ้อนเงา
    */
   card?: boolean;
 }
@@ -775,6 +811,7 @@ export function DataTable<TData>({
   serverPagination,
   serverQuery,
   serverSearch,
+  sortable = false,
   searchable,
   emptyTitle,
   emptyDescription,
@@ -783,6 +820,7 @@ export function DataTable<TData>({
   onRowClick,
   toolbarExtra,
   toolbarFilters,
+  footer,
   card = true,
 }: Readonly<DataTableProps<TData>>) {
   'use no memo';
@@ -858,6 +896,9 @@ export function DataTable<TData>({
   // ตารางที่ paginate ฝั่ง server แต่ยังไม่ย้าย sort/filter ลง URL (ไม่มี serverQuery)
   // ห้ามโชว์กรองรายคอลัมน์ — จะกลายเป็นกรอง client บนข้อมูลหน้าเดียว = ผลลัพธ์ลวง
   const columnFilterEnabled = !serverPagination || !!serverQuery;
+  // ด่านเดียวกันกับ sort ฝั่ง client: มี serverPagination = ข้อมูลหน้าเดียว → `sortable`
+  // ถูกเพิกเฉย (มี serverQuery = sort ฝั่ง server ทำงานแทนอยู่แล้ว)
+  const clientSortable = sortable && !serverPagination;
 
   const applyColumnFilter = (key: string, raw: string) => {
     const value = raw.trim();
@@ -1019,21 +1060,25 @@ export function DataTable<TData>({
   }));
 
   return (
-    // การ์ดเดียวทั้งชุดบนจอ ≥sm (มติ 2026-08-21 — DESIGN.md §3): หัวการ์ด =
-    // toolbar+chips (เส้นคั่นล่าง) · ตารางชิดขอบ · ท้ายการ์ด = pagination
+    // การ์ดเดียวทั้งชุดทุกขนาดจอ (มติ 2026-08-21 — DESIGN.md §3 · มือถือด้วยตั้งแต่ D8/A12):
+    // หัวการ์ด = toolbar+chips (เส้นคั่นล่าง) · ตาราง (≥sm) หรือ list แถว (<sm) ชิดขอบ ·
+    // ท้ายการ์ด = pagination แล้ว footer · elevation เดียวกับ Card (D3) — ห้ามซ้อนเงา
     <div
       className={cn(
-        'flex flex-col gap-4',
-        card && 'sm:gap-0 sm:overflow-clip sm:rounded-lg sm:border sm:bg-card'
+        'flex flex-col',
+        card ? 'overflow-clip rounded-lg bg-card shadow-xs ring-1 ring-border' : 'gap-4'
       )}
     >
-      <div className={cn('flex flex-col gap-3', card && 'sm:border-b sm:p-3')}>
-        {/* toolbar แถวเดียว (มติ 2026-08-11): ค้นหาซ้ายสุด → filter ระดับหน้า
-          (toolbarFilters, กว้าง→แคบ) → ช่องว่าง → toolbarExtra + ปุ่มตั้งค่าคอลัมน์
-          ชิดขวา · จอแคบ wrap ลงบรรทัดใหม่เอง */}
-        <div className="flex flex-wrap items-center gap-2">
+      <div className={cn('flex flex-col gap-3', card && 'border-b p-3')}>
+        {/* toolbar (มติ 2026-08-11): ค้นหาซ้ายสุด → filter ระดับหน้า (toolbarFilters,
+          กว้าง→แคบ) → ช่องว่าง → toolbarExtra + ปุ่มตั้งค่าคอลัมน์ชิดขวา · แถวแคบ wrap เอง
+          มือถือ (มติ D8/A12): ทุกแถวเต็มกว้าง ตามลำดับ นำทาง (ค้นหา → filter) → เครื่องมือรอง
+          (toolbarExtra + ปุ่มตั้งค่าคอลัมน์) รวมแถวเดียวชิดขวา — ปุ่มตั้งค่าคอลัมน์ไม่ซ่อน
+          ปุ่มหลักของหน้าไม่อยู่ในแถบนี้ (contract: แถว filter ไม่รับปุ่ม action) — มันอยู่ที่
+          PageActions เหนือการ์ด ซึ่งบนมือถือเป็นปุ่มเต็มกว้างขนาด `cta` */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           {(filterColumn || globalSearch || serverSearch) && (
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Search
                 className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
                 strokeWidth={2}
@@ -1042,21 +1087,24 @@ export function DataTable<TData>({
                 placeholder={placeholder}
                 value={searchValue}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="max-w-sm pl-8"
+                className="w-full pl-8 sm:max-w-sm"
               />
             </div>
           )}
 
-          {toolbarFilters}
+          {/* `contents` = ลูกของ toolbarFilters เป็นลูกของแถว toolbar โดยตรง (desktop เรียงต่อ
+            ช่องค้นหาเหมือนเดิม) · มือถือยืดลูกทุกตัวเต็มกว้าง ทับ `w-44` ของ call site เฉพาะ <sm */}
+          {toolbarFilters && <div className="contents max-sm:*:w-full">{toolbarFilters}</div>}
 
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">{toolbarExtra}</div>
-
-          <DataTableColumnSettings
-            entries={settingsEntries}
-            onToggle={toggleColumn}
-            onMove={moveColumn}
-            onReset={resetTable}
-          />
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:ml-auto sm:flex-nowrap">
+            {toolbarExtra}
+            <DataTableColumnSettings
+              entries={settingsEntries}
+              onToggle={toggleColumn}
+              onMove={moveColumn}
+              onReset={resetTable}
+            />
+          </div>
         </div>
 
         {/* แถว chip ตัวกรองที่ใช้อยู่ — chip ละคอลัมน์ กด ✕ ล้างรายตัว หรือปุ่มล้างทั้งหมด */}
@@ -1121,6 +1169,8 @@ export function DataTable<TData>({
                     typeof def.header === 'string' &&
                     header.column.getCanSort() &&
                     (!serverQuery.fields || serverQuery.fields.sortable.includes(key));
+                  const columnSortable =
+                    serverSortable || (clientSortable && !pinned && header.column.getCanSort());
                   const filterValue = serverQuery
                     ? (serverQuery.query.filters[key] ?? '')
                     : ((header.column.getFilterValue() as string | undefined) ?? '');
@@ -1130,7 +1180,7 @@ export function DataTable<TData>({
                       header={header}
                       draggable={draggable}
                       filterable={filterable}
-                      serverSortable={serverSortable}
+                      sortable={columnSortable}
                       filterLabel={labelByKey.get(key) ?? key}
                       filterValue={filterValue}
                       dragKey={dragKey}
@@ -1181,8 +1231,10 @@ export function DataTable<TData>({
         </Table>
       </div>
 
-      <div className="sm:hidden">
-        <DataTableMobileCards
+      {/* มือถือ: list แถวคั่นเส้น — ในการ์ด = ชิดขอบการ์ด · ไม่มีการ์ด = กรอบเดียวรอบ list
+          (แบบเดียวกับกรอบตารางของ desktop) ไม่ใช่กรอบรายแถว */}
+      <div className={cn('sm:hidden', !card && 'overflow-clip rounded-lg border')}>
+        <DataTableMobileList
           table={table}
           rowClassName={rowClassName}
           onRowClick={onRowClick}
@@ -1191,7 +1243,7 @@ export function DataTable<TData>({
       </div>
 
       {!disablePagination && (
-        <div className={cn('flex items-center justify-between', card && 'sm:border-t sm:p-3')}>
+        <div className={cn('flex items-center justify-between', card && 'border-t p-3')}>
           <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
             {(() => {
               // server mode: `data` is one page, so the row count must come from
@@ -1283,6 +1335,13 @@ export function DataTable<TData>({
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* footer ในการ์ด (มติ B3) — legend/หมายเหตุของตารางอยู่ในชิ้นเดียวกับตาราง ไม่ลอยใต้การ์ด */}
+      {footer && (
+        <div className={cn('text-xs text-muted-foreground', card && 'border-t px-3 py-2.5')}>
+          {footer}
         </div>
       )}
     </div>

@@ -13,7 +13,8 @@
    custom ได้เฉพาะ Tailwind utilities · ห้ามเขียน component ที่ shadcn มี ·
    ห้าม raw CSS / CSS-in-JS / inline style (ยกเว้นค่า dynamic จริง) ·
    `globals.css` รับเฉพาะ token / `@layer` / pattern ที่ utility เขียนไม่ได้
-2. **แก้ไฟล์ใน `components/ui/` ได้เฉพาะ** variant ที่ประกาศในส่วน 4 —
+2. **แก้ไฟล์ใน `components/ui/` ได้เฉพาะ** variant ที่ประกาศในส่วน 4 และ sanctioned edit ของ
+   ข้อตกลงนี้ (`select` w-full · `card` เงา · `table` 2xl · `dialog`/`sheet`/`alert-dialog` 3 โซน) —
    นอกนั้นห้ามแตะ (อัปเดตจาก registry: `npx shadcn@latest add <x> --overwrite`)
 3. **Icon = lucide เท่านั้น ห้าม emoji** · mapping งาน→icon ตายตัว (ส่วน 4)
 4. **ขนาด = `default` ทุกตัว** · ข้อยกเว้น: **ปุ่มไอคอนล้วนใช้ `size="icon"`
@@ -24,9 +25,8 @@
    ในแถว — `sm` ใช้ได้เฉพาะใน panel แน่น เช่นใน popover ตัวกรอง และห้ามปนกับ
    `default` ในแถวเดียวกัน · มติ 2026-10-16 A3) · **`size="cta"`** (44px บนมือถือ /
    36px ตั้งแต่ `sm` · ตัวอักษร 14px) ใช้ได้**เฉพาะ** ปุ่มหลักของหน้า · แถบปุ่ม
-   ท้ายฟอร์ม · footer ของ dialog — ที่อื่นยัง `default` (มติ 2026-10-16 A7 ·
-   size นี้มากับสูตร `button-variants.md` ของ kit ≥ next release — ก่อนนั้นใช้
-   `default`) · **ห้าม override กล่องขนาดของ control
+   ท้ายฟอร์ม · footer ของ dialog/sheet — ที่อื่นยัง `default` (มติ 2026-10-16 A7 ·
+   footer ได้ `cta` จาก primitive เอง ไม่ต้องส่ง `size` รายปุ่ม) · **ห้าม override กล่องขนาดของ control
    ด้วย className** (`h-*` `p-*` `size-*` เช่น `size-7 p-0`) — ไม่พอให้แก้ที่
    `components/ui/button.tsx` · ข้อยกเว้นสองอย่าง: `w-*`/`w-full` เป็น layout
    ไม่ใช่ขนาด control · `variant="link"` เป็นข้อความไม่ใช่ปุ่ม จึงถอด `h-auto p-0`
@@ -64,19 +64,17 @@
   `shadow-xs ring-1 ring-border`** (เงาชั้นเดียวบางมาก) · **sidebar ขาว** แยกจากพื้น
   ด้วยเส้นขอบ · **ห้ามซ้อนเงา** (การ์ดมีเงาห้ามอยู่ในการ์ดมีเงาอีกชั้น) ·
   เงาของการ์ดตั้งที่ `components/ui/card.tsx` จุดเดียว ห้ามใส่ `shadow-*` รายหน้า
-  > Card ของ registry วันนี้ = `ring-1 ring-foreground/10` ไม่มีเงา — sanctioned edit
-  > `shadow-xs ring-border` มากับ kit ≥ next release · ระหว่างนั้นการ์ดแยกจากพื้นด้วย
-  > พื้นเทาฟ้า + ring อย่างเดียว ซึ่งยังถูกข้อตกลง (อย่าเติมเงารายหน้าเพื่อรอ)
+  > Card ของ registry = `ring-1 ring-foreground/10` ไม่มีเงา — sanctioned edit แทนเป็น
+  > `shadow-xs ring-1 ring-border` (`primitive-edits.md` ของ skill · `verify.mjs` เตือนเมื่อยังไม่แก้)
 - **สีสถานะ 7 ตัว** (`--status-*` + `-foreground` — ค่ากลางองค์กร):
   amber=รอ/เตือน · emerald=สำเร็จ · red=ปฏิเสธ/ลบ · coral=ขอยกเลิก ·
   **violet=กลุ่มที่โปรเจคตั้งชื่อเอง** (ยังไม่ใช้จนกว่าจะมีมติส่วน 10 บอกว่ากลุ่มไหน) ·
   sky=ข้อมูล/ระบบ (**ไม่ใช่ของกดได้ — นั่นคือ primary**) ·
   gray=ยกเลิก/ร่าง · ใช้ผ่าน `StatusBadge` เท่านั้น (tone + icon บังคับ)
   > violet (มติ 2026-10-16 TK-VIO) = สถานะกลุ่มเดียวที่โปรเจคตั้งชื่อเอง สำหรับกลุ่มที่ถ้าไม่มี
-  > จะต้องยืมสีข้างเคียง (hrms: การลา — coral ใกล้ amber เกินไป) · tone `violet` ของ
-  > `StatusBadge`/`TONE_STYLES` มากับ kit ≥ next release (`status-badge.tsx` วันนี้ยัง 6
-  > tone) — ระหว่างนั้นใช้ violet ผ่าน utility `bg-status-violet/10
-  > text-status-violet-foreground` บนแถบ/tile/จุดสีเท่านั้น ห้ามประกอบป้ายสถานะ violet เอง
+  > จะต้องยืมสีข้างเคียง (hrms: การลา — coral ใกล้ amber เกินไป) · ใช้ผ่าน
+  > `<StatusBadge tone="violet">` / `TONE_STYLES.violet` เมื่อส่วน 10 บอกแล้วว่ากลุ่มไหน —
+  > ห้ามประกอบป้ายสถานะ violet เองด้วย utility
 - **สีแยกหมวด `--cat-1..8`** (มติ 2026-10-16 TK-CAT): 8 hue ตัวอักษรขาวผ่าน AA ทุกตัว
   ค่าเดียวทั้ง light/dark · ใช้กับ avatar สีตามชื่อ (`avatarColorClass()` +
   `getInitials()` ใน `lib/avatar.ts` — seed = รหัสที่ไม่เปลี่ยน) · จุดสีกลุ่ม/หมวด ·
@@ -95,14 +93,14 @@
   ทั่วไปของหน้า ผู้อนุมัติจะไม่อ่าน "อนุมัติ" เป็น "บันทึก" · ปุ่มรองข้างปุ่มหลักในหัวหน้า =
   variant **`soft`** (พื้น primary/10 ขอบ primary/25) · ในตารางใช้ `IconAction tone`
   > **ยืนยันลบ = แดงทึบ** (มติ 2026-10-16 D6 แทนมติ 2026-08-21 "ยึด preset แดงจาง"):
-  > `destructive` เป็น `bg-destructive text-white` · สูตร variant `destructive` ทึบ +
-  > `soft` มากับ `button-variants.md` ของ kit ≥ next release — ระหว่างนั้น
-  > `destructive` ของ base-mira ยังเป็นแดงพื้นจาง (`bg-destructive/10`) ห้ามแต่ง
-  > className รายจุดให้ทึบ · `soft-destructive` คนละตัว: พื้นโปร่งใสตอนพัก จางตอน hover
+  > `destructive` เป็น `bg-destructive text-white` (แทน variant ของ base-mira ที่เป็นแดงพื้นจาง
+  > ที่ `components/ui/button.tsx`) · ห้ามแต่ง className รายจุดให้ทึบ/จางเอง ·
+  > `soft-destructive` คนละตัว: พื้นโปร่งใสตอนพัก จางตอน hover (toolbar ปุ่มติดกันเยอะ)
 - **เมนู** (จาก preset กลาง): สี Default · พื้นทึบ (Solid — ไม่ใช้
-  translucent/blur) · เมนูที่เลือก = **พื้นทึบ** (มติ 2026-10-16 D7 · มากับ shell ของ
-  kit ≥ next release พร้อมช่องค้นหาเมนู + จุดสีกลุ่มจาก `--cat-*` — ระหว่างนั้น
-  highlight แบบ Subtle ของ block) · ห้ามใช้สีสถานะเป็นสีกลุ่มเมนู
+  translucent/blur) · เมนูที่เลือก = **พื้นทึบสี primary** (มติ 2026-10-16 D7 —
+  sanctioned edit ที่ `components/ui/sidebar.tsx` จุดเดียว) · มีช่องค้นหาเมนูใต้ชื่อแอป ·
+  หัวกลุ่มมีจุดสีจาก `--cat-*` (ตั้งที่ nav config — breadcrumb แสดงจุดเดียวกัน) ·
+  ห้ามใช้สีสถานะเป็นสีกลุ่มเมนู · sidebar = `components/app-sidebar.tsx` ของ kit
 - **มุมโค้ง = สเกลตายตัว 4 บทบาท** (มติ 2026-10-16 TK-RAD "ผสม" แทนมติ 2026-08-09
   ที่ให้ preset คูณจาก `--radius`): ค่าแบบ ugt-hrms ทุกระดับ **ยกเว้นการ์ด** ที่คง
   ค่าเดิมของ kit — อยู่ใน `@theme` ของ `app/globals.css`:
@@ -139,9 +137,7 @@
 - **ห้าม uppercase eyebrow กับข้อความไทย** (ไทยไม่มี case + tracking ทำสระลอย)
 - ตาราง `text-xs 2xl:text-sm` (12px → 14px ตั้งแต่จอ ≥1536px — หัวและเนื้อขยายพร้อมกัน ·
   มติ 2026-10-16 B10 = ข้อยกเว้นเดียวของกฎ "ทุก breakpoint เท่ากัน" ฝั่งตัวอักษร) ตั้งที่ราก
-  `ui/table.tsx` จุดเดียว — ห้าม override ราย cell · ตัวเลขชิดขวา tabular
-  > sanctioned edit `2xl:text-sm` ที่ `ui/table.tsx` มากับ kit ≥ next release — ระหว่างนั้น
-  > `text-xs` ทุกจอ (ห้ามเติมรายหน้า)
+  `ui/table.tsx` จุดเดียว (sanctioned edit) — ห้าม override ราย cell · ตัวเลขชิดขวา tabular
 
 ## 3. Layout & app shell
 
@@ -185,11 +181,12 @@
   sidebar — mount เป็น child แรกของ `SidebarInset`): `SidebarTrigger` ·
   เส้นคั่นแนวตั้ง · breadcrumb เส้นทางเต็ม · ขวาสุด = `LanguageSwitcher`
   (เมื่อ th+en) แล้ว `ThemeToggle` (เมื่อ dark = มี) · มี `border-b` คั่นกับ
-  เนื้อหา — header ที่มีแต่ trigger เปล่า ๆ คือการติดตั้งที่ไม่ครบ
+  เนื้อหา · แผงขาว (`bg-card shadow-xs`) เหมือน sidebar — header ที่มีแต่ trigger เปล่า ๆ คือการติดตั้งที่ไม่ครบ
 - **Breadcrumb อยู่ใน site-header ที่เดียว** (ห้ามวางเหนือ title ในหน้า):
-  `group › หน้า › segment ลึกกว่า` — label มาจาก nav config ชุดเดียวกับ
-  sidebar ห้าม hardcode · ตัวสุดท้าย = หน้าปัจจุบัน ไม่เป็นลิงก์ ·
-  ตัวก่อนหน้าเป็นลิงก์สี muted
+  `ไอคอนบ้าน › group (จุดสี) › หน้า › segment ลึกกว่า` — เริ่มด้วยไอคอนบ้าน · หัวกลุ่มมีจุดสีของ
+  กลุ่ม · label มาจาก nav config ชุดเดียวกับ sidebar ห้าม hardcode · ตัวสุดท้าย = หน้าปัจจุบัน
+  ไม่เป็นลิงก์ · ตัวก่อนหน้าเป็นลิงก์สี muted · **มือถือเหลือ "จุดสี + หน้าปัจจุบัน"** (ตัดคำ)
+  ไม่เบียดปุ่มขวา (มติ 2026-10-16 D7)
 - โครงทุกหน้า = `ui/page-shell` เสมอ:
   `PageShell > PageHeader > PageTitle + PageDescription` แล้ว actions ขวาบน
   — **ทุกหน้าต้องมี subtitle** ไม่ใช่หัวข้อลอย ๆ
@@ -197,16 +194,18 @@
   จัดกลาง `mx-auto` · topbar/site-header ยังเต็มกว้าง — จอกว้างบรรทัดและตารางยืดจน
   อ่านยาก (1536 ไม่ใช่ 1280/1440 เพราะแอปข้อมูลหนาแน่น) · cap อยู่ที่ `PageShell`
   จุดเดียว ห้ามตั้งรายหน้า
-  > `PageShell` ที่ cap ให้เองมากับ kit ≥ next release — ระหว่างนั้นเนื้อหายืดเต็มพื้นที่
-  > ห้ามใส่ `max-w-*` รายหน้าเพื่อรอ
+- **หัวหน้า**: `PageEyebrow` (ไม่บังคับ — หมวด/กลุ่มเมนูของหน้า ตัวพิมพ์ปกติ ห้าม uppercase) เหนือ
+  title · หน้าย่อยมี `PageBackLink` "‹ <ชื่อหน้าแม่>" (12px muted ลิงก์ไปหน้าแม่ที่ตายตัว ไม่ใช่
+  ถอยตามประวัติ · ข้อความคือชื่อหน้าปลายทาง ไม่ใช่ "ย้อนกลับ") เหนือ eyebrow/title · ปุ่มหลัก 1 ปุ่ม variant
+  `default` (primary) + ปุ่มรอง variant `soft` ใน `PageActions` — ทุกปุ่มขนาด `cta` (มติ 2026-10-16 A10/B11)
 - **รูปแบบหน้ามี 3 แบบ ห้ามคิดแบบใหม่รายหน้า** (มติ 2026-10-16 D12 เพิ่มแบบที่ 3):
   - **หน้าข้อมูล** — หัวหน้า + actions + เนื้อหาในการ์ด
   - **หน้าฟอร์ม** — ส่วน 4 §ฟอร์มแยกหน้า (คอลัมน์เดียว การ์ดต่อ section)
   - **หน้า dashboard** — hero (จุดเดียวที่ gradient ได้) → แถว `StatCard`
     (`grid-cols-2 lg:grid-cols-4` · ค่า + delta เทียบช่วงก่อน · กดแล้วไปหน้าที่เกี่ยว) →
-    แถวการ์ดที่มี `CardHeading` สูงเท่ากันต่อแถว
-    > `StatCard` / `CardHeading` มากับ kit ≥ next release — ยังไม่มีไฟล์ใน kit วันนี้
-    > ห้าม hand-build การ์ดตัวเลขเองระหว่างรอ ใช้ `Card` ธรรมดา + ข้อความ
+    แถวการ์ดที่มี `CardHeading` (`ui/card-heading`) สูงเท่ากันต่อแถว
+    > `StatCard` มากับ kit ≥ next release — ยังไม่มีไฟล์ใน kit วันนี้
+    > ห้าม hand-build การ์ดตัวเลขเองระหว่างรอ ใช้ `Card` + `CardHeading` + ข้อความ
 - **แถบ filter ระดับหน้า** (filter ที่อยู่นอกตาราง เช่น ปี/เดือน/หน่วยงาน):
   อยู่ใน**หัวการ์ดเดียวกับตาราง** (ไม่ลอยเหนือการ์ด ไม่แยกการ์ด) · **ชิดซ้าย**
   เรียง**กว้างไปแคบ**: ช่วงเวลา → หน่วยงาน/ขอบเขต → สถานะ · ปุ่ม action ของหน้า
@@ -226,10 +225,10 @@
   ล้างการเลือกผ่าน `resetSelectionKey` ของ `DataTable` ไม่ใช่ remount ทั้งตาราง
 - **Mobile เป็นระบบ ไม่ใช่รายหน้า** (มติ 2026-10-16 D8/A12): ตาราง → **list แถวคั่น
   เส้นในการ์ดใบเดียว** (ไม่ใช่การ์ดต่อแถวลอยบนพื้นเทา — DataTable จัดให้) · แถว toolbar
-  เต็มกว้าง ปุ่มตั้งค่าคอลัมน์ชิดขวาท้ายแถว · ปุ่มหลักของหน้าเต็มกว้าง `cta` 44px ·
+  เต็มกว้าง เรียง **นำทาง/ค้นหา → filter → แถวเครื่องมือรอง** (`toolbarExtra` + ปุ่มตั้งค่า
+  คอลัมน์ชิดขวา — ปุ่มตั้งค่าคอลัมน์ไม่ซ่อน) · **ปุ่มหลักของหน้าไม่อยู่ใน toolbar** — อยู่ใน
+  `PageActions` เหนือการ์ด เต็มกว้าง `cta` 44px (แถว filter ไม่มีปุ่ม action ตามสัญญากลาง) ·
   popover และ dialog → bottom sheet
-  > DataTable แบบ list ในการ์ดเดียวมากับ kit ≥ next release — `data-table.tsx` วันนี้
-  > บนจอ `<sm` ยังเป็นการ์ดต่อแถว (มติ kit 2026-08-21) ห้ามแต่งรายหน้าให้เป็น list
 - **หน้า login = สองคอลัมน์** (`components/login-shell.tsx` จาก auth-setup): ซ้าย =
   hero ตั้งแต่ `lg` ขึ้นไป (`bg-primary` + รูป `public/login-hero.webp` ถ้ามี ใต้ overlay
   `bg-primary/65`) เรียง 3 แถว — `ube-logo-long.svg` · ชื่อระบบ + คำอธิบาย 1 บรรทัด +
@@ -269,11 +268,10 @@
 - **ฟอร์มแยกหน้า** (มติ 2026-10-16 D4 แทน "container กึ่งกลาง `max-w-3xl` ไม่ครอบการ์ด"):
   **คอลัมน์เดียวกว้างถึง cap ของหน้า (96rem)** · **แต่ละ section เป็นการ์ด** ที่มี
   `CardHeading` (ไอคอน primary + ชื่อ section) · ช่องเรียงแนวนอนเมื่อจอกว้าง
-  (grid ภายในการ์ด) · back-link `‹ ชื่อหน้าแม่` เหนือ title + คำอธิบาย · แถบปุ่มท้ายฟอร์ม
-  ชิดขวา ขนาด `cta` (ยกเลิก/กลับ `outline` ซ้าย · ส่ง primary ขวา) — ทำไมเปลี่ยน: พอการ์ด
+  (grid ภายในการ์ด) · `PageBackLink` `‹ ชื่อหน้าแม่` เหนือ title + คำอธิบาย · แถบปุ่มท้ายฟอร์ม
+  = `PageFormActions` ชิดขวา ขนาด `cta` (ยกเลิก/กลับ `outline` ก่อน · ส่ง primary หลัง) — มือถือ
+  ติดขอบล่างเต็มกว้าง grid `[1fr_2fr]` (รอง │ หลัก) · ห้ามข้อมูลสรุปปนในแถบ — ทำไมเปลี่ยน: พอการ์ด
   ขาวลอยบนพื้นเทา (§1 Elevation) ฟอร์มที่ไม่มีการ์ดดูลอยกลางพื้น ไม่เข้าพวกกับหน้าอื่น
-  > `CardHeading` + back-link มากับ kit ≥ next release — ระหว่างนั้นใช้ `CardHeader` +
-  > `CardTitle` ของ `card` แทน (โครงเดียวกัน แค่หน้าตาหัวการ์ดยังไม่ใช่ของ kit)
 - **แถวคู่ label–ค่า** (detail dialog, สรุป, การ์ดข้อมูล): flex `justify-between`
   + `align-items:center` + ระยะระหว่างคอลัมน์ ≥16px + ความสูงแถวขั้นต่ำ ~24px
   — ค่าที่เป็น `StatusBadge` จะได้ไม่ชนข้อความฝั่งซ้าย (badge สูงกว่าข้อความธรรมดา)
@@ -299,14 +297,18 @@
   > สูงคงที่แต่ข้อมูลไม่คงที่ → ใช้ `Sheet` (body เลื่อน) หรือหน้าแยก
   > (บทเรียนจริง 4.25.0: ฟอร์มบทบาท "3 ช่อง" เลยถูกยัดใส่ Dialog
   > จน checklist สูงเกินจอแล้ว scroll ไม่ได้)
+- **Dialog/Sheet = 3 โซน หัว/เนื้อ/ท้าย** (มติ 2026-10-16 A8 — ตั้งที่ primitive จุดเดียว):
+  หัวมีเส้นล่าง · ท้ายมีเส้นบน + พื้น `muted/40` ชนขอบ · **dialog ดูอย่างเดียวไม่มีโซนท้าย** ปิดด้วย ✕
+  · **ห้ามใส่เนื้อหา (กล่อง/รายการ/ช่องกรอก) ใน `AlertDialogHeader`** (A9) — หัวมีแค่ title +
+  คำอธิบายสั้น เนื้อหาวางต่อจากหัว
 - Footer dialog: ยกเลิก (outline) ซ้าย · ยืนยัน primary ขวาสุด · primary
-  **ปุ่มเดียว**ต่อ dialog · ปุ่ม footer ขนาด `cta` · ห้ามซ้อน dialog (ยกเว้น
+  **ปุ่มเดียว**ต่อ dialog · ปุ่ม footer ขนาด `cta` (มาจาก primitive) · ห้ามซ้อน dialog (ยกเว้น
   AlertDialog ยืนยัน 1 ชั้น) · ฟอร์ม dirty ปิดต้องถามก่อน
-- Variant เพิ่มที่อนุญาต: Button `success`, `soft-primary`,
-  `soft-destructive`, `soft-success`, `field` (trigger ของ
-  datepicker/combobox — ผิวเหมือน Input) · มติ 2026-10-16 เพิ่ม variant `soft` (ปุ่มรองใน
-  หัวหน้า), `destructive` แบบทึบ และ size `cta` — สามตัวนี้มากับ `button-variants.md` ของ
-  kit ≥ next release · `success` = ปุ่มอนุมัติ (§1) — เพิ่มอื่นต้องเป็นมติส่วน 10
+- Variant เพิ่มที่อนุญาต: Button `success` (ปุ่มอนุมัติ §1), `soft` (ปุ่มรองในหัวหน้า — มีพื้น),
+  `soft-primary`, `soft-destructive`, `soft-success` (toolbar ปุ่มติดกันเยอะ — โปร่งใสตอนพัก),
+  `field` (trigger ของ datepicker/combobox — ผิวเหมือน Input), `destructive` แบบทึบ (แทนของ
+  preset) และ size `cta` (มติ 2026-10-16) — เพิ่มอื่นต้องเป็นมติส่วน 10 · `ViewToggle`
+  (`ui/view-toggle`) = segmented 2–4 ตัวเลือก สลับมุมมอง/ค่าเดียวสั้น ๆ — เกินนั้น `Select`/`Tabs`
 - Row actions: ≤3 = `IconAction` · >3 = `DropdownMenu` + `MoreHorizontal`
   > **ทำไม่ได้เพราะสิทธิ์ = ซ่อนปุ่ม** (กฎ §3) · **ทำไม่ได้เพราะ business
   > rule** (แถว system, มีข้อมูลผูกอยู่) = **disabled + tooltip บอกเหตุผล**
@@ -341,7 +343,11 @@
   **เป็น 0 ให้ซ่อน ไม่แสดงเลข 0** · เกิน 99 แสดง `99+` · ตัวเลขต้องมาจาก
   query ที่ scope ตามสิทธิ์ผู้ใช้แล้ว ไม่ใช่ยอดรวมทั้งระบบ
 - Tabs: มุมมองย่อยในหน้าเดียว · tab หลักของหน้า = `?tab=` ใน URL · เกิน ~5
-  = แตกหน้า
+  = แตกหน้า · **ปุ่มหลักของแต่ละแท็บอยู่ใน `PageActions` บนหัวหน้า และเปลี่ยนตามแท็บที่เปิด**
+  (มติ 2026-10-16): แท็บละปุ่มหลักเดียว ไม่โชว์ปุ่มของแท็บอื่นค้าง · แท็บที่ไม่มีอะไรให้สร้าง =
+  ไม่แสดงปุ่ม (ไม่ใช่ปุ่ม disabled) · ปุ่มที่ใช้ได้ทุกแท็บ (เช่น ส่งออกทั้งหมด) = `soft` คงที่
+  ซ้ายของปุ่มหลัก · หัวหน้าอ่าน `?tab=` เพื่อเลือกปุ่ม · มือถือ = `cta` เต็มกว้างใต้ชื่อหน้า
+  เหนือแถบแท็บ · toolbar ของตารางในแท็บยังมีแค่ค้นหา/filter/เครื่องมือ (`references/tabbed-pages.md`)
 - Tooltip: delay 0 · ห้ามซ่อนข้อมูลจำเป็นไว้ใน tooltip อย่างเดียว
 - Chart: `ui/chart` + `--chart-1..5` (series ทั่วไป) · series ที่เป็นสถานะ =
   `--status-*` ตัวเดียวกับ StatusBadge · หมวดที่เกิน 5 สี/ต้องแยกกันชัด = `--cat-1..8`
@@ -351,7 +357,10 @@
   สลับคอลัมน์ · ซ่อน/แสดงคอลัมน์ (จำ localStorage) · คืนค่าเริ่มต้น — ปิดได้
   ราย prop · **ห่อการ์ดเดียวทั้งชุดเอง** (toolbar หัวการ์ด · ตารางชิดขอบ ·
   pagination ท้ายการ์ด — มติ 2026-08-21 ตาม §3 "เนื้อหาในการ์ด") ห้ามห่อการ์ด
-  ซ้อนอีกชั้น; ตารางใน dialog/sheet ส่ง `card={false}`
+  ซ้อนอีกชั้น; ตารางใน dialog/sheet ส่ง `card={false}` · การ์ดของ DataTable ใช้เงาเดียวกับ Card
+  (`shadow-xs ring-1 ring-border`) · legend ของตารางใส่ prop `footer` (ในการ์ดเดียวกัน — B3) ·
+  `sortable` = sort ฝั่ง client แบบ opt-in **ห้ามคู่ `serverPagination`** (sort ได้แค่หน้าเดียว —
+  ตาราง server sort ผ่าน `serverQuery` · `verify.mjs` fail)
 - **Pagination ของตาราง = แถวต่อหน้า + "หน้า X จาก Y" + ปุ่มไอคอน 4 ตัว**
   (แรก · ก่อน · ถัดไป · สุดท้าย — ตัวแรก/สุดท้ายซ่อนบนจอเล็ก) — **ไม่มีรายการเลขหน้า
   2 3 4 … 10 11** (มติ 2026-08-09: เลขหน้ากินพื้นที่และพังตอนข้อมูลว่าง
