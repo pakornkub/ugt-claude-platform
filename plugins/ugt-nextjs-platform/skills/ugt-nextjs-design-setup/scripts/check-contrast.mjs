@@ -95,12 +95,19 @@ const PAIRS = [
   ['sidebar-primary-foreground', 'sidebar-primary'],
   ['sidebar-accent-foreground', 'sidebar-accent'],
 ];
-const STATUS = ['amber', 'emerald', 'red', 'coral', 'sky', 'gray'];
+const STATUS = ['amber', 'emerald', 'red', 'coral', 'violet', 'sky', 'gray'];
+// categorical palette (มติ 2026-10-16 TK-CAT): avatar/chip fills carry WHITE
+// text, one value for both modes — .dark doesn't redeclare them, so dark
+// falls back to the :root values (which is what the browser does too)
+const CATS = ['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-5', 'cat-6', 'cat-7', 'cat-8'];
+const WHITE = parse('oklch(1 0 0)');
 const AA = 4.5;
 
+const rootVars = block(':root') ?? {};
 let failed = 0;
 for (const scope of [':root', '\\.dark']) {
-  const vars = block(scope);
+  const own = block(scope);
+  const vars = own && scope !== ':root' ? { ...rootVars, ...own } : own;
   const label = scope === ':root' ? 'light' : 'dark';
   if (!vars) {
     console.log(`✘ [${label}] token block not found`);
@@ -129,6 +136,11 @@ for (const scope of [':root', '\\.dark']) {
     const text = get(`status-${s}-foreground`);
     const tone = get(`status-${s}`);
     if (!text || !tone || !card) {
+      if (s === 'violet' && card) {
+        // the 7th tone arrived with มติ 2026-10-16 — absent = project not synced yet (warn)
+        console.log(`  ! status-violet — missing (added 2026-10-16 — "sync ข้อตกลง design" brings it in)`);
+        continue;
+      }
       console.log(`  ! status-${s} — missing token(s)`);
       failed++;
       continue;
@@ -138,6 +150,20 @@ for (const scope of [':root', '\\.dark']) {
     const ok = r >= AA;
     if (!ok) failed++;
     console.log(`  ${ok ? '✔' : '✘'} status-${s}-foreground on badge bg (10% over card): ${r.toFixed(2)}:1`);
+  }
+
+  for (const c of CATS) {
+    const fill = get(c);
+    if (!fill) {
+      // warn, not fail: added by มติ 2026-10-16 — a project that has not run
+      // "sync ข้อตกลง design" yet simply doesn't have them
+      console.log(`  ! ${c} — missing (added 2026-10-16 — "sync ข้อตกลง design" brings it in)`);
+      continue;
+    }
+    const r = ratio(WHITE.rgb, fill.rgb);
+    const ok = r >= AA;
+    if (!ok) failed++;
+    console.log(`  ${ok ? '✔' : '✘'} white on ${c}: ${r.toFixed(2)}:1`);
   }
 }
 

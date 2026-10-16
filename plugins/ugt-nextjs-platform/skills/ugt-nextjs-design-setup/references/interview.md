@@ -10,7 +10,7 @@ every value into DESIGN.md — a default answered is still an agreement.
 
 **What is deliberately NOT asked** (iron rules / org defaults with converged
 evidence — the user deviates only via "อื่นๆ", which forces a มติ): fonts ·
-density/sizes · radius · the semantic-6 status set · date/number formats ·
+density/sizes · radius · the 7-tone status set + `--cat-*` palette · date/number formats ·
 toast semantics · motion rules · icon library · accessibility floor. **ปีบนจอ
 เป็น ค.ศ. เสมอ ไม่ใช่แค่ default แต่ไม่มีทางเลือกให้ deviate เลย** —
 `lib/format.ts` บังคับ `-u-ca-gregory` ที่ formatter เดียว ไม่มีโค้ดแปลง พ.ศ.
@@ -35,8 +35,9 @@ a project's Sarabun with Inter + Noto Sans Thai right after the user said
 from the prototype/brand FIRST (before any UI work — the retheme lesson),
 map them onto the same token names, run check-contrast, and record the
 source in DESIGN.md §1. ข้อ 2 with a brand color → substitute `__PRIMARY__`
-(+ a lighter dark-mode variant as `__PRIMARY_DARK__` — it also feeds the
-dark `--ring`/`--sidebar-ring`) and run check-contrast.
+(+ a lighter dark-mode variant as `__PRIMARY_DARK__`, and from it
+`__RING_DARK__` for the dark `--ring`/`--sidebar-ring` — same hue, L +0.07,
+C −0.04) and run check-contrast.
 
 **Brand-color AA trap (predictable — handle, don't discover):** for a
 mid-lightness brand color (many greens/oranges), "dark primary must be
@@ -127,7 +128,7 @@ harness rule keeps them from spreading to new code.
 | กลุ่ม | วัดอะไร | ค่า kit (base-mira) เอาไว้เทียบ |
 | --- | --- | --- |
 | ขนาด control | ความสูง input / button / select / textarea · padding x/y · ขนาด icon ในปุ่มและช่อง | control `h-7` (28px) · icon `size-4` |
-| รูปทรง | radius แยกชั้น chip/control/card/overlay · ความหนา+สี border · เงาของ card/popover · focus ring (สี ความหนา offset) | `--radius` 0.45rem (สเกล sm–4xl คำนวณต่อ) · ring `--ring` |
+| รูปทรง | radius แยกชั้น chip/control/card/overlay · ความหนา+สี border · เงาของ card/popover · focus ring (สี ความหนา offset) | สเกลตายตัว sm 4 · md 6 · lg 7.2 (การ์ด) · xl 14 px (มติ 2026-10-16) · การ์ด `ring-1` บนพื้น #f5f7fb · ring `--ring` |
 | ตัวอักษร | font-size + weight ของข้อความใน control · label · placeholder · สเกล heading (title หน้า, หัว section) · line-height ในฟอร์ม | control `text-sm` · ตาราง `text-xs` · title `text-2xl font-semibold` |
 | Density | gap ระหว่างช่องในฟอร์ม · padding ของ card/section · ความสูงแถวตาราง + padding cell | ตาราง compact `text-xs` · ฟอร์ม gap มาตรฐาน kit |
 | แบบแผนฟอร์ม | ตำแหน่ง label (บนช่อง/ลอย/ซ้าย) · เครื่องหมาย required · ตำแหน่ง-สี-ขนาดข้อความ error · สไตล์ disabled/hover ที่ทำเอง | label บนช่อง · `*` แดงท้าย label · error ใต้ช่องผ่าน `ui/field` |
@@ -147,7 +148,7 @@ base class ในนั้นคือวิธีที่ shadcn ตั้ง�
 | --- | --- |
 | ความสูง + padding + font-size ของ control | base class ใน `ui/input.tsx` · `ui/button.tsx` (default size variant) · `ui/select.tsx` (trigger) · `ui/textarea.tsx` |
 | ขนาด icon ในปุ่ม/ช่อง | `ui/button.tsx` / `ui/input-group.tsx` — ให้สัมพันธ์ความสูงใหม่ (≤32px → `size-4` · ≥40px → `size-5`) |
-| radius | `--radius` ใน `app/globals.css` — สเกล sm–4xl คำนวณต่ออัตโนมัติ ห้ามแก้รายชั้น |
+| radius | สเกล `--radius-sm/md/lg/xl` ใน `@theme` ของ `app/globals.css` — ค่าตายตัวรายบทบาท (มติ 2026-10-16) แก้ที่นี่จุดเดียว ห้ามแต่ง `rounded-*` รายหน้า |
 | focus ring · border · เงา | token `--ring`/`--border` + class ใน ui component ต้นทาง |
 | ความสูงแถว/ตัวอักษรตาราง | `ui/table.tsx` + DataTable จุดเดียว (กฎเดิม §2: ห้าม override ราย cell) |
 | แบบแผน label / required / error | `ui/field` จุดเดียว |

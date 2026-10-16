@@ -27,6 +27,7 @@
 | `components/language-switcher.tsx` | HRMS | ship only when ภาษา = th+en (needs `next-intl` + `lib/actions/locale.ts`) · **mount = `actions` ของ site-header ก่อน ThemeToggle** |
 | `lib/format.ts` | merge: HRMS `format-date.ts` (Intl + cache + wall-clock/instant contract) + BOI `formatNumber`/`bangkokToday` + new `formatExportDate` (ISO) | the only formatter |
 | `lib/format.test.ts` | kit-native | ships with `lib/format.ts` — ล็อก timezone contract (Asia/Bangkok pin + `toDateKey` ของปฏิทินต้องไม่ร่นวัน) |
+| `lib/avatar.ts` · `lib/avatar.test.ts` | HRMS `lib/utils.ts` (มติ 2026-10-16 B12) | `avatarColorClass(seed)` → literal `bg-cat-1..8` (pair with `text-white`) + `getInitials(name)` (first + last word, skips Thai leading vowels เ แ โ ใ ไ) · own file, not `lib/utils.ts` — that one is shadcn's (`cn`) and the kit never overwrites it · pair ships together · needs the `--cat-*` tokens |
 | `lib/table-query.ts` · `lib/table-prefs.ts` · `lib/pagination.ts` | BOI | URL-state + column prefs + page params for server-mode tables (`table-query` imports `firstParam` from `pagination`) |
 | `lib/actions-locale.ts` → `lib/actions/locale.ts` | HRMS | th+en only; standalone — no session guard on purpose (mutates only the caller's own locale cookie), so it never depends on auth-setup |
 | `lib/export.ts` | merge: HRMS's two hand-written export routes, collapsed into one column spec (+ BOM, formula guard, row cap) | server-only (`exceljs`); pairs with `ui/export-menu` |

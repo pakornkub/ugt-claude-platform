@@ -103,13 +103,19 @@ Merge `assets/globals.tokens.css` into `app/globals.css` (replace the
 e.g. the preset's button `cursor: pointer` — and keep preset `@theme`
 vars: re-point `--font-heading` at the font-sans variables).
 
-**Radius is the preset's, not ours (มติ 2026-08-09)** — when replacing the
-`:root` block you MUST carry over the preset's `--radius` line
-(`base-mira` ships `0.45rem`), and leave its `@theme` radius scale
-(`--radius-sm/md/lg/xl/2xl/3xl/4xl` as `calc()` of `--radius`) untouched.
-Our token file deliberately declares no radius; dropping the preset's line
-too leaves `--radius` undefined and every card/button goes square.
-`scripts/verify.mjs` fails if it is missing.
+**Radius is ours now (มติ 2026-10-16 TK-RAD — replaces มติ 2026-08-09
+"radius is the preset's")** — the token file declares `--radius: 0.75rem` in
+`:root` and a **fixed** scale in `@theme` (sm 4 · md 6 · lg 7.2 = card, the
+kit's old value kept on purpose · xl 14). When merging, **replace** the
+preset's `--radius: 0.45rem` line and its `@theme` scale
+(`--radius-sm/md/lg/xl/2xl/3xl/4xl` as `calc()` of `--radius`) — do not keep
+both: the preset's `calc()` lines next to our `0.75rem` make every corner
+×1.67 (cards 12px), and `scripts/verify.mjs` fails on exactly that pair.
+Dropping both leaves no radius at all (everything square) — verify fails
+there too.
 
-Substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers
-(dark ring tokens derive from `__PRIMARY_DARK__` automatically).
+Substitute `__PRIMARY__`/`__PRIMARY_DARK__` from interview answers, and
+`__RING_DARK__` from `__PRIMARY_DARK__` (same hue, L +0.07, C −0.04 — the
+dark focus ring sits one step lighter than the dark primary so it shows
+around a focused primary button; default `oklch(0.62 0.17 264.4)`). The
+light ring still equals `__PRIMARY__`.

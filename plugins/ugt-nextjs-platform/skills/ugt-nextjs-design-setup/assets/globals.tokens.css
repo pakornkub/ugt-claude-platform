@@ -4,8 +4,16 @@
    Placeholders — substitute from the interview, then run check-contrast.mjs:
      __PRIMARY__       default: oklch(0.488 0.243 264.4)   (org indigo, light)
      __PRIMARY_DARK__  default: oklch(0.55 0.21 264.4)     (must be LIGHTER than light-mode primary)
+     __RING_DARK__     default: oklch(0.62 0.17 264.4)     (dark focus ring — derive from __PRIMARY_DARK__:
+                       same hue, L +0.07, C −0.04 · มติ 2026-10-16 TK-RING: a ring equal to the
+                       dark primary disappears around a focused primary button, so it sits one
+                       step lighter · still follows the brand hue — never hardcode indigo)
    Rule of the palette: neutrals stay hue ~258 chroma 0.004–0.02 — never add
-   a chroma-0 gray. Editing ANY color = re-run check-contrast.mjs. */
+   a chroma-0 gray (white surfaces — card/popover/sidebar oklch(1 0 0) — are
+   surfaces, not grays). One sanctioned tilt: the light --background sits on
+   the org indigo's hue 264.5 at chroma 0.006 (#f5f7fb) so white cards lift
+   off it (มติ 2026-10-16 TK-BG — a brand primary does not move it).
+   Editing ANY color = re-run check-contrast.mjs. */
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -33,6 +41,14 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-cat-1: var(--cat-1);
+  --color-cat-2: var(--cat-2);
+  --color-cat-3: var(--cat-3);
+  --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5);
+  --color-cat-6: var(--cat-6);
+  --color-cat-7: var(--cat-7);
+  --color-cat-8: var(--cat-8);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -57,25 +73,43 @@
   --color-status-red-foreground: var(--status-red-foreground);
   --color-status-coral: var(--status-coral);
   --color-status-coral-foreground: var(--status-coral-foreground);
+  --color-status-violet: var(--status-violet);
+  --color-status-violet-foreground: var(--status-violet-foreground);
   --color-status-sky: var(--status-sky);
   --color-status-sky-foreground: var(--status-sky-foreground);
   --color-status-gray: var(--status-gray);
   --color-status-gray-foreground: var(--status-gray-foreground);
-  /* RADIUS ไม่ได้ประกาศที่นี่โดยตั้งใจ (มติ 2026-08-09) — ใช้ของ preset
-     `base-mira` ตามที่ shadcn ให้มา:
-       :root  --radius: 0.45rem (7.2px)
-       @theme --radius-sm/md/lg/xl/2xl/3xl/4xl = calc(--radius × 0.6/0.8/1/1.4/1.8/2.2/2.6)
-     บทบาทที่ใช้จริง: sm 4.3 = ของย่อยใน control (ปุ่ม xs, จุด focus เล็ก ๆ,
-     tooltip, เมนู sidebar) · md 5.8 = control หลัก · lg 7.2 = การ์ด ·
-     xl 10.1 = overlay · Badge/chip ใช้ rounded-full ไม่อยู่ในสเกลนี้
-     ตอน merge ไฟล์นี้เข้า app/globals.css ต้อง **คงบรรทัด --radius ของ preset
-     ใน :root และ scale ใน @theme ไว้** — ถ้าลบทิ้งตาม pattern "แทนที่บล็อก
-     :root" จะไม่มีใครนิยาม --radius แล้วการ์ด/ปุ่มจะกลายเป็นมุมเหลี่ยมทั้งแอป
-     (verify.mjs เช็คข้อนี้ให้) */
+  /* RADIUS — สเกลตายตัว (มติ 2026-10-16 TK-RAD "ผสม", backlog §14 — แทนมติ
+     2026-08-09 ที่ยกให้ preset คูณจาก --radius): ค่าแบบ ugt-hrms ทุกระดับ
+     **ยกเว้นการ์ด** ที่คงค่าเดิมของ kit (7.2px = 0.45rem ของ base-mira)
+       sm  4px   ของย่อยใน control (ปุ่ม xs/icon-xs, ✕ ของ chip, tooltip, เมนู sidebar)
+       md  6px   control หลัก — input / select / button
+       lg  7.2px การ์ด (Card ของ registry ใช้ rounded-lg) + popup เล็กที่ registry
+                 ให้ rounded-lg (popover / select / dropdown) — ผลข้างเคียงที่ยอมรับแล้ว:
+                 popup พวกนี้คง 7.2px ไม่ใช่ 12px แบบ hrms (มติผู้ดูแล 2026-10-16)
+       xl  14px  overlay กลางจอ — dialog / alert-dialog / command
+     ทำไมการ์ดไม่ใช้ --radius: บทบาทการ์ดอยู่ที่ lg ทั้งใน kit และ hrms — ผูก lg
+     ไว้ที่ค่าเดิมจึงคงหน้าตาการ์ดได้โดยไม่ต้องแก้ card.tsx สักบรรทัด
+     --radius (0.75rem ใน :root) จึงไม่ใช่ตัวคูณของสเกลแล้ว — เหลือให้ของที่อ่าน
+     var(--radius) ตรง ๆ (Sonner toast) · ปรับความโค้ง = แก้ค่าตายตัวด้านล่าง
+     เป็นมติ ไม่ใช่ปุ่มเดียว · Badge/chip = rounded-full ไม่อยู่ในสเกลนี้ ·
+     2xl–4xl นิยามไว้ตาม hrms แต่ข้อตกลงใช้ 4 บทบาท (verify.mjs จับ)
+     ตอน merge: **แทนที่** บรรทัด --radius ของ preset ใน :root และ scale
+     calc(var(--radius) × …) ใน @theme ของ preset ด้วยชุดนี้ — ปล่อย calc() ของ
+     preset ค้างคู่กับ --radius 0.75rem = ทุกมุมโค้งขึ้น ×1.67 (การ์ด 12px)
+     verify.mjs เช็คข้อนี้ให้ */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.45rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
 }
 
 :root {
-  --background: oklch(0.977 0.004 258);
+  /* #f5f7fb — เทาอมฟ้าเย็น (hue ของ indigo องค์กร) ให้การ์ดขาวลอยจากพื้น (มติ 2026-10-16 TK-BG · ที่มา ugt-hrms) */
+  --background: oklch(0.976 0.006 264.5);
   --foreground: oklch(0.16 0.01 258);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.16 0.01 258);
@@ -98,7 +132,22 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.965 0.006 258);
+  /* categorical palette — avatar สีตามชื่อ (lib/avatar.ts) · หมวดหมู่ · กราฟเกิน 5 series
+     8 hue ตัวอักษรขาวผ่าน AA ทุกตัว · ค่าเดียวใช้ทั้ง light/dark (white-on-fill คงที่ —
+     .dark ไม่ประกาศซ้ำ) · ตกแต่งเท่านั้น: ห้ามใช้บอกสถานะ (นั่นคือ --status-*) และห้าม
+     ใช้บอกว่ากดได้ (นั่นคือ primary) · มติ 2026-10-16 TK-CAT · ที่มา ugt-hrms */
+  --cat-1: oklch(0.557 0.14 250);
+  --cat-2: oklch(0.54 0.11 178);
+  --cat-3: oklch(0.571 0.15 292);
+  --cat-4: oklch(0.574 0.15 32);
+  --cat-5: oklch(0.564 0.13 70);
+  --cat-6: oklch(0.577 0.15 350);
+  --cat-7: oklch(0.544 0.13 145);
+  --cat-8: oklch(0.541 0.12 220);
+  /* ไม่ใช่ตัวคูณของสเกล radius แล้ว (ดู @theme) — ค่าแบบ hrms ให้ของที่อ่าน var(--radius) ตรง ๆ */
+  --radius: 0.75rem;
+  /* ขาว — sidebar เป็นแผงขาวแยกจากพื้นเทาด้วยเส้นขอบ (มติ 2026-10-16 TK-SB) */
+  --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.16 0.01 258);
   --sidebar-primary: __PRIMARY__;
   --sidebar-primary-foreground: oklch(0.985 0.008 255);
@@ -114,6 +163,9 @@
   --status-red-foreground: oklch(0.444 0.177 26.9);
   --status-coral: oklch(0.68 0.18 35);
   --status-coral-foreground: oklch(0.5 0.15 33);
+  /* สถานะตัวที่ 7 — ความหมายให้โปรเจคกำหนดใน DESIGN.md (hrms: การลา) · มติ 2026-10-16 TK-VIO */
+  --status-violet: oklch(0.6 0.19 293);
+  --status-violet-foreground: oklch(0.47 0.19 293.5);
   --status-sky: oklch(0.588 0.158 242);
   --status-sky-foreground: oklch(0.443 0.11 240.8);
   --status-gray: oklch(0.554 0.041 257.4);
@@ -139,8 +191,9 @@
   /* dark border ≥ 16% white or it vanishes on real monitors (contract rule) */
   --border: oklch(1 0 0 / 22%);
   --input: oklch(1 0 0 / 28%);
-  /* ring ตาม primary เสมอ — ห้าม hardcode สี (บทเรียน eval: brand เขียวแต่ ring indigo) */
-  --ring: __PRIMARY_DARK__;
+  /* ring ตาม hue ของ primary เสมอ — ห้าม hardcode สี (บทเรียน eval: brand เขียวแต่ ring indigo)
+     แต่สว่างกว่า primary dark หนึ่งขั้น ไม่งั้นวง focus รอบปุ่ม primary หายกลืน (มติ 2026-10-16 TK-RING) */
+  --ring: __RING_DARK__;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -153,7 +206,7 @@
   --sidebar-accent: oklch(0.3 0.015 258);
   --sidebar-accent-foreground: oklch(0.975 0.005 258);
   --sidebar-border: oklch(1 0 0 / 22%);
-  --sidebar-ring: __PRIMARY_DARK__;
+  --sidebar-ring: __RING_DARK__;
   --status-amber: oklch(0.769 0.188 70.1);
   --status-amber-foreground: oklch(0.879 0.169 91.6);
   --status-emerald: oklch(0.696 0.17 162.5);
@@ -162,6 +215,8 @@
   --status-red-foreground: oklch(0.808 0.114 19.6);
   --status-coral: oklch(0.74 0.16 35);
   --status-coral-foreground: oklch(0.84 0.11 35);
+  --status-violet: oklch(0.72 0.15 293);
+  --status-violet-foreground: oklch(0.84 0.1 293);
   --status-sky: oklch(0.685 0.169 237.3);
   --status-sky-foreground: oklch(0.828 0.111 230.3);
   --status-gray: oklch(0.704 0.04 256.8);
@@ -203,6 +258,22 @@
   html {
     @apply font-sans;
     /* base 16px — never overridden; density comes from base-mira (h-7 controls, text-xs tables) */
+  }
+}
+
+/* Reduced motion (WCAG 2.1 AA · contract iron rule 6) — ปิด animation/transition
+   ทั้งแอปจุดเดียวเมื่อผู้ใช้ตั้ง prefers-reduced-motion: ครอบ tw-animate-css +
+   transition utility ทุกตัว ไม่ต้องพึ่ง motion-safe: รายจุด · จุดที่ใช้แพ็กเกจ
+   `motion` (lib/motion.ts) ยังต้องเรียก useReducedMotion() เพิ่มรายจุด — แพ็กเกจนั้น
+   animate ผ่าน JS ไม่ผ่าน CSS · มติ 2026-10-16 TK-MOT · ที่มา ugt-hrms */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

@@ -151,9 +151,14 @@ their own.
   ```
 - **Page skeleton** (every page, no exceptions): page title
   (`text-2xl font-semibold tracking-tight`, no leading icon) + actions ขวาบน
-  + content in a card — **except form pages** (centered container, no card —
-  DESIGN.md §4 ฟอร์มแยกหน้า) · breadcrumb lives in the site-header only,
-  never above the title
+  + content in a card · three page patterns — data / form (single column,
+  one card per section) / dashboard — DESIGN.md §3 · content capped at
+  `max-w-[96rem]` centred while the site-header stays full width (มติ
+  2026-10-16 A1 — the cap belongs to `PageShell`, kit ≥ next release; never
+  per page) · breadcrumb lives in the site-header only, never above the title
+- **Sidebar surface**: white (`--sidebar: oklch(1 0 0)`, มติ 2026-10-16
+  TK-SB) on the #f5f7fb page, separated by its border — keep the block's
+  `border-r`; don't tint it back
 - **Mobile**: sidebar collapses to the block's built-in sheet/drawer ·
-  content transforms are systematic (table→card via DataTable, dialog→bottom
-  sheet via the primitive) — never per-page improvisation
+  content transforms are systematic (DataTable → list rows in one card,
+  dialog/popover → bottom sheet) — never per-page improvisation

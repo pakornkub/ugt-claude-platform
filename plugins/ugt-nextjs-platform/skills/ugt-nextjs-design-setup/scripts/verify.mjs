@@ -173,7 +173,8 @@ check('globals.css carries the org token set', () => {
   if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
   const css = readIn('app', 'globals.css');
   const problems = [];
-  if (/__PRIMARY(_DARK)?__/.test(css)) problems.push('__PRIMARY__ placeholder not substituted');
+  const leftover = [...new Set(css.match(/__(PRIMARY|PRIMARY_DARK|RING_DARK)__/g) ?? [])];
+  if (leftover.length) problems.push(`placeholder not substituted: ${leftover.join(' ')} (globals.tokens.css header has the defaults)`);
   for (const t of ['amber', 'emerald', 'red', 'coral', 'sky', 'gray']) {
     if (!css.includes(`--status-${t}:`)) problems.push(`--status-${t} missing`);
   }
@@ -184,6 +185,23 @@ check('globals.css carries the org token set', () => {
   }
   if (!css.includes('.dark')) problems.push('no .dark token block (tokens must exist even without a toggle)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+// มติ 2026-10-16 (backlog §14 release 1) added three token pieces. Warn, not
+// fail: a project installed before it only gets them through "sync ข้อตกลง
+// design", where each change is accepted or rejected as a มติ — verify must not
+// turn a recorded rejection into a red build.
+check('Tokens from มติ 2026-10-16 present (status-violet · cat-1..8 · reduced-motion)', () => {
+  if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
+  const css = readIn('app', 'globals.css');
+  const missing = [];
+  if (!css.includes('--status-violet:')) missing.push('--status-violet (+ -foreground)');
+  const cats = [1, 2, 3, 4, 5, 6, 7, 8].filter((n) => !css.includes(`--cat-${n}:`));
+  if (cats.length) missing.push(`--cat-${cats.join('/')}`);
+  if (!/prefers-reduced-motion:\s*reduce/.test(css)) missing.push('@media (prefers-reduced-motion: reduce) block');
+  return missing.length
+    ? { ok: 'warn', msg: `missing ${missing.join(' · ')} — copy from assets/globals.tokens.css (fresh install) or run "sync ข้อตกลง design" (existing project)` }
+    : { ok: true };
 });
 
 check('layout.tsx wires the agreed font via next/font', () => {
@@ -264,18 +282,32 @@ check('Every <DataTable> passes a unique id (column prefs persist)', () => {
     : { ok: 'warn', msg: 'No <DataTable> in the project yet — nothing to check' };
 });
 
-check('--radius survived the token merge', () => {
-  // Radius belongs to the preset (มติ 2026-08-09): our token file declares
-  // none, so if the merge dropped the preset's `--radius` line while replacing
-  // :root, nothing defines it and every card/button silently goes square.
+check('Radius scale merged as agreed (fixed roles, card = 0.45rem)', () => {
+  // มติ 2026-10-16 (TK-RAD) replaced มติ 2026-08-09: the token file now owns a
+  // FIXED scale (sm 4 · md 6 · lg 7.2 card · xl 14) plus `--radius: 0.75rem`.
+  // The merge failure this catches: the preset's own `calc(var(--radius) × …)`
+  // scale left in @theme next to our 0.75rem — every corner grows ×1.67 and
+  // cards hit 12px. A project on the pre-2026-10-16 scale (preset calc +
+  // 0.45rem) is still coherent, so it passes with a note; preserve mode
+  // rebases radius onto measured values (§Scale bridge), so no value is pinned
+  // there.
   if (!hasIn('app', 'globals.css')) return { ok: false, msg: 'No app/globals.css' };
-  const css = readIn('app', 'globals.css');
-  if (!/--radius\s*:/.test(css)) {
-    return { ok: false, msg: 'globals.css defines no `--radius` — the preset line was lost when the :root block was replaced; restore it (base-mira ships 0.45rem)' };
+  // comments mention "--radius: 0.45rem …" in prose (the old token file did) — read declarations only
+  const css = readIn('app', 'globals.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const base = /--radius\s*:\s*([^;]+);/.exec(css)?.[1]?.trim();
+  const lg = [...css.matchAll(/--radius-lg\s*:\s*([^;]+);/g)].at(-1)?.[1]?.trim();
+  if (!base && !lg) {
+    return { ok: false, msg: 'globals.css defines no radius at all — the :root/@theme blocks were replaced without the radius lines; copy them from assets/globals.tokens.css (every card/button is square right now)' };
   }
-  return /--radius-lg\s*:/.test(css)
-    ? { ok: true }
-    : { ok: 'warn', msg: 'no `--radius-lg` in globals.css — the preset @theme radius scale may have been overwritten' };
+  const lgIsCalc = /calc\(\s*var\(--radius\)/.test(lg ?? '');
+  if (lgIsCalc && base === '0.75rem') {
+    return { ok: false, msg: 'the preset\'s calc(var(--radius) × …) scale is still in @theme next to --radius: 0.75rem — every corner is ×1.67 (cards 12px). Replace the preset scale with the fixed one from assets/globals.tokens.css (--radius-lg: 0.45rem = card)' };
+  }
+  if (isPreserveMode()) return { ok: true, msg: 'preserve mode — radius follows the measured scale' };
+  if (lg === '0.45rem') return { ok: true };
+  return lgIsCalc
+    ? { ok: true, msg: `pre-2026-10-16 radius (preset calc of --radius ${base ?? '?'}) — "sync ข้อตกลง design" offers the fixed scale` }
+    : { ok: 'warn', msg: `--radius-lg is ${lg ?? 'undefined'} — the card role is 0.45rem (มติ 2026-10-16 TK-RAD); a different value needs its own มติ in DESIGN.md §10` };
 });
 
 // ── preserve mode + Tailwind major ────────────────────────────────────────

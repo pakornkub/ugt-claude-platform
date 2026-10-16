@@ -7,6 +7,12 @@
 หัวข้อถัดไป) และ `field` (หัวข้อท้ายไฟล์ — **จำเป็น** เพราะ `ui/date-picker` ใช้) ·
 แก้เฉพาะ object `variants.variant` ภายใน `cva(...)` ไม่ต้องแตะส่วนอื่นของไฟล์
 
+> **มติ 2026-10-16 (D6/A7, platform `docs/backlog.md` §14) — ไฟล์นี้ยังเป็นสูตรรุ่นก่อน:**
+> ปุ่มอนุมัติ = `success` (เขียวทึบ ตามเดิม) · บันทึก/submit ทั่วไป = `default` (primary) ·
+> ข้อตกลงใหม่คือ `destructive` เป็น **แดงทึบ** · เพิ่ม variant `soft` และ size `cta` —
+> สูตรของสามตัวนี้ยังไม่อยู่ในไฟล์นี้ (มากับ kit ≥ next release) **ห้ามเขียนเองจากความจำ** ·
+> ระหว่างนั้นติดตั้งตามไฟล์นี้ตามเดิม
+
 สีถูกแปลงจาก token ของโปรเจกต์ต้นทาง (`--success`) มาเป็น token ขององค์กรแล้ว:
 
 | ความหมาย | token ต้นทาง | token องค์กร | utility |
@@ -43,8 +49,8 @@ utility `bg-status-emerald` / `text-status-emerald` ใช้ได้เลย 
   > ซึ่ง**ไม่จริงแล้ว**: registry ปัจจุบันให้ `destructive` เป็นพื้นจาง
   > (`bg-destructive/10 text-destructive`) ไม่ใช่ solid + `text-white` ·
   > ผลคือปุ่มยืนยันลบใน `ConfirmActionDialog` จะออกมาเป็นแดงจาง ไม่ใช่แดงทึบ
-  > **มติ 2026-08-21: ยึด preset** — ไม่เพิ่ม variant แดงทึบของเราเอง
-  > ปุ่มยืนยันลบจึงเป็นแดงพื้นจาง และ `design-preview.html` วาดตามนี้แล้ว
+  > ~~มติ 2026-08-21: ยึด preset — ไม่เพิ่ม variant แดงทึบของเราเอง~~ **แทนด้วยมติ
+  > 2026-10-16 D6: ยืนยันลบ = แดงทึบ** (สูตรมากับ kit ≥ next release — ดูกล่องบนสุด)
 - ตัวต้นทางมี `focus-visible:ring` เฉพาะสีบน variant `destructive` — ถ้า button.tsx ปลายทาง
   มีแบบแผนนั้น จะเพิ่มให้ `success` ด้วยก็ได้:
   `focus-visible:ring-status-emerald/20 dark:focus-visible:ring-status-emerald/40`

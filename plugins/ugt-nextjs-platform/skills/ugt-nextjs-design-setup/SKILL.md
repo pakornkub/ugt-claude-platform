@@ -5,7 +5,7 @@ description: >
   design system", "กำหนดธีม", "ทำ DESIGN.md", "จัด layout ให้เป็นมาตรฐาน",
   "สีกับฟ้อนต์ยังมั่วอยู่", "UI แต่ละหน้าไม่เหมือนกัน" — covering the interview
   → generated `docs/DESIGN.md` (the design source of truth), shadcn/ui tokens in
-  globals.css (org indigo + semantic-6 status set), Inter + Noto Sans Thai
+  globals.css (org indigo + 7-tone status set + categorical palette), Inter + Noto Sans Thai
   fonts, the app shell (sidebar/topbar via shadcn blocks), the org UI kit
   (DataTable, FormDialog, StatusBadge, IconAction, date pickers, formatter lib),
   and the harness rule that makes every later session read the agreement before
@@ -43,7 +43,7 @@ What lands in the project:
 | Color/radius/status tokens (light+dark) | `app/globals.css` — from `assets/globals.tokens.css` |
 | Fonts (Inter + Noto Sans Thai + Geist Mono via `next/font`) | `app/layout.tsx` |
 | shadcn config (style `base-mira`, neutral, lucide) | `components.json` |
-| Org UI kit | `components/ui/*` + `lib/format.ts` — from `assets/ui/` and `assets/lib/` |
+| Org UI kit | `components/ui/*` + `lib/format.ts` + `lib/avatar.ts` — from `assets/ui/` and `assets/lib/` |
 | App shell (sidebar or topbar per interview) | `components/` + `app/(app)/layout.tsx` — see `references/layout-shells.md` |
 | Site header (breadcrumb เส้นทางเต็ม + จุด mount ของ toggles) | `components/site-header.tsx` — from `assets/components/`, mandatory on every sidebar shell (§Site header in layout-shells.md) |
 | Company logos (tintable SVG, `fill="currentColor"`) | `public/brand/` — from `assets/brand/` |
@@ -79,9 +79,11 @@ What lands in the project:
    (`frontend-design`, `impeccable`): they may propose, never override.
 
 Org defaults (interview only asks "เปลี่ยนไหม"): primary indigo
-`oklch(0.488 0.243 264.4)` · neutral hue ~258 · semantic-6 `--status-*` set ·
-Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables text-xs)
-· radius มาจากปุ่มเดียว `--radius: 0.45rem` แล้ว preset คูณออกเป็น 4 ระดับ (control 5.8 / card 7.2 / overlay 10.1 px — มติ 2026-08-09 ยกให้ preset คุม).
+`oklch(0.488 0.243 264.4)` · neutral hue ~258 (พื้นหน้า light #f5f7fb) · `--status-*` 7 ตัว (+ violet) ·
+`--cat-1..8` · Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables text-xs)
+· radius สเกลตายตัวใน token file: chip 4 / control 6 / card 7.2 / overlay 14 px (มติ 2026-10-16 TK-RAD — แทนมติ 2026-08-09 ที่ให้ preset คูณจาก `--radius`).
+มติ 2026-10-16 (backlog §14 รุ่น 1) เขียนกฎที่ component ยังตามไม่ทัน — ข้อความที่ติด
+**(kit ≥ next release)** ใน DESIGN.template/conventions คือของที่ยังไม่มีไฟล์ใน kit: ห้ามสร้างเองรายหน้าระหว่างรอ.
 
 ## 3. Workflow
 
@@ -148,9 +150,10 @@ different size — is the field bug this step exists to prevent.
      rename `package.json` `"name"` · **keep the `cn` npm package**.
    - Run `verify.mjs` right after init (gates preset + no Radix). Windows: run
      every CLI/build step from a **short path**.
-   - Merge `assets/globals.tokens.css` into `app/globals.css` — **carry over the
-     preset's `--radius` line** (verify fails without it) · substitute
-     `__PRIMARY__`/`__PRIMARY_DARK__`.
+   - Merge `assets/globals.tokens.css` into `app/globals.css` — **replace the
+     preset's `--radius` line and its `calc()` radius scale with ours** (left
+     side by side, every corner grows ×1.67 — verify fails) · substitute
+     `__PRIMARY__`/`__PRIMARY_DARK__`/`__RING_DARK__`.
 3. Root layout + `next.config.ts` — exact wiring in **`references/root-layout.md`**.
    Must-not-miss:
    - Fonts Inter + Noto Sans Thai + Geist Mono via `next/font` (preserve mode ข้อ 10
@@ -273,6 +276,7 @@ design-questions.template.md · globals.tokens.css) พร้อมที่ม�
 | `__STD_VERSION__` | เวอร์ชัน ugt-core ใน `plugins/ugt-core/.claude-plugin/plugin.json` ณ ตอนติดตั้ง |
 | `__REFERENCE__` | ข้อ 1 — prototype/brand ที่ต้อง match |
 | `__PRIMARY__` / `__PRIMARY_DARK__` | ข้อ 2 — สีหลัก (dark ต้องสว่างกว่า light) |
+| `__RING_DARK__` | คำนวณจาก `__PRIMARY_DARK__` (hue เดิม · L +0.07 · C −0.04 — default `oklch(0.62 0.17 264.4)`) ไม่ถาม |
 | `__DARK_MODE__` | ข้อ 3 |
 | `__SHELL__` | ข้อ 5 (sidebar/topbar/ทั้งคู่) |
 | `__LANDING__` | ข้อ 6 |

@@ -47,7 +47,11 @@ search (toolbar) · per-column filter (header icon → Popover, active-filter
 chips with per-chip ✕ and clear-all) · sort · pagination (default 10,
 options 10/20/50) · column drag-reorder · column hide/show · user prefs
 (order+hidden) persisted in localStorage · reset-to-default · mobile
-table→card · row selection · built-in Empty state.
+layout · row selection · built-in Empty state. **Mobile target (มติ
+2026-10-16 D8/A12): a list of rows inside the one card**, rows divided by
+hairlines — not a card per row on the gray page (kit ≥ next release; today's
+`data-table.tsx` still renders a card per row below `sm` — don't restyle it
+per page).
 
 ติ๊กเลือกแถวใช้ `selectionColumn()` จาก `ui/data-table` เป็นคอลัมน์แรกเสมอ —
 อย่าเขียน header/cell เอง: helper บังคับ `aria-label` ที่ระบุแถวได้ (ไม่งั้น

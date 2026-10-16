@@ -28,9 +28,17 @@ beautification skill. The short version that catches 90% of violations:
 - Sizes come from the `size` prop, never from `className`. `default`
   everywhere; `size="icon"` for an icon-only button **anywhere** as long as
   it carries an `aria-label` (in a table row it must go through
-  `IconAction`); `sm` in dense toolbars. `xs`/`icon-xs` are for kit
-  internals only. Overriding `h-*`/`p-*`/`size-*` on a Button is a lint
-  failure — if no size fits, fix `components/ui/button.tsx` instead.
+  `IconAction`). **One toolbar row = one size** (`default`; `sm` only inside
+  dense panels, never mixed into a row). `size="cta"` only for the page's
+  primary action, the form action bar and dialog footers (once the project's
+  button carries it — DESIGN.md §0). `xs`/`icon-xs` are for kit internals
+  only. Overriding `h-*`/`p-*`/`size-*` on a Button is a lint failure — if
+  no size fits, fix `components/ui/button.tsx` instead.
+- Approve = solid green `success` + `Check` · ordinary save/submit/create =
+  primary · reject = `outline` red + `X` · confirm-destructive = solid red.
+  Colors come from tokens only: `--status-*` = state (with an icon),
+  `--cat-*` = identity/grouping (avatar via `lib/avatar.ts`), primary =
+  clickable. Gradient only on a hero/banner.
 - lucide only, per the fixed icon mapping in DESIGN.md §4 — never emoji,
   never a different icon for the same action.
 - Tables → `DataTable`. Server-paginated data must sort/filter server-side
@@ -50,12 +58,13 @@ beautification skill. The short version that catches 90% of violations:
   labels/counts → `Badge`, colorless.
 - Icon-only buttons → `IconAction` (label mandatory). Destructive actions →
   `ConfirmActionDialog`, text button.
-- Forms → `ui/field` (zod + react-hook-form), short forms in `FormDialog`,
-  long forms on a page. "Long" includes any form with a list/checklist that
-  **grows with data** (permission checklists, option lists) — always long
-  even if short today; those go in a `Sheet` (scrolling body) or a page,
-  never a fixed-height Dialog. One primary button per dialog; dirty forms
-  confirm before closing.
+- Forms → `ui/field` (zod + react-hook-form); the container follows the
+  job (DESIGN.md §4 ladder): multi-step core work / needs a calendar → page
+  (single column, one card per section) · one master/settings record with
+  ≥ 4 fields → `Sheet` (`xl` or `5xl` only) · ≤ 3 fields in one go →
+  `FormDialog` · confirm only → `ConfirmActionDialog`. A list/checklist that
+  **grows with data** is never a fixed-height Dialog. One primary button per
+  dialog; dirty forms confirm before closing.
 - New colors or token edits → run the design skill's `check-contrast.mjs`
   before committing.
 - Deviating from DESIGN.md on purpose? Add a dated มติ to its §10 — a silent

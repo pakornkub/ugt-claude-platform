@@ -28,6 +28,7 @@ const ALIAS = {
   'status-emerald-foreground': 'status-emerald-fg',
   'status-red-foreground': 'status-red-fg',
   'status-coral-foreground': 'status-coral-fg',
+  'status-violet-foreground': 'status-violet-fg',
   'status-sky-foreground': 'status-sky-fg',
   'status-gray-foreground': 'status-gray-fg',
 };
@@ -36,11 +37,13 @@ const ALIAS = {
 const PLACEHOLDER = {
   __PRIMARY__: 'oklch(0.488 0.243 264.4)',
   __PRIMARY_DARK__: 'oklch(0.55 0.21 264.4)',
+  __RING_DARK__: 'oklch(0.62 0.17 264.4)',
 };
 // Tokens the preview MUST carry — dropping one silently makes the preview lie.
 const REQUIRED = [
   'primary', 'background', 'foreground', 'card', 'muted', 'muted-foreground', 'destructive',
-  'status-amber', 'status-emerald', 'status-red', 'status-coral', 'status-sky', 'status-gray',
+  'status-amber', 'status-emerald', 'status-red', 'status-coral', 'status-violet', 'status-sky',
+  'status-gray', 'cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-5', 'cat-6', 'cat-7', 'cat-8',
 ];
 
 for (const [label, path] of [['globals.tokens.css', SRC], ['design-preview.html', PREVIEW]]) {

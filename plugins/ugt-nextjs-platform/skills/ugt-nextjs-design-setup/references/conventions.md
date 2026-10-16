@@ -59,16 +59,24 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 | > 15 หรือต้องค้นหา | `Combobox` (command + popover) |
 | วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ยกเว้น filter ปี/เดือนใน toolbar ใช้ `Select` ได้ |
 
+Sizes (มติ 2026-10-16 A3/A7): **one toolbar row = one size** (`default` for every button/Select
+in it; `sm` only inside dense panels, never mixed into a row) · `size="cta"` (44px phone / 36px
+≥sm, 14px) **only** for the page's primary action, the form action bar and dialog footers —
+recipe arrives with `button-variants.md` in kit ≥ next release; until then those use `default`.
+
 ## ตรวจ API ของ primitive กับ registry ก่อนเขียน (อย่าเดาจากความจำ Radix)
 
 → moved to `base-ui-api.md` (sources of truth in order + the Radix↔Base UI difference table).
 
 ## Dialog ladder
 
+Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — replaces "FormDialog ≤ ~6 fields"):
+
 | งาน | ภาชนะ |
 | --- | --- |
-| ฟอร์มสั้น ≤ ~6 ช่อง | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม |
-| ฟอร์มยาว / หลายขั้น | หน้าแยก — container กึ่งกลาง **ไม่ครอบการ์ด**: มาตรฐาน `max-w-3xl mx-auto` grid 2 คอลัมน์ · ข้อมูลเยอะ/หลาย section `max-w-5xl` grid 3 คอลัมน์ + หัวข้อ section + เส้นคั่น (DESIGN.md §4 ฟอร์มแยกหน้า) |
+| งานหลักหลายขั้น / ต้องเลือกวันบนปฏิทิน | หน้าแยก — คอลัมน์เดียวถึง cap 96rem · **การ์ดต่อ section** + `CardHeading` · back-link · แถบปุ่ม `cta` ชิดขวา (มติ 2026-10-16 D4 แทน "กึ่งกลาง `max-w-3xl` ไม่ครอบการ์ด" · DESIGN.md §4 ฟอร์มแยกหน้า · `CardHeading` = kit ≥ next release, ระหว่างนั้น `CardHeader`+`CardTitle`) |
+| แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `Sheet` — 2 ขนาดเท่านั้น: `sm:max-w-xl` (576px) ฟอร์มล้วน · `sm:max-w-5xl` (1024px) มีตารางย่อย |
+| ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผล) | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
 | panel เปิดค้างดูคู่เนื้อหา (filter ชุดใหญ่, preview) | `Sheet` |
 | ดูรายละเอียด read-only | `detail-dialog-shell` + `detail-row`/`detail-section` |
@@ -88,6 +96,12 @@ first. Mobile: dialog renders as bottom sheet (built into the primitive).
   text-status-x-foreground`. Tones: success=emerald · warning=amber ·
   danger=red · cancel=coral · info=sky · neutral=gray. **sky ≠ primary**:
   sky labels information, primary marks interactive — never swap.
+  7th token `status-violet` (มติ 2026-10-16): StatusBadge tone `violet` = kit ≥ next
+  release (`status-badge.tsx` ships 6 today) — until then bars/tiles/dots only.
+- `--cat-1..8` (มติ 2026-10-16) = identity/grouping, white text: avatar via
+  `avatarColorClass(stableId)` + `getInitials(name)` (`lib/avatar.ts`, skips
+  Thai leading vowels) · group dots · chart series > 5. Never a status, never
+  "clickable" — literal classes only.
 - `Badge` plain — labels/counts/identifiers, text-only, **no status colors
   inline**.
 - **TONE_STYLES exception**: a colored label that must stay icon-free (e.g.
@@ -100,12 +114,14 @@ first. Mobile: dialog renders as bottom sheet (built into the primitive).
 
 เพิ่ม `Plus` · แก้ไข `Pencil` · ลบ `Trash2` · กู้คืน `RotateCcw` ·
 ดูรายละเอียด `Eye` · Import `Upload` · Export `Download` · ค้นหา `Search` ·
-กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2` · ปิด `X`.
-Decorative icons (text alongside) get `aria-hidden`. Icon-only buttons only
-via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
-ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/สร้าง/Import=primary (มติ
-2026-08-21) · อนุมัติ/ยืนยันเชิงบวก=เขียวทึบ (`success`).
-ในแถวตาราง สีมาจาก prop `tone` ไม่ใช่ชื่อ variant — ดูตารางข้างล่าง.
+กรอง `Filter` · เมนูแถว `MoreHorizontal` · สำเร็จ `CheckCircle2` · อนุมัติ `Check` ·
+ปฏิเสธ/ปิด `X`. Decorative icons (text alongside) get `aria-hidden`. Icon-only
+buttons only via `IconAction` (label → aria-label + tooltip, delay 0). Action
+colors: ลบ=แดง · กู้คืน=เขียว · แก้ไข=น้ำเงิน · เพิ่ม/สร้าง/Import=primary
+(มติ 2026-08-21) · บันทึก/submit ทั่วไป=primary · **ปุ่มตัดสินแบบมีข้อความ: อนุมัติ =
+เขียวทึบ `success` + `Check` · ปฏิเสธ = `outline` + `border-destructive/40 text-destructive`
++ `X`** (มติ 2026-10-16 D6 — เขียว = ผลบวกของการตัดสิน แยกจากปุ่มบันทึก primary).
+ในแถวตาราง (ไอคอนล้วน) สีมาจาก prop `tone` ไม่ใช่ชื่อ variant — ดูตารางข้างล่าง.
 
 **`IconAction` tone (มติ 2026-08-23)** — 4 โทนเท่านั้น ห้ามเพิ่ม เพราะสีต้องบอก
 "อันตรายแค่ไหน" ไม่ใช่ "action ตัวที่เท่าไร" (ในกล่อง 28px คนแยกออกแค่ 3-4 สี):
@@ -126,9 +142,9 @@ via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
 (เช่น `ui/tiptap-editor` 8-10 ปุ่ม) — ที่นั่นปุ่มรวมกันเป็นแถบอยู่แล้ว จึงเห็นว่ากดได้
 โดยไม่ต้องมีพื้นทุกใบ · ส่ง `tone` กับ `variant` พร้อมกันไม่ได้
 
-หมายเหตุ "แดง": `destructive` ของ preset เป็น**พื้นจาง**
-(`bg-destructive/10 text-destructive`) ไม่ใช่แดงทึบ — มติ 2026-08-21 ยึด preset
-ไม่เพิ่ม variant แดงทึบของเราเอง ปุ่มยืนยันลบจึงออกมาเป็นแดงจาง.
+หมายเหตุ "แดง" (มติ 2026-10-16 D6 แทนมติ 2026-08-21): ยืนยันลบ = **แดงทึบ** + variant `soft`
+(primary/10 ขอบ primary/25 = ปุ่มรองในหัวหน้า) — สูตรมากับ `button-variants.md` ของ kit ≥ next
+release · ระหว่างนั้น `destructive` ของ preset ยังพื้นจาง ห้ามแต่ง className รายจุดให้ทึบ.
 
 ## Feedback
 
@@ -153,12 +169,12 @@ via `IconAction` (label → aria-label + tooltip, delay 0). Action colors:
   project first needs one) — no other chart lib, no hardcoded colors. Colors:
   generic series take `--chart-1..5` in order; a series that **is** a status
   (สำเร็จ/ข้าม/ผิดพลาด) takes the matching `--status-*` so the chart and the
-  StatusBadge on the table tell the same story in the same color. Working
+  StatusBadge on the table tell the same story in the same color; categories
+  that need more than 5 distinct colors take `--cat-1..8`. Working
   example: `ui/chart-example.tsx` (copy, adapt, delete).
 - Rich text: tiptap via the kit's `ui/tiptap-editor` — no other editor lib,
   no second editor component. Deps are the `@tiptap/*` ^3 set; install only
   when the project actually has rich text.
-
 
 ## i18n — เพิ่มข้อความใหม่ต้องทำอะไร
 
