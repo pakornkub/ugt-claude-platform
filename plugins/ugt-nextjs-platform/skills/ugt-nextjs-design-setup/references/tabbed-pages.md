@@ -24,7 +24,7 @@ export default async function Page({ searchParams }: Readonly<{ searchParams: Pr
         <PageActions>
           <Button variant="soft" size="cta">ส่งออกทั้งหมด</Button>
           {action && (
-            <Button size="cta" render={<Link href={action.href} />}>
+            <Button size="cta" nativeButton={false} render={<Link href={action.href} />}>
               <Plus />
               {action.label}
             </Button>

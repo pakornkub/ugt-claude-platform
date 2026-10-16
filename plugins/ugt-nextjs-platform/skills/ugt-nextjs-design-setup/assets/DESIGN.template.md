@@ -132,7 +132,7 @@
 
 - **__FONT__** ผ่าน `next/font` · mono = Geist Mono ·
   ฐาน html 16px ไม่ override
-- น้ำหนัก 400/500 · 600 เฉพาะ title หน้า ·
+- น้ำหนัก 400/500 · 600 เฉพาะหัวข้อ (หน้า · การ์ด · dialog · section) และตัวเลข KPI ·
   Title: `text-2xl font-semibold tracking-tight` ไม่มีไอคอนนำ
 - **ห้าม uppercase eyebrow กับข้อความไทย** (ไทยไม่มี case + tracking ทำสระลอย)
 - ตาราง `text-xs 2xl:text-sm` (12px → 14px ตั้งแต่จอ ≥1536px — หัวและเนื้อขยายพร้อมกัน ·
@@ -204,12 +204,14 @@
   - **หน้า dashboard** — hero (จุดเดียวที่ gradient ได้) → แถว `StatCard`
     (`grid-cols-2 lg:grid-cols-4` · ค่า + delta เทียบช่วงก่อน · กดแล้วไปหน้าที่เกี่ยว) →
     แถวการ์ดที่มี `CardHeading` (`ui/card-heading`) สูงเท่ากันต่อแถว
-    > `StatCard` มากับ kit ≥ next release — ยังไม่มีไฟล์ใน kit วันนี้
-    > ห้าม hand-build การ์ดตัวเลขเองระหว่างรอ ใช้ `Card` + `CardHeading` + ข้อความ
+    > `StatCard` = `ui/stat-card` (`href` ไปหน้าที่เกี่ยว · ห้ามห่อด้วย `Card`) — ผังเต็ม +
+    > ตัวอย่าง: `references/dashboard.md` ของ design-setup · ห้าม hand-build การ์ดตัวเลขเอง
 - **แถบ filter ระดับหน้า** (filter ที่อยู่นอกตาราง เช่น ปี/เดือน/หน่วยงาน):
   อยู่ใน**หัวการ์ดเดียวกับตาราง** (ไม่ลอยเหนือการ์ด ไม่แยกการ์ด) · **ชิดซ้าย**
   เรียง**กว้างไปแคบ**: ช่วงเวลา → หน่วยงาน/ขอบเขต → สถานะ · ปุ่ม action ของหน้า
   ยังอยู่ขวาบนใน `PageActions` เหมือนเดิม ห้ามย้ายลงมาปนแถบ filter ·
+  ช่วงเวลา = `PeriodNavigator` ตัวแรก · หน้าที่มี filter ≥ 3–4 ตัว ยุบตัวรองไว้ใน
+  `FilterPopover` ตัวท้าย (badge นับ + ปุ่มล้าง) ·
   control เลือกตามบันไดส่วน 4 (≤5 = RadioGroup · 6–15 = Select · >15 =
   Combobox · ช่วงวันที่ = `ui/date-range-picker`) — **ห้ามใช้ Input เปล่า
   เป็น filter** ยกเว้นช่องค้นหาอิสระ ซึ่งเป็นของ DataTable อยู่แล้ว
@@ -228,7 +230,7 @@
   เต็มกว้าง เรียง **นำทาง/ค้นหา → filter → แถวเครื่องมือรอง** (`toolbarExtra` + ปุ่มตั้งค่า
   คอลัมน์ชิดขวา — ปุ่มตั้งค่าคอลัมน์ไม่ซ่อน) · **ปุ่มหลักของหน้าไม่อยู่ใน toolbar** — อยู่ใน
   `PageActions` เหนือการ์ด เต็มกว้าง `cta` 44px (แถว filter ไม่มีปุ่ม action ตามสัญญากลาง) ·
-  popover และ dialog → bottom sheet
+  popover (ผ่าน `ui/responsive-popover`) และ dialog → bottom sheet
 - **หน้า login = สองคอลัมน์** (`components/login-shell.tsx` จาก auth-setup): ซ้าย =
   hero ตั้งแต่ `lg` ขึ้นไป (`bg-primary` + รูป `public/login-hero.webp` ถ้ามี ใต้ overlay
   `bg-primary/65`) เรียง 3 แถว — `ube-logo-long.svg` · ชื่อระบบ + คำอธิบาย 1 บรรทัด +
@@ -248,7 +250,9 @@
 - **กฎสเกล**: control ทุกตัวในฟอร์มเดียวกันสูงเท่ากันเสมอ · เปลี่ยนขนาดได้ที่
   `components/ui/*` ต้นทางเท่านั้น — ห้าม override ขนาดรายหน้า/รายจุด
 - เลือก control: ≤5 = RadioGroup · 6–15 = Select · >15/ค้นหา = Combobox ·
-  วันที่ = `ui/date-picker` เสมอ (ยกเว้น filter ปี/เดือน = Select)
+  วันที่ = `ui/date-picker` เสมอ · ช่วงเวลาระดับหน้า = `ui/period-navigator` (‹ ป้าย › วันนี้) ·
+  กรองแค่ปี = `ui/year-select` · **เวลา = `ui/time-input` เสมอ** (`HH:MM` 24 ชม. — ห้าม
+  `<input type="time">`: picker ตามภาษาเครื่อง AM/PM + ช่องวินาที)
 - Form: label บนช่อง · required = `*` แดง · **ผูก zod + react-hook-form ผ่าน
   `zodResolver` เสมอ** (ไม่ใช่ `useState` ต่อช่อง) · error ของช่องอยู่ใต้ช่อง
   ผ่าน `ui/field` · **error ระดับฟอร์ม** (ล็อกอินผิด, เซิร์ฟเวอร์ปฏิเสธ) เป็น
@@ -282,15 +286,16 @@
   | --- | --- |
   | งานหลักหลายขั้น / ต้องเลือกวันบนปฏิทิน | หน้าเต็ม (§ฟอร์มแยกหน้า) |
   | แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `Sheet` — **2 ขนาดเท่านั้น**: `xl` (576px) ฟอร์มล้วน · `5xl` (1024px) มีตารางย่อย |
-  | ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผลปฏิเสธ/ยกเลิก) | `FormDialog` (compound + height `fluid`/`auto`/`fill`) |
+  | ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผลปฏิเสธ/ยกเลิก) | `FormDialog` (compound + height `fluid`/`auto`/`fill`) · ขอเหตุผล = `ReasonDialog` (`ui/reason-dialog`) ตัวเดียวทั้งแอป |
   | ยืนยันอย่างเดียว ไม่มีช่องกรอก | `ConfirmActionDialog` (`AlertDialog`) ปุ่มมีข้อความ |
 
   panel ค้างดูคู่เนื้อหา = `Sheet` · read-only = `detail-dialog-shell` · system alert
   บังคับ action เดียว (session หมดอายุ) = `AlertDialog` ปิดไม่ได้ ปุ่ม primary เดียว
   **ไม่มีปุ่มยกเลิก** — ข้อยกเว้น footer ข้อเดียวที่อนุญาต
-  > ขนาด Sheet `xl`/`5xl` ตั้งผ่าน `className` ของ `SheetContent` (`sm:max-w-xl` /
-  > `sm:max-w-5xl`) ได้สองค่านี้เท่านั้น · ฟอร์มตั้งค่าใน Sheet แบบสำเร็จรูปมากับ kit
-  > ≥ next release
+  > Sheet ฟอร์มตั้งค่า = `ui/settings-sheet` — `SettingsSheetContent size="xl"` / `"5xl"`
+  > (ได้สองค่านี้เท่านั้น · `sm:max-w-*` เปล่าบน `SheetContent` แพ้ class
+  > `data-[side=right]:sm:max-w-sm` ของ primitive) · section มีไอคอน + คำอธิบาย ·
+  > helper มองเห็นใต้ทุกช่อง (ไม่ใช่ tooltip) · หน่วยเป็น suffix · กล่องสรุปกฎจาก pure function ตัวเดียวกับ server
   > **นิยาม "ยาว" ให้นับเนื้อหาที่โตตามข้อมูลด้วย** — ฟอร์มที่มี
   > list/checklist ซึ่งความยาวขึ้นกับข้อมูลจริง (เช่น checklist สิทธิ์ที่โต
   > ตาม `ALL_PERMISSIONS`) ถือว่า "ยาว" เสมอแม้วันนี้จะสั้น เพราะ Dialog

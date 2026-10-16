@@ -18,6 +18,7 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 - `datatable.md` — page-level filter bar + DataTable (modes, toolbar, pagination, mobile)
 - `export.md` — Excel/CSV export (route order, DO/DON'T, `lib/export.ts` guards)
 - `kit-inventory.md` — every kit file with provenance
+- `form-pages.md` · `dashboard.md` — form container ladder in depth + full-page form · the dashboard pattern
 
 ## ถูก/ผิด — the five violations that cover 90% of review comments
 
@@ -55,7 +56,8 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 | ≤ 5 | `RadioGroup` |
 | 6–15 | `Select` |
 | > 15 หรือต้องค้นหา | `Combobox` (command + popover) |
-| วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ยกเว้น filter ปี/เดือนใน toolbar ใช้ `Select` ได้ |
+| วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ช่วงเวลาระดับหน้า (เลื่อนวัน/สัปดาห์/เดือน/ปี) = `ui/period-navigator` · กรองแค่ปี = `ui/year-select` (+ `ui/month-select`) |
+| เวลา | `ui/time-input` (`HH:MM` 24 ชม.) เสมอ — ห้าม `<input type="time">` (picker ตามภาษาเครื่อง AM/PM + ช่องวินาที) |
 
 Sizes (A3/A7): **one toolbar row = one size** (`default`; `sm` only in dense panels; `ui/view-toggle` = 28px)
 · `size="cta"` (44px phone / 36px ≥sm) **only** in `PageActions`, `PageFormActions` and dialog/sheet
@@ -74,11 +76,10 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 | งาน | ภาชนะ |
 | --- | --- |
 | งานหลักหลายขั้น / ต้องเลือกวันบนปฏิทิน | หน้าแยก — คอลัมน์เดียวถึง cap 96rem · **การ์ดต่อ section** + `CardHeading` · `PageBackLink` · `PageFormActions` ขนาด `cta` ชิดขวา (มือถือ `[1fr_2fr]`) (มติ 2026-10-16 D4 แทน "กึ่งกลาง `max-w-3xl` ไม่ครอบการ์ด" · DESIGN.md §4 ฟอร์มแยกหน้า · `CardHeading` = `ui/card-heading`) |
-| แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `Sheet` — 2 ขนาดเท่านั้น: `sm:max-w-xl` (576px) ฟอร์มล้วน · `sm:max-w-5xl` (1024px) มีตารางย่อย |
-| ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผล) | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม |
+| แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `ui/settings-sheet` — `SettingsSheetContent size="xl"` (576px) ฟอร์มล้วน · `size="5xl"` (1024px) มีตารางย่อย · 2 ขนาดเท่านั้น (`sm:max-w-*` เปล่าบน `SheetContent` แพ้ class ของ primitive) |
+| ≤ 3 ช่อง จบในจังหวะเดียว | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม · **ขอเหตุผล (ปฏิเสธ/ยกเลิก) = `ui/reason-dialog` ตัวเดียว** ห้ามทำใหม่รายหน้า |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
-| panel เปิดค้างดูคู่เนื้อหา (filter ชุดใหญ่, preview) | `Sheet` |
-| ดูรายละเอียด read-only | `detail-dialog-shell` + `detail-row`/`detail-section` |
+| ดูรายละเอียด read-only | `detail-dialog-shell` (หัว: ไอคอน + ชื่อ + `description` + `status`) + `DetailHighlights` + `DetailSection`/`DetailRow` |
 | ยืนยัน destructive | `AlertDialog` ผ่าน `ConfirmActionDialog` — ปุ่มมีข้อความ ไม่ใช่ icon ล้วน |
 | system alert บังคับ action เดียว (session หมดอายุ) | `AlertDialog` ปิดไม่ได้ — **ไม่มีปุ่มยกเลิก** (ข้อยกเว้น footer ข้อเดียวที่อนุญาต เพราะ "ยกเลิก" ไม่มีความหมายเมื่อ session ตายแล้ว) · ตัวจริง: `session-expired-dialog.tsx` ของ auth-setup |
 
@@ -86,9 +87,9 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 `bg-muted/40` edge to edge, buttons `cta`. **Read-only = no footer** (✕ closes). **Only title + short
 description in `AlertDialogHeader`** (A9 — its grid squeezes content; put it after, e.g.
 `ConfirmActionDialog` `children`). Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
-dialog**. No dialog-over-dialog except a single AlertDialog confirm on top of
-a form. A dirty form never closes silently on Esc/outside-click — confirm
-first. Mobile: dialog renders as bottom sheet (built into the primitive).
+dialog**. No dialog-over-dialog except one AlertDialog confirm over a form. A dirty form never closes
+silently on Esc/outside-click. Value-picking overlays go through `ui/responsive-popover` (bottom sheet on phones,
+A12) — never a raw `Popover`; kit DatePicker/DateRangePicker/Combobox still are (backlog §14) · `form-pages.md`.
 
 ## Badge vs StatusBadge
 
@@ -193,7 +194,6 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 ไฟล์ `kit.*`** เพราะ `/plugin update` เขียนทับไฟล์ของคิตทั้งไฟล์ ของที่เพิ่มเข้าไป
 จะหายเงียบ (`ugt-nextjs-kit-sync` เตือนตอนไฟล์ตกรุ่น แต่กู้ของที่หายไปแล้วไม่ได้)
 
-**คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action.tsx`,
-`ui/bulk-action-bar.tsx`, `ui/status-badge.tsx`, `ui/page-shell.tsx`,
-`ui/card-heading.tsx`, `ui/view-toggle.tsx`, `ui/query-state.tsx`, `ui/detail-*.tsx` ออกแบบมาให้ผู้เรียกประกอบข้อความเอง
-ตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล
+**คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action` `bulk-action-bar` `status-badge` `page-shell`
+`card-heading` `view-toggle` `stat-card` `time-input` `settings-sheet` `responsive-popover` `query-state` `detail-*`
+ออกแบบมาให้ผู้เรียกประกอบข้อความเองตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล

@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.15.1 (2026-10-16)
+
+- contract design §Typography: น้ำหนัก 600 = หัวข้อ (หน้า · การ์ด · dialog · section) และตัวเลข KPI — เดิมเขียน "page titles only" ซึ่งขัดกับ `CardHeading`/`StatCard` ที่ยกจาก hrms (มติ 2026-10-16 B1/B2)
+
 ## 2.15.0 (2026-10-16)
 
 - **contract design: ยก UI จาก ugt-hrms รุ่น 1** (มติผู้ดูแล 2026-10-16, backlog §14 — กฎที่มาจากที่นี่ติด *(hrms 2026-10-16)* ในตัว contract): neutral ยอมให้พื้นหน้า light อยู่บน hue ของ indigo (`oklch(0.976 0.006 264.5)` #f5f7fb) · **elevation** light = พื้นเทาฟ้า + การ์ดขาว `shadow-xs ring-1` + sidebar ขาว ห้ามซ้อนเงา (dark ยังมาจากความสว่าง) · **สถานะ "exactly six" → seven** เพิ่ม `status-violet` (โปรเจคตั้งความหมายใน DESIGN.md) · **categorical palette `--cat-1..8`** สำหรับ avatar/หมวด/กราฟเกิน 5 series — ตกแต่งเท่านั้น ห้ามบอกสถานะ ห้ามบอกว่ากดได้ · **gradient เฉพาะ hero/banner** · ตาราง `12px → 14px` ตั้งแต่ 2xl เป็นข้อยกเว้นเดียวฝั่งตัวอักษร · หัวข้อใหม่ **Controls**: หนึ่งแถว toolbar = หนึ่งขนาด · size `cta` (44px มือถือ / 36px ≥sm, 14px) เฉพาะปุ่มหลักของหน้า แถบปุ่มท้ายฟอร์ม footer dialog · ตัดสินคำขอ: อนุมัติ = เขียวทึบ `success` (ผลบวกของการตัดสิน แยกจากปุ่มบันทึก) บันทึก/submit ทั่วไป = primary ปฏิเสธ = outline แดง ยืนยันลบ = แดงทึบ `soft` = ปุ่มรอง · Layout: เนื้อหา cap 96rem จัดกลาง topbar เต็มกว้าง · page pattern **2 → 3** (data / form / dashboard) · form page เปลี่ยนจาก "กึ่งกลางไม่ครอบการ์ด" เป็นคอลัมน์เดียวการ์ดต่อ section · **บันไดภาชนะฟอร์ม** หน้าเต็ม / Sheet (≥4 ช่อง 2 ขนาด) / Dialog (≤3) / AlertDialog · มือถือ ตาราง = list ในการ์ดเดียว (เลิก table→card ต่อแถว) · Motion: reduced-motion บังคับที่ stylesheet จุดเดียว · iron rule 3 ชี้ไปข้อยกเว้นระดับองค์กรใน §Controls (ugt-nextjs-platform คือฉบับ Next.js — token + template รุ่นนี้, primitive/component รุ่นถัดไป)

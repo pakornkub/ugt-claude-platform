@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.79.4 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: 6344352961fa
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: dc1c5cc61e98
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
 // (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
@@ -146,7 +146,7 @@ export function RolesManager({
 
       {/* Sheet ตัวเดียวคุมทั้ง create/edit จาก state — checklist สิทธิ์เลื่อนใน body ของ Sheet */}
       <Sheet open={openSheet !== null} onOpenChange={(open) => !open && setOpenSheet(null)}>
-        <SheetContent className="flex w-full flex-col sm:max-w-md">
+        <SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
           <SheetHeader className="border-b">
             <SheetTitle>{editingRole ? t('editTitle') : t('createTitle')}</SheetTitle>
           </SheetHeader>

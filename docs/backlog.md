@@ -346,6 +346,8 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 | 3 · component ใหม่ | B1 StatCard · B4 FilterPopover · B5 ReasonDialog · B6 detail dialog anatomy · B7 TimeInput · A6 PeriodNavigator/YearSelect/ViewToggle 3 ทาง · A5 settings form ใน Sheet (**พื้นแบบ plugin ที่เหลือแบบ hrms**) · A12 ResponsivePopover · D4 form page คอลัมน์เดียวการ์ดต่อ section · D12 dashboard pattern · A11 บันไดเลือกฟอร์ม |
 | 4 · login + pitfalls + docs | A4 login (แผงเข้มสีตายตัว + การ์ดกระจก + kenburns, มือถือภาพเต็มจอ) · pitfalls A2 ไทยใน font-mono · A13 RT-042 flex-1 บีบความสูง + RT-044 cache ไฟล์ public · B13 RT-045 useIsMobile #418 · design-preview + docs/web ตามของจริง |
 
+ค้างจากรุ่น 3 (review 2026-10-16): `ui/date-picker` · `date-range-picker` · `combobox` ยังเป็น Popover ดิบ — มือถือไม่เป็น bottom sheet ตาม A12 · ย้ายผ่าน `ResponsivePopover` (ต้องมี variant ไม่มี padding ให้ปฏิทิน) — ทำในรุ่น 4
+
 ไม่เอา: ภาษาช่องวัน/กะ, HERO_GRADIENT hex, view-as, เนื้อหา dashboard โดเมน HR, โลโก้ PNG, สีกลุ่มเมนูจากสีสถานะ, `DecisionButtons` สูงรายจุด
 
 ## รอเงื่อนไข (ทำไม่ได้จนกว่า)

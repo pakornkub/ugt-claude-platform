@@ -1,6 +1,7 @@
-// kit: ugt-nextjs-platform 4.30.0 · ugt-nextjs-design-setup/ui/detail-row.tsx
-// kit-hash: a0ee111707a6
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/detail-row.tsx
+// kit-hash: 2ef92a0dc727
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
+// layout: มติ 2026-10-16 B6 (platform docs/backlog.md §14 รุ่น 3) — hrms DESIGN §10 2026-09-30
 import * as React from 'react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -11,16 +12,20 @@ interface DetailRowProps {
    */
   icon?: LucideIcon;
   label: string;
-  /** Row value. Falsy value ⇒ the whole row is skipped (no empty label left behind). */
+  /**
+   * Row value. Empty (`null` / `undefined` / `false` / `''`) ⇒ the whole row is
+   * skipped (no empty label left behind). `0` is a value and renders.
+   */
   children?: React.ReactNode;
 }
 
 /**
  * Canonical read-only detail row for detail dialogs / detail views.
  *
- * Layout follows DESIGN.md §4 label–value: flex justify-between, centred,
- * gap ≥16px and a ~24px min row height so a StatusBadge value cannot collide
- * with the label. Stacks to label-on-top on mobile.
+ * Layout: **label column fixed on the left (8rem) · value on the right, left-aligned**,
+ * top-aligned so a multi-line value (list, long note) reads down from the label;
+ * stacks label-on-top on mobile. Label 12px muted · value 14px foreground — the
+ * value is what the reader came for, so it is the larger of the two.
  * Labels are sentence case — no `uppercase` / `tracking-*` eyebrow, which breaks
  * Thai text (`docs/DESIGN.md` § Typography).
  *
@@ -28,14 +33,14 @@ interface DetailRowProps {
  * straight through without wrapping each row in its own guard.
  */
 export function DetailRow({ icon: Icon, label, children }: Readonly<DetailRowProps>) {
-  if (!children) return null;
+  if (children == null || children === false || children === '') return null;
   return (
-    <div className="flex flex-col gap-0.5 py-1 sm:min-h-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <div className="flex shrink-0 items-center gap-1.5">
-        {Icon && <Icon className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={2} />}
+    <div data-slot="detail-row" className="flex flex-col gap-0.5 py-1.5 sm:flex-row sm:items-start sm:gap-3">
+      <div className="flex shrink-0 items-center gap-1.5 sm:w-32 sm:pt-0.5">
+        {Icon && <Icon className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden="true" />}
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
-      <div className="min-w-0 text-xs sm:text-right">{children}</div>
+      <div className="min-w-0 flex-1 text-sm leading-relaxed text-foreground">{children}</div>
     </div>
   );
 }

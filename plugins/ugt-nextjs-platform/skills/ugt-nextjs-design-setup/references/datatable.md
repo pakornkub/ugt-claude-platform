@@ -16,6 +16,13 @@ table's per-column filters. Fixed placement so page N+1 never moves them:
   job). On narrow screens the row wraps naturally.
 - Page actions stay top-right in `PageActions`; never mix an action button
   into the toolbar's filter zone.
+- **Kit pieces for this slot** (มติ 2026-10-16 A6/B4): the period is
+  `ui/period-navigator` (`‹ label › today`, first in `toolbarFilters`) — not a
+  year Select + month Select pair; a view switch that also changes granularity
+  is one `ViewToggle` in `toolbarExtra` ([calendar | list | whole year]). A page
+  with ≥ 3–4 filters folds the secondary ones into `ui/filter-popover`, **last**
+  in `toolbarFilters` (count badge + clear; each field applies at once). No
+  DataTable prop is needed — both stretch full width on phones like any filter.
 - Control per the ladder (`conventions.md` §Control selection ladder) (≤5 RadioGroup · 6–15 Select · >15 Combobox ·
   date range = `ui/date-range-picker` with `hideLabels` — visible labels above the
   pickers push them below the search box; hidden they stay as placeholders +

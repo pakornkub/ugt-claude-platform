@@ -7,8 +7,10 @@ Last updated: 2026-10-15
   รุ่น 1 ออกแล้ว = nextjs 4.80.0 + core 2.15.0 (934cc20: token, contract, template) ·
   รุ่น 2 ออกแล้ว = nextjs 4.81.0 (467f588: ปุ่ม/การ์ด/dialog/table/PageShell/sidebar/DataTable/
   StatusBadge violet + กฎหน้าหลายแท็บ `references/tabbed-pages.md`, eval 4 case ผ่าน) ·
-  **ถัดไป รุ่น 3 component ใหม่** (StatCard, FilterPopover, ReasonDialog, detail dialog, TimeInput,
-  PeriodNavigator/YearSelect, settings Sheet, ResponsivePopover, form page, dashboard) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  รุ่น 3 ออกแล้ว = nextjs 4.82.0 + core 2.15.1 (StatCard, ReasonDialog, TimeInput, detail dialog, ResponsivePopover,
+  FilterPopover, PeriodNavigator/YearSelect/MonthSelect, settings-sheet, `dashboard.md`, `form-pages.md`; eval design/auth/mail ผ่าน) ·
+  **ถัดไป รุ่น 4** (login · pitfalls A2/A13/B13 · design-preview + docs/web ตามของจริง · date-picker/combobox ผ่าน
+  ResponsivePopover ที่ค้างจากรุ่น 3) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
   บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: ad44e9a6e359
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: 71163a5d914f
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -75,5 +75,30 @@ export const kitTh = {
   },
   siteHeader: {
     home: 'หน้าแรก',
+  },
+  // ── ui/reason-dialog.tsx (มติ 2026-10-16 B5) — ป้าย/ปุ่มของ dialog เหตุผลตัวกลาง
+  // หัว/คำอธิบาย/ปุ่มยืนยันเป็นของผู้เรียก (ปฏิเสธ · ขอยกเลิก …) ไม่อยู่ที่นี่
+  reasonDialog: {
+    reasonLabel: 'เหตุผล',
+    reasonRequired: 'กรุณาระบุเหตุผล',
+    cancel: 'ยกเลิก',
+    genericError: 'เกิดข้อผิดพลาด',
+  },
+  // ── ตัวเลือกช่วงเวลา (ui/period-navigator · month-select — มติ 2026-10-16 A6) ──
+  period: {
+    select: 'เลือกช่วงเวลา',
+    prev: 'ช่วงก่อนหน้า',
+    next: 'ช่วงถัดไป',
+    today: 'วันนี้',
+    thisYear: 'ปีนี้',
+    year: 'ปี',
+    month: 'เดือน',
+    allMonths: 'ทุกเดือน',
+  },
+  // ── ปุ่มตัวกรอง (ui/filter-popover — มติ 2026-10-16 B4) ──
+  filterPopover: {
+    trigger: 'ตัวกรอง',
+    clear: 'ล้างตัวกรอง',
+    activeCount: 'ใช้อยู่ {count} ตัว',
   },
 } as const;

@@ -234,6 +234,73 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
   });
 }
 
+// Release-3 kit pieces import each other — copying one without its companions
+// is a build break that only shows on the page that first uses it.
+const KIT_COMPANIONS = {
+  'filter-popover': ['ui/responsive-popover'],
+  'period-navigator': ['ui/responsive-popover', 'ui/year-select', 'ui/month-select', 'ui/date-picker', 'ui/icon-action'],
+  'responsive-popover': ['hooks/use-mobile'],
+  'settings-sheet': ['ui/sheet', 'ui/field', 'ui/input-group', 'ui/switch', 'ui/label'],
+};
+check('Kit pieces ship with their companions (period-navigator · filter-popover · settings-sheet)', () => {
+  const present = (rel) => {
+    const [dir, name] = rel.split('/');
+    const base = dir === 'hooks' ? ['hooks'] : ['components', 'ui'];
+    return ['.ts', '.tsx'].some((ext) => hasIn(...base, `${name}${ext}`));
+  };
+  const missing = [];
+  for (const [file, needs] of Object.entries(KIT_COMPANIONS)) {
+    if (!hasIn('components', 'ui', `${file}.tsx`)) continue;
+    for (const need of needs) if (!present(need)) missing.push(`${file} → ${need}`);
+  }
+  return missing.length
+    ? { ok: false, msg: `${missing.join(' · ')} — copy the companion (kit-inventory.md) · hooks/use-mobile: npx shadcn@latest add use-mobile` }
+    : { ok: true };
+});
+
+// มติ 2026-10-16 B7: the native time picker follows the OS locale (AM/PM on en-US) and can show
+// a seconds segment — testers read it as a wrong time. components/ui/ is the kit itself: skip it.
+check('Time fields use ui/time-input (no native type="time")', () => {
+  // Blank comments out but keep their newlines (reported line numbers stay right); a `//` only
+  // starts a comment at line start / after whitespace, so a URL inside a string survives.
+  const blank = (m) => m.replace(/[^\n]/g, '');
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/(^|\s)\/\/[^\n]*/gm, blank);
+  const hits = [];
+  for (const file of sourceTsx()) {
+    const rel = relative(ROOT, file).split('\\').join('/');
+    if (/(?:^|\/)components\/ui\//.test(rel)) continue;
+    const body = strip(readFileSync(file, 'utf8'));
+    // JSX attribute only (whitespace before, no spaces around `=`) — not `const type = 'time'` / `data-type`
+    for (const m of body.matchAll(/(?<=\s)type=(?:"time"|'time'|\{\s*['"]time['"]\s*\})/g)) {
+      hits.push(`${rel}:${body.slice(0, m.index).split('\n').length}`);
+    }
+  }
+  return hits.length
+    ? { ok: 'warn', msg: `native time input → <TimeInput>: ${hits.slice(0, 5).join(' · ')}${hits.length > 5 ? ` …+${hits.length - 5}` : ''}` }
+    : { ok: true };
+});
+
+// A bare `w-full` / `sm:max-w-*` (md: lg: …) on a left/right SheetContent never applies — the
+// primitive's data-[side=right]:w-3/4 / data-[side=right]:sm:max-w-sm win on specificity, so the
+// sheet silently stays 75% wide on phones and 384px above. top/bottom sheets have no such cap.
+check('SheetContent widths actually apply (data-[side=…]: prefix / SettingsSheetContent)', () => {
+  const bare = /(?<![\w:\]-])(?:w-full|(?:sm|md|lg|xl|2xl):max-w-\S+)/;
+  const hits = [];
+  for (const file of sourceTsx()) {
+    const rel = relative(ROOT, file).split('\\').join('/');
+    if (/(?:^|\/)components\/ui\//.test(rel)) continue;
+    const body = readFileSync(file, 'utf8');
+    // the opening tag up to its className string (props before it may hold `=>`)
+    for (const m of body.matchAll(/<SheetContent\b((?:(?!<|\/>)[\s\S]){0,600}?)className=\{?\s*(?:cn\(\s*)?["'`]([^"'`]*)/g)) {
+      if (/side=["'{]*\s*["']?(?:top|bottom)/.test(m[1]) || !bare.test(m[2])) continue;
+      hits.push(`${rel}:${body.slice(0, m.index).split('\n').length}`);
+    }
+  }
+  return hits.length
+    ? { ok: 'warn', msg: `${hits.slice(0, 5).join(' · ')} — bare w-full / sm:max-w-* on SheetContent is overridden by the primitive; settings → SettingsSheetContent size="xl" | "5xl", other panels → data-[side=right]:w-full data-[side=right]:sm:max-w-* (form-pages.md)` }
+    : { ok: true };
+});
+
 check('lib/format.ts installed (the only formatter)', () =>
   hasIn('lib', 'format.ts') ? { ok: true } : { ok: false, msg: 'Central formatter missing' }
 );

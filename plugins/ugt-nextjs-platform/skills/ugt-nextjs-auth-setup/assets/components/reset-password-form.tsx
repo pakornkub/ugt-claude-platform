@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.47.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
-// kit-hash: aaea566a235c
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-auth-setup/components/reset-password-form.tsx
+// kit-hash: 26fe1fb78d84
 
 // installed by ugt-nextjs-auth-setup — [METHOD: LOCAL]
 // ปลายทางของลิงก์ในอีเมล: app/(auth)/reset-password/page.tsx ส่ง token จาก
@@ -62,7 +62,7 @@ export function ResetPasswordForm({ token }: Readonly<{ token: string | undefine
     return (
       <div className="flex flex-col gap-4 text-sm">
         <Callout tone="danger">{t('invalidLink')}</Callout>
-        <Button render={<Link href="/login" />}>{t('backToLogin')}</Button>
+        <Button nativeButton={false} render={<Link href="/login" />}>{t('backToLogin')}</Button>
       </div>
     );
   }

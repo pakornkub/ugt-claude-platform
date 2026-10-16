@@ -84,8 +84,6 @@ Org defaults (interview only asks "เปลี่ยนไหม"): primary ind
 `oklch(0.488 0.243 264.4)` · neutral hue ~258 (พื้นหน้า light #f5f7fb) · `--status-*` 7 ตัว (+ violet) ·
 `--cat-1..8` · Inter + Noto Sans Thai · density ตระกูล mira (controls h-7, tables text-xs)
 · radius สเกลตายตัวใน token file: chip 4 / control 6 / card 7.2 / overlay 14 px (มติ 2026-10-16 TK-RAD — แทนมติ 2026-08-09 ที่ให้ preset คูณจาก `--radius`).
-มติ 2026-10-16 (backlog §14 รุ่น 1) เขียนกฎที่ component ยังตามไม่ทัน — ข้อความที่ติด
-**(kit ≥ next release)** ใน DESIGN.template/conventions คือของที่ยังไม่มีไฟล์ใน kit: ห้ามสร้างเองรายหน้าระหว่างรอ.
 
 ## 3. Workflow
 
@@ -181,6 +179,8 @@ different size — is the field bug this step exists to prevent.
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea
    avatar input-group`
+   (+ `use-mobile` — the hook `ui/responsive-popover` reads; the sidebar block installs it,
+   a topbar-only shell runs `npx shadcn@latest add use-mobile`)
    (**`field`, not `form`** — the mira styles' `form.json` is an empty stub; the
    registry moved form composition to the `field` primitive. It still pairs
    with zod + react-hook-form.)
@@ -233,7 +233,9 @@ different size — is the field bug this step exists to prevent.
    `<LanguageSwitcher />` (th+en) + `<ThemeToggle />` (dark = มี) in its
    `actions` slot. A shell whose top bar is just the trigger is the field
    bug this step closes.
-6. Copy the org UI kit from `assets/ui/` into `components/ui/` and
+6. (Copying is long — a sub-agent may do it, **foreground only**: a background copy still running
+   when you close out leaves the project half-installed and the summary false.)
+   Copy the org UI kit from `assets/ui/` into `components/ui/` and
    `assets/lib/` into `lib/` (`actions-locale.ts` → `lib/actions/locale.ts`,
    th+en only; **`app-sidebar` + `site-header` + `site-header.test.ts` + `lib/nav.ts` +
    `lib/nav.test.ts` ชุดเดียวกันเสมอ (ทุกโปรเจคที่มี sidebar shell — site-header import
@@ -351,8 +353,11 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
 - `references/layout-shells.md` — shell answer → shadcn block mapping + nav
   highlight rule + overflow rule
 - `references/nav-config.md` — the one nav config feeding `AppSidebar` + `SiteHeader`, and the site header itself
-- `references/tabbed-pages.md` — a tabbed page's primary action: in `PageActions`, swapping with `?tab=`
   (client-built list, groups/colours, admin merge)
+- `references/tabbed-pages.md` — a tabbed page's primary action: in `PageActions`, swapping with `?tab=`
+- `references/dashboard.md` — the dashboard page pattern (D12): header → hero → StatCard row → panel grid, with example
+- `references/form-pages.md` — which form container (page / Sheet / Dialog / AlertDialog) + the full-page form
+  pattern (one card per section, `PageBackLink`, `PageFormActions`)
 - `references/shadcn-init.md` — Step 3.2 in full: Tailwind v4 check/upgrade,
   org-preset init command, after-init gate, Windows short path, token merge
 - `references/root-layout.md` — Step 3.3 in full: fonts + `lang`, provider
@@ -379,6 +384,7 @@ go indigo, legacy pages stay hardcoded — two templates in one app).
 | shadcn block for the shell | Hand-compose a sidebar/topbar |
 | Diff-and-ask on existing `components/ui/` files | Overwrite the project's components silently |
 | Run check-contrast + verify before closing | Close with a failing script "to fix later" |
+| Delegated install steps run in the foreground (`run_in_background: false`) — close out on their reports | End the turn "waiting on the sub-agent" — the close-out must describe finished work |
 | Sync mode diffs and records มติ | Regenerate DESIGN.md over project decisions |
 | Dev deploy: root layout mounts `<DevEnvironmentBar />` + title `[DEV] ` from `isDevEnvironment()` | Rely on the site-header `DEV` badge alone (login page has none) or leave dev and prod looking identical |
 | Re-align: list files tokens won't move, append `ยึด org (re-align)` | Flip tokens only and leave hardcoded legacy pages as a second template |

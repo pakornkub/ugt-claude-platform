@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: 24c9d586de16
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: f1c4002c76e0
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -75,5 +75,30 @@ export const kitEn = {
   },
   siteHeader: {
     home: 'Home',
+  },
+  // ── ui/reason-dialog.tsx (2026-10-16 B5) — the shared reason prompt's own label/buttons;
+  // title/description/confirm label belong to the caller
+  reasonDialog: {
+    reasonLabel: 'Reason',
+    reasonRequired: 'Please enter a reason',
+    cancel: 'Cancel',
+    genericError: 'Something went wrong',
+  },
+  // ── period picker (ui/period-navigator · month-select — A6) ──
+  period: {
+    select: 'Select period',
+    prev: 'Previous period',
+    next: 'Next period',
+    today: 'Today',
+    thisYear: 'This year',
+    year: 'Year',
+    month: 'Month',
+    allMonths: 'All months',
+  },
+  // ── filters button (ui/filter-popover — B4) ──
+  filterPopover: {
+    trigger: 'Filters',
+    clear: 'Clear filters',
+    activeCount: '{count} active',
   },
 } as const;

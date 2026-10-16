@@ -93,7 +93,8 @@
 
 - **Inter (latin) + Noto Sans Thai** — *(converged; one project detoured
   through Sarabun and reverted)*. Monospace: Geist Mono.
-- Weights 400/500; 600 for page titles only. Base font size 16px, never
+- Weights 400/500; 600 for headings only (page · card · dialog · section) and KPI
+  numbers — never body text *(hrms 2026-10-16)*. Base font size 16px, never
   overridden at the root.
 - **Thai text is never uppercased/letter-spaced for "eyebrow" effect** — Thai
   has no case and tracking floats vowel marks; use sentence case + weight.

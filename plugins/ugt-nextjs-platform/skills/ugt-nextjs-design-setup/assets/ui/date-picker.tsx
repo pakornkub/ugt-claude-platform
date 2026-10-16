@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: e629c839841b
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 8bc68850a9fc
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -44,6 +44,8 @@ interface DatePickerProps {
   holidays?: string[];
   /** ชื่อปุ่มสำหรับ screen reader เมื่อไม่มี label ที่มองเห็น (เช่น DateRangePicker `hideLabels`) */
   ariaLabel?: string;
+  /** วันแรกของสัปดาห์บนปฏิทิน — ค่าเริ่มตาม locale (`th` = อาทิตย์) · `PeriodNavigator` โหมด week ส่งค่าของมันมา */
+  weekStartsOn?: 0 | 1;
 }
 
 export function DatePicker({
@@ -61,6 +63,7 @@ export function DatePicker({
   triggerSuffix,
   holidays,
   ariaLabel,
+  weekStartsOn,
 }: Readonly<DatePickerProps>) {
   // ปิด popover ทันทีที่เลือกวัน — ปล่อยค้างไว้จะบังช่องถัดไป (เจ็บจริงตอนใช้คู่ใน
   // DateRangePicker: เลือก "จาก" แล้วปฏิทินบังช่อง "ถึง")
@@ -107,6 +110,9 @@ export function DatePicker({
           }}
           disabled={disabled}
           autoFocus
+          // เปิดที่เดือนของค่าที่เลือก — ไม่งั้น react-day-picker เปิดที่เดือนนี้เสมอ
+          defaultMonth={value}
+          weekStartsOn={weekStartsOn}
           locale={dateFnsLocale}
           modifiers={allModifiers}
           modifiersClassNames={allModifierClasses}

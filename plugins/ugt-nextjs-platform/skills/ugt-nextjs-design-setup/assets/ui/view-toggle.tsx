@@ -1,8 +1,8 @@
 'use client';
-// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/view-toggle.tsx
-// kit-hash: 1dd120ca311b
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/view-toggle.tsx
+// kit-hash: 46b160e7b29e
 // source: ugt-hrms components/ui/view-toggle.tsx (radix-mira era) — ported to the base-mira Button by ugt-nextjs-design-setup
-// มติ 2026-10-16 B8 (platform docs/backlog.md §14) · DESIGN.md §4
+// มติ 2026-10-16 B8 + A6 ตัวสลับ 3 ทาง (platform docs/backlog.md §14) · DESIGN.md §4
 
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,17 +29,22 @@ interface ViewToggleProps<T extends string> {
 }
 
 /**
- * Segmented control 2–4 ตัวเลือก — สลับมุมมอง (ตาราง ⟷ ปฏิทิน · รายเดือน ⟷ ทั้งปี) หรือเป็น
- * ตัวเลือกค่าเดียวสั้น ๆ ในฟอร์ม · presentational ล้วน ผู้เรียกถือ state เอง (มุมมองหลักของหน้า
- * เก็บใน URL ตามกฎ Tabs)
+ * Segmented control 2–4 ตัวเลือก — สลับมุมมอง (ตาราง ⟷ ปฏิทิน · รายเดือน ⟷ ทั้งปี · 3 ทาง
+ * [ปฏิทิน | รายการ | ทั้งปี]) หรือเป็นตัวเลือกค่าเดียวสั้น ๆ ในฟอร์ม · presentational ล้วน ผู้เรียกถือ
+ * state เอง (มุมมองหลักของหน้าเก็บใน URL ตามกฎ Tabs)
  *
+ * - **ตัวสลับเดียวต่อหน้า (มติ A6)**: มุมมองที่ใช้ได้เฉพาะบาง granularity รวมเป็นตัวเลือกเดียว — หน้าที่มี
+ *   ปฏิทินรายเดือน + รายการ + รายการทั้งปี ใช้ 3 ทางตัวเดียว ไม่ใช่ [เดือน|ปี] + [ปฏิทิน|รายการ] สองตัว
+ *   (ตัวหลังไร้ความหมายตอนเลือกทั้งปี) · คู่กับ `PeriodNavigator` ที่สลับ `mode` month ⟷ year ตามตัวเลือก
+ *   (รูปร่างเดิม เปลี่ยนแค่ป้าย) · ตำแหน่ง: ขวาของแถว toolbar (`toolbarExtra`) หรือ `action` ของ `CardHeading`
  * - สูงรวม 28px (ปุ่ม `sm` 24px + ขอบ + `p-px`) = เท่า control `default` จึงวางใน toolbar ได้โดยแถว
  *   ยังเป็นขนาดเดียว (มติ A3) และวางใน `action` ของ `CardHeading` ได้โดยแถบไม่สูงขึ้น
  * - ตัวที่เลือก: light = `secondary` · dark = พื้น `primary/25` (secondary สว่างกว่าการ์ดแค่ ~6 L
  *   มองไม่ออกว่าเลือกตัวไหน — primary คือสีของ "สถานะเลือก")
  * - ปุ่มแต่ละตัวเป็น toggle button (`aria-pressed`) ในกลุ่ม `role="group"`
- * - มือถือใน toolbar ให้เต็มแถวแบ่งเท่ากัน: `className="max-sm:w-full max-sm:*:flex-1"`
- *   (ในหัวการ์ดไม่ต้อง — พอดีตัวเสมอ)
+ * - มือถือใน toolbar ให้เต็มแถวแบ่งเท่ากัน: `className="max-sm:w-full max-sm:*:flex-1"` · ใน `toolbarExtra`
+ *   ของ `DataTable` ใช้ `max-sm:flex-1 max-sm:*:flex-1` แทน (ยืดเต็มที่เหลือ ปุ่มตั้งค่าคอลัมน์อยู่ท้ายแถวเดียวกัน)
+ *   · ในหัวการ์ดไม่ต้อง — พอดีตัวเสมอ
  *
  * ```tsx
  * <ViewToggle
@@ -47,8 +52,9 @@ interface ViewToggleProps<T extends string> {
  *   onValueChange={setView}
  *   aria-label={t('viewLabel')}
  *   options={[
- *     { value: 'list', label: t('list'), icon: List },
  *     { value: 'calendar', label: t('calendar'), icon: CalendarDays },
+ *     { value: 'list', label: t('list'), icon: List },
+ *     { value: 'year', label: t('wholeYear'), icon: CalendarRange },
  *   ]}
  * />
  * ```

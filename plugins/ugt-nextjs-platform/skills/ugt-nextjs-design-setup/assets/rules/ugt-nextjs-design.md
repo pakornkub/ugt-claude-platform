@@ -51,6 +51,9 @@ beautification skill. The short version that catches 90% of violations:
   dialog/sheet); a table legend goes in its `footer` prop, not below the card.
   Mobile toolbar: search → filters → tools + column settings right; the page's
   primary action stays in `PageActions`, never in the toolbar/filter row.
+  Period filter = `PeriodNavigator` (first in `toolbarFilters`); ≥ 3–4 filters → secondary ones in
+  `FilterPopover` (last). Value-picking overlays go through `ResponsivePopover` (bottom sheet on phones).
+  Time fields = `TimeInput`, never `type="time"`. Reject/cancel reason = `ReasonDialog`. KPI tile = `StatCard`.
   Tabbed page: `PageActions` shows the ACTIVE tab's one primary action (read `?tab=`),
   nothing when that tab creates nothing — never another tab's button, never disabled.
 - Shell menu = ONE nav config (`lib/nav.ts` types) feeding both
@@ -74,7 +77,7 @@ beautification skill. The short version that catches 90% of violations:
 - Forms → `ui/field` (zod + react-hook-form); the container follows the
   job (DESIGN.md §4 ladder): multi-step core work / needs a calendar → page
   (single column, one card per section) · one master/settings record with
-  ≥ 4 fields → `Sheet` (`xl` or `5xl` only) · ≤ 3 fields in one go →
+  ≥ 4 fields → `SettingsSheetContent` (`ui/settings-sheet`, `xl` or `5xl` only) · ≤ 3 fields in one go →
   `FormDialog` · confirm only → `ConfirmActionDialog`. A list/checklist that
   **grows with data** is never a fixed-height Dialog. One primary button per
   dialog; dirty forms confirm before closing. Dialogs are 3 zones (header

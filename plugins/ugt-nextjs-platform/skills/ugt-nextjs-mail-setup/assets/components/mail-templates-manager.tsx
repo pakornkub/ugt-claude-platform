@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.48.0 · ugt-nextjs-mail-setup/components/mail-templates-manager.tsx
-// kit-hash: 81a3cd4dd66a
+// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-mail-setup/components/mail-templates-manager.tsx
+// kit-hash: 553d92102fa3
 // components/mail-templates-manager.tsx — client editor of /admin/mail-templates:
 // รายการ template ซ้าย (จัดกลุ่มตาม workflow) · ฟอร์มแก้ subject/body ขวา ·
 // preview เปิดเป็น Sheet (panel ค้างดูคู่ฟอร์ม — บันได dialog DESIGN.md §4)
@@ -201,7 +201,7 @@ export function MailTemplatesManager({ items }: Readonly<{ items: MailTemplateIt
       {/* preview = Sheet (panel ค้างดูคู่ฟอร์ม) · srcDoc ใน iframe sandbox —
           HTML ของอีเมลต้อง render แยกจากหน้า ไม่ให้ style รั่วเข้าหากัน */}
       <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
-        <SheetContent className="flex w-full flex-col sm:max-w-2xl">
+        <SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-2xl">
           <SheetHeader>
             <SheetTitle className="truncate">{preview?.subject ?? t('previewLabel')}</SheetTitle>
           </SheetHeader>
