@@ -5,8 +5,30 @@ Last updated: 2026-10-15
 ## In progress
 - **ยก UI จาก ugt-hrms เข้า kit** (มติ 35/35 2026-10-16, `docs/backlog.md` §14 — 4 รุ่น) ·
   รุ่น 1 ออกแล้ว = nextjs 4.80.0 + core 2.15.0 (934cc20: token, contract, template) ·
-  รุ่น 2 ออกแล้ว = nextjs 4.81.0 (467f588: ปุ่ม/การ์ด/dialog/table/PageShell/sidebar/DataTable/StatusBadge violet + กฎหน้าหลายแท็บ, eval 4 case ผ่าน) ·
-  **ถัดไป รุ่น 3 component ใหม่** (StatCard, FilterPopover, ReasonDialog, detail dialog, TimeInput, PeriodNavigator/YearSelect, settings Sheet, ResponsivePopover, form page, dashboard) · eval 6 case ผ่าน (run-through-plan judge แกว่ง 1–2 เสียง ตรวจ plan แล้วผ่านจริง) · ร่างประกาศ 4.79 ส่งผู้ดูแลแล้ว ยังไม่ได้ประกาศ
+  รุ่น 2 ออกแล้ว = nextjs 4.81.0 (467f588: ปุ่ม/การ์ด/dialog/table/PageShell/sidebar/DataTable/
+  StatusBadge violet + กฎหน้าหลายแท็บ `references/tabbed-pages.md`, eval 4 case ผ่าน) ·
+  **ถัดไป รุ่น 3 component ใหม่** (StatCard, FilterPopover, ReasonDialog, detail dialog, TimeInput,
+  PeriodNavigator/YearSelect, settings Sheet, ResponsivePopover, form page, dashboard) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
+- field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
+  ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
+  = Tailwind v3 (`@tailwind base;`) ที่ token file v4-only ถูกมองข้าม — รอค่า
+  `tailwindcss` ใน package.json + 3 บรรทัดแรก `app/globals.css` จากน้อง
+
+## Next
+- Post-deploy standard — รอเจ้าของระบบตอบเช็ค infra 8 ข้อ (docs/backlog.md §1, เลื่อนไว้ 2026-08-12)
+- ugt-python-platform 0.9.5 / ugt-php-platform 0.8.5 — รอ pilot จริงภาษาละ 1 โปรเจคก่อน tag (README ตาราง plugin); eval baseline 2026-09-13 ผ่านแล้วแต่ไม่แทน pilot (ไม่มี build/pipeline จริง)
+- E2E Playwright skill — เลื่อนโดยมติผู้ดูแล 2026-08-10 (docs/backlog.md §2)
+- Pilot bundle mattpocock กับโปรเจคจริง 1 ตัวก่อนแนะนำวงกว้าง (walkthrough + setup-matt-pocock-skills ยังไม่เคยถูกใช้จริง)
+
+## Open Questions
+- เช็คความพร้อม infra 8 ข้อของ post-deploy standard — เจ้าของระบบเป็นคนตอบ (รายการอยู่ docs/backlog.md §1)
+- โปรเจค ugt-customer-request: root cause ของ `SCANNER_UNAVAILABLE` ยังไม่ได้ diagnose จบ (ถอด scan ออกชั่วคราวแล้ว — ยังไม่เห็นบรรทัด `virus scan unavailable <สาเหตุ>` ใน log แอป) ตอน retrofit ให้ไล่ตาม SKILL.md upload-setup §7
+- ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
+
+## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-10-15 ลบ branch วิดีโอ `claude/wizardly-albattani-ywvn6s` ทิ้ง (ผู้ดูแลตัดสินไม่เอา — ไม่ merge)
+- 2026-10-15 nextjs **4.79.3** + core **2.14.5** (9504ed4, tag ครบ): กฎ No shell ใน full-setup §3, ที่พัก deviation ก่อนมี project-context (ugt-context §3b), แตก reference >200 บรรทัด 5 ไฟล์, fixture eval มี shadcn base-mira, `.gitattributes` CHANGELOG merge=union, mail `hasDevMode` = permission อย่างเดียว, §2.5 รายการ default ห้ามมีข้อที่ตอบแล้ว · eval 6 case ผ่าน (run-through-plan judge แกว่ง 1–2 เสียง ตรวจ plan แล้วผ่านจริง) · ร่างประกาศ 4.79 ส่งผู้ดูแลแล้ว ยังไม่ได้ประกาศ
 - 2026-10-15 nextjs **4.79.1** (full-setup วางไฟล์ `.claude/` ที่เขียนไม่ได้ใน `docs/setup-finish.md`) · **4.79.2**
   (eval ใหม่ `module-auth-org-identity` + `module-mail-after-auth` 1.00 · verify auth/mail false-fail 4 ข้อ ·
   review เจอ policy check ถูกข้าม + grader 2 ตัว แก้แล้ว) · eval หลัง merge 4.79.0 ครบ: plan/design/auth 1.00,
