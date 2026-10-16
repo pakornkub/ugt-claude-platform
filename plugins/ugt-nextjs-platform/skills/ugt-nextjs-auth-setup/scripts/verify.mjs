@@ -328,13 +328,13 @@ check('proxy does not bounce auth pages on cookie presence (stale-cookie redirec
   return problems.length ? { ok: bounce ? false : 'warn', msg: problems.join(' · ') } : { ok: true };
 });
 
-check('Login page: two-column hero, copy from the project catalog (DESIGN.md §3)', () => {
+check('Login page: LoginShell hero, copy from the project catalog (DESIGN.md §3)', () => {
   const loginPage = ['app/(auth)/login/page.tsx', 'app/login/page.tsx', 'app/[locale]/(auth)/login/page.tsx', 'app/[locale]/login/page.tsx'].find((f) => has(f));
   if (!loginPage) return { ok: 'warn', msg: 'no login page found (SKILL.md §5.5 step 1)' };
   const page = stripComments(read(loginPage));
   const problems = [];
   if (!/<LoginShell\b/.test(page)) {
-    problems.push(`${loginPage} does not render <LoginShell> — no two-column login hero (references/login-page.md; a project keeping its own page records the deviation in DESIGN.md §10)`);
+    problems.push(`${loginPage} does not render <LoginShell> — no login hero (references/login-page.md; a project keeping its own page records the deviation in DESIGN.md §10)`);
   } else {
     if (!/hero=\{/.test(page)) problems.push('<LoginShell> has no hero={…} — the page renders as the plain centred form');
     // hero copy belongs to messages/app.*.ts — a literal in the page is untranslatable and drifts
@@ -352,7 +352,10 @@ check('Login page: two-column hero, copy from the project catalog (DESIGN.md §3
     if (/<h[1-6]\b/.test(shell)) {
       problems.push("components/login-shell.tsx: the hero holds a heading that comes before the form's <h1> in document order — keep the title as styled text");
     }
-    if (!/\bhidden\b[^"'`]*\blg:flex\b/.test(shell)) problems.push('components/login-shell.tsx: the hero is not `hidden … lg:flex` — mobile would get the panel above the form');
+    if (!/\bhidden\b[^"'`]*\blg:flex\b/.test(shell)) problems.push('components/login-shell.tsx: the hero text is not `hidden … lg:flex` — a phone would get the hero copy above the form');
+    // มติ A4 (2026-10-16): the panel is a fixed dark colour in both themes, behind the
+    // form on phones — a bg-primary <aside> is the pre-A4 shell (hidden on phones)
+    if (/<aside\b[^>]*\bbg-primary\b/.test(shell)) problems.push('components/login-shell.tsx is the old bg-primary hero — re-copy the kit file (fixed dark panel + glass card on phones, references/login-page.md §5)');
   }
   if (has('public/login-hero.webp')) {
     const kb = Math.round(statSync(p('public/login-hero.webp')).size / 1024);

@@ -312,7 +312,7 @@ requiredness and the reason for each: `references/schema-and-env.md` §Env schem
 
 ### 5.5 Wire the login page + guards
 
-1. Create `app/(auth)/login/page.tsx`: the two-column hero `<LoginShell hero={…}>`
+1. Create `app/(auth)/login/page.tsx`: the dark-hero `<LoginShell hero={…}>`
    (copy from the project's `app` catalog, optional photo — page + recipe in
    `references/login-page.md`) wrapping
    `<LoginForm sessionExpired={reason === 'session_expired'} ssoError={error} from={from} />`

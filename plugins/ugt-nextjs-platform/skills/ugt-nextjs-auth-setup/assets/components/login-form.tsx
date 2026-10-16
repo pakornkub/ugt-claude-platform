@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/login-form.tsx
-// kit-hash: c63bb8f86891
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-auth-setup/components/login-form.tsx
+// kit-hash: dfbf335d1ef0
 
 // components/login-form.tsx — login form supporting all 3 org methods.
 // DELETE the sections marked [METHOD: …] that were not selected during the interview:
@@ -8,6 +8,8 @@
 //   - SSO + one form method: replace the Tabs block with the single remaining section
 //   - No SSO: delete SsoSection + the "or" separator
 // Requires shadcn primitives: button, input, tabs, field — and sonner for toasts.
+// Primary buttons use size="cta" (44px on phones, 36px from sm) — the sanctioned
+// button.tsx edit from design-setup assets/ui/button-variants.md.
 // [METHOD: LOCAL + mail] also `dialog` (ForgotPasswordDialog mounts one).
 //
 // ฟอร์ม = react-hook-form + zodResolver + ui/field (DESIGN.md §4) · error ของการ
@@ -88,7 +90,7 @@ function SsoSection({ from }: Readonly<{ from: string }>) {
       <p className="text-center text-sm text-balance text-muted-foreground">
         {t('ssoTitle')}
       </p>
-      <Button className="w-full" onClick={handleSsoLogin} disabled={isLoading}>
+      <Button size="cta" className="w-full" onClick={handleSsoLogin} disabled={isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="size-4 animate-spin" />
@@ -167,7 +169,7 @@ function LdapSection({ from }: Readonly<{ from: string }>) {
         />
         <FieldError errors={fieldError(errors.password)} />
       </Field>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" size="cta" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="size-4 animate-spin" />}
         {t('submit')}
       </Button>
@@ -250,7 +252,7 @@ function LocalSection({ from }: Readonly<{ from: string }>) {
         />
         <FieldError errors={fieldError(errors.password)} />
       </Field>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" size="cta" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="size-4 animate-spin" />}
         {t('submit')}
       </Button>
@@ -315,8 +317,13 @@ export function LoginForm({
 
       {/* [METHOD: LDAP|LOCAL] — separator between SSO and form-based login.
           Delete when SSO is the only method, or when SSO is not enabled. */}
-      <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-        <span className="relative z-10 bg-background px-2 text-muted-foreground">{t('orSeparator')}</span>
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        {/* two rules, no background behind the word — the form also sits on the
+            translucent glass card (LoginShell, below lg), where a bg-background
+            strip would show as a solid bar */}
+        <span aria-hidden className="h-px flex-1 bg-border" />
+        {t('orSeparator')}
+        <span aria-hidden className="h-px flex-1 bg-border" />
       </div>
 
       {/* [METHOD: LDAP|LOCAL] — keep the Tabs block only when BOTH form methods are

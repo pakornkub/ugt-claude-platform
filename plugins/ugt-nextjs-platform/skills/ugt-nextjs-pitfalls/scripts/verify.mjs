@@ -13,7 +13,7 @@ import { join, relative } from 'node:path';
 const ROOT = process.cwd();
 const ALL = process.argv.includes('--all');
 const isSource = (f) => /\.(ts|tsx)$/.test(f) && !/\.d\.ts$/.test(f);
-const isAppSource = (rel) => /^(app|components|lib)\//.test(rel);
+const isAppSource = (rel) => /^(app|components|lib|hooks)\//.test(rel);
 
 function walkAll() {
   const skip = new Set(['node_modules', '.next', '.git', 'coverage', 'test-results', 'generated', '.claude']);
@@ -106,6 +106,28 @@ const RULES = [
   },
 ];
 
+// File-level (multi-line) warn checks — Prettier wraps the realistic cases over several lines.
+const FILE_RULES = [
+  {
+    id: 'THAI-MONO',
+    name: 'Thai text inside a font-mono element — monospace fonts have no Thai glyphs, the fallback renders it garbled',
+    // element text up to the next tag; `=>` is not the end of the opening tag
+    re: /font-mono(?:[^>]|=>)*(?<!=)>[^<{]*[฀-๿]/g,
+    fix: 'keep the label in the UI font; wrap only the digits/codes in <span className="font-mono tabular-nums">',
+  },
+  {
+    id: 'WINDOW-IN-RENDER',
+    name: 'state initializer / render body reads window/matchMedia/storage — server and first client render differ (React #418)',
+    re: /useState\s*(?:<[^()]*?>)?\s*\(\s*(?:\(\)\s*=>)?[^;]*?\b(?:typeof window|window\.|matchMedia|innerWidth|localStorage|sessionStorage|navigator\.)|^\s*const\s+\w+\s*=\s*typeof window\s*!==?\s*['"]undefined['"]\s*&&/gm,
+    fix: 'useSyncExternalStore(subscribe, getSnapshot, () => false) or read it in an effect — first render must match the server (references/ui-rendering.md §4)',
+  },
+];
+// Comments → blanks with their newlines kept (line numbers stay right): /* */, {/* */}, // after whitespace
+const blankComments = (s) =>
+  s
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ''))
+    .replace(/(^|\s)\/\/[^\n]*/gm, (m) => m.replace(/[^\n]/g, ''));
+
 const findings = new Map();
 const swallowCatches = [];
 const missingGetRowId = [];
@@ -128,6 +150,15 @@ for (const file of files) {
       }
     }
   });
+
+  const code = blankComments(body);
+  for (const rule of FILE_RULES) {
+    for (const m of code.matchAll(rule.re)) {
+      const key = `${rule.id} — ${rule.name}`;
+      if (!findings.has(key)) findings.set(key, { severity: 'warn', fix: rule.fix, hits: [] });
+      findings.get(key).hits.push(`${rel}:${code.slice(0, m.index).split('\n').length}`);
+    }
+  }
 
   // catch that swallows into an empty/default result (multi-line, error)
   for (const m of body.matchAll(/catch\s*(\([^)]*\))?\s*\{\s*(?:\/\/[^\n]*\s*)?return\s+(\[\]|null|undefined|\{\}|'')\s*;?\s*\}/g)) {
@@ -194,6 +225,7 @@ console.log(
   `\n${errors} error group(s), ${warns} warning group(s)\n` +
     'Not machine-checkable here: Date params bound into $queryRaw (assert bound params in tests) ·\n' +
     'React Query invalidation after mutations · dataset filters re-fetching server-side ·\n' +
-    'useMemo on data props · fail-closed gates · scope overrides — see the references.\n',
+    'useMemo on data props · fail-closed gates · scope overrides · flex-1 squeezing a control ·\n' +
+    'files replaced in public/ under the same name — see the references.\n',
 );
 process.exit(errors > 0 ? 1 : 0);

@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
-// kit-hash: 2ad46fbe459c
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
+// kit-hash: bc87b8dcf683
 // source: ugt-hrms components/ui/responsive-popover.tsx (radix-mira era) — ported to base-mira Popover/Sheet by ugt-nextjs-design-setup
 // มติ 2026-10-16 A12 (platform docs/backlog.md §14) · DESIGN.md §3 Mobile — popover บนมือถือ = bottom sheet
 
@@ -22,13 +22,19 @@ interface ResponsivePopoverProps {
   align?: 'start' | 'center' | 'end';
   /** ความกว้าง/สไตล์ของ popover บน desktop — ค่าเริ่ม `w-[min(92vw,28rem)]` · ไม่มีผลกับ bottom sheet */
   className?: string;
+  /**
+   * เนื้อหามี padding ของตัวเอง (ปฏิทิน) — ตัด padding ของ body ทั้งสองแบบ · desktop ไม่โชว์ป้ายหัวข้อ
+   * (ยังเป็นชื่อ popup สำหรับ screen reader) และกว้างตามเนื้อหา · `DatePicker` ใช้ตัวนี้
+   */
+  flush?: boolean;
   children: React.ReactNode;
 }
 
 /**
  * เนื้อหาลอยที่ปรับตามจอ: **desktop = Popover · มือถือ (< 768px) = bottom Sheet** — ตัวเปิด overlay
- * เลือกค่าทุกตัวของ kit (`FilterPopover`, `PeriodNavigator`) ผ่านตัวนี้ จึงทำตัวเหมือนกันทั้งแอป
- * · ห้ามเปิด `Popover` ดิบสำหรับเลือกค่าในหน้าที่ใช้บนมือถือ
+ * เลือกค่าทุกตัวของ kit (`FilterPopover`, `PeriodNavigator`, `DatePicker`/`DateRangePicker`) ผ่านตัวนี้
+ * จึงทำตัวเหมือนกันทั้งแอป · ห้ามเปิด `Popover` ดิบสำหรับเลือกค่าในหน้าที่ใช้บนมือถือ · ข้อยกเว้นเดียว =
+ * `Combobox` (ช่องพิมพ์อยู่ในหน้า รายการต้องอยู่เหนือคีย์บอร์ดมือถือ — เหตุผลในหัว `combobox.tsx`)
  *
  * - จุดตัด = `useIsMobile` (`hooks/use-mobile`, 768px) — hook ของ registry ตอบ `false` ใน render แรกทั้ง
  *   server และ client แล้วค่อยอ่านจอใน effect → paint แรกเป็น Popover เสมอ HTML จึงตรงกัน (ไม่เกิด
@@ -53,6 +59,7 @@ export function ResponsivePopover({
   onOpenChange,
   align = 'start',
   className,
+  flush = false,
   children,
 }: Readonly<ResponsivePopoverProps>) {
   const isMobile = useIsMobile();
@@ -72,7 +79,7 @@ export function ResponsivePopover({
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
           </SheetHeader>
-          <div className="p-6 pt-4">{children}</div>
+          <div className={flush ? 'pb-2' : 'p-6 pt-4'}>{children}</div>
         </SheetContent>
       </Sheet>
     );
@@ -81,8 +88,13 @@ export function ResponsivePopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={trigger} />
-      <PopoverContent align={align} className={cn('w-[min(92vw,28rem)] gap-2', className)}>
-        <PopoverTitle className="text-xs font-medium text-muted-foreground">{title}</PopoverTitle>
+      <PopoverContent
+        align={align}
+        className={cn(flush ? 'w-auto gap-0 p-0' : 'w-[min(92vw,28rem)] gap-2', className)}
+      >
+        <PopoverTitle className={flush ? 'sr-only' : 'text-xs font-medium text-muted-foreground'}>
+          {title}
+        </PopoverTitle>
         {children}
       </PopoverContent>
     </Popover>

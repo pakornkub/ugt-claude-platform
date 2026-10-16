@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/combobox.tsx
-// kit-hash: 4860dc996e1f
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/combobox.tsx
+// kit-hash: 8a9bf304b6aa
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -16,6 +16,19 @@ import {
 } from '@/components/ui/input-group';
 import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react';
 
+/**
+ * Combobox (Base UI) — ช่องพิมพ์ (`ComboboxInput`) อยู่ในหน้า รายการเป็น popup เกาะใต้ช่อง
+ *
+ * **บนมือถือไม่เปลี่ยนเป็น bottom sheet** (ข้อยกเว้นเดียวของ `ResponsivePopover`, มติ A12 · ตัดสินรุ่น 4):
+ * - ผู้ใช้พิมพ์ → คีย์บอร์ดจอเปิด · sheet `fixed bottom-0` อิง layout viewport ซึ่งคีย์บอร์ดทับ (iOS Safari,
+ *   Chrome Android ≥108) → รายการผลค้นหาจมใต้คีย์บอร์ด · popup ของ Base UI จำกัดความสูงด้วย
+ *   `--available-height` (floating-ui วัดจาก visual viewport) รายการจึงอยู่เหนือคีย์บอร์ดเสมอ
+ * - sheet = dialog modal ย้าย focus ออกจากช่องที่กำลังพิมพ์ → คีย์บอร์ดปิด-เปิดซ้ำ และ chip (multiple)
+ *   แยกจากช่องที่เห็นในหน้า
+ * - **ใช้ใน Sheet/Dialog ได้** (เช่นใน `FilterPopover` ที่เป็น sheet บนมือถือ): ลูกศร/Enter/คลิกเลือกได้ ·
+ *   Esc ครั้งแรกปิดรายการ · ครั้งถัดไปล้างค่าที่เลือก (พฤติกรรม Base UI) · ครั้งถัดไปจึงปิด sheet
+ * - เลือกจากรายการสั้นที่ไม่ต้องพิมพ์ = `Select` ไม่ใช่ Combobox (conventions §Control selection ladder)
+ */
 const Combobox = ComboboxPrimitive.Root;
 
 function ComboboxValue({ ...props }: Readonly<ComboboxPrimitive.Value.Props>) {

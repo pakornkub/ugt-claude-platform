@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## 2.15.2 (2026-10-17)
+
+- `ugt-contribute`: ตารางเจ้าของ gotcha รู้จัก reference ใหม่ของ pitfalls `ui-rendering` (ตัวไทยใน font-mono · flex-1 บีบความสูง · ไฟล์ public ค้าง cache · #418 จาก hook อ่าน window)
+
 ## 2.15.1 (2026-10-16)
 
 - contract design §Typography: น้ำหนัก 600 = หัวข้อ (หน้า · การ์ด · dialog · section) และตัวเลข KPI — เดิมเขียน "page titles only" ซึ่งขัดกับ `CardHeading`/`StatCard` ที่ยกจาก hrms (มติ 2026-10-16 B1/B2)

@@ -55,7 +55,7 @@ Contents: §ถูก/ผิด · §Control selection ladder · §ตรวจ 
 | --- | --- |
 | ≤ 5 | `RadioGroup` |
 | 6–15 | `Select` |
-| > 15 หรือต้องค้นหา | `Combobox` (command + popover) |
+| > 15 หรือต้องค้นหา | `Combobox` (Base UI — พิมพ์ค้นหาในช่อง รายการลอยใต้ช่อง) |
 | วันที่ | `ui/date-picker` เสมอ · ช่วง = `ui/date-range-picker` · ช่วงเวลาระดับหน้า (เลื่อนวัน/สัปดาห์/เดือน/ปี) = `ui/period-navigator` · กรองแค่ปี = `ui/year-select` (+ `ui/month-select`) |
 | เวลา | `ui/time-input` (`HH:MM` 24 ชม.) เสมอ — ห้าม `<input type="time">` (picker ตามภาษาเครื่อง AM/PM + ช่องวินาที) |
 
@@ -88,8 +88,8 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 description in `AlertDialogHeader`** (A9 — its grid squeezes content; put it after, e.g.
 `ConfirmActionDialog` `children`). Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
 dialog**. No dialog-over-dialog except one AlertDialog confirm over a form. A dirty form never closes
-silently on Esc/outside-click. Value-picking overlays go through `ui/responsive-popover` (bottom sheet on phones,
-A12) — never a raw `Popover`; kit DatePicker/DateRangePicker/Combobox still are (backlog §14) · `form-pages.md`.
+silently on Esc/outside-click. Value-picking overlays (DatePicker too) go through `ui/responsive-popover` — bottom
+sheet on phones (A12) · except `Combobox`: input in the page, a sheet would sit under the keyboard · `form-pages.md`.
 
 ## Badge vs StatusBadge
 

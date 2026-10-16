@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 8bc68850a9fc
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 9a8d5edd191f
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -12,7 +12,7 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ResponsivePopover } from '@/components/ui/responsive-popover';
 
 // i18n removed for the generic kit — Thai-first default. โปรเจกต์ที่ใช้ next-intl
 // ค่อย wire `useLocale()` มาเลือก locale เอง (เดิม: locale === 'th' ? th : enUS)
@@ -81,49 +81,53 @@ export function DatePicker({
     ? { holiday: 'text-status-red font-semibold', ...modifiersClassNames }
     : modifiersClassNames;
 
+  // desktop = Popover · มือถือ (< 768px) = bottom sheet (ResponsivePopover, A12) · หัวข้อ sheet = ชื่อช่อง
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            variant="field"
-            aria-label={ariaLabel ? `${ariaLabel} ${value ? formatLabel(value) : ''}`.trim() : undefined}
-            className={cn(
-              'w-36 justify-start text-left font-normal',
-              !value && 'text-muted-foreground',
-              className
-            )}
-          />
-        }
-      >
-        <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
-        {value ? formatLabel(value) : (placeholder ?? t('placeholder'))}
-        {triggerSuffix}
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={(date) => {
-            onSelect(date);
-            setOpen(false);
-          }}
-          disabled={disabled}
-          autoFocus
-          // เปิดที่เดือนของค่าที่เลือก — ไม่งั้น react-day-picker เปิดที่เดือนนี้เสมอ
-          defaultMonth={value}
-          weekStartsOn={weekStartsOn}
-          locale={dateFnsLocale}
-          modifiers={allModifiers}
-          modifiersClassNames={allModifierClasses}
-        />
-        {hasHolidays && (
-          <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-muted-foreground">
-            <span className="size-2 rounded-full bg-status-red" /> {t('holidayLegend')}
-          </div>
-        )}
-        {footer}
-      </PopoverContent>
-    </Popover>
+    <ResponsivePopover
+      flush
+      open={open}
+      onOpenChange={setOpen}
+      title={ariaLabel ?? placeholder ?? t('placeholder')}
+      trigger={
+        <Button
+          variant="field"
+          aria-label={ariaLabel ? `${ariaLabel} ${value ? formatLabel(value) : ''}`.trim() : undefined}
+          className={cn(
+            'w-36 justify-start text-left font-normal',
+            !value && 'text-muted-foreground',
+            className
+          )}
+        >
+          <CalendarIcon className="size-4 shrink-0" strokeWidth={2} />
+          {value ? formatLabel(value) : (placeholder ?? t('placeholder'))}
+          {triggerSuffix}
+        </Button>
+      }
+    >
+      <Calendar
+        // ใน bottom sheet: ช่องวัน 40px (นิ้วกดได้) จัดกลาง · popover desktop คงขนาดเดิม
+        className="mx-auto in-data-[slot=sheet-content]:bg-transparent in-data-[slot=sheet-content]:[--cell-size:--spacing(10)]"
+        mode="single"
+        selected={value}
+        onSelect={(date) => {
+          onSelect(date);
+          setOpen(false);
+        }}
+        disabled={disabled}
+        autoFocus
+        // เปิดที่เดือนของค่าที่เลือก — ไม่งั้น react-day-picker เปิดที่เดือนนี้เสมอ
+        defaultMonth={value}
+        weekStartsOn={weekStartsOn}
+        locale={dateFnsLocale}
+        modifiers={allModifiers}
+        modifiersClassNames={allModifierClasses}
+      />
+      {hasHolidays && (
+        <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-muted-foreground">
+          <span className="size-2 rounded-full bg-status-red" /> {t('holidayLegend')}
+        </div>
+      )}
+      {footer}
+    </ResponsivePopover>
   );
 }

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.77.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
-// kit-hash: 38b45fe2d6d8
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/date-range-picker.tsx
+// kit-hash: 18c60b74b97d
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -37,6 +37,8 @@ interface DateRangePickerProps {
 /**
  * ช่วงวันที่ from–to กลาง — DatePicker 2 ตัว + cross-disable (from ≤ to) รวมที่เดียว.
  * label เหนือแต่ละช่อง (optional). presentational — consumer ถือ state เอง.
+ * ปฏิทินแต่ละช่อง = popover บน desktop · bottom sheet บนมือถือ (ผ่าน `DatePicker` → `ResponsivePopover`)
+ * หัวข้อ sheet = `fromLabel` / `toLabel` — ส่งป้ายเสมอแม้ `hideLabels` ไม่งั้นทั้งสอง sheet ชื่อ "เลือกวันที่" เหมือนกัน
  */
 export function DateRangePicker({
   from,

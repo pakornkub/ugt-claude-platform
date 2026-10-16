@@ -60,7 +60,7 @@ skill whose description already lists symptoms of this kind.
 
 | Gotcha is about | Owner | Where the entry goes |
 | --- | --- | --- |
-| Feature code on Next.js (dates, queries, fetches, forms, tables, render loops) | `ugt-nextjs-pitfalls` | the matching `references/*.md` (dates-timezones · data-fetching · version-skew · form-validation · hardening) + one row in the SKILL.md symptom table |
+| Feature code on Next.js (dates, queries, fetches, forms, tables, render loops) | `ugt-nextjs-pitfalls` | the matching `references/*.md` (dates-timezones · data-fetching · version-skew · form-validation · hardening · ui-rendering) + one row in the SKILL.md symptom table |
 | Something a `*-setup` skill installs (login loop, pipeline red, upload 413, mail never arrives, token drift) | that `ugt-<stack>-<area>-setup` skill | its "symptoms with a documented cause" table / troubleshooting section; the asset itself if the asset is the bug |
 | SonarQube rule that keeps failing the gate | `ugt-nextjs-clean-code` | the rule table |
 | Python / PHP (deploy-only stacks, no pitfalls skill yet) | `ugt-<stack>-cicd-setup` | its troubleshooting section |

@@ -334,7 +334,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
   / `<jenkins-host>` เอง (ผ่านกฎ "ไม่เหลือ `__…__`" แต่ไฟล์ส่ง admin ยังมีช่องว่าง) · ควรถาม
   ใน interview หรือกำหนด default (Jenkins host ขององค์กรเป็นค่าคงที่)
 
-### 14. ยก UI จาก ugt-hrms เข้า kit — มติผู้ดูแล 2026-10-16 (35/35 ข้อ, ตัดสินจากหน้าเทียบ `.scratch/hrms-vs-plugin.html`)
+### 14. ✅ ปิดครบ 4 รุ่น (nextjs 4.80.0 → 4.83.0, 2026-10-17) — ยก UI จาก ugt-hrms เข้า kit — มติผู้ดูแล 2026-10-16 (35/35 ข้อ, ตัดสินจากหน้าเทียบ `.scratch/hrms-vs-plugin.html`)
 
 ทำ 4 รุ่นตามลำดับ แต่ละรุ่น review + eval แล้วออกรุ่น · ทุก component ต้อง port Radix → Base UI (`asChild`→`render`,
 `data-[state=open]`→`data-open`, `form.tsx`→`field`) แล้วตรวจกับ registry · ต้นทาง = `ugt-hrms/docs/DESIGN.md` §10 + โค้ดจริง
@@ -346,7 +346,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 | 3 · component ใหม่ | B1 StatCard · B4 FilterPopover · B5 ReasonDialog · B6 detail dialog anatomy · B7 TimeInput · A6 PeriodNavigator/YearSelect/ViewToggle 3 ทาง · A5 settings form ใน Sheet (**พื้นแบบ plugin ที่เหลือแบบ hrms**) · A12 ResponsivePopover · D4 form page คอลัมน์เดียวการ์ดต่อ section · D12 dashboard pattern · A11 บันไดเลือกฟอร์ม |
 | 4 · login + pitfalls + docs | A4 login (แผงเข้มสีตายตัว + การ์ดกระจก + kenburns, มือถือภาพเต็มจอ) · pitfalls A2 ไทยใน font-mono · A13 RT-042 flex-1 บีบความสูง + RT-044 cache ไฟล์ public · B13 RT-045 useIsMobile #418 · design-preview + docs/web ตามของจริง |
 
-ค้างจากรุ่น 3 (review 2026-10-16): `ui/date-picker` · `date-range-picker` · `combobox` ยังเป็น Popover ดิบ — มือถือไม่เป็น bottom sheet ตาม A12 · ย้ายผ่าน `ResponsivePopover` (ต้องมี variant ไม่มี padding ให้ปฏิทิน) — ทำในรุ่น 4
+~~ค้างจากรุ่น 3~~ ปิดในรุ่น 4: date-picker + date-range-picker เป็น bottom sheet แล้ว · combobox ไม่ทำโดยตั้งใจ (ช่องพิมพ์อยู่ในหน้า sheet ชิดล่างจมใต้คีย์บอร์ด) — เดิม (review 2026-10-16): `ui/date-picker` · `date-range-picker` · `combobox` ยังเป็น Popover ดิบ — มือถือไม่เป็น bottom sheet ตาม A12 · ย้ายผ่าน `ResponsivePopover` (ต้องมี variant ไม่มี padding ให้ปฏิทิน) — ทำในรุ่น 4
 
 ไม่เอา: ภาษาช่องวัน/กะ, HERO_GRADIENT hex, view-as, เนื้อหา dashboard โดเมน HR, โลโก้ PNG, สีกลุ่มเมนูจากสีสถานะ, `DecisionButtons` สูงรายจุด
 

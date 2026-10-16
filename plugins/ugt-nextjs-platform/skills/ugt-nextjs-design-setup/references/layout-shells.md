@@ -47,7 +47,7 @@ a demo, not an app shell; both eval runs independently needed these steps):
    it by width; `size-5` squeezes it to an unreadable sliver.
    The **long** logo (with tagline) belongs to the login hero — same mask
    pattern, already wired in auth-setup's `components/login-shell.tsx`
-   (two-column login page: `ugt-nextjs-auth-setup` → `references/login-page.md`).
+   (login page — dark hero + glass card: `ugt-nextjs-auth-setup` → `references/login-page.md`).
 3. The scaffold's root `app/page.tsx` collides with `app/(app)/page.tsx` on
    `/` — remove/redirect the root one.
 4. **Replace the block's `app-sidebar.tsx` with the kit's**

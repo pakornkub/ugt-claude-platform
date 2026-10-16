@@ -179,8 +179,8 @@ different size — is the field bug this step exists to prevent.
    sheet dropdown-menu popover tooltip table tabs badge card sonner skeleton
    breadcrumb empty command calendar scroll-area separator switch textarea
    avatar input-group`
-   (+ `use-mobile` — the hook `ui/responsive-popover` reads; the sidebar block installs it,
-   a topbar-only shell runs `npx shadcn@latest add use-mobile`)
+   (+ **`use-mobile` in every project** — `ui/responsive-popover` reads it and `ui/date-picker` goes
+   through that; the sidebar block installs it, a topbar-only shell runs `npx shadcn@latest add use-mobile`)
    (**`field`, not `form`** — the mira styles' `form.json` is an empty stub; the
    registry moved form composition to the `field` primitive. It still pairs
    with zod + react-hook-form.)

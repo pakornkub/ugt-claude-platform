@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/ui/period-navigator.tsx
-// kit-hash: 7795b9f32c91
+// kit: ugt-nextjs-platform 4.83.0 · ugt-nextjs-design-setup/ui/period-navigator.tsx
+// kit-hash: 303f19966584
 // source: ugt-hrms components/ui/period-navigator.tsx (radix-mira era) — ported to base-mira + kit formatter by ugt-nextjs-design-setup
 // มติ 2026-10-16 A6 (platform docs/backlog.md §14) · DESIGN.md §3 แถบ filter ระดับหน้า
 // needs ui/responsive-popover · ui/year-select · ui/month-select · ui/date-picker · ui/icon-action
@@ -76,8 +76,7 @@ const LABEL_CLASS = 'min-w-0 flex-1 justify-center font-medium sm:min-w-44 sm:fl
  * (ช่วงของหน้าเก็บใน URL — filter ที่เปลี่ยนแถวต้องอยู่ใน query key)
  *
  * - ป้ายกดได้ทุกโหมด: day/week = `DatePicker` · month = popover ปี + เดือน · year = popover ปี
- *   (month/year popover → bottom sheet บนมือถือผ่าน `ResponsivePopover` · day/week ใช้ `DatePicker` ซึ่งยังเป็น
- *   Popover ธรรมดา — งานค้าง backlog §14)
+ *   (ทุกโหมดเป็น bottom sheet บนมือถือผ่าน `ResponsivePopover` — DatePicker ก็ผ่านตัวนี้)
  * - **รูปร่างคงเดิมเมื่อสลับ granularity** (เดือน ⟷ ปี เปลี่ยนแค่ป้าย) — วางคู่ `ViewToggle` ที่รวม
  *   มุมมอง + granularity เป็นตัวเลือกเดียว เช่น [ปฏิทิน | รายการ | ทั้งปี]
  * - year: ‹ › จำกัดช่วงเท่า `YearSelect` (`YEAR_BACK`/`YEAR_FORWARD` หรือ `yearBack`/`yearForward`)

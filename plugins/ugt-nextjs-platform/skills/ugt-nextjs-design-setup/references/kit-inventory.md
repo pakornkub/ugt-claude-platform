@@ -11,8 +11,8 @@
 | `ui/status-badge.tsx` | HRMS | exports `TONE_STYLES` · 7 tones (`violet` since มติ 2026-10-16 — a project-named group, only once DESIGN.md §10 names it) |
 | `ui/icon-action.tsx` | BOI (Base UI native, `render` prop) | label required |
 | `ui/confirm-action-dialog.tsx` | BOI (Base UI native) | destructive confirm · extra content goes in `children` (after the header — never inside `AlertDialogHeader`, A9) |
-| `ui/date-picker.tsx` / `ui/date-range-picker.tsx` | HRMS | |
-| `ui/combobox.tsx` | HRMS | generic (employee-combobox ไม่เอา — HR-specific) |
+| `ui/date-picker.tsx` / `ui/date-range-picker.tsx` | HRMS | popover ≥ 768px / bottom sheet below via `ui/responsive-popover` (needs it + `hooks/use-mobile`) · range picker = two DatePickers, sheets titled by `fromLabel`/`toLabel` |
+| `ui/combobox.tsx` | HRMS | generic (employee-combobox ไม่เอา — HR-specific) · stays an anchored popup on phones on purpose (input in the page; a sheet would sit under the keyboard) |
 | `ui/page-shell.tsx` | HRMS | `PageShell` caps content at `max-w-[96rem]` centred (A1) · `PageEyebrow` (B11, sentence case) · `PageBackLink` (A10, `‹ parent` to a fixed `href`) · `PageFormActions` (form-page action bar, phones `[1fr_2fr]` sticky) — needs `next/link` |
 | `ui/card-heading.tsx` | HRMS `card.tsx` `CardHeading`, split into its own file (มติ 2026-10-16 B2) | every titled card — `h-11` bar + `border-b`, primary icon, `badge`/`action` slots · pairs with the `card.tsx` edit in `primitive-edits.md` (drops the card's `pt`) |
 | `ui/view-toggle.tsx` | HRMS, re-built on the base-mira `Button` (มติ 2026-10-16 B8) | segmented 2–4 options, `aria-pressed` buttons in a `role="group"` · 28px total = fits a `default` toolbar row and a `CardHeading` action · 3-way [calendar \| list \| whole year] = one toggle per page (A6), in `toolbarExtra` |

@@ -19,6 +19,15 @@
     "method_note": "Judges ran as 6 subagents (3 judges × 2 batches, each judge's 186-query set shuffled with its own seed) given the skill listing as TEXT generated from the repo SKILL.md frontmatter at this commit (17 ugt skills) plus distractor descriptions from the installed superpowers 6.3.0, mattpocock-skills 1.2.3 and frontend-design caches — 47 entries total. Instructed to answer only from the listing; no judge named an environment skill. Because BOTH pipelines were listed, secondary answers that hit the mattpocock twin of an expected superpowers skill are counted as misses by the strict scorer but are not routing errors.",
     "note": "S-side 30/30 — every symptom phrase still routes here with the causes moved into the body table. N-side 30/30 primary. Secondary 24/30: N5 (\"pipeline แดงที่ stage Quality Gate\") → clean-code 3/3 instead of cicd-setup — defensible, \"Quality Gate แดง\" is a literal clean-code trigger; expected relabelled the same day to \"clean-code / cicd-setup\". N10 (SP timeout) → debugging skills 3/3 instead of database-setup, whose description did not claim runtime timeouts — fixed the same day by adding the SP-timeout symptom to database-setup's description; N10 then routed to database-setup 3/3 (see database-setup revalidation_2026-09-06). Neither involves pitfalls."
   },
+  "revalidation_2026-10-17": {
+    "date": "2026-10-17",
+    "reason": "Release 4 added references/ui-rendering.md (font-mono Thai, flex-1 squeezing a control, stale public/ file, hydration #418) and S11–S14. Description rewritten 1052→1016 chars (it had drifted over the 1024 spec limit) to fit the four new symptoms; 'Loads itself via paths' sentence dropped (paths: does that).",
+    "judges": 1,
+    "judgments": 24,
+    "primary_accuracy": "24/24 (S 14/14, N 10/10)",
+    "method_note": "Smoke check, not a full rerun: one fresh subagent judge, all 24 queries in one seeded shuffle, listing = every repo SKILL.md description (18 ugt skills) + 4 distractors (superpowers:systematic-debugging, mattpocock diagnosing-bugs, impeccable, frontend-design). A 3-judge rerun with the full installed listing is still owed.",
+    "note": "N5 → clean-code (accepted label). New S11–S14 all routed here, each citing its new description phrase."
+  },
   "queries": {
     "S1": {
       "prompt": "หน้ารายงานแสดงวันที่เลื่อนไป 1 วัน แต่เป็นเฉพาะรายการที่สร้างตอนกลางคืน",
@@ -58,6 +67,22 @@
     },
     "S10": {
       "prompt": "แก้โค้ดแล้ว refresh หน้าเว็บยังเห็นโค้ดเก่า ทั้งที่ไฟล์บนดิสก์ถูกแล้ว",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S11": {
+      "prompt": "คอลัมน์เวลาในตารางที่ใช้ font-mono ตัวหนังสือไทยเพี้ยน สระลอยผิดที่",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S12": {
+      "prompt": "ช่องค้นหาหน้านี้เตี้ยกว่าหน้าอื่น ทั้งที่ใช้ component เดียวกัน",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S13": {
+      "prompt": "เปลี่ยนรูปโลโก้ใน public แล้ว deploy ไปแล้ว แต่ user ยังเห็นรูปเก่าอยู่",
+      "expected": "ugt-nextjs-pitfalls"
+    },
+    "S14": {
+      "prompt": "เปิดเว็บบนมือถือแล้ว console ขึ้น Minified React error #418 ทุกหน้า บนคอมไม่เป็น",
       "expected": "ugt-nextjs-pitfalls"
     },
     "N1": {

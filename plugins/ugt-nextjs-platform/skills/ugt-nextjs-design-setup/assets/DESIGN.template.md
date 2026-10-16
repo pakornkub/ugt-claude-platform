@@ -132,6 +132,8 @@
 
 - **__FONT__** ผ่าน `next/font` · mono = Geist Mono ·
   ฐาน html 16px ไม่ override
+- **ห้ามวางข้อความไทยใน `font-mono`** — ฟอนต์ mono ไม่มี glyph ไทย · ครอบ `font-mono tabular-nums` เฉพาะตัวเลข/รหัส
+  (ป้ายไทยใช้ฟอนต์ UI) — ugt-nextjs-pitfalls `ui-rendering.md` §1
 - น้ำหนัก 400/500 · 600 เฉพาะหัวข้อ (หน้า · การ์ด · dialog · section) และตัวเลข KPI ·
   Title: `text-2xl font-semibold tracking-tight` ไม่มีไอคอนนำ
 - **ห้าม uppercase eyebrow กับข้อความไทย** (ไทยไม่มี case + tracking ทำสระลอย)
@@ -231,11 +233,14 @@
   คอลัมน์ชิดขวา — ปุ่มตั้งค่าคอลัมน์ไม่ซ่อน) · **ปุ่มหลักของหน้าไม่อยู่ใน toolbar** — อยู่ใน
   `PageActions` เหนือการ์ด เต็มกว้าง `cta` 44px (แถว filter ไม่มีปุ่ม action ตามสัญญากลาง) ·
   popover (ผ่าน `ui/responsive-popover`) และ dialog → bottom sheet
-- **หน้า login = สองคอลัมน์** (`components/login-shell.tsx` จาก auth-setup): ซ้าย =
-  hero ตั้งแต่ `lg` ขึ้นไป (`bg-primary` + รูป `public/login-hero.webp` ถ้ามี ใต้ overlay
-  `bg-primary/65`) เรียง 3 แถว — `ube-logo-long.svg` · ชื่อระบบ + คำอธิบาย 1 บรรทัด +
-  ฟีเจอร์ 3–4 แถว (ไอคอนใน tile `size-10` + หัวข้อ + บรรทัดรอง) · footer · ขวา = ฟอร์มกลาง
-  `bg-muted/30` · มือถือเห็นฟอร์มอย่างเดียว · ข้อความมาจาก `messages/app.*` ของโปรเจค
+- **หน้า login** (`components/login-shell.tsx` จาก auth-setup · มติ A4): ตั้งแต่ `lg` =
+  สองคอลัมน์ — ซ้ายแผง hero **สีตายตัว `indigo-950` เข้มทั้ง light/dark** (ข้อยกเว้น token
+  จุดเดียว: palette step + ตัวอักษรขาว ไม่ใช่ `bg-primary`) รูป `public/login-hero.webp`
+  ถ้ามี (ไม่มี = พื้น CSS แสง indigo) ซูมช้า Ken Burns เฉพาะ `motion-safe:` · โลโก้ยาว
+  สีขาว · ชื่อระบบ + คำอธิบาย 1 บรรทัด + ฟีเจอร์ 3–4 tile กระจก (`bg-white/10
+  backdrop-blur-md`) · ขวา = ฟอร์มบน `bg-background` · **มือถือ: แผงเดียวกันเป็นพื้นหลัง
+  เต็มจอ** ฟอร์มบนการ์ดกระจก `bg-card/90` (ห้าม `bg-white` — dark mode) · ข้อความมาจาก
+  `messages/app.*` ของโปรเจค · ไม่ใช้ไลบรารี 3D/JS animation
 - Landing page: __LANDING__
 
 ## 4. Components

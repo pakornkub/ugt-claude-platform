@@ -237,12 +237,14 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
 // Release-3 kit pieces import each other — copying one without its companions
 // is a build break that only shows on the page that first uses it.
 const KIT_COMPANIONS = {
+  'date-picker': ['ui/responsive-popover'],
+  'date-range-picker': ['ui/date-picker'],
   'filter-popover': ['ui/responsive-popover'],
   'period-navigator': ['ui/responsive-popover', 'ui/year-select', 'ui/month-select', 'ui/date-picker', 'ui/icon-action'],
   'responsive-popover': ['hooks/use-mobile'],
   'settings-sheet': ['ui/sheet', 'ui/field', 'ui/input-group', 'ui/switch', 'ui/label'],
 };
-check('Kit pieces ship with their companions (period-navigator · filter-popover · settings-sheet)', () => {
+check('Kit pieces ship with their companions (date-picker · period-navigator · filter-popover · settings-sheet)', () => {
   const present = (rel) => {
     const [dir, name] = rel.split('/');
     const base = dir === 'hooks' ? ['hooks'] : ['components', 'ui'];
@@ -250,8 +252,14 @@ check('Kit pieces ship with their companions (period-navigator · filter-popover
   };
   const missing = [];
   for (const [file, needs] of Object.entries(KIT_COMPANIONS)) {
-    if (!hasIn('components', 'ui', `${file}.tsx`)) continue;
-    for (const need of needs) if (!present(need)) missing.push(`${file} → ${need}`);
+    const path = [join(ROOT, 'components', 'ui', `${file}.tsx`), join(ROOT, 'src', 'components', 'ui', `${file}.tsx`)].find(existsSync);
+    if (!path) continue;
+    // only what this copy imports — a pre-4.83 date-picker (raw Popover) needs no responsive-popover
+    const body = readFileSync(path, 'utf8');
+    for (const need of needs) {
+      const spec = need.startsWith('hooks/') ? `@/${need}` : `@/components/${need}`;
+      if (body.includes(spec) && !present(need)) missing.push(`${file} → ${need}`);
+    }
   }
   return missing.length
     ? { ok: false, msg: `${missing.join(' · ')} — copy the companion (kit-inventory.md) · hooks/use-mobile: npx shadcn@latest add use-mobile` }

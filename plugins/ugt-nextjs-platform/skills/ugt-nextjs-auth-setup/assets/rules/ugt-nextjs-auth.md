@@ -207,7 +207,10 @@ employee view over a linked server — `lib/directory.ts`.
   catalog — never literals in `login-shell.tsx` (kit file, overwritten on
   update) and no Thai in the page. Photo optional: `public/login-hero.webp`,
   ~1440 px, ≤ 400 KB. No `<main>` in the page — `LoginShell` renders the
-  form column as `<main>` (the root layout has none).
+  form column as `<main>` (the root layout has none). The hero panel is a
+  fixed dark colour in both themes (not `bg-primary`) and is the phone's
+  backdrop behind a glass card — nothing inside the form may paint a solid
+  `bg-background`/`bg-white` strip.
 
 ## proxy.ts
 

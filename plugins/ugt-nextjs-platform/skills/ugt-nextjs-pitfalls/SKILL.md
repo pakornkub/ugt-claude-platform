@@ -2,24 +2,24 @@
 name: ugt-nextjs-pitfalls
 description: >
   Use when writing or editing feature code (dates, queries, fetches, forms,
-  tables) on the org's Next.js + Prisma/MSSQL + React Query + next-intl stack.
-  Every rule traces to a real production incident; read the matching reference
-  BEFORE writing the code. Symptoms with documented root causes here: date off
-  by one day ("วันที่เลื่อน −1", "วันเพี้ยน"), year shown as พ.ศ. (+543), stale
-  UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), fetch 404 only in production,
-  "Maximum update depth exceeded", pagination "หน้า 1 จาก 0", Select crashing on
-  an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form passes
-  validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
-  showing in the browser ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"), a form left open across a
-  deploy that can no longer save ("ส่งข้อมูลไม่ได้หลัง deploy", `Server Action …
-  was not found on the server`). Loads itself via paths
-  on app/components/lib edits. Don't use for SonarQube violations (→
-  ugt-nextjs-clean-code) or installing infrastructure (→ the ugt-nextjs-*-setup
-  skills).
+  tables, UI) on the org's Next.js + Prisma/MSSQL + React Query stack. Read the
+  matching reference BEFORE writing the code — each rule is a shipped incident.
+  Documented symptoms: date off by one day ("วันที่เลื่อน −1"), year shown as
+  พ.ศ., stale UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), fetch 404 only in
+  production, "Maximum update depth exceeded", "หน้า 1 จาก 0", Select crashing
+  on an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form
+  passes validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
+  showing ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"), a form open across a deploy that can't
+  save ("ส่งข้อมูลไม่ได้หลัง deploy", `Server Action … was not found`), React
+  #418 only on phones, Thai text garbled in font-mono, a replaced public/ image
+  still old, a control shorter than on other pages ("ช่องเตี้ยกว่าหน้าอื่น").
+  Not for SonarQube violations (→ ugt-nextjs-clean-code) or installing infra
+  (→ ugt-nextjs-*-setup).
 paths:
   - "app/**/*.{ts,tsx}"
   - "components/**/*.{ts,tsx}"
   - "lib/**/*.{ts,tsx}"
+  - "hooks/**/*.{ts,tsx}"
 ---
 
 # UGT Pitfalls — production-bug lessons for feature code
@@ -46,6 +46,10 @@ appears.
 | Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
 | A page open across a deploy fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy", `UnrecognizedActionError` + `POST … 409`); refresh fixes it but loses the typed form | action ids change per build; catch `unstable_isUnrecognizedActionError`, keep a read-once draft, offer a reload (deploy half: cicd-setup `version-skew.md`) | version-skew |
 | Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | Quick Rules (below) |
+| Thai text garbled next to digits in a mono cell ("ตัวไทยเพี้ยน") | `font-mono` has no Thai glyphs — per-character fallback | ui-rendering |
+| Same kit control shorter on one page ("ช่องเตี้ยกว่าหน้าอื่น") though its class still says `h-7` | caller passed `flex-1` into a control inside a `flex-col` — `flex-basis: 0%` replaces height | ui-rendering |
+| A replaced image/file in `public/` still shows the old version after deploy ("เปลี่ยนรูปแล้วยังเห็นรูปเก่า") | same file name = same URL; proxy/image/browser caches key on the URL | ui-rendering |
+| React #418 / "Hydration failed" on every page, only on narrow screens | a hook (`useIsMobile`) read `window`/`matchMedia` during the first render | ui-rendering |
 
 ## Which reference, when
 
@@ -56,11 +60,14 @@ appears.
 | Write a form's submit handler / Server Action error path (a page left open across a deploy) | `references/version-skew.md` |
 | Guard a route/action, build a batch/cron job, shape a DTO, pre-fill an edit form | `references/hardening.md` |
 | Build or change a form, add a validation rule, write the Server Action it submits to | `references/form-validation.md` |
+| Put numbers/codes in `font-mono`, pass `className` size/flex into a kit control, replace a file in `public/`, write a hook that reads the window/viewport/storage | `references/ui-rendering.md` |
 
 Symptom → likely file: date wrong by 1 day / hours → dates-timezones · stale UI
 after save, infinite render loop, prod-only 404 → data-fetching · save fails
 only on a tab opened before a deploy → version-skew · a user seeing
-another user's rows, a cron wiping data early → hardening.
+another user's rows, a cron wiping data early → hardening · the screen draws
+wrong while the code looks right (glyphs, heights, stale images, hydration
+#418) → ui-rendering.
 
 ## Quick Rules — DO / DON'T
 
@@ -98,5 +105,7 @@ It flags: bare `fetch('/api/...')`, `SelectItem value=""`, swallow-catches,
 `.toISOString().slice(0, 10)` (verify the Date's anchor), inline `±543`
 year math outside a central helper, `startOfDay(...)` bound into
 `$queryRaw`/`EXEC` (a Date param binds as UTC), `useReactTable` without
-`'use no memo'`, and selectable `DataTable`s missing `getRowId`. Everything
-else in this skill is judgment — the references say what to check by hand.
+`'use no memo'`, selectable `DataTable`s missing `getRowId`, Thai text in a
+`font-mono` element, and `useState` initializers that read
+`window`/`matchMedia`/storage (hydration #418). Everything else in this skill
+is judgment — the references say what to check by hand.

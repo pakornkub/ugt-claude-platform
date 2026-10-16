@@ -9,8 +9,10 @@ Last updated: 2026-10-15
   StatusBadge violet + กฎหน้าหลายแท็บ `references/tabbed-pages.md`, eval 4 case ผ่าน) ·
   รุ่น 3 ออกแล้ว = nextjs 4.82.0 + core 2.15.1 (StatCard, ReasonDialog, TimeInput, detail dialog, ResponsivePopover,
   FilterPopover, PeriodNavigator/YearSelect/MonthSelect, settings-sheet, `dashboard.md`, `form-pages.md`; eval design/auth/mail ผ่าน) ·
-  **ถัดไป รุ่น 4** (login · pitfalls A2/A13/B13 · design-preview + docs/web ตามของจริง · date-picker/combobox ผ่าน
-  ResponsivePopover ที่ค้างจากรุ่น 3) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  รุ่น 4 ออกแล้ว = nextjs 4.83.0 + core 2.15.2 (login แผง indigo-950 + การ์ดกระจก · date-picker bottom sheet มือถือ ·
+  combobox ไม่ทำโดยตั้งใจ · pitfalls `ui-rendering.md` · design-preview/reference ตามของจริง; eval 4 case ผ่านรอบแรก) ·
+  **§14 ปิดครบ 4 รุ่น** · ค้างเล็ก: โฟกัสแรกของปฏิทินอยู่ปุ่มเดือนก่อน (ต้องมี `initialFocus` ใน ResponsivePopover) ·
+  iOS ซูมเมื่อโฟกัสช่อง 14px · trigger eval 3 judges ของ pitfalls ยังค้าง · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
   บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน
