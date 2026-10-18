@@ -237,6 +237,8 @@ for (const f of ['status-badge', 'icon-action', 'confirm-action-dialog', 'form-d
 // Release-3 kit pieces import each other — copying one without its companions
 // is a build break that only shows on the page that first uses it.
 const KIT_COMPANIONS = {
+  combobox: ['hooks/use-mobile', 'ui/sheet'],
+  'data-table': ['ui/responsive-popover'],
   'date-picker': ['ui/responsive-popover'],
   'date-range-picker': ['ui/date-picker'],
   'filter-popover': ['ui/responsive-popover'],
@@ -244,7 +246,7 @@ const KIT_COMPANIONS = {
   'responsive-popover': ['hooks/use-mobile'],
   'settings-sheet': ['ui/sheet', 'ui/field', 'ui/input-group', 'ui/switch', 'ui/label'],
 };
-check('Kit pieces ship with their companions (date-picker · period-navigator · filter-popover · settings-sheet)', () => {
+check('Kit pieces ship with their companions (date-picker · period-navigator · filter-popover · settings-sheet · combobox · data-table)', () => {
   const present = (rel) => {
     const [dir, name] = rel.split('/');
     const base = dir === 'hooks' ? ['hooks'] : ['components', 'ui'];

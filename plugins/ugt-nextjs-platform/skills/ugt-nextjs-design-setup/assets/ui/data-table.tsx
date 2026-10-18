@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 011e0aa6a0c2
+// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 58888a197b4e
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -72,6 +72,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ResponsivePopover } from '@/components/ui/responsive-popover';
 import {
   Select,
   SelectContent,
@@ -446,13 +447,21 @@ function DataTableFilterPopover({
   );
 }
 
+/** ▲▼ ใน bottom sheet ของเมนูคอลัมน์ — 44px นิ้วกดได้ (Button ไม่มี size ไอคอน 44px · ปุ่มจับข้าง ๆ ก็เป็น <button> ดิบ) */
+const MOVE_BUTTON =
+  'inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 aria-disabled:opacity-40';
+
 interface ColumnSettingsEntry {
   key: string;
   label: string;
   visible: boolean;
 }
 
-/** เมนู Settings2: ติ๊กซ่อน/แสดง + ลาก (หรือลูกศรขึ้น/ลง) จัดลำดับ + คืนค่าเริ่มต้น */
+/**
+ * เมนู Settings2: ติ๊กซ่อน/แสดง + ลาก (หรือลูกศรขึ้น/ลง) จัดลำดับ + คืนค่าเริ่มต้น ·
+ * ผ่าน `ResponsivePopover`: desktop popover ชิดขวา กว้าง 15rem · มือถือ (< 768px) bottom sheet หัวข้อ
+ * "คอลัมน์" + ปุ่ม ▲▼ ที่มองเห็น (ลากด้วยนิ้วไม่ได้ทุกเบราว์เซอร์ และมือถือไม่มีคีย์บอร์ดกดลูกศร)
+ */
 function DataTableColumnSettings({
   entries,
   onToggle,
@@ -470,14 +479,18 @@ function DataTableColumnSettings({
   const [dragKey, setDragKey] = React.useState<string | null>(null);
   const [overKey, setOverKey] = React.useState<string | null>(null);
   return (
-    <Popover>
-      <PopoverTrigger
-        render={<Button variant="outline" size="icon" aria-label={t('columnSettings')} />}
-      >
-        <Settings2 strokeWidth={2} />
-      </PopoverTrigger>
-      <PopoverContent align="end" className="flex w-60 flex-col gap-1 p-2">
-        <p className="px-1 py-0.5 text-xs font-medium text-muted-foreground">{t('columns')}</p>
+    <ResponsivePopover
+      title={t('columns')}
+      align="end"
+      // desktop: หน้าตาเดิม (ป้าย "คอลัมน์" = PopoverTitle เว้นขอบเท่า <p> เดิม)
+      className="w-60 gap-1 p-2 *:data-[slot=popover-title]:px-1 *:data-[slot=popover-title]:py-0.5"
+      trigger={
+        <Button variant="outline" size="icon" aria-label={t('columnSettings')}>
+          <Settings2 strokeWidth={2} />
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-1">
         {entries.map((entry, i) => (
           <div
             key={entry.key}
@@ -498,7 +511,7 @@ function DataTableColumnSettings({
               setOverKey(null);
             }}
             className={cn(
-              'flex items-center gap-2 rounded-md px-1 py-0.5',
+              'flex items-center gap-2 rounded-md px-1 py-0.5 in-data-[slot=sheet-content]:min-h-11',
               dragKey === entry.key && 'opacity-40',
               overKey === entry.key && 'bg-accent'
             )}
@@ -527,17 +540,46 @@ function DataTableColumnSettings({
               checked={entry.visible}
               onCheckedChange={() => onToggle(entry.key)}
             />
-            <Label htmlFor={`${idBase}-${entry.key}`} className="flex-1 text-xs font-normal">
+            <Label
+              htmlFor={`${idBase}-${entry.key}`}
+              className="flex-1 text-xs font-normal in-data-[slot=sheet-content]:text-sm"
+            >
               {entry.label}
             </Label>
+            {/* bottom sheet (มือถือ) เท่านั้น: ปุ่มเลื่อนที่มองเห็น 44px — desktop ใช้ลาก/ลูกศรบนปุ่มจับ ·
+                ปลายแถวใช้ aria-disabled ไม่ใช่ disabled (ปุ่ม disabled ทำ focus หลุดเมื่อเลื่อนจนสุด) */}
+            <span className="hidden in-data-[slot=sheet-content]:flex">
+              <button
+                type="button"
+                className={MOVE_BUTTON}
+                aria-label={t('moveUpAria', { label: entry.label })}
+                aria-disabled={i === 0 || undefined}
+                onClick={() => {
+                  if (i > 0) onMove(entry.key, entries[i - 1].key);
+                }}
+              >
+                <ArrowUp className="size-4" strokeWidth={2} aria-hidden />
+              </button>
+              <button
+                type="button"
+                className={MOVE_BUTTON}
+                aria-label={t('moveDownAria', { label: entry.label })}
+                aria-disabled={i === entries.length - 1 || undefined}
+                onClick={() => {
+                  if (i < entries.length - 1) onMove(entry.key, entries[i + 1].key);
+                }}
+              >
+                <ArrowDown className="size-4" strokeWidth={2} aria-hidden />
+              </button>
+            </span>
           </div>
         ))}
         <Button variant="ghost" size="sm" className="mt-1 justify-start gap-2" onClick={onReset}>
           <RotateCcw strokeWidth={2} />
           {t('resetColumns')}
         </Button>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </ResponsivePopover>
   );
 }
 

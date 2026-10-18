@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.83.1 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
-// kit-hash: eb4cfdf91f3e
+// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/ui/responsive-popover.tsx
+// kit-hash: dbbd440c7c66
 // source: ugt-hrms components/ui/responsive-popover.tsx (radix-mira era) — ported to base-mira Popover/Sheet by ugt-nextjs-design-setup
 // มติ 2026-10-16 A12 (platform docs/backlog.md §14) · DESIGN.md §3 Mobile — popover บนมือถือ = bottom sheet
 
@@ -39,8 +39,10 @@ interface ResponsivePopoverProps {
 /**
  * เนื้อหาลอยที่ปรับตามจอ: **desktop = Popover · มือถือ (< 768px) = bottom Sheet** — ตัวเปิด overlay
  * เลือกค่าทุกตัวของ kit (`FilterPopover`, `PeriodNavigator`, `DatePicker`/`DateRangePicker`) ผ่านตัวนี้
- * จึงทำตัวเหมือนกันทั้งแอป · ห้ามเปิด `Popover` ดิบสำหรับเลือกค่าในหน้าที่ใช้บนมือถือ · ข้อยกเว้นเดียว =
- * `Combobox` (ช่องพิมพ์อยู่ในหน้า รายการต้องอยู่เหนือคีย์บอร์ดมือถือ — เหตุผลในหัว `combobox.tsx`)
+ * จึงทำตัวเหมือนกันทั้งแอป (ปุ่มตั้งค่าคอลัมน์ของ `DataTable` ด้วย) · ห้ามเปิด `Popover` ดิบสำหรับเลือกค่าในหน้า
+ * ที่ใช้บนมือถือ · `Combobox` ก็เป็น bottom sheet บนมือถือแต่วาด sheet เอง (สูงเกือบเต็มจอ ช่องค้นหาบนสุด —
+ * เหตุผลในหัว `combobox.tsx`)
+ * - sheet สูงไม่เกินจอ: เนื้อหายาว (คอลัมน์ 12+ · FilterPopover หลายช่อง) เลื่อนใน body หัวข้อค้างอยู่บน
  *
  * - จุดตัด = `useIsMobile` (`hooks/use-mobile`, 768px) — hook ของ registry ตอบ `false` ใน render แรกทั้ง
  *   server และ client แล้วค่อยอ่านจอใน effect → paint แรกเป็น Popover เสมอ HTML จึงตรงกัน (ไม่เกิด
@@ -82,11 +84,22 @@ export function ResponsivePopover({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger render={trigger} />
-        <SheetContent side="bottom" initialFocus={initialFocus}>
+        <SheetContent
+          side="bottom"
+          initialFocus={initialFocus}
+          className="max-h-[calc(100dvh-2.5rem)]"
+        >
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
           </SheetHeader>
-          <div className={flush ? 'pb-2' : 'p-6 pt-4'}>{children}</div>
+          <div
+            className={cn(
+              'min-h-0 overflow-y-auto overscroll-contain',
+              flush ? 'pb-2' : 'p-6 pt-4'
+            )}
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     );

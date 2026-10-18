@@ -13,7 +13,7 @@ Last updated: 2026-10-15
   combobox ไม่ทำโดยตั้งใจ · pitfalls `ui-rendering.md` · design-preview/reference ตามของจริง; eval 4 case ผ่านรอบแรก) ·
   **§14 ปิดครบ 4 รุ่น** · 4.83.1 เก็บตก: โฟกัสแรกของปฏิทิน = วันที่เลือก · trigger eval pitfalls 3 judges 72/72 ·
   CLAUDE-block ADR ไม่ขัด handoff แล้ว · python 0.9.6 (log ใน compose.md) · README/guide TDD 4 ขั้น ·
-  4.83.2: ช่องพิมพ์ 16px ใต้ md (มติ 2026-10-18 iOS zoom) · ร่างประกาศรวมถึง 4.83.2 = `.scratch/announcement-4.83.md` (รอผู้ดูแลโพสต์) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
+  4.83.2: ช่องพิมพ์ 16px ใต้ md (มติ 2026-10-18 iOS zoom) · 4.83.3: Combobox + เมนูตั้งค่าคอลัมน์เป็น sheet บนมือถือ (มติ 2026-10-18 แบบ B · ต้องลองเครื่องจริง: คีย์บอร์ด iOS แตะแรก, ลากบน Android) · ร่างประกาศรวมถึง 4.83.2 (ต้องเติม 4.83.3) = `.scratch/announcement-4.83.md` (รอผู้ดูแลโพสต์) · กติกาที่ตกลงแล้ว: การ์ด/popover คง 7.2px · อนุมัติ = เขียว `success` ·
   บันทึก/submit = primary · หน้าเทียบใช้ตัดสิน `.scratch/hrms-vs-plugin.html` (gitignored)
 - field report AI Studio (2026-09-09) — แก้ platform แล้ว (4.61.0) แต่**ยังไม่ได้
   ยืนยันอาการที่ 3** ("template default เองก็เพี้ยน") จากโปรเจคจริง: สมมติฐาน

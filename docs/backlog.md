@@ -348,7 +348,7 @@ WCAG compliance เป็นทางการ — ตอนนั้นมี�
 
 ~~รอผู้ดูแลตัดสิน~~ **ตัดสินแล้ว 2026-10-18: ช่องพิมพ์ 16px ใต้ md (nextjs 4.83.2)** — iOS ซูมหน้าเมื่อแตะช่องกรอก — Safari ซูมเมื่อ font ของ input < 16px · kit ใช้ `text-sm` (14px) ทุก breakpoint ตามมติ "ไม่ bump บนมือถือ" (DESIGN.template §2) · ทางแก้ = `text-base md:text-sm` ที่ input/textarea/select (ผิดมติเดิม) หรือยอมรับการซูม · ห้ามใช้ `maximum-scale=1` (ปิดการซูมของผู้ใช้สายตาไม่ดี)
 
-~~ค้างจากรุ่น 3~~ ปิดในรุ่น 4: date-picker + date-range-picker เป็น bottom sheet แล้ว · combobox ไม่ทำโดยตั้งใจ (ช่องพิมพ์อยู่ในหน้า sheet ชิดล่างจมใต้คีย์บอร์ด) — เดิม (review 2026-10-16): `ui/date-picker` · `date-range-picker` · `combobox` ยังเป็น Popover ดิบ — มือถือไม่เป็น bottom sheet ตาม A12 · ย้ายผ่าน `ResponsivePopover` (ต้องมี variant ไม่มี padding ให้ปฏิทิน) — ทำในรุ่น 4
+~~ค้างจากรุ่น 3~~ ปิดในรุ่น 4: date-picker + date-range-picker เป็น bottom sheet แล้ว · combobox ตอนแรกไม่ทำ แล้ว**มติ 2026-10-18 เปลี่ยนเป็น sheet เกือบเต็มจอ ช่องค้นหาอยู่บนสุด** (4.83.3 — hrms เองยังเป็น popover) + เมนูตั้งค่าคอลัมน์ของ DataTable เป็น sheet ด้วย — เดิม (review 2026-10-16): `ui/date-picker` · `date-range-picker` · `combobox` ยังเป็น Popover ดิบ — มือถือไม่เป็น bottom sheet ตาม A12 · ย้ายผ่าน `ResponsivePopover` (ต้องมี variant ไม่มี padding ให้ปฏิทิน) — ทำในรุ่น 4
 
 ไม่เอา: ภาษาช่องวัน/กะ, HERO_GRADIENT hex, view-as, เนื้อหา dashboard โดเมน HR, โลโก้ PNG, สีกลุ่มเมนูจากสีสถานะ, `DecisionButtons` สูงรายจุด
 

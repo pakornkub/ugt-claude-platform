@@ -1622,7 +1622,7 @@ import { CalendarDays, CalendarRange, List } from 'lucide-react';
 <section class="story" id="s-field" data-group="forms" data-title="Input &amp; Field" data-th="ช่องกรอกและฟอร์ม" data-kw="input field form label required error checkbox radio switch textarea zod react-hook-form">
   <div class="story-head">
     <h1>Input &amp; Field <span>ช่องกรอก</span></h1>
-    <p class="purpose">label อยู่บนช่อง · <span style="color:var(--bad)">*</span> แดงท้าย label · error ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form) · ตัวอักษรในช่องพิมพ์ <b>16px บนมือถือ</b> (&lt; md) แล้ว 12px ตั้งแต่ md — iOS ซูมหน้าเมื่อช่อง &lt; 16px (4.83.2)</p>
+    <p class="purpose">label อยู่บนช่อง · <span style="color:var(--bad)">*</span> แดงท้าย label · error ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form) · ตัวอักษรในช่องพิมพ์ <b>16px บนมือถือ</b> (&lt; md) แล้ว 12px ตั้งแต่ md — iOS ซูมหน้าเมื่อช่อง &lt; 16px (4.83.3)</p>
     <div class="files"><code>components/ui/field.tsx</code> · <code>input</code> · <code>textarea</code> · <code>checkbox</code> · <code>radio-group</code> · <code>switch</code> (shadcn base-mira)</div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui">
@@ -1698,7 +1698,7 @@ import { Input } from '@/components/ui/input';
         <div class="k-pop k-menu" style="width:100%"><div class="k-mi focus">สมชาย ใจดี</div><div class="k-mi">สมศรี มั่นคง</div><div class="k-mi">สมหญิง รักงาน</div></div></div>
     </div>
   </div></div></div></div>
-  <p class="note"><b>มือถือ</b>: Combobox <b>ไม่</b>เปลี่ยนเป็น bottom sheet (ข้อยกเว้นเดียวของ <a href="#responsive-popover">ResponsivePopover</a>) — ผู้ใช้กำลังพิมพ์ คีย์บอร์ดจอจะทับ sheet และ sheet ดึง focus ออกจากช่อง · รายการเป็น popup เกาะใต้ช่องที่สูงตามพื้นที่เหนือคีย์บอร์ด · ใช้ใน Sheet/Dialog ได้ (เช่นใน FilterPopover)</p>
+  <p class="note"><b>มือถือ</b> (&lt; 768px): ช่อง Combobox ในหน้าเป็นปุ่มแสดงค่า (หรือ placeholder) แตะแล้วเปิด <b>bottom sheet เกือบเต็มจอ — ช่องค้นหาอยู่บนสุด</b> (โฟกัสให้เลย) รายการอยู่ใต้ช่อง คีย์บอร์ดจึงทับแค่ท้ายรายการ ไม่ว่าช่องจะอยู่ตรงไหนของฟอร์ม · เลือกตัวเดียว = ปิด sheet โฟกัสกลับช่อง · <code>multiple</code> = sheet ค้างไว้ ✓ บอกตัวที่เลือก chip อยู่ในหน้า · ปิดด้วย ✕ / Esc / แตะพื้นหลัง · หัว sheet = prop <code>label</code> ของ <code>Combobox</code> (ไม่ส่ง = <code>aria-label</code> → <code>placeholder</code>) · desktop ไม่เปลี่ยน (ช่องในหน้า + popup ใต้ช่อง) · ใช้ใน Sheet/Dialog ได้ (เช่นใน FilterPopover — มือถือเป็น sheet ซ้อน sheet)</p>
 
   <h2 class="sh">Variants</h2>
   <div class="variants">
@@ -2061,7 +2061,7 @@ toolbarFilters={
     <div class="files"><code>components/ui/data-table.tsx</code> · <code>lib/table-query.ts</code> · <code>lib/table-prefs.ts</code> · <code>lib/pagination.ts</code></div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui"><div data-tpl="tpl-leave-table"></div></div></div></div></div>
-  <p class="note">กดปุ่ม <b>Mobile</b> — การ์ดยังอยู่ · toolbar เรียงเต็มกว้าง (ค้นหา → ช่วงเวลา → ตัวกรอง → เครื่องมือชิดขวา) · แถวเป็น list คั่นเส้น (<code>data-table-mobile-row</code>) ปุ่มอยู่ท้ายแถว · pagination เหลือ "หน้า X จาก Y" + ก่อน/ถัดไป · ปุ่มหลักของหน้าไม่อยู่ใน toolbar — อยู่ PageActions เหนือการ์ด</p>
+  <p class="note">กดปุ่ม <b>Mobile</b> — การ์ดยังอยู่ · toolbar เรียงเต็มกว้าง (ค้นหา → ช่วงเวลา → ตัวกรอง → เครื่องมือชิดขวา) · แถวเป็น list คั่นเส้น (<code>data-table-mobile-row</code>) ปุ่มอยู่ท้ายแถว · pagination เหลือ "หน้า X จาก Y" + ก่อน/ถัดไป · ปุ่มตั้งค่าคอลัมน์เปิด bottom sheet (<a href="#responsive-popover">ResponsivePopover</a>) มีปุ่ม ▲▼ เลื่อนลำดับแทนการลาก · ปุ่มหลักของหน้าไม่อยู่ใน toolbar — อยู่ PageActions เหนือการ์ด</p>
 
   <h2 class="sh">ลำดับใน toolbar <small>แถวเดียว ขนาดเดียว ตายตัว (มติ 2026-08-11 · A3)</small></h2>
   <div class="table-wrap"><table>
@@ -2095,7 +2095,7 @@ toolbarFilters={
       <div class="row" style="gap:8px;padding:2px 4px"><svg class="i mut" style="font-size:14px"><use href="#i-grip"/></svg><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="พนักงาน"><svg class="i"><use href="#i-check"/></svg></button><span class="t12">พนักงาน</span></div>
       <div class="row" style="gap:8px;padding:2px 4px"><svg class="i mut" style="font-size:14px"><use href="#i-grip"/></svg><button class="k-check" type="button" role="checkbox" aria-checked="false" aria-label="ประเภท"><svg class="i"><use href="#i-check"/></svg></button><span class="t12">ประเภท</span></div>
       <button class="k-btn v-ghost s-sm" type="button" style="justify-content:flex-start;gap:8px;margin-top:4px"><svg class="i"><use href="#i-rotate"/></svg>คืนค่าเริ่มต้น</button></div></div>
-      <div class="cap"><b>column settings</b>ลากสลับ + ซ่อน/แสดง + คืนค่า · จำใน localStorage ต่อ <code>id</code></div></div>
+      <div class="cap"><b>column settings</b>ลากสลับ + ซ่อน/แสดง + คืนค่า · จำใน localStorage ต่อ <code>id</code> · มือถือเป็น bottom sheet หัว "คอลัมน์" + ปุ่ม ▲▼ ต่อแถว</div></div>
     <div class="vcell"><div class="ui stack"><div class="k-empty"><div class="k-emedia"><svg class="i"><use href="#i-inbox"/></svg></div><div class="k-ehead"><div class="k-etitle">ไม่พบข้อมูล</div><div class="k-edesc">ลองปรับ filter หรือค้นหาด้วยคำอื่น</div></div></div></div>
       <div class="cap"><b>empty (มีช่องค้นหา)</b>ไม่มีช่องค้นหา = "ยังไม่มีรายการ / เมื่อมีข้อมูลจะแสดงที่นี่" · เปลี่ยนข้อความได้ด้วย <code>emptyTitle</code></div></div>
     <div class="vcell"><div class="ui"><button class="k-btn v-outline s-icon" type="button" aria-label="ดาวน์โหลด" aria-expanded="true"><svg class="i"><use href="#i-download"/></svg></button>
@@ -2821,7 +2821,7 @@ import { DetailRow } from '@/components/ui/detail-row';
 <section class="story" id="s-responsive-popover" data-group="overlays" data-title="ResponsivePopover" data-th="popover / bottom sheet ตามจอ" data-kw="responsive popover bottom sheet มือถือ use-mobile 768 ตัวเลือก overlay">
   <div class="story-head">
     <h1>ResponsivePopover <span>desktop = Popover · มือถือ = bottom sheet</span></h1>
-    <p class="purpose">ตัวเปิด overlay เลือกค่าของ kit ผ่านตัวนี้ (FilterPopover · PeriodNavigator · DatePicker / DateRangePicker) — จอแคบกว่า 768px เปิดเป็น bottom sheet เต็มกว้าง ทั้งแอปจึงทำตัวเหมือนกัน · ข้อยกเว้นเดียว = Combobox (ช่องพิมพ์ — คีย์บอร์ดทับ sheet)</p>
+    <p class="purpose">ตัวเปิด overlay เลือกค่าของ kit ผ่านตัวนี้ (FilterPopover · PeriodNavigator · DatePicker / DateRangePicker · ปุ่มตั้งค่าคอลัมน์ของ DataTable) — จอแคบกว่า 768px เปิดเป็น bottom sheet เต็มกว้าง ทั้งแอปจึงทำตัวเหมือนกัน · Combobox ก็เป็น bottom sheet บนมือถือ แต่วาด sheet เอง (เกือบเต็มจอ ช่องค้นหาบนสุด — <a href="#select">ดู Select &amp; Combobox</a>)</p>
     <div class="files"><code>components/ui/responsive-popover.tsx</code> (ต้องมี <code>hooks/use-mobile</code> — sidebar block มีให้ · topbar <code>npx shadcn@latest add use-mobile</code>)</div>
   </div>
   <div class="canvas" data-novp><div class="canvas-stage"><div class="frame"><div class="ui">
@@ -3704,7 +3704,7 @@ return (
   </main>
 </div>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.83.2</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.83.3</span></div></footer>
 
 <script>
 (function () {

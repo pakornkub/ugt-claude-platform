@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: 71163a5d914f
+// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: 1755aa6dafc4
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -14,6 +14,8 @@ export const kitTh = {
     columnSettings: 'ตั้งค่าคอลัมน์',
     columns: 'คอลัมน์',
     reorderAria: 'ลำดับของ {label} — ลากเพื่อสลับ หรือกดลูกศรขึ้น/ลง',
+    moveUpAria: 'เลื่อน {label} ขึ้น',
+    moveDownAria: 'เลื่อน {label} ลง',
     filterPlaceholder: 'กรอกเพื่อกรอง...',
     clearFilterAria: 'ล้างกรอง {label}',
     rangeSummary: '{start}–{end} จาก {total}',

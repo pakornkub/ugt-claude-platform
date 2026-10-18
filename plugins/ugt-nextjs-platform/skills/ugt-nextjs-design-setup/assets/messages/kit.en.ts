@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: f1c4002c76e0
+// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: b351f4cd55e8
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -13,6 +13,8 @@ export const kitEn = {
     columnSettings: 'Column settings',
     columns: 'Columns',
     reorderAria: 'Position of {label} — drag to reorder, or use the up and down arrows',
+    moveUpAria: 'Move {label} up',
+    moveDownAria: 'Move {label} down',
     filterPlaceholder: 'Type to filter...',
     clearFilterAria: 'Clear filter {label}',
     rangeSummary: '{start}–{end} of {total}',

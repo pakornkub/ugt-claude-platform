@@ -90,7 +90,8 @@ Built into the component; never restyle it per page.
 - **Toolbar rows go full width, in this order**: navigation (search box →
   `toolbarFilters`, each control stretched full width) → secondary tools
   (`toolbarExtra` + the column-settings button) together in one row,
-  right-aligned. The column-settings button is never hidden on mobile.
+  right-aligned. The column-settings button is never hidden on mobile; below 768px it opens a
+  bottom sheet (`ui/responsive-popover`) with visible ▲▼ buttons — touch drag is not reliable.
 - The page's **primary action is not in the toolbar** (contract: a filter row
   never hosts an action) — it stays in `PageActions` above the card, which
   on phones is the full-width `cta` button.
@@ -123,7 +124,7 @@ rather than trusting the caller.
 **search input leftmost** → `toolbarFilters` (page-level filters, wide →
 narrow) → flex spacer → `toolbarExtra` (export menu and friends) and the
 column-settings icon button hugging the **right** edge (phones: §Mobile). The column-settings
-Popover has drag-to-reorder + show/hide checkboxes + reset; prefs persist per
+ResponsivePopover has drag-to-reorder + show/hide checkboxes + reset; prefs persist per
 table `id`. Search never migrates to the right side, and filters never get
 their own row above the toolbar (มติ 2026-08-11).
 
