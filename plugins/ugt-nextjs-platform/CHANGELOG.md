@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.83.2 (2026-10-18)
+
+- **ช่องพิมพ์ 16px บนมือถือ (มติ 2026-10-18)** — sanctioned edit ใหม่ใน `assets/ui/primitive-edits.md`: `components/ui/input.tsx` + `textarea.tsx` แทน `text-sm` → `text-base` (คง `md:text-xs/relaxed`) — Safari บน iOS ซูมทั้งหน้าเมื่อโฟกัสช่องที่ตัวอักษร < 16px แล้วไม่ซูมกลับ · InputGroup/TimeInput/Combobox ได้ตาม · ห้ามแก้ด้วย `maximum-scale=1` · DESIGN.template §2 ข้อยกเว้น "ไม่ bump บนมือถือ" เป็นสามจุด · `verify.mjs` เตือนเมื่อ input/textarea ยังไม่มี `text-base` · **โปรเจคเดิม**: แก้สอง token นี้เองหรือ "sync ข้อตกลง design"
+
 ## 4.83.1 (2026-10-17)
 
 - `ui/date-picker.tsx`: เปิดปฏิทินแล้วโฟกัสอยู่ที่**ช่องวันที่เลือก** (ไม่มีค่า = วันนี้) — เดิมโฟกัสปุ่ม "เดือนก่อน" ต้องกด Tab หลายทีกว่าจะถึงวัน · `ui/responsive-popover.tsx` prop ใหม่ `initialFocus` (ส่งต่อ Base UI ทั้ง Popover/Sheet; ค่าเริ่มเหมือนเดิม) · ทดสอบ jsdom ทั้ง desktop/มือถือ

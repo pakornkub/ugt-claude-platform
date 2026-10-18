@@ -31,6 +31,13 @@ string ของ `className` ที่ระบุด้านล่าง (ม�
 **`"w-full caption-bottom text-xs 2xl:text-sm"`** (12px → 14px ตั้งแต่ 1536px — หัวและเนื้อขยายพร้อมกัน ·
 ห้าม override ราย cell)
 
+## `components/ui/input.tsx` · `textarea.tsx` — ช่องพิมพ์ 16px บนมือถือ (มติ 2026-10-18)
+
+ใน className ของ primitive แทน token **`text-sm` → `text-base`** (คง `md:text-xs/relaxed` ไว้) — Safari บน iOS
+ซูมทั้งหน้าเมื่อโฟกัสช่องที่ตัวอักษร < 16px แล้วไม่ซูมกลับ · ตั้งแต่ `md` ขนาดเดิม · `InputGroup`/`TimeInput`/
+`Combobox` ได้ตามเพราะใช้ `Input` ตัวนี้ · `select` ของ kit เป็นปุ่ม (ไม่ซูม) ไม่ต้องแก้ · **ห้าม**
+`maximum-scale=1` ใน viewport แทน (ปิดการซูมของคนสายตาไม่ดี)
+
 ## `components/ui/dialog.tsx` — 3 โซน หัว/เนื้อ/ท้าย (A8)
 
 - `DialogHeader`: เดิม `"flex flex-col gap-1"` → **`"-mx-4 flex flex-col gap-1 border-b px-4 pb-3"`**
