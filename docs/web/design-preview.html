@@ -1698,6 +1698,28 @@ import { Input } from '@/components/ui/input';
         <div class="k-pop k-menu" style="width:100%"><div class="k-mi focus">สมชาย ใจดี</div><div class="k-mi">สมศรี มั่นคง</div><div class="k-mi">สมหญิง รักงาน</div></div></div>
     </div>
   </div></div></div></div>
+  <div class="canvas" data-novp><div class="canvas-stage"><div class="frame"><div class="ui">
+    <div class="row" style="align-items:flex-start;gap:24px">
+      <div class="col" style="gap:8px;flex:1;min-width:220px;max-width:300px"><span class="t12 fw5 mut">มือถือ — ในหน้า: ปุ่มแสดงค่า</span>
+        <label class="k-label" for="m-cb-trig">ผู้ปฏิบัติงานแทน<span class="k-req">*</span></label>
+        <button class="k-btn v-field" id="m-cb-trig" type="button" style="width:100%;justify-content:space-between;font-weight:400;color:var(--muted-foreground)">เลือกพนักงาน<svg class="i"><use href="#i-chev-d"/></svg></button>
+      </div>
+      <div class="col" style="gap:8px;flex:1;min-width:220px;max-width:340px"><span class="t12 fw5 mut">มือถือ — แตะแล้ว: sheet เกือบเต็มจอ ช่องค้นหาบนสุด</span>
+        <div style="border:1px solid var(--border-c);border-radius:var(--r-lg);overflow:hidden;background:rgb(0 0 0/.8);padding-top:24px">
+          <div class="k-bsheet">
+            <div class="sh" style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 12px">ผู้ปฏิบัติงานแทน<svg class="i" aria-hidden="true"><use href="#i-x"/></svg></div>
+            <div style="padding:12px 16px"><div class="k-search"><svg class="i"><use href="#i-search"/></svg><input class="k-input" value="สม" aria-label="ค้นหาพนักงาน (ตัวอย่าง)"></div></div>
+            <div style="border-top:1px solid var(--border-c)">
+              <div style="min-height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border-c);font-size:14px">สมชาย ใจดี</div>
+              <div style="min-height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border-c);font-size:14px">สมศรี มั่นคง</div>
+              <div style="min-height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border-c);font-size:14px">สมหญิง รักงาน</div>
+              <div style="min-height:44px;display:flex;align-items:center;padding:0 16px;font-size:14px;color:var(--muted-foreground)">… คีย์บอร์ดทับแค่ส่วนนี้</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div></div></div>
   <p class="note"><b>มือถือ</b> (&lt; 768px): ช่อง Combobox ในหน้าเป็นปุ่มแสดงค่า (หรือ placeholder) แตะแล้วเปิด <b>bottom sheet เกือบเต็มจอ — ช่องค้นหาอยู่บนสุด</b> (โฟกัสให้เลย) รายการอยู่ใต้ช่อง คีย์บอร์ดจึงทับแค่ท้ายรายการ ไม่ว่าช่องจะอยู่ตรงไหนของฟอร์ม · เลือกตัวเดียว = ปิด sheet โฟกัสกลับช่อง · <code>multiple</code> = sheet ค้างไว้ ✓ บอกตัวที่เลือก chip อยู่ในหน้า · ปิดด้วย ✕ / Esc / แตะพื้นหลัง · หัว sheet = prop <code>label</code> ของ <code>Combobox</code> (ไม่ส่ง = <code>aria-label</code> → <code>placeholder</code>) · desktop ไม่เปลี่ยน (ช่องในหน้า + popup ใต้ช่อง) · ใช้ใน Sheet/Dialog ได้ (เช่นใน FilterPopover — มือถือเป็น sheet ซ้อน sheet)</p>
 
   <h2 class="sh">Variants</h2>
@@ -2061,6 +2083,22 @@ toolbarFilters={
     <div class="files"><code>components/ui/data-table.tsx</code> · <code>lib/table-query.ts</code> · <code>lib/table-prefs.ts</code> · <code>lib/pagination.ts</code></div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui"><div data-tpl="tpl-leave-table"></div></div></div></div></div>
+  <div class="canvas" data-novp><div class="canvas-stage"><div class="frame"><div class="ui">
+    <div class="col" style="gap:8px;max-width:340px"><span class="t12 fw5 mut">มือถือ — ปุ่มตั้งค่าคอลัมน์ → bottom sheet "คอลัมน์"</span>
+      <div style="border:1px solid var(--border-c);border-radius:var(--r-lg);overflow:hidden;background:rgb(0 0 0/.8);padding-top:72px">
+        <div class="k-bsheet">
+          <div class="sh" style="display:flex;justify-content:space-between;align-items:center;padding:16px">คอลัมน์<svg class="i" aria-hidden="true"><use href="#i-x"/></svg></div>
+          <div>
+            <div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 4px 0 16px;border-bottom:1px solid var(--border-c);font-size:14px"><input type="checkbox" checked aria-label="ชื่อพนักงาน"><span style="flex:1">ชื่อพนักงาน</span><span class="t12 mut" style="width:44px;text-align:center" aria-hidden="true">▲</span><span class="t12" style="width:44px;text-align:center" aria-hidden="true">▼</span></div>
+            <div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 4px 0 16px;border-bottom:1px solid var(--border-c);font-size:14px"><input type="checkbox" checked aria-label="ประเภทการลา"><span style="flex:1">ประเภทการลา</span><span class="t12" style="width:44px;text-align:center" aria-hidden="true">▲</span><span class="t12" style="width:44px;text-align:center" aria-hidden="true">▼</span></div>
+            <div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 4px 0 16px;border-bottom:1px solid var(--border-c);font-size:14px"><input type="checkbox" aria-label="หน่วยงาน"><span style="flex:1">หน่วยงาน</span><span class="t12" style="width:44px;text-align:center" aria-hidden="true">▲</span><span class="t12" style="width:44px;text-align:center" aria-hidden="true">▼</span></div>
+            <div style="padding:12px 16px 16px"><button class="k-btn v-outline" type="button" style="width:100%;justify-content:center">คืนค่าเริ่มต้น</button></div>
+          </div>
+        </div>
+      </div>
+      <span class="t12 mut">แถวสูง 44px · ▲▼ 44px (ตัวบนสุด ▲ / ล่างสุด ▼ กดแล้วไม่ทำอะไร โฟกัสไม่หลุด) · คอลัมน์เยอะ sheet เลื่อนได้ หัวไม่หลุดจอ</span>
+    </div>
+  </div></div></div></div>
   <p class="note">กดปุ่ม <b>Mobile</b> — การ์ดยังอยู่ · toolbar เรียงเต็มกว้าง (ค้นหา → ช่วงเวลา → ตัวกรอง → เครื่องมือชิดขวา) · แถวเป็น list คั่นเส้น (<code>data-table-mobile-row</code>) ปุ่มอยู่ท้ายแถว · pagination เหลือ "หน้า X จาก Y" + ก่อน/ถัดไป · ปุ่มตั้งค่าคอลัมน์เปิด bottom sheet (<a href="#responsive-popover">ResponsivePopover</a>) มีปุ่ม ▲▼ เลื่อนลำดับแทนการลาก · ปุ่มหลักของหน้าไม่อยู่ใน toolbar — อยู่ PageActions เหนือการ์ด</p>
 
   <h2 class="sh">ลำดับใน toolbar <small>แถวเดียว ขนาดเดียว ตายตัว (มติ 2026-08-11 · A3)</small></h2>
