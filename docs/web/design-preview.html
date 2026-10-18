@@ -1622,7 +1622,7 @@ import { CalendarDays, CalendarRange, List } from 'lucide-react';
 <section class="story" id="s-field" data-group="forms" data-title="Input &amp; Field" data-th="ช่องกรอกและฟอร์ม" data-kw="input field form label required error checkbox radio switch textarea zod react-hook-form">
   <div class="story-head">
     <h1>Input &amp; Field <span>ช่องกรอก</span></h1>
-    <p class="purpose">label อยู่บนช่อง · <span style="color:var(--bad)">*</span> แดงท้าย label · error ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form)</p>
+    <p class="purpose">label อยู่บนช่อง · <span style="color:var(--bad)">*</span> แดงท้าย label · error ใต้ช่องผ่าน <code>ui/field</code> (zod + react-hook-form) · ตัวอักษรในช่องพิมพ์ <b>16px บนมือถือ</b> (&lt; md) แล้ว 12px ตั้งแต่ md — iOS ซูมหน้าเมื่อช่อง &lt; 16px (4.83.2)</p>
     <div class="files"><code>components/ui/field.tsx</code> · <code>input</code> · <code>textarea</code> · <code>checkbox</code> · <code>radio-group</code> · <code>switch</code> (shadcn base-mira)</div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui">
@@ -1756,6 +1756,7 @@ const NO_ROLE = '__none__'; // Base UI ถือว่า value="" คือ "�
     </div>
   </div></div></div></div>
   <p class="note"><b>มือถือ (&lt; 768px)</b>: ปฏิทินเปิดเป็น <b>bottom sheet</b> เต็มกว้างผ่าน <code>ui/responsive-popover</code> แทน popover ลอย — ปุ่มและค่าที่ได้เหมือนเดิม · ปฏิทินเปิดที่เดือนของค่าที่เลือก (<code>defaultMonth</code>) · <code>weekStartsOn</code> ส่งวันเริ่มสัปดาห์ได้ (PeriodNavigator โหมด week ส่งจันทร์)</p>
+  <p class="note"><b>คีย์บอร์ด</b>: เปิดปฏิทินแล้วโฟกัสอยู่ที่<b>ช่องวันที่เลือก</b> (ไม่มีค่า = วันนี้) กดลูกศรเลื่อนวันได้ทันที — ไม่ต้อง Tab ผ่านปุ่มเดือนก่อน/ถัดไป (4.83.1)</p>
 
   <h2 class="sh">Variants</h2>
   <div class="variants">
