@@ -92,7 +92,7 @@ org path, never a named or anonymous Docker volume:
   (single declared exception: WordPress `wp-content`)
 - Host file backup covers `/home/docker02/appdata` once for every project
 
-## Scheduled jobs = host cron (มติผู้ดูแล 2026-10-09)
+## Scheduled jobs = host cron, or a compose cron service where documented (มติผู้ดูแล 2026-10-09)
 
 Every scheduled job / recurring task runs from the **host crontab** of the
 Docker host (the `jenkins` user's crontab — it owns `/home/docker02/appdata`
@@ -110,6 +110,18 @@ project's admin handoff (cron table). Nothing else schedules:
   run --rm job`) — jobs are idempotent, log to
   `/home/docker02/appdata/<project>/logs/cron.log`, and run on **prod only**
   (dev = run by hand when testing)
+
+**Alternative — a cron service in the prod compose file**, only on a stack whose
+cicd skill documents it (today: Python, `ugt-python-cicd-setup`
+`references/docker-deploy.md` §C). A second service in `docker-compose.yml`, built
+from the app's own image, runs a container cron daemon (supercronic) on a crontab
+committed to the repo; Jenkins deploys it with the app, so the job needs no host
+crontab line and the handoff has no cron table. It is **not** an in-app scheduler:
+its own container and process, one per environment, and a restart re-reads the same
+schedule. Same rules as host cron: idempotent jobs, **prod only** (the service never
+appears in `docker-compose.dev.yml`), times in the image's `TZ`, output in
+`docker logs` (json-file rotation) plus the job's own log under
+`/home/docker02/appdata/<project>/`.
 
 ## Server names (must match exactly)
 
