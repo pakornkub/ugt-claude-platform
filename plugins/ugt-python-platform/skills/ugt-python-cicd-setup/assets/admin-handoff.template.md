@@ -6,7 +6,7 @@ RENDER RULES (delete this comment block in the rendered file):
   letters and anchors stay FIXED (gaps are fine) — other skills and the overview links
   point at them by letter. Never leave an empty table or "N/A" rows.
   [DB] = has a database · [VOLUME] = compose has an /home/docker02/appdata bind ·
-  [CRON] = has scheduled jobs (one cron-table row per job) · [FIRST] = first org project on this Jenkins/Docker host
+  [CRON] = has host-cron jobs (one cron-table row per job; none when the jobs run in a compose cron service) · [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
 -->
 # คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)

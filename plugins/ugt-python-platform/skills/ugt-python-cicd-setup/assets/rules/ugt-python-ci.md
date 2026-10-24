@@ -63,13 +63,16 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
 - ชื่อ credential: `nvd` (global ต่อ server ไม่ผูกโปรเจค) · `env-<project>` ·
   `env-<project>-dev` — ไม่มี sentry credential ใน stack นี้
 
-## Scheduled jobs — host cron เท่านั้น (มติ 2026-10-09)
+## Scheduled jobs — host cron หรือ cron service ใน compose prod (มติ 2026-10-09)
 
 - job ตามรอบทุกตัว = **host cron** หนึ่งบรรทัดต่อ job ในตาราง cron ของ admin handoff:
   shape batch → `docker compose run --rm job` · shape web → `docker exec <container> python -m <module>`
   (`references/docker-deploy.md` §C) · **ห้าม in-app scheduler**: APScheduler,
   Celery beat, `schedule`, `while True: sleep()` · ห้าม SQL Agent job / Jenkins timer สำหรับงานของแอป
-- job ต้อง idempotent (รันซ้ำได้) · log ไป `/home/docker02/appdata/<project>/logs/cron.log` · ตั้งเฉพาะ prod
+- **หรือ cron service ใน `docker-compose.yml`** (§C "ทางเลือก"): service แยก image เดียวกับแอป ·
+  `supercronic` + crontab ใน repo · Jenkins deploy ไปพร้อมแอป · ไม่มีตาราง cron ใน handoff ·
+  **ห้ามมีใน `docker-compose.dev.yml`** · `healthcheck: disable: true` (HEALTHCHECK ของ image ยิงเว็บที่ service นี้ไม่ได้รัน)
+- job ต้อง idempotent (รันซ้ำได้) · log ไป `/home/docker02/appdata/<project>/logs/` (host cron: `cron.log`) · ตั้งเฉพาะ prod
 
 ## Branch / ค่าตามสาขา
 

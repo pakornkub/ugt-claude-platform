@@ -501,6 +501,14 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
     : { ok: true };
 });
 
+check('A compose cron service runs on prod only', () => {
+  // docker-deploy.md §C "ทางเลือก": the cron service belongs in docker-compose.yml only —
+  // in the dev compose the job would run in both environments
+  return /supercronic|crond\b/.test(composeActive('docker-compose.dev.yml'))
+    ? { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only (references/docker-deploy.md §C), or every job runs twice' }
+    : { ok: true };
+});
+
 check('docs/admin-handoff.md rendered', () => {
   // Content (leftover __*__) is covered by the placeholder scan above; this is
   // the existence half of the same references/verification.md line.

@@ -104,6 +104,7 @@ Jenkinsfile / compose, `CMD` เป็น JSON array, `mkdir -p` ↔ bind, path 
       ให้ทั้งสอง
 - [ ] ปิด Lightweight checkout ใน job config
 - [ ] `/home/docker02/appdata` มีอยู่และ Jenkins user เขียนได้ (ครั้งเดียวต่อ server)
+- [ ] มี job ตามรอบแบบ cron service: `docker logs <project>-cron` เห็น job รอบแรกรันจบ (ทดสอบตั้งเวลาใกล้ ๆ ใน image ก่อน push)
 - [ ] มี job ตามรอบ: ตั้ง host cron (ตาราง cron ของ handoff) — batch เรียก `docker compose run --rm job` แล้ว
       + ทดสอบรันมือ 1 รอบผ่าน
 - [ ] ได้ `APP_PORT` prod/dev ตัวจริงกลับมาแล้ว (ไม่ใช่ค่า placeholder)

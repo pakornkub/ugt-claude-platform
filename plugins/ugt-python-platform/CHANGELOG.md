@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## Unreleased
+
+- **job ตามรอบใน cron service ของ compose prod (ทางเลือกของ host cron)** — host cron ต้องให้ admin ตั้งทีละ host · เวลาตาม timezone ของ host · ไม่มี retry → เพิ่ม §C "ทางเลือก" ใน `references/docker-deploy.md`: service แยก image เดียวกับแอป + supercronic (pin + SHA1) + crontab ใน repo, เฉพาะ `docker-compose.yml`, `healthcheck: disable` · rules / SKILL.md interview ข้อ 9 / render rule `[CRON]` / verification ตาม · verify.mjs ใหม่: cron daemon ใน `docker-compose.dev.yml` = fail · origin mtn-work-planning · 2026-10-25 · asset: ugt-python-cicd-setup/assets/rules/ugt-python-ci.md
+
 ## 0.9.6 (2026-10-17)
 
 - `references/compose.md` (no-new-privileges): ตัวอย่าง log เดิมเป็นข้อความของ PHP (`docker-php-entrypoint`) — เปลี่ยนเป็นของ python (`exec /usr/local/bin/python`) + บอกว่าชื่อหลัง `exec` คือ binary แรกของ CMD/ENTRYPOINT

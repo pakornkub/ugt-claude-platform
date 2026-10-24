@@ -92,7 +92,7 @@ const CHECKS = [
     },
   },
   {
-    name: 'Scheduled jobs: host cron only',
+    name: 'Scheduled jobs: host cron (or a documented compose cron service)',
     files: {
       [`${CORE}/contracts/cicd.md`]: [/host crontab/, /No in-app scheduler/],
       [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/host cron/, /in-app scheduler/],
