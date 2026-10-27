@@ -52,7 +52,7 @@ Skill layout:
 | `assets/admin-handoff.template.md` | เอกสารส่งทีม admin — render แล้วเขียนลงโปรเจคเป็น `docs/admin-handoff.md` |
 | `references/org-standards.md` | contract ร่วมเต็ม (stages, toolchain, gate, credentials, secret, health, persistent data) — สรุปอยู่ §2 |
 | `references/verification.md` | เช็คลิสต์ตรวจเต็มหลัง setup (repo · server · รันจริง) — สรุปอยู่ §7 |
-| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, [WEB] vs [BATCH], host cron + ตาราง index ไปไฟล์เชิงลึก: `volumes.md` (ownership/chown, DooD) · `healthcheck.md` · `build-gotchas.md` (`.dockerignore`) · `db-dns.md` · `compose.md` · `django-static.md` |
+| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, [WEB] vs [BATCH], host cron / cron service ใน compose prod + ตาราง index ไปไฟล์เชิงลึก: `volumes.md` (ownership/chown, DooD) · `healthcheck.md` · `build-gotchas.md` (`.dockerignore`) · `db-dns.md` · `compose.md` · `django-static.md` |
 | `references/legacy-test-generation.md` | ขั้น optional (มติ M7) — ไล่สร้าง characterization test ให้โค้ดเดิม ทำใน session แยก |
 | `scripts/verify.mjs` | ตรวจฝั่ง repo ให้อัตโนมัติหลัง setup เสร็จ (§7) |
 

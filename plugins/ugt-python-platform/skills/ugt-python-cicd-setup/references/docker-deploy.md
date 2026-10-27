@@ -84,7 +84,7 @@ context จาก Jenkins agent; เช็ค binary ที่มีจริง
 ด้วย) — สอง binary ไม่ compatible กัน 100% ในทุกกรณี (env-var interpolation
 ต่างกันเล็กน้อย).
 
-### shape web ที่มี job ตามรอบ (มติ 2026-10-09: host cron เท่านั้น)
+### shape web ที่มี job ตามรอบ (มติ 2026-10-09: host cron — หรือทางเลือกด้านล่าง)
 
 ไม่ต้องแยก shape batch — code อยู่ใน container web อยู่แล้ว ให้ cron สั่งรันใน
 container ที่ยืนอยู่:
@@ -109,7 +109,8 @@ service (ตั้งใน compose ด้านล่าง — `Dockerfile.web
 
 **Dockerfile** — supercronic (cron สำหรับ container: รัน non-root ได้ และส่ง env ของ
 container ต่อให้ job — busybox `crond` ไม่ส่ง) pin version + ตรวจ SHA1 จาก release notes
-ของ `supercronic-linux-amd64` · วาง **ก่อน `USER app`** (เขียน `/usr/local/bin` ต้องเป็น root):
+ของ `supercronic-linux-amd64` · วาง **หลัง `pip install` ก่อน `COPY . .`** (ยังเป็น root และ cache
+ไม่หลุดทุก commit — ไม่งั้นทุก build โหลดจาก GitHub ใหม่):
 
 ```dockerfile
 ARG SUPERCRONIC_VERSION=v0.2.49
@@ -122,12 +123,16 @@ RUN python -c "import urllib.request as u; u.urlretrieve('https://github.com/apt
 (slim ไม่มี `curl` จึงโหลดด้วย python ที่มีอยู่แล้ว · ห้ามเขียน comment ท้ายบรรทัด `ARG` —
 Dockerfile ไม่มี inline comment · ต้องเปิด `github.com` ให้ docker host ตอน build)
 
+แล้ว **หลัง `COPY . .`** เพิ่ม `RUN supercronic -test /app/jobs.crontab` — crontab ผิดหรือ
+ลืมขั้นติดตั้ง = build แดง (ถ้าไม่มีบรรทัดนี้ container cron จะ restart วน แต่ pipeline ยังเขียว
+เพราะ health poll ดูแค่เว็บ แล้ว job ไม่เคยรันโดยไม่มีใครรู้)
+
 **crontab ใน repo** (เช่น `jobs.crontab`) — supercronic รันแต่ละบรรทัดผ่าน
 `/bin/sh -c` ที่ `WORKDIR` ของ image:
 
 ```
-# Monday 08:00 (image TZ); retried hourly up to 3 more times
-0 8 * * 1 python -m app.jobs.export || (sleep 3600; python -m app.jobs.export) || (sleep 3600; python -m app.jobs.export) || (sleep 3600; python -m app.jobs.export)
+# Monday 08:00 (the service TZ); retried every 10 minutes up to 2 more times
+0 8 * * 1 python -m app.jobs.export || (sleep 600; python -m app.jobs.export) || (sleep 600; python -m app.jobs.export)
 ```
 
 **`docker-compose.yml` เท่านั้น** — ห้ามใส่ใน `docker-compose.dev.yml` (dev จะรัน job ซ้ำกับ prod):
@@ -139,6 +144,7 @@ Dockerfile ไม่มี inline comment · ต้องเปิด `github.co
     container_name: __PROJECT_NAME__-cron
     restart: unless-stopped
     command: ['supercronic', '/app/jobs.crontab']
+    stop_grace_period: 15m        # supercronic รอ job ที่รันอยู่จบก่อนออก — deploy ระหว่าง job ไม่ฆ่าทิ้ง
     volumes:                      # เฉพาะที่ job ใช้ — path เดียวกับ service app
       - /home/docker02/appdata/__PROJECT_NAME__/logs:/app/logs
     environment:                  # key เดียวกับ service app ที่ job ต้องใช้ (มาจาก .env)
@@ -154,6 +160,11 @@ Dockerfile ไม่มี inline comment · ต้องเปิด `github.co
 ```
 
 - ไม่มีแถวในตาราง cron `[CRON]` ของ handoff · Jenkinsfile ไม่ต้องแก้ (`up -d` เปิดทั้งสอง
-  service, health poll ดูแค่ container ของเว็บ) · bind ใหม่ต้องอยู่ในบรรทัด `for p in` ของ `[VOLUME]` ตามเดิม
-- ดู log ด้วย `docker logs __PROJECT_NAME__-cron` · ตรวจ crontab ก่อน push: `docker run --rm <image> supercronic -test /app/jobs.crontab`
+  service, health poll ดูแค่ container ของเว็บ) · bind ใหม่ต้องอยู่ในบรรทัด `for p in` ของ `[VOLUME]`
+  (โปรเจคที่ลบบล็อก `[VOLUME]` ทิ้งตอน setup → ใส่กลับจาก `assets/Jenkinsfile`)
+- job เรียกเว็บผ่าน `proxy-network` หรือกินแรมมาก (Chromium) → copy `networks:` / `deploy.resources`
+  จาก service app · ใส่ `TZ: Asia/Bangkok` ให้ service app ด้วย ไม่งั้น `datetime.now()` ของ job กับเว็บคนละโซน
+- deploy ระหว่าง job รัน: `up -d` รอได้ถึง `stop_grace_period` แล้วฆ่า และ supercronic ไม่รันรอบที่พลาดซ้ำ —
+  retry ใน crontab ให้สั้น (รวมไม่เกิน grace) และอย่า push `main` ช่วงเวลา job
+- ดู log ด้วย `docker logs __PROJECT_NAME__-cron`
 - Origin: mtn-work-planning (export รายสัปดาห์ + Chromium) · แบบเดียวกับ service `cron` ของ ugt-hrms · 2026-10-25

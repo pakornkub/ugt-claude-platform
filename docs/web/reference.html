@@ -2751,7 +2751,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
       <li>secret ใน <code>sh</code> ใช้ <code>"$VAR"</code> ห้าม <code>"${VAR}"</code> แบบ Groovy</li>
       <li>healthcheck ยิง <code>127.0.0.1:8000</code> ด้วย <code>python -c urllib</code> (slim ไม่มี <code>wget</code>/<code>curl</code>)</li>
       <li>volume อยู่ใต้ <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> เท่านั้น และทุก <code>&lt;name&gt;</code> ต้องอยู่ในบรรทัด <code>for p in</code></li>
-      <li>job ตามรอบ = host cron เท่านั้น — ห้าม APScheduler / <code>schedule</code> / celery beat · batch ใช้ <code>restart: "no"</code></li>
+      <li>job ตามรอบ = host cron หรือ service <code>cron</code> (supercronic) ใน <code>docker-compose.yml</code> ของ prod เท่านั้น — ห้าม APScheduler / <code>schedule</code> / celery beat · batch ใช้ <code>restart: "no"</code></li>
       <li>baseline โค้ดเดิมด้วย <code>per-file-ignores</code> ระบุ rule + path + เหตุผล — ห้ามปิดยกโปรเจค</li>
     </ul>
 
@@ -3019,7 +3019,7 @@ vendor/bin/phpunit</pre>
             <li>Quality Gate: <code>new_violations</code> = 0 · duplication ≤ 3% · coverage ≥ 60% · hotspot reviewed = 100% · OWASP fail CRITICAL ≥ 1 / unstable HIGH ≥ 1</li>
             <li>credential: <code>nvd</code> · <code>env-&lt;project&gt;</code> · <code>env-&lt;project&gt;-dev</code></li>
             <li>health ไม่ต้อง login: 200 healthy / 503 degraded ไม่มี version · healthcheck ยิง <code>127.0.0.1</code></li>
-            <li>volume: <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> · <b>งานตามรอบ = host cron เท่านั้น</b> (มติ 2026-10-09)</li>
+            <li>volume: <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> · <b>งานตามรอบ = host cron</b> (มติ 2026-10-09) หรือ cron service ใน compose prod เฉพาะ stack ที่เขียนวิธีไว้ (ตอนนี้ Python)</li>
           </ul></td>
           <td><a href="#skill-ugt-nextjs-cicd-setup">ugt-nextjs-cicd-setup</a> · <a href="#skill-ugt-python-cicd-setup">ugt-python-cicd-setup</a> · <a href="#skill-ugt-php-cicd-setup">ugt-php-cicd-setup</a></td>
         </tr>
