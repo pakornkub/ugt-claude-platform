@@ -52,7 +52,7 @@ Skill layout:
 | `assets/admin-handoff.template.md` | เอกสารส่งทีม admin — render แล้วเขียนลงโปรเจคเป็น `docs/admin-handoff.md` |
 | `references/org-standards.md` | contract ร่วมเต็ม (stages, toolchain, gate, credentials, secret, health, persistent data) — สรุปอยู่ §2 |
 | `references/verification.md` | เช็คลิสต์ตรวจเต็มหลัง setup (repo · server · รันจริง) — สรุปอยู่ §7 |
-| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, [WEB] vs [BATCH], host cron + ตาราง index ไปไฟล์เชิงลึก: `volumes.md` (ownership/chown, DooD) · `healthcheck.md` · `build-gotchas.md` (`.dockerignore`) · `db-dns.md` · `compose.md` · `django-static.md` |
+| `references/docker-deploy.md` | ภาพรวม deploy: branch → target, [WEB] vs [BATCH], host cron / cron service ใน compose prod + ตาราง index ไปไฟล์เชิงลึก: `volumes.md` (ownership/chown, DooD) · `healthcheck.md` · `build-gotchas.md` (`.dockerignore`) · `db-dns.md` · `compose.md` · `django-static.md` |
 | `references/legacy-test-generation.md` | ขั้น optional (มติ M7) — ไล่สร้าง characterization test ให้โค้ดเดิม ทำใน session แยก |
 | `scripts/verify.mjs` | ตรวจฝั่ง repo ให้อัตโนมัติหลัง setup เสร็จ (§7) |
 
@@ -137,6 +137,8 @@ contract ร่วมที่ **ทุกโปรเจคทำเหมื�
    `references/legacy-test-generation.md` อย่าทำปนใน session นี้
 9. **Job ตามรอบ + ชื่อ DB** — มีงานที่ต้องรันตามเวลาไหม (ชื่อ · ทำอะไร · ทุกเมื่อ)
    → แถวในตาราง cron `[CRON]` ของ admin handoff (batch มีอย่างน้อย 1 แถวเสมอ) · ไม่มี = ลบตาราง ·
+   shape web เลือกได้: host cron (default) หรือ cron service ใน compose prod
+   (`references/docker-deploy.md` §C "ทางเลือก" — ไม่มีตาราง cron) ·
    และ (ถ้ามี DB) ชื่อ database + login ของ prod/dev → `__DB_NAME_*__` / `__DB_LOGIN_*__`
    — ไม่รู้ให้เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` และ `<project>_app` / `<project>_dev`
 
@@ -391,7 +393,7 @@ python -m venv .venv
 **Render `assets/admin-handoff.template.md` → เขียนลงโปรเจคเป็น
 `docs/admin-handoff.md`** ตาม RENDER RULES ที่หัวไฟล์: แทน `__...__` ทุกตัว ·
 ลบแถว/หัวข้อที่ติดป้าย `[TAG]` ที่โปรเจคไม่มี (ไม่มี DB → ไม่มีตาราง A · ไม่มี
-volume → ไม่มีตาราง B · ไม่มี job ตามรอบ → ไม่มีตาราง G cron (shape batch มีเสมอ) · ไม่ใช่โปรเจคแรกของ
+volume → ไม่มีตาราง B · ไม่มี job ตามรอบ หรือใช้ cron service ใน compose → ไม่มีตาราง G cron (shape batch มีเสมอ) · ไม่ใช่โปรเจคแรกของ
 server → ไม่มีภาคผนวก) · เรียงเลข # ในตารางขั้นตอนรวมใหม่ (ตัวอักษรหัวข้อ/anchor คงที่ ข้ามได้) · ลบ
 comment กติกาและ comment ป้ายออก · **รูปแบบตายตัว**: ตารางขั้นตอนรวม → ตารางแยก
 ต่อระบบ → ตาราง "ส่งกลับ" ห้ามเพิ่มย่อหน้าอธิบาย
@@ -421,6 +423,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
 | batch: `restart: "no"` + host cron เรียก `docker compose run --rm job` | `restart: unless-stopped` กับ batch (รัน job ซ้ำไม่หยุด) |
+| cron service: เฉพาะ `docker-compose.yml` + `healthcheck: disable: true` | ใส่ cron service ใน `docker-compose.dev.yml` (job รันทั้ง prod และ dev) |
 
 ## 7. Verification Checklist
 

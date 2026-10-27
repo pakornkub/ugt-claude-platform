@@ -493,11 +493,19 @@ check('.claude/rules/ugt-python-ci.md in place', () => {
 });
 
 check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
-  // มติ 2026-10-09 (rules/ugt-python-ci.md): job ตามรอบ = host cron เท่านั้น
+  // มติ 2026-10-09 (rules/ugt-python-ci.md): job ตามรอบ = host cron หรือ cron service ใน compose prod — ไม่ใช่ in-app scheduler
   const deps = ['requirements.txt', 'requirements-dev.txt'].filter((f) => has(f)).map((f) => read(f)).join('\n') + '\n' + pyproject;
   const hit = deps.match(/(?:^|[\s"'\[,])(apscheduler|schedule|django-celery-beat|rq-scheduler|django-q2?|huey)(?![\w.-])/im);
   return hit
-    ? { ok: false, msg: `${hit[1]} in the dependencies — org rule: scheduled jobs run from host cron (docker exec / docker compose run --rm job), never an in-app scheduler (references/docker-deploy.md §C)` }
+    ? { ok: false, msg: `${hit[1]} in the dependencies — org rule: scheduled jobs run from host cron (docker exec / docker compose run --rm job) or a prod compose cron service (supercronic), never an in-app scheduler (references/docker-deploy.md §C)` }
+    : { ok: true };
+});
+
+check('A compose cron service runs on prod only', () => {
+  // docker-deploy.md §C "ทางเลือก": the cron service belongs in docker-compose.yml only —
+  // in the dev compose the job would run in both environments
+  return /supercronic|crond\b/.test(composeActive('docker-compose.dev.yml'))
+    ? { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only (references/docker-deploy.md §C), or every job runs twice' }
     : { ok: true };
 });
 

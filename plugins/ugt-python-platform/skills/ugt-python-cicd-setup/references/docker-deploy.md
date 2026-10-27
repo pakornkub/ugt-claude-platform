@@ -1,13 +1,13 @@
 # Docker Deploy — ภาพรวม (Python)
 
-ภาพรวมกลไก deploy: branch → deploy target, สอง shape `[WEB]` / `[BATCH]`, job ตามรอบผ่าน host cron —
+ภาพรวมกลไก deploy: branch → deploy target, สอง shape `[WEB]` / `[BATCH]`, job ตามรอบผ่าน host cron หรือ cron service ใน compose prod —
 รายละเอียดเชิงลึกแยกไฟล์ตามหัวข้อ (ตารางด้านล่าง)
 
 ## หัวข้อเชิงลึก — ไฟล์ไหน
 
 | หัวข้อ | ไฟล์ | เดิมคือ |
 | --- | --- | --- |
-| Branch → deploy target · [WEB] vs [BATCH] · host cron | ไฟล์นี้ | §A, §B, §C |
+| Branch → deploy target · [WEB] vs [BATCH] · host cron / cron service | ไฟล์นี้ | §A, §B, §C |
 | Volume ownership (user `app`) + bind mount จาก Jenkins (DooD) | `references/volumes.md` | §D, §J |
 | Healthcheck บน slim (`urllib.request`, `127.0.0.1:8000`) | `references/healthcheck.md` | §E |
 | `.dockerignore` กัน `.venv` / artifact ของ CI / `.env` | `references/build-gotchas.md` | §F |
@@ -84,7 +84,7 @@ context จาก Jenkins agent; เช็ค binary ที่มีจริง
 ด้วย) — สอง binary ไม่ compatible กัน 100% ในทุกกรณี (env-var interpolation
 ต่างกันเล็กน้อย).
 
-### shape web ที่มี job ตามรอบ (มติ 2026-10-09: host cron เท่านั้น)
+### shape web ที่มี job ตามรอบ (มติ 2026-10-09: host cron — หรือทางเลือกด้านล่าง)
 
 ไม่ต้องแยก shape batch — code อยู่ใน container web อยู่แล้ว ให้ cron สั่งรันใน
 container ที่ยืนอยู่:
@@ -98,3 +98,73 @@ container ที่ยืนอยู่:
 - **ห้าม** APScheduler / Celery beat / `schedule` / loop `sleep` ในแอป — container
   restart หรือรันสองตัวจะได้ job ซ้ำ และไม่มีใครเห็นใน handoff
 - ตั้งเฉพาะ prod (dev รันมือด้วยบรรทัดเดียวกันกับ `__PROJECT_NAME__-dev`)
+
+### ทางเลือก: cron service ใน compose ของ prod (ไม่ต้องตั้ง host cron)
+
+ใช้แทน host cron ได้กับ shape web ที่มี job ตามรอบ — ตารางเวลาเดินทางไปกับ image,
+Jenkins deploy ให้เอง admin ไม่ต้องแก้ crontab ของ host, เวลาเป็นเวลาไทยตาม `TZ` ของ
+service (ตั้งใน compose ด้านล่าง — `Dockerfile.web` ไม่ได้ตั้ง ไม่ใส่ = รันตามเวลา UTC) และ retry
+เขียนไว้ในบรรทัด crontab ได้ ไม่ใช่ in-app scheduler: เป็น container/process ของมันเอง
+หนึ่งตัวต่อ environment
+
+**Dockerfile** — supercronic (cron สำหรับ container: รัน non-root ได้ และส่ง env ของ
+container ต่อให้ job — busybox `crond` ไม่ส่ง) pin version + ตรวจ SHA1 จาก release notes
+ของ `supercronic-linux-amd64` · วาง **หลัง `pip install` ก่อน `COPY . .`** (ยังเป็น root และ cache
+ไม่หลุดทุก commit — ไม่งั้นทุก build โหลดจาก GitHub ใหม่):
+
+```dockerfile
+ARG SUPERCRONIC_VERSION=v0.2.49
+ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68
+RUN python -c "import urllib.request as u; u.urlretrieve('https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64', '/usr/local/bin/supercronic')" \
+ && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
+ && chmod +x /usr/local/bin/supercronic
+```
+
+(slim ไม่มี `curl` จึงโหลดด้วย python ที่มีอยู่แล้ว · ห้ามเขียน comment ท้ายบรรทัด `ARG` —
+Dockerfile ไม่มี inline comment · ต้องเปิด `github.com` ให้ docker host ตอน build)
+
+แล้ว **หลัง `COPY . .`** เพิ่ม `RUN supercronic -test /app/jobs.crontab` — crontab ผิดหรือ
+ลืมขั้นติดตั้ง = build แดง (ถ้าไม่มีบรรทัดนี้ container cron จะ restart วน แต่ pipeline ยังเขียว
+เพราะ health poll ดูแค่เว็บ แล้ว job ไม่เคยรันโดยไม่มีใครรู้)
+
+**crontab ใน repo** (เช่น `jobs.crontab`) — supercronic รันแต่ละบรรทัดผ่าน
+`/bin/sh -c` ที่ `WORKDIR` ของ image:
+
+```
+# Monday 08:00 (the service TZ); retried every 10 minutes up to 2 more times
+0 8 * * 1 python -m app.jobs.export || (sleep 600; python -m app.jobs.export) || (sleep 600; python -m app.jobs.export)
+```
+
+**`docker-compose.yml` เท่านั้น** — ห้ามใส่ใน `docker-compose.dev.yml` (dev จะรัน job ซ้ำกับ prod):
+
+```yaml
+  cron:
+    image: __PROJECT_NAME__:latest
+    pull_policy: never
+    container_name: __PROJECT_NAME__-cron
+    restart: unless-stopped
+    command: ['supercronic', '/app/jobs.crontab']
+    stop_grace_period: 15m        # supercronic รอ job ที่รันอยู่จบก่อนออก — deploy ระหว่าง job ไม่ฆ่าทิ้ง
+    volumes:                      # เฉพาะที่ job ใช้ — path เดียวกับ service app
+      - /home/docker02/appdata/__PROJECT_NAME__/logs:/app/logs
+    environment:                  # key เดียวกับ service app ที่ job ต้องใช้ (มาจาก .env)
+      TZ: Asia/Bangkok            # เวลาใน crontab — python slim มี tzdata อยู่แล้ว
+      DATABASE_URL: ${DATABASE_URL}
+    healthcheck:
+      disable: true               # HEALTHCHECK ของ image ยิงเว็บที่ service นี้ไม่ได้รัน
+    logging:                      # เหมือน service app
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+```
+
+- ไม่มีแถวในตาราง cron `[CRON]` ของ handoff · Jenkinsfile ไม่ต้องแก้ (`up -d` เปิดทั้งสอง
+  service, health poll ดูแค่ container ของเว็บ) · bind ใหม่ต้องอยู่ในบรรทัด `for p in` ของ `[VOLUME]`
+  (โปรเจคที่ลบบล็อก `[VOLUME]` ทิ้งตอน setup → ใส่กลับจาก `assets/Jenkinsfile`)
+- job เรียกเว็บผ่าน `proxy-network` หรือกินแรมมาก (Chromium) → copy `networks:` / `deploy.resources`
+  จาก service app · ใส่ `TZ: Asia/Bangkok` ให้ service app ด้วย ไม่งั้น `datetime.now()` ของ job กับเว็บคนละโซน
+- deploy ระหว่าง job รัน: `up -d` รอได้ถึง `stop_grace_period` แล้วฆ่า และ supercronic ไม่รันรอบที่พลาดซ้ำ —
+  retry ใน crontab ให้สั้น (รวมไม่เกิน grace) และอย่า push `main` ช่วงเวลา job
+- ดู log ด้วย `docker logs __PROJECT_NAME__-cron`
+- Origin: mtn-work-planning (export รายสัปดาห์ + Chromium) · แบบเดียวกับ service `cron` ของ ugt-hrms · 2026-10-25
