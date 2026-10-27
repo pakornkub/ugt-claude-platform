@@ -222,7 +222,7 @@
       <h2>ห้ามพลาด — กติกาที่ทำ build/ข้อมูลพัง</h2>
       <div class="in">
         <ul class="rules">
-          <li><b>งานตั้งเวลา = host cron เท่านั้น</b> — ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · cron เรียก <code>/api/cron/&lt;job&gt;</code> พร้อม <code>CRON_SECRET</code></li>
+          <li><b>งานตั้งเวลา = host cron เท่านั้น</b> (Next.js — ทางเลือก cron service ใน compose ตอนนี้มีแค่ Python) — ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · cron เรียก <code>/api/cron/&lt;job&gt;</code> พร้อม <code>CRON_SECRET</code></li>
           <li><b>ลบข้อมูล = <code>IsDeleted = 1</code></b> (soft delete) ห้าม hard delete</li>
           <li><b>ตารางใหม่มี audit columns ครบ</b>: <code>Id CreatedAt UpdatedAt CreatedBy UpdatedBy IsActive IsDeleted</code> · ชื่อตาราง PascalCase พหูพจน์</li>
           <li>ห้ามใช้ reserved word เป็นชื่อคอลัมน์ (<code>key</code> <code>value</code> <code>group</code> <code>count</code> <code>order</code>) — เติมคำขยาย</li>
