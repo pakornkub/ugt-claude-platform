@@ -121,7 +121,7 @@ RUN python -c "import urllib.request as u; u.urlretrieve('https://github.com/apt
 ```
 
 (slim ไม่มี `curl` จึงโหลดด้วย python ที่มีอยู่แล้ว · ห้ามเขียน comment ท้ายบรรทัด `ARG` —
-Dockerfile ไม่มี inline comment · ต้องเปิด `github.com` ให้ docker host ตอน build)
+Dockerfile ไม่มี inline comment · ต้องเปิด `github.com` + `release-assets.githubusercontent.com` (ปลายทาง redirect ของ release) ให้ docker host ตอน build)
 
 แล้ว **หลัง `COPY . .`** เพิ่ม `RUN supercronic -test /app/jobs.crontab` — crontab ผิดหรือ
 ลืมขั้นติดตั้ง = build แดง (ถ้าไม่มีบรรทัดนี้ container cron จะ restart วน แต่ pipeline ยังเขียว

@@ -501,11 +501,16 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
     : { ok: true };
 });
 
-check('A compose cron service runs on prod only', () => {
+check('A compose cron service runs on prod only, in Bangkok time', () => {
   // docker-deploy.md §C "ทางเลือก": the cron service belongs in docker-compose.yml only —
   // in the dev compose the job would run in both environments
-  return /supercronic|crond\b/.test(composeActive('docker-compose.dev.yml'))
-    ? { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only (references/docker-deploy.md §C), or every job runs twice' }
+  if (/supercronic|crond\b/.test(composeActive('docker-compose.dev.yml'))) {
+    return { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only (references/docker-deploy.md §C), or every job runs twice' };
+  }
+  // the service block that runs supercronic, so a TZ on the app service does not count
+  const cron = composeActive('docker-compose.yml').split(/\n(?= {2}[\w-]+:\s*$)/m).find((b) => /supercronic/.test(b));
+  return cron && !/\bTZ\s*[:=]\s*['"]?Asia\/Bangkok/.test(cron)
+    ? { ok: false, msg: 'docker-compose.yml: the cron service has no TZ: Asia/Bangkok — the image is UTC, so every job runs 7 hours late (references/docker-deploy.md §C)' }
     : { ok: true };
 });
 

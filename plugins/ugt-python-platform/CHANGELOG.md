@@ -1,5 +1,10 @@
 # Changelog — ugt-python-platform
 
+## 0.10.1 (2026-10-28)
+
+- verify.mjs: cron service ใน `docker-compose.yml` ที่ไม่มี `TZ` = fail (image เป็น UTC — job รันช้า 7 ชั่วโมง) · เหมือนเช็คใหม่ของ Next.js
+
+
 ## 0.10.0 (2026-10-27)
 
 - **job ตามรอบใน cron service ของ compose prod (ทางเลือกของ host cron)** — host cron ต้องให้ admin ตั้งทีละ host · เวลาตาม timezone ของ host · ไม่มี retry → เพิ่ม §C "ทางเลือก" ใน `references/docker-deploy.md`: service แยก image เดียวกับแอป + supercronic (pin + SHA1) + crontab ใน repo, เฉพาะ `docker-compose.yml`, `healthcheck: disable` · rules / SKILL.md interview ข้อ 9 / render rule `[CRON]` / verification ตาม · verify.mjs ใหม่: cron daemon ใน `docker-compose.dev.yml` = fail · origin mtn-work-planning · 2026-10-25 · asset: ugt-python-cicd-setup/assets/rules/ugt-python-ci.md

@@ -113,16 +113,15 @@ service below. Nothing else schedules:
   (dev = run by hand when testing)
 
 **Alternative — a cron service in the prod compose file**, only on a stack whose
-cicd skill documents it (today: Python, `ugt-python-cicd-setup`
-`references/docker-deploy.md` §C). A second service in `docker-compose.yml`, built
+cicd skill documents it (today: Python `ugt-python-cicd-setup` `references/docker-deploy.md` §C ·
+Next.js `ugt-nextjs-cicd-setup` `references/scheduled-jobs.md`, which still calls `/api/cron/<job>`; PHP: host cron only). A second service in `docker-compose.yml`, built
 from the app's own image, runs a container cron daemon (supercronic) on a crontab
 committed to the repo; Jenkins deploys it with the app, so the job needs no host
 crontab line and the handoff has no cron table. It is **not** an in-app scheduler:
 its own container and process, one per environment, and a restart re-reads the same
 schedule. Same rules as host cron: idempotent jobs, **prod only** (the service never
 appears in `docker-compose.dev.yml`), times in the service's `TZ` (set it), output in
-`docker logs` (json-file rotation) plus the job's own log under
-`/home/docker02/appdata/<project>/`.
+`docker logs` (json-file rotation) plus the job's own log where it writes one.
 
 ## Server names (must match exactly)
 

@@ -8,7 +8,7 @@ RENDER RULES (delete this comment block in the rendered file):
   [DB] = Prisma/SQL Server · [LINKED] = reads over a linked server · [VOLUME] = compose has
   an /home/docker02/appdata bind · [UPLOAD] = ugt-nextjs-upload-setup installed ·
   [SSO] = Keycloak login · [SENTRY] = Sentry · [BASEPATH] = served under a basePath ·
-  [CRON] = has scheduled jobs (one cron-table row per job) ·
+  [CRON] = has scheduled jobs (one cron-table row per job; with a compose cron service drop section I and its row, keep the nginx deny) ·
   [AUTH] = ugt-nextjs-auth-setup installed · [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
 -->

@@ -120,7 +120,7 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
   const deps = { ...(pkg?.dependencies ?? {}), ...(pkg?.devDependencies ?? {}) };
   const schedulers = ['node-cron', 'node-schedule', 'cron', 'toad-scheduler', 'agenda', 'bree'].filter((d) => d in deps);
   if (schedulers.length) {
-    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron → /api/cron/<job> (references/scheduled-jobs.md)` };
+    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron or a prod compose cron service → /api/cron/<job> (references/scheduled-jobs.md)` };
   }
   const cronDir = ['app/api/cron', 'src/app/api/cron'].find((d) => has(d));
   if (!cronDir) return { ok: true };
@@ -141,9 +141,25 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
     if (!/export\s+(async\s+)?function\s+POST\b|export\s+const\s+POST\b/.test(src)) problems.push(`${r} exports no POST — the cron call is a POST, every run would get 405`);
   }
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
-    if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
+    // a compose cron service carries its own CRON_SECRET line — the app's must be live too
+    const want = /supercronic/.test(read(f)) ? 2 : 1;
+    if ((read(f).match(/^\s*(-\s*)?CRON_SECRET\s*[:=]/gm) ?? []).length < want) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
+});
+
+check('A compose cron service runs on prod only, in Bangkok time', () => {
+  // references/scheduled-jobs.md, last section: docker-compose.yml only, TZ set
+  const live = (f) => (has(f) ? read(f).split('\n').filter((l) => !l.trim().startsWith('#')).join('\n') : '');
+  if (/supercronic|crond\b/.test(live('docker-compose.dev.yml'))) {
+    return { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only, or every job runs twice (references/scheduled-jobs.md)' };
+  }
+  // the service block that runs supercronic, so a TZ on the app service does not count
+  const cron = live('docker-compose.yml').split(/\n(?= {2}[\w-]+:\s*$)/m).find((b) => /supercronic/.test(b));
+  if (cron && !/\bTZ\s*[:=]\s*['"]?Asia\/Bangkok/.test(cron)) {
+    return { ok: false, msg: 'docker-compose.yml: the cron service has no TZ: Asia/Bangkok — the image is UTC, so every job runs 7 hours late (references/scheduled-jobs.md)' };
+  }
+  return { ok: true };
 });
 
 check('Builds of the same job never overlap (disableConcurrentBuilds)', () => {

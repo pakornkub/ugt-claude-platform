@@ -148,9 +148,9 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.83.3</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.16.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
-      <tr><td><code>ugt-python-platform</code></td><td>0.10.0</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.84.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.16.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-python-platform</code></td><td>0.10.1</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.5</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
     </tbody>
   </table></div>
@@ -1579,7 +1579,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
       <tr><td>5 ใช้ Sentry ไหม</td><td>ไม่ใช้ → ตัดบล็อก <code>[SENTRY]</code> + credential</td></tr>
       <tr><td>6 ปลายทาง deploy</td><td>Docker host ไหน, Jenkins อยู่เครื่องเดียวกับ Docker หรือ mount socket, compose v1/v2, host ของ Jenkins (สำหรับ webhook) · repo URL อ่านจาก <code>git remote</code></td></tr>
       <tr><td>7 มี path ที่ต้องเก็บข้าม deploy ไหม (volume)</td><td>มี → บล็อก <code>[VOLUME]</code> · ไม่มี → ลบทุกบล็อก <code>[VOLUME]</code> รวมใน Jenkinsfile</td></tr>
-      <tr><td>8 มีงานตั้งเวลาไหม (ชื่อ · ทำอะไร · เมื่อไหร่)</td><td>มี → <code>[CRON]</code>: route ต่องาน + <code>CRON_SECRET</code> + แถวในตาราง cron ของ handoff · ไม่มี → ลบทุก <code>[CRON]</code></td></tr>
+      <tr><td>8 มีงานตั้งเวลาไหม (ชื่อ · ทำอะไร · เมื่อไหร่)</td><td>มี → <code>[CRON]</code>: route ต่องาน + <code>CRON_SECRET</code> + แถวในตาราง cron ของ handoff · ไม่มี → ลบทุก <code>[CRON]</code> · มี → เลือก host cron (default) หรือ service <code>cron</code> ใน compose prod (admin ไม่ต้องแก้ crontab)</td></tr>
     </tbody>
   </table></div>
 
@@ -1643,7 +1643,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <li><b>Quality Gate</b> (บน New Code): <code>new_coverage</code> ≥ 60% · <code>new_violations</code> = 0 · <code>new_duplicated_lines_density</code> ≤ 3% · <code>new_security_hotspots_reviewed</code> = 100% · OWASP: CRITICAL ≥ 1 = fail, HIGH ≥ 1 = unstable</li>
     <li><b>Credential</b>: <code>nvd</code> (ใช้ร่วมทุกโปรเจค) · <code>env-&lt;project&gt;</code> · <code>env-&lt;project&gt;-dev</code> · <code>sentry-dsn-&lt;project&gt;</code> (ถ้าใช้) · token ของ SonarQube ผูกที่ System → SonarQube servers</li>
     <li><b>compose <code>environment:</code></b> เป็นรายการคงที่ — uncomment บรรทัดของโมดูลที่ติดตั้งแล้ว (<code>[AUTH]</code>, <code>[AUTH: SSO]</code>/<code>[AUTH: LDAP]</code>, <code>[MAIL]</code>, <code>[UPLOAD]</code>) ห้ามสลับลำดับ ห้ามลบบรรทัดที่ comment</li>
-    <li><b>งานตั้งเวลา</b> = host cron → <code>docker exec</code> → <code>node -e "fetch(…)"</code> → <code>POST /api/cron/&lt;job&gt;</code> + <code>CRON_SECRET</code> (≥ 32 ตัว ต่างกัน prod/dev) · ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · nginx ปิด <code>/api/cron/</code> จากภายนอก</li>
+    <li><b>งานตั้งเวลา</b> = host cron (หรือ service <code>cron</code> ใน <code>docker-compose.yml</code> ของ prod: supercronic + <code>jobs.crontab</code> เรียก route เดียวกันผ่าน <code>proxy-network</code>, ต้องมี <code>TZ</code> + <code>tzdata</code>) → <code>docker exec</code> → <code>node -e "fetch(…)"</code> → <code>POST /api/cron/&lt;job&gt;</code> + <code>CRON_SECRET</code> (≥ 32 ตัว ต่างกัน prod/dev) · ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · nginx ปิด <code>/api/cron/</code> จากภายนอก</li>
     <li><b>ไม่มี basePath</b> → basePath ว่าง health path = <code>/api/health</code> (และไม่มีแถบ DEV)</li>
     <li><b>Persistent data</b>: bind mount ใต้ <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> (dev = <code>&lt;project&gt;-dev</code>) · stage Deploy สร้าง path + chown ให้</li>
     <li>Host มีแต่ <code>docker-compose</code> v1 → เปลี่ยน stage Deploy กลับเป็นแบบมีขีด และแจ้งผู้ดูแล host (v1 EOL แล้ว)</li>
@@ -1772,6 +1772,10 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <p><b>สาเหตุ:</b> route export <code>GET</code> แต่ cron เรียก <code>POST</code></p>
     <p><b>วิธีแก้:</b> export <code>POST</code> อย่างเดียว พร้อมเช็ค <code>CRON_SECRET</code> แบบ <code>timingSafeEqual</code></p>
   </div></details>
+  <details class="acc"><summary>[cron service] job รันช้าไป 7 ชั่วโมง หรือ pipeline เขียวแต่ job ไม่เคยรัน</summary><div class="body">
+    <p><b>สาเหตุ:</b> service <code>cron</code> ไม่มี <code>TZ</code> หรือ image Alpine ไม่มี <code>tzdata</code> (เวลาเป็น UTC) · crontab ผิดแล้ว container cron restart วน ซึ่ง health poll ของ Jenkins ไม่เห็นเพราะดูแค่ container แอป</p>
+    <p><b>วิธีแก้:</b> <code>apk add --no-cache tzdata</code> ใน runner + <code>TZ: Asia/Bangkok</code> ใน service <code>cron</code> · <code>RUN supercronic -test /app/jobs.crontab</code> ใน Dockerfile ให้ build แดงแทน · ดู <code>docker logs &lt;project&gt;-cron</code></p>
+  </div></details>
   <details class="acc"><summary>เผลอ commit <code>.env</code> ที่มีค่าจริง</summary><div class="body">
     <p><b>สาเหตุ:</b> <code>.gitignore</code> ไม่ครอบ <code>.env</code>, <code>.env.dev</code></p>
     <p><b>วิธีแก้:</b> ใส่ <code>.env</code>, <code>.env.dev</code>, <code>.env.local</code>, <code>.env*.local</code> (+ <code>!.env.example</code> ถ้าใช้ <code>.env*</code>) · ตรวจด้วย <code>git check-ignore .env .env.dev</code> — ถือเป็นเหตุ secret รั่ว ไม่ใช่เรื่องรูปแบบ</p>
@@ -1781,7 +1785,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
   <pre class="code">node &lt;skill-dir&gt;/scripts/verify.mjs</pre>
   <ul class="checklist">
     <li>ไฟล์ CI ครบ · มี <code>/api/health</code> · ไม่มี placeholder · Jenkinsfile มี 10 stage ตามลำดับ · Quality Gate บล็อกจริง · <code>disableConcurrentBuilds</code> · post ครบ · ปีกกาสมดุล · ไม่มี Groovy interpolation ของ secret</li>
-    <li><code>[DB]</code> / <code>[SENTRY]</code> ตรงกับการใช้งานจริง · งานตั้งเวลาผ่าน host cron · path ใน <code>sonar.sources</code>/<code>sonar.tests</code> มีจริง · sonar ชี้ lcov</li>
+    <li><code>[DB]</code> / <code>[SENTRY]</code> ตรงกับการใช้งานจริง · งานตั้งเวลาผ่าน host cron หรือ cron service ใน compose prod (ไม่อยู่ใน compose dev) · path ใน <code>sonar.sources</code>/<code>sonar.tests</code> มีจริง · sonar ชี้ lcov</li>
     <li><code>deploymentId</code> ต่อครบ next.config + Dockerfile + build ทั้งสอง · Dockerfile มี <code>HEALTHCHECK</code> · next.config เปิด standalone · มี npm script ที่ pipeline เรียก</li>
     <li><code>.env</code>/<code>.env.dev</code> ถูก gitignore (แต่ <code>.env.example</code> ไม่) · <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> ใน compose + <code>.env.example</code> · <code>.env.example</code> เรียงตาม layout มาตรฐาน</li>
     <li><code>docs/admin-handoff.md</code> ไม่มี <code>__*__</code> · ทุก bind ใต้ <code>/home/docker02/appdata</code> มี <code>mkdir -p</code> · มี <code>.dockerignore</code> · <code>owasp-suppressions.xml</code> เป็น XML ที่อ่านได้</li>
@@ -2685,7 +2689,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
-  <p><span class="badge">ugt-python-platform 0.10.0</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-python-platform 0.10.1</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>ยังไม่ผ่าน pilot ทุก shape</b>FastAPI · Flask · Django · Batch job ยังไม่เคยรันกับโปรเจคจริง — ค่าคงที่ถูกตรวจด้วยเหตุผลแล้วแต่ยังไม่ผ่าน build จริง · โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้ แล้วส่ง feedback กลับเป็น PR ที่ platform · plugin นี้ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -3022,7 +3026,7 @@ vendor/bin/phpunit</pre>
             <li>Quality Gate: <code>new_violations</code> = 0 · duplication ≤ 3% · coverage ≥ 60% · hotspot reviewed = 100% · OWASP fail CRITICAL ≥ 1 / unstable HIGH ≥ 1</li>
             <li>credential: <code>nvd</code> · <code>env-&lt;project&gt;</code> · <code>env-&lt;project&gt;-dev</code></li>
             <li>health ไม่ต้อง login: 200 healthy / 503 degraded ไม่มี version · healthcheck ยิง <code>127.0.0.1</code></li>
-            <li>volume: <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> · <b>งานตามรอบ = host cron</b> (มติ 2026-10-09) หรือ cron service ใน compose prod เฉพาะ stack ที่เขียนวิธีไว้ (ตอนนี้ Python)</li>
+            <li>volume: <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> · <b>งานตามรอบ = host cron</b> (มติ 2026-10-09) หรือ cron service ใน compose prod เฉพาะ stack ที่เขียนวิธีไว้ (Python, Next.js — PHP ยัง host cron อย่างเดียว)</li>
           </ul></td>
           <td><a href="#skill-ugt-nextjs-cicd-setup">ugt-nextjs-cicd-setup</a> · <a href="#skill-ugt-python-cicd-setup">ugt-python-cicd-setup</a> · <a href="#skill-ugt-php-cicd-setup">ugt-php-cicd-setup</a></td>
         </tr>
@@ -3071,7 +3075,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.83.3</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.84.0</span></div></footer>
 
 <script>
 (() => {

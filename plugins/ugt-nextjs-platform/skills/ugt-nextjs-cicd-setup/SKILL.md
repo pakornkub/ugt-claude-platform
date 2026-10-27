@@ -56,7 +56,7 @@ Skill layout:
 | `references/jenkins-project-setup.md` | what the admin repeats per project (credentials/job config/webhook/dev reverse proxy) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule, compose, reverse proxy |
-| `references/scheduled-jobs.md` | host cron → `POST /api/cron/<job>` + `CRON_SECRET` (route shape, crontab line) |
+| `references/scheduled-jobs.md` | host cron → `POST /api/cron/<job>` + `CRON_SECRET` (route shape, crontab line) · alternative: cron service in the prod compose |
 | `references/version-skew.md` | `deploymentId` ← `NEXT_DEPLOYMENT_ID` build arg — a tab left open across a deploy |
 | `references/external-config-handoff.md` | the three docs above, pulled into **one table** with this project's real substituted names — what actually gets handed to the admin |
 
@@ -158,7 +158,8 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
    รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี → ลบบล็อก `[VOLUME]`
 8. **Scheduled jobs?** (งานที่ต้องรันตามเวลา: ชื่อ · ทำอะไร · ทุกเมื่อ) — มี →
    `[CRON]` (route ต่อ job, `CRON_SECRET`, แถวในตาราง cron ของ handoff,
-   `references/scheduled-jobs.md`) · ไม่มี → ลบทุกอย่างที่ติด `[CRON]`
+   `references/scheduled-jobs.md`) · ไม่มี → ลบทุกอย่างที่ติด `[CRON]` · มี → ถามต่อ: host cron
+   (default) หรือ cron service ใน compose prod (admin ไม่ต้องแก้ crontab — ส่วนท้าย `scheduled-jobs.md`)
 
 ## 4. Setup Steps
 
@@ -235,7 +236,9 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `.env.example` section 1 (real value ≥ 32 chars in `.env`/`.env.dev`, different per env) ·
   `lib/env.ts`: `CRON_SECRET: z.string().min(32).optional()` in `server` **and**
   `CRON_SECRET: process.env.CRON_SECRET` in `runtimeEnv` · one `app/api/cron/<job>/route.ts`
-  per job (`references/scheduled-jobs.md` shape) · one row per job in the handoff cron table
+  per job (`references/scheduled-jobs.md` shape) · one row per job in the handoff cron table —
+  **or**, cron service: Dockerfile block + `jobs.crontab` + `cron` service in `docker-compose.yml`
+  only, and drop handoff section I + its row 9 (keep the nginx `deny` row)
 - No basePath → basePath = empty, health path = `/api/health`
 - Check `package.json` has the scripts the pipeline calls: `lint`,
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
@@ -329,7 +332,7 @@ Checklist §6
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
-| Scheduled jobs = host cron → `docker exec` `node -e "fetch(…)"` → `POST /api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table (`references/scheduled-jobs.md`) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
+| Scheduled jobs = host cron → `docker exec` `node -e "fetch(…)"` → `POST /api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table — or a `cron` service in `docker-compose.yml` only (`references/scheduled-jobs.md`) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`references/version-skew.md`) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
