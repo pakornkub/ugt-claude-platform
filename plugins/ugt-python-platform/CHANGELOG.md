@@ -1,8 +1,9 @@
 # Changelog — ugt-python-platform
 
-## Unreleased
+## 0.10.0 (2026-10-27)
 
 - **job ตามรอบใน cron service ของ compose prod (ทางเลือกของ host cron)** — host cron ต้องให้ admin ตั้งทีละ host · เวลาตาม timezone ของ host · ไม่มี retry → เพิ่ม §C "ทางเลือก" ใน `references/docker-deploy.md`: service แยก image เดียวกับแอป + supercronic (pin + SHA1) + crontab ใน repo, เฉพาะ `docker-compose.yml`, `healthcheck: disable` · rules / SKILL.md interview ข้อ 9 / render rule `[CRON]` / verification ตาม · verify.mjs ใหม่: cron daemon ใน `docker-compose.dev.yml` = fail · origin mtn-work-planning · 2026-10-25 · asset: ugt-python-cicd-setup/assets/rules/ugt-python-ci.md
+- **review ก่อน merge (PR #24)** — ตัวอย่าง compose ตั้ง `TZ: Asia/Bangkok` (Dockerfile.web ไม่มี TZ เดิมรันตาม UTC) + log rotation + `stop_grace_period` (deploy ไม่ฆ่า job ที่รันอยู่) · Dockerfile โหลด supercronic ด้วย python (slim ไม่มี curl) วางหลัง `pip install` ก่อน `COPY . .` และ `RUN supercronic -test` หลัง `COPY` ให้ crontab ผิด = build แดง (ไม่งั้น deploy เขียวแต่ job ไม่เคยรัน) · ตัด comment ท้าย `ARG` · หัวข้อ/SKILL index/ข้อความ verify ที่ยังเขียน "host cron เท่านั้น" · eval grader health-route แยก main.py กับ health.py
 
 ## 0.9.6 (2026-10-17)
 

@@ -45,7 +45,7 @@ HRMS มี `playwright.config.ts` + โฟลเดอร์ `e2e/` สกั�
 (default: ไม่เอา) เปิดเฉพาะโปรเจคที่มี flow เสี่ยงสูงและแพงถ้าต้อง manual re-test
 ทุกครั้ง (auth/SSO, approval workflow, payment) → ย้ายไปตารางรอเงื่อนไขด้านล่าง
 
-### ~~3. Cron / background job~~ — ปิดแล้ว: host cron (มติ 2026-10-09) + retention sweep ของ upload-setup → nextjs CHANGELOG `## Unreleased`
+### ~~3. Cron / background job~~ — ปิดแล้ว: host cron (มติ 2026-10-09; Python เพิ่มทางเลือก cron service ใน compose prod 2026-10-27, PR #24) + retention sweep ของ upload-setup → nextjs CHANGELOG `## Unreleased`
 
 ### 4. ~~Security headers~~ + rate limiting ชุดเต็ม
 

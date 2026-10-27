@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.16.0 (2026-10-27)
 
 - **contract `cicd.md` — Scheduled jobs: เพิ่มทางเลือก cron service ใน compose prod** — มติ 2026-10-09 ให้ host cron อย่างเดียว → ยอมรับ service แยกใน `docker-compose.yml` ที่รัน container cron daemon (supercronic) บน crontab ใน repo เฉพาะ stack ที่ cicd skill เขียนวิธีไว้ (ตอนนี้ Python) · ไม่ใช่ in-app scheduler · prod only · Next.js / PHP ยังเป็น host cron จนกว่าจะเขียนวิธีของ stack นั้น · origin mtn-work-planning (แบบเดียวกับ ugt-hrms) · 2026-10-25
 

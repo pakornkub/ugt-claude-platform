@@ -149,8 +149,8 @@
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
       <tr><td><code>ugt-nextjs-platform</code></td><td>4.83.3</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.15.2</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
-      <tr><td><code>ugt-python-platform</code></td><td>0.9.5</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.16.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-python-platform</code></td><td>0.10.0</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.5</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
     </tbody>
   </table></div>
@@ -2685,7 +2685,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
-  <p><span class="badge">ugt-python-platform 0.9.5</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-python-platform 0.10.0</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>ยังไม่ผ่าน pilot ทุก shape</b>FastAPI · Flask · Django · Batch job ยังไม่เคยรันกับโปรเจคจริง — ค่าคงที่ถูกตรวจด้วยเหตุผลแล้วแต่ยังไม่ผ่าน build จริง · โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้ แล้วส่ง feedback กลับเป็น PR ที่ platform · plugin นี้ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
