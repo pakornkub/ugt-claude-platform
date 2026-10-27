@@ -71,7 +71,7 @@ abortPipeline: true` คู่กับ timeout เสมอ — ถ้าไม
   Celery beat, `schedule`, `while True: sleep()` · ห้าม SQL Agent job / Jenkins timer สำหรับงานของแอป
 - **หรือ cron service ใน `docker-compose.yml`** (§C "ทางเลือก"): service แยก image เดียวกับแอป ·
   `supercronic` + crontab ใน repo · Jenkins deploy ไปพร้อมแอป · ไม่มีตาราง cron ใน handoff ·
-  **ห้ามมีใน `docker-compose.dev.yml`** · `healthcheck: disable: true` (HEALTHCHECK ของ image ยิงเว็บที่ service นี้ไม่ได้รัน)
+  **ห้ามมีใน `docker-compose.dev.yml`** · `TZ: Asia/Bangkok` · `healthcheck: disable: true` (HEALTHCHECK ของ image ยิงเว็บที่ service นี้ไม่ได้รัน)
 - job ต้อง idempotent (รันซ้ำได้) · log ไป `/home/docker02/appdata/<project>/logs/` (host cron: `cron.log`) · ตั้งเฉพาะ prod
 
 ## Branch / ค่าตามสาขา

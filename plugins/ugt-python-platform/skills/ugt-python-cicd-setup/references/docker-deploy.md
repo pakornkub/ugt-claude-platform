@@ -103,22 +103,24 @@ container ที่ยืนอยู่:
 
 ใช้แทน host cron ได้กับ shape web ที่มี job ตามรอบ — ตารางเวลาเดินทางไปกับ image,
 Jenkins deploy ให้เอง admin ไม่ต้องแก้ crontab ของ host, เวลาเป็นเวลาไทยตาม `TZ` ของ
-image ไม่ขึ้นกับ timezone ของ host และ retry เขียนไว้ในบรรทัด crontab ได้ ไม่ใช่
-in-app scheduler: เป็น container/process ของมันเอง หนึ่งตัวต่อ environment
+service (ตั้งใน compose ด้านล่าง — `Dockerfile.web` ไม่ได้ตั้ง ไม่ใส่ = รันตามเวลา UTC) และ retry
+เขียนไว้ในบรรทัด crontab ได้ ไม่ใช่ in-app scheduler: เป็น container/process ของมันเอง
+หนึ่งตัวต่อ environment
 
 **Dockerfile** — supercronic (cron สำหรับ container: รัน non-root ได้ และส่ง env ของ
-container ต่อให้ job — busybox `crond` ไม่ส่ง) pin version + ตรวจ SHA1 จาก release notes:
+container ต่อให้ job — busybox `crond` ไม่ส่ง) pin version + ตรวจ SHA1 จาก release notes
+ของ `supercronic-linux-amd64` · วาง **ก่อน `USER app`** (เขียน `/usr/local/bin` ต้องเป็น root):
 
 ```dockerfile
 ARG SUPERCRONIC_VERSION=v0.2.49
-ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68   # linux-amd64, from the release notes
-RUN curl -fsSL -o /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" \
+ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68
+RUN python -c "import urllib.request as u; u.urlretrieve('https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64', '/usr/local/bin/supercronic')" \
  && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
  && chmod +x /usr/local/bin/supercronic
 ```
 
-(slim ไม่มี `curl` — ติดตั้งใน `RUN apt-get` เดียวกันแล้ว purge ทิ้ง · ต้องเปิด
-`github.com` ให้ docker host ตอน build)
+(slim ไม่มี `curl` จึงโหลดด้วย python ที่มีอยู่แล้ว · ห้ามเขียน comment ท้ายบรรทัด `ARG` —
+Dockerfile ไม่มี inline comment · ต้องเปิด `github.com` ให้ docker host ตอน build)
 
 **crontab ใน repo** (เช่น `jobs.crontab`) — supercronic รันแต่ละบรรทัดผ่าน
 `/bin/sh -c` ที่ `WORKDIR` ของ image:
@@ -140,9 +142,15 @@ RUN curl -fsSL -o /usr/local/bin/supercronic "https://github.com/aptible/supercr
     volumes:                      # เฉพาะที่ job ใช้ — path เดียวกับ service app
       - /home/docker02/appdata/__PROJECT_NAME__/logs:/app/logs
     environment:                  # key เดียวกับ service app ที่ job ต้องใช้ (มาจาก .env)
+      TZ: Asia/Bangkok            # เวลาใน crontab — python slim มี tzdata อยู่แล้ว
       DATABASE_URL: ${DATABASE_URL}
     healthcheck:
       disable: true               # HEALTHCHECK ของ image ยิงเว็บที่ service นี้ไม่ได้รัน
+    logging:                      # เหมือน service app
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
 ```
 
 - ไม่มีแถวในตาราง cron `[CRON]` ของ handoff · Jenkinsfile ไม่ต้องแก้ (`up -d` เปิดทั้งสอง

@@ -97,7 +97,8 @@ org path, never a named or anonymous Docker volume:
 Every scheduled job / recurring task runs from the **host crontab** of the
 Docker host (the `jenkins` user's crontab — it owns `/home/docker02/appdata`
 and is in group `docker`) — one crontab line per job, set by the server admin from the
-project's admin handoff (cron table). Nothing else schedules:
+project's admin handoff (cron table) — or, where documented, the compose cron
+service below. Nothing else schedules:
 
 - **No in-app scheduler** — no `node-cron` / `node-schedule` / `setInterval`
   loops, no APScheduler / Celery beat / `schedule`, no Laravel `schedule:run`
@@ -119,7 +120,7 @@ committed to the repo; Jenkins deploys it with the app, so the job needs no host
 crontab line and the handoff has no cron table. It is **not** an in-app scheduler:
 its own container and process, one per environment, and a restart re-reads the same
 schedule. Same rules as host cron: idempotent jobs, **prod only** (the service never
-appears in `docker-compose.dev.yml`), times in the image's `TZ`, output in
+appears in `docker-compose.dev.yml`), times in the service's `TZ` (set it), output in
 `docker logs` (json-file rotation) plus the job's own log under
 `/home/docker02/appdata/<project>/`.
 
