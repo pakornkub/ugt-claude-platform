@@ -1,8 +1,8 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.84.1 (2026-11-02)
 
-- **design-setup: dialog ที่ไม่มีเนื้อหาเห็นเส้น 2 เส้นห่างกัน** — โซน A8 วาดเส้นใต้หัว + เส้นบนท้าย · dialog ยืนยัน (`ConfirmActionDialog` ไม่ส่ง children) หัวต่อท้ายทันที จึงเหลือแถบว่างระหว่าง 2 เส้น → `DialogHeader`/`AlertDialogHeader` เติม `[&:has(+[data-slot=…-footer])]:border-b-0` ใน `primitive-edits.md` เหลือเส้นบนของท้ายเส้นเดียว · dialog ที่มีเนื้อหาไม่เปลี่ยน · origin ugt-hrms · 2026-11-02 · asset: ugt-nextjs-design-setup/assets/DESIGN.template.md
+- **design-setup: dialog ที่ไม่มีเนื้อหาเห็นเส้น 2 เส้นห่างกัน** — โซน A8 วาดเส้นใต้หัว + เส้นบนท้าย · dialog ยืนยัน (`ConfirmActionDialog` ไม่ส่ง children) หัวต่อท้ายทันที จึงเหลือแถบว่างระหว่าง 2 เส้น → `DialogHeader`/`AlertDialogHeader` เติม `[&:has(+[data-slot=…-footer])]:border-b-0` ใน `primitive-edits.md` เหลือเส้นบนของท้ายเส้นเดียว · dialog ที่มีเนื้อหาไม่เปลี่ยน · หน้า Design system ในเว็บ (ตัวอย่าง dialog ยืนยัน) ตามแล้ว · origin ugt-hrms #366 (PR #25) · 2026-11-02 · asset: ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.84.0 (2026-10-28)
 

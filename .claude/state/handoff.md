@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-28
+Last updated: 2026-11-02
 
 ## In progress
 - **ยก UI จาก ugt-hrms เข้า kit** (มติ 35/35 2026-10-16, `docs/backlog.md` §14 — 4 รุ่น) ·
@@ -32,6 +32,7 @@ Last updated: 2026-10-28
 - ทีมที่ใช้ `ugt-nextjs-standard` เดิม (ก่อน split) ต้องประกาศ migration: `/plugin install ugt-nextjs-standard-superpowers@ugt` + ลบ key เก่าใน settings.json (รายละเอียด CHANGELOG 4.56.0) — ยังไม่ได้ประกาศ
 
 ## Done (newest first — keep only ~10; older history lives in git and CHANGELOG)
+- 2026-11-02 **merge PR #25 (ugt-hrms #366): dialog ไม่มีเนื้อหา = เส้นเดียว** — nextjs **4.84.1** · `primitive-edits.md` หัว dialog/alert-dialog ที่ต่อด้วยท้ายทันทีตัดเส้นล่าง (`[&:has(+[data-slot=…-footer])]:border-b-0`, slot ตรง base-mira) · DESIGN.template A8 · design-preview ตัวอย่าง dialog ยืนยันตาม
 - 2026-10-28 **Next.js เลือก cron service ใน compose prod ได้แล้ว (ตาม Python)** — nextjs **4.84.0** · core **2.16.1** · python **0.10.1** · job ยังเป็น route `/api/cron/<job>` เดิม container cron (supercronic, `apk add tzdata`) เรียกผ่าน `proxy-network` ด้วยชื่อ container · verify: cron daemon ใน compose dev = fail, cron service ไม่มี `TZ: Asia/Bangkok` = fail (python ด้วย), cron service ทำให้เช็ค `CRON_SECRET` ต้องมี 2 บรรทัด · review อิสระแก้ 5 จุด (regex เช็ค TZ/CRON_SECRET, firewall `release-assets.githubusercontent.com`) · eval case ใหม่ `cicd-cron-service` 9/9 · PHP ยัง host cron อย่างเดียว
 - 2026-10-27 **merge PR #24 (mtn-work-planning): cron service ใน compose prod = ทางเลือกของ host cron (Python)** — core **2.16.0** · python **0.10.0** · เปลี่ยนมติ 2026-10-09 โดยผู้ดูแล: supercronic (pin+SHA1) + crontab ใน repo, prod only, verify กันใน dev compose · review แก้ 8 จุดก่อน merge (TZ, log rotation, grace period, `supercronic -test` ตอน build, ตำแหน่งใน Dockerfile, ไม่ใช้ curl) · Next.js/PHP ยัง host cron อย่างเดียว · eval python full-setup: grader health-route แยกไฟล์ (judge เห็นแค่ main.py)
 - 2026-10-15 ลบ branch วิดีโอ `claude/wizardly-albattani-ywvn6s` ทิ้ง (ผู้ดูแลตัดสินไม่เอา — ไม่ merge)
