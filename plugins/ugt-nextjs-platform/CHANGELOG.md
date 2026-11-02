@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **design-setup: dialog ที่ไม่มีเนื้อหาเห็นเส้น 2 เส้นห่างกัน** — โซน A8 วาดเส้นใต้หัว + เส้นบนท้าย · dialog ยืนยัน (`ConfirmActionDialog` ไม่ส่ง children) หัวต่อท้ายทันที จึงเหลือแถบว่างระหว่าง 2 เส้น → `DialogHeader`/`AlertDialogHeader` เติม `[&:has(+[data-slot=…-footer])]:border-b-0` ใน `primitive-edits.md` เหลือเส้นบนของท้ายเส้นเดียว · dialog ที่มีเนื้อหาไม่เปลี่ยน · origin ugt-hrms · 2026-11-02 · asset: ugt-nextjs-design-setup/assets/DESIGN.template.md
+
 ## 4.84.0 (2026-10-28)
 
 - **cicd-setup: job ตามรอบเลือก cron service ใน compose prod ได้ (ทางเลือกของ host cron — ตาม Python 0.10.0)** — interview ข้อ 8 ถามต่อ host cron (default) / cron service · `references/scheduled-jobs.md` ส่วนท้าย: service `cron` image เดียวกับแอป รัน supercronic (pin + SHA1, `apk add tzdata` — Alpine ไม่มี ไม่ใส่ = `TZ` ไม่มีผล) บน `jobs.crontab` ใน repo เรียก route `/api/cron/<job>` เดิมผ่าน `proxy-network` ด้วยชื่อ container · `RUN supercronic -test` ตอน build · เฉพาะ `docker-compose.yml` · handoff ตัดหัวข้อ I (cron) แต่คง nginx deny · verify.mjs ใหม่: cron daemon ใน compose dev = fail · cron service ไม่มี `TZ` = fail · eval case ใหม่ `cicd-cron-service` · asset: ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md, ugt-nextjs-cicd-setup/assets/admin-handoff.template.md

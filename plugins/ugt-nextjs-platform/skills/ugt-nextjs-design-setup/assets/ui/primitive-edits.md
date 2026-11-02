@@ -40,7 +40,9 @@ string ของ `className` ที่ระบุด้านล่าง (ม�
 
 ## `components/ui/dialog.tsx` — 3 โซน หัว/เนื้อ/ท้าย (A8)
 
-- `DialogHeader`: เดิม `"flex flex-col gap-1"` → **`"-mx-4 flex flex-col gap-1 border-b px-4 pb-3"`**
+- `DialogHeader`: เดิม `"flex flex-col gap-1"` → **`"-mx-4 flex flex-col gap-1 border-b px-4 pb-3 [&:has(+[data-slot=dialog-footer])]:border-b-0"`**
+  — ตัวท้าย = dialog ที่**ไม่มีเนื้อหา** (หัวต่อด้วยท้ายทันที) ตัดเส้นล่างของหัว เหลือเส้นบนของท้ายเส้นเดียว
+  (ไม่ตัด = เห็น 2 เส้นห่างกันโดยไม่มีอะไรคั่น) · dialog ที่มีเนื้อหาไม่เปลี่ยน
 - `DialogFooter`: เดิม `"flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"` →
 
   ```ts
@@ -64,10 +66,10 @@ string ของ `className` ที่ระบุด้านล่าง (ม�
 
 ## `components/ui/alert-dialog.tsx` — โซนเดียวกัน + ปุ่ม `cta` เป็นค่าเริ่มต้น
 
-- `AlertDialogHeader`: เติม **`-mx-4`** หน้า class เดิม และ **`border-b px-4 pb-3`** ต่อจาก `gap-1`
-  (เดิม `"grid grid-rows-[auto_1fr] place-items-center gap-1 text-center …"` →
-  `"-mx-4 grid grid-rows-[auto_1fr] place-items-center gap-1 border-b px-4 pb-3 text-center …"` — ส่วน `…`
-  คงเดิมทั้งหมด)
+- `AlertDialogHeader`: เติม **`-mx-4`** หน้า class เดิม และ **`border-b px-4 pb-3 [&:has(+[data-slot=alert-dialog-footer])]:border-b-0`**
+  ต่อจาก `gap-1` (เดิม `"grid grid-rows-[auto_1fr] place-items-center gap-1 text-center …"` →
+  `"-mx-4 grid grid-rows-[auto_1fr] place-items-center gap-1 border-b px-4 pb-3 [&:has(+[data-slot=alert-dialog-footer])]:border-b-0 text-center …"`
+  — ส่วน `…` คงเดิมทั้งหมด) · `ConfirmActionDialog` ที่ไม่ส่ง `children` = หัวต่อท้ายทันที → เหลือเส้นเดียว (ดู `DialogHeader`)
 - `AlertDialogFooter`: เติม **`-mx-4 -mb-4`** หน้า class เดิม และ **`rounded-b-xl border-t bg-muted/40 px-4 py-3`**
   ต่อจาก `gap-2` (คง `group-data-[size=sm]/…:grid-cols-2` และ `sm:flex-row sm:justify-end` ไว้)
 - `AlertDialogAction`: รับ `size = "cta"` ใน destructure แล้วส่ง `size={size}` ให้ `<Button>`
