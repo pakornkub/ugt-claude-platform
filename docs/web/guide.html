@@ -133,7 +133,7 @@
   <!-- ===================== 2 ===================== -->
   <section class="chapter" id="install">
     <h2><span class="no">2</span>ติดตั้ง</h2>
-    <p class="sub">ทำครั้งเดียวต่อเครื่อง (หรือต่อโปรเจค ถ้าเลือก scope project)</p>
+    <p class="sub">ทำครั้งเดียวต่อเครื่อง — ติดระดับ user แล้วใช้ได้ทุกโปรเจค</p>
 
     <ol class="steps">
       <li>
@@ -157,14 +157,18 @@
 <span class="c"># เลือก mattpocock: บรรทัดที่สองใช้ ugt-nextjs-standard-mattpocock@ugt แทน</span></pre></div>
       </li>
       <li>
-        <h3>เลือก scope ตอน install</h3>
+        <h3>เลือก scope <b>user</b> ตอน install</h3>
         <div class="table-wrap"><table>
           <thead><tr><th>Scope</th><th>ผล</th></tr></thead>
           <tbody>
-            <tr><td><b>project</b></td><td>เพื่อนร่วมทีมที่ clone โปรเจคไปได้ด้วย</td></tr>
-            <tr><td><b>user</b></td><td>ใช้เองได้ทุกโปรเจคในเครื่องนี้</td></tr>
+            <tr><td><b>user</b> <span class="badge ok">มาตรฐาน</span></td><td>ติดครั้งเดียว ใช้ได้ทุกโปรเจคในเครื่องนี้ · เพื่อนร่วมทีมแต่ละคนติดเองครั้งเดียวต่อเครื่อง</td></tr>
+            <tr><td><b>project</b> <span class="badge">ห้ามเลือก</span></td><td>ได้อีกชุดที่อัปเดตแยกรายโปรเจค — อัปเดตในโปรเจคหนึ่ง อีกโปรเจคยังเป็นรุ่นเก่า · ถ้าเปิด Claude Code แล้วขึ้น <code>ugt: โปรเจคนี้ติดตั้ง plugin ของ ugt ระดับ project</code> ให้รันคำสั่งที่มันบอก แล้ว commit <code>.claude/settings.json</code></td></tr>
           </tbody>
         </table></div>
+      </li>
+      <li>
+        <h3>เปิดอัปเดตอัตโนมัติ</h3>
+        <p><code>/plugin</code> → Marketplaces → <code>ugt</code> → <b>Enable auto-update</b> · marketplace นอก Anthropic ปิดไว้เป็นค่าเริ่มต้น (โปรเจคที่ผ่าน full-setup เปิดให้แล้วใน <code>.claude/settings.json</code>)</p>
       </li>
       <li>
         <h3>เช็คว่าติดแล้ว</h3>
@@ -671,6 +675,7 @@
     <ol class="steps">
       <li>
         <h3>อัปเดต plugin</h3>
+        <p>เปิด auto-update ไว้ (บท 2) จะอัปเดตเองหลังข้อความแรกของ session ช้าสุดราว 10 นาที มีผลเมื่อ <code>/reload-plugins</code> หรือเปิด session ใหม่ · อยากได้ทันที:</p>
         <div class="term"><div class="dots"><i></i><i></i><i></i></div><pre><span class="k">/plugin marketplace update</span> ugt
 <span class="k">/plugin update</span> ugt-nextjs-standard-superpowers
 <span class="k">/reload-plugins</span>
@@ -835,7 +840,7 @@
   </main>
 </div>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.84.1</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.85.0</span></div></footer>
 
 <script>
   // highlight the TOC entry of the chapter in view

@@ -20,10 +20,10 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.84.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.85.0 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.1 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.5 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-core` | 2.16.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.17.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -78,8 +78,17 @@ context ใหม่ที่อ่านโปรเจคซ้ำ) ส่ว�
 (ใช้ `ugt-nextjs-standard-mattpocock@ugt` แทนบรรทัดที่สองถ้าเลือก pipeline
 mattpocock)
 
-ตอน install เลือก scope **project** ถ้าอยากให้เพื่อนร่วมทีมที่ clone โปรเจคได้ด้วย ·
-เลือก **user** ถ้าอยากใช้เองทุกโปรเจค · เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็นรายการตัวช่วย
+ตอน install เลือก scope **user** เท่านั้น (ใน terminal:
+`claude plugin install ugt-nextjs-standard-superpowers@ugt --scope user`) —
+ติดครั้งเดียวใช้ได้ทุกโปรเจค เพื่อนร่วมทีมแต่ละคนติดเองครั้งเดียวต่อเครื่อง ·
+**อย่าเลือก project**: จะได้อีกชุดที่อัปเดตแยกกันรายโปรเจค (อัปเดตในโปรเจคหนึ่ง
+อีกโปรเจคยังเป็นรุ่นเก่า) · ถ้าเปิด Claude Code แล้วขึ้นข้อความ `ugt: โปรเจคนี้ติดตั้ง
+plugin ของ ugt ระดับ project` ให้รันคำสั่งที่มันบอกครั้งเดียว แล้ว commit ไฟล์
+`.claude/settings.json` ที่เปลี่ยน
+
+แล้วเปิดอัปเดตอัตโนมัติ: `/plugin` → Marketplaces → `ugt` → **Enable auto-update**
+(marketplace นอก Anthropic ปิดไว้เป็นค่าเริ่มต้น · โปรเจคที่ผ่าน full-setup เปิดให้แล้ว
+ใน `.claude/settings.json`) · เช็คว่าติดแล้ว: พิมพ์ `/ugt` ต้องเห็นรายการตัวช่วย
 
 <details>
 <summary>ทางเลือกอื่น: copy ไฟล์ตรง ๆ (ไม่ต้องแตะ marketplace แต่ update เองทุกครั้ง)</summary>
@@ -203,7 +212,9 @@ superpowers ที่เดินทั้ง pipeline เอง) ยกเว�
 
 ## การอัปเดต
 
-เมื่อมีประกาศรุ่นใหม่ รันในโปรเจคไหนก็ได้:
+เปิด auto-update ไว้แล้ว (ด้านบน) plugin จะอัปเดตเองหลังข้อความแรกของ session
+(ช้าสุดราว 10 นาที — มีผลเมื่อ `/reload-plugins` หรือเปิด session ใหม่) · อยากได้ทันที หรือยังไม่ได้เปิด
+auto-update ให้รันในโปรเจคไหนก็ได้:
 
 ```
 /plugin marketplace update ugt

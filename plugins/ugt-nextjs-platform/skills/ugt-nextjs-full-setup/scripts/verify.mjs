@@ -160,15 +160,9 @@ check('model-mode.md declares a valid model mode', () => {
     : { ok: false, msg: 'model-mode.md has no `Current mode: **easy|default|god|auto**` line — rewrite it with /ugt-model-mode' };
 });
 
-// Bundle detection mirrors SKILL.md §4.3: the committed enabledPlugins key is
-// the one signal that survives the session that installed it.
-const mattpocockBundle = (() => {
-  try {
-    return JSON.parse(read('.claude/settings.json')).enabledPlugins?.['ugt-nextjs-standard-mattpocock@ugt'] === true;
-  } catch {
-    return false;
-  }
-})();
+// Bundle detection mirrors SKILL.md §4.3: the resolved CLAUDE.md block is the
+// committed record of the bundle (settings.json no longer carries enabledPlugins).
+const mattpocockBundle = /### Merging a feature branch \(mattpocock\)/.test(claudeMd ?? '');
 const keepsAdrs = has('docs/adr') || mattpocockBundle;
 
 check('docs/project-context/ knowledge base exists', () => {
@@ -214,9 +208,9 @@ check('No secrets leaked into committed state/knowledge files', () => {
 });
 
 // ── settings / gitignore ───────────────────────────────────────────────────
-check('.claude/settings.json declares marketplace + plugin', () => {
+check('.claude/settings.json declares marketplace, no project-scope plugin', () => {
   if (!has('.claude/settings.json')) {
-    return { ok: false, msg: 'No .claude/settings.json — people cloning the repo will not be prompted to install the plugin' };
+    return { ok: false, msg: 'No .claude/settings.json — people cloning the repo will not be offered the ugt marketplace' };
   }
   let s;
   try {
@@ -225,12 +219,14 @@ check('.claude/settings.json declares marketplace + plugin', () => {
     return { ok: false, msg: `Broken JSON: ${error.message}` };
   }
   const problems = [];
-  if (!s.extraKnownMarketplaces) problems.push('no extraKnownMarketplaces');
-  if (!s.enabledPlugins) problems.push('no enabledPlugins (an explicitly empty {} is fine for projects that chose no pipeline bundle)');
-  if (s.enabledPlugins && s.enabledPlugins['ugt-nextjs-standard@ugt'] !== undefined) {
+  const ugt = s.extraKnownMarketplaces?.ugt;
+  if (!ugt) problems.push('no extraKnownMarketplaces.ugt');
+  else if (ugt.autoUpdate !== true) problems.push('extraKnownMarketplaces.ugt has no "autoUpdate": true — the team stays on old plugin versions until someone updates by hand');
+  const projectScoped = Object.keys(s.enabledPlugins ?? {}).filter((k) => k.endsWith('@ugt'));
+  if (projectScoped.length) {
     problems.push(
-      'stale pre-split key "ugt-nextjs-standard@ugt" — that plugin was renamed in platform 4.55.0; ' +
-        'replace with "ugt-nextjs-standard-superpowers@ugt" (same behavior) or "ugt-nextjs-standard-mattpocock@ugt", then commit'
+      `enabledPlugins carries ${projectScoped.join(', ')} — every machine that opens the repo gets a project-scope install that updates separately; ` +
+        `run \`claude plugin uninstall <key> --scope project\` for each (removes the key and this machine's record), install at user scope if missing, then commit`
     );
   }
   const raw = JSON.stringify(s);

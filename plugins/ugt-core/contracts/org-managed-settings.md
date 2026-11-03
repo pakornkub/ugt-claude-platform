@@ -54,7 +54,8 @@ only in managed/policy settings).
   },
   "extraKnownMarketplaces": {
     "ugt": {
-      "source": { "source": "github", "repo": "pakornkub/ugt-claude-platform" }
+      "source": { "source": "github", "repo": "pakornkub/ugt-claude-platform" },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
@@ -82,7 +83,14 @@ What this buys:
 - **deny** — rules the client enforces itself, outside the model's decisions,
   and projects cannot switch off
 - **extraKnownMarketplaces + enabledPlugins** — every machine gets
-  `ugt-nextjs-standard-superpowers` without each person running `/plugin marketplace add`
+  `ugt-nextjs-standard-superpowers` without each person running `/plugin marketplace add`,
+  installed once per machine at managed scope (users cannot disable it) — the
+  only real enforcement of "one install per machine": projects must not commit
+  `enabledPlugins` for platform plugins (`harness.md`), because that creates a
+  separate project-scope install on every machine that opens the repo
+- **autoUpdate** — third-party marketplaces default to no auto-update; with
+  this, every machine pulls a new platform release by itself after the first
+  message of a session (no `/plugin marketplace update` round)
 - **claudeMd** — text present in every session of every project on the machine,
   which users cannot exclude
 

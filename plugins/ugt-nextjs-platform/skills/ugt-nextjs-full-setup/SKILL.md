@@ -262,8 +262,8 @@ where noted.
 
 **A write under `.claude/` (or `.husky/`) refused by the environment** is not a
 reason to stop or to tell the user to "re-run setup later": put every refused
-file's path + full content into `docs/setup-finish.md` (enabledPlugins written
-out explicitly), keep going, and name that file in the close-out's "ยังไม่ได้รัน".
+file's path + full content into `docs/setup-finish.md` (settings.json written
+out in full, `autoUpdate` included), keep going, and name that file in the close-out's "ยังไม่ได้รัน".
 
 | Asset | Destination | Overwritable? |
 | --- | --- | --- |
@@ -319,24 +319,30 @@ How:
    frontmatter, so the runtime loads them by itself when Claude touches
    matching files — there is no need to write "if you edit X, read Y" into
    CLAUDE.md.
-3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`,
-   `enabledPlugins`, `permissions` (the marketplace repo is already set to
-   `pakornkub/ugt-claude-platform`) ·
-   if the file already exists, merge — do not overwrite; **while merging,
-   remove a stale `"ugt-nextjs-standard@ugt"` key if present** (the pre-split
-   bundle — that plugin no longer exists in the marketplace, and leaving it
-   makes every clone prompt for a plugin that cannot resolve).
-   Substitute `__BUNDLE_NAME__` in `enabledPlugins` by **detecting which
-   orchestration plugin is installed** in the current session: `superpowers`
-   skills/commands available → `ugt-nextjs-standard-superpowers` ·
-   `mattpocock-skills` skills/commands available →
-   `ugt-nextjs-standard-mattpocock` (this same detection also resolves the
-   `[PIPELINE]` spans in step 1). **Ambiguous (both present) or neither
-   found → never guess: ask the user one question** — which bundle this
-   project uses, or none. If the answer is none (they installed
-   `ugt-nextjs-platform` standalone or copied files directly), write
-   `"enabledPlugins": {}` (explicitly empty) — never enable a bundle the
-   team did not choose.
+3. **`.claude/settings.json`** — merge the keys `extraKnownMarketplaces`
+   (the `ugt` entry, repo `pakornkub/ugt-claude-platform`, **with
+   `"autoUpdate": true`** — third-party marketplaces default to off) and
+   `permissions` · if the file already exists, merge — do not overwrite.
+   **Never write `enabledPlugins` for an `@ugt` plugin, and while merging
+   delete every existing `*@ugt` key from it** (drop `enabledPlugins` when
+   that leaves it empty): a committed `enabledPlugins` key makes Claude Code
+   create a **project-scope** install record on every machine that opens the
+   repo, even when the plugin is already installed at user scope — the
+   record then updates separately, so `/plugin update` run in one project
+   leaves the others on the old version. The org installs bundles at **user
+   scope only** (README §ติดตั้ง); ugt-core's SessionStart hook flags
+   leftover project records. Removing the key leaves this machine's own
+   record in place — tell the user to run
+   `claude plugin uninstall <bundle>@ugt --scope project` once in the
+   project (it removes the record; the key is already gone).
+   **Bundle detection** (resolves the `[PIPELINE]` spans in step 1 and the
+   `CODING_STANDARDS.md` row): `superpowers` skills/commands available in
+   the current session → superpowers · `mattpocock-skills` skills/commands
+   available → mattpocock. **Ambiguous (both present) or neither found →
+   never guess: ask the user one question** — which bundle this project
+   uses, or none (they installed `ugt-nextjs-platform` standalone or copied
+   files directly). The resolved CLAUDE.md block is the committed record of
+   the choice — verify.mjs reads the bundle back from it.
 4. **`.claude/state/`** — create from the skeletons **only if absent** · if
    present, do not touch (it is the team's memory) · fill in the date and the
    installed modules in `handoff.md` · `model-mode.md` ships with the `auto`

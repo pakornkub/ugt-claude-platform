@@ -224,13 +224,15 @@ const CHECKS = [
   {
     // review 2026-09-01: pipeline conditionality is resolved at generation
     // time via [PIPELINE:*] spans — pin the markers and the SKILL.md step
-    // that consumes them so neither side is edited away alone
-    name: 'Pipeline spans: [PIPELINE:*] markers in CLAUDE-block + SKILL.md consumer',
+    // that consumes them so neither side is edited away alone · 4.85.0: verify.mjs
+    // reads the bundle back from the mattpocock-only heading (no enabledPlugins)
+    name: 'Pipeline spans: [PIPELINE:*] markers in CLAUDE-block + SKILL.md consumer + verify reader',
     files: {
       [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
-        /\[PIPELINE:superpowers\]/, /\[PIPELINE:mattpocock\]/,
+        /\[PIPELINE:superpowers\]/, /\[PIPELINE:mattpocock\]/, /### Merging a feature branch \(mattpocock\)/,
       ],
-      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/\[PIPELINE/, /__BUNDLE_NAME__/],
+      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/\[PIPELINE/, /Bundle detection/],
+      [`${NEXT}/ugt-nextjs-full-setup/scripts/verify.mjs`]: [/Merging a feature branch \\\(mattpocock\\\)/],
     },
   },
   {
