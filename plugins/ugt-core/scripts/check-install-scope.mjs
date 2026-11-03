@@ -13,7 +13,8 @@ import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const norm = (p) => (process.platform === 'win32' ? resolve(p).toLowerCase() : resolve(p));
+// win32 and macOS (APFS default) are case-insensitive — the same folder can be recorded in either case
+const norm = (p) => (['win32', 'darwin'].includes(process.platform) ? resolve(p).toLowerCase() : resolve(p));
 
 try {
   const project = norm(process.env.CLAUDE_PROJECT_DIR || process.cwd());

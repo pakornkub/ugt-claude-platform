@@ -1,5 +1,12 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.85.1 (2026-11-03)
+
+- full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว
+- drift-check: ปักกฎ "Never write `enabledPlugins`" + คำสั่ง uninstall ใน SKILL.md และเช็คว่า `assets/settings.json` มี `"autoUpdate": true` และไม่มี `enabledPlugins`
+- docs/web reference: แถว settings.json · bullet เลือก bundle · ขั้นสลับ bundle เลิกพูดถึง `enabledPlugins` (ติดตั้ง bundle ระดับ user, ผลเลือกอยู่ใน block CLAUDE.md)
+
+
 ## 4.85.0 (2026-11-03)
 
 - **full-setup: เลิกเขียน `enabledPlugins` ลง `.claude/settings.json` + เปิด auto-update ของ marketplace `ugt`** — `assets/settings.json` เหลือ `extraKnownMarketplaces.ugt` (`"autoUpdate": true`) + `permissions` · §4.3 ตอน merge ลบทุก key `*@ugt` ใน `enabledPlugins` (แทนกฎเดิมที่ลบแค่ `ugt-nextjs-standard@ugt`) และบอกผู้ใช้ให้รัน `claude plugin uninstall <bundle>@ugt --scope project` หนึ่งครั้ง · เหตุ: key ที่ commit ไว้ทำให้ทุกเครื่องที่เปิด repo ได้ install ระดับ project ที่อัปเดตแยกจากระดับ user (ugt-core 2.17.0) · การตรวจ bundle ยังเหมือนเดิม — ดูจาก skill ที่มีใน session และถามเมื่อกำกวม

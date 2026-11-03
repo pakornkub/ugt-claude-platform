@@ -231,8 +231,12 @@ const CHECKS = [
       [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
         /\[PIPELINE:superpowers\]/, /\[PIPELINE:mattpocock\]/, /### Merging a feature branch \(mattpocock\)/,
       ],
-      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/\[PIPELINE/, /Bundle detection/],
+      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [
+        /\[PIPELINE/, /Bundle detection/, /Never write `enabledPlugins` for an `@ugt` plugin/, /uninstall <key> --scope project/,
+      ],
       [`${NEXT}/ugt-nextjs-full-setup/scripts/verify.mjs`]: [/Merging a feature branch \\\(mattpocock\\\)/],
+      // user-scope install only: the shipped settings carry autoUpdate and never enabledPlugins
+      [`${NEXT}/ugt-nextjs-full-setup/assets/settings.json`]: [/^(?![\s\S]*enabledPlugins)[\s\S]*"autoUpdate":\s*true/],
     },
   },
   {

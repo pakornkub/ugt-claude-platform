@@ -323,18 +323,19 @@ How:
    (the `ugt` entry, repo `pakornkub/ugt-claude-platform`, **with
    `"autoUpdate": true`** — third-party marketplaces default to off) and
    `permissions` · if the file already exists, merge — do not overwrite.
-   **Never write `enabledPlugins` for an `@ugt` plugin, and while merging
-   delete every existing `*@ugt` key from it** (drop `enabledPlugins` when
-   that leaves it empty): a committed `enabledPlugins` key makes Claude Code
-   create a **project-scope** install record on every machine that opens the
-   repo, even when the plugin is already installed at user scope — the
-   record then updates separately, so `/plugin update` run in one project
-   leaves the others on the old version. The org installs bundles at **user
-   scope only** (README §ติดตั้ง); ugt-core's SessionStart hook flags
-   leftover project records. Removing the key leaves this machine's own
-   record in place — tell the user to run
-   `claude plugin uninstall <bundle>@ugt --scope project` once in the
-   project (it removes the record; the key is already gone).
+   **Never write `enabledPlugins` for an `@ugt` plugin**: a committed
+   `enabledPlugins` key makes Claude Code create a **project-scope** install
+   record on every machine that opens the repo, even when the plugin is
+   already installed at user scope — the record then updates separately, so
+   `/plugin update` run in one project leaves the others on the old version.
+   The org installs bundles at **user scope only** (README §ติดตั้ง);
+   ugt-core's SessionStart hook flags leftover project records. **An existing
+   `*@ugt` key is removed by the CLI, not by hand** — run (or, with no shell,
+   tell the user to run) `claude plugin uninstall <key> --scope project` in
+   the project for each one: that removes this machine's record *and* the key
+   (verified on 2.1.300). Deleting the key yourself first leaves the record
+   behind with nothing for the uninstall to match. Only after that, drop
+   `enabledPlugins` if it is left empty.
    **Bundle detection** (resolves the `[PIPELINE]` spans in step 1 and the
    `CODING_STANDARDS.md` row): `superpowers` skills/commands available in
    the current session → superpowers · `mattpocock-skills` skills/commands

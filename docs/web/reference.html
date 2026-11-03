@@ -148,8 +148,8 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.85.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.17.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.85.1</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.17.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
       <tr><td><code>ugt-python-platform</code></td><td>0.10.1</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.5</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
     </tbody>
@@ -282,7 +282,7 @@
     <thead><tr><th>Path</th><th>หน้าที่</th></tr></thead>
     <tbody>
       <tr><td><code>CLAUDE.md</code></td><td>แทรก block ระหว่าง <code>&lt;!-- ugt:start --&gt;</code> … <code>&lt;!-- ugt:end --&gt;</code> เท่านั้น เนื้อหาของโปรเจคเองไม่ถูกแตะ</td></tr>
-      <tr><td><code>.claude/settings.json</code></td><td>merge เฉพาะ <code>extraKnownMarketplaces</code>, <code>enabledPlugins</code>, <code>permissions</code></td></tr>
+      <tr><td><code>.claude/settings.json</code></td><td>merge เฉพาะ <code>extraKnownMarketplaces</code> (marketplace <code>ugt</code> พร้อม <code>"autoUpdate": true</code>) และ <code>permissions</code> · ไม่เขียน <code>enabledPlugins</code> ของ <code>@ugt</code> — bundle ติดตั้งระดับ user เท่านั้น</td></tr>
       <tr><td><code>.claude/state/handoff.md</code></td><td>สถานะงานของทีม — สร้างครั้งเดียว ไม่ทับ</td></tr>
       <tr><td><code>.claude/state/model-mode.md</code></td><td>โหมดเลือกโมเดล เริ่มที่ <code>auto</code> — สร้างครั้งเดียว ต่อจากนั้นเป็นงานของ <a href="#skill-ugt-model-mode">ugt-model-mode</a></td></tr>
       <tr><td><code>.claude/rules/ugt-nextjs-*.md</code></td><td>กฎที่โหลดเองเมื่อแตะไฟล์ที่เกี่ยว — ตัวช่วยลูกแต่ละตัวติดตั้งของตัวเอง ตัวนี้แค่ตรวจว่าครบ</td></tr>
@@ -301,7 +301,7 @@
     <li><b>Local login + Mail</b>: "ลืมรหัสผ่าน" อยู่ใน auth แต่ส่งผ่าน mail จึงต้องย้อนกลับไปติดตั้งส่วน reset ของ auth (§5.5) หลัง mail เสร็จ</li>
     <li><b>Upload</b>: ติดตั้งหลัง Auth แต่ส่วนแก้ compose/Dockerfile รอจน cicd-setup เขียนไฟล์เหล่านั้นแล้วค่อยทำตอนปิดงาน</li>
     <li><b>ไม่มี shell</b> (session รันคำสั่งไม่ได้): เพิ่ม package ลง <code>package.json</code> ด้วยมือตามเวอร์ชันบรรทัด <code>npm i</code> (ไม่มีเวอร์ชัน → <code>^&lt;major ปัจจุบัน&gt;</code> ห้าม <code>"latest"</code>) แล้วลิสต์ทุกคำสั่งที่ยังไม่ได้รันไว้ในหัวข้อ "ยังไม่ได้รัน"</li>
-    <li><b>เลือก bundle อัตโนมัติ</b>: ตรวจว่ามี <code>superpowers</code> หรือ <code>mattpocock-skills</code> ติดตั้งอยู่ — มีทั้งคู่หรือไม่มีเลย จะถามหนึ่งข้อ ตอบ "ไม่ใช้" → <code>"enabledPlugins": {}</code></li>
+    <li><b>เลือก bundle อัตโนมัติ</b>: ตรวจว่ามี <code>superpowers</code> หรือ <code>mattpocock-skills</code> ติดตั้งอยู่ — มีทั้งคู่หรือไม่มีเลย จะถามหนึ่งข้อ · ผลที่เลือกบันทึกไว้ใน block ของ <code>CLAUDE.md</code> (ไม่ใช่ <code>enabledPlugins</code>)</li>
     <li>ระหว่างติดตั้ง <b>ไม่เรียกตัวช่วยจาก superpowers / mattpocock-skills / frontend-design</b> — SKILL.md ของตัวช่วยลูกคือแผน และ <code>verify.mjs</code> คือการ review อยู่แล้ว</li>
   </ul>
 
@@ -2959,8 +2959,8 @@ vendor/bin/phpunit</pre>
     <p>ไม่มีคำสั่งสลับ — ต้องทำ 3 ขั้น</p>
     <ol class="steps">
       <li>uninstall bundle ตัวเดิม (ผ่าน <code>/plugin</code>)</li>
-      <li><code>/plugin install</code> อีกตัว แล้ว <code>/reload-plugins</code></li>
-      <li>รันขั้น harness ของ <a href="#skill-ugt-nextjs-full-setup">full-setup</a> ใหม่ — block ใน <code>CLAUDE.md</code> และ <code>enabledPlugins</code> ถูกสร้างตาม pipeline ที่ตรวจเจอ<b>ตอนรัน</b> ไม่เปลี่ยนเอง (ไป mattpocock: ได้ <code>CODING_STANDARDS.md</code> และต้องรัน <code>/setup-matt-pocock-skills</code> ต่อ)</li>
+      <li>ติดตั้งอีกตัว<b>ระดับ user</b> (<code>claude plugin install &lt;bundle&gt;@ugt --scope user</code>) แล้ว <code>/reload-plugins</code></li>
+      <li>รันขั้น harness ของ <a href="#skill-ugt-nextjs-full-setup">full-setup</a> ใหม่ — block ใน <code>CLAUDE.md</code> ถูกสร้างตาม pipeline ที่ตรวจเจอ<b>ตอนรัน</b> ไม่เปลี่ยนเอง (ไป mattpocock: ได้ <code>CODING_STANDARDS.md</code> และต้องรัน <code>/setup-matt-pocock-skills</code> ต่อ)</li>
     </ol>
 
     <h3>ย้ายจาก <code>ugt-nextjs-standard</code> ตัวเดิม</h3>
@@ -3075,7 +3075,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.85.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.85.1</span></div></footer>
 
 <script>
 (() => {
