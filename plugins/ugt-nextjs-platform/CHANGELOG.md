@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.85.0 (2026-11-03)
+
+- **full-setup: เลิกเขียน `enabledPlugins` ลง `.claude/settings.json` + เปิด auto-update ของ marketplace `ugt`** — `assets/settings.json` เหลือ `extraKnownMarketplaces.ugt` (`"autoUpdate": true`) + `permissions` · §4.3 ตอน merge ลบทุก key `*@ugt` ใน `enabledPlugins` (แทนกฎเดิมที่ลบแค่ `ugt-nextjs-standard@ugt`) และบอกผู้ใช้ให้รัน `claude plugin uninstall <bundle>@ugt --scope project` หนึ่งครั้ง · เหตุ: key ที่ commit ไว้ทำให้ทุกเครื่องที่เปิด repo ได้ install ระดับ project ที่อัปเดตแยกจากระดับ user (ugt-core 2.17.0) · การตรวจ bundle ยังเหมือนเดิม — ดูจาก skill ที่มีใน session และถามเมื่อกำกวม
+- `verify.mjs`: รู้ว่าเป็น bundle mattpocock จากหัวข้อ `### Merging a feature branch (mattpocock)` ใน block CLAUDE.md (เดิมอ่านจาก `enabledPlugins`) · เช็ค settings: ต้องมี `extraKnownMarketplaces.ugt.autoUpdate: true` · มี key `*@ugt` ใน `enabledPlugins` = fail พร้อมคำสั่งแก้ (รวมกรณี key เก่า `ugt-nextjs-standard@ugt`)
+- eval `run-through-db-quality-ci` grader `harness-layer`: ไฟล์ settings ที่ parked ไว้ต้องมี `"autoUpdate": true` และต้องไม่มี key `@ugt": true` (เดิมบังคับ `"enabledPlugins": {}`)
+- docs: README / web (guide · cheatsheet · slides) ให้ติดตั้งระดับ **user** เท่านั้น · ห้ามเลือก project · เปิด auto-update ที่ `/plugin` → Marketplaces → `ugt`
+- **ย้ายของโปรเจคเดิม**: ในแต่ละโปรเจคที่ `.claude/settings.json` มี `"ugt-nextjs-standard-*@ugt": true` ให้รัน `claude plugin uninstall <key> --scope project` (ลบทั้ง key และ record ของเครื่องนี้ — เช็คว่ามีระดับ user แล้ว) · เพิ่ม `"autoUpdate": true` ใน `extraKnownMarketplaces.ugt` · commit · เพื่อนร่วมทีมที่มี record เดิมจะเห็นข้อความเตือนจาก hook ของ ugt-core ตอนเปิด session
+
+
 ## 4.84.1 (2026-11-02)
 
 - **design-setup: dialog ที่ไม่มีเนื้อหาเห็นเส้น 2 เส้นห่างกัน** — โซน A8 วาดเส้นใต้หัว + เส้นบนท้าย · dialog ยืนยัน (`ConfirmActionDialog` ไม่ส่ง children) หัวต่อท้ายทันที จึงเหลือแถบว่างระหว่าง 2 เส้น → `DialogHeader`/`AlertDialogHeader` เติม `[&:has(+[data-slot=…-footer])]:border-b-0` ใน `primitive-edits.md` เหลือเส้นบนของท้ายเส้นเดียว · dialog ที่มีเนื้อหาไม่เปลี่ยน · หน้า Design system ในเว็บ (ตัวอย่าง dialog ยืนยัน) ตามแล้ว · origin ugt-hrms #366 (PR #25) · 2026-11-02 · asset: ugt-nextjs-design-setup/assets/DESIGN.template.md

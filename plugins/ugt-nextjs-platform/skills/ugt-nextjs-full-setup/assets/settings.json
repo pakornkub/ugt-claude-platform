@@ -4,11 +4,9 @@
       "source": {
         "source": "github",
         "repo": "pakornkub/ugt-claude-platform"
-      }
+      },
+      "autoUpdate": true
     }
-  },
-  "enabledPlugins": {
-    "__BUNDLE_NAME__@ugt": true
   },
   "permissions": {
     "deny": [

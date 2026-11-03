@@ -1,5 +1,12 @@
 # Changelog — ugt-core
 
+## 2.17.0 (2026-11-03)
+
+- **hook ใหม่ SessionStart `check-install-scope.mjs` — เตือนเมื่อ plugin `@ugt` ติดตั้งระดับ project/local ในโปรเจคที่เปิด** — อ่าน `~/.claude/plugins/installed_plugins.json` เทียบ `projectPath` กับโปรเจคนี้ · แสดงคำสั่งแก้ (`claude plugin uninstall <id> --scope project` · ถ้ายังไม่มีระดับ user ให้ `install --scope user` ก่อน) ทั้งกับผู้ใช้ (`systemMessage`) และ Claude (`additionalContext`) · เงียบทุกกรณีที่อ่านไฟล์ไม่ได้ ไม่ block session · เหตุ: ทดสอบกับ Claude Code 2.1.300 แล้วพบว่า `enabledPlugins` ที่ commit ไว้ในโปรเจค สร้าง record ระดับ project เองทุกครั้งที่เปิดโปรเจค แม้ติดระดับ user แล้ว · skill ไม่โหลดซ้ำ แต่ `/plugin update` ในโปรเจคไหนจะอัปเดตเฉพาะ record ของโปรเจคนั้น — โปรเจคอื่นและระดับ user ค้างรุ่นเก่า
+- contract `harness.md`: `.claude/settings.json` merge แค่ `extraKnownMarketplaces` (มี `autoUpdate: true`) + `permissions` · **ห้ามมี `enabledPlugins` ของ platform plugin** — platform ติดตั้งระดับ user (หรือ managed)
+- contract `org-managed-settings.md`: template ใส่ `"autoUpdate": true` ใน entry `ugt` · อธิบายว่า managed `enabledPlugins` คือทางบังคับเดียวที่ได้ "ติดครั้งเดียวต่อเครื่อง" จริง
+
+
 ## 2.16.1 (2026-10-28)
 
 - contract `cicd.md` — cron service ใน compose prod ใช้ได้กับ Next.js ด้วย (`ugt-nextjs-cicd-setup` `references/scheduled-jobs.md` — ยังเรียก `/api/cron/<job>`) · PHP ยัง host cron อย่างเดียว
