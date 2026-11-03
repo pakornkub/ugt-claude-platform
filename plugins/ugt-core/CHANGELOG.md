@@ -1,5 +1,10 @@
 # Changelog — ugt-core
 
+## 2.17.1 (2026-11-03)
+
+- hook `check-install-scope.mjs` (หลัง code-review ของ 2.17.0): ทำงานตอน `resume` และ `clear` ด้วย (เดิมแค่ `startup` — คนที่เปิด session เดิมต่อไม่เคยเห็นคำเตือน) · เทียบ path แบบไม่สนตัวพิมพ์บน macOS ด้วย (APFS ไม่สนตัวพิมพ์เหมือน Windows)
+
+
 ## 2.17.0 (2026-11-03)
 
 - **hook ใหม่ SessionStart `check-install-scope.mjs` — เตือนเมื่อ plugin `@ugt` ติดตั้งระดับ project/local ในโปรเจคที่เปิด** — อ่าน `~/.claude/plugins/installed_plugins.json` เทียบ `projectPath` กับโปรเจคนี้ · แสดงคำสั่งแก้ (`claude plugin uninstall <id> --scope project` · ถ้ายังไม่มีระดับ user ให้ `install --scope user` ก่อน) ทั้งกับผู้ใช้ (`systemMessage`) และ Claude (`additionalContext`) · เงียบทุกกรณีที่อ่านไฟล์ไม่ได้ ไม่ block session · เหตุ: ทดสอบกับ Claude Code 2.1.300 แล้วพบว่า `enabledPlugins` ที่ commit ไว้ในโปรเจค สร้าง record ระดับ project เองทุกครั้งที่เปิดโปรเจค แม้ติดระดับ user แล้ว · skill ไม่โหลดซ้ำ แต่ `/plugin update` ในโปรเจคไหนจะอัปเดตเฉพาะ record ของโปรเจคนั้น — โปรเจคอื่นและระดับ user ค้างรุ่นเก่า
