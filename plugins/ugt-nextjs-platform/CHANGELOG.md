@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **clean-code: Sonar เปิดกฎใหม่ S9382 (await ในลูป) / S9383 (promise ลอย) → Quality Gate แดงทั้งที่ไม่ได้แก้โค้ด** — profile อัปเดตแล้วนับโค้ดเดิมในช่วง new code เป็น violation ใหม่ (47 → ~84) → แถวใหม่ในตาราง §1: อ่านอิสระใช้ `Promise.all` · งานที่ต้องทีละรายการใช้ helper มีชื่อ (`mapSequential`) + NOSONAR จุดเดียว · `Promise.all` ต้องได้แต่ promise (S4123) · `void` กับ promise ที่ตั้งใจไม่รอ · ลูปที่ `return`/`break` กลางทาง Sonar ไม่จับ · origin ugt-hrms · 2026-11-06
+
 ## 4.85.1 (2026-11-03)
 
 - full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว
