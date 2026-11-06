@@ -159,6 +159,49 @@ sonar.dependencyCheck.severity.medium=4.0
 sonar.dependencyCheck.severity.low=0.0
 ```
 
+### A CVE wave turns the gate red without a code change
+
+**Symptom.** Every build fails from one day to the next while the code is
+fine ("deploy ไม่ได้ทั้งที่โค้ดไม่ผิด"): `new_violations` jumps (one project:
+113, of which 66 were `OWASP:UsingComponentWithKnownVulnerability`) and the
+OWASP stage is often red as well.
+
+**Root cause.** The plugin above imports each Dependency-Check finding as a
+Sonar issue on the project, inside the new-code period — so newly published
+CVEs count against `new_violations` exactly like code smells. The Jenkins
+`dependencyCheckPublisher` fails the OWASP stage on its own when any finding
+is CRITICAL (CVSS ≥ 9).
+
+**Fix.** Upgrade, don't suppress, wherever a fixed release exists:
+
+1. `npm audit --json --package-lock-only` lists the patched range per
+   advisory — it reads the lockfile, no `node_modules` needed.
+2. Direct dependency → bump it in `package.json`. Transitive → `overrides`.
+   Before overriding across a major, check what the parent accepts
+   (`npm view <parent>@<version> dependencies`): bumping the parent often
+   pulls the fixed major legitimately (e.g. `@azure/identity` `^4.14.1` →
+   `@azure/msal-node` 7). A package present in several majors takes version
+   selectors, one key per major:
+
+   ```json
+   "overrides": {
+     "brace-expansion@^1": "^1.1.21",
+     "brace-expansion@^2": "^2.1.7",
+     "brace-expansion@^5": "^5.0.12"
+   }
+   ```
+
+3. npm 10.9.x can crash while resolving new overrides with
+   `Cannot read properties of null (reading 'edgesOut')` → run
+   `npx npm@latest install` once; the lockfile stays v3 and Jenkins' `npm ci`
+   reads it.
+4. Fix only in a breaking major and the advisory does not apply to you (it
+   needs a plugin/feature you don't enable)? Upgrading vs. an advisory-ID
+   suppression with a `<notes>` reason is the project owner's decision —
+   never a silent default.
+
+**Origin.** ugt-hrms · 2026-11-06
+
 ## G. Coverage property
 
 `sonar.javascript.lcov.reportPaths=coverage/lcov.info` — this file comes from
