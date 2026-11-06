@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **cicd-setup: CVE ระลอกใหม่ทำ Quality Gate แดงทั้งที่ไม่ได้แก้โค้ด** — ปลั๊กอิน Dependency-Check นับ CVE ทุกตัวเป็น `new_violations` (113 โดย 66 เป็น OWASP) + critical ตัวเดียวทำ OWASP stage แดง → แถวอาการใน SKILL.md + `sonarqube-setup.md` §F: `npm audit --package-lock-only` หาเวอร์ชันแก้ · bump direct / `overrides` แบบ `pkg@^major` · เช็คช่วงที่ parent รับก่อนข้ามเมเจอร์ · npm 10.9.x crash `edgesOut` → `npx npm@latest install` · origin ugt-hrms · 2026-11-06
+
 ## 4.85.1 (2026-11-03)
 
 - full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว
