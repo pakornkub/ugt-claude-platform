@@ -337,6 +337,7 @@ Checklist §6
 | `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`references/version-skew.md`) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
 | Every suppression/CPD exclusion carries a rationale comment | Suppressing preemptively with no real finding |
+| Pipeline red fixed and green again → run `/ugt-contribute`'s gate (Jenkins/Sonar/Docker-host causes are usually every-stack) | Let the fix live only in this project's Jenkinsfile |
 
 ## 6. Verification Checklist
 

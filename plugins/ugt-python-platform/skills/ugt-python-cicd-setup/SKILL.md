@@ -424,6 +424,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `.dockerignore` กัน `.venv` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
 | batch: `restart: "no"` + host cron เรียก `docker compose run --rm job` | `restart: unless-stopped` กับ batch (รัน job ซ้ำไม่หยุด) |
 | cron service: เฉพาะ `docker-compose.yml` + `healthcheck: disable: true` | ใส่ cron service ใน `docker-compose.dev.yml` (job รันทั้ง prod และ dev) |
+| pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา) | ปล่อยวิธีแก้ไว้แค่ใน Jenkinsfile ของโปรเจคนี้ |
 
 ## 7. Verification Checklist
 

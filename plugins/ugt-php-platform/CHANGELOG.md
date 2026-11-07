@@ -1,5 +1,10 @@
 # Changelog — ugt-php-platform
 
+## Unreleased
+
+- cicd-setup: Quick Rules แถวใหม่ — pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา)
+
+
 ## 0.8.5 (2026-10-14)
 
 - interview ข้อ 7: ถาม Jenkins host + repo URL จาก `git remote` (เหมือน python 0.9.5) · eval `sonar` เป็น regex (llm โหวตแตกบนไฟล์ที่ถูก)

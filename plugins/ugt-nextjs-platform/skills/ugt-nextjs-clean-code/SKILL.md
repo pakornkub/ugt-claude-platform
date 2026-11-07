@@ -168,6 +168,9 @@ the Quality Profile your SonarQube project uses. Look at
 is dead weight, and a rule you assumed was off may be the thing turning the
 gate red.
 
+**Gate went red on a rule this skill doesn't cover?** Once the fix is green,
+run `/ugt-contribute` — the rule belongs in §1's table for the next project.
+
 ## Verification Checklist
 
 **Run the script first** (cwd = project root) — by default it checks only files

@@ -1,5 +1,11 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- cicd-setup: Quick Rules แถวใหม่ — pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา)
+- clean-code: gate แดงด้วย rule ที่ skill ยังไม่ครอบ → `/ugt-contribute` หลังแก้ผ่าน
+
+
 ## 4.85.1 (2026-11-03)
 
 - full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว
