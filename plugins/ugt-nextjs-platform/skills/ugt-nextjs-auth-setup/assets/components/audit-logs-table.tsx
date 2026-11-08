@@ -1,18 +1,18 @@
 'use client';
-// kit: ugt-nextjs-platform 4.67.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: b2991b3491d0
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: 3c9a30782b0b
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
 // โหมด server — หน้านี้ไม่วาด Input เอง ตาม DESIGN.md §3) ส่วน filter ที่เหลือ
-// (ช่วงวันที่ → action เรียงกว้าง→แคบ มติ 2026-08-11) push URL เอง ·
+// (action) push URL เอง · ช่วงวันที่ = ตัวกรองคอลัมน์ "เวลา" ของ DataTable (ปฏิทินเลือกช่วง
+// → `f_createdAt`) แทน DateRangePicker บน toolbar ที่เคยมี ·
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
@@ -33,23 +33,6 @@ type AuditLogRow = {
   action: string;
   detail: string | null;
 };
-
-// URL อาจถูกแก้มือ (แชร์ลิงก์พิมพ์ผิด/ตัดครึ่ง) — parse ไม่ขึ้นต้อง fallback เป็น
-// undefined เงียบ ๆ ไม่ปล่อย Invalid Date ไหลเข้า DateRangePicker
-function parseDateParam(value: string): Date | undefined {
-  if (!value) return undefined;
-  const d = new Date(`${value}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? undefined : d;
-}
-
-// อ่านส่วนวัน/เดือน/ปีแบบ local เท่านั้น (ห้าม toISOString) — toISOString แปลงเป็น
-// UTC ก่อนเสมอ ในโซน UTC+ (เช่น Asia/Bangkok) เที่ยงคืน local ของวันที่เลือกจะกลาย
-// เป็นเย็นวันก่อนหน้า แล้ววันที่เลื่อนถอยหนึ่งวันตอน round-trip ผ่าน parseDateParam
-function toDateParam(date: Date): string {
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${m}-${d}`;
-}
 
 function prettyDetail(detail: string | null): string {
   if (!detail) return '';
@@ -79,7 +62,7 @@ export function AuditLogsTable({
   fields: TableFields;
   baseParams: string;
   actionOptions: string[];
-  filters: { q: string; from: string; to: string; action: string };
+  filters: { q: string; action: string };
 }>) {
   const t = useTranslations('auth');
   const router = useRouter();
@@ -87,7 +70,7 @@ export function AuditLogsTable({
   const [openDetail, setOpenDetail] = useState<string | null>(null);
 
   // filter เปลี่ยน = เงื่อนไขใหม่ → กลับหน้า 1 เสมอ (ลบ page ทิ้ง ให้ server default)
-  function applyFilters(next: Partial<{ q: string; from: string; to: string; action: string }>) {
+  function applyFilters(next: Partial<{ q: string; action: string }>) {
     const params = new URLSearchParams(baseParams);
     params.delete('page');
     for (const [key, value] of Object.entries({ ...filters, ...next })) {
@@ -101,7 +84,8 @@ export function AuditLogsTable({
     {
       accessorKey: 'createdAt',
       header: t('auditLogsTable.colTime'),
-      meta: { cellClassName: 'whitespace-nowrap tabular-nums' },
+      // dateFilter: true — หน้าที่กรองแล้วไม่มีแถวยังต้องเป็นปฏิทิน (ตรวจจากแถวไม่ได้)
+      meta: { cellClassName: 'whitespace-nowrap tabular-nums', dateFilter: true },
       // instant จริง → เวลาไทยผ่าน lib/format.ts เท่านั้น (DESIGN.md §5)
       cell: ({ row }) => formatDateTime(row.original.createdAt),
     },
@@ -140,17 +124,7 @@ export function AuditLogsTable({
         serverPagination={{ pageIndex, pageSize, totalItems }}
         serverQuery={{ query, baseParams, fields }}
         toolbarFilters={
-          <>
-            <DateRangePicker
-              fromLabel={t('auditLogsTable.fromLabel')}
-              toLabel={t('auditLogsTable.toLabel')}
-              hideLabels
-              from={parseDateParam(filters.from)}
-              to={parseDateParam(filters.to)}
-              onFromChange={(d) => applyFilters({ from: d ? toDateParam(d) : '' })}
-              onToChange={(d) => applyFilters({ to: d ? toDateParam(d) : '' })}
-            />
-            <Select
+          <Select
               // items: without it Base UI renders the raw value in <SelectValue> (a cuid, "__all__")
               items={[
                 { value: ALL_ACTIONS, label: t('auditLogsTable.allActions') },
@@ -170,8 +144,7 @@ export function AuditLogsTable({
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
-          </>
+          </Select>
         }
       />
 
