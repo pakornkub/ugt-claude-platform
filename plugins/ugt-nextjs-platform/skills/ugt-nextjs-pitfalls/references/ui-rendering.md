@@ -1,6 +1,6 @@
 # UI rendering — what the browser actually draws
 
-Four traps where the code looks right and the screen is wrong. None throws an
+Five traps where the code looks right and the screen is wrong. None throws an
 exception except §4, and that one only in the console.
 
 ## 1. Thai text inside `font-mono` renders garbled
@@ -137,3 +137,38 @@ localStorage…)` initializers (WINDOW-IN-RENDER). Reproduce with a production
 build at two widths (< 768 and ≥ 768): the error only at one width means a
 viewport-dependent render; on **every** page it lives in the app shell
 (sidebar/header), not in the page.
+
+## 5. A link to `/page#section` lands at the top — the route has `loading.tsx`
+
+**Symptom.** A link from another page (a search result, notification or menu) to
+`/docs/leave#s-7-4` changes the URL to include the hash, but the page stays at
+the top while the section is far below ("กดลิงก์แล้วไม่เลื่อนไปหัวข้อ"). A link to the
+same hash *within* the page scrolls fine.
+
+**Root cause.** On a client-side navigation Next scrolls to the hash once,
+while the route's `loading.tsx` skeleton is still on screen. The element with
+that id does not exist yet, and Next does not retry when the real content
+streams in. Same-page anchors work because the element is already there. When
+the scroll container is a layout `div` rather than `window`, the browser's own
+hash jump does not help either.
+
+**Fix.** On mount, scroll once from a client component of the destination page,
+by which time the content has rendered:
+
+```tsx
+'use client';
+// a link from another page to `/…#id`: Next scrolled while loading.tsx was up
+React.useEffect(() => {
+  const id = decodeURIComponent(globalThis.location.hash.slice(1));
+  if (id) document.getElementById(id)?.scrollIntoView({ block: 'start' });
+}, []);
+```
+
+`decodeURIComponent` is needed for non-ASCII ids. Dropping `loading.tsx` also
+fixes the problem, but then every slow load shows no skeleton.
+
+**How to check.** Navigate from another page and measure the target
+(`document.getElementById(id).getBoundingClientRect().top` ≈ 0). A correct URL
+does not prove that the page scrolled.
+
+**Origin.** ugt-hrms (RT-067) · 2026-11-02

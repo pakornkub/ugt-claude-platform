@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **pitfalls: ลิงก์ `#หัวข้อ` จากหน้าอื่นไม่เลื่อนไปถึงหัวข้อ** — URL มี hash แต่หน้าค้างอยู่บนสุด → Next เลื่อนหา id ตอน skeleton ของ `loading.tsx` ยังแสดง แล้วไม่ลองอีก → client component ของหน้าปลายทาง `scrollIntoView` ครั้งเดียวตอน mount · ui-rendering §5 · origin ugt-hrms (RT-067) · 2026-11-02
+
 ## 4.85.1 (2026-11-03)
 
 - full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว
