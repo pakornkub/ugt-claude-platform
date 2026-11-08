@@ -1,8 +1,9 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.test.ts
-// kit-hash: 1fa951223feb
+// kit-hash: eb06348bd656
 import { describe, expect, it } from 'vitest';
 import {
   dateRangeFilterLabel,
+  dateRangeWhere,
   dayKeyOf,
   decodeDateRangeFilter,
   encodeDateRangeFilter,
@@ -48,6 +49,16 @@ describe('DataTable date-range filter', () => {
     const from28 = encodeDateRangeFilter({ from: '2026-09-28' });
     expect(matchesTextFilter('2026-10-30', from28)).toBe(true);
     expect(matchesTextFilter('2026-09-01', from28)).toBe(false);
+  });
+
+  it('bounds a server query by Bangkok days, to-day inclusive', () => {
+    expect(dateRangeWhere({ from: '2026-09-28', to: '2026-09-28' })).toEqual({
+      gte: new Date('2026-09-27T17:00:00.000Z'),
+      lt: new Date('2026-09-28T17:00:00.000Z'),
+    });
+    expect(dateRangeWhere({ to: '2026-09-28' })).toEqual({ lt: new Date('2026-09-28T17:00:00.000Z') });
+    // malformed ends were dropped by decode → no bound, never Invalid Date
+    expect(dateRangeWhere(decodeDateRangeFilter('\u001erange:junk~') ?? {})).toEqual({});
   });
 
   it('labels the chip in DD/MM/YYYY', () => {

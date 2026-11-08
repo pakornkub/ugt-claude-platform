@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
-// kit-hash: bc30f41e0474
+// kit-hash: ac5555da85f2
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
 // ผ่าน URL state ทั้งหมด "never half" · หน้านี้ parse searchParams แล้ว query จริง
@@ -13,7 +13,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { firstParam, getTotalPages, parsePageParams, parsePageSize, withPage } from '@/lib/pagination';
 import { parseTableQuery, toOrderBy, type TableFields } from '@/lib/table-query';
-import { decodeDateRangeFilter } from '@/lib/table-filter';
+import { dateRangeWhere, decodeDateRangeFilter } from '@/lib/table-filter';
 import { PageDescription, PageHeader, PageHeaderText, PageTitle } from '@/components/ui/page-shell';
 import { AuditLogsTable } from '@/components/audit-logs-table';
 
@@ -47,13 +47,8 @@ export default async function AdminAuditLogsPage({
     createdAt?: { gte?: Date; lt?: Date };
   } = {};
   if (action) where.action = action;
-  // ขอบเขตวันคิดที่เวลาไทยเสมอ (+07:00) — createdAt เป็น instant และ server อาจรัน
-  // UTC · to เป็นขอบ exclusive ของวันถัดไป เพื่อรวมทั้งวันสุดท้าย
-  if (range?.from) where.createdAt = { gte: new Date(`${range.from}T00:00:00+07:00`) };
-  if (range?.to) {
-    const end = new Date(`${range.to}T00:00:00+07:00`);
-    where.createdAt = { ...where.createdAt, lt: new Date(end.getTime() + 86_400_000) };
-  }
+  // ขอบเขตวันคิดที่เวลาไทยเสมอ (+07:00) — createdAt เป็น instant และ server อาจรัน UTC
+  if (range) where.createdAt = dateRangeWhere(range);
   if (q) {
     const matched = await prisma.user.findMany({
       where: { OR: [{ name: { contains: q } }, { email: { contains: q } }] },

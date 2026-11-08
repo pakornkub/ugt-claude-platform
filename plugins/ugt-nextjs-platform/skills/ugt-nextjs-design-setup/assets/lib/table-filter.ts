@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.ts
-// kit-hash: 8f8b1b381eb9
+// kit-hash: 1f9fb9024296
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**
  * DataTable column filters — match what the cell SHOWS, not the raw value.
@@ -57,6 +57,18 @@ export function dayKeyOf(value: Date | string): string {
   const iso = value instanceof Date ? value.toISOString() : value;
   const dateOnly = !iso.includes('T') || /T00:00:00(?:\.0+)?Z$/.test(iso);
   return dateOnly ? formatExportDate(value) : bangkokToday(new Date(value));
+}
+
+/**
+ * Prisma bounds for a range on a DateTime column, days counted in Asia/Bangkok (+07:00 — the
+ * server may run UTC) · `to` is inclusive, so the bound is the exclusive next midnight. A SQL
+ * `date` (UTC midnight) lands inside its own day too.
+ */
+export function dateRangeWhere({ from, to }: DateRangeFilter): { gte?: Date; lt?: Date } {
+  const where: { gte?: Date; lt?: Date } = {};
+  if (from) where.gte = new Date(`${from}T00:00:00+07:00`);
+  if (to) where.lt = new Date(new Date(`${to}T00:00:00+07:00`).getTime() + 86_400_000);
+  return where;
 }
 
 /** Is the cell's day inside the range (inclusive, either end open)? Non-dates fail. */
