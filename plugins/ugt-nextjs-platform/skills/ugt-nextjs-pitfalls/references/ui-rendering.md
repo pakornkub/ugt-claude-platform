@@ -159,12 +159,18 @@ by which time the content has rendered:
 'use client';
 // a link from another page to `/…#id`: Next scrolled while loading.tsx was up
 React.useEffect(() => {
-  const id = decodeURIComponent(globalThis.location.hash.slice(1));
+  let id: string;
+  try {
+    id = decodeURIComponent(globalThis.location.hash.slice(1));
+  } catch {
+    return; // malformed %-escape in a hand-edited URL — no scroll, no crash
+  }
   if (id) document.getElementById(id)?.scrollIntoView({ block: 'start' });
 }, []);
 ```
 
-`decodeURIComponent` is needed for non-ASCII ids. Dropping `loading.tsx` also
+`decodeURIComponent` is needed for non-ASCII ids, and throws `URIError` on a
+malformed hash such as `#%E0` — hence the `try`. Dropping `loading.tsx` also
 fixes the problem, but then every slow load shows no skeleton.
 
 **How to check.** Navigate from another page and measure the target
