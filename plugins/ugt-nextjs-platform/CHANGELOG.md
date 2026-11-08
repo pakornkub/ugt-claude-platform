@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **DataTable: กรองรายคอลัมน์ค้นตามที่เห็นบนจอ + คอลัมน์วันที่เลือกช่วงจากปฏิทิน** — พิมพ์ "06/11/2026" ในคอลัมน์วันที่ หรือป้ายสถานะที่แปลจากรหัส แล้วหาไม่เจอ → `auto` filterFn ของ TanStack เทียบค่าดิบ (ISO / รหัส) ไม่ใช่สิ่งที่เซลล์แสดง → `lib/table-filter.ts` ใหม่: ทุกคอลัมน์ที่ไม่ตั้ง `filterFn` ค้นค่าดิบ + รูป DD/MM/YYYY · `meta.filterValueOf` สำหรับคอลัมน์ป้าย · คอลัมน์วันที่ได้ปฏิทิน `mode="range"` แทนช่องพิมพ์ (ตรวจจากค่าแถว / `meta.dateFilter`) วันของ timestamp นับตาม Asia/Bangkok · auth-setup `/admin/audit-logs`: เอา DateRangePicker บน toolbar ออก กรองช่วงที่คอลัมน์เวลา (`f_createdAt` → `decodeDateRangeFilter` ในหน้า) · origin ugt-hrms (RT-075) · 2026-11-08 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx, ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+
 ## 4.85.1 (2026-11-03)
 
 - full-setup §4.3 (หลัง code-review ของ 4.85.0): key `*@ugt` เดิมให้ลบด้วย `claude plugin uninstall <key> --scope project` (ลบทั้ง record ของเครื่องและ key — ทดสอบแล้วบน 2.1.300) แทนการลบ key เองก่อน ซึ่งทำให้ uninstall ไม่มีอะไรให้จับคู่และ record ค้าง · ลำดับตรงกับข้อความแก้ของ `verify.mjs` แล้ว

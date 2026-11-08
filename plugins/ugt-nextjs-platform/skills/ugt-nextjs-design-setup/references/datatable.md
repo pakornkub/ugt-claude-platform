@@ -120,6 +120,16 @@ sort are **auto-suppressed** when a table passes `serverPagination` without
 server-paginated set returns confident nonsense, so the component refuses
 rather than trusting the caller.
 
+**What a per-column filter matches** (`lib/table-filter.ts`): what the cell
+*shows*, never TanStack's `auto` on the raw value — a text filter searches the
+raw value plus its DD/MM/YYYY forms, a column whose cell shows a label for a code
+(status, type) sets `meta.filterValueOf: (row) => label`, and a **date column gets
+a range calendar** instead of the text box (auto-detected from the first non-empty
+value; `meta.dateFilter: true` on server tables, whose filtered page may be empty).
+The range travels as one string in `filters[key]`: a server page decodes it with
+`decodeDateRangeFilter` and bounds the day in Asia/Bangkok — the audit-logs page
+is the worked example.
+
 **Toolbar** — one row, fixed order, matching the component (`data-table.tsx`):
 **search input leftmost** → `toolbarFilters` (page-level filters, wide →
 narrow) → flex spacer → `toolbarExtra` (export menu and friends) and the
