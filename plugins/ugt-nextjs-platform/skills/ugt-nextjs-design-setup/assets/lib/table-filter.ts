@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.ts
-// kit-hash: 1f9fb9024296
+// kit-hash: 647d848252a8
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**
  * DataTable column filters — match what the cell SHOWS, not the raw value.
@@ -83,7 +83,8 @@ function filterTexts(value: unknown): string[] {
   if (value == null) return [];
   if (isDateValue(value)) {
     const raw = value instanceof Date ? value.toISOString() : value;
-    return [raw, formatDate(value), formatDateTime(value)];
+    // formatDate(timestamp) would read the UTC day — use the day the cell shows (Bangkok)
+    return [raw, formatDate(dayKeyOf(value)), formatDateTime(value)];
   }
   return [typeof value === 'object' ? JSON.stringify(value) : String(value)];
 }

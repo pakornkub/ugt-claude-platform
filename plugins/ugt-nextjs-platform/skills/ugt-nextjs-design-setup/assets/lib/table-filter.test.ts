@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.test.ts
-// kit-hash: eb06348bd656
+// kit-hash: 25098058e4d4
 import { describe, expect, it } from 'vitest';
 import {
   dateRangeFilterLabel,
@@ -15,6 +15,9 @@ describe('DataTable text filter', () => {
     expect(matchesTextFilter('2026-11-06T03:00:00.000Z', '06/11/2026')).toBe(true);
     expect(matchesTextFilter('2026-11-06', '06/11')).toBe(true);
     expect(matchesTextFilter('2026-11-06', '07/11')).toBe(false);
+    // 28/09 02:07 Bangkok — found by the 28th the cell shows, not the UTC 27th
+    expect(matchesTextFilter('2026-09-27T19:07:00.000Z', '28/09/2026')).toBe(true);
+    expect(matchesTextFilter('2026-09-27T19:07:00.000Z', '27/09/2026')).toBe(false);
   });
 
   it('matches plain text case-insensitively and lets an empty filter through', () => {
