@@ -7,9 +7,10 @@ description: >
   — "ส่ง PR ไป platform", "อัพเดทกลับ plugin", "ยกขึ้น pitfalls", "เอาบั๊กนี้เข้า
   skill", "ให้ทีมอื่นไม่ต้องเจออีก", "contribute กลับ", or when `/ugt-handoff`'s
   triage lands on "true for every project on this stack". Also right after a
-  Jenkins/SonarQube/deploy failure was fixed and passes again ("pipeline ผ่านแล้ว",
+  Jenkins/SonarQube/deploy failure fixed in this session passes again ("pipeline ผ่านแล้ว",
   "Quality Gate เขียวแล้ว", "deploy ผ่านแล้ว") — run the gate before the fix
-  is forgotten. Lifts ONE proven
+  is forgotten (a bare "ผ่านแล้ว ขอบคุณ" with no fix behind it is not
+  a trigger). Lifts ONE proven
   troubleshooting entry (or the bug just fixed) into the owning platform skill
   as a PR — after explicit confirmation — and removes it from the project. Reach for it even when the user
   only hints ("อันนี้น่าจะเจอทุกโปรเจค", "น้องทีมอื่นก็เจอ") — the alternative is the
