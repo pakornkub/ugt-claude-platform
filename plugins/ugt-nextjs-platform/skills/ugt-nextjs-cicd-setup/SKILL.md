@@ -11,7 +11,8 @@ description: >
   reaching healthy, `COPY .next/standalone` failing, client-side env vars empty
   in the browser bundle, Groovy parse error after removing an optional block,
   a page left open across a deploy that can't save any more ("ส่งข้อมูลไม่ได้หลัง
-  deploy", `Server Action … was not found on the server`).
+  deploy", `Server Action … was not found on the server`), a Quality Gate that
+  goes red after a CVE wave with no code change.
   Run ugt-nextjs-test-lint-setup first — the pipeline calls `lint`,
   `format:check` and `test:coverage` by exact name and goes red without them.
   Not for writing code that passes the gate (→ ugt-nextjs-clean-code) or DB/auth
@@ -34,6 +35,7 @@ description: >
 | OWASP Dependency Check stays UNSTABLE (yellow) on every build — HIGH `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`) via `eslint-config-next`, moderate `sprintf-js@1.1.3` (`GHSA-hp3w-g68c-fv3c`) via `@prisma/adapter-mssql` → tedious; `npm audit fix` offers a downgrade of `eslint-config-next` to 14.x | no fixed release of either package exists; both were reviewed (CI-lint-only / literal format strings) — do **not** take the audit downgrade (cannot run Next 16); suppress pinned to exact version + advisory after `npm ls braces sprintf-js` confirms the same path | `references/sonarqube-setup.md` §E "OWASP: two reviewed findings" |
 | Two quick pushes → two builds of the same job run at once; the second `prisma migrate deploy` / `docker compose up` collides with the first still deploying (flaky Deploy, container recreated mid-health-poll) | `options {}` had no `disableConcurrentBuilds()` — Jenkins runs same-job builds in parallel by default | `assets/Jenkinsfile` `options {}` · `references/docker-deploy.md` §C |
 | Right after a deploy, a page that was already open fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy") — console `UnrecognizedActionError: Server Action "…" was not found on the server` + `POST … 409`; a refresh fixes it | Server Action ids change every build and the old client bundle calls the previous ids; no `deploymentId` is set, so Next.js cannot detect the skew and reload — `next.config` `deploymentId` ← Docker `ARG NEXT_DEPLOYMENT_ID` ← Jenkins `--build-arg NEXT_DEPLOYMENT_ID=${deployId}` on both builds | `references/version-skew.md` · pitfalls `version-skew.md` (client half) |
+| Quality Gate red with no code change ("deploy ไม่ได้ทั้งที่โค้ดไม่ผิด") — `new_violations` jumps and most issues are `OWASP:UsingComponentWithKnownVulnerability`; often the OWASP stage is red too (a CRITICAL) | the Dependency-Check plugin imports every CVE as a Sonar issue inside the new-code period, so a fresh CVE wave counts against `new_violations`; the publisher separately fails on CRITICAL ≥ 1 | `references/sonarqube-setup.md` §F "A CVE wave turns the gate red" |
 | Groovy parse error after removing an optional block | dangling comma / brace in the declarative pipeline | `assets/Jenkinsfile` comments |
 
 ## 1. Overview

@@ -10,7 +10,8 @@ description: >
   validation schema, table, or hook — the gate blocks on `new_violations = 0`, so
   a single stray `parseInt` fails the build for the whole team.
   Use it explicitly too when someone says "sonar ไม่ผ่าน", "แก้ violation",
-  "Quality Gate แดง", "โค้ดซ้ำเยอะ", or asks how to suppress a finding correctly.
+  "Quality Gate แดง", "Quality Gate แดงทั้งที่ไม่ได้แก้โค้ด", "โค้ดซ้ำเยอะ", or asks how
+  to suppress a finding correctly.
   Don't use for Jenkins/SonarQube server or pipeline config (→ ugt-nextjs-cicd-setup).
 paths:
   - "**/*.{ts,tsx}"
@@ -55,8 +56,11 @@ Write the **left** column by default — the right one is what SonarQube flags.
 | `catch (error)` (nested: `catch (error_)`) | `catch (problem)` / `catch (failure)` — any name outside the allowed set | S7718 |
 | remove the assertion | `value as Foo` where TS already narrows | S4325 |
 | delete the dead expression | `void someExpr;` | S3735 |
+| independent reads → `await Promise.all(items.map((x) => load(x)))` · work that must stay one-at-a-time (writes in one interactive `$transaction`, one mail per recipient, bulk approve guarded on status, company-wide batches) → a named helper such as `mapSequential(items, fn)` holding the single `// NOSONAR typescript:S9382` | `for (const x of items) { await load(x); }` | S9382 |
+| every element a Promise: `filter` first, or `cond ? load(x) : Promise.resolve(null)` | `Promise.all(xs.map((x) => (x ? load(x) : null)))` | S4123 |
+| `void promise` when you deliberately don't wait — `void queryClient.invalidateQueries(…)` | a dropped promise: an async call or `.then()` chain with no `await` / `.catch` / `void` | S9383 |
 
-**Two rows people over-apply — don't "fix" what the rule already allows:**
+**Rows people over-apply — don't "fix" what the rule already allows:**
 
 - **S7764** (`unicorn/prefer-global-this`) **exempts `typeof` existence
   checks**: the SSR guard `typeof window !== 'undefined'` is *fine as written*
@@ -70,6 +74,15 @@ Write the **left** column by default — the right one is what SonarQube flags.
   name**. So `catch (e)` and `catch (err)` do **not** raise an issue — only a
   name outside that set does (`catch (problem)`). Write `error` for
   consistency; never open a PR just to rename `e` → `error`.
+- **S9382** (await inside a loop) **does not flag a loop that `return`s or
+  `break`s on the awaited result** — `for (const rule of rules) { const r =
+  await run(rule); if (r.failed) return r; }` is sequential by nature and stays
+  as written. ESLint's own `no-await-in-loop` does flag it, so don't work from
+  the ESLint list. And don't `Promise.all` transaction writes, mail loops or
+  company-wide batches just to clear the rule — order and DB load are the
+  point there; that is what the named sequential helper is for.
+- **S3735 vs S9383**: `void someAsyncCall()` is the intended way to drop a
+  promise — S3735 does not fire on a promise operand.
 
 **Component / type rules:**
 
@@ -168,6 +181,13 @@ the Quality Profile your SonarQube project uses. Look at
 is dead weight, and a rule you assumed was off may be the thing turning the
 gate red.
 
+**A profile update lands on code you already shipped.** When SonarQube turned
+on S9382 / S9383 (2026-11), every existing hit inside the new-code period
+(`PREVIOUS_VERSION`) counted as a new violation — one project went from 47 to
+~84 overnight with no related diff. Gate red right after a server upgrade →
+list the open issues by rule and look for a rule key you have never seen
+before blaming the last merge.
+
 **Gate went red on a rule this skill doesn't cover?** Once the fix is green,
 run `/ugt-contribute` — the rule belongs in §1's table for the next project.
 
@@ -182,6 +202,7 @@ node <skill-dir>/scripts/verify.mjs
 ```
 
 - [ ] No `parseInt` / `.replace(/…/g)` / `typeof … 'undefined'` / `arr[len-1]` / negated ternaries — modern idioms used
+- [ ] No `await` inside a loop except through the named sequential helper · `Promise.all` gets only promises · dropped promises marked `void`
 - [ ] Every component prop type wrapped in `Readonly<>`
 - [ ] No duplicate imports from one module · no deprecated Zod APIs
 - [ ] No copy-pasted block ≥ ~10 lines — refactored, or in `sonar.cpd.exclusions` with a reason
