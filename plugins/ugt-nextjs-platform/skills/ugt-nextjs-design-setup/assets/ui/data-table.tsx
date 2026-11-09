@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 58888a197b4e
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 802349164c61
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -54,13 +54,24 @@ import {
   X,
 } from 'lucide-react';
 
+import { th } from 'date-fns/locale';
+import type { DateRange } from 'react-day-picker';
+
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, toDateKey } from '@/lib/format';
+import {
+  dateRangeFilterLabel,
+  decodeDateRangeFilter,
+  encodeDateRangeFilter,
+  isDateValue,
+  matchesTextFilter,
+} from '@/lib/table-filter';
 import { ROWS_PER_PAGE_OPTIONS } from '@/lib/pagination';
 import { withTableQuery, type TableFields, type TableQuery } from '@/lib/table-query';
 import { moveKey, normalizeOrder, useTablePrefs } from '@/lib/table-prefs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Empty,
@@ -111,7 +122,47 @@ declare module '@tanstack/react-table' {
     filterable?: boolean;
     /** คอลัมน์ตัวเลข — ไม่เข้าเกณฑ์กรองรายคอลัมน์ (ช่อง contains ใช้กับตัวเลขไม่ได้) */
     numeric?: boolean;
+    /**
+     * ข้อความที่ช่องกรองใช้ค้น เมื่อเซลล์แสดงต่างจากค่าดิบ (ป้ายที่แปลจากรหัสสถานะ/ประเภท)
+     * — ไม่ใส่ = ค้นค่าดิบ + วันที่รูป DD/MM/YYYY · ใช้ได้เฉพาะตารางกรองฝั่ง client
+     */
+    filterValueOf?: (row: TData) => string;
+    /**
+     * ปฏิทินเลือกช่วงแทนช่องพิมพ์ — ไม่ใส่ = ตรวจเองจากค่าแถวแรก · ตาราง `serverQuery` ควรตั้ง
+     * `true` เพราะหน้าที่กรองแล้วไม่มีแถวจะตรวจไม่เจอ แล้วกลายเป็นช่องพิมพ์
+     */
+    dateFilter?: boolean;
   }
+}
+
+/**
+ * ทุกคอลัมน์ที่ไม่ได้ตั้ง `filterFn` เอง กรองด้วยข้อความที่เห็นบนจอ (`lib/table-filter`) แทน
+ * `auto` ของ TanStack ที่เทียบค่าดิบ — วันที่ ISO / รหัสสถานะ พิมพ์สิ่งที่เห็นแล้วหาไม่เจอ
+ */
+function withTextFilters<TData>(columns: ColumnDef<TData>[]): ColumnDef<TData>[] {
+  return columns.map((c) => {
+    if (c.filterFn) return c;
+    const valueOf = c.meta?.filterValueOf;
+    return {
+      ...c,
+      filterFn: (row: Row<TData>, columnId: string, value: unknown) =>
+        matchesTextFilter(valueOf ? valueOf(row.original) : row.getValue(columnId), value as string),
+    } as ColumnDef<TData>;
+  });
+}
+
+/**
+ * คอลัมน์วันที่ (ค่าแถวแรกที่ไม่ว่างเป็น `Date`/ISO) ได้ปฏิทินเลือกช่วงแทนช่องพิมพ์ · ตาราง
+ * `serverQuery` ต้องมีคีย์ใน `fields.filterable` และหน้า/route แปลงช่วงเองด้วย `decodeDateRangeFilter`
+ */
+function isDateColumn<TData>(table: TanstackTable<TData>, key: string): boolean {
+  const column = table.getColumn(key);
+  const flag = column?.columnDef.meta?.dateFilter;
+  if (flag !== undefined) return flag;
+  // a range already applied = a date column, even when it filtered the page down to no rows
+  if (decodeDateRangeFilter(column?.getFilterValue() as string | undefined)) return true;
+  const row = table.getCoreRowModel().rows.find((r) => r.getValue(key) != null);
+  return row !== undefined && isDateValue(row.getValue(key));
 }
 
 function mobileLabel<TData>(column: Column<TData, unknown>): string {
@@ -447,6 +498,72 @@ function DataTableFilterPopover({
   );
 }
 
+const fromDayKey = (key: string | undefined) => (key ? new Date(`${key}T00:00:00`) : undefined);
+
+/** ปุ่มกรวยของคอลัมน์วันที่ → ปฏิทินเลือกช่วง (คลิกวันเริ่ม แล้ววันสิ้นสุด) */
+function DataTableDateRangeFilterPopover({
+  label,
+  value,
+  onApply,
+}: Readonly<{ label: string; value: string; onApply: (value: string) => void }>) {
+  const t = useTranslations('kit.dataTable');
+  const [open, setOpen] = React.useState(false);
+  const current = decodeDateRangeFilter(value);
+  const [draft, setDraft] = React.useState<DateRange | undefined>(undefined);
+  const apply = (next: DateRange | undefined) => {
+    // เซลล์ปฏิทิน = Date แบบ local → toDateKey (ห้าม formatExportDate — ร่นวันที่ +07:00)
+    onApply(
+      encodeDateRangeFilter({
+        from: next?.from ? toDateKey(next.from) : undefined,
+        to: next?.to ? toDateKey(next.to) : undefined,
+      })
+    );
+    setOpen(false);
+  };
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setDraft({ from: fromDayKey(current?.from), to: fromDayKey(current?.to) });
+      }}
+    >
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={t('filterAria', { label })}
+            className={cn(
+              'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
+              current && 'text-primary opacity-100'
+            )}
+          />
+        }
+      >
+        <Filter className="size-3" strokeWidth={2} aria-hidden />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="flex w-auto flex-col gap-2 p-3">
+        <Calendar
+          mode="range"
+          selected={draft}
+          onSelect={setDraft}
+          defaultMonth={draft?.from}
+          locale={th}
+          autoFocus
+        />
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={() => apply(undefined)}>
+            {t('clear')}
+          </Button>
+          <Button className="flex-1" disabled={!draft?.from} onClick={() => apply(draft)}>
+            {t('apply')}
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /** ▲▼ ใน bottom sheet ของเมนูคอลัมน์ — 44px นิ้วกดได้ (Button ไม่มี size ไอคอน 44px · ปุ่มจับข้าง ๆ ก็เป็น <button> ดิบ) */
 const MOVE_BUTTON =
   'inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 aria-disabled:opacity-40';
@@ -597,6 +714,7 @@ function DataTableHeaderCell<TData>({
   onOverKey,
   onMove,
   onApplyFilter,
+  dateFilter = false,
 }: Readonly<{
   header: Header<TData, unknown>;
   draggable: boolean;
@@ -610,6 +728,8 @@ function DataTableHeaderCell<TData>({
   onOverKey: (key: string | null) => void;
   onMove: (from: string, to: string) => void;
   onApplyFilter: (value: string) => void;
+  /** คอลัมน์วันที่ → ปฏิทินเลือกช่วงแทนช่องพิมพ์ */
+  dateFilter?: boolean;
 }>) {
   'use no memo';
   const key = header.column.id;
@@ -665,7 +785,14 @@ function DataTableHeaderCell<TData>({
           ) : (
             content
           )}
-          {filterable && (
+          {filterable && dateFilter && (
+            <DataTableDateRangeFilterPopover
+              label={filterLabel}
+              value={filterValue}
+              onApply={onApplyFilter}
+            />
+          )}
+          {filterable && !dateFilter && (
             <DataTableFilterPopover
               label={filterLabel}
               value={filterValue}
@@ -1019,9 +1146,10 @@ export function DataTable<TData>({
     serverPaginationState ??
     (disablePagination ? { pageIndex: 0, pageSize: Math.max(1, data.length) } : pagination);
 
+  const tableColumns = React.useMemo(() => withTextFilters(columns), [columns]);
   const table = useReactTable({
     data,
-    columns,
+    columns: tableColumns,
     state: {
       sorting: serverQuery ? serverSorting : sorting,
       columnFilters,
@@ -1154,12 +1282,13 @@ export function DataTable<TData>({
           <div className="flex flex-wrap items-center gap-1.5">
             {activeColumnFilters.map(([key, value]) => {
               const label = labelByKey.get(key) ?? key;
+              const range = decodeDateRangeFilter(value);
               return (
                 // ป้ายตัวกรอง = `Badge` ตามข้อตกลง (ป้ายที่ไม่ใช่สถานะ) — ห้ามเขียน
                 // ทรง pill เองอีกชุด ไม่งั้นสูง/ขนาดตัวอักษรไม่ตรงกับ Badge ที่อื่น
                 <Badge key={key} variant="secondary" className="gap-1">
                   <span className="text-muted-foreground">{label}:</span>
-                  {value}
+                  {range ? dateRangeFilterLabel(range) : value}
                   <button
                     type="button"
                     aria-label={t('clearFilterAria', { label })}
@@ -1231,6 +1360,7 @@ export function DataTable<TData>({
                       onOverKey={setOverKey}
                       onMove={moveColumn}
                       onApplyFilter={(value) => applyColumnFilter(key, value)}
+                      dateFilter={filterable && !def.meta?.filterValueOf && isDateColumn(table, key)}
                     />
                   );
                 })}

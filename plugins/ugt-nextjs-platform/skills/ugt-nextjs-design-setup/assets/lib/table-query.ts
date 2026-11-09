@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.14.0 · ugt-nextjs-design-setup/lib/table-query.ts
-// kit-hash: 8ba537363505
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-query.ts
+// kit-hash: 8bbb092eaf3a
 // source: ugt-hrms (port/adapt จาก gov-boi-smart) — installed by ugt-nextjs-design-setup (org UI kit)
 // port มาจาก gov-boi-smart `lib/table-query.ts` (แบบแผนเดียวกันทั้ง org)
 //
@@ -8,6 +8,7 @@
 // (ผู้ใช้แก้ URL มั่วไม่ควรได้หน้า error) · คีย์คอลัมน์ = `accessorKey` ของ
 // column def และต้องตรงกับชื่อฟิลด์ Prisma
 import { firstParam } from '@/lib/pagination';
+import { dateRangeWhere, decodeDateRangeFilter } from '@/lib/table-filter';
 
 export const FILTER_PREFIX = 'f_';
 
@@ -46,8 +47,17 @@ export function toOrderBy(q: TableQuery): Record<string, 'asc' | 'desc'> | undef
 }
 
 // SQL Server collation เป็น case-insensitive อยู่แล้ว ไม่ต้องใส่ mode (Prisma ไม่รองรับบน MSSQL)
-export function toWhere(q: TableQuery): Record<string, { contains: string }> {
-  return Object.fromEntries(Object.entries(q.filters).map(([k, v]) => [k, { contains: v }]));
+// ค่าจากปฏิทินเลือกช่วงของคอลัมน์วันที่ (lib/table-filter) → gte/lt ตามวันไทย · ห้ามส่งเข้า
+// `contains` — Prisma ปฏิเสธ contains บน DateTime แล้วหน้าได้ 500
+export function toWhere(
+  q: TableQuery
+): Record<string, { contains: string } | { gte?: Date; lt?: Date }> {
+  return Object.fromEntries(
+    Object.entries(q.filters).map(([k, v]) => {
+      const range = decodeDateRangeFilter(v);
+      return [k, range ? dateRangeWhere(range) : { contains: v }];
+    })
+  );
 }
 
 export function toParams(q: TableQuery): URLSearchParams {

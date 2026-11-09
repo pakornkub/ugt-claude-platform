@@ -82,6 +82,13 @@ with raw placeholders breaks the build in the most confusing way available.
 **REMOVED**: follow the CHANGELOG (usually a rename → treat as UPDATE at the
 new path, or a retirement → propose deleting the copy).
 
+**New dependencies**: the checker only reports files the project already has.
+After UPDATE/MERGE, list every `@/…` import of each written file; one that
+does not resolve in the project is an asset added since its version (e.g.
+`ui/data-table.tsx` → `lib/table-filter.ts` + `ui/calendar`) — propose
+copying it from the plugin in the same round, or the build breaks on
+"Module not found".
+
 ### Step 3 — Close out
 
 - Append a dated มติ to the project's decision home (the one `00-index.md`
