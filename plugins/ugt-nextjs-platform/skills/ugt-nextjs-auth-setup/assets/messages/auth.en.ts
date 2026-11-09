@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
 // kit-hash: a6a6b0b41c41
 import type { authTh } from './auth.th';
 
