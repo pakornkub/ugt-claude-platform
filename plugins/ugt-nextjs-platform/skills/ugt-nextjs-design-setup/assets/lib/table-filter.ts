@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.ts
+// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/lib/table-filter.ts
 // kit-hash: 647d848252a8
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**

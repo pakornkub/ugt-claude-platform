@@ -1,6 +1,6 @@
 # Changelog — ugt-php-platform
 
-## Unreleased
+## 0.8.6 (2026-11-09)
 
 - cicd-setup: Quick Rules แถวใหม่ — pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา)
 

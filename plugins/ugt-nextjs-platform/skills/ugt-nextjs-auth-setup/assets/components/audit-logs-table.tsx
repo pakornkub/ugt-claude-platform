@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
 // kit-hash: 3c9a30782b0b
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว

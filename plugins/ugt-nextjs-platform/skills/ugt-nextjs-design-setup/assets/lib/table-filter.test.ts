@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.test.ts
+// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/lib/table-filter.test.ts
 // kit-hash: 25098058e4d4
 import { describe, expect, it } from 'vitest';
 import {

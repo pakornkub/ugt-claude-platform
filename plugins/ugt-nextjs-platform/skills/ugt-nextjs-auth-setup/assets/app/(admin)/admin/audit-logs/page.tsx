@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
 // kit-hash: ac5555da85f2
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
