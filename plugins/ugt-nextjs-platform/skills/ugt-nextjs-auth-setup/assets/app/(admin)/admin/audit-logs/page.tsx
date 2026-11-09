@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
-// kit-hash: 8a6af796e7da
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx
+// kit-hash: ac5555da85f2
 // app/(admin)/admin/audit-logs/page.tsx — read-only ActivityLogs viewer.
 // DataTable โหมด server (DESIGN.md §4): log โตไม่จำกัด — sort + filter + paginate
 // ผ่าน URL state ทั้งหมด "never half" · หน้านี้ parse searchParams แล้ว query จริง
@@ -13,12 +13,13 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getUserPermissions } from '@/lib/get-user-permissions';
 import { firstParam, getTotalPages, parsePageParams, parsePageSize, withPage } from '@/lib/pagination';
 import { parseTableQuery, toOrderBy, type TableFields } from '@/lib/table-query';
+import { dateRangeWhere, decodeDateRangeFilter } from '@/lib/table-filter';
 import { PageDescription, PageHeader, PageHeaderText, PageTitle } from '@/components/ui/page-shell';
 import { AuditLogsTable } from '@/components/audit-logs-table';
 
-// allowlist ของตารางนี้ — sort ได้เฉพาะเวลา · ไม่มีกรองรายคอลัมน์ (การกรองอยู่ที่
-// toolbar: ชื่อผู้ใช้ / ช่วงวันที่ / action ซึ่งหน้านี้อ่านจาก q/from/to/action เอง)
-const AUDIT_FIELDS: TableFields = { sortable: ['createdAt'], filterable: [] };
+// allowlist ของตารางนี้ — sort ได้เฉพาะเวลา · กรองรายคอลัมน์ได้เฉพาะเวลา (ปฏิทินเลือกช่วง
+// ของ DataTable → `f_createdAt`) · ชื่อผู้ใช้ / action อยู่ที่ toolbar หน้านี้อ่านจาก q/action เอง
+const AUDIT_FIELDS: TableFields = { sortable: ['createdAt'], filterable: ['createdAt'] };
 
 export default async function AdminAuditLogsPage({
   searchParams,
@@ -37,8 +38,8 @@ export default async function AdminAuditLogsPage({
   const query = parseTableQuery(sp, AUDIT_FIELDS);
   const q = firstParam(sp.q).trim();
   const action = firstParam(sp.action).trim();
-  const from = firstParam(sp.from).trim();
-  const to = firstParam(sp.to).trim();
+  // ช่วงวันที่จากปฏิทินของคอลัมน์เวลา — ค่าที่ไม่ใช่ช่วง (แก้ URL มือ) = ไม่กรอง
+  const range = decodeDateRangeFilter(query.filters.createdAt);
 
   const where: {
     action?: string;
@@ -46,13 +47,8 @@ export default async function AdminAuditLogsPage({
     createdAt?: { gte?: Date; lt?: Date };
   } = {};
   if (action) where.action = action;
-  // ขอบเขตวันคิดที่เวลาไทยเสมอ (+07:00) — createdAt เป็น instant และ server อาจรัน
-  // UTC · to เป็นขอบ exclusive ของวันถัดไป เพื่อรวมทั้งวันสุดท้าย
-  if (from) where.createdAt = { gte: new Date(`${from}T00:00:00+07:00`) };
-  if (to) {
-    const end = new Date(`${to}T00:00:00+07:00`);
-    where.createdAt = { ...where.createdAt, lt: new Date(end.getTime() + 86_400_000) };
-  }
+  // ขอบเขตวันคิดที่เวลาไทยเสมอ (+07:00) — createdAt เป็น instant และ server อาจรัน UTC
+  if (range) where.createdAt = dateRangeWhere(range);
   if (q) {
     const matched = await prisma.user.findMany({
       where: { OR: [{ name: { contains: q } }, { email: { contains: q } }] },
@@ -128,7 +124,7 @@ export default async function AdminAuditLogsPage({
         fields={AUDIT_FIELDS}
         baseParams={baseParams.toString()}
         actionOptions={actionOptions}
-        filters={{ q, from, to, action }}
+        filters={{ q, action }}
       />
     </div>
   );
