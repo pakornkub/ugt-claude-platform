@@ -2,10 +2,15 @@
 name: ugt-contribute
 description: >
   Use when a gotcha found while working in a project turns out to be true for
-  EVERY project on the org stack and should graduate into the platform plugin
+  EVERY project on the org stack — or on every stack, whatever the language —
+  and should graduate into the platform plugin
   — "ส่ง PR ไป platform", "อัพเดทกลับ plugin", "ยกขึ้น pitfalls", "เอาบั๊กนี้เข้า
   skill", "ให้ทีมอื่นไม่ต้องเจออีก", "contribute กลับ", or when `/ugt-handoff`'s
-  triage lands on "true for every project on this stack". Lifts ONE proven
+  triage lands on "true for every project on this stack". Also right after a
+  Jenkins/SonarQube/deploy failure fixed in this session passes again ("pipeline ผ่านแล้ว",
+  "Quality Gate เขียวแล้ว", "deploy ผ่านแล้ว") — run the gate before the fix
+  is forgotten (a bare "ผ่านแล้ว ขอบคุณ" with no fix behind it is not
+  a trigger). Lifts ONE proven
   troubleshooting entry (or the bug just fixed) into the owning platform skill
   as a PR — after explicit confirmation — and removes it from the project. Reach for it even when the user
   only hints ("อันนี้น่าจะเจอทุกโปรเจค", "น้องทีมอื่นก็เจอ") — the alternative is the
@@ -53,6 +58,29 @@ Borderline (stack-caused but only under one project's setup) → still a **no**
 for now; write the condition into the project entry and revisit when a second
 project hits it.
 
+**Then the scope question — this stack, or every stack?** All three yes, ask
+once more: would a Python or PHP (or Next.js) project hit it too? The cause
+lives in the **shared delivery infra** — Jenkins agent/credentials/webhooks,
+the SonarQube server or gate, the Docker host, compose/volume conventions,
+`/home/docker02/appdata`, the admin handoff — not in the language's toolchain.
+Yes → the "Shared delivery infra" row in §2: one PR covers every stack, so the
+next team on another language doesn't rediscover it.
+
+## 1b. Already covered?
+
+Before cloning, look for the same gotcha — a duplicate PR wastes the reviewer
+and the second one gets closed:
+
+```bash
+gh pr list --repo pakornkub/ugt-claude-platform --state open --search "<2-3 symptom keywords>"
+```
+
+and grep the installed plugins' `skills/` for the error text or symptom. Found
+it already shipped → tell the user to `/plugin update` (their copy is old),
+stop. Found an open PR → show it; with the user's yes, add what this project
+adds as a comment on that PR (`gh pr comment`) instead of opening a second
+one, then continue at §6.
+
 ## 2. Which platform skill owns it
 
 Read the installed plugin's `skills/*/SKILL.md` descriptions; the owner is the
@@ -63,7 +91,8 @@ skill whose description already lists symptoms of this kind.
 | Feature code on Next.js (dates, queries, fetches, forms, tables, render loops) | `ugt-nextjs-pitfalls` | the matching `references/*.md` (dates-timezones · data-fetching · version-skew · form-validation · hardening · ui-rendering) + one row in the SKILL.md symptom table |
 | Something a `*-setup` skill installs (login loop, pipeline red, upload 413, mail never arrives, token drift) | that `ugt-<stack>-<area>-setup` skill | its "symptoms with a documented cause" table / troubleshooting section; the asset itself if the asset is the bug |
 | SonarQube rule that keeps failing the gate | `ugt-nextjs-clean-code` | the rule table |
-| Python / PHP (deploy-only stacks, no pitfalls skill yet) | `ugt-<stack>-cicd-setup` | its troubleshooting section |
+| Python / PHP (deploy-only stacks, no pitfalls skill yet) | `ugt-<stack>-cicd-setup` | `references/build-gotchas.md` (or the reference matching the topic — compose, volumes, healthcheck…) |
+| Shared delivery infra — true on every stack (§1 scope question) | `ugt-core/contracts/cicd.md` **first**, then **every** `ugt-*-cicd-setup` (nextjs · python · php) | contract + each stack's matching place above, same PR; one CHANGELOG bullet per plugin touched; branch `contribute/all-<slug>`, title `feat(all): pitfall <slug>` |
 | Cross-stack org rule (naming, audit columns, secret handling) | `ugt-core/contracts/*.md` **first**, then the stack skill that renders it | contract + rendering skill, same PR |
 
 New reference file only when none of the existing ones fits — and then add it
@@ -181,6 +210,8 @@ rm -rf "$SCRATCH/ugt-claude-platform"
 | DO ✅ | DON'T ❌ |
 | --- | --- |
 | One entry, one PR | Bundle every gotcha of the sprint into one PR |
+| Search open PRs + shipped skills first (§1b) | Open a second PR for a gotcha already in review |
+| Infra gotcha (Jenkins/Sonar/Docker host) → contract + every cicd-setup | Fix it in one stack and let the other languages rediscover it |
 | Gate first (§1) — a no is a fine answer | Lift something because the user is excited about it |
 | Owner = the skill whose description already lists that symptom kind | Default everything into pitfalls |
 | Scratch clone, match the file's existing format | Edit the plugin cache, or a platform checkout you happened to find |
@@ -190,7 +221,8 @@ rm -rf "$SCRATCH/ugt-claude-platform"
 
 ## Verification Checklist
 
-- [ ] §1 answered yes ×3 in the transcript (or the run stopped with the reason)
+- [ ] §1 answered yes ×3 + the scope question (this stack / every stack) in the transcript (or the run stopped with the reason)
+- [ ] §1b searched open PRs + installed skills — no duplicate opened
 - [ ] Entry sits in the owner skill's existing structure, numbered/tabled like its neighbours
 - [ ] SKILL.md symptom row added; description phrase added only if user-facing
 - [ ] CHANGELOG bullet under `## Unreleased`; plugin.json, README and index.html untouched; all four check scripts exit 0

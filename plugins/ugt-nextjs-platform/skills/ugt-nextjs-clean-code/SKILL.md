@@ -188,6 +188,9 @@ on S9382 / S9383 (2026-11), every existing hit inside the new-code period
 list the open issues by rule and look for a rule key you have never seen
 before blaming the last merge.
 
+**Gate went red on a rule this skill doesn't cover?** Once the fix is green,
+run `/ugt-contribute` — the rule belongs in §1's table for the next project.
+
 ## Verification Checklist
 
 **Run the script first** (cwd = project root) — by default it checks only files

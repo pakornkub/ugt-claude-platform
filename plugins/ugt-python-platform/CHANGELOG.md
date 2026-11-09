@@ -1,5 +1,10 @@
 # Changelog — ugt-python-platform
 
+## Unreleased
+
+- cicd-setup: Quick Rules แถวใหม่ — pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา)
+
+
 ## 0.10.1 (2026-10-28)
 
 - verify.mjs: cron service ใน `docker-compose.yml` ที่ไม่มี `TZ` = fail (image เป็น UTC — job รันช้า 7 ชั่วโมง) · เหมือนเช็คใหม่ของ Next.js

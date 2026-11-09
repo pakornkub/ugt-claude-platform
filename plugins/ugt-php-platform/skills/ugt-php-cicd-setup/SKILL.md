@@ -463,6 +463,7 @@ push `develop` → ดู pipeline รันครบ 10 stages → ไล่ §
 | `.env` / `.env.dev` อยู่ในเครื่อง gitignored · commit แค่ `.env.example` | commit `.env` ค่าจริง (= secret รั่ว ไม่ใช่ style nit) |
 | `.dockerignore` กัน `vendor` `coverage` `dc-report` `test-results` `.env`/`.env.*` | ปล่อย artifact ของ CI หรือ secret จริงหลุดเข้า build context |
 | `pdo_sqlsrv` มาคู่กับ `msodbcsql18` + `unixodbc-dev` (→ `references/sqlserver.md`) | `pecl install sqlsrv` บรรทัดเดียว (fail ที่ configure หา `sql.h` ไม่เจอ) |
+| pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา) | ปล่อยวิธีแก้ไว้แค่ใน Jenkinsfile ของโปรเจคนี้ |
 
 ## 7. Verification Checklist
 
@@ -494,6 +495,5 @@ script ครอบฝั่ง repo ให้ทั้งหมด (อ่า�
 
 ถ้า interview ข้อ 8 ตอบ **ใช่** และ pipeline เขียวแล้ว → เปิด session ใหม่ทำ
 characterization test ให้โค้ดเดิมตาม `references/legacy-test-generation.md`
-(ไล่ทีละ class จากใบไปหาราก, ทีมต้อง review ทุกไฟล์ก่อน commit เพราะ test
-ชุดนี้ล็อกพฤติกรรมปัจจุบันรวม bug ที่มีอยู่, และไม่ใช่เงื่อนไขของ Quality Gate
-เพราะ gate นับเฉพาะโค้ดใหม่)
+(ไล่ทีละ class จากใบไปหาราก, ทีมต้อง review ทุกไฟล์ก่อน commit เพราะ test ชุดนี้ล็อกพฤติกรรมปัจจุบันรวม bug ที่มีอยู่,
+และไม่ใช่เงื่อนไขของ Quality Gate เพราะ gate นับเฉพาะโค้ดใหม่)
