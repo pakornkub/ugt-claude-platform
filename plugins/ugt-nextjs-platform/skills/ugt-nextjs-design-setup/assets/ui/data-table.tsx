@@ -1,5 +1,5 @@
 // kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: b108b64124df
+// kit-hash: 802349164c61
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -156,8 +156,11 @@ function withTextFilters<TData>(columns: ColumnDef<TData>[]): ColumnDef<TData>[]
  * `serverQuery` ต้องมีคีย์ใน `fields.filterable` และหน้า/route แปลงช่วงเองด้วย `decodeDateRangeFilter`
  */
 function isDateColumn<TData>(table: TanstackTable<TData>, key: string): boolean {
-  const flag = table.getColumn(key)?.columnDef.meta?.dateFilter;
+  const column = table.getColumn(key);
+  const flag = column?.columnDef.meta?.dateFilter;
   if (flag !== undefined) return flag;
+  // a range already applied = a date column, even when it filtered the page down to no rows
+  if (decodeDateRangeFilter(column?.getFilterValue() as string | undefined)) return true;
   const row = table.getCoreRowModel().rows.find((r) => r.getValue(key) != null);
   return row !== undefined && isDateValue(row.getValue(key));
 }
