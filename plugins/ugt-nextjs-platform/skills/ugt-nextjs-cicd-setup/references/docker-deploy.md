@@ -113,6 +113,21 @@ HEALTHCHECK (wget from Jenkins can false-positive on network/proxy issues).
 | `proxy-network` external | every app shares one network with the reverse proxy (created once on the host) |
 | logging json-file 10m×3 | logs can't grow unbounded |
 
+## D.1 A runtime env var set in the Jenkins Secret File never reaches the app
+
+**Symptom.** A new variable is in `env-<project>(-dev)` and in `lib/env.ts`, but the app
+still behaves as if it is unset — the feature stays off with no error.
+**Root cause.** Deploy runs `cp $ENV_FILE .env` then `docker compose up`. Compose
+reads `.env` only to **substitute `${VAR}` inside the compose file**; the
+service has no `env_file:` — it gets exactly the keys listed under
+`environment:`, nothing else.
+**Fix.** Every runtime variable the app reads goes into `environment:` of
+**both** `docker-compose.yml` and `docker-compose.dev.yml`, in the same PR that
+starts reading it. Optional ones as `VAR: ${VAR:-}` — the app then receives
+`''`, so its env parsing must treat an empty string as unset
+(`emptyStringAsUndefined: true` in `createEnv` of `lib/env.ts`).
+**Origin.** ugt-hrms (RT-074) · 2026-11-05
+
 ## E. Healthcheck gotchas
 
 - **`127.0.0.1`, not `localhost`** — Alpine resolves `localhost` to `::1`

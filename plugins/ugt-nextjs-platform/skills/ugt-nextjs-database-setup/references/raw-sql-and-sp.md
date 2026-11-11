@@ -140,3 +140,29 @@ local getters (`getHours()`, `toLocaleString()`) shifts it by the machine's
 timezone → write one central formatter that reads via
 `getUTCHours()`/`getUTCMinutes()` and force every call site to format through
 it at the data layer, before the UI.
+
+## 7. Same `Prisma.sql` fragment in SELECT and GROUP BY → error 8120
+
+**Symptom.** A `$queryRaw` that groups by a computed expression fails on SQL
+Server: `Column '…' is invalid in the select list because it is not contained
+in either an aggregate function or the GROUP BY clause` (error 8120) — although
+the SELECT and the GROUP BY interpolate the very same helper.
+**Root cause.** Every interpolation of a fragment that carries values binds a
+**fresh set of parameters**: `SELECT ${riskSql(codes)} … GROUP BY ${riskSql(codes)}`
+becomes `… CASE WHEN x IN (@P1,@P2) …` vs `… CASE WHEN x IN (@P4,@P5) …`. SQL
+Server matches GROUP BY expressions by text, so different parameter names =
+different expressions. Unit tests that mock `sqltag` and inline the values
+cannot see it.
+**Fix.** Compute the expression once in a derived table (or `CROSS APPLY`) and
+group by the column name:
+
+```ts
+await prisma.$queryRaw`
+  SELECT t.Risk, COUNT(*) AS Total
+  FROM (SELECT ${riskSql(codes)} AS Risk FROM WeeklySummary WHERE …) t
+  GROUP BY t.Risk`;
+```
+
+Repeating a fragment in WHERE / ORDER BY is fine — those don't have to match.
+Run a raw query that groups by an expression against a real SQL Server once.
+**Origin.** ugt-hrms (RT-077) · 2026-11-09

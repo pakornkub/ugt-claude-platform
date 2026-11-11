@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.79.4 · ugt-nextjs-design-setup/components/language-switcher.tsx
-// kit-hash: 9c7c4a8e9778
+// kit: ugt-nextjs-platform 4.87.0 · ugt-nextjs-design-setup/components/language-switcher.tsx
+// kit-hash: e485ad172492
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // requires next-intl — ship only when the project chose th+en
 'use client';
@@ -18,7 +18,8 @@ export function LanguageSwitcher() {
   function switchLocale(next: 'en' | 'th') {
     startTransition(async () => {
       await setLocale(next);
-      router.refresh();
+      // own transition: the buttons stay disabled until the page arrives in the new language
+      startTransition(() => router.refresh());
     });
   }
 

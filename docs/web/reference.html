@@ -148,10 +148,10 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.86.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.18.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
-      <tr><td><code>ugt-python-platform</code></td><td>0.10.2</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
-      <tr><td><code>ugt-php-platform</code></td><td>0.8.6</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.87.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.18.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-python-platform</code></td><td>0.10.3</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
+      <tr><td><code>ugt-php-platform</code></td><td>0.8.7</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
     </tbody>
   </table></div>
   <figure class="diagram">
@@ -464,6 +464,7 @@
     <li class="no">ห้ามอ่าน <code>process.env</code> ตรง ๆ ในโค้ดแอป — ใช้ <code>@/lib/env</code></li>
     <li>รัน <code>npx prisma generate</code> หลัง <code>migrate dev</code> และหลังแก้ schema ทุกครั้ง</li>
     <li>Raw SQL: <b>sanitize ด้วย regex ก่อน แล้วค่อย parameterize</b> เสมอ · เรียก SP แบบ <code>$executeRaw`EXEC usp_Name ${p1}`</code> · ห้าม <code>$queryRawUnsafe</code> / <code>$executeRawUnsafe</code> กับค่าจากผู้ใช้</li>
+    <li class="no">ห้าม interpolate fragment <code>Prisma.sql</code> ตัวเดียวกันทั้งใน SELECT และ GROUP BY — ผูกพารามิเตอร์ชุดใหม่ทุกครั้ง SQL Server มองเป็นคนละนิพจน์ → error 8120 · คำนวณครั้งเดียวใน derived table แล้ว GROUP BY ชื่อคอลัมน์ (<code>raw-sql-and-sp.md</code> §7)</li>
     <li>ตาราง <code>__EXT___</code> และทุกอย่างบน linked server = SELECT อย่างเดียว · ต้องการปรับค่า → สร้างตาราง override ฝั่งแอป</li>
     <li>ตาราง auth 8 ตัว (<code>User</code>, <code>Session</code>, <code>Account</code>, <code>Verification</code>, <code>RateLimit</code>, <code>Role</code>, <code>Permission</code>, <code>RolePermission</code>) ใช้ชื่อ<b>เอกพจน์</b> — ยกเว้นตามไลบรารี ห้าม "แก้ให้ถูก"</li>
   </ul>
@@ -1558,7 +1559,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
   <p class="say">deploy ด้วย docker / ต่อ SonarQube</p>
   <p class="say">ยัง deploy มือทุกครั้ง</p>
   <p class="say">ส่งข้อมูลไม่ได้หลัง deploy</p>
-  <p>และเมื่อ pipeline มีปัญหาตอนตั้ง: Quality Gate ไม่จบ, OWASP timeout, container ไม่ healthy, <code>COPY .next/standalone</code> ล้ม, env ฝั่ง browser ว่าง, Groovy parse error หลังลบบล็อก</p>
+  <p>และเมื่อ pipeline มีปัญหาตอนตั้ง: Quality Gate ไม่จบ, OWASP timeout, container ไม่ healthy, <code>COPY .next/standalone</code> ล้ม, env ฝั่ง browser ว่าง, env ใหม่ใน Secret File ไม่ถึงแอป, build ล้มตอนโหลดฟ้อนต์, Groovy parse error หลังลบบล็อก</p>
   <p class="not-this"><b>ไม่ใช่งานของตัวนี้ →</b> เขียนโค้ดให้ผ่าน gate ใช้ <a href="#skill-ugt-nextjs-clean-code">clean-code</a> · DB / login ใช้ <a href="#skill-ugt-nextjs-database-setup">database-setup</a> / <a href="#skill-ugt-nextjs-auth-setup">auth-setup</a></p>
 
   <h3 class="sec-h"><span class="n">2</span>ต้องมีก่อน</h3>
@@ -1688,6 +1689,10 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <p><b>สาเหตุ:</b> ตั้งเป็น runtime <code>environment:</code> ใน compose — ค่าถูกฝังใน bundle ตอน build แล้ว</p>
     <p><b>วิธีแก้:</b> ส่งเป็น <code>--build-arg</code> ใน stage Docker Build · ค่าตาม branch คำนวณใน <code>script {}</code></p>
   </div></details>
+  <details class="acc"><summary>เพิ่ม env ใน Jenkins Secret File แล้ว แต่แอปทำเหมือนไม่ได้ตั้ง (ฟีเจอร์ปิดเงียบ ไม่มี error)</summary><div class="body">
+    <p><b>สาเหตุ:</b> compose ใช้ <code>.env</code> แค่แทนค่า <code>${VAR}</code> ในไฟล์ compose — service ไม่มี <code>env_file:</code> ได้เฉพาะชื่อที่อยู่ใต้ <code>environment:</code></p>
+    <p><b>วิธีแก้:</b> เพิ่มชื่อใน <code>environment:</code> ของ compose <b>ทั้งสองไฟล์</b>ใน PR เดียวกับที่เริ่มอ่าน · ตัวที่ไม่บังคับใช้ <code>VAR: ${VAR:-}</code> (แอปได้ <code>''</code> → ตั้ง <code>emptyStringAsUndefined: true</code> ใน <code>lib/env.ts</code>) · <code>references/docker-deploy.md</code> §D.1</p>
+  </div></details>
   <details class="acc"><summary>deploy แล้วหน้าเว็บพัง ทั้งที่ build ผ่าน</summary><div class="body">
     <p><b>สาเหตุ:</b> ลืม <code>--no-build</code> — compose build ใหม่โดยไม่มี build arg ได้ bundle เสียทับของดี</p>
     <p><b>วิธีแก้:</b> <code>docker compose -f &lt;file&gt; up -d --no-build</code> เสมอ</p>
@@ -1760,9 +1765,9 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <p><b>สาเหตุ:</b> ใน Docker ไม่มี <code>.git</code></p>
     <p><b>วิธีแก้:</b> คง <code>ENV HUSKY=0</code> ใน deps stage (directive ใน Dockerfile ห้ามลบทั้งหมด)</p>
   </div></details>
-  <details class="acc"><summary>docker build ล้มตอนโหลดฟ้อนต์ (<code>next/font/google</code>)</summary><div class="body">
-    <p><b>สาเหตุ:</b> เครือข่าย bridge ของ host ออกไปข้างนอกไม่ได้ (proxy / DNS องค์กร)</p>
-    <p><b>วิธีแก้:</b> ใส่ <code>--network host</code> เฉพาะเมื่ออาการนี้เกิดจริง · หรือใช้ <code>next/font/local</code></p>
+  <details class="acc"><summary>Build / docker build ล้มตอนโหลดฟ้อนต์ (<code>next/font/google</code>) — <code>Can't resolve '@vercel/turbopack-next/internal/font/google/font'</code> บางรอบ</summary><div class="body">
+    <p><b>สาเหตุ:</b> <code>next/font/google</code> ดาวน์โหลดฟ้อนต์ตอน build — agent หรือเครือข่าย bridge ของ host ออกไป Google ไม่ได้ (proxy / DNS องค์กร) รอบถัดไปผ่านเลยดูเหมือน flaky</p>
+    <p><b>วิธีแก้:</b> ใส่ <code>--network host</code> เฉพาะเมื่ออาการนี้เกิดจริง · หรือย้ายเป็น <code>next/font/local</code> — ฟ้อนต์เดิมเป็นไฟล์ใน <code>app/fonts/</code> ตัวแปร CSS เดิม (สูตรใน design-setup <code>references/root-layout.md</code>) แล้วบันทึกมติใน DESIGN.md §10</p>
   </div></details>
   <details class="acc"><summary>โฟลเดอร์ย่อยของ volume เป็นของ <code>root:root</code> แอปเขียนไม่ได้</summary><div class="body">
     <p><b>สาเหตุ:</b> ไม่ได้ใส่ชื่อ volume จริงในบรรทัด <code>for p in</code> ของ Jenkinsfile — dockerd สร้างโฟลเดอร์ให้เอง</p>
@@ -2038,6 +2043,13 @@ await prisma.$queryRaw`EXEC usp_GetShiftSchedule ${toLocalYmd(date)}, ${empCode}
     <details class="acc"><summary>บันทึกแล้วหน้าไม่อัปเดต รายการเก่าค้างจนกด reload (เคยค้าง 30 นาที)</summary><div class="body"><p><b>สาเหตุ:</b> <code>revalidatePath</code>/<code>revalidateTag</code> ล้างแค่ cache ฝั่ง server — ข้อมูลใน React Query ค้างจนหมด <code>staleTime</code><br><b>วิธีแก้:</b> mutation ที่ผลแสดงผ่าน React Query ต้อง <code>invalidateQueries</code> (หรือ <code>setQueryData</code>) ด้วย prefix key</p>
 <pre class="code">await queryClient.invalidateQueries({ queryKey: ['employee-monitor'] }); // prefix
 router.push(backUrl);</pre></div></details>
+    <details class="acc"><summary>กดแล้วไม่มี loading — ปุ่มหยุดหมุน dialog ปิด แต่ตารางยังเป็นข้อมูลเดิมอีก 2–3 วินาที</summary><div class="body"><p><b>สาเหตุ:</b> busy จบตอน <b>action</b> เสร็จ ไม่ใช่ตอน<b>ข้อมูล</b>มาถึง — <code>router.refresh()</code> ที่สั่งหลัง <code>await</code> ใน <code>startTransition(async …)</code> อยู่นอก transition (React 19) · หรือ <code>void invalidateQueries</code> แล้วปิด dialog ทันที (<code>QueryProgress</code> ไม่แสดง background refetch)<br><b>วิธีแก้:</b> ห่อ refresh ด้วย transition ของมันเอง + ตารางจางระหว่างรอ · ฝั่ง React Query <code>await</code> refetch ก่อนล้าง busy</p>
+<pre class="code">startTransition(async () => {
+  await saveAction(input);
+  setOpen(false);
+  startTransition(() => router.refresh()); // isPending ค้างจนข้อมูลใหม่มา
+});
+await queryClient.invalidateQueries({ queryKey: ['approvals'] }); // แล้วค่อย setBusy(false)</pre></div></details>
     <details class="acc"><summary>เปลี่ยนปี/เดือนแล้วรายการว่างตลอด หรือ badge นับไม่ตรงกับรายการ</summary><div class="body"><p><b>สาเหตุ:</b> filter ที่เปลี่ยน<b>ชุดแถว</b>ถูกทำฝั่ง client บนข้อมูลที่ server กรองมาแล้ว · badge กับ list ใช้เงื่อนไขคนละชุด<br><b>วิธีแก้:</b> ใส่ filter ใน query key แล้วดึงใหม่จาก server เช่น <code>queryKey: ['leave-approval', year, month]</code> · badge กับ list ใช้ where-builder เดียวกัน (helper ใน <code>lib/services/*-scope.ts</code>)</p></div></details>
     <details class="acc"><summary>"Maximum update depth exceeded" ชี้ไปที่ UI primitive ที่ไม่เกี่ยว</summary><div class="body"><p><b>สาเหตุ:</b> array ที่คำนวณใหม่ทุก render (<code>[...rows].sort()</code>, <code>.filter()</code>, <code>.map()</code>) ส่งเป็น prop → effect ของตารางยิง → parent <code>setState</code> → render ใหม่ → วนไม่จบ<br><b>วิธีแก้:</b></p><ul>
       <li>ห่อ array ที่ derive ทุกตัวด้วย <code>useMemo</code></li>
@@ -2689,7 +2701,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
-  <p><span class="badge">ugt-python-platform 0.10.2</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-python-platform 0.10.3</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>ยังไม่ผ่าน pilot ทุก shape</b>FastAPI · Flask · Django · Batch job ยังไม่เคยรันกับโปรเจคจริง — ค่าคงที่ถูกตรวจด้วยเหตุผลแล้วแต่ยังไม่ผ่าน build จริง · โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้ แล้วส่ง feedback กลับเป็น PR ที่ platform · plugin นี้ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -2767,6 +2779,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
     <details class="acc"><summary>container healthy แต่เขียนไฟล์ลง volume ไม่ได้ — <code>PermissionError: [Errno 13]</code></summary><div class="body"><p><b>สาเหตุ:</b> image รันเป็น user <code>app</code> แต่ path บน host เป็นของ UID อื่น · หรือ <code>&lt;name&gt;</code> ไม่อยู่ในบรรทัด <code>for p in</code> จึงถูก dockerd สร้างเป็น <code>root:root</code><br><b>วิธีแก้:</b> ใส่ทุก <code>&lt;name&gt;</code> ในบล็อก <code>[VOLUME]</code> ของ stage Deploy (mkdir + chown ให้เอง)</p></div></details>
     <details class="acc"><summary>unhealthy เร็วกว่า <code>start_period</code> — log: <code>exec … operation not permitted</code></summary><div class="body"><p><b>สาเหตุ:</b> <code>security_opt: [no-new-privileges:true]</code> บน docker02 จริง (Ubuntu 24.04 + AppArmor) — บน Docker Desktop ไม่เกิด<br><b>วิธีแก้:</b> ห้ามใส่ <code>no-new-privileges:true</code> ใน compose ทั้งสองไฟล์ · ถ้า unhealthy เร็วผิดปกติ ดู <code>docker inspect</code> (RestartCount) + <code>docker logs</code> ก่อนไล่ DB</p></div></details>
     <details class="acc"><summary>ต่อ DB ค้างจน timeout ทั้งที่ <code>DATABASE_URL</code> ถูก และเครื่อง host ต่อได้</summary><div class="body"><p><b>สาเหตุ:</b> container ใช้ DNS ของ Docker — ชื่อสั้นอย่าง <code>SQLSRV01</code> resolve ไม่ได้<br><b>วิธีแก้:</b> ใช้ FQDN → หรือ IP → หรือใส่ <code>dns:</code> ขององค์กรใน compose ทั้งสองไฟล์</p></div></details>
+    <details class="acc"><summary>เพิ่ม env ใน Jenkins Secret File แล้ว แต่แอปทำเหมือนไม่ได้ตั้ง</summary><div class="body"><p><b>สาเหตุ:</b> compose ใช้ <code>.env</code> แค่แทนค่า <code>${VAR}</code> — service ได้เฉพาะชื่อใต้ <code>environment:</code><br><b>วิธีแก้:</b> เพิ่มใน <code>environment:</code> ของ compose ทั้งสองไฟล์ใน PR เดียวกับที่เริ่มอ่าน · ตัวไม่บังคับใช้ <code>${VAR:-}</code> แล้วให้แอปมอง <code>''</code> เป็นไม่ได้ตั้ง (<code>references/compose.md</code>)</p></div></details>
     <details class="acc"><summary>Quality Gate บล็อกที่ coverage 0% โดยไม่มี error</summary><div class="body"><p><b>สาเหตุ:</b> ไม่มี <code>coverage.xml</code> + <code>test-results/junit.xml</code><br><b>วิธีแก้:</b> ยืนยันว่า <code>pytest</code> ในเครื่องสร้างสองไฟล์นี้จริงก่อน push</p></div></details>
     <details class="acc"><summary>[cron service] pipeline เขียว แต่ job ไม่เคยรัน — <code>docker ps</code> เห็น <code>&lt;project&gt;-cron</code> restart วน</summary><div class="body"><p><b>สาเหตุ:</b> crontab ผิดหรือไม่ได้ติดตั้ง supercronic ใน image — health poll ของ Jenkins ดูแค่ container เว็บ จึงไม่จับ<br><b>วิธีแก้:</b> เพิ่ม <code>RUN supercronic -test /app/jobs.crontab</code> หลัง <code>COPY . .</code> ใน Dockerfile ให้ build แดงแทน · ดู <code>docker logs &lt;project&gt;-cron</code></p></div></details>
     <details class="acc"><summary>[cron service] job รันช้าไป 7 ชั่วโมง (ตั้ง 08:00 รันตอน 15:00)</summary><div class="body"><p><b>สาเหตุ:</b> service <code>cron</code> ไม่ได้ตั้ง <code>TZ</code> — <code>Dockerfile.web</code> ไม่มี TZ จึงเป็น UTC<br><b>วิธีแก้:</b> ใส่ <code>TZ: Asia/Bangkok</code> ใน <code>environment:</code> ของ service <code>cron</code> (และ service app ให้ <code>datetime.now()</code> ตรงกัน)</p></div></details>
@@ -2787,7 +2800,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-php-cicd-setup" class="skill">
   <h2><code>ugt-php-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค PHP ที่มีอยู่แล้ว — Laravel, CodeIgniter, PHP legacy และ WordPress</p>
-  <p><span class="badge">ugt-php-platform 0.8.6</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-php-platform 0.8.7</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>สถานะ pilot ราย shape</b>PHP legacy (ไม่มี framework) <b>ผ่าน pilot</b> — <code>ugt-mscpl-ana</code> (2026-08) · <code>ugt-bd-forecast</code> (2026-09-03) · Laravel · CodeIgniter (CI3/CI4) · WordPress <b>ยังไม่ผ่าน</b> · plugin ยังไม่ tag · ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -2865,6 +2878,7 @@ vendor/bin/phpunit</pre>
     <details class="acc"><summary><code>pecl install sqlsrv</code> fail ที่ configure หา <code>sql.h</code> ไม่เจอ</summary><div class="body"><p><b>วิธีแก้:</b> <code>pdo_sqlsrv</code> ต้องมาคู่กับ <code>msodbcsql18</code> + <code>unixodbc-dev</code> (รายละเอียด <code>references/sqlserver.md</code>)</p></div></details>
     <details class="acc"><summary>health ตอบ 500 แทน 503 — <code>SQLSTATE[IMSSP]: An unsupported attribute was designated on the PDO object</code></summary><div class="body"><p><b>สาเหตุ:</b> ใส่ <code>PDO::ATTR_TIMEOUT</code> กับ DSN <code>sqlsrv:</code><br><b>วิธีแก้:</b> connection helper ที่ health พึ่งพาใส่ได้แค่ <code>PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION</code></p></div></details>
     <details class="acc"><summary>ต่อ DB <code>Login timeout expired</code> ทั้งที่ค่าถูกและเครื่อง host ต่อได้</summary><div class="body"><p><b>สาเหตุ:</b> ชื่อ host สั้นของ DB resolve ไม่ได้ใน DNS ของ Docker<br><b>วิธีแก้:</b> FQDN → IP → <code>dns:</code> ขององค์กรใน compose ทั้งสองไฟล์</p></div></details>
+    <details class="acc"><summary>เพิ่ม env ใน Jenkins Secret File แล้ว แต่แอปทำเหมือนไม่ได้ตั้ง</summary><div class="body"><p><b>สาเหตุ:</b> compose ใช้ <code>.env</code> แค่แทนค่า <code>${VAR}</code> — service ได้เฉพาะชื่อใต้ <code>environment:</code><br><b>วิธีแก้:</b> เพิ่มใน <code>environment:</code> ของ compose ทั้งสองไฟล์ใน PR เดียวกับที่เริ่มอ่าน · ตัวไม่บังคับใช้ <code>${VAR:-}</code> แล้วให้แอปมอง <code>''</code> เป็นไม่ได้ตั้ง (<code>references/compose.md</code>)</p></div></details>
     <details class="acc"><summary>เปิดผ่าน proxy ที่ <code>https://host/app</code> แล้ว CSS/JS/รูป 404 แต่ <code>https://host/app/</code> ปกติ</summary><div class="body"><p><b>สาเหตุ:</b> แอป legacy อ้าง asset แบบ relative — browser ตัด segment สุดท้ายทิ้ง<br><b>วิธีแก้:</b> inline script บรรทัดเดียวเป็นสิ่งแรกใน <code>&lt;head&gt;</code> ที่เติม <code>/</code> ท้าย URL (สูตรใน <code>references/subpath.md</code>) · เช็คผ่าน URL เต็มหลัง proxy</p></div></details>
     <details class="acc"><summary>stage ที่ใช้ <code>docker run -v "$PWD/…"</code> พัง: <code>mkdir /var/jenkins_home: read-only file system</code></summary><div class="body"><p><b>สาเหตุ:</b> Jenkins agent อยู่ใน container แล้ว mount <code>docker.sock</code> (DooD) — <code>$PWD</code> เป็น path ข้างใน agent ไม่ใช่บน host<br><b>วิธีแก้:</b> bind mount ต้องเป็น host path จริงเท่านั้น (<code>references/volumes.md</code>)</p></div></details>
     <details class="acc"><summary>container healthy แต่ <code>www-data</code> เขียน volume ไม่ได้</summary><div class="body"><p><b>สาเหตุ:</b> <code>&lt;name&gt;</code> ไม่อยู่ในบรรทัด <code>for p in</code> ของบล็อก <code>[VOLUME]</code> จึงถูกสร้างเป็น <code>root:root</code><br><b>วิธีแก้:</b> ใส่ชื่อจริงทุกตัวในบรรทัดนั้น</p></div></details>
@@ -3075,7 +3089,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.86.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.87.0</span></div></footer>
 
 <script>
 (() => {

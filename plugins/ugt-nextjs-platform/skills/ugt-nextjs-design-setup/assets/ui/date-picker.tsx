@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.1 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 46f01b423a1c
+// kit: ugt-nextjs-platform 4.87.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 96ff523bf427
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -121,7 +121,8 @@ export function DatePicker({
           selected={value}
           onSelect={(date) => {
             onSelect(date);
-            setOpen(false);
+            // re-clicking the selected day deselects (date = undefined) — keep the popover open
+            if (date) setOpen(false);
           }}
           disabled={disabled}
           autoFocus

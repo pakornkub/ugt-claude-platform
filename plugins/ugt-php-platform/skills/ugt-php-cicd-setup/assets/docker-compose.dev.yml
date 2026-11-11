@@ -23,6 +23,8 @@ services:
     networks:
       - proxy-network
     environment:
+      # Only the keys listed here reach the container — .env just fills ${VAR}:
+      # a new runtime var is added here AND in the other compose file, same PR.
       # Dev .env MUST differ from prod in at least:
       #   DATABASE_URL  → separate dev DB (never point dev at prod data)
       #   auth secret   → never share secrets between environments

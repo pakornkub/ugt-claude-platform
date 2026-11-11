@@ -214,8 +214,9 @@ check('layout.tsx wires the agreed font via next/font', () => {
       : { ok: false, msg: `DESIGN.md keeps the project font (${kept}) but app/layout.tsx imports nothing from next/font` };
   }
   const problems = [];
-  if (!/Noto_Sans_Thai/.test(l)) problems.push('Noto_Sans_Thai not imported');
-  if (!/Inter/.test(l)) problems.push('Inter not imported');
+  // next/font/google (Inter / Noto_Sans_Thai) or next/font/local files (inter-*.woff2 / noto-sans-thai-*.woff2)
+  if (!/Noto_Sans_Thai|noto-sans-thai[^'"]*\.woff2/.test(l)) problems.push('Noto Sans Thai not wired (Noto_Sans_Thai or a noto-sans-thai*.woff2 file)');
+  if (!/Inter|inter[^'"]*\.woff2/.test(l)) problems.push('Inter not wired (Inter or an inter*.woff2 file)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 

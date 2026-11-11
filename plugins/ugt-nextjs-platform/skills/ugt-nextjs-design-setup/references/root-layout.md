@@ -20,6 +20,31 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 // <html lang="th" className={`${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`}>
 ```
 
+### Build host can't reach Google → `next/font/local`
+
+**Symptom.** Jenkins Build / Docker build fails with
+`Can't resolve '@vercel/turbopack-next/internal/font/google/font'` (or a font
+fetch error) on runs where the agent cannot reach Google — passes again on the
+next run, so it looks flaky.
+**Root cause.** `next/font/google` downloads the font files **at build time**;
+no network to Google = no build.
+**Fix.** Same fonts, same CSS variables, files committed under `app/fonts/` —
+`globals.css` does not change:
+
+```tsx
+import localFont from 'next/font/local';
+// files copied out of `npm pack @fontsource-variable/inter` / `@fontsource-variable/noto-sans-thai` / `geist`
+// (no dependency added) + their OFL-*.txt beside them
+const inter = localFont({ src: './fonts/inter-latin-wght-normal.woff2', variable: '--font-inter', weight: '100 900' });
+const notoSansThai = localFont({ src: './fonts/noto-sans-thai-thai-wght-normal.woff2', variable: '--font-noto-sans-thai', weight: '100 900' });
+const geistMono = localFont({ src: './fonts/geist-mono-variable.woff2', variable: '--font-geist-mono', weight: '100 900' });
+```
+
+Record it as a มติ in DESIGN.md §10 so nobody switches back to Google.
+`verify.mjs` accepts either form. (`--network host` on the build is the other
+workaround — `ugt-nextjs-cicd-setup` `docker-deploy.md` §A.)
+**Origin.** ugt-hrms · 2026-11-02
+
 `<html lang="th">` → `<html lang={locale}>` เมื่อ ภาษา = th+en (อ่าน locale
 ด้วย `getLocale()` จาก `next-intl/server` ใน RootLayout ซึ่งเป็น Server
 Component อยู่แล้ว) — `lang` ที่ไม่ตรงภาษาจริงทำให้ screen reader อ่านผิดภาษา
