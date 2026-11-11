@@ -1,5 +1,5 @@
 'use client';
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/page-actions-slot.tsx
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/page-actions-slot.tsx
 // kit-hash: 92725557d57d
 // source: ugt-hrms components/ui/page-actions-slot.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // มติ ugt-hrms DESIGN §10 2026-11-04 · references/tabbed-pages.md (option B)

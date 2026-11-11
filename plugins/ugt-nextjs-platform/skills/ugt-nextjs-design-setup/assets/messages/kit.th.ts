@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/messages/kit.th.ts
 // kit-hash: c0463a63c118
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.

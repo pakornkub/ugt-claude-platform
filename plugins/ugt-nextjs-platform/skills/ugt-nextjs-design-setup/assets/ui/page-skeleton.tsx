@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/page-skeleton.tsx
-// kit-hash: 56ef9c06f8ee
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/page-skeleton.tsx
+// kit-hash: 2b67d8008073
 // source: ugt-hrms components/ui/page-skeleton.tsx (radix-mira era) — re-built on the kit PageShell / base-mira Card by ugt-nextjs-design-setup
 // มติ ugt-hrms DESIGN §10 2026-09-30 "skeleton ตามโครงหน้า" · DESIGN.md §6
 import * as React from 'react';
@@ -108,11 +108,22 @@ export function SkeletonTableCard({
   columns = 5,
   toolbar = true,
   footer = true,
+  card = true,
   className,
-}: Readonly<{ rows?: number; columns?: number; toolbar?: boolean; footer?: boolean; className?: string }>) {
+}: Readonly<{
+  rows?: number;
+  columns?: number;
+  toolbar?: boolean;
+  footer?: boolean;
+  /** false = no card surface — inside a Dialog/Sheet or an existing Card (same as DataTable `card={false}`) */
+  card?: boolean;
+  className?: string;
+}>) {
   const cellIds = ids('col', columns);
   return (
-    <div className={cn('flex flex-col overflow-clip rounded-lg bg-card shadow-xs ring-1 ring-border', className)}>
+    <div
+      className={cn('flex flex-col', card && 'overflow-clip rounded-lg bg-card shadow-xs ring-1 ring-border', className)}
+    >
       {toolbar && (
         <div className="flex flex-col gap-2 border-b p-3 sm:flex-row sm:flex-wrap sm:items-center">
           <Skeleton className="h-9 w-full sm:w-80" />
@@ -128,10 +139,10 @@ export function SkeletonTableCard({
       {ids('row', rows).map((rowId) => (
         <div key={rowId} className="flex h-14 items-center gap-4 border-b px-3 last:border-b-0">
           {cellIds.map((cellId, c) => (
-            <Skeleton
-              key={`${rowId}-${cellId}`}
-              className={cn('h-4', c === 0 ? 'flex-[2]' : 'flex-1 max-sm:hidden', BAR_WIDTHS[c % BAR_WIDTHS.length])}
-            />
+            // the column takes the flex share; the bar inside keeps its ragged width
+            <div key={`${rowId}-${cellId}`} className={c === 0 ? 'flex-[2]' : 'flex-1 max-sm:hidden'}>
+              <Skeleton className={cn('h-4', BAR_WIDTHS[c % BAR_WIDTHS.length])} />
+            </div>
           ))}
         </div>
       ))}

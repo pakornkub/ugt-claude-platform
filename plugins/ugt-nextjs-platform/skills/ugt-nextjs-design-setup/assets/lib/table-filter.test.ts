@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.test.ts
-// kit-hash: b1d86fd158e1
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/lib/table-filter.test.ts
+// kit-hash: 58f62e0c5792
 import { describe, expect, it } from 'vitest';
 import {
   dateRangeFilterLabel,
@@ -9,6 +9,7 @@ import {
   decodeOptionFilter,
   encodeDateRangeFilter,
   encodeOptionFilter,
+  isOptionFilter,
   matchesOptionFilter,
   matchesTextFilter,
   optionFilterLabel,
@@ -88,6 +89,18 @@ describe('DataTable option filter', () => {
     expect(decodeOptionFilter(encodeOptionFilter(['PENDING', 'REJECTED']))).toEqual(['PENDING', 'REJECTED']);
     expect(decodeOptionFilter('')).toEqual([]);
     expect(decodeOptionFilter(undefined)).toEqual([]);
+  });
+
+  it('keeps an empty-value option and padded codes, and tells typed text apart', () => {
+    const blank = encodeOptionFilter(['']);
+    expect(blank).not.toBe('');
+    expect(matchesOptionFilter('', blank)).toBe(true);
+    expect(matchesOptionFilter('PENDING', blank)).toBe(false);
+    const padded = encodeOptionFilter([' A', 'B ']);
+    expect(decodeOptionFilter(padded.trim())).toEqual([' A', 'B ']);
+    expect(isOptionFilter(padded)).toBe(true);
+    expect(isOptionFilter('pend')).toBe(false);
+    expect(decodeOptionFilter('pend')).toEqual([]);
   });
 
   it('passes only picked values, everything when nothing is picked', () => {

@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/code-label.tsx
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/code-label.tsx
 // kit-hash: c728466b4efc
 // source: ugt-hrms components/ui/code-label.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // มติ ugt-hrms DESIGN §10 2026-10-28 "รหัส+คำอธิบาย" (แบบ B) · DESIGN.md §4 ตาราง Badge

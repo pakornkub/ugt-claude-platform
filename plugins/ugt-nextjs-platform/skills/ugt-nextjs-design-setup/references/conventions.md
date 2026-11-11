@@ -88,7 +88,9 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 description in `AlertDialogHeader`** (A9 — its grid squeezes content; put it after, e.g.
 `ConfirmActionDialog` `children`). Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
 dialog**. No dialog-over-dialog except one AlertDialog confirm over a form. A dirty form never closes
-silently on Esc/outside-click. Value-picking overlays (DatePicker too) go through `ui/responsive-popover` — bottom
+silently on Esc/outside-click. **The overlay is the card** (DESIGN.md §4): no `Card` or tinted
+section boxes inside — headings + spacing, `bg-popover` kept; exceptions are the kit's dialog pieces
+(`DetailSection`/`ApprovalTimeline`, `ReasonDialog` items); DataTable / `QueryLoading` take `card={false}`. Value-picking overlays (DatePicker too) go through `ui/responsive-popover` — bottom
 sheet on phones (A12) · `Combobox` too: tall sheet, **search input on top** (keyboard hides only the list tail) · `form-pages.md`.
 
 ## Badge vs StatusBadge
@@ -166,7 +168,8 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 ## Tabs · Tooltip · Chart · Rich text
 
 - Tabs: sub-views of one page · state in `?tab=` · > ~5 = split · each tab's primary action swaps in
-  `PageActions` (none if it creates nothing; page-wide = constant `soft`) — `references/tabbed-pages.md`.
+  `PageActions` (none if it creates nothing; page-wide = constant `soft`) — `references/tabbed-pages.md`
+  (A: page picks the button from `?tab=` · B: the tab's own table portals it up via `ui/page-actions-slot`).
 - Tooltip: `TooltipProvider` delay 0 · never the sole carrier of essential
   info (mobile has no hover).
 - Chart: `ui/chart` (recharts via shadcn — `npx shadcn add chart` when the

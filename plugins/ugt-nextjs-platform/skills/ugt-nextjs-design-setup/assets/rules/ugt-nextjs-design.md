@@ -82,7 +82,9 @@ beautification skill. The short version that catches 90% of violations:
   **grows with data** is never a fixed-height Dialog. One primary button per
   dialog; dirty forms confirm before closing. The overlay is the card:
   no `Card` (or tinted section boxes) inside a Dialog/Sheet — group with
-  headings + spacing, keep the primitive's `bg-popover` surface. Dialogs are 3 zones (header
+  headings + spacing, keep the primitive's `bg-popover` surface (kit pieces built
+  for dialogs are the exception: `DetailSection`/`ApprovalTimeline`, `ReasonDialog`
+  items; DataTable / `QueryLoading` inside take `card={false}`). Dialogs are 3 zones (header
   line · body · muted footer, from the primitive); a read-only dialog has
   **no footer** (✕ closes it); `AlertDialogHeader` holds title + a short
   description only — content goes after it.

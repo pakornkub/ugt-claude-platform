@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/approval-timeline.tsx
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/approval-timeline.tsx
 // kit-hash: 1cb8f750a95c
 // source: ugt-hrms components/ui/approval-timeline.tsx — re-built as a data-in component on the kit DetailSection by ugt-nextjs-design-setup
 // มติ ugt-hrms DESIGN §10 2026-10-28 "การ์ดสถานะการอนุมัติเป็นเส้นเวลาเดียวกันทุก dialog" (แบบ A)

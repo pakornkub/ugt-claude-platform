@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/messages/kit.en.ts
 // kit-hash: e3b631a07728
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {

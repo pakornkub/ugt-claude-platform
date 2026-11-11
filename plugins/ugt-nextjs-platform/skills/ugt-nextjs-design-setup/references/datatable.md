@@ -145,8 +145,14 @@ The popover lists the labels with a row count per value (counted before
 filtering, so the numbers stay put while ticking) and filters on each tick; the
 chip shows the labels, never the codes. Compared value = the accessor, or
 `meta.filterValueOf(row)` when the status on screen is derived from several
-fields (a display column with no accessor gets it as one). **Client tables only**
-— with `serverQuery` the column falls back to the default rule (no tick list).
+fields (a display column with no accessor gets it as one, not sortable unless
+it says `enableSorting`; with neither, the column gets no filter at all). A
+null/undefined value compares as `''` — add `{ value: '', label: 'ไม่ระบุ' }` to
+let users pick the blanks. A column's own `filterFn` replaces the matching (the
+tick list stays) — it receives the encoded value: read it with `decodeOptionFilter`.
+**Client tables only** — with `serverQuery` the column gets no column filter
+(a typed label would never match the stored code); filter it with stat cards or
+`toolbarFilters`.
 
 **Toolbar** — one row, fixed order, matching the component (`data-table.tsx`):
 **search input leftmost** → `toolbarFilters` (page-level filters, wide →

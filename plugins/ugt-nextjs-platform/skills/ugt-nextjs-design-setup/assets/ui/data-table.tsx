@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 5c47a8e67af7
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: d398e13aa3f1
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -66,6 +66,7 @@ import {
   encodeDateRangeFilter,
   encodeOptionFilter,
   isDateValue,
+  isOptionFilter,
   matchesOptionFilter,
   matchesTextFilter,
   optionFilterLabel,
@@ -150,7 +151,8 @@ declare module '@tanstack/react-table' {
 
 /** ค่าที่คอลัมน์ `filterOptions` ใช้เทียบของแถวหนึ่ง */
 function optionValueOf<TData>(meta: ColumnDef<TData>['meta'], row: Row<TData>, columnId: string): string {
-  return meta?.filterValueOf ? meta.filterValueOf(row.original) : String(row.getValue(columnId));
+  const v: unknown = meta?.filterValueOf ? meta.filterValueOf(row.original) : row.getValue(columnId);
+  return v == null ? '' : String(v); // null/undefined = the "ไม่ระบุ" option (value '')
 }
 
 /** แถวต่อค่าของคอลัมน์ `filterOptions` — นับจากข้อมูลทั้งหมด (ก่อนกรอง) ตัวเลขจึงไม่หายตอนติ๊ก */
@@ -171,24 +173,26 @@ function countOptionValues<TData>(table: TanstackTable<TData>, key: string): Map
  */
 function withTextFilters<TData>(columns: ColumnDef<TData>[]): ColumnDef<TData>[] {
   return columns.map((c) => {
+    if (c.filterFn) return c;
     const meta = c.meta;
+    const valueOf = meta?.filterValueOf;
+    const textMatch = (row: Row<TData>, columnId: string, value: unknown) =>
+      matchesTextFilter(valueOf ? valueOf(row.original) : row.getValue(columnId), value as string);
     if (meta?.filterOptions) {
       // TanStack กรองได้เฉพาะคอลัมน์ที่มี accessor — คอลัมน์สถานะแบบ `id` + `cell` ใช้ filterValueOf แทน
-      const needsAccessor = !('accessorKey' in c) && !('accessorFn' in c) && meta.filterValueOf;
+      // (accessor ที่ฉีดเข้าไปไม่ทำให้คอลัมน์ sort ได้เอง)
+      const needsAccessor = !('accessorKey' in c) && !('accessorFn' in c) && valueOf;
       return {
         ...c,
-        ...(needsAccessor ? { accessorFn: meta.filterValueOf } : {}),
+        ...(needsAccessor ? { accessorFn: valueOf, enableSorting: c.enableSorting ?? false } : {}),
+        // ค่าที่ติ๊ก = เทียบรหัสตรงตัว · ข้อความจากช่องค้นหาหลัก (filterColumn) = ค้นแบบเดิม
         filterFn: (row: Row<TData>, columnId: string, value: unknown) =>
-          matchesOptionFilter(optionValueOf(meta, row, columnId), value as string),
+          isOptionFilter(value as string)
+            ? matchesOptionFilter(optionValueOf(meta, row, columnId), value as string)
+            : textMatch(row, columnId, value),
       } as ColumnDef<TData>;
     }
-    if (c.filterFn) return c;
-    const valueOf = meta?.filterValueOf;
-    return {
-      ...c,
-      filterFn: (row: Row<TData>, columnId: string, value: unknown) =>
-        matchesTextFilter(valueOf ? valueOf(row.original) : row.getValue(columnId), value as string),
-    } as ColumnDef<TData>;
+    return { ...c, filterFn: textMatch } as ColumnDef<TData>;
   });
 }
 
@@ -241,7 +245,10 @@ function isPinnedKey(key: string): boolean {
 function isFilterableColumn<TData>(def: ColumnDef<TData>, client: boolean): boolean {
   const meta = def.meta;
   if (meta?.filterable !== undefined) return meta.filterable;
-  if (client && meta?.filterOptions) return true;
+  // ตาราง server: ไม่มีรายการติ๊ก และช่องพิมพ์ป้ายก็หารหัสไม่เจอ → ไม่มีกรองที่หัวคอลัมน์ (ใช้ toolbarFilters)
+  // ตาราง client: ต้องมีที่มาของค่า — คอลัมน์ `id` + `cell` ล้วนนับได้ 0 ทุกค่า
+  if (meta?.filterOptions)
+    return client && ('accessorKey' in def || 'accessorFn' in def || !!meta.filterValueOf);
   return 'accessorKey' in def && typeof def.header === 'string' && !meta?.numeric;
 }
 
@@ -516,7 +523,7 @@ function DataTableOptionsFilterPopover({
       >
         <Filter className="size-3" strokeWidth={2} aria-hidden />
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-60 flex-col gap-1 p-2">
+      <PopoverContent align="start" role="group" aria-label={label} className="flex w-60 flex-col gap-1 p-2">
         {options.map((o, i) => (
           <div key={o.value} className="flex items-center gap-2 rounded-sm px-1.5 py-1 hover:bg-muted">
             <Checkbox
@@ -536,7 +543,7 @@ function DataTableOptionsFilterPopover({
           variant="ghost"
           size="sm"
           className="mt-1 self-start"
-          disabled={picked.length === 0}
+          // ไม่ disable หลังกด — ปุ่มที่ถือโฟกัสอยู่แล้วถูก disable ทำให้โฟกัสหลุดไป body
           onClick={() => onApply('')}
         >
           {t('clear')}

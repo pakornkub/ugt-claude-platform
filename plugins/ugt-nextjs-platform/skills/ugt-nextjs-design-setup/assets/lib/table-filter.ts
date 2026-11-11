@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.ts
-// kit-hash: 80ad7d2fd8c0
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/lib/table-filter.ts
+// kit-hash: 01baa979ec1e
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**
  * DataTable column filters — match what the cell SHOWS, not the raw value.
@@ -117,14 +117,27 @@ export interface FilterOption {
   label: string;
 }
 
-const OPTION_SEP = '\u001f'; // never inside a code or a label
+// Prefixed like the range filter: `['']` (a "ไม่ระบุ" option) stays distinct from "no filter",
+// `.trim()` can't eat a padded CHAR(n) code, and free text typed into the same column
+// (the main search box) is told apart with `isOptionFilter`.
+const OPTION_PREFIX = '\u001eopt:';
 
 export function encodeOptionFilter(values: readonly string[]): string {
-  return values.join(OPTION_SEP);
+  return values.length ? `${OPTION_PREFIX}${JSON.stringify(values)}` : '';
+}
+
+export function isOptionFilter(raw: string | undefined | null): raw is string {
+  return !!raw?.startsWith(OPTION_PREFIX);
 }
 
 export function decodeOptionFilter(raw: string | undefined | null): string[] {
-  return raw ? raw.split(OPTION_SEP).filter(Boolean) : [];
+  if (!isOptionFilter(raw)) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw.slice(OPTION_PREFIX.length));
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
 }
 
 /** Does the row's value pass the picked options? Nothing picked = everything passes. */

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/query-state.tsx
-// kit-hash: b46c01def0f5
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/query-state.tsx
+// kit-hash: 8815ddaf70f3
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // RefreshCw = ลองใหม่/รีเฟรช · RotateCcw สงวนไว้กับ "กู้คืน" (icon mapping DESIGN.md §4)
 import { RefreshCw } from 'lucide-react';
@@ -20,13 +20,24 @@ const MAX_SKELETON_ROWS = 10;
  * (call site เดิมไม่ต้องแก้).
  *
  * หน้าตา = การ์ดตารางแบบเดียวกับ DataTable (`SkeletonTableCard` ของ `ui/page-skeleton`)
- * ไม่ใช่แถวเปล่าลอย ๆ — วางแทนตำแหน่ง DataTable ไม่ใช่ข้างในการ์ดอีกใบ.
+ * ไม่ใช่แถวเปล่าลอย ๆ — วางแทนตำแหน่ง DataTable · ใน Dialog/Sheet หรือในการ์ดอีกใบ ส่ง `card={false}`
+ * (เหมือน DataTable — overlay คือการ์ดอยู่แล้ว).
  */
-export function QueryLoading({ label, rows = 5 }: Readonly<{ label: string; rows?: number }>) {
+export function QueryLoading({
+  label,
+  rows = 5,
+  card = true,
+}: Readonly<{ label: string; rows?: number; card?: boolean }>) {
   return (
     <output aria-busy="true" className="block">
       <span className="sr-only">{label}</span>
-      <SkeletonTableCard rows={Math.min(rows, MAX_SKELETON_ROWS)} columns={4} toolbar={false} footer={false} />
+      <SkeletonTableCard
+        rows={Math.min(rows, MAX_SKELETON_ROWS)}
+        columns={4}
+        toolbar={false}
+        footer={false}
+        card={card}
+      />
     </output>
   );
 }

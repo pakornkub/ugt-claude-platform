@@ -117,6 +117,8 @@ const OPTIONAL_CONVERTED_FILES = [
   // hrms UI lift release 3 (มติ 2026-10-16 A6/B4/A12/A5/B5) — ship only when a page needs them
   'ui/responsive-popover.tsx', 'ui/filter-popover.tsx', 'ui/period-navigator.tsx',
   'ui/year-select.tsx', 'ui/month-select.tsx', 'ui/settings-sheet.tsx', 'ui/reason-dialog.tsx',
+  // hrms lift 4.88.0 — approval-timeline renders kit.approvalTimeline strings
+  'ui/approval-timeline.tsx',
   // DEV bar (4.76.0) — ships with every install, but verify.mjs already fails on its
   // absence; listing it here only keeps Thai out of the file once it is there.
   'components/dev-environment-bar.tsx',
