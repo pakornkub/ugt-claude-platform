@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/lib/table-filter.ts
-// kit-hash: 647d848252a8
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/lib/table-filter.ts
+// kit-hash: 01baa979ec1e
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**
  * DataTable column filters — match what the cell SHOWS, not the raw value.
@@ -103,4 +103,54 @@ export function dateRangeFilterLabel({ from, to }: DateRangeFilter): string {
   if (from && to) return from === to ? formatDate(from) : `${formatDate(from)} – ${formatDate(to)}`;
   if (from) return `≥ ${formatDate(from)}`;
   return to ? `≤ ${formatDate(to)}` : '';
+}
+
+// ─── pick-from-list filter (status / type columns — `meta.filterOptions`) ────────
+//
+// A status column shows a translated label but holds a code — typing "รออนุมัติ" matched
+// nothing (ugt-hrms 2026-10-27). Such columns get a tick list of the labels instead; the
+// picked values ride as ONE string in the same column-filter state (chips, clear-all and
+// the reset button need no second code path).
+
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+// Prefixed like the range filter: `['']` (a "ไม่ระบุ" option) stays distinct from "no filter",
+// `.trim()` can't eat a padded CHAR(n) code, and free text typed into the same column
+// (the main search box) is told apart with `isOptionFilter`.
+const OPTION_PREFIX = '\u001eopt:';
+
+export function encodeOptionFilter(values: readonly string[]): string {
+  return values.length ? `${OPTION_PREFIX}${JSON.stringify(values)}` : '';
+}
+
+export function isOptionFilter(raw: string | undefined | null): raw is string {
+  return !!raw?.startsWith(OPTION_PREFIX);
+}
+
+export function decodeOptionFilter(raw: string | undefined | null): string[] {
+  if (!isOptionFilter(raw)) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw.slice(OPTION_PREFIX.length));
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Does the row's value pass the picked options? Nothing picked = everything passes. */
+export function matchesOptionFilter(rowValue: string, raw: string | undefined | null): boolean {
+  const picked = decodeOptionFilter(raw);
+  return picked.length === 0 || picked.includes(rowValue);
+}
+
+/** Chip text: the picked options' labels, in the column's own order. */
+export function optionFilterLabel(options: readonly FilterOption[], raw: string): string {
+  const picked = new Set(decodeOptionFilter(raw));
+  return options
+    .filter((o) => picked.has(o.value))
+    .map((o) => o.label)
+    .join(', ');
 }

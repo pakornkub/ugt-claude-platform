@@ -148,7 +148,7 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.87.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.88.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
       <tr><td><code>ugt-core</code></td><td>2.18.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
       <tr><td><code>ugt-python-platform</code></td><td>0.10.3</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.7</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
@@ -778,7 +778,9 @@ CI=true npm run test:coverage &amp;&amp; ls test-results/junit.xml coverage/lcov
     <li>ไอคอน <b>lucide เท่านั้น</b> ห้าม emoji · action เดียวกัน = ไอคอนเดียวกันทุกหน้า</li>
     <li>ขนาด <code>default</code> ทุกที่ (หนึ่งแถว toolbar = หนึ่งขนาด) · <code>size="cta"</code> (44px มือถือ / 36px) เฉพาะ <code>PageActions</code> · <code>PageFormActions</code> · footer ของ dialog/sheet · <code>size="icon"</code> ได้เมื่อมี <code>aria-label</code> แต่ในแถวตารางต้องใช้ <code>IconAction</code></li>
     <li>สีปุ่มตัดสิน: บันทึก/ส่ง = primary · อนุมัติ = <code>success</code> เขียวทึบ · ปฏิเสธ = <code>outline</code> ขอบแดง + <code>X</code> · ยืนยันลบ = <code>destructive</code> แดงทึบ · ปุ่มรองในหัวหน้า = <code>soft</code></li>
-    <li>ข้อมูลตาราง = <b>DataTable</b> เท่านั้น · ทุกตัวมี <code>id</code> ไม่ซ้ำ · ตัวกรองอยู่ใน toolbar ต่อจากช่องค้น · ข้อมูลแบบแบ่งหน้าฝั่ง server ต้อง sort/filter ฝั่ง server ผ่าน URL</li>
+    <li>ข้อมูลตาราง = <b>DataTable</b> เท่านั้น · ทุกตัวมี <code>id</code> ไม่ซ้ำ · ตัวกรองอยู่ใน toolbar ต่อจากช่องค้น · ข้อมูลแบบแบ่งหน้าฝั่ง server ต้อง sort/filter ฝั่ง server ผ่าน URL · คอลัมน์สถานะ/ประเภทในตาราง client ใส่ <code>meta.filterOptions</code> ให้กรองแบบติ๊กจากรายการ</li>
+    <li>overlay (Dialog / Sheet / AlertDialog / Drawer) คือการ์ด — ห้ามซ้อน <code>Card</code> หรือกล่องพื้นสีข้างใน จัดกลุ่มด้วยหัวข้อ + ระยะห่าง (ยกเว้นชิ้นของ kit ที่ทำมาให้อยู่ใน dialog: <code>DetailSection</code> / <code>ApprovalTimeline</code>) · DataTable และ <code>QueryLoading</code> ข้างในใช้ <code>card={false}</code></li>
+    <li>ทุก route มี <code>loading.tsx</code> ที่ใช้ skeleton ตามโครงหน้าจริง (<code>TablePageSkeleton</code> / <code>FormPageSkeleton</code> / <code>CalendarPageSkeleton</code>) ไม่ใช่ spinner · รหัส master แสดงคู่คำอธิบายเสมอ (<code>CodeLabel</code>) · สถานะการอนุมัติในหน้ารายละเอียดใช้ <code>ApprovalTimeline</code></li>
     <li>วันที่/ตัวเลขผ่าน <code>lib/format.ts</code> เท่านั้น — จอแสดง <code>DD/MM/YYYY</code> ค.ศ. · ไฟล์ export ใช้ <code>yyyy-MM-dd</code></li>
     <li>สถานะ = สี + ไอคอน (<code>StatusBadge</code>) · คอนทราสต์ WCAG AA ≥ 4.5:1 ตรวจด้วย <code>check-contrast.mjs</code> ทุกครั้งที่แก้สี</li>
     <li class="no">ห้าม <code>npx shadcn init</code> เปล่า ๆ หรือ <code>-b radix</code> · ใช้ <code>npx shadcn@latest init --preset b1ZzrZbs0 --pointer --yes</code> · อ่าน API ของ component จาก registry ของ base-mira เท่านั้น (shadcn MCP ตอบเวอร์ชัน Radix)</li>
@@ -3089,7 +3091,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.87.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.88.0</span></div></footer>
 
 <script>
 (() => {

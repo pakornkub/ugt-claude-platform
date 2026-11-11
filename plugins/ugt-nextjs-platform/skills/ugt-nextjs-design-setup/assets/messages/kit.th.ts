@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/messages/kit.th.ts
-// kit-hash: 1755aa6dafc4
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/messages/kit.th.ts
+// kit-hash: c0463a63c118
 // Thai catalog for the org UI kit. Keys must match kit.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const kitTh = {
@@ -102,5 +102,28 @@ export const kitTh = {
     trigger: 'ตัวกรอง',
     clear: 'ล้างตัวกรอง',
     activeCount: 'ใช้อยู่ {count} ตัว',
+  },
+  // ── ui/approval-timeline.tsx (มติ ugt-hrms 2026-10-28) — ชื่อคนมาจากข้อมูล (แปลแล้ว) ──
+  approvalTimeline: {
+    title: 'สถานะการอนุมัติ',
+    submitted: 'ยื่นคำขอ',
+    cancelRequested: 'ขอยกเลิก',
+    filedBy: 'ยื่นแทนโดย {name}',
+    waiting: 'รอ {name}',
+    waitingAnyone: 'รออนุมัติ',
+    approvedBy: 'อนุมัติโดย {name}',
+    approved: 'อนุมัติแล้ว',
+    rejectedBy: 'ไม่อนุมัติโดย {name}',
+    rejected: 'ไม่อนุมัติ',
+    cancelledBy: 'ยกเลิกโดย {name}',
+    cancelled: 'ยกเลิกแล้ว',
+    cancelWaiting: 'รออนุมัติการยกเลิก · {name}',
+    cancelWaitingAnyone: 'รออนุมัติการยกเลิก',
+    cancelApprovedBy: 'อนุมัติการยกเลิกโดย {name}',
+    cancelApproved: 'อนุมัติการยกเลิกแล้ว',
+    cancelRejectedBy: 'ไม่อนุมัติการยกเลิกโดย {name}',
+    cancelRejected: 'ไม่อนุมัติการยกเลิก',
+    level: 'ขั้น {level}',
+    upcoming: 'ยังไม่ถึงขั้นนี้',
   },
 } as const;

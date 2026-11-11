@@ -1,12 +1,15 @@
-// kit: ugt-nextjs-platform 4.25.0 · ugt-nextjs-design-setup/ui/query-state.tsx
-// kit-hash: 10e960118030
+// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/query-state.tsx
+// kit-hash: 8815ddaf70f3
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 // RefreshCw = ลองใหม่/รีเฟรช · RotateCcw สงวนไว้กับ "กู้คืน" (icon mapping DESIGN.md §4)
 import { RefreshCw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Callout } from '@/components/ui/callout';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonTableCard } from '@/components/ui/page-skeleton';
+
+// page size อาจ 50–100 แถว — skeleton แค่พอให้เห็นโครง ไม่ต้องยาวเท่าจริง
+const MAX_SKELETON_ROWS = 10;
 
 /**
  * Placeholder ระหว่างโหลดรายการครั้งแรก — **skeleton ไม่ใช่ spinner**
@@ -15,14 +18,26 @@ import { Skeleton } from '@/components/ui/skeleton';
  *
  * `label` ไม่แสดงเป็นข้อความอีกแล้ว แต่คงไว้เป็นชื่อให้ screen reader
  * (call site เดิมไม่ต้องแก้).
+ *
+ * หน้าตา = การ์ดตารางแบบเดียวกับ DataTable (`SkeletonTableCard` ของ `ui/page-skeleton`)
+ * ไม่ใช่แถวเปล่าลอย ๆ — วางแทนตำแหน่ง DataTable · ใน Dialog/Sheet หรือในการ์ดอีกใบ ส่ง `card={false}`
+ * (เหมือน DataTable — overlay คือการ์ดอยู่แล้ว).
  */
-export function QueryLoading({ label, rows = 5 }: Readonly<{ label: string; rows?: number }>) {
+export function QueryLoading({
+  label,
+  rows = 5,
+  card = true,
+}: Readonly<{ label: string; rows?: number; card?: boolean }>) {
   return (
-    <output aria-busy="true" className="block space-y-2 py-2">
+    <output aria-busy="true" className="block">
       <span className="sr-only">{label}</span>
-      {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-11 w-full" /> // NOSONAR typescript:S6479 — skeleton rows ไม่มี key ที่เสถียร
-      ))}
+      <SkeletonTableCard
+        rows={Math.min(rows, MAX_SKELETON_ROWS)}
+        columns={4}
+        toolbar={false}
+        footer={false}
+        card={card}
+      />
     </output>
   );
 }

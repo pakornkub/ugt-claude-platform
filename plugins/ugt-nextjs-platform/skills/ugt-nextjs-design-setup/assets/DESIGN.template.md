@@ -294,7 +294,9 @@
   | ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผลปฏิเสธ/ยกเลิก) | `FormDialog` (compound + height `fluid`/`auto`/`fill`) · ขอเหตุผล = `ReasonDialog` (`ui/reason-dialog`) ตัวเดียวทั้งแอป |
   | ยืนยันอย่างเดียว ไม่มีช่องกรอก | `ConfirmActionDialog` (`AlertDialog`) ปุ่มมีข้อความ |
 
-  panel ค้างดูคู่เนื้อหา = `Sheet` · read-only = `detail-dialog-shell` · system alert
+  panel ค้างดูคู่เนื้อหา = `Sheet` · read-only = `detail-dialog-shell` (รายการที่มี workflow อนุมัติ
+  ใส่การ์ด `ApprovalTimeline` ตัวเดียวกันทุก dialog — จุดเขียว/เหลือง/แดง/เทา = เสร็จ/รอ/ไม่อนุมัติ/ยกเลิก ·
+  "รอ {ชื่อ}" · "อนุมัติโดย {ชื่อ}" + วันเวลา · เหตุผลไม่อนุมัติใต้ขั้นในกรอบแดงอ่อน) · system alert
   บังคับ action เดียว (session หมดอายุ) = `AlertDialog` ปิดไม่ได้ ปุ่ม primary เดียว
   **ไม่มีปุ่มยกเลิก** — ข้อยกเว้น footer ข้อเดียวที่อนุญาต
   > Sheet ฟอร์มตั้งค่า = `ui/settings-sheet` — `SettingsSheetContent size="xl"` / `"5xl"`
@@ -312,6 +314,12 @@
   · **ไม่มีเนื้อหา (หัว + ท้าย เช่น dialog ยืนยัน) = เส้นเดียว** — หัวที่ต่อด้วยท้ายทันทีไม่มีเส้นล่าง (ตั้งที่ primitive)
   · **ห้ามใส่เนื้อหา (กล่อง/รายการ/ช่องกรอก) ใน `AlertDialogHeader`** (A9) — หัวมีแค่ title +
   คำอธิบายสั้น เนื้อหาวางต่อจากหัว
+- **Overlay ทำหน้าที่เป็นการ์ดเอง** (Dialog / Sheet / AlertDialog / Drawer): พื้นเนื้อหา = `bg-popover`
+  (registry base-mira ตั้งไว้แล้ว — ขาวในโหมดสว่าง ตัดกับพื้นหน้า) · **ห้ามใส่ `Card` ซ้อนใน overlay**
+  และห้ามกล่องพื้นอ่อนแยกหมวด — แยกหมวดด้วยหัวข้อ + ระยะห่าง (`SettingsSheetBody` + `SettingsSection`) ·
+  ข้อยกเว้นเดียวคือชิ้นของ kit ที่ออกแบบมาให้อยู่ใน dialog: `DetailSection` ของ `detail-dialog-shell`
+  (รวม `ApprovalTimeline`) และกล่องรายการใน `ReasonDialog` · DataTable / `QueryLoading` ใน overlay ส่ง `card={false}` · อย่าเปลี่ยนพื้น overlay เป็น `bg-background` (พื้นเทาของหน้ามีไว้ให้การ์ดลอย
+  — ใน overlay ไม่มีการ์ดให้ลอย เนื้อหาจะดูจมกับพื้น)
 - Footer dialog: ยกเลิก (outline) ซ้าย · ยืนยัน primary ขวาสุด · primary
   **ปุ่มเดียว**ต่อ dialog · ปุ่ม footer ขนาด `cta` (มาจาก primitive) · ห้ามซ้อน dialog (ยกเว้น
   AlertDialog ยืนยัน 1 ชั้น) · ฟอร์ม dirty ปิดต้องถามก่อน
@@ -343,6 +351,7 @@
   | --- | --- |
   | สถานะ (รอ/อนุมัติ/ปฏิเสธ/ยกเลิก) | `StatusBadge` — tone + **ไอคอนบังคับ** |
   | ป้ายกำกับ/ตัวระบุ (ชื่อ role, ประเภท, template) | `Badge variant="outline"` ข้อความล้วน **ห้ามสีสถานะ** |
+  | รหัส master สั้น ๆ (กะ `D`/`N`, ประเภท `DM`, รหัสคำนวณ) | `CodeLabel` — รหัส (`Badge` outline mono) **+ คำอธิบายข้าง ๆ เสมอ** ห้ามรหัสเปล่า |
   | ตัวเลขนับ | `Badge` + `tabular-nums` |
   | chip ตัวกรองที่กดปิดได้ | `Badge variant="secondary"` + ปุ่ม ✕ |
   | ป้ายสีที่ต้องไม่มีไอคอน (เช่น IN/OUT ใน log ดิบ) | `Badge variant="outline"` + `TONE_STYLES` — ห้ามประกาศสีใหม่ |
@@ -357,7 +366,7 @@
   = แตกหน้า · **ปุ่มหลักของแต่ละแท็บอยู่ใน `PageActions` บนหัวหน้า และเปลี่ยนตามแท็บที่เปิด**
   (มติ 2026-10-16): แท็บละปุ่มหลักเดียว ไม่โชว์ปุ่มของแท็บอื่นค้าง · แท็บที่ไม่มีอะไรให้สร้าง =
   ไม่แสดงปุ่ม (ไม่ใช่ปุ่ม disabled) · ปุ่มที่ใช้ได้ทุกแท็บ (เช่น ส่งออกทั้งหมด) = `soft` คงที่
-  ซ้ายของปุ่มหลัก · หัวหน้าอ่าน `?tab=` เพื่อเลือกปุ่ม · มือถือ = `cta` เต็มกว้างใต้ชื่อหน้า
+  ซ้ายของปุ่มหลัก · หัวหน้าอ่าน `?tab=` เพื่อเลือกปุ่ม (ปุ่มที่เปิด dialog ซึ่ง state อยู่ในตารางของแท็บ = ตารางส่งปุ่มขึ้นหัวหน้าเองผ่าน `PageActionsPortal` — `references/tabbed-pages.md` B) · มือถือ = `cta` เต็มกว้างใต้ชื่อหน้า
   เหนือแถบแท็บ · toolbar ของตารางในแท็บยังมีแค่ค้นหา/filter/เครื่องมือ (`references/tabbed-pages.md`)
 - Tooltip: delay 0 · ห้ามซ่อนข้อมูลจำเป็นไว้ใน tooltip อย่างเดียว
 - Chart: `ui/chart` + `--chart-1..5` (series ทั่วไป) · series ที่เป็นสถานะ =
@@ -372,6 +381,10 @@
   (`shadow-xs ring-1 ring-border`) · legend ของตารางใส่ prop `footer` (ในการ์ดเดียวกัน — B3) ·
   `sortable` = sort ฝั่ง client แบบ opt-in **ห้ามคู่ `serverPagination`** (sort ได้แค่หน้าเดียว —
   ตาราง server sort ผ่าน `serverQuery` · `verify.mjs` fail)
+- **filter รายคอลัมน์ค้นตามที่เห็นบนจอ**: ข้อความ/ตัวเลขพิมพ์ค้น · วันที่ = ปฏิทินเลือกช่วง ·
+  **คอลัมน์สถานะ/ประเภท/ที่มา = ติ๊กเลือก** (`meta.filterOptions` — ป้ายที่เห็นบนจอ + จำนวนแถวต่อค่า
+  นับก่อนกรอง · chip โชว์ป้าย ไม่ใช่รหัส) · ใช้ได้เฉพาะตารางกรองฝั่ง client — ตาราง server กรองสถานะ
+  ด้วยการ์ดตัวเลข/`toolbarFilters`
 - **Pagination ของตาราง = แถวต่อหน้า + "หน้า X จาก Y" + ปุ่มไอคอน 4 ตัว**
   (แรก · ก่อน · ถัดไป · สุดท้าย — ตัวแรก/สุดท้ายซ่อนบนจอเล็ก) — **ไม่มีรายการเลขหน้า
   2 3 4 … 10 11** (มติ 2026-08-09: เลขหน้ากินพื้นที่และพังตอนข้อมูลว่าง
@@ -412,6 +425,10 @@
   — ห้าม `toast.error` แทน warning
 - Loading: `Skeleton` โครง · spinner ในปุ่ม (disabled) สำหรับ action ·
   data state ผ่าน `ui/query-state` — ไม่เขียน if-loading เอง
+- **ทุก route มี `loading.tsx` คู่กัน** ประกอบจาก `ui/page-skeleton` (preset
+  `TablePageSkeleton` / `CalendarPageSkeleton` / `FormPageSkeleton` หรือชิ้นย่อย) —
+  จำนวนการ์ดตัวเลข/แท็บ/คอลัมน์/การ์ดฟอร์มตรงกับหน้าจริง หน้าไม่กระโดดตอนข้อมูลมา ·
+  **ห้าม spinner แทนเนื้อหา** · skeleton เฉพาะโหลดครั้งแรก (`isLoading`) ไม่ขึ้นตอน refetch เบื้องหลัง
 - Empty: `ui/empty` ทุกกรณี (ตารางว่าง/ไม่มีสิทธิ์/404) — icon + ข้อความ +
   CTA ถ้ามีทางไปต่อ
 - Error ระดับหน้า: `Callout` บนสุดของการ์ด · ระดับฟอร์ม: `Callout` ในฟอร์ม · ระดับ field: ใต้ช่องผ่าน `ui/field` (รายละเอียดที่ส่วน 4)

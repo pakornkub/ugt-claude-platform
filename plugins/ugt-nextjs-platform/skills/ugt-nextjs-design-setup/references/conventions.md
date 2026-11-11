@@ -79,7 +79,7 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 | แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `ui/settings-sheet` — `SettingsSheetContent size="xl"` (576px) ฟอร์มล้วน · `size="5xl"` (1024px) มีตารางย่อย · 2 ขนาดเท่านั้น (`sm:max-w-*` เปล่าบน `SheetContent` แพ้ class ของ primitive) |
 | ≤ 3 ช่อง จบในจังหวะเดียว | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม · **ขอเหตุผล (ปฏิเสธ/ยกเลิก) = `ui/reason-dialog` ตัวเดียว** ห้ามทำใหม่รายหน้า |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
-| ดูรายละเอียด read-only | `detail-dialog-shell` (หัว: ไอคอน + ชื่อ + `description` + `status`) + `DetailHighlights` + `DetailSection`/`DetailRow` |
+| ดูรายละเอียด read-only | `detail-dialog-shell` (หัว: ไอคอน + ชื่อ + `description` + `status`) + `DetailHighlights` + `DetailSection`/`DetailRow` · รายการที่ผ่าน workflow อนุมัติ = **`ui/approval-timeline` การ์ดเดียวกันทุก dialog** (ยื่น → แต่ละขั้น → ขอยกเลิก · รอใคร/ใครกด) ห้ามรายชื่อผู้อนุมัติแบบรายหน้า |
 | ยืนยัน destructive | `AlertDialog` ผ่าน `ConfirmActionDialog` — ปุ่มมีข้อความ ไม่ใช่ icon ล้วน |
 | system alert บังคับ action เดียว (session หมดอายุ) | `AlertDialog` ปิดไม่ได้ — **ไม่มีปุ่มยกเลิก** (ข้อยกเว้น footer ข้อเดียวที่อนุญาต เพราะ "ยกเลิก" ไม่มีความหมายเมื่อ session ตายแล้ว) · ตัวจริง: `session-expired-dialog.tsx` ของ auth-setup |
 
@@ -88,7 +88,9 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 description in `AlertDialogHeader`** (A9 — its grid squeezes content; put it after, e.g.
 `ConfirmActionDialog` `children`). Footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · **one primary per
 dialog**. No dialog-over-dialog except one AlertDialog confirm over a form. A dirty form never closes
-silently on Esc/outside-click. Value-picking overlays (DatePicker too) go through `ui/responsive-popover` — bottom
+silently on Esc/outside-click. **The overlay is the card** (DESIGN.md §4): no `Card` or tinted
+section boxes inside — headings + spacing, `bg-popover` kept; exceptions are the kit's dialog pieces
+(`DetailSection`/`ApprovalTimeline`, `ReasonDialog` items); DataTable / `QueryLoading` take `card={false}`. Value-picking overlays (DatePicker too) go through `ui/responsive-popover` — bottom
 sheet on phones (A12) · `Combobox` too: tall sheet, **search input on top** (keyboard hides only the list tail) · `form-pages.md`.
 
 ## Badge vs StatusBadge
@@ -154,6 +156,9 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 - Loading: `Skeleton` for structure · in-button spinner (disabled) for
   actions · data states via `ui/query-state` (loading/error/empty in one) —
   no hand-written if-loading per page.
+- Route loading: every route ships a `loading.tsx` composed from
+  `ui/page-skeleton` (presets or parts) with the real page's counts — stat
+  cards, tabs, columns, form cards. Never a spinner in place of content.
 - Empty: `ui/empty` everywhere (empty table / no permission / 404) — icon +
   message + CTA when actionable.
 - Page-level error: banner at the top of the content card · field-level:
@@ -163,7 +168,8 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 ## Tabs · Tooltip · Chart · Rich text
 
 - Tabs: sub-views of one page · state in `?tab=` · > ~5 = split · each tab's primary action swaps in
-  `PageActions` (none if it creates nothing; page-wide = constant `soft`) — `references/tabbed-pages.md`.
+  `PageActions` (none if it creates nothing; page-wide = constant `soft`) — `references/tabbed-pages.md`
+  (A: page picks the button from `?tab=` · B: the tab's own table portals it up via `ui/page-actions-slot`).
 - Tooltip: `TooltipProvider` delay 0 · never the sole carrier of essential
   info (mobile has no hover).
 - Chart: `ui/chart` (recharts via shadcn — `npx shadcn add chart` when the
@@ -195,5 +201,5 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 จะหายเงียบ (`ugt-nextjs-kit-sync` เตือนตอนไฟล์ตกรุ่น แต่กู้ของที่หายไปแล้วไม่ได้)
 
 **คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action` `bulk-action-bar` `status-badge` `page-shell`
-`card-heading` `view-toggle` `stat-card` `time-input` `settings-sheet` `responsive-popover` `query-state` `detail-*`
+`card-heading` `view-toggle` `stat-card` `time-input` `settings-sheet` `responsive-popover` `query-state` `detail-*` `code-label`
 ออกแบบมาให้ผู้เรียกประกอบข้อความเองตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล
