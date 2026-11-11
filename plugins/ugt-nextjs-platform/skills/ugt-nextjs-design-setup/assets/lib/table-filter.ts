@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/lib/table-filter.ts
-// kit-hash: 647d848252a8
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.ts
+// kit-hash: 80ad7d2fd8c0
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 /**
  * DataTable column filters — match what the cell SHOWS, not the raw value.
@@ -103,4 +103,41 @@ export function dateRangeFilterLabel({ from, to }: DateRangeFilter): string {
   if (from && to) return from === to ? formatDate(from) : `${formatDate(from)} – ${formatDate(to)}`;
   if (from) return `≥ ${formatDate(from)}`;
   return to ? `≤ ${formatDate(to)}` : '';
+}
+
+// ─── pick-from-list filter (status / type columns — `meta.filterOptions`) ────────
+//
+// A status column shows a translated label but holds a code — typing "รออนุมัติ" matched
+// nothing (ugt-hrms 2026-10-27). Such columns get a tick list of the labels instead; the
+// picked values ride as ONE string in the same column-filter state (chips, clear-all and
+// the reset button need no second code path).
+
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+const OPTION_SEP = '\u001f'; // never inside a code or a label
+
+export function encodeOptionFilter(values: readonly string[]): string {
+  return values.join(OPTION_SEP);
+}
+
+export function decodeOptionFilter(raw: string | undefined | null): string[] {
+  return raw ? raw.split(OPTION_SEP).filter(Boolean) : [];
+}
+
+/** Does the row's value pass the picked options? Nothing picked = everything passes. */
+export function matchesOptionFilter(rowValue: string, raw: string | undefined | null): boolean {
+  const picked = decodeOptionFilter(raw);
+  return picked.length === 0 || picked.includes(rowValue);
+}
+
+/** Chip text: the picked options' labels, in the column's own order. */
+export function optionFilterLabel(options: readonly FilterOption[], raw: string): string {
+  const picked = new Set(decodeOptionFilter(raw));
+  return options
+    .filter((o) => picked.has(o.value))
+    .map((o) => o.label)
+    .join(', ');
 }
