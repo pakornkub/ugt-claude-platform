@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.46.0 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
-// kit-hash: f1b1156f8f69
+// kit: ugt-nextjs-platform 4.88.1 · ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+// kit-hash: 65e1a4ba7c89
 
 // source: ugt-hrms components/ui/tiptap-editor.tsx — installed by ugt-nextjs-design-setup (org UI kit)
 // editor rich text ตัวเดียวของทั้งแอป (ห้ามใช้ editor อื่น) — ติดตั้งเฉพาะโปรเจคที่มี rich text
@@ -331,7 +331,7 @@ function EditorToolbar({ editor, sourceMode, onSourceToggle, disabled }: Readonl
       <ToolbarSep />
 
       {/* HTML source toggle */}
-      <ToolbarButton onClick={onSourceToggle} active={sourceMode} title="HTML source view">
+      <ToolbarButton onClick={onSourceToggle} active={sourceMode} label="HTML source view">
         <Code2 />
       </ToolbarButton>
     </div>

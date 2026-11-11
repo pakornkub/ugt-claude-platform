@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.88.1 (2026-11-12)
+
+- **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
+
 ## 4.88.0 (2026-11-11)
 
 - **design-setup: overlay = การ์ด — ห้ามใส่ `Card` ซ้อนใน Dialog/Sheet** — ข้อตกลงใหม่ใน DESIGN.template §4 + `rules/ugt-nextjs-design.md`: พื้นเนื้อหาของ overlay เป็น `bg-popover` (ค่าของ registry) ทำหน้าที่เป็นการ์ดเอง · แยกหมวดด้วยหัวข้อ + ระยะห่าง ไม่ใช่การ์ด/กล่องพื้นอ่อน · ห้ามเปลี่ยนเป็น `bg-background` (เนื้อหาจมกับพื้นหน้า) · โปรเจกต์ที่ติดตั้งแล้วรับผ่าน "sync ข้อตกลง design" · origin ugt-hrms (DESIGN §10 2026-11-08, เคาะจาก mock) · 2026-11-08

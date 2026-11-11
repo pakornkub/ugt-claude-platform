@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/ui/combobox.tsx
-// kit-hash: 47c93110b285
+// kit: ugt-nextjs-platform 4.88.1 · ugt-nextjs-design-setup/ui/combobox.tsx
+// kit-hash: 03b8556dd1a7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -87,7 +87,7 @@ function Combobox<Value, Multiple extends boolean | undefined = false, Item = Va
   );
 
   const open = openProp ?? openState;
-  function setOpen(next: boolean, details: ComboboxPrimitive.Root.OpenChangeEventDetails) {
+  function setOpen(next: boolean, details: ComboboxPrimitive.Root.ChangeEventDetails) {
     if (next && disabled && isMobile) return; // desktop: Base UI ตัดสินเอง
     if (openProp === undefined) setOpenState(next);
     onOpenChange?.(next, details);
@@ -109,7 +109,7 @@ function Combobox<Value, Multiple extends boolean | undefined = false, Item = Va
             open={open}
             // ปิดจาก ✕ / พื้นหลัง / Esc ของ dialog — รายละเอียด event ของ Dialog รูปเดียวกับของ Combobox
             onOpenChange={(next, details) =>
-              setOpen(next, details as unknown as ComboboxPrimitive.Root.OpenChangeEventDetails)
+              setOpen(next, details as unknown as ComboboxPrimitive.Root.ChangeEventDetails)
             }
           >
             {children}
