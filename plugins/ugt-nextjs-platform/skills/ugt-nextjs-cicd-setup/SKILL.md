@@ -30,6 +30,7 @@ description: >
 | Container never reaches `healthy` | `/api/health` route missing or healthcheck path lacks the basePath | `references/docker-deploy.md` |
 | `COPY .next/standalone` fails | `output: 'standalone'` not set in next.config | `references/docker-deploy.md` |
 | A new runtime env var is in the Jenkins Secret File and `lib/env.ts`, yet the app acts as if it is unset (feature silently off) | compose passes env by name — `.env` only substitutes `${VAR}`; the key is missing from `environment:` | `references/docker-deploy.md` §D.1 |
+| Build / Docker build fails `Can't resolve '@vercel/turbopack-next/internal/font/google/font'` on some runs | `next/font/google` downloads fonts at build time and the agent could not reach Google | design-setup `references/root-layout.md` §Build host can't reach Google (`next/font/local`) |
 | Client-side env vars empty in the browser | `NEXT_PUBLIC_*` must be build args, not runtime env | `references/docker-deploy.md` |
 | DB password visible in the Deploy console (`+ DB_URL=sqlserver://…;password=…`) | migrate step expanded the URL under `sh -x`; `withCredentials` masks the file path only | `assets/Jenkinsfile` Deploy `[DB]` block · `references/docker-deploy.md` |
 | `npm ci` fails with `ERESOLVE` in Install or the Docker deps stage | `.npmrc` (`legacy-peer-deps=true`, auth-setup §5.1) missing from the repo or not copied by the Dockerfile | `assets/Dockerfile` deps stage · auth-setup §5.1 |
