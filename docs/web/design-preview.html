@@ -313,6 +313,28 @@
   .k-drow .dl{display:flex;align-items:center;gap:6px;width:128px;flex:none;padding-top:2px;font-size:12px;color:var(--muted-foreground)}
   .k-drow .dl svg.i{font-size:14px}
   .k-drow .dv{min-width:0;flex:1;font-size:14px;line-height:1.625}
+  /* ApprovalTimeline = ol ใน DetailSection · จุด 20px สีตาม state (ชุดเดียวกับ StatusBadge) + เส้นต่อ · เหตุผลปฏิเสธ = กล่องแดงอ่อน */
+  .k-tl{list-style:none;margin:0;padding:4px 0}
+  .k-tl li{position:relative;display:flex;gap:10px;padding-bottom:12px}
+  .k-tl li:last-child{padding-bottom:0}
+  .k-tl li:not(:last-child)::before{content:"";position:absolute;top:20px;bottom:0;left:10px;width:1px;background:var(--border-c)}
+  .k-tl .dot{position:relative;display:flex;align-items:center;justify-content:center;width:20px;height:20px;flex:none;border-radius:50%}
+  .k-tl .dot svg.i{font-size:12px;stroke-width:2.5}
+  .k-tl .dot b{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+  .k-tl .dot.done{background:color-mix(in oklab,var(--status-emerald) 15%,transparent);color:var(--status-emerald-fg)}
+  .k-tl .dot.waiting{background:color-mix(in oklab,var(--status-amber) 15%,transparent);color:var(--status-amber-fg)}
+  .k-tl .dot.rejected{background:color-mix(in oklab,var(--status-red) 15%,transparent);color:var(--status-red-fg)}
+  .k-tl .dot.cancelled{background:var(--muted);color:var(--muted-foreground)}
+  .k-tl .dot.up{border:1px dashed var(--border-c);background:transparent;color:var(--muted-foreground)}
+  .k-tl .tb{min-width:0;flex:1;font-size:14px;line-height:1.43}
+  .k-tl .tt{margin:0;font-weight:500}
+  .k-tl .tt.up{color:var(--muted-foreground)}
+  .k-tl .tm{margin:0;font-size:12px;line-height:1.625;color:var(--muted-foreground)}
+  .k-tl .rsn{margin:4px 0 0;padding:4px 8px;border-radius:var(--r-md);font-size:12px;line-height:1.625;
+    background:color-mix(in oklab,var(--status-red) 10%,transparent);color:var(--status-red-fg)}
+  /* CodeLabel = Badge outline mono + คำอธิบาย (ตัด … เมื่อยาว) */
+  .k-codel{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%}
+  .k-codel>span:last-child:not(.k-badge){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .k-dhl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .k-dhl>div{border-radius:var(--r-lg);padding:8px 12px}
   .k-dhl p{font-size:12px}
@@ -561,6 +583,20 @@
   .k-ptitle{font-size:24px;font-weight:600;letter-spacing:-.025em;line-height:1.33}
   .k-pdesc{font-size:14px;line-height:1.43;color:var(--muted-foreground)}
   .k-pact{display:flex;align-items:center;gap:8px}
+  /* PageActionsSlot (tabbed page B) — ไม่มีปุ่มในช่อง = ซ่อนทั้งช่อง (empty:hidden ของจริง) */
+  .k-pact[data-pslot]:not(:has(>:not([hidden]))){display:none}
+  /* page-skeleton — ชิ้นเดียวกับหน้าจริง (หัวหน้า · stat · การ์ดตาราง) แค่เนื้อเป็น k-skel */
+  .k-skel.on-muted{background:color-mix(in oklab,var(--muted-foreground) 15%,transparent)}
+  .k-skact{height:36px;width:128px}
+  .k-sktool{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--border-c)}
+  .k-skhead{display:flex;align-items:center;gap:16px;height:40px;padding:0 12px;background:var(--muted)}
+  .k-skhead>*,.k-skrow>*{flex:1}
+  .k-skrow{display:flex;align-items:center;gap:16px;height:56px;padding:0 12px;border-bottom:1px solid var(--border-c)}
+  .k-skrow>:first-child{flex:2}
+  .k-skrow:last-child{border-bottom:0}
+  .k-skcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+  .k-skcal>div{min-height:48px;padding:6px;border-right:1px solid var(--border-c);border-bottom:1px solid var(--border-c)}
+  .k-skcal>div:nth-child(7n){border-right:0}
   .k-devbar{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 16px;border:0;border-bottom:1px solid;font-size:12px;font-weight:500;line-height:1.5;text-align:center}
   .k-devbar svg.i{font-size:16px}
 
@@ -643,6 +679,10 @@
     .k-formgrid .span2{grid-column:auto}
     .k-scrim{padding:24px 16px}
     .k-statgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .k-skact{height:44px}
+    .k-sktool>.k-skel{width:100%!important}
+    .k-sktool>.k-skel.k-hide-sm{display:none}
+    .k-skhead,.k-skrow>:not(:first-child){display:none}
     .k-panels{grid-template-columns:1fr}
     .k-ssec .grid2{grid-template-columns:1fr}
     .k-sheet.xl,.k-sheet{max-width:none}
@@ -847,6 +887,7 @@
   <symbol id="i-tri" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
   <symbol id="i-circle-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
   <symbol id="i-circle-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
   <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
   <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></symbol>
   <symbol id="i-updown" viewBox="0 0 24 24"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></symbol>
@@ -2077,7 +2118,7 @@ toolbarFilters={
   </div>
 </template>
 
-<section class="story" id="s-data-table" data-group="data" data-title="DataTable" data-th="ตาราง" data-kw="datatable table ตาราง pagination search filter sort column mobile card server client export">
+<section class="story" id="s-data-table" data-group="data" data-title="DataTable" data-th="ตาราง" data-kw="datatable table ตาราง pagination search filter sort column mobile card server client export filteroptions ติ๊ก สถานะ">
   <div class="story-head">
     <h1>DataTable <span>ตาราง</span></h1>
     <p class="purpose">ตารางกลางตัวเดียวของทั้งแอป — ค้นหา กรองรายคอลัมน์ ลากสลับ/ซ่อนคอลัมน์ แบ่งหน้า · เป็นการ์ดใบเดียว (เงาเดียวกับ Card) ทุกขนาดจอ · มือถือแถวกลายเป็น list คั่นเส้นในการ์ดเดิม</p>
@@ -2128,6 +2169,18 @@ toolbarFilters={
       <div class="cap"><b>client (ค่าเริ่มต้น)</b>จุดจับลาก → ชื่อคอลัมน์ → ไอคอนกรวยเปิด popover กรองเฉพาะคอลัมน์</div></div>
     <div class="vcell"><div class="ui stack"><div class="k-pop" style="width:224px;padding:12px;display:flex;flex-direction:column;gap:8px"><input class="k-input" placeholder="ค่าที่ต้องการกรอง..." value="ลาพักร้อน"><div class="row" style="flex-wrap:nowrap"><button class="k-btn v-outline" type="button" style="flex:1">ล้าง</button><button class="k-btn v-default" type="button" style="flex:1">กรอง</button></div></div></div>
       <div class="cap"><b>filter popover</b>Enter = กรอง · กรองแล้วไอคอนในหัวคอลัมน์เป็นสี primary</div></div>
+    <div class="vcell"><div class="ui stack"><div class="col" style="gap:8px">
+      <span class="k-hc t12 fw5">สถานะ<span class="flt on"><svg class="i"><use href="#i-filter"/></svg></span></span>
+      <div class="k-pop" role="group" aria-label="สถานะ" style="width:240px;padding:8px;display:flex;flex-direction:column;gap:4px">
+        <div class="row" style="gap:8px;padding:4px 6px;flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="รออนุมัติ"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">รออนุมัติ</span><span class="t12 mut tnum">12</span></div>
+        <div class="row" style="gap:8px;padding:4px 6px;flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="อนุมัติแล้ว"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">อนุมัติแล้ว</span><span class="t12 mut tnum">48</span></div>
+        <div class="row" style="gap:8px;padding:4px 6px;flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="false" aria-label="ไม่อนุมัติ"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">ไม่อนุมัติ</span><span class="t12 mut tnum">3</span></div>
+        <div class="row" style="gap:8px;padding:4px 6px;flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="false" aria-label="ยกเลิก"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">ยกเลิก</span><span class="t12 mut tnum">5</span></div>
+        <button class="k-btn v-ghost s-sm" type="button" style="align-self:flex-start;margin-top:4px">ล้าง</button>
+      </div>
+      <div class="k-chips"><span class="k-badge b-secondary"><span class="mut">สถานะ:</span>รออนุมัติ, อนุมัติแล้ว<span class="x" role="button" aria-label="ล้างกรอง สถานะ"><svg class="i"><use href="#i-x"/></svg></span></span></div>
+    </div></div>
+      <div class="cap"><b>meta.filterOptions</b>คอลัมน์สถานะ/ประเภท/ที่มา = ติ๊กเลือกแทนพิมพ์ — ป้ายที่เห็นบนจอ + จำนวนแถวต่อค่า (นับก่อนกรอง ตัวเลขไม่หายตอนติ๊ก) · ติ๊กแล้วกรองทันที ไม่มีปุ่ม "กรอง" · chip โชว์ป้าย ไม่ใช่รหัส · <b>ตาราง client เท่านั้น</b></div></div>
     <div class="vcell"><div class="ui stack"><div class="k-pop" style="width:240px;padding:8px;display:flex;flex-direction:column;gap:4px">
       <p class="t12 fw5 mut" style="padding:2px 4px">คอลัมน์</p>
       <div class="row" style="gap:8px;padding:2px 4px"><svg class="i mut" style="font-size:14px"><use href="#i-grip"/></svg><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="รหัส"><svg class="i"><use href="#i-check"/></svg></button><span class="t12">รหัส</span></div>
@@ -2173,6 +2226,16 @@ toolbarFilters={
   serverSearch={{ value: q, onChange: (q) =&gt; applyFilters({ q }) }}
   pageSize={20}                                       // ตารางเฝ้าดู/ตรวจสอบ = 20
 /&gt;</code></pre></div>
+  <div class="snip" style="margin-top:12px"><span class="label">TSX — คอลัมน์สถานะติ๊กเลือก (ตาราง client เท่านั้น)</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>{
+  accessorKey: 'status',
+  header: t('status'),
+  cell: ({ row }) =&gt; &lt;StatusBadge tone={TONE[row.original.status]}&gt;{t(`status.${row.original.status}`)}&lt;/StatusBadge&gt;,
+  meta: {
+    filterOptions: STATUSES.map((s) =&gt; ({ value: s, label: t(`status.${s}`) })),   // ป้ายบนจอ ไม่ใช่รหัส
+    // filterValueOf: (row) =&gt; …   ← สถานะบนจอคำนวณจากหลายฟิลด์
+  },
+}
+// ค่าว่างเทียบเป็น '' — อยากให้เลือกแถวว่างได้ เพิ่ม { value: '', label: 'ไม่ระบุ' }</code></pre></div>
 
   <h2 class="sh">ทำ / อย่าทำ</h2>
   <div class="dd">
@@ -2181,6 +2244,7 @@ toolbarFilters={
       <li>ข้อมูลโตไม่จำกัด → โหมด server ทั้ง sort/filter/paginate ผ่าน URL</li>
       <li>แถวต่อหน้า 10 (ตาราง CRUD) หรือ 20 (ตารางเฝ้าดู) จากชุด 10/20/50</li>
       <li>ตารางใน dialog/sheet ส่ง <code>card={false}</code></li>
+      <li>คอลัมน์สถานะ/ประเภท/ที่มาของตาราง client ใส่ <code>meta.filterOptions</code> — ติ๊กเลือกแทนพิมพ์</li>
     </ul></div>
     <div class="dont"><b class="t">อย่าทำ</b><ul>
       <li>ห่อ <code>Card</code> ซ้อนอีกชั้น — DataTable วาดการ์ดเองแล้ว</li>
@@ -2189,6 +2253,7 @@ toolbarFilters={
       <li>ใช้ <code>Input</code> เปล่าเป็น filter หรือทำช่องค้นหาซ้ำนอกตาราง</li>
       <li>ใส่รายการเลขหน้า 1 2 3 … หรือ hardcode <code>size-8</code> ให้ปุ่ม</li>
       <li>ส่ง <code>scrollX={false}</code> โดยไม่มีคอมเมนต์เหตุผล — คอลัมน์ที่ล้นจะหายเงียบ</li>
+      <li>หวัง <code>filterOptions</code> บนตาราง <code>serverQuery</code> — คอลัมน์นั้นไม่มีตัวกรองเลย (ป้ายไม่ตรงรหัสที่เก็บ) กรองสถานะด้วยการ์ดตัวเลข/<code>toolbarFilters</code></li>
     </ul></div>
   </div>
 </section>
@@ -2360,6 +2425,63 @@ import { CheckCircle2, Clock } from 'lucide-react';
   </div>
 </section>
 
+<!-- ======================= CODE LABEL ======================= -->
+<section class="story" id="s-code-label" data-group="data" data-title="CodeLabel" data-th="รหัส + คำอธิบาย" data-kw="codelabel code label รหัส master กะ shift ประเภท ot mono badge outline คำอธิบาย">
+  <div class="story-head">
+    <h1>CodeLabel <span>รหัส master คู่คำอธิบายเสมอ</span></h1>
+    <p class="purpose">รหัสสั้น ๆ (กะ <code>D</code>/<code>N</code> · ประเภท <code>DM</code> · รหัสคำนวณ <code>OT_M600</code>) = <code>Badge</code> outline ตัว mono <b>+ คำอธิบายข้าง ๆ</b> (ยาวเกินตัด …) · ผู้ใช้หน้างานอ่านรหัสเปล่าไม่ออก · ไม่มีรหัส = <code>-</code></p>
+    <div class="files"><code>components/ui/code-label.tsx</code> (ต่อจาก <code>ui/badge</code>) · DESIGN.md §4 ตาราง Badge</div>
+  </div>
+  <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui">
+    <div class="k-dt"><div class="k-dt-scroll"><table class="k-table">
+      <thead><tr><th><span class="k-hc">วันที่</span></th><th><span class="k-hc">พนักงาน</span></th><th><span class="k-hc">กะ</span></th><th><span class="k-hc">ประเภท OT</span></th></tr></thead>
+      <tbody>
+        <tr><td class="tnum">12/08/2026</td><td>สมชาย ใจดี</td><td><span class="k-codel"><span class="k-badge b-outline mono">D</span><span>กะเช้า 08:00–17:00</span></span></td><td><span class="k-codel"><span class="k-badge b-outline mono">OT_M150</span><span>OT วันทำงาน 1.5 เท่า</span></span></td></tr>
+        <tr><td class="tnum">12/08/2026</td><td>ปรียา วงศ์ทอง</td><td><span class="k-codel"><span class="k-badge b-outline mono">N</span><span>กะดึก 20:00–05:00</span></span></td><td><span class="mut">-</span></td></tr>
+        <tr><td class="tnum">13/08/2026</td><td>ธนา พูลผล</td><td><span class="k-codel"><span class="k-badge b-outline mono">DM</span><span>กะเช้าวันหยุด</span></span></td><td><span class="k-codel"><span class="k-badge b-outline mono">OT_H300</span><span>OT วันหยุด 3 เท่า</span></span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="k-dt-cards">
+      <div class="k-mcard"><div class="mh">12/08/2026 · สมชาย ใจดี</div><dl><div><dt>กะ</dt><dd><span class="k-codel"><span class="k-badge b-outline mono">D</span><span>กะเช้า 08:00–17:00</span></span></dd></div><div><dt>ประเภท OT</dt><dd><span class="k-codel"><span class="k-badge b-outline mono">OT_M150</span><span>OT วันทำงาน 1.5 เท่า</span></span></dd></div></dl></div>
+      <div class="k-mcard"><div class="mh">12/08/2026 · ปรียา วงศ์ทอง</div><dl><div><dt>กะ</dt><dd><span class="k-codel"><span class="k-badge b-outline mono">N</span><span>กะดึก 20:00–05:00</span></span></dd></div><div><dt>ประเภท OT</dt><dd><span class="mut">-</span></dd></div></dl></div>
+    </div></div>
+  </div></div></div></div>
+  <p class="note">รหัสในภาพเป็นตัวอย่าง — ของจริงมาจากตาราง master ของแต่ละโปรเจค · ข้อความทั้งสองผู้เรียกส่งมา (แปลแล้ว) · กด <b>Mobile</b> — คู่รหัส+คำอธิบายอยู่ในแถว list เหมือนเดิม</p>
+
+  <h2 class="sh">Variants</h2>
+  <div class="variants">
+    <div class="vcell"><div class="ui"><span class="k-codel"><span class="k-badge b-outline mono">DM</span><span>กะเช้าวันหยุด</span></span></div><div class="cap"><b>code + description</b>แบบปกติ — ใช้ทุกที่ที่รหัส master โผล่</div></div>
+    <div class="vcell"><div class="ui"><span class="k-codel" style="max-width:180px"><span class="k-badge b-outline mono">OT_H300</span><span>OT วันหยุดนักขัตฤกษ์ 3 เท่า หลังเวลาทำงาน</span></span></div><div class="cap"><b>คำอธิบายยาว</b>ป้ายรหัสไม่หด · คำอธิบายตัด …</div></div>
+    <div class="vcell"><div class="ui"><span class="k-codel"><span class="k-badge b-outline mono">N</span></span></div><div class="cap"><b>ไม่มี description</b>รหัสอย่างเดียว — ใช้เมื่อไม่มีความหมายให้แสดงจริง ๆ</div></div>
+    <div class="vcell"><div class="ui"><span class="mut">-</span></div><div class="cap"><b>code ว่าง</b><code>null</code>/<code>''</code> → <code>-</code> สีจาง (ค่าว่างตาม §5)</div></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="k-drow"><span class="dl">กะ</span><span class="dv"><span class="k-codel"><span class="k-badge b-outline mono">D</span><span>กะเช้า 08:00–17:00</span></span></span></div></section></div><div class="cap"><b>ใน DetailRow</b>อยากซ่อนทั้งแถวเมื่อไม่มีรหัส → ส่ง <code>{code &amp;&amp; &lt;CodeLabel … /&gt;}</code> (CodeLabel ว่างคืน <code>-</code> ไม่ใช่ null)</div></div>
+  </div>
+
+  <h2 class="sh">ใช้ยังไง</h2>
+  <div class="snip"><span class="label">TSX</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { CodeLabel } from '@/components/ui/code-label';
+
+// คอลัมน์ในตาราง
+cell: ({ row }) =&gt; &lt;CodeLabel code={row.original.shiftCode} description={row.original.shiftName} /&gt;
+
+// ใน dialog รายละเอียด — ไม่มีรหัส = ไม่แสดงทั้งแถว
+&lt;DetailRow label={t('shift')}&gt;
+  {row.shiftCode &amp;&amp; &lt;CodeLabel code={row.shiftCode} description={row.shiftName} /&gt;}
+&lt;/DetailRow&gt;</code></pre></div>
+
+  <h2 class="sh">ทำ / อย่าทำ</h2>
+  <div class="dd">
+    <div class="do"><b class="t">ทำ</b><ul>
+      <li>รหัส master ทุกตัวที่ผู้ใช้เห็น (ตาราง · รายละเอียด) ใช้ CodeLabel คู่คำอธิบาย</li>
+      <li>คำอธิบายแปลฝั่งผู้เรียก — CodeLabel ไม่มีข้อความของตัวเอง</li>
+    </ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul>
+      <li>แสดงรหัสเปล่า <code>DM</code> ในตาราง — ผู้ใช้หน้างานต้องเดาความหมาย</li>
+      <li>ใช้ <code>Badge variant="secondary"</code> กับรหัส — secondary คือ chip ตัวกรอง</li>
+      <li>ใส่สีสถานะ (<code>TONE_STYLES</code>) ให้รหัส — รหัสไม่ใช่สถานะ</li>
+    </ul></div>
+  </div>
+</section>
+
 <!-- ======================= CHART ======================= -->
 <section class="story" id="s-chart" data-group="data" data-title="Chart" data-th="กราฟ" data-kw="chart graph กราฟ recharts color">
   <div class="story-head">
@@ -2468,6 +2590,97 @@ import { QueryErrorBanner, QueryLoading } from '@/components/ui/query-state';
   </div>
 </section>
 
+<!-- ======================= PAGE SKELETON ======================= -->
+<section class="story" id="s-page-skeleton" data-group="data" data-title="PageSkeleton" data-th="โครงหน้าตอนโหลด loading.tsx" data-kw="page skeleton loading loading.tsx โหลด โครงหน้า table form calendar querystate card spinner">
+  <div class="story-head">
+    <h1>PageSkeleton <span>โครงหน้าตอนโหลดครั้งแรก</span></h1>
+    <p class="purpose"><b>ทุก route มี <code>loading.tsx</code> คู่กัน</b> — skeleton ไม่ใช่ spinner · ประกอบจากชิ้นจริงของหน้า (<code>PageShell</code> · <code>PageHeader</code> · <code>Card</code> · การ์ดตารางแบบเดียวกับ DataTable) กล่อง ระยะ และ breakpoint จึงตรงของจริง ข้อมูลมาแล้วไม่มีอะไรกระโดด · preset 3 แบบตามรูปแบบหน้า: <code>TablePageSkeleton</code> · <code>FormPageSkeleton</code> · <code>CalendarPageSkeleton</code></p>
+    <div class="files"><code>components/ui/page-skeleton.tsx</code> (ต่อจาก <code>page-shell</code> · <code>card</code> · <code>ui/skeleton</code>) · <code>query-state.tsx</code> (<code>QueryLoading</code>) · DESIGN.md §6</div>
+  </div>
+  <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush">
+    <div class="k-page" aria-busy="true">
+      <div class="k-ph">
+        <div class="k-phtext"><div class="k-skel" style="height:12px;width:96px"></div><div class="k-skel" style="height:28px;width:224px"></div><div class="k-skel" style="height:16px;width:320px;max-width:100%"></div></div>
+        <div class="k-pact"><div class="k-skel k-skact"></div></div>
+      </div>
+      <div class="k-statgrid">
+        <div class="k-card sm"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><div class="k-skel" style="height:12px;width:80px;margin-top:2px"></div><div class="k-skel" style="width:32px;height:32px;flex:none"></div></div><div><div class="k-skel" style="height:24px;width:64px"></div></div></div>
+        <div class="k-card sm"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><div class="k-skel" style="height:12px;width:80px;margin-top:2px"></div><div class="k-skel" style="width:32px;height:32px;flex:none"></div></div><div><div class="k-skel" style="height:24px;width:64px"></div></div></div>
+        <div class="k-card sm"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><div class="k-skel" style="height:12px;width:80px;margin-top:2px"></div><div class="k-skel" style="width:32px;height:32px;flex:none"></div></div><div><div class="k-skel" style="height:24px;width:64px"></div></div></div>
+        <div class="k-card sm"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><div class="k-skel" style="height:12px;width:80px;margin-top:2px"></div><div class="k-skel" style="width:32px;height:32px;flex:none"></div></div><div><div class="k-skel" style="height:24px;width:64px"></div></div></div>
+      </div>
+      <div class="k-dt">
+        <div class="k-sktool"><div class="k-skel" style="height:36px;width:320px"></div><div class="k-skel k-hide-sm" style="height:36px;width:112px"></div><div class="k-skel" style="height:36px;width:96px;margin-left:auto"></div></div>
+        <div class="k-skhead"><div class="k-skel on-muted" style="height:12px"></div><div class="k-skel on-muted" style="height:12px"></div><div class="k-skel on-muted" style="height:12px"></div><div class="k-skel on-muted" style="height:12px"></div><div class="k-skel on-muted" style="height:12px"></div></div>
+        <div class="k-skrow"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div><div><div class="k-skel" style="height:16px;width:83%"></div></div></div>
+        <div class="k-skrow"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div><div><div class="k-skel" style="height:16px;width:83%"></div></div></div>
+        <div class="k-skrow"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div><div><div class="k-skel" style="height:16px;width:83%"></div></div></div>
+        <div class="k-skrow"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div><div><div class="k-skel" style="height:16px;width:83%"></div></div></div>
+        <div class="k-dt-foot"><div class="k-skel" style="height:16px;width:128px"></div><div class="k-skel" style="height:32px;width:160px"></div></div>
+      </div>
+    </div>
+  </div></div></div></div>
+  <p class="note"><code>&lt;TablePageSkeleton eyebrow actions={1} stats={4} columns={5} /&gt;</code> — จำนวนปุ่ม/การ์ดตัวเลข/คอลัมน์ = ของหน้าจริง · กด <b>Mobile</b> — ปุ่มเต็มกว้างสูง 44px · ตารางเหลือคอลัมน์แรก (ของจริงเป็น list แถว) · การ์ดตัวเลข 2 คอลัมน์</p>
+
+  <h2 class="sh">Variants</h2>
+  <div class="variants wide">
+    <div class="vcell"><div class="ui stack"><div class="col" style="gap:16px" aria-busy="true">
+      <div class="k-phtext"><div class="k-skel" style="height:12px;width:80px"></div><div class="k-skel" style="height:24px;width:192px"></div><div class="k-skel" style="height:16px;width:256px;max-width:100%"></div></div>
+      <div class="k-card"><div class="k-chead"><div class="row" style="gap:8px"><div class="k-skel" style="width:16px;height:16px"></div><div class="k-skel" style="height:16px;width:128px"></div></div></div>
+        <div class="k-formgrid" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="col" style="gap:6px"><div class="k-skel" style="height:12px;width:96px"></div><div class="k-skel" style="height:36px"></div></div><div class="col" style="gap:6px"><div class="k-skel" style="height:12px;width:96px"></div><div class="k-skel" style="height:36px"></div></div><div class="col" style="gap:6px"><div class="k-skel" style="height:12px;width:96px"></div><div class="k-skel" style="height:36px"></div></div></div></div>
+      <div class="k-pfa"><div class="k-skel" style="height:36px;width:96px"></div><div class="k-skel" style="height:36px;width:128px"></div></div>
+    </div></div>
+      <div class="cap"><b>FormPageSkeleton</b>back-link → การ์ดละหมวด (หัวการ์ด + ช่องกรอก 3 คอลัมน์) → แถบปุ่ม <code>PageFormActions</code> · <code>cards</code> / <code>fieldsPerCard</code> = ของหน้าจริง</div></div>
+    <div class="vcell"><div class="ui stack"><div class="k-dt" aria-busy="true">
+      <div class="k-sktool"><div class="k-skel" style="height:36px;width:224px"></div><div class="k-skel" style="height:36px;width:112px;margin-left:auto"></div></div>
+      <div class="k-skcal" style="background:color-mix(in oklab,var(--muted) 50%,transparent);border-bottom:1px solid var(--border-c)"><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div><div style="min-height:0;padding:8px 0;border:0"><div class="k-skel" style="height:12px;width:24px;margin:0 auto"></div></div></div>
+      <div class="k-skcal"><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div><div style="border-bottom:0"><div class="k-skel" style="height:14px;width:18px"></div></div></div>
+    </div></div>
+      <div class="cap"><b>CalendarPageSkeleton</b>หัวหน้า → การ์ดตัวเลข → การ์ดเดือน (toolbar · หัววัน 7 ช่อง · 5 แถว ช่องวัน <code>min-h-20</code>) — ภาพนี้ตัดเหลือ 2 แถว</div></div>
+    <div class="vcell"><div class="ui stack"><div class="k-dialog k-fd" style="max-width:none;box-shadow:var(--pop-shadow)">
+      <div class="fh"><div class="k-dtitle">ประวัติการลา · สมชาย ใจดี</div></div>
+      <div class="fb" aria-busy="true" style="gap:0">
+        <div class="k-skrow" style="padding:0"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div></div>
+        <div class="k-skrow" style="padding:0"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div></div>
+        <div class="k-skrow" style="padding:0"><div><div class="k-skel" style="height:16px;width:75%"></div></div><div><div class="k-skel" style="height:16px;width:50%"></div></div><div><div class="k-skel" style="height:16px;width:66%"></div></div><div><div class="k-skel" style="height:16px;width:33%"></div></div></div>
+      </div>
+    </div></div>
+      <div class="cap"><b>QueryLoading card={false}</b>โหลดใน Dialog/Sheet — แถวตารางชิดพื้น overlay ไม่มีการ์ดซ้อน (overlay คือการ์ดอยู่แล้ว · DataTable ข้างในก็ <code>card={false}</code>)</div></div>
+  </div>
+
+  <h2 class="sh">ใช้ยังไง</h2>
+  <div class="snip"><span class="label">app/(app)/requests/loading.tsx — ทุก route มีคู่กัน</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { TablePageSkeleton } from '@/components/ui/page-skeleton';
+
+export default function Loading() {
+  return &lt;TablePageSkeleton eyebrow actions={1} stats={4} columns={6} /&gt;;   // จำนวน = ของหน้าจริง
+}
+
+// หน้าแบบอื่น — children ของ preset = บล็อกเฉพาะหน้า (แถบช่วงเวลา · banner) วางตามตำแหน่งจริง
+&lt;FormPageSkeleton cards={3} fieldsPerCard={3} /&gt;
+&lt;CalendarPageSkeleton actions={1} stats={3} /&gt;
+&lt;TablePageSkeleton back tabs={3} rows={10} columns={5} /&gt;</code></pre></div>
+  <div class="snip" style="margin-top:12px"><span class="label">TSX — โหลดใน Dialog/Sheet</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { QueryLoading } from '@/components/ui/query-state';
+
+{query.isPending
+  ? &lt;QueryLoading label="กำลังโหลด" card={false} /&gt;
+  : &lt;DataTable id="leave-history" card={false} columns={columns} data={query.data} /&gt;}</code></pre></div>
+
+  <h2 class="sh">ทำ / อย่าทำ</h2>
+  <div class="dd">
+    <div class="do"><b class="t">ทำ</b><ul>
+      <li>ทุก route มี <code>loading.tsx</code> — preset ไม่ตรงก็ประกอบจากชิ้นย่อย (<code>SkeletonHeader</code> · <code>SkeletonTabs</code> · <code>SkeletonStatCards</code> · <code>SkeletonTableCard</code> · <code>SkeletonCard</code> · <code>SkeletonFields</code>)</li>
+      <li>จำนวนแท็บ/การ์ดตัวเลข/คอลัมน์/การ์ดฟอร์ม = ของหน้าจริง</li>
+      <li>skeleton เฉพาะโหลดครั้งแรก (<code>isLoading</code>) — refetch เบื้องหลังคงเนื้อหาเดิมไว้บนจอ</li>
+      <li><code>QueryLoading</code> ใน Dialog/Sheet ส่ง <code>card={false}</code></li>
+    </ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul>
+      <li>spinner กลางหน้าแทนเนื้อหา — spinner สงวนให้ปุ่มที่กำลัง submit</li>
+      <li>วาด skeleton เองด้วย <code>div</code> ขนาดเดา — กล่องไม่ตรงหน้าจริง ข้อมูลมาแล้วหน้ากระโดด</li>
+      <li>เปลี่ยนเป็น skeleton ทุกครั้งที่ refetch / เปลี่ยนตัวกรอง — ตารางกระพริบ</li>
+    </ul></div>
+  </div>
+</section>
+
 <!-- ======================= FORM DIALOG ======================= -->
 <section class="story" id="s-form-dialog" data-group="overlays" data-title="FormDialog" data-th="ฟอร์มใน dialog" data-kw="dialog formdialog modal ฟอร์ม popup height fluid fill">
   <div class="story-head">
@@ -2537,11 +2750,13 @@ import { FormDialogBody, FormDialogContent, FormDialogFooter, FormDialogHeader }
     <div class="do"><b class="t">ทำ</b><ul>
       <li>footer: ยกเลิก (outline) ซ้าย · ยืนยัน (primary) ขวาสุด · primary ปุ่มเดียวต่อ dialog</li>
       <li>ฟอร์มที่แก้ค้างไว้ ปิดด้วย Esc/คลิกนอก ต้องถามก่อน</li>
+      <li><b>overlay คือการ์ด</b> — พื้นเนื้อหา <code>bg-popover</code> ตัดกับหน้าอยู่แล้ว แยกหมวดด้วยหัวข้อ + ระยะห่าง · DataTable / <code>QueryLoading</code> ข้างในส่ง <code>card={false}</code></li>
     </ul></div>
     <div class="dont"><b class="t">อย่าทำ</b><ul>
       <li>ประกอบ <code>Dialog</code> ดิบเป็นฟอร์มเอง</li>
       <li>ยัดฟอร์มยาวหรือ checklist ลง dialog (บทเรียน 4.25.0: checklist สิทธิ์ล้นจอ)</li>
       <li>dialog ซ้อน dialog (ยกเว้น AlertDialog ยืนยันชั้นเดียว)</li>
+      <li>ห่อ <code>Card</code> หรือกล่องพื้นอ่อนแยกหมวดใน Dialog/Sheet — การ์ดซ้อนการ์ด · ยกเว้นชิ้นของ kit ที่ทำมาให้อยู่ใน dialog: <code>DetailSection</code> (รวม <a href="#approval-timeline">ApprovalTimeline</a>) และกล่องรายการใน <code>ReasonDialog</code></li>
     </ul></div>
   </div>
 </section>
@@ -2724,10 +2939,113 @@ import { DetailRow } from '@/components/ui/detail-row';
     <div class="do"><b class="t">ทำ</b><ul>
       <li>ชื่อ dialog = รายการนี้คืออะไร (ไม่ใช่ "รายละเอียด") · สถานะไปที่ <code>status</code> ไม่ใช่แถวในเนื้อ</li>
       <li><code>DetailRow</code> ห่อด้วย <code>DetailSection</code> เสมอ</li>
+      <li>สถานะการอนุมัติ = <a href="#approval-timeline">ApprovalTimeline</a> ใบเดียวต่อท้าย — ไม่ทำแถวผู้อนุมัติเอง</li>
     </ul></div>
     <div class="dont"><b class="t">อย่าทำ</b><ul>
       <li>ขีดเส้นคั่นทุกแถว · หัว section แบบ uppercase eyebrow</li>
       <li>footer ที่มีแต่ปุ่ม "ปิด"</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ======================= APPROVAL TIMELINE ======================= -->
+<section class="story" id="s-approval-timeline" data-group="overlays" data-title="ApprovalTimeline" data-th="สถานะการอนุมัติ" data-kw="approval timeline อนุมัติ ผู้อนุมัติ ขั้น level workflow รอ ไม่อนุมัติ ยกเลิก เส้นเวลา detail section">
+  <div class="story-head">
+    <h1>ApprovalTimeline <span>สถานะการอนุมัติ — การ์ดเดียวกันทุก dialog</span></h1>
+    <p class="purpose">ยื่นคำขอ → อนุมัติทีละขั้น → (ขอยกเลิก) เป็นเส้นเวลาเดียว บอกว่า<b>รอใคร</b>และ<b>ใครตัดสิน</b>เมื่อไร · เป็น <code>DetailSection</code> หนึ่งใบใน <a href="#detail-dialog">DetailDialogShell</a> ของทุก workflow · ส่ง<b>ข้อมูล</b>เข้าไป ข้อความ "รอ {ชื่อ}" / "อนุมัติโดย {ชื่อ}" kit สร้างเองจาก <code>kit.approvalTimeline</code></p>
+    <div class="files"><code>components/ui/approval-timeline.tsx</code> (ต่อจาก <code>detail-section</code> · <code>lib/format</code>) · catalog <code>kit.approvalTimeline</code> ใน <code>messages/kit.*.ts</code></div>
+  </div>
+  <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush"><div class="k-scrim">
+    <div class="k-dialog md k-fd">
+      <button class="k-btn v-ghost s-icon-sm k-dx" type="button" aria-label="ปิด"><svg class="i"><use href="#i-x"/></svg></button>
+      <div class="fh row3"><span class="k-icotile"><svg class="i"><use href="#i-cal"/></svg></span>
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><div class="k-dtitle lg">ลาพักร้อน · LV-0241</div><div class="k-ddesc">12/08/2026 – 14/08/2026</div></div>
+        <span class="k-badge b-outline ts-warning" style="margin-top:2px"><svg class="i"><use href="#i-clock"/></svg>รออนุมัติ</span></div>
+      <div class="fb dense">
+        <section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-users"/></svg>ผู้ขอ</div>
+          <div class="k-drow"><span class="dl">ชื่อ</span><span class="dv">สมชาย ใจดี</span></div>
+          <div class="k-drow"><span class="dl">หน่วยงาน</span><span class="dv">แผนกบัญชี</span></div></section>
+        <section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div>
+          <ol class="k-tl">
+            <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ยื่นคำขอ</p><p class="tm">10/08/2026 09:12 · ยื่นแทนโดย นภา ฝ่ายบุคคล</p></div></li>
+            <li><span class="dot done"><b>1</b></span><div class="tb"><p class="tt">ขั้น 1 · อนุมัติโดย วิไล ศรีสุข</p><p class="tm">10/08/2026 13:40</p><p class="tm">ทีมรับงานต่อได้ครบ</p></div></li>
+            <li><span class="dot waiting"><b>2</b></span><div class="tb"><p class="tt">ขั้น 2 · รอ ประเสริฐ มั่นคง, อรุณี แก้วใส</p></div></li>
+          </ol></section>
+      </div>
+    </div>
+  </div></div></div></div></div>
+  <p class="note">workflow หลายขั้น = "ขั้น N · …" + เลขในจุด · รอหลายชื่อ = ใครคนหนึ่งตัดสินได้ · ความเห็นของผู้อนุมัติเป็นบรรทัดจาง (ถ้าไม่อนุมัติเป็นกล่องแดงอ่อน) · ทั้งหมดเป็นข้อมูลตัวอย่าง</p>
+
+  <h2 class="sh">สีของจุด <small>state ชุดเดียวกับ StatusBadge</small></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>จุด · state</th><th>หัวข้อ (ตัวอย่าง)</th></tr></thead>
+    <tbody>
+      <tr><td><div class="ui" style="background:none;display:flex;align-items:center;gap:8px"><ol class="k-tl" style="padding:0"><li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span></li></ol><code style="white-space:nowrap">done</code></div></td><td>เขียว · ยื่นคำขอ / อนุมัติโดย {ชื่อ}</td></tr>
+      <tr><td><div class="ui" style="background:none;display:flex;align-items:center;gap:8px"><ol class="k-tl" style="padding:0"><li><span class="dot waiting"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg></span></li></ol><code style="white-space:nowrap">waiting</code></div></td><td>เหลือง · รอ {ชื่อ} (ไม่มีชื่อ = รออนุมัติ)</td></tr>
+      <tr><td><div class="ui" style="background:none;display:flex;align-items:center;gap:8px"><ol class="k-tl" style="padding:0"><li><span class="dot rejected"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></span></li></ol><code style="white-space:nowrap">rejected</code></div></td><td>แดง · ไม่อนุมัติโดย {ชื่อ} + เหตุผลในกล่องแดงอ่อน</td></tr>
+      <tr><td><div class="ui" style="background:none;display:flex;align-items:center;gap:8px"><ol class="k-tl" style="padding:0"><li><span class="dot cancelled"><svg class="i" aria-hidden="true"><use href="#i-ban"/></svg></span></li></ol><code style="white-space:nowrap">cancelled</code></div></td><td>เทา · ยกเลิกโดย {ชื่อ}</td></tr>
+      <tr><td><div class="ui" style="background:none;display:flex;align-items:center;gap:8px"><ol class="k-tl" style="padding:0"><li><span class="dot up"><b>2</b></span></li></ol><code style="white-space:nowrap">upcoming</code></div></td><td>เส้นประ หัวข้อจาง · "ยังไม่ถึงขั้นนี้"</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 class="sh">Variants</h2>
+  <div class="variants wide">
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div><ol class="k-tl">
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ยื่นคำขอ</p><p class="tm">10/08/2026 09:12</p></div></li>
+      <li><span class="dot rejected"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></span><div class="tb"><p class="tt">ไม่อนุมัติโดย วิไล ศรีสุข</p><p class="tm">10/08/2026 13:40</p><p class="rsn">ช่วงนั้นทีมปิดงบไตรมาส ขอเลื่อนเป็นสัปดาห์ถัดไป</p></div></li>
+    </ol></section></div>
+      <div class="cap"><b>rejected + note</b>เหตุผลปฏิเสธอยู่ในกล่องแดงอ่อนใต้ขั้นนั้น — ไม่ต้องทำแถว "เหตุผล" แยก</div></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div><ol class="k-tl">
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ยื่นคำขอ</p><p class="tm">10/08/2026 09:12</p></div></li>
+      <li><span class="dot waiting"><b>1</b></span><div class="tb"><p class="tt">ขั้น 1 · รอ วิไล ศรีสุข</p></div></li>
+      <li><span class="dot up"><b>2</b></span><div class="tb"><p class="tt up">ขั้น 2 · รอ ประเสริฐ มั่นคง</p><p class="tm">ยังไม่ถึงขั้นนี้</p></div></li>
+    </ol></section></div>
+      <div class="cap"><b>upcoming</b>ขั้นที่ยังไม่ถึง = จุดเส้นประ หัวข้อจาง — ผู้ขอเห็นว่าต้องผ่านอีกกี่ขั้น</div></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div><ol class="k-tl">
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ยื่นคำขอ</p><p class="tm">10/08/2026 09:12</p></div></li>
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">อนุมัติโดย วิไล ศรีสุข</p><p class="tm">10/08/2026 13:40</p></div></li>
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ขอยกเลิก</p><p class="tm">11/08/2026 08:05</p></div></li>
+      <li><span class="dot waiting"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg></span><div class="tb"><p class="tt">รออนุมัติการยกเลิก · วิไล ศรีสุข</p></div></li>
+    </ol></section></div>
+      <div class="cap"><b>stage="cancel"</b>ขอยกเลิกรายการที่อนุมัติแล้ว ต่อท้ายเส้นเดิม — ไม่แยกการ์ดใหม่</div></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div><ol class="k-tl">
+      <li><span class="dot done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div class="tb"><p class="tt">ยื่นคำขอ</p><p class="tm">10/08/2026 09:12</p></div></li>
+      <li><span class="dot cancelled"><svg class="i" aria-hidden="true"><use href="#i-ban"/></svg></span><div class="tb"><p class="tt">ยกเลิกโดย สมชาย ใจดี</p><p class="tm">10/08/2026 10:30</p></div></li>
+    </ol></section></div>
+      <div class="cap"><b>event="cancelled"</b>เจ้าของถอนคำขอเองก่อนมีคนตัดสิน</div></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="dh"><svg class="i"><use href="#i-circle-check"/></svg>สถานะการอนุมัติ</div><div class="col" style="gap:8px;padding:4px 0" aria-busy="true"><div class="k-skel" style="height:16px;width:160px"></div><div class="k-skel" style="height:16px;width:224px"></div></div></section></div>
+      <div class="cap"><b>steps=undefined</b>กำลังโหลด = skeleton 2 บรรทัดในการ์ดเดิม · <code>[]</code>/<code>null</code> = ไม่แสดงอะไรเลย</div></div>
+  </div>
+
+  <h2 class="sh">ใช้ยังไง</h2>
+  <div class="snip"><span class="label">TSX</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { ApprovalTimeline, type ApprovalStep } from '@/components/ui/approval-timeline';
+
+// server action คืน ApprovalStep[] — ข้อมูลล้วน ไม่มีข้อความ
+const { data } = useQuery({ queryKey: ['approval-steps', id], queryFn: () =&gt; getApprovalSteps(id) });
+
+&lt;DetailDialogShell …&gt;
+  &lt;DetailSection label={t('requester')} icon={Users}&gt;…&lt;/DetailSection&gt;
+  &lt;ApprovalTimeline steps={data} /&gt;   {/* undefined = skeleton · [] = ไม่แสดง */}
+&lt;/DetailDialogShell&gt;
+
+// ตัวอย่าง steps ของภาพด้านบน
+const steps: ApprovalStep[] = [
+  { event: 'submitted', state: 'done', at: '2026-08-10T09:12', names: ['นภา ฝ่ายบุคคล'] },   // names = ยื่นแทน
+  { event: 'decision', state: 'done', level: 1, names: ['วิไล ศรีสุข'], at: '2026-08-10T13:40', note: 'ทีมรับงานต่อได้ครบ' },
+  { event: 'decision', state: 'waiting', level: 2, names: ['ประเสริฐ มั่นคง', 'อรุณี แก้วใส'] }, // หลายชื่อ = ใครก็ได้
+];</code></pre></div>
+
+  <h2 class="sh">ทำ / อย่าทำ</h2>
+  <div class="dd">
+    <div class="do"><b class="t">ทำ</b><ul>
+      <li>ใช้การ์ดนี้ใบเดียวกันใน dialog รายละเอียดของทุก workflow</li>
+      <li>ส่ง <code>names</code> ที่แปลเป็นภาษาผู้อ่านแล้ว · ขั้นที่ยังไม่ถึงส่ง <code>upcoming</code></li>
+      <li>บรรทัดเฉพาะโปรเจค (ยอดที่ผู้อนุมัติแก้ · เลยกำหนด) ส่งทาง <code>extra</code></li>
+    </ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul>
+      <li>ทำรายชื่อผู้อนุมัติ/ตารางผู้อนุมัติเองต่อหน้า — ข้อความคนละแบบในแต่ละ workflow</li>
+      <li>ห่อ <code>Card</code> หรือ <code>DetailSection</code> อีกชั้น — ตัวมันเป็น DetailSection อยู่แล้ว</li>
+      <li>ใส่ StatusBadge ต่อแถว หรือแต่งสีจุดเอง — สีมาจาก <code>state</code></li>
     </ul></div>
   </div>
 </section>
@@ -2780,8 +3098,8 @@ import { DetailRow } from '@/components/ui/detail-row';
 
   <h2 class="sh">ทำ / อย่าทำ</h2>
   <div class="dd">
-    <div class="do"><b class="t">ทำ</b><ul><li>หัวกลุ่มติ๊กครั้งเดียว = เลือก/เอาออกทั้งกลุ่ม · ครึ่ง = เลือกบางส่วน</li><li>ตัวเลขนับใช้ <code>Badge</code> + <code>tabular-nums</code></li></ul></div>
-    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ใช้ Sheet แทน dialog กับฟอร์มสั้นที่ไม่มี list</li><li><code>SheetContent className="sm:max-w-md"</code> / <code>w-full</code> เปล่า — แพ้ class ของ primitive (verify เตือน) · ขนาดอื่นนอก xl/5xl</li></ul></div>
+    <div class="do"><b class="t">ทำ</b><ul><li>หัวกลุ่มติ๊กครั้งเดียว = เลือก/เอาออกทั้งกลุ่ม · ครึ่ง = เลือกบางส่วน</li><li>ตัวเลขนับใช้ <code>Badge</code> + <code>tabular-nums</code></li><li><b>overlay คือการ์ด</b> — พื้นเนื้อหา <code>bg-popover</code> ตัดกับหน้าอยู่แล้ว แยกหมวดด้วยหัวข้อ + ระยะห่าง (<code>SettingsSheetBody</code> + <code>SettingsSection</code>) · DataTable / <code>QueryLoading</code> ข้างในส่ง <code>card={false}</code></li></ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ใช้ Sheet แทน dialog กับฟอร์มสั้นที่ไม่มี list</li><li><code>SheetContent className="sm:max-w-md"</code> / <code>w-full</code> เปล่า — แพ้ class ของ primitive (verify เตือน) · ขนาดอื่นนอก xl/5xl</li><li>ห่อ <code>Card</code> หรือกล่องพื้นอ่อนแยกหมวดใน Dialog/Sheet — การ์ดซ้อนการ์ด · ยกเว้นชิ้นของ kit ที่ทำมาให้อยู่ใน dialog: <code>DetailSection</code> (รวม <a href="#approval-timeline">ApprovalTimeline</a>) และกล่องรายการใน <code>ReasonDialog</code></li><li>เปลี่ยนพื้น overlay เป็น <code>bg-background</code> — ไม่มีการ์ดให้ลอย เนื้อหาจมกับพื้น</li></ul></div>
   </div>
 </section>
 
@@ -3418,11 +3736,11 @@ export const metadata: Metadata = { title: `${DEV_PREFIX}Leave Portal` };
 </section>
 
 <!-- ======================= TABBED PAGE ======================= -->
-<section class="story" id="s-tabbed-page" data-group="patterns" data-title="Tabbed page" data-th="หน้ามีหลายแท็บ" data-kw="tabbed page tabs แท็บ ปุ่มหลักตามแท็บ page actions soft ?tab=">
+<section class="story" id="s-tabbed-page" data-group="patterns" data-title="Tabbed page" data-th="หน้ามีหลายแท็บ" data-kw="tabbed page tabs แท็บ ปุ่มหลักตามแท็บ page actions soft ?tab= page-actions-slot portal slot sheet dialog">
   <div class="story-head">
     <h1>Tabbed page <span>ปุ่มหลักของแท็บอยู่บนหัวหน้า</span></h1>
-    <p class="purpose">แท็บละหนึ่งปุ่มหลักใน <code>PageActions</code> — สลับตามแท็บที่เปิด (อ่าน <code>?tab=</code>) · แท็บที่ไม่มีอะไรให้สร้าง = <b>ไม่แสดงปุ่ม</b> (ไม่ใช่ disabled) · ปุ่มที่ใช้ได้ทุกแท็บ = <code>soft</code> คงที่ทางซ้าย</p>
-    <div class="files"><code>references/tabbed-pages.md</code> · <code>page-shell</code> + <code>tabs</code> + <code>data-table</code> (มติ 2026-10-16)</div>
+    <p class="purpose">แท็บละหนึ่งปุ่มหลักใน <code>PageActions</code> — สลับตามแท็บที่เปิด (อ่าน <code>?tab=</code>) · แท็บที่ไม่มีอะไรให้สร้าง = <b>ไม่แสดงปุ่ม</b> (ไม่ใช่ disabled) · ปุ่มที่ใช้ได้ทุกแท็บ = <code>soft</code> คงที่ทางซ้าย · 2 แบบ: <b>A</b> ปุ่มเป็นลิงก์ (ค่าเริ่มต้น — ภาพนี้) · <b>B</b> ปุ่มเปิด dialog/sheet ที่ตารางในแท็บถือ state → <code>ui/page-actions-slot</code> (ด้านล่าง)</p>
+    <div class="files"><code>references/tabbed-pages.md</code> · <code>page-shell</code> + <code>tabs</code> + <code>data-table</code> (มติ 2026-10-16) · <code>components/ui/page-actions-slot.tsx</code> (B · มติ 2026-11-04)</div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush">
     <div class="k-shell">
@@ -3446,8 +3764,25 @@ export const metadata: Metadata = { title: `${DEV_PREFIX}Leave Portal` };
   </div></div></div></div>
   <p class="note">ลองกดแท็บใน canvas — ปุ่มหลักเปลี่ยนตามแท็บ · แท็บ "กฎ" ไม่มีปุ่ม · กด <b>Mobile</b> — ปุ่มเต็มกว้าง <code>cta</code> ใต้ชื่อหน้า เหนือแถบแท็บ · toolbar ในแท็บมีแค่ค้นหา/ตัวกรอง/เครื่องมือ</p>
 
+  <h2 class="sh">B · ปุ่มเปิด dialog/sheet ของตารางในแท็บ <small>ui/page-actions-slot</small></h2>
+  <p class="note" style="margin-top:0">ปุ่ม "เพิ่ม" เปิด Sheet ที่ state (<code>open</code> · แถวที่แก้) อยู่ในคอมโพเนนต์ตารางของแท็บ — ยก state ขึ้นหน้าเพื่อวาดปุ่มอย่างเดียวจะผูกทุกแท็บไว้กับหน้า · ตารางจึงวาดปุ่มของตัวเอง<b>ลงหัวหน้า</b>ผ่าน portal: หน้าวาง <code>PageActionsSlot</code> แทน <code>PageActions</code> · ตารางห่อปุ่มด้วย <code>PageActionsPortal</code></p>
+  <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush">
+    <div class="k-page">
+      <div class="k-ph">
+        <div class="k-phtext"><div class="k-ptitle">ตั้งค่า OT</div><p class="k-pdesc">ประเภท OT อัตราค่าแรง และกฎการคำนวณ</p></div>
+        <div class="k-pact" data-pslot><button class="k-btn v-default s-cta" type="button" data-tabact><svg class="i"><use href="#i-plus"/></svg><span>เพิ่มประเภท OT</span></button></div>
+      </div>
+      <div class="k-tabscroll"><div class="k-tabs" role="tablist">
+        <button class="k-tab" role="tab" type="button" aria-selected="true" data-act="เพิ่มประเภท OT">ประเภท OT</button>
+        <button class="k-tab" role="tab" type="button" aria-selected="false" data-act="เพิ่มอัตรา">อัตราค่าแรง</button>
+        <button class="k-tab" role="tab" type="button" aria-selected="false" data-act="">กฎการคำนวณ</button>
+      </div></div>
+      <div class="k-dt"><div class="k-dt-head" style="border-bottom:0"><div class="k-dt-tool"><div class="k-search"><svg class="i"><use href="#i-search"/></svg><input class="k-input" placeholder="ค้นหาประเภท OT..." aria-label="ค้นหา"></div><div class="tools"><button class="k-btn v-outline s-icon" type="button" aria-label="ตั้งค่าคอลัมน์"><svg class="i"><use href="#i-settings2"/></svg></button></div></div></div></div>
+    </div>
+  </div></div></div></div>
+  <p class="note">ลองกดแท็บ — แท็บที่ไม่ได้เปิดถูก unmount ปุ่มของมันจึงหายไปด้วยเอง · แท็บ "กฎการคำนวณ" ไม่มีปุ่ม → ช่องว่างและซ่อนทั้งช่อง (<code>empty:hidden</code> — มือถือไม่เหลือแถวเปล่า) · B ถือว่าปุ่มของแท็บเป็นปุ่มเดียวบนหัว — หน้าที่ต้องมีปุ่ม <code>soft</code> ระดับหน้าคงที่ใช้ A</p>
   <h2 class="sh">ใช้ยังไง</h2>
-  <div class="snip"><span class="label">app/(app)/leave-settings/page.tsx — Server Component</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>const TAB_ACTION = {
+  <div class="snip"><span class="label">A · app/(app)/leave-settings/page.tsx — Server Component</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>const TAB_ACTION = {
   types: { href: '/leave-settings/types/new', label: t('addType') },
   holidays: { href: '/leave-settings/holidays/new', label: t('addHoliday') },
   rules: null, // ไม่มีอะไรให้สร้าง → ไม่มีปุ่ม
@@ -3463,11 +3798,33 @@ const action = TAB_ACTION[tab as keyof typeof TAB_ACTION] ?? null;
   )}
 &lt;/PageActions&gt;
 &lt;SettingsTabs value={tab} /&gt;   {/* client: onValueChange → router.replace('?tab=…') */}</code></pre></div>
+  <div class="snip" style="margin-top:12px"><span class="label">B · page.tsx (Server Component) + ot-types-table.tsx (client ถือ Sheet)</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { PageActionsPortal, PageActionsSlot, PageActionsSlotProvider } from '@/components/ui/page-actions-slot';
+
+// page.tsx
+&lt;PageShell&gt;
+  &lt;PageActionsSlotProvider&gt;
+    &lt;PageHeader&gt;
+      &lt;PageHeaderText&gt;…&lt;/PageHeaderText&gt;
+      &lt;PageActionsSlot /&gt;   {/* แทน &lt;PageActions&gt; — ว่าง = ซ่อน */}
+    &lt;/PageHeader&gt;
+    &lt;OtSettingsTabs /&gt;     {/* client: Tabs บน ?tab= · TabsContent ละตาราง — ห้าม keepMounted */}
+  &lt;/PageActionsSlotProvider&gt;
+&lt;/PageShell&gt;
+
+// ot-types-table.tsx
+const [open, setOpen] = React.useState(false);
+…
+{canCreate &amp;&amp; (
+  &lt;PageActionsPortal&gt;
+    &lt;Button size="cta" onClick={() =&gt; setOpen(true)}&gt;&lt;Plus /&gt;{t('createOtType')}&lt;/Button&gt;
+  &lt;/PageActionsPortal&gt;
+)}
+&lt;Sheet open={open} onOpenChange={setOpen}&gt;…&lt;/Sheet&gt;</code></pre></div>
 
   <h2 class="sh">ทำ / อย่าทำ</h2>
   <div class="dd">
-    <div class="do"><b class="t">ทำ</b><ul><li>แท็บละหนึ่งปุ่มหลัก · เลือกปุ่มที่ server จาก <code>?tab=</code></li><li>ปุ่มระดับหน้า (ส่งออกทั้งหมด) = <code>soft</code> ซ้ายของปุ่มหลัก</li></ul></div>
-    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ปุ่ม disabled ในแท็บที่ไม่มีอะไรให้สร้าง</li><li>ปุ่มหลักใน toolbar ของตารางในแท็บ หรือในเนื้อแท็บ</li></ul></div>
+    <div class="do"><b class="t">ทำ</b><ul><li>แท็บละหนึ่งปุ่มหลัก · เลือกปุ่มที่ server จาก <code>?tab=</code></li><li>ปุ่มระดับหน้า (ส่งออกทั้งหมด) = <code>soft</code> ซ้ายของปุ่มหลัก</li><li>ปุ่มเป็นลิงก์ → A · ปุ่มเปิด state ของแท็บ (Sheet/Dialog ในตาราง) → B</li></ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ปุ่ม disabled ในแท็บที่ไม่มีอะไรให้สร้าง</li><li>ปุ่มหลักใน toolbar ของตารางในแท็บ หรือในเนื้อแท็บ</li><li>B: ตั้ง <code>keepMounted</code> บน <code>TabsPanel</code> — ปุ่มของทุกแท็บโผล่บนหัวพร้อมกัน</li><li>ยก state ของ Sheet ขึ้นหน้าเพื่อวาดปุ่ม — ใช้ B แทน</li></ul></div>
   </div>
 </section>
 
@@ -3757,8 +4114,8 @@ return (
     { id: 'foundations', name: 'พื้นฐาน', icon: 'i-settings2', desc: 'สี ตัวอักษร ระยะ ไอคอน วันที่/ตัวเลข การเคลื่อนไหว — ทุกชิ้นใช้ร่วมกัน' },
     { id: 'actions', name: 'ปุ่มและการกระทำ', icon: 'i-plus', desc: 'ปุ่ม ปุ่มไอคอนในแถวตาราง การทำกับหลายแถว และตัวสลับมุมมอง' },
     { id: 'forms', name: 'ฟอร์มและการกรอก', icon: 'i-pencil', desc: 'ช่องกรอก ตัวเลือก วันที่ เวลา ช่วงเวลา ตัวกรอง และข้อความยาว' },
-    { id: 'data', name: 'แสดงข้อมูล', icon: 'i-chart', desc: 'ตาราง การ์ดตัวเลข การ์ด ป้ายสถานะ กราฟ หน้าว่าง และกล่องแจ้ง/สถานะโหลด' },
-    { id: 'overlays', name: 'หน้าต่างซ้อน', icon: 'i-layers', desc: 'dialog แผงเลื่อนข้าง popover/bottom sheet และ toast ที่ลอยเหนือหน้า' },
+    { id: 'data', name: 'แสดงข้อมูล', icon: 'i-chart', desc: 'ตาราง การ์ดตัวเลข การ์ด ป้ายสถานะ รหัส+คำอธิบาย กราฟ หน้าว่าง กล่องแจ้ง/สถานะโหลด และโครงหน้าตอนโหลด' },
+    { id: 'overlays', name: 'หน้าต่างซ้อน', icon: 'i-layers', desc: 'dialog เส้นเวลาการอนุมัติ แผงเลื่อนข้าง popover/bottom sheet และ toast ที่ลอยเหนือหน้า' },
     { id: 'layout', name: 'โครงหน้า', icon: 'i-panel', desc: 'sidebar header หัวหน้าเพจ แท็บ แถบ DEV และเมนูผู้ใช้' },
     { id: 'patterns', name: 'รูปแบบหน้า', icon: 'i-layout', desc: 'หน้ารายการ dashboard ฟอร์มเต็มหน้า และหน้าที่มีหลายแท็บ — ประกอบจากชิ้นด้านบน' },
     { id: 'auth', name: 'หน้าที่มากับระบบ login', icon: 'i-shield', desc: 'หน้า login และหน้า admin — ได้เมื่อรัน ugt-nextjs-auth-setup' }
