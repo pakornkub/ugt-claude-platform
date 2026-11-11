@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.18.1 (2026-11-11)
 
 - **contracts/cicd.md: compose ส่ง env เข้า container ทีละชื่อ** — กติกาใหม่ใน Build & deploy rules: ตัวแปร runtime ที่แอปเริ่มอ่านต้องเพิ่มใน `environment:` ของ compose ทั้งสองไฟล์ในงานเดียวกัน · origin ugt-hrms (RT-074) · 2026-11-05
 

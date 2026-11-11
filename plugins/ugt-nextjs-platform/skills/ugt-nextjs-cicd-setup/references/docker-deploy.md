@@ -124,7 +124,8 @@ service has no `env_file:` — it gets exactly the keys listed under
 **Fix.** Every runtime variable the app reads goes into `environment:` of
 **both** `docker-compose.yml` and `docker-compose.dev.yml`, in the same PR that
 starts reading it. Optional ones as `VAR: ${VAR:-}` — the app then receives
-`''`, so its env parsing must treat an empty string as unset.
+`''`, so its env parsing must treat an empty string as unset
+(`emptyStringAsUndefined: true` in `createEnv` of `lib/env.ts`).
 **Origin.** ugt-hrms (RT-074) · 2026-11-05
 
 ## E. Healthcheck gotchas
