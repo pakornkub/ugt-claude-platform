@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.83.3 · ugt-nextjs-design-setup/messages/kit.en.ts
-// kit-hash: b351f4cd55e8
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/messages/kit.en.ts
+// kit-hash: e3b631a07728
 // English catalog for the org UI kit. Keys must match kit.th.ts exactly.
 export const kitEn = {
   dataTable: {
@@ -102,5 +102,28 @@ export const kitEn = {
     trigger: 'Filters',
     clear: 'Clear filters',
     activeCount: '{count} active',
+  },
+  // ── ui/approval-timeline.tsx (ugt-hrms decision 2026-10-28) — names come from the data ──
+  approvalTimeline: {
+    title: 'Approval status',
+    submitted: 'Submitted',
+    cancelRequested: 'Cancellation requested',
+    filedBy: 'Filed by {name}',
+    waiting: 'Waiting on {name}',
+    waitingAnyone: 'Waiting for approval',
+    approvedBy: 'Approved by {name}',
+    approved: 'Approved',
+    rejectedBy: 'Rejected by {name}',
+    rejected: 'Rejected',
+    cancelledBy: 'Cancelled by {name}',
+    cancelled: 'Cancelled',
+    cancelWaiting: 'Cancellation waiting on {name}',
+    cancelWaitingAnyone: 'Cancellation waiting for approval',
+    cancelApprovedBy: 'Cancellation approved by {name}',
+    cancelApproved: 'Cancellation approved',
+    cancelRejectedBy: 'Cancellation rejected by {name}',
+    cancelRejected: 'Cancellation rejected',
+    level: 'Step {level}',
+    upcoming: 'Not reached yet',
   },
 } as const;

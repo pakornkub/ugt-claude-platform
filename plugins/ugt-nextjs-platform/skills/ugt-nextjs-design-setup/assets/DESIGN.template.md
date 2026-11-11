@@ -294,7 +294,9 @@
   | ≤ 3 ช่อง จบในจังหวะเดียว (ขอเหตุผลปฏิเสธ/ยกเลิก) | `FormDialog` (compound + height `fluid`/`auto`/`fill`) · ขอเหตุผล = `ReasonDialog` (`ui/reason-dialog`) ตัวเดียวทั้งแอป |
   | ยืนยันอย่างเดียว ไม่มีช่องกรอก | `ConfirmActionDialog` (`AlertDialog`) ปุ่มมีข้อความ |
 
-  panel ค้างดูคู่เนื้อหา = `Sheet` · read-only = `detail-dialog-shell` · system alert
+  panel ค้างดูคู่เนื้อหา = `Sheet` · read-only = `detail-dialog-shell` (รายการที่มี workflow อนุมัติ
+  ใส่การ์ด `ApprovalTimeline` ตัวเดียวกันทุก dialog — จุดเขียว/เหลือง/แดง/เทา = เสร็จ/รอ/ไม่อนุมัติ/ยกเลิก ·
+  "รอ {ชื่อ}" · "อนุมัติโดย {ชื่อ}" + วันเวลา · เหตุผลไม่อนุมัติใต้ขั้นในกรอบแดงอ่อน) · system alert
   บังคับ action เดียว (session หมดอายุ) = `AlertDialog` ปิดไม่ได้ ปุ่ม primary เดียว
   **ไม่มีปุ่มยกเลิก** — ข้อยกเว้น footer ข้อเดียวที่อนุญาต
   > Sheet ฟอร์มตั้งค่า = `ui/settings-sheet` — `SettingsSheetContent size="xl"` / `"5xl"`

@@ -20,6 +20,9 @@
 ## Unreleased
 
 - **design-setup: รหัส master แสดงคู่คำอธิบายเสมอ (`ui/code-label.tsx` ใหม่)** — ผู้ใช้หน้างานอ่านรหัสเปล่าในตาราง/dialog ไม่ออก ("O", "DM") → แต่ละหน้าเขียนรหัสเองคนละแบบ ไม่มีที่บังคับคำอธิบาย → `CodeLabel code description`: รหัสเป็น `Badge` outline mono (แถว "ตัวระบุ" ของตาราง Badge) + คำอธิบายข้าง ๆ · ไม่มีรหัส = `-` · DESIGN.template §4 ตาราง Badge แถวใหม่ "รหัส master" · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/code-label.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
+## Unreleased
+
+- **design-setup: การ์ด "สถานะการอนุมัติ" เป็นเส้นเวลาเดียวกันทุก dialog (`ui/approval-timeline.tsx` ใหม่)** — dialog รายละเอียดแต่ละหน้าแสดงผู้อนุมัติไม่เหมือนกัน (รายชื่อทั้งสาย / ชื่อเดียว / ไม่มีเลย) และไม่บอกว่ารอใคร ใครกด → ไม่มี component กลาง → `ApprovalTimeline steps`: ขั้นเป็น data (`event` · `state` · `stage` · `level` · `names` · `at` · `note` · `upcoming` · ช่อง `extra` สำหรับบรรทัดเฉพาะโปรเจค) แปลที่ UI ผ่าน catalog `kit.approvalTimeline` ใหม่ · จุดสีตามโทน StatusBadge · `undefined` = skeleton · โหลดข้อมูลที่ผู้เรียก · DESIGN.template §4 read-only dialog · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/approval-timeline.tsx, ugt-nextjs-design-setup/messages/kit.th.ts, ugt-nextjs-design-setup/messages/kit.en.ts, ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.86.0 (2026-11-09)
 

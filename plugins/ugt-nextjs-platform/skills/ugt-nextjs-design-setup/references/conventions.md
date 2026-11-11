@@ -79,7 +79,7 @@ Chosen by the **job**, not field count alone (มติ 2026-10-16 A11 — repla
 | แก้ 1 record ของ master/ตั้งค่า ≥ 4 ช่อง | `ui/settings-sheet` — `SettingsSheetContent size="xl"` (576px) ฟอร์มล้วน · `size="5xl"` (1024px) มีตารางย่อย · 2 ขนาดเท่านั้น (`sm:max-w-*` เปล่าบน `SheetContent` แพ้ class ของ primitive) |
 | ≤ 3 ช่อง จบในจังหวะเดียว | `FormDialog` (compound: `FormDialogContent/Header/Body/Footer`, prop `height`: `fluid`/`auto`/`fill`) — ห้ามประกอบ `Dialog` ดิบเป็นฟอร์ม · **ขอเหตุผล (ปฏิเสธ/ยกเลิก) = `ui/reason-dialog` ตัวเดียว** ห้ามทำใหม่รายหน้า |
 | ฟอร์มที่มี list/checklist **โตตามข้อมูล** (นับเป็น "ยาว" เสมอแม้วันนี้สั้น — Dialog สูงคงที่ ข้อมูลไม่คงที่) | `Sheet` (body เลื่อน) หรือหน้าแยก — บทเรียน 4.25.0: ฟอร์มบทบาท "3 ช่อง" + checklist สิทธิ์ |
-| ดูรายละเอียด read-only | `detail-dialog-shell` (หัว: ไอคอน + ชื่อ + `description` + `status`) + `DetailHighlights` + `DetailSection`/`DetailRow` |
+| ดูรายละเอียด read-only | `detail-dialog-shell` (หัว: ไอคอน + ชื่อ + `description` + `status`) + `DetailHighlights` + `DetailSection`/`DetailRow` · รายการที่ผ่าน workflow อนุมัติ = **`ui/approval-timeline` การ์ดเดียวกันทุก dialog** (ยื่น → แต่ละขั้น → ขอยกเลิก · รอใคร/ใครกด) ห้ามรายชื่อผู้อนุมัติแบบรายหน้า |
 | ยืนยัน destructive | `AlertDialog` ผ่าน `ConfirmActionDialog` — ปุ่มมีข้อความ ไม่ใช่ icon ล้วน |
 | system alert บังคับ action เดียว (session หมดอายุ) | `AlertDialog` ปิดไม่ได้ — **ไม่มีปุ่มยกเลิก** (ข้อยกเว้น footer ข้อเดียวที่อนุญาต เพราะ "ยกเลิก" ไม่มีความหมายเมื่อ session ตายแล้ว) · ตัวจริง: `session-expired-dialog.tsx` ของ auth-setup |
 
