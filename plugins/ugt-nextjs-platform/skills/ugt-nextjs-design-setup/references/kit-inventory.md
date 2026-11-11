@@ -27,6 +27,7 @@
 | `ui/time-input.tsx` | HRMS (มติ 2026-10-16 B7) | `HH:MM` 24h typed field (mask while typing, normalize on blur) — replaces every `<input type="time">` · works with RHF `register`/`Controller` · exports `maskTimeInput`/`normalizeTimeInput` + `TIME_PATTERN` (schema regex — out-of-range input is kept, never clamped, so the schema flags it) · `ui/time-input.test.ts` ships alongside |
 | `ui/query-state.tsx` · `ui/truncated-text.tsx` | HRMS | query-state needs `ui/callout` |
 | `ui/callout.tsx` | HRMS | page-level banner; tones reuse `TONE_STYLES` |
+| `ui/code-label.tsx` | HRMS (hrms มติ 2026-10-28 "รหัส+คำอธิบาย") | a master code + what it means: code as `Badge variant="outline"` mono (identifier row of the Badge table — not `secondary`, the filter chip) + description beside it · no code = `-` · strings via props · needs `badge` |
 | `ui/bulk-action-bar.tsx` | HRMS (4 approval pages) | เลือกหลายแถวแล้วสั่งงานรวม; needs `checkbox`; pairs with `DataTable` `onSelectionChange` + `resetSelectionKey` |
 | `ui/export-menu.tsx` | HRMS | ปุ่ม Excel/CSV สำหรับ `toolbarExtra`; ship only when a page exports (needs `dropdown-menu` + `sonner`) |
 | `components/theme-provider.tsx` | standard next-themes wrapper | **fallback only** — the org preset scaffold ships its own (superset: hotkey + disableTransitionOnChange); keep the registry's file when present |

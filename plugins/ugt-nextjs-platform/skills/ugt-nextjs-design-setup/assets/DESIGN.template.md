@@ -343,6 +343,7 @@
   | --- | --- |
   | สถานะ (รอ/อนุมัติ/ปฏิเสธ/ยกเลิก) | `StatusBadge` — tone + **ไอคอนบังคับ** |
   | ป้ายกำกับ/ตัวระบุ (ชื่อ role, ประเภท, template) | `Badge variant="outline"` ข้อความล้วน **ห้ามสีสถานะ** |
+  | รหัส master สั้น ๆ (กะ `D`/`N`, ประเภท `DM`, รหัสคำนวณ) | `CodeLabel` — รหัส (`Badge` outline mono) **+ คำอธิบายข้าง ๆ เสมอ** ห้ามรหัสเปล่า |
   | ตัวเลขนับ | `Badge` + `tabular-nums` |
   | chip ตัวกรองที่กดปิดได้ | `Badge variant="secondary"` + ปุ่ม ✕ |
   | ป้ายสีที่ต้องไม่มีไอคอน (เช่น IN/OUT ใน log ดิบ) | `Badge variant="outline"` + `TONE_STYLES` — ห้ามประกาศสีใหม่ |
