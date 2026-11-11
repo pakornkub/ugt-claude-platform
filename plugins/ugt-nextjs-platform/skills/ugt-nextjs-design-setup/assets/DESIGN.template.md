@@ -312,6 +312,11 @@
   · **ไม่มีเนื้อหา (หัว + ท้าย เช่น dialog ยืนยัน) = เส้นเดียว** — หัวที่ต่อด้วยท้ายทันทีไม่มีเส้นล่าง (ตั้งที่ primitive)
   · **ห้ามใส่เนื้อหา (กล่อง/รายการ/ช่องกรอก) ใน `AlertDialogHeader`** (A9) — หัวมีแค่ title +
   คำอธิบายสั้น เนื้อหาวางต่อจากหัว
+- **Overlay ทำหน้าที่เป็นการ์ดเอง** (Dialog / Sheet / AlertDialog / Drawer): พื้นเนื้อหา = `bg-popover`
+  (registry base-mira ตั้งไว้แล้ว — ขาวในโหมดสว่าง ตัดกับพื้นหน้า) · **ห้ามใส่ `Card` ซ้อนใน overlay**
+  และห้ามกล่องพื้นอ่อนแยกหมวด — แยกหมวดด้วยหัวข้อ + ระยะห่าง (`SettingsSheetBody` + `SettingsSection`) ·
+  DataTable ใน overlay ส่ง `card={false}` · อย่าเปลี่ยนพื้น overlay เป็น `bg-background` (พื้นเทาของหน้ามีไว้ให้การ์ดลอย
+  — ใน overlay ไม่มีการ์ดให้ลอย เนื้อหาจะดูจมกับพื้น)
 - Footer dialog: ยกเลิก (outline) ซ้าย · ยืนยัน primary ขวาสุด · primary
   **ปุ่มเดียว**ต่อ dialog · ปุ่ม footer ขนาด `cta` (มาจาก primitive) · ห้ามซ้อน dialog (ยกเว้น
   AlertDialog ยืนยัน 1 ชั้น) · ฟอร์ม dirty ปิดต้องถามก่อน

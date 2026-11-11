@@ -8,6 +8,9 @@
 - **cicd-setup: env ใหม่ใส่ใน Jenkins Secret File แล้วไม่ถึงแอป** — compose ใช้ `.env` แค่แทนค่า `${VAR}` ในไฟล์ compose และ service ไม่มี `env_file:` → ตัวแปรที่ไม่อยู่ใน `environment:` ไม่เข้า container (ฟีเจอร์ปิดเงียบ ไม่มี error) → เพิ่มใน `environment:` ของ compose ทั้งสองไฟล์ใน PR เดียวกับที่เริ่มอ่าน · optional ใช้ `${VAR:-}` · origin ugt-hrms (RT-074) · 2026-11-05 · docker-deploy §D.1 + แถวอาการ + คอมเมนต์ใน compose · asset: ugt-nextjs-cicd-setup/docker-compose.yml, ugt-nextjs-cicd-setup/docker-compose.dev.yml
 - **design-setup: build ล้มเพราะโหลดฟอนต์จาก Google ไม่ได้** — Jenkins Build/Docker build ล้ม `Can't resolve '@vercel/turbopack-next/internal/font/google/font'` บางรอบ → `next/font/google` ดาวน์โหลดฟอนต์ตอน build → root-layout.md หัวข้อใหม่: ฟอนต์เดิมเป็นไฟล์ใน `app/fonts/` ผ่าน `next/font/local` (คัดจาก `npm pack @fontsource-variable/*` ไม่เพิ่ม dependency, ตัวแปร CSS เดิม) · `verify.mjs` ยอมรับไฟล์ local · แถวอาการใน cicd-setup · ค่าเริ่มต้นยังเป็น Google · origin ugt-hrms · 2026-11-02
 - review หลัง merge PR #35–#39: `verify.mjs` เช็คฟ้อนต์กลับมาแยกตัวพิมพ์ (เดิม flag `i` ทำให้คำว่า "inter" ที่ไหนก็ได้ เช่น `pointer-events` ผ่าน) + escape `.woff2` · docker-deploy §D.1 บอกวิธีให้ `lib/env.ts` มอง `''` เป็นไม่ได้ตั้ง (`emptyStringAsUndefined: true`) · reference.html: แถวอาการใหม่ใน cicd (Next.js/Python/PHP), pitfalls data-fetching, กฎ GROUP BY ของ database
+## Unreleased
+
+- **design-setup: overlay = การ์ด — ห้ามใส่ `Card` ซ้อนใน Dialog/Sheet** — ข้อตกลงใหม่ใน DESIGN.template §4 + `rules/ugt-nextjs-design.md`: พื้นเนื้อหาของ overlay เป็น `bg-popover` (ค่าของ registry) ทำหน้าที่เป็นการ์ดเอง · แยกหมวดด้วยหัวข้อ + ระยะห่าง ไม่ใช่การ์ด/กล่องพื้นอ่อน · ห้ามเปลี่ยนเป็น `bg-background` (เนื้อหาจมกับพื้นหน้า) · โปรเจกต์ที่ติดตั้งแล้วรับผ่าน "sync ข้อตกลง design" · origin ugt-hrms (DESIGN §10 2026-11-08, เคาะจาก mock) · 2026-11-08
 
 ## 4.86.0 (2026-11-09)
 
