@@ -4,6 +4,7 @@
 
 - **pitfalls: กดแล้วไม่มี loading — ปุ่มหยุดหมุน dialog ปิด แต่ตารางยังเป็นข้อมูลเดิมหลายวินาที** — `router.refresh()` ที่สั่งหลัง `await` ใน `startTransition(async …)` อยู่นอก transition (React 19) / `invalidateQueries` ไม่ถูก `await` ก่อนล้าง busy → ห่อ `startTransition(() => router.refresh())` อีกชั้น + ตารางจางระหว่างรอ · `await` refetch ก่อนปิด dialog · data-fetching §6 + แถวอาการ · language-switcher ของ kit แก้ตาม · origin ugt-hrms (RT-078) · 2026-11-11 · asset: ugt-nextjs-design-setup/components/language-switcher.tsx
 - **DatePicker: กดวันที่เลือกอยู่แล้วซ้ำ popover ปิดแล้วช่องว่าง** — react-day-picker `mode="single"` ส่ง `onSelect(undefined)` เมื่อกดวันเดิม แต่ kit ปิด popover ทุกครั้ง → ผู้ใช้เห็นช่องว่างโดยไม่ได้ตั้งใจล้างค่า → ปิดเฉพาะเมื่อได้วันที่ (`if (date) setOpen(false)`) · origin ugt-hrms · 2026-10-27 · asset: ugt-nextjs-design-setup/ui/date-picker.tsx
+- **database-setup: `$queryRaw` ที่ GROUP BY ด้วย fragment ล้มด้วย error 8120** — interpolate fragment `Prisma.sql` ตัวเดียวกันทั้งใน SELECT และ GROUP BY → แต่ละครั้งผูกพารามิเตอร์ชุดใหม่ (`@P1` vs `@P4`) SQL Server จึงมองเป็นคนละนิพจน์ → คำนวณครั้งเดียวใน derived table แล้ว GROUP BY ชื่อคอลัมน์ · raw-sql-and-sp §7 + แถว Quick Rules · origin ugt-hrms (RT-077) · 2026-11-09
 
 ## 4.86.0 (2026-11-09)
 
