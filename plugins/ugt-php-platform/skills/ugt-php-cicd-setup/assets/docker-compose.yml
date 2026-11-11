@@ -26,6 +26,8 @@ services:
     networks:
       - proxy-network
     environment:
+      # Only the keys listed here reach the container — .env just fills ${VAR}:
+      # a new runtime var is added here AND in the other compose file, same PR.
       # Runtime secrets — read from .env (copied from the Jenkins Secret File
       # credential at deploy time). NEVER bake secrets into image layers.
       DATABASE_URL: ${DATABASE_URL} # [DB] delete if no database

@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## Unreleased
+
+- **contracts/cicd.md: compose ส่ง env เข้า container ทีละชื่อ** — กติกาใหม่ใน Build & deploy rules: ตัวแปร runtime ที่แอปเริ่มอ่านต้องเพิ่มใน `environment:` ของ compose ทั้งสองไฟล์ในงานเดียวกัน · origin ugt-hrms (RT-074) · 2026-11-05
+
 ## 2.18.0 (2026-11-09)
 
 - **`ugt-contribute`: feedback loop ครอบคลุมขึ้น** — (1) description ติด trigger ตอน pipeline/Quality Gate/deploy กลับมาเขียว ("pipeline ผ่านแล้ว", "Quality Gate เขียวแล้ว") · (2) §1 เพิ่มคำถาม "stack นี้ หรือทุก stack?" + แถวเจ้าของ "Shared delivery infra" → `contracts/cicd.md` + `ugt-*-cicd-setup` ทุกตัวใน PR เดียว (`contribute/all-<slug>`) · แถว Python/PHP ชี้ `references/build-gotchas.md` แทน troubleshooting section ที่ไม่มีอยู่ · (3) §1b ค้น PR ที่เปิดอยู่ + skill ที่ ship แล้วก่อนเปิด PR ใหม่ — เจอ PR ซ้ำ → comment แทน · `ugt-handoff` triage รู้จัก "ทุก stack"
