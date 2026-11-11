@@ -417,6 +417,10 @@
   — ห้าม `toast.error` แทน warning
 - Loading: `Skeleton` โครง · spinner ในปุ่ม (disabled) สำหรับ action ·
   data state ผ่าน `ui/query-state` — ไม่เขียน if-loading เอง
+- **ทุก route มี `loading.tsx` คู่กัน** ประกอบจาก `ui/page-skeleton` (preset
+  `TablePageSkeleton` / `CalendarPageSkeleton` / `FormPageSkeleton` หรือชิ้นย่อย) —
+  จำนวนการ์ดตัวเลข/แท็บ/คอลัมน์/การ์ดฟอร์มตรงกับหน้าจริง หน้าไม่กระโดดตอนข้อมูลมา ·
+  **ห้าม spinner แทนเนื้อหา** · skeleton เฉพาะโหลดครั้งแรก (`isLoading`) ไม่ขึ้นตอน refetch เบื้องหลัง
 - Empty: `ui/empty` ทุกกรณี (ตารางว่าง/ไม่มีสิทธิ์/404) — icon + ข้อความ +
   CTA ถ้ามีทางไปต่อ
 - Error ระดับหน้า: `Callout` บนสุดของการ์ด · ระดับฟอร์ม: `Callout` ในฟอร์ม · ระดับ field: ใต้ช่องผ่าน `ui/field` (รายละเอียดที่ส่วน 4)

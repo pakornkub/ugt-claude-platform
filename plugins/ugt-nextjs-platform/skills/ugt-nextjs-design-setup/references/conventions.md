@@ -154,6 +154,9 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 - Loading: `Skeleton` for structure · in-button spinner (disabled) for
   actions · data states via `ui/query-state` (loading/error/empty in one) —
   no hand-written if-loading per page.
+- Route loading: every route ships a `loading.tsx` composed from
+  `ui/page-skeleton` (presets or parts) with the real page's counts — stat
+  cards, tabs, columns, form cards. Never a spinner in place of content.
 - Empty: `ui/empty` everywhere (empty table / no permission / 404) — icon +
   message + CTA when actionable.
 - Page-level error: banner at the top of the content card · field-level:

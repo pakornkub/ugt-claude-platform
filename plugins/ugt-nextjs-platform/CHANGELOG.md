@@ -11,6 +11,9 @@
 ## Unreleased
 
 - **design-setup: overlay = การ์ด — ห้ามใส่ `Card` ซ้อนใน Dialog/Sheet** — ข้อตกลงใหม่ใน DESIGN.template §4 + `rules/ugt-nextjs-design.md`: พื้นเนื้อหาของ overlay เป็น `bg-popover` (ค่าของ registry) ทำหน้าที่เป็นการ์ดเอง · แยกหมวดด้วยหัวข้อ + ระยะห่าง ไม่ใช่การ์ด/กล่องพื้นอ่อน · ห้ามเปลี่ยนเป็น `bg-background` (เนื้อหาจมกับพื้นหน้า) · โปรเจกต์ที่ติดตั้งแล้วรับผ่าน "sync ข้อตกลง design" · origin ugt-hrms (DESIGN §10 2026-11-08, เคาะจาก mock) · 2026-11-08
+## Unreleased
+
+- **design-setup: skeleton ตามโครงหน้า (`ui/page-skeleton.tsx` ใหม่)** — หน้าโหลดเป็น spinner หรือแถบเทาลอย ๆ แล้วกระโดดตอนข้อมูลมา → ไม่มีชิ้น skeleton ที่ประกอบจากโครงหน้าจริง → kit ใหม่: `PageSkeleton` (= `PageShell`) · `SkeletonHeader` (`PageHeader` + `PageActions` ปุ่ม `cta`) · `SkeletonStatCards` · `SkeletonTableCard` (พื้นการ์ดเดียวกับ DataTable) · `SkeletonCalendarCard` · `SkeletonTabs` · `SkeletonCard` · `SkeletonFields` + preset `TablePageSkeleton` / `CalendarPageSkeleton` / `FormPageSkeleton` (`PageFormActions`) สำหรับ `loading.tsx` ทุก route · `QueryLoading` เป็นการ์ดตาราง (ต้องมี `ui/page-skeleton` คู่กัน) · DESIGN.template §6: ทุก route มี `loading.tsx` ห้าม spinner แทนเนื้อหา · origin ugt-hrms (DESIGN §10 2026-09-30) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/page-skeleton.tsx, ugt-nextjs-design-setup/ui/query-state.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.86.0 (2026-11-09)
 
