@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **design-setup: หน้าที่มีแท็บ — ปุ่มหลักที่เปิด dialog ของตารางในแท็บ ขึ้นหัวหน้าผ่าน portal (`ui/page-actions-slot.tsx` ใหม่)** — `tabbed-pages.md` มีแต่แบบหน้าเลือก `Link` จาก `?tab=` · ปุ่มที่เปิด Sheet/Dialog ซึ่ง state อยู่ในตารางของแท็บ ต้องยก state ทุกแท็บขึ้นหน้า หรือยอมวางปุ่มใน toolbar ผิดข้อตกลง → `PageActionsSlotProvider` + `PageActionsSlot` (แทน `PageActions` ในหัว · ว่าง = ซ่อน) + `PageActionsPortal` (ตารางส่งปุ่มตัวเอง) · สลับตามแท็บเองเพราะ Base UI `TabsPanel` ถอดแท็บที่ไม่เปิด (ห้าม `keepMounted`) · `tabbed-pages.md` แบ่งเป็น A (ลิงก์ — เดิม) / B (portal) · origin ugt-hrms (DESIGN §10 2026-11-04) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/page-actions-slot.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
+
 ## 4.86.0 (2026-11-09)
 
 - **DataTable: กรองรายคอลัมน์ค้นตามที่เห็นบนจอ + คอลัมน์วันที่เลือกช่วงจากปฏิทิน** — พิมพ์ "06/11/2026" ในคอลัมน์วันที่ หรือป้ายสถานะที่แปลจากรหัส แล้วหาไม่เจอ → `auto` filterFn ของ TanStack เทียบค่าดิบ (ISO / รหัส) ไม่ใช่สิ่งที่เซลล์แสดง → `lib/table-filter.ts` ใหม่: ทุกคอลัมน์ที่ไม่ตั้ง `filterFn` ค้นค่าดิบ + รูป DD/MM/YYYY · `meta.filterValueOf` สำหรับคอลัมน์ป้าย · คอลัมน์วันที่ได้ปฏิทิน `mode="range"` แทนช่องพิมพ์ (ตรวจจากค่าแถว / `meta.dateFilter`) วันของ timestamp นับตาม Asia/Bangkok · auth-setup `/admin/audit-logs`: เอา DateRangePicker บน toolbar ออก กรองช่วงที่คอลัมน์เวลา (`f_createdAt` → `decodeDateRangeFilter` ในหน้า) · `toWhere()` แปลงค่าช่วงเป็น `gte/lt` ตามวันไทย (`dateRangeWhere`) แทน `contains` — ตาราง server อื่นที่เปิดกรองคอลัมน์วันที่ไม่ได้ 500 จาก Prisma · ลิงก์ audit-logs เก่าแบบ `?from=…&to=…` ไม่กรองแล้ว (ใช้ `f_createdAt`) · origin ugt-hrms (RT-075) · 2026-11-08 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx, ugt-nextjs-auth-setup/components/audit-logs-table.tsx, ugt-nextjs-design-setup/lib/table-query.ts
