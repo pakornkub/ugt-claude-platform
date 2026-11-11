@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: 802349164c61
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 5c47a8e67af7
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -62,9 +62,14 @@ import { formatNumber, toDateKey } from '@/lib/format';
 import {
   dateRangeFilterLabel,
   decodeDateRangeFilter,
+  decodeOptionFilter,
   encodeDateRangeFilter,
+  encodeOptionFilter,
   isDateValue,
+  matchesOptionFilter,
   matchesTextFilter,
+  optionFilterLabel,
+  type FilterOption,
 } from '@/lib/table-filter';
 import { ROWS_PER_PAGE_OPTIONS } from '@/lib/pagination';
 import { withTableQuery, type TableFields, type TableQuery } from '@/lib/table-query';
@@ -123,8 +128,16 @@ declare module '@tanstack/react-table' {
     /** คอลัมน์ตัวเลข — ไม่เข้าเกณฑ์กรองรายคอลัมน์ (ช่อง contains ใช้กับตัวเลขไม่ได้) */
     numeric?: boolean;
     /**
-     * ข้อความที่ช่องกรองใช้ค้น เมื่อเซลล์แสดงต่างจากค่าดิบ (ป้ายที่แปลจากรหัสสถานะ/ประเภท)
-     * — ไม่ใส่ = ค้นค่าดิบ + วันที่รูป DD/MM/YYYY · ใช้ได้เฉพาะตารางกรองฝั่ง client
+     * คอลัมน์สถานะ/ประเภท: กรองด้วยการติ๊กเลือกจากรายการนี้ (ป้ายที่เห็นบนจอ + จำนวนแถวต่อค่า)
+     * แทนช่องพิมพ์ — ค่าที่เทียบ = `filterValueOf(row)` หรือค่าของ accessor · ไม่ต้องตั้ง
+     * `filterable` · **ตารางกรองฝั่ง client เท่านั้น** (มี `serverQuery` = ไม่มีรายการติ๊ก)
+     */
+    filterOptions?: readonly FilterOption[];
+    /**
+     * มี `filterOptions`: ค่าของแถวที่เทียบกับ `value` ของรายการ เมื่อสถานะที่เห็นคำนวณจากหลายฟิลด์
+     * (คอลัมน์ `id` + `cell` ที่ไม่มี accessor ก็กรองได้ — ใช้ตัวนี้เป็น accessor ให้) ·
+     * ไม่มี `filterOptions`: ข้อความที่ช่องพิมพ์ใช้ค้น เมื่อเซลล์แสดงต่างจากค่าดิบ — ไม่ใส่ = ค้นค่าดิบ
+     * + วันที่รูป DD/MM/YYYY · ใช้ได้เฉพาะตารางกรองฝั่ง client
      */
     filterValueOf?: (row: TData) => string;
     /**
@@ -135,14 +148,42 @@ declare module '@tanstack/react-table' {
   }
 }
 
+/** ค่าที่คอลัมน์ `filterOptions` ใช้เทียบของแถวหนึ่ง */
+function optionValueOf<TData>(meta: ColumnDef<TData>['meta'], row: Row<TData>, columnId: string): string {
+  return meta?.filterValueOf ? meta.filterValueOf(row.original) : String(row.getValue(columnId));
+}
+
+/** แถวต่อค่าของคอลัมน์ `filterOptions` — นับจากข้อมูลทั้งหมด (ก่อนกรอง) ตัวเลขจึงไม่หายตอนติ๊ก */
+function countOptionValues<TData>(table: TanstackTable<TData>, key: string): Map<string, number> {
+  const meta = table.getColumn(key)?.columnDef.meta;
+  const counts = new Map<string, number>();
+  for (const row of table.getCoreRowModel().rows) {
+    const v = optionValueOf(meta, row, key);
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  return counts;
+}
+
 /**
  * ทุกคอลัมน์ที่ไม่ได้ตั้ง `filterFn` เอง กรองด้วยข้อความที่เห็นบนจอ (`lib/table-filter`) แทน
- * `auto` ของ TanStack ที่เทียบค่าดิบ — วันที่ ISO / รหัสสถานะ พิมพ์สิ่งที่เห็นแล้วหาไม่เจอ
+ * `auto` ของ TanStack ที่เทียบค่าดิบ — วันที่ ISO / รหัสสถานะ พิมพ์สิ่งที่เห็นแล้วหาไม่เจอ ·
+ * คอลัมน์ `meta.filterOptions` กรองตามค่าที่ติ๊ก
  */
 function withTextFilters<TData>(columns: ColumnDef<TData>[]): ColumnDef<TData>[] {
   return columns.map((c) => {
+    const meta = c.meta;
+    if (meta?.filterOptions) {
+      // TanStack กรองได้เฉพาะคอลัมน์ที่มี accessor — คอลัมน์สถานะแบบ `id` + `cell` ใช้ filterValueOf แทน
+      const needsAccessor = !('accessorKey' in c) && !('accessorFn' in c) && meta.filterValueOf;
+      return {
+        ...c,
+        ...(needsAccessor ? { accessorFn: meta.filterValueOf } : {}),
+        filterFn: (row: Row<TData>, columnId: string, value: unknown) =>
+          matchesOptionFilter(optionValueOf(meta, row, columnId), value as string),
+      } as ColumnDef<TData>;
+    }
     if (c.filterFn) return c;
-    const valueOf = c.meta?.filterValueOf;
+    const valueOf = meta?.filterValueOf;
     return {
       ...c,
       filterFn: (row: Row<TData>, columnId: string, value: unknown) =>
@@ -193,10 +234,14 @@ function isPinnedKey(key: string): boolean {
   return key === 'select' || key === 'actions';
 }
 
-/** เกณฑ์ default ของกรองรายคอลัมน์ — override ได้ด้วย `meta.filterable` */
-function isFilterableColumn<TData>(def: ColumnDef<TData>): boolean {
+/**
+ * เกณฑ์ default ของกรองรายคอลัมน์ — override ได้ด้วย `meta.filterable` · `filterOptions`
+ * เปิดให้เองเฉพาะตาราง client (`client`) — ตาราง server ไม่มีรายการติ๊ก
+ */
+function isFilterableColumn<TData>(def: ColumnDef<TData>, client: boolean): boolean {
   const meta = def.meta;
   if (meta?.filterable !== undefined) return meta.filterable;
+  if (client && meta?.filterOptions) return true;
   return 'accessorKey' in def && typeof def.header === 'string' && !meta?.numeric;
 }
 
@@ -430,6 +475,74 @@ function DataTableMobileList<TData>({
         );
       })}
     </div>
+  );
+}
+
+/**
+ * ปุ่มกรวยของคอลัมน์ `meta.filterOptions` → ติ๊กเลือกป้ายที่เห็นบนจอ พร้อมจำนวนแถวต่อค่า
+ * (ติ๊กแล้วกรองทันที — ไม่มีปุ่ม "กรอง" · มีปุ่มล้าง) · มติ ugt-hrms 2026-10-28
+ */
+function DataTableOptionsFilterPopover({
+  label,
+  options,
+  counts,
+  value,
+  onApply,
+}: Readonly<{
+  label: string;
+  options: readonly FilterOption[];
+  counts: ReadonlyMap<string, number>;
+  value: string;
+  onApply: (value: string) => void;
+}>) {
+  const t = useTranslations('kit.dataTable');
+  const idBase = React.useId();
+  const picked = decodeOptionFilter(value);
+  const toggle = (v: string, on: boolean) =>
+    onApply(encodeOptionFilter(on ? [...picked, v] : picked.filter((p) => p !== v)));
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={t('filterAria', { label })}
+            className={cn(
+              'shrink-0 rounded-sm p-0.5 opacity-50 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50',
+              picked.length > 0 && 'text-primary opacity-100'
+            )}
+          />
+        }
+      >
+        <Filter className="size-3" strokeWidth={2} aria-hidden />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="flex w-60 flex-col gap-1 p-2">
+        {options.map((o, i) => (
+          <div key={o.value} className="flex items-center gap-2 rounded-sm px-1.5 py-1 hover:bg-muted">
+            <Checkbox
+              id={`${idBase}-${i}`}
+              checked={picked.includes(o.value)}
+              onCheckedChange={(on) => toggle(o.value, on)}
+            />
+            <Label htmlFor={`${idBase}-${i}`} className="flex-1 cursor-pointer font-normal">
+              {o.label}
+            </Label>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {formatNumber(counts.get(o.value) ?? 0)}
+            </span>
+          </div>
+        ))}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 self-start"
+          disabled={picked.length === 0}
+          onClick={() => onApply('')}
+        >
+          {t('clear')}
+        </Button>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -715,6 +828,8 @@ function DataTableHeaderCell<TData>({
   onMove,
   onApplyFilter,
   dateFilter = false,
+  options,
+  optionCounts,
 }: Readonly<{
   header: Header<TData, unknown>;
   draggable: boolean;
@@ -730,6 +845,9 @@ function DataTableHeaderCell<TData>({
   onApplyFilter: (value: string) => void;
   /** คอลัมน์วันที่ → ปฏิทินเลือกช่วงแทนช่องพิมพ์ */
   dateFilter?: boolean;
+  /** `meta.filterOptions` (ตาราง client) → รายการติ๊กแทนช่องพิมพ์ · คู่กับ `optionCounts` */
+  options?: readonly FilterOption[];
+  optionCounts?: ReadonlyMap<string, number>;
 }>) {
   'use no memo';
   const key = header.column.id;
@@ -785,14 +903,23 @@ function DataTableHeaderCell<TData>({
           ) : (
             content
           )}
-          {filterable && dateFilter && (
+          {filterable && options && (
+            <DataTableOptionsFilterPopover
+              label={filterLabel}
+              options={options}
+              counts={optionCounts ?? new Map()}
+              value={filterValue}
+              onApply={onApplyFilter}
+            />
+          )}
+          {filterable && !options && dateFilter && (
             <DataTableDateRangeFilterPopover
               label={filterLabel}
               value={filterValue}
               onApply={onApplyFilter}
             />
           )}
-          {filterable && !dateFilter && (
+          {filterable && !options && !dateFilter && (
             <DataTableFilterPopover
               label={filterLabel}
               value={filterValue}
@@ -1095,6 +1222,18 @@ export function DataTable<TData>({
         .map((f) => [f.id, f.value as string]);
 
   const labelByKey = new Map(columns.map((c) => [columnKeyOf(c), columnLabelOf(c)]));
+  // รายการติ๊กมีเฉพาะตาราง client — ตาราง server ส่งค่ากรองเป็นข้อความลง URL ตามเดิม
+  const optionsByKey = new Map<string, readonly FilterOption[]>();
+  if (!serverQuery) {
+    for (const c of columns) if (c.meta?.filterOptions) optionsByKey.set(columnKeyOf(c), c.meta.filterOptions);
+  }
+  /** chip โชว์สิ่งที่ผู้ใช้เห็น: ป้ายของค่าที่ติ๊ก · ช่วงวันที่ DD/MM/YYYY · ข้อความที่พิมพ์ */
+  const chipText = (key: string, value: string) => {
+    const options = optionsByKey.get(key);
+    if (options) return optionFilterLabel(options, value);
+    const range = decodeDateRangeFilter(value);
+    return range ? dateRangeFilterLabel(range) : value;
+  };
 
   const resetTable = () => {
     if (id) stored.reset();
@@ -1282,13 +1421,12 @@ export function DataTable<TData>({
           <div className="flex flex-wrap items-center gap-1.5">
             {activeColumnFilters.map(([key, value]) => {
               const label = labelByKey.get(key) ?? key;
-              const range = decodeDateRangeFilter(value);
               return (
                 // ป้ายตัวกรอง = `Badge` ตามข้อตกลง (ป้ายที่ไม่ใช่สถานะ) — ห้ามเขียน
                 // ทรง pill เองอีกชุด ไม่งั้นสูง/ขนาดตัวอักษรไม่ตรงกับ Badge ที่อื่น
                 <Badge key={key} variant="secondary" className="gap-1">
                   <span className="text-muted-foreground">{label}:</span>
-                  {range ? dateRangeFilterLabel(range) : value}
+                  {chipText(key, value)}
                   <button
                     type="button"
                     aria-label={t('clearFilterAria', { label })}
@@ -1332,7 +1470,7 @@ export function DataTable<TData>({
                     columnFilterEnabled &&
                     !pinned &&
                     key !== filterColumn &&
-                    isFilterableColumn(def) &&
+                    isFilterableColumn(def, !serverQuery) &&
                     (!serverQuery?.fields || serverQuery.fields.filterable.includes(key));
                   const serverSortable =
                     !!serverQuery &&
@@ -1361,6 +1499,8 @@ export function DataTable<TData>({
                       onMove={moveColumn}
                       onApplyFilter={(value) => applyColumnFilter(key, value)}
                       dateFilter={filterable && !def.meta?.filterValueOf && isDateColumn(table, key)}
+                      options={filterable ? optionsByKey.get(key) : undefined}
+                      optionCounts={filterable && optionsByKey.has(key) ? countOptionValues(table, key) : undefined}
                     />
                   );
                 })}

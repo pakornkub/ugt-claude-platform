@@ -1,13 +1,17 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-design-setup/lib/table-filter.test.ts
-// kit-hash: 25098058e4d4
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/lib/table-filter.test.ts
+// kit-hash: b1d86fd158e1
 import { describe, expect, it } from 'vitest';
 import {
   dateRangeFilterLabel,
   dateRangeWhere,
   dayKeyOf,
   decodeDateRangeFilter,
+  decodeOptionFilter,
   encodeDateRangeFilter,
+  encodeOptionFilter,
+  matchesOptionFilter,
   matchesTextFilter,
+  optionFilterLabel,
 } from './table-filter';
 
 describe('DataTable text filter', () => {
@@ -70,5 +74,30 @@ describe('DataTable date-range filter', () => {
     );
     expect(dateRangeFilterLabel({ from: '2026-09-27', to: '2026-09-27' })).toBe('27/09/2026');
     expect(dateRangeFilterLabel({ to: '2026-09-28' })).toBe('≤ 28/09/2026');
+  });
+});
+
+describe('DataTable option filter', () => {
+  const options = [
+    { value: 'PENDING', label: 'รออนุมัติ' },
+    { value: 'APPROVED', label: 'อนุมัติแล้ว' },
+    { value: 'REJECTED', label: 'ไม่อนุมัติ' },
+  ];
+
+  it('round-trips the picked values through one string', () => {
+    expect(decodeOptionFilter(encodeOptionFilter(['PENDING', 'REJECTED']))).toEqual(['PENDING', 'REJECTED']);
+    expect(decodeOptionFilter('')).toEqual([]);
+    expect(decodeOptionFilter(undefined)).toEqual([]);
+  });
+
+  it('passes only picked values, everything when nothing is picked', () => {
+    const raw = encodeOptionFilter(['PENDING', 'REJECTED']);
+    expect(matchesOptionFilter('PENDING', raw)).toBe(true);
+    expect(matchesOptionFilter('APPROVED', raw)).toBe(false);
+    expect(matchesOptionFilter('APPROVED', '')).toBe(true);
+  });
+
+  it('labels the chip in the column order, not the click order', () => {
+    expect(optionFilterLabel(options, encodeOptionFilter(['REJECTED', 'PENDING']))).toBe('รออนุมัติ, ไม่อนุมัติ');
   });
 });

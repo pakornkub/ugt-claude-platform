@@ -123,12 +123,30 @@ rather than trusting the caller.
 **What a per-column filter matches** (`lib/table-filter.ts`): what the cell
 *shows*, never TanStack's `auto` on the raw value — a text filter searches the
 raw value plus its DD/MM/YYYY forms, a column whose cell shows a label for a code
-(status, type) sets `meta.filterValueOf: (row) => label`, and a **date column gets
+(a type name for its code) sets `meta.filterValueOf: (row) => label`, and a **date column gets
 a range calendar** instead of the text box (auto-detected from the first non-empty
 value; `meta.dateFilter: true` on server tables, whose filtered page may be empty).
 The range travels as one string in `filters[key]`: a server page decodes it with
 `decodeDateRangeFilter` and bounds the day in Asia/Bangkok — the audit-logs page
 is the worked example.
+
+**Status / type / source columns tick instead of type** (`meta.filterOptions`):
+
+```tsx
+{
+  accessorKey: 'status',
+  header: t('status'),
+  cell: ({ row }) => <StatusBadge tone={TONE[row.original.status]}>{t(`status.${row.original.status}`)}</StatusBadge>,
+  meta: { filterOptions: STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) })) },
+}
+```
+
+The popover lists the labels with a row count per value (counted before
+filtering, so the numbers stay put while ticking) and filters on each tick; the
+chip shows the labels, never the codes. Compared value = the accessor, or
+`meta.filterValueOf(row)` when the status on screen is derived from several
+fields (a display column with no accessor gets it as one). **Client tables only**
+— with `serverQuery` the column falls back to the default rule (no tick list).
 
 **Toolbar** — one row, fixed order, matching the component (`data-table.tsx`):
 **search input leftmost** → `toolbarFilters` (page-level filters, wide →

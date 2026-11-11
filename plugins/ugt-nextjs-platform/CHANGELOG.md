@@ -14,6 +14,9 @@
 ## Unreleased
 
 - **design-setup: skeleton ตามโครงหน้า (`ui/page-skeleton.tsx` ใหม่)** — หน้าโหลดเป็น spinner หรือแถบเทาลอย ๆ แล้วกระโดดตอนข้อมูลมา → ไม่มีชิ้น skeleton ที่ประกอบจากโครงหน้าจริง → kit ใหม่: `PageSkeleton` (= `PageShell`) · `SkeletonHeader` (`PageHeader` + `PageActions` ปุ่ม `cta`) · `SkeletonStatCards` · `SkeletonTableCard` (พื้นการ์ดเดียวกับ DataTable) · `SkeletonCalendarCard` · `SkeletonTabs` · `SkeletonCard` · `SkeletonFields` + preset `TablePageSkeleton` / `CalendarPageSkeleton` / `FormPageSkeleton` (`PageFormActions`) สำหรับ `loading.tsx` ทุก route · `QueryLoading` เป็นการ์ดตาราง (ต้องมี `ui/page-skeleton` คู่กัน) · DESIGN.template §6: ทุก route มี `loading.tsx` ห้าม spinner แทนเนื้อหา · origin ugt-hrms (DESIGN §10 2026-09-30) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/page-skeleton.tsx, ugt-nextjs-design-setup/ui/query-state.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
+## Unreleased
+
+- **DataTable: คอลัมน์สถานะ/ประเภทกรองด้วยการติ๊กเลือก + จำนวนต่อค่า (`meta.filterOptions`)** — พิมพ์ป้ายที่เห็น ("รออนุมัติ") ในช่องกรองคอลัมน์สถานะแล้วต้องรู้คำสะกดเป๊ะ หรือไม่รู้ว่ามีค่าอะไรให้กรองบ้าง → ช่องพิมพ์ไม่เหมาะกับคอลัมน์ที่มีค่าจำกัด → `meta.filterOptions: { value, label }[]` เปลี่ยนปุ่มกรวยเป็นรายการติ๊ก (ป้ายบนจอ + จำนวนแถวต่อค่านับก่อนกรอง · กรองทันทีที่ติ๊ก · chip โชว์ป้าย) · ค่าที่เทียบ = accessor หรือ `filterValueOf` (คอลัมน์ `id`+`cell` ไม่มี accessor ก็กรองได้) · ค่าที่ติ๊กเก็บเป็นสตริงเดียวใน column filter เดิม (chip/ล้างทั้งหมด/คืนค่าเริ่มต้นใช้ทางเดิม) · `lib/table-filter.ts`: `FilterOption` + encode/decode/match/label + test · ตาราง client เท่านั้น — มี `serverQuery` = ไม่มีรายการติ๊ก · DESIGN.template §4 ข้อตกลงใหม่ · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-design-setup/lib/table-filter.test.ts, ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.86.0 (2026-11-09)
 
