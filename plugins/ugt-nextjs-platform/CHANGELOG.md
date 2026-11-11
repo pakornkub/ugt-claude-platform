@@ -23,6 +23,9 @@
 ## Unreleased
 
 - **design-setup: การ์ด "สถานะการอนุมัติ" เป็นเส้นเวลาเดียวกันทุก dialog (`ui/approval-timeline.tsx` ใหม่)** — dialog รายละเอียดแต่ละหน้าแสดงผู้อนุมัติไม่เหมือนกัน (รายชื่อทั้งสาย / ชื่อเดียว / ไม่มีเลย) และไม่บอกว่ารอใคร ใครกด → ไม่มี component กลาง → `ApprovalTimeline steps`: ขั้นเป็น data (`event` · `state` · `stage` · `level` · `names` · `at` · `note` · `upcoming` · ช่อง `extra` สำหรับบรรทัดเฉพาะโปรเจค) แปลที่ UI ผ่าน catalog `kit.approvalTimeline` ใหม่ · จุดสีตามโทน StatusBadge · `undefined` = skeleton · โหลดข้อมูลที่ผู้เรียก · DESIGN.template §4 read-only dialog · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/approval-timeline.tsx, ugt-nextjs-design-setup/messages/kit.th.ts, ugt-nextjs-design-setup/messages/kit.en.ts, ugt-nextjs-design-setup/assets/DESIGN.template.md
+## Unreleased
+
+- **design-setup: หน้าที่มีแท็บ — ปุ่มหลักที่เปิด dialog ของตารางในแท็บ ขึ้นหัวหน้าผ่าน portal (`ui/page-actions-slot.tsx` ใหม่)** — `tabbed-pages.md` มีแต่แบบหน้าเลือก `Link` จาก `?tab=` · ปุ่มที่เปิด Sheet/Dialog ซึ่ง state อยู่ในตารางของแท็บ ต้องยก state ทุกแท็บขึ้นหน้า หรือยอมวางปุ่มใน toolbar ผิดข้อตกลง → `PageActionsSlotProvider` + `PageActionsSlot` (แทน `PageActions` ในหัว · ว่าง = ซ่อน) + `PageActionsPortal` (ตารางส่งปุ่มตัวเอง) · สลับตามแท็บเองเพราะ Base UI `TabsPanel` ถอดแท็บที่ไม่เปิด (ห้าม `keepMounted`) · `tabbed-pages.md` แบ่งเป็น A (ลิงก์ — เดิม) / B (portal) · origin ugt-hrms (DESIGN §10 2026-11-04) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/page-actions-slot.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.86.0 (2026-11-09)
 
