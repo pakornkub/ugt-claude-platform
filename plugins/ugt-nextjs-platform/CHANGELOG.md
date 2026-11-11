@@ -17,6 +17,9 @@
 ## Unreleased
 
 - **DataTable: คอลัมน์สถานะ/ประเภทกรองด้วยการติ๊กเลือก + จำนวนต่อค่า (`meta.filterOptions`)** — พิมพ์ป้ายที่เห็น ("รออนุมัติ") ในช่องกรองคอลัมน์สถานะแล้วต้องรู้คำสะกดเป๊ะ หรือไม่รู้ว่ามีค่าอะไรให้กรองบ้าง → ช่องพิมพ์ไม่เหมาะกับคอลัมน์ที่มีค่าจำกัด → `meta.filterOptions: { value, label }[]` เปลี่ยนปุ่มกรวยเป็นรายการติ๊ก (ป้ายบนจอ + จำนวนแถวต่อค่านับก่อนกรอง · กรองทันทีที่ติ๊ก · chip โชว์ป้าย) · ค่าที่เทียบ = accessor หรือ `filterValueOf` (คอลัมน์ `id`+`cell` ไม่มี accessor ก็กรองได้) · ค่าที่ติ๊กเก็บเป็นสตริงเดียวใน column filter เดิม (chip/ล้างทั้งหมด/คืนค่าเริ่มต้นใช้ทางเดิม) · `lib/table-filter.ts`: `FilterOption` + encode/decode/match/label + test · ตาราง client เท่านั้น — มี `serverQuery` = ไม่มีรายการติ๊ก · DESIGN.template §4 ข้อตกลงใหม่ · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-design-setup/lib/table-filter.test.ts, ugt-nextjs-design-setup/assets/DESIGN.template.md
+## Unreleased
+
+- **design-setup: รหัส master แสดงคู่คำอธิบายเสมอ (`ui/code-label.tsx` ใหม่)** — ผู้ใช้หน้างานอ่านรหัสเปล่าในตาราง/dialog ไม่ออก ("O", "DM") → แต่ละหน้าเขียนรหัสเองคนละแบบ ไม่มีที่บังคับคำอธิบาย → `CodeLabel code description`: รหัสเป็น `Badge` outline mono (แถว "ตัวระบุ" ของตาราง Badge) + คำอธิบายข้าง ๆ · ไม่มีรหัส = `-` · DESIGN.template §4 ตาราง Badge แถวใหม่ "รหัส master" · origin ugt-hrms (DESIGN §10 2026-10-28) · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/code-label.tsx, ugt-nextjs-design-setup/assets/DESIGN.template.md
 
 ## 4.86.0 (2026-11-09)
 

@@ -198,5 +198,5 @@ colors: ลบ=แดง · กู้คืน=เขียว · แก้ไ�
 จะหายเงียบ (`ugt-nextjs-kit-sync` เตือนตอนไฟล์ตกรุ่น แต่กู้ของที่หายไปแล้วไม่ได้)
 
 **คอมโพเนนต์ที่รับ label เป็น prop ไม่ต้องแตะ** — `ui/icon-action` `bulk-action-bar` `status-badge` `page-shell`
-`card-heading` `view-toggle` `stat-card` `time-input` `settings-sheet` `responsive-popover` `query-state` `detail-*`
+`card-heading` `view-toggle` `stat-card` `time-input` `settings-sheet` `responsive-popover` `query-state` `detail-*` `code-label`
 ออกแบบมาให้ผู้เรียกประกอบข้อความเองตั้งแต่ต้นแล้ว ผู้เรียกเป็นคนแปล
