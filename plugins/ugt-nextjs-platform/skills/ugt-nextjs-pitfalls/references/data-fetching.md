@@ -129,3 +129,44 @@ misparsed empty result.
 
 A Server Action failing on a page left open across a deploy
 (`UnrecognizedActionError`) → `references/version-skew.md`.
+
+## 6. The spinner stops before the new data arrives — refresh outside the transition
+
+**Symptom.** "กดแล้วไม่มี loading แล้วรอพักนึงถึงจะเห็นการเปลี่ยนแปลง" — after save /
+delete / approve the button stops spinning and the dialog closes, but the table
+keeps the old rows for 2–3 seconds with nothing on screen saying it is loading.
+**Root cause.** Two variants of one mistake — the busy state ends when the
+*action* resolves, not when the *data* does:
+
+- **RSC refresh:** `startTransition(async () => { await action(); router.refresh(); })`.
+  React 19 does not count updates scheduled after an `await` as part of the
+  surrounding transition, so `isPending` turns false as soon as the action
+  returns and `router.refresh()` (an RSC round trip) runs unobserved.
+- **React Query:** `void queryClient.invalidateQueries(...)` and then
+  `setBusy(false)` / closing the dialog in `finally` — the refetch is still in
+  flight. `QueryProgress` deliberately ignores background refetches, so nothing
+  covers the gap.
+
+**Fix.** Keep the busy state until the data has arrived:
+
+```tsx
+startTransition(async () => {
+  const res = await saveAction(input);
+  if ('error' in res) return toast.error(res.error);
+  setOpen(false);
+  startTransition(() => router.refresh()); // own transition → isPending holds until the new RSC payload
+});
+// a table whose dialog closes first: dim it while the refresh runs
+<div className={cn(isPending && 'pointer-events-none opacity-50')} aria-busy={isPending}>
+
+// React Query: await the refetch before clearing busy / closing
+await approveAction(ids);
+await queryClient.invalidateQueries({ queryKey: ['approvals'] });
+setBusy(false);
+```
+
+`void invalidateQueries` stays fine for side caches the user is not looking at.
+A cheap guard that keeps this from coming back: a test that scans `app/` +
+`components/` and fails on any `router.refresh()` not written as
+`start…(() => router.refresh())`.
+**Origin.** ugt-hrms (RT-078) · 2026-11-11
