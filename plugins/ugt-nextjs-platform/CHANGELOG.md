@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **pitfalls: กดแล้วไม่มี loading — ปุ่มหยุดหมุน dialog ปิด แต่ตารางยังเป็นข้อมูลเดิมหลายวินาที** — `router.refresh()` ที่สั่งหลัง `await` ใน `startTransition(async …)` อยู่นอก transition (React 19) / `invalidateQueries` ไม่ถูก `await` ก่อนล้าง busy → ห่อ `startTransition(() => router.refresh())` อีกชั้น + ตารางจางระหว่างรอ · `await` refetch ก่อนปิด dialog · data-fetching §6 + แถวอาการ · language-switcher ของ kit แก้ตาม · origin ugt-hrms (RT-078) · 2026-11-11 · asset: ugt-nextjs-design-setup/components/language-switcher.tsx
+
 ## 4.86.0 (2026-11-09)
 
 - **DataTable: กรองรายคอลัมน์ค้นตามที่เห็นบนจอ + คอลัมน์วันที่เลือกช่วงจากปฏิทิน** — พิมพ์ "06/11/2026" ในคอลัมน์วันที่ หรือป้ายสถานะที่แปลจากรหัส แล้วหาไม่เจอ → `auto` filterFn ของ TanStack เทียบค่าดิบ (ISO / รหัส) ไม่ใช่สิ่งที่เซลล์แสดง → `lib/table-filter.ts` ใหม่: ทุกคอลัมน์ที่ไม่ตั้ง `filterFn` ค้นค่าดิบ + รูป DD/MM/YYYY · `meta.filterValueOf` สำหรับคอลัมน์ป้าย · คอลัมน์วันที่ได้ปฏิทิน `mode="range"` แทนช่องพิมพ์ (ตรวจจากค่าแถว / `meta.dateFilter`) วันของ timestamp นับตาม Asia/Bangkok · auth-setup `/admin/audit-logs`: เอา DateRangePicker บน toolbar ออก กรองช่วงที่คอลัมน์เวลา (`f_createdAt` → `decodeDateRangeFilter` ในหน้า) · `toWhere()` แปลงค่าช่วงเป็น `gte/lt` ตามวันไทย (`dateRangeWhere`) แทน `contains` — ตาราง server อื่นที่เปิดกรองคอลัมน์วันที่ไม่ได้ 500 จาก Prisma · ลิงก์ audit-logs เก่าแบบ `?from=…&to=…` ไม่กรองแล้ว (ใช้ `f_createdAt`) · origin ugt-hrms (RT-075) · 2026-11-08 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx, ugt-nextjs-auth-setup/components/audit-logs-table.tsx, ugt-nextjs-design-setup/lib/table-query.ts

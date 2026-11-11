@@ -5,7 +5,8 @@ description: >
   tables, UI) on the org's Next.js + Prisma/MSSQL + React Query stack. Read the
   matching reference BEFORE writing the code — each rule is a shipped incident.
   Documented symptoms: date off by one day ("วันที่เลื่อน −1"), year shown as
-  พ.ศ., stale UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), fetch 404 only in
+  พ.ศ., stale UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), no loading while the new data arrives
+  ("กดแล้วไม่มี loading"), fetch 404 only in
   production, "Maximum update depth exceeded", "หน้า 1 จาก 0", Select crashing
   on an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form
   passes validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
@@ -37,6 +38,7 @@ appears.
 | Date picker button shows yesterday ("ปุ่มเลือกวันที่ขึ้นวันก่อนหน้า") while the saved value and the table are right | `formatDate(Date)` (UTC anchor) applied to a calendar-cell `Date` (local-midnight) | dates-timezones |
 | Year on screen off by ~543 ("ปีเป็น พ.ศ.") | BE conversion somewhere — org rule is ค.ศ. always, no BE path | dates-timezones |
 | Data not refreshing after a save ("บันทึกแล้วหน้าไม่อัปเดต"), stale list until reload | React Query invalidated with a specific key instead of a prefix | data-fetching |
+| Button stops spinning and the dialog closes, but the list stays old for seconds ("กดแล้วไม่มี loading") | `router.refresh()` after an `await` runs outside the transition · `invalidateQueries` not awaited before clearing busy | data-fetching |
 | A fetch that 404s only in production | client fetch missing the basePath | data-fetching |
 | "Maximum update depth exceeded" pointing at a UI-primitive component (Base UI now, Radix in legacy projects) | `useEffect` + `setState` reset pattern | data-fetching |
 | Pagination shows "หน้า 1 จาก 0" | `getPageCount()` / `totalPages` rendered raw on empty data | Quick Rules (below) |
