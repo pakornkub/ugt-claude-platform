@@ -7,7 +7,7 @@ description: >
   naming convention and audit columns here are mandatory and expensive to change
   after data exists. Also use when writing raw SQL / `EXEC usp_*` calls, reading
   across a linked server, a stored-procedure call that times out (mssql
-  15-second default), setting up type-safe env validation, or debugging MSSQL
+  15-second default), a raw GROUP BY failing with error 8120, setting up type-safe env validation, or debugging MSSQL
   migration problems (column renames that would drop data, filtered unique
   indexes Prisma can't express, `url` in the wrong place breaking generate).
   Load it before touching `prisma/schema.prisma` even for a one-field change —
@@ -225,6 +225,7 @@ Mandatory pattern: **sanitize before parameterize, always**; call SPs with
 | `import type sql from 'mssql'` | `import sql from 'mssql'` (value import) |
 | sanitize regex before interpolating into `$queryRaw` | hand-built SQL strings / skipped sanitize |
 | `` $executeRaw`EXEC usp_X ${a}, ${b}` `` (parameterized) | `$executeRawUnsafe` with user input |
+| GROUP BY a computed fragment → compute it once in a derived table, group by its column name (raw-sql §7) | Interpolate the same `Prisma.sql` fragment in SELECT and GROUP BY — fresh parameters each time → error 8120 |
 | existing store found → migrate (§4b) or say plainly the app still runs on it | install Prisma beside SQLite/mock data and report "ต่อ database แล้ว" |
 
 ## Verification Checklist

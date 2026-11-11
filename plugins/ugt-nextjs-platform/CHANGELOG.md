@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **database-setup: `$queryRaw` ที่ GROUP BY ด้วย fragment ล้มด้วย error 8120** — interpolate fragment `Prisma.sql` ตัวเดียวกันทั้งใน SELECT และ GROUP BY → แต่ละครั้งผูกพารามิเตอร์ชุดใหม่ (`@P1` vs `@P4`) SQL Server จึงมองเป็นคนละนิพจน์ → คำนวณครั้งเดียวใน derived table แล้ว GROUP BY ชื่อคอลัมน์ · raw-sql-and-sp §7 + แถว Quick Rules · origin ugt-hrms (RT-077) · 2026-11-09
+
 ## 4.86.0 (2026-11-09)
 
 - **DataTable: กรองรายคอลัมน์ค้นตามที่เห็นบนจอ + คอลัมน์วันที่เลือกช่วงจากปฏิทิน** — พิมพ์ "06/11/2026" ในคอลัมน์วันที่ หรือป้ายสถานะที่แปลจากรหัส แล้วหาไม่เจอ → `auto` filterFn ของ TanStack เทียบค่าดิบ (ISO / รหัส) ไม่ใช่สิ่งที่เซลล์แสดง → `lib/table-filter.ts` ใหม่: ทุกคอลัมน์ที่ไม่ตั้ง `filterFn` ค้นค่าดิบ + รูป DD/MM/YYYY · `meta.filterValueOf` สำหรับคอลัมน์ป้าย · คอลัมน์วันที่ได้ปฏิทิน `mode="range"` แทนช่องพิมพ์ (ตรวจจากค่าแถว / `meta.dateFilter`) วันของ timestamp นับตาม Asia/Bangkok · auth-setup `/admin/audit-logs`: เอา DateRangePicker บน toolbar ออก กรองช่วงที่คอลัมน์เวลา (`f_createdAt` → `decodeDateRangeFilter` ในหน้า) · `toWhere()` แปลงค่าช่วงเป็น `gte/lt` ตามวันไทย (`dateRangeWhere`) แทน `contains` — ตาราง server อื่นที่เปิดกรองคอลัมน์วันที่ไม่ได้ 500 จาก Prisma · ลิงก์ audit-logs เก่าแบบ `?from=…&to=…` ไม่กรองแล้ว (ใช้ `f_createdAt`) · origin ugt-hrms (RT-075) · 2026-11-08 · asset: ugt-nextjs-design-setup/ui/data-table.tsx, ugt-nextjs-design-setup/lib/table-filter.ts, ugt-nextjs-auth-setup/app/(admin)/admin/audit-logs/page.tsx, ugt-nextjs-auth-setup/components/audit-logs-table.tsx, ugt-nextjs-design-setup/lib/table-query.ts
