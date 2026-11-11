@@ -72,6 +72,10 @@ SonarQube analysis token is bound once in the Jenkins server config
   healthchecks poll `127.0.0.1` (never `localhost`)
 - Compose: `pull_policy: never` for locally-built images, host port
   overridable, log rotation bounded
+- Compose passes runtime env **by name only** (`environment:` list, no `env_file:`) —
+  `.env` just substitutes `${VAR}` in the compose file. A variable the app starts
+  reading is added to `environment:` of both compose files in the same change,
+  or it never reaches the container
 
 ## Persistent data (volumes)
 

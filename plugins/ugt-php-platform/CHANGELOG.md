@@ -1,5 +1,9 @@
 # Changelog — ugt-php-platform
 
+## Unreleased
+
+- **cicd-setup: env ใหม่ใส่ใน Jenkins Secret File แล้วไม่ถึงแอป** — compose ใช้ `.env` แค่แทนค่า `${VAR}` ในไฟล์ compose และ service ไม่มี `env_file:` → ตัวแปรที่ไม่อยู่ใน `environment:` ไม่เข้า container (ฟีเจอร์ปิดเงียบ ไม่มี error) → เพิ่มใน `environment:` ของ compose ทั้งสองไฟล์ใน PR เดียวกับที่เริ่มอ่าน · optional ใช้ `${VAR:-}` · origin ugt-hrms (RT-074) · 2026-11-05 · compose.md + คอมเมนต์ใน compose · asset: ugt-php-cicd-setup/docker-compose.yml, ugt-php-cicd-setup/docker-compose.dev.yml
+
 ## 0.8.6 (2026-11-09)
 
 - cicd-setup: Quick Rules แถวใหม่ — pipeline แดงแล้วแก้ผ่าน → รัน gate ของ `/ugt-contribute` (สาเหตุฝั่ง Jenkins/Sonar/Docker host มักเจอทุกภาษา)

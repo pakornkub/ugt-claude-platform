@@ -61,3 +61,17 @@ docker logs <container>
 
 `RestartCount` ที่วิ่งขึ้นเรื่อย ๆ พร้อม status `restarting` คือสัญญาณ
 crash-loop ชัดเจน — ไปดู `docker logs` ก่อนเสมอ ไม่ใช่ไล่ credential/DNS
+
+## A runtime env var set in the Jenkins Secret File never reaches the app
+
+**Symptom.** A new variable is in `env-<project>(-dev)` and the app reads it, but the app
+still behaves as if it is unset — the feature stays off with no error.
+**Root cause.** Deploy runs `cp $ENV_FILE .env` then `docker compose up`. Compose
+reads `.env` only to **substitute `${VAR}` inside the compose file**; the
+service has no `env_file:` — it gets exactly the keys listed under
+`environment:`, nothing else.
+**Fix.** Every runtime variable the app reads goes into `environment:` of
+**both** `docker-compose.yml` and `docker-compose.dev.yml`, in the same PR that
+starts reading it. Optional ones as `VAR: ${VAR:-}` — the app then receives
+`''`, so its env parsing must treat an empty string as unset.
+**Origin.** ugt-hrms (RT-074) · 2026-11-05

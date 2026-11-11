@@ -25,6 +25,8 @@ services:
       # sections 1–5, ugt-nextjs-database-setup/assets/env.example). Values come
       # from .env (the Jenkins Secret File copied at deploy). A module not
       # installed keeps its lines commented; its setup skill uncomments them.
+      # Only the keys listed here reach the container — .env just fills ${VAR}:
+      # a new runtime var is added here AND in the other compose file, same PR.
       # NEVER put NEXT_PUBLIC_* here (build args — no effect at runtime) and
       # NEVER bake secrets into image layers.
       # 1. runtime
