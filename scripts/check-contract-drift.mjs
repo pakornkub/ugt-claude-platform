@@ -281,6 +281,7 @@ const VERSION_SOURCES = [
   'ugt-nextjs-standard-mattpocock',
   'ugt-php-platform',
   'ugt-python-platform',
+  'ugt-devops-mcp',
 ];
 const versionCheck = { name: 'Doc versions match plugin.json (README.md + docs/web/index.html)', files: {} };
 try {
