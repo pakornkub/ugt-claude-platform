@@ -12,10 +12,12 @@ export const apiUrl = (base, path) => new URL(path.replace(/^\/+/, ''), base.end
 export const basicAuth = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
 
 export async function getJson(url, authHeader, { json = true } = {}) {
-  const res = await fetch(url, { headers: { Authorization: authHeader } });
+  const res = await fetch(url, { headers: { Authorization: authHeader }, signal: AbortSignal.timeout(30_000) });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw new Error(`${res.status} ${res.statusText} — ${url.pathname}: ${body.slice(0, 500)}`);
+    // Jenkins error pages are full HTML (with a CSRF crumb) — only JSON/text bodies help the caller
+    const detail = body.trimStart().startsWith('<') ? '' : `: ${body.slice(0, 500)}`;
+    throw new Error(`${res.status} ${res.statusText} — ${url.pathname}${detail}`);
   }
   return json ? res.json() : res.text();
 }

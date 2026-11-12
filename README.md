@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.88.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.7 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-devops-mcp` | 0.1.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
+| `ugt-devops-mcp` | 0.1.1 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
 | `ugt-core` | 2.18.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -111,9 +111,14 @@ claude mcp remove jenkins -s user
 claude mcp remove sonarqube -s user
 ```
 
-แล้วลบ env var เดิมที่เก็บ token เป็นข้อความเปล่า (`JENKINS_TOKEN`,
-`SONAR_TOKEN`/`SONARQUBE_TOKEN` และตัว URL/USER คู่กัน) ใน System Properties →
-Environment Variables → User variables · โฟลเดอร์ `~/.claude/mcp-servers/` ลบได้
+ถ้าขึ้นว่าไม่เจอ แปลว่าสคริปต์เก่าไปผูกไว้กับโปรเจคใดโปรเจคหนึ่ง (บั๊กของสคริปต์)
+→ `cd` เข้าโปรเจคที่ `/mcp` ยังเห็น `jenkins`/`sonarqube` ตัวเก่า แล้วรันคำสั่งเดิม
+โดยเปลี่ยน `-s user` เป็น `-s local`
+
+แล้วลบ env var เดิมที่เก็บ token เป็นข้อความเปล่า (`JENKINS_URL`/`USER`/`TOKEN`,
+`SONARQUBE_URL`/`TOKEN`) ใน System Properties → Environment Variables → User variables ·
+`SONAR_HOST_URL`/`SONAR_TOKEN` (สคริปต์บางรุ่นใช้ชื่อนี้) ลบเฉพาะถ้าไม่ได้รัน
+sonar-scanner ในเครื่อง — scanner ใช้ชื่อเดียวกัน · โฟลเดอร์ `~/.claude/mcp-servers/` ลบได้
 
 <details>
 <summary>ทางเลือกอื่น: copy ไฟล์ตรง ๆ (ไม่ต้องแตะ marketplace แต่ update เองทุกครั้ง)</summary>
@@ -342,8 +347,8 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
      ติดตั้งจริง — โครงหน้าและข้อความยังต้องดูด้วยตาตามข้อ 4
 6. `claude plugin validate ./plugins/<ชื่อ> --strict`
 7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
-   push tag ของ dependency ก่อน) · **ยกเว้น `ugt-python-platform` และ
-   `ugt-php-platform` — สองตัวนี้ bump version + push ได้ แต่ยังไม่ tag
+   push tag ของ dependency ก่อน) · **ยกเว้น `ugt-python-platform`,
+   `ugt-php-platform` และ `ugt-devops-mcp` — สามตัวนี้ bump version + push ได้ แต่ยังไม่ tag
    จนกว่าจะผ่าน pilot จริง** (มติเดิม · ดูแถว pilot ใน `docs/backlog.md`
    §รอเงื่อนไข) ถ้าเผลอ tag ไปแล้ว ให้ลบ tag ทั้ง local และ origin
 8. ประกาศให้ทีมรันคำสั่งอัปเดต

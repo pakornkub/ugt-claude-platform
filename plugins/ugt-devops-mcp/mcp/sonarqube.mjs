@@ -21,7 +21,7 @@ function sonar(path, params) {
 
 const projectKey = z.string().describe('SonarQube project key, e.g. my-app or my-app-dev');
 
-const server = new McpServer({ name: 'sonarqube-mcp', version: '0.1.0' });
+const server = new McpServer({ name: 'sonarqube-mcp', version: '0.1.1' });
 
 server.tool(
   'list_issues',
@@ -35,7 +35,7 @@ server.tool(
   },
   async ({ projectKey, severities, types, resolved, pageSize }) => {
     const data = await sonar('api/issues/search', {
-      componentKeys: projectKey,
+      components: projectKey, // componentKeys is deprecated since SonarQube 10.2
       severities,
       types,
       resolved: resolved ?? false,
