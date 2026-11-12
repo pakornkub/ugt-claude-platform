@@ -1,5 +1,15 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.1 (2026-11-12)
+
+- **eval หลัง merge (#48)** — รันทุก tool กับ Jenkins + SonarQube 26.10 ของจริงผ่าน stdio (อ่านอย่างเดียว): `list_jobs`, `get_build` (+stages), `get_console_log` (tail จาก log 186K ตัวอักษร), `get_quality_gate_status`, `list_issues` ผ่านหมด · Jenkins อยู่หลัง base path `/jenkins/` → relative join ใช้ได้จริง
+- error 404/401 จาก Jenkins เดิมแนบ HTML ทั้งหน้า (มี CSRF crumb) เข้า error → ตัด body ที่เป็น HTML ทิ้ง เหลือแค่ status + path
+- ทุก request มี timeout 30 วินาที (เดิม server ค้าง = tool ค้างจน Claude Code ตัด)
+- `list_issues` ใช้ `components` แทน `componentKeys` (deprecated ตั้งแต่ SonarQube 10.2 — ทดสอบแล้วกรองได้ผลเท่ากันบน 26.10)
+- `get_build` ดึงข้อมูล build กับ stages พร้อมกัน · คำอธิบาย `job` บอกวิธีเขียน branch ที่มี `/` ของ multibranch (`%2F`)
+- README: วิธีลบ MCP เก่าที่สคริปต์ผูกไว้ระดับโปรเจค (`-s local`) · `SONAR_TOKEN` ลบเฉพาะถ้าไม่ใช้ sonar-scanner · ขั้น release ข้อ 7 เพิ่ม `ugt-devops-mcp` เข้ารายการ "ยังไม่ tag จนกว่าจะผ่าน pilot"
+- ยังไม่แก้: `get_console_log` ยังโหลด log ทั้งไฟล์แล้วตัดท้าย (186K ตัวอักษรใช้ ~0.3 วินาที รับได้) · ไม่มีเช็ค Node ≥ 18
+
 ## 0.1.0 (2026-11-12)
 
 - **plugin ใหม่ แทนสคริปต์ `install-jenkins-mcp.ps1` / `install-sonarqube-mcp.ps1`** — MCP Jenkins (`list_jobs`, `get_build` + stages, `get_console_log`) และ SonarQube (`list_issues`, `get_quality_gate_status`) แบบอ่านอย่างเดียว ย้ายโค้ดเดิมมา แก้ปัญหาของสคริปต์:

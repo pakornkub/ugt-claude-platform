@@ -14,7 +14,7 @@ const jenkins = (path, opts) => getJson(apiUrl(HOST, path), AUTH, opts);
 // "folder/sub/job" → "job/folder/job/sub/job/job"
 const jobPath = (name) => name.split('/').filter(Boolean).map((p) => `job/${encodeURIComponent(p)}`).join('/');
 
-const server = new McpServer({ name: 'jenkins-mcp', version: '0.1.0' });
+const server = new McpServer({ name: 'jenkins-mcp', version: '0.1.1' });
 
 server.tool(
   'list_jobs',
@@ -27,6 +27,11 @@ server.tool(
   }
 );
 
+// Multibranch stores branch "feature/x" as item "feature%2Fx"; jobPath encodes it again, which is the URL Jenkins expects
+const jobArg = z
+  .string()
+  .describe('Job full name incl. folders, e.g. "my-app-dev" or "team/my-app/main". A "/" inside a branch name is written %2F, e.g. "my-app/feature%2Flogin"');
+
 const buildArg = z
   .string()
   .optional()
@@ -37,18 +42,18 @@ server.tool(
   'get_build',
   'Get status of a build (default: lastBuild) — result, building, duration, timestamp, changes, and pipeline stages.',
   {
-    job: z.string().describe('Job full name incl. folders and branch, e.g. "my-app/main"'),
+    job: jobArg,
     build: buildArg,
   },
   async ({ job, build }) => {
     const base = `${jobPath(job)}/${encodeURIComponent(build)}`;
-    const b = await jenkins(
-      `${base}/api/json?tree=number,result,building,timestamp,duration,url,changeSets[items[msg,author[fullName]]]`
-    );
-    // Stages via wfapi (Pipeline: REST API plugin) — absent on some installs, so optional
-    const stages = await jenkins(`${base}/wfapi/describe`)
-      .then((d) => (d.stages ?? []).map((s) => ({ name: s.name, status: s.status, ms: s.durationMillis })))
-      .catch(() => undefined);
+    const [b, stages] = await Promise.all([
+      jenkins(`${base}/api/json?tree=number,result,building,timestamp,duration,url,changeSets[items[msg,author[fullName]]]`),
+      // Stages via wfapi (Pipeline: REST API plugin) — absent on some installs, so optional
+      jenkins(`${base}/wfapi/describe`)
+        .then((d) => (d.stages ?? []).map((s) => ({ name: s.name, status: s.status, ms: s.durationMillis })))
+        .catch(() => undefined),
+    ]);
     return text({ ...b, stages });
   }
 );
@@ -57,7 +62,7 @@ server.tool(
   'get_console_log',
   'Get the tail of a build console log. Use after get_build shows FAILURE to see why.',
   {
-    job: z.string().describe('Job full name incl. folders and branch'),
+    job: jobArg,
     build: buildArg,
     tailChars: z.number().int().min(500).max(200000).optional().default(20000),
   },
