@@ -1,5 +1,9 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.2 (2026-11-12)
+
+- **SessionStart hook เตือน MCP เก่าจากสคริปต์** — เดิมวิธีลบอยู่แค่ใน README คนติดตั้ง plugin โดยไม่อ่านได้ tool ซ้ำสองชุด + ตัวเก่ายังอ่าน token จาก env var ข้อความเปล่า → `scripts/check-legacy-mcp.mjs` อ่าน `~/.claude.json` (ไม่แก้ไฟล์) หา server ที่ชี้ `.claude/mcp-servers/{jenkins,sonarqube}-mcp/` ทั้งระดับ user และใต้ `projects` แล้วพิมพ์คำสั่งลบตาม scope ที่เจอจริง (`-s user` / `cd` + `-s local`) · เงียบเมื่อไม่เจอหรืออ่านไฟล์ไม่ได้ · ทดสอบกับเครื่อง dev: เจอ 2 ตัวระดับ user, ~160ms
+
 ## 0.1.1 (2026-11-12)
 
 - **eval หลัง merge (#48)** — รันทุก tool กับ Jenkins + SonarQube 26.10 ของจริงผ่าน stdio (อ่านอย่างเดียว): `list_jobs`, `get_build` (+stages), `get_console_log` (tail จาก log 186K ตัวอักษร), `get_quality_gate_status`, `list_issues` ผ่านหมด · Jenkins อยู่หลัง base path `/jenkins/` → relative join ใช้ได้จริง
