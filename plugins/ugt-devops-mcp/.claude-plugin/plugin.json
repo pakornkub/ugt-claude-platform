@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-devops-mcp",
+  "displayName": "UGT DevOps MCP",
+  "version": "0.1.0",
+  "description": "Read-only MCP servers for the org Jenkins and SonarQube: list jobs, build status with pipeline stages, console log tail, open issues and Quality Gate status. Asks for the server URLs and personal API tokens when the plugin is enabled; tokens go to the OS credential store, not env vars. Optional — install only if you want Claude to read Jenkins/SonarQube directly.",
+  "author": { "name": "UGT DX Team" },
+  "keywords": ["jenkins", "sonarqube", "mcp", "ci"],
+  "userConfig": {
+    "jenkins_url": {
+      "type": "string",
+      "title": "Jenkins URL",
+      "description": "e.g. https://jenkins.example.com or https://host/jenkins/"
+    },
+    "jenkins_user": {
+      "type": "string",
+      "title": "Jenkins username",
+      "description": "The Jenkins user that owns the API token below"
+    },
+    "jenkins_token": {
+      "type": "string",
+      "title": "Jenkins API token",
+      "description": "Jenkins → your user → Configure → API Token (not your password)",
+      "sensitive": true
+    },
+    "sonarqube_url": {
+      "type": "string",
+      "title": "SonarQube URL",
+      "description": "e.g. https://sonar.example.com"
+    },
+    "sonarqube_token": {
+      "type": "string",
+      "title": "SonarQube user token",
+      "description": "SonarQube → My Account → Security → Generate token (type: User)",
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "jenkins": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/jenkins.mjs"],
+      "env": {
+        "JENKINS_URL": "${user_config.jenkins_url}",
+        "JENKINS_USER": "${user_config.jenkins_user}",
+        "JENKINS_TOKEN": "${user_config.jenkins_token}"
+      }
+    },
+    "sonarqube": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/sonarqube.mjs"],
+      "env": {
+        "SONARQUBE_URL": "${user_config.sonarqube_url}",
+        "SONARQUBE_TOKEN": "${user_config.sonarqube_token}"
+      }
+    }
+  }
+}
