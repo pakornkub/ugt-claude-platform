@@ -24,7 +24,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-python-platform` | 0.10.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.7 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-devops-mcp` | 0.1.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
-| `ugt-core` | 2.18.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.19.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -58,6 +58,7 @@ context ใหม่ที่อ่านโปรเจคซ้ำ) ส่ว�
 | `ugt-nextjs-kit-sync` | เช็คว่าไฟล์ kit (ชุดไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค — component, ตัวช่วย, proxy) ตกรุ่นจาก plugin ไหม แล้วเสนอทีละไฟล์ว่าจะทับของเดิม (ถ้าโปรเจคไม่เคยแก้) หรือรวมของสองฝั่ง (ถ้าโปรเจคแก้เอง) | หลัง `/plugin update` ทุกครั้ง |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่านเกณฑ์คุณภาพตั้งแต่ครั้งแรก | **ทำงานเองเมื่อแตะไฟล์โค้ด** |
 | `ugt-nextjs-pitfalls` | กับดักที่เคยพังจริงบน production (วันที่เลื่อน, cache, 404) | **ทำงานเองเมื่อแตะไฟล์ที่เสี่ยง** |
+| `ugt-help` | ดูว่าโปรเจคถึงไหนแล้ว บอกขั้นถัดไป 1–2 ข้อ + ตัวไหนทำงานเอง ตัวไหนต้องสั่ง (อ่านอย่างเดียว ไม่แก้ไฟล์) | ลง plugin แล้วไม่รู้จะเริ่มตรงไหน — `/ugt-help` |
 | `ugt-handoff` | ปิดงานหนึ่งรอบ: จดว่าค้างตรงไหน + อัปเดตความรู้ของโปรเจคให้ตรงปัจจุบัน | จบงานทุกครั้ง |
 | `ugt-context` | สร้าง**สารบัญความรู้ของโปรเจค** (`docs/project-context/`) ครั้งแรก — สแกนโค้ดเดิมให้ด้วย | ตอนติดตั้ง หรือโปรเจคเดิมที่ยังไม่มี |
 | `ugt-model-mode` | เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน | `/ugt-model-mode god` / "โหมดประหยัด" |
