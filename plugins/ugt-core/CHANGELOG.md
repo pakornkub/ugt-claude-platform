@@ -2,7 +2,7 @@
 
 ## 2.19.0 (2026-11-13)
 
-- **skill ใหม่ `ugt-help`** — ตอบว่า "ลง plugin แล้วทำไงต่อ" ในแชตโดยไม่ต้องเปิดเว็บ · อ่านสถานะโปรเจค (stack · บล็อก `ugt:start` · requirements/brief · project-context · handoff · DESIGN.md · Jenkinsfile) แล้วบอกขั้นถัดไป 1–2 ข้อ + แยกให้เห็นว่าอะไรทำงานเอง (clean-code, pitfalls, hook) อะไรต้องสั่ง (`/ugt-handoff`, `/ugt-nextjs-kit-sync`, `/ugt-model-mode`, `/ugt-contribute`, ขั้นของ mattpocock) · อ่านอย่างเดียว ไม่ติดตั้งอะไรเอง · ไม่ไล่รายการ skill ทั้งหมด (เมนู `/` มีอยู่แล้ว)
+- **skill ใหม่ `ugt-help`** — ตอบว่า "ลง plugin แล้วทำไงต่อ" ในแชตโดยไม่ต้องเปิดเว็บ · อ่านสถานะโปรเจค (stack · บล็อก `ugt:start` · requirements/brief · project-context · handoff · DESIGN.md · Jenkinsfile) แล้วบอกขั้นถัดไป 1–2 ข้อ + แยกให้เห็นว่าอะไรทำงานเอง (clean-code, pitfalls, hook) อะไรต้องสั่ง (`/ugt-handoff`, `/ugt-nextjs-kit-sync`, `/ugt-model-mode`, `/ugt-contribute`, ขั้นของ mattpocock) · อ่านอย่างเดียว ไม่ติดตั้งอะไรเอง · ไม่ไล่รายการ skill ทั้งหมด (เมนู `/` มีอยู่แล้ว) · trigger eval 3 judge แบบ blind: 60/60 (ไม่มีคำถามกับดักตัวไหนถูกดึงเข้า ugt-help — ทั้ง full-setup, ask-matt, `/help` ของ Claude Code, "help me fix")
 
 ## 2.18.1 (2026-11-11)
 
