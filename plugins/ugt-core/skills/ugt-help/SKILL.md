@@ -48,7 +48,7 @@ recommend only skills that are actually listed.
 | `docs/requirements/` has docs, no brief | `/ugt-requirements` |
 | Next.js, no `ugt:start` block | `/ugt-nextjs-full-setup` (asks once, installs database → test-lint → design → auth → cicd) |
 | Python / PHP, no `Jenkinsfile` | `/ugt-python-cicd-setup` · `/ugt-php-cicd-setup` |
-| Harness present, no `docs/project-context/` | `/ugt-context` |
+| Setup done (`ugt:start` block or `Jenkinsfile`), no `docs/project-context/` | `/ugt-context` |
 | `handoff.md` has "In progress" | continue that item — quote it |
 | Brief exists, board has unbuilt features | build one feature per session — superpowers: "สร้าง feature X ตาม docs/requirements-brief/NN.md" · mattpocock: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` |
 | Everything present | nothing to set up — just describe the work; end each chunk with `/ugt-handoff` |
@@ -61,9 +61,16 @@ recommend only skills that are actually listed.
 **ทำต่อ:** <คำสั่งหรือประโยคที่พิมพ์ได้เลย> — <เหตุผลครึ่งบรรทัด>
 (ถ้ามีขั้นที่สอง ใส่อีกบรรทัดเดียว)
 
-**ทำงานเอง ไม่ต้องสั่ง:** <เฉพาะที่เกี่ยวกับ stack นี้ จากตารางด้านล่าง>
-**ต้องสั่งเอง:** <เฉพาะที่เกี่ยวกับ stack นี้>
+**ทำงานเอง ไม่ต้องสั่ง:** <บรรทัดเดียว ไม่เกิน 3 อย่างที่เกี่ยวกับงานถัดไปที่สุด>
+**ต้องสั่งเอง:** <บรรทัดเดียว — `/ugt-handoff` ก่อนเสมอ + อีกไม่เกิน 2>
 ```
+
+The whole answer fits on one screen (~15 lines). The full lists below are
+for choosing from, not for copying out.
+
+Two steps at most, counted honestly: no third step slipped in as a
+conditional ("ถ้ามี requirement ให้…") or a side note ("ข้อสังเกต: ควรติดตั้ง…").
+What comes after those two, the user gets by asking `/ugt-help` again.
 
 If the user asked something narrower ("อันไหนทำเอง"), answer only that part.
 
@@ -83,8 +90,9 @@ when the user says so.
 - superpowers pipeline: brainstorming → plan → TDD → review starts on its own
   from "สร้าง feature X".
 - Hooks (no tokens): audit log of every tool call → `.claude/logs/`; a warning
-  at session start if an `@ugt` plugin is installed at project scope, or if the
-  old Jenkins/SonarQube MCP scripts are still configured.
+  at session start if an `@ugt` plugin is installed at project scope; with
+  `ugt-devops-mcp`, a warning if the old Jenkins/SonarQube MCP scripts are
+  still configured.
 
 **Must be asked for**
 
