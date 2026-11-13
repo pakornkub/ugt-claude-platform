@@ -14,7 +14,7 @@ const jenkins = (path, opts) => getJson(apiUrl(HOST, path), AUTH, opts);
 // "folder/sub/job" → "job/folder/job/sub/job/job"
 const jobPath = (name) => name.split('/').filter(Boolean).map((p) => `job/${encodeURIComponent(p)}`).join('/');
 
-const server = new McpServer({ name: 'jenkins-mcp', version: '0.1.2' });
+const server = new McpServer({ name: 'jenkins-mcp', version: '0.1.3' });
 
 server.tool(
   'list_jobs',

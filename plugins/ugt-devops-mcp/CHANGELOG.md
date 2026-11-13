@@ -1,5 +1,10 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.3 (2026-11-12)
+
+- **แก้คำอธิบายที่เก็บ token** — 0.1.0 เขียนว่าเก็บใน credential store / Credential Manager ของเครื่อง แต่ pilot บน Windows พบว่า Claude Code เก็บ `sensitive` userConfig ไว้ใน `~/.claude/.credentials.json` (คีย์ `pluginSecrets`, ไฟล์เดียวกับ token login ของ Claude Code) ไม่ใช่ Windows Credential Manager · ค่าไม่ลับ (URL, user) อยู่ `~/.claude/settings.json` คีย์ `pluginConfigs` · ทั้งคู่อยู่ถาวรข้าม restart/update · แก้ `plugin.json`, `marketplace.json`, README
+- **ผล pilot บนเครื่อง dev (Windows 11)** — `claude mcp remove` ตัวเก่า → hook เงียบ · `claude plugin install … --config` ตั้ง URL/user ได้จาก CLI, token ใส่ผ่าน `/plugin` configure · install รวม npm ใช้ 55 วินาที (เฉียด timeout 60) · ทุก tool ตอบผ่าน server ของ plugin: `list_jobs` (36 job), `get_build`, `get_quality_gate_status` · ยังไม่ได้ดูข้อความเตือนของ hook ใน UI จริง และพฤติกรรมตอน uninstall
+
 ## 0.1.2 (2026-11-12)
 
 - **SessionStart hook เตือน MCP เก่าจากสคริปต์** — เดิมวิธีลบอยู่แค่ใน README คนติดตั้ง plugin โดยไม่อ่านได้ tool ซ้ำสองชุด + ตัวเก่ายังอ่าน token จาก env var ข้อความเปล่า → `scripts/check-legacy-mcp.mjs` อ่าน `~/.claude.json` (ไม่แก้ไฟล์) หา server ที่ชี้ `.claude/mcp-servers/{jenkins,sonarqube}-mcp/` ทั้งระดับ user และใต้ `projects` แล้วพิมพ์คำสั่งลบตาม scope ที่เจอจริง (`-s user` / `cd` + `-s local`) · เงียบเมื่อไม่เจอหรืออ่านไฟล์ไม่ได้ · ทดสอบกับเครื่อง dev: เจอ 2 ตัวระดับ user, ~160ms

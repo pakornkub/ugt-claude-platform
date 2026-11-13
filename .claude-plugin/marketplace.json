@@ -41,7 +41,7 @@
     {
       "name": "ugt-devops-mcp",
       "source": "./plugins/ugt-devops-mcp",
-      "description": "Optional, any stack: read-only MCP servers for the org Jenkins (jobs, build status + stages, console log) and SonarQube (open issues, Quality Gate status). Asks for URLs and personal API tokens on enable; tokens are kept in the OS credential store. Replaces the old install-jenkins-mcp / install-sonarqube-mcp scripts"
+      "description": "Optional, any stack: read-only MCP servers for the org Jenkins (jobs, build status + stages, console log) and SonarQube (open issues, Quality Gate status). Asks for URLs and personal API tokens on enable; tokens are kept with Claude Code's own login secrets (macOS Keychain; ~/.claude/.credentials.json on Windows), not in env vars. Replaces the old install-jenkins-mcp / install-sonarqube-mcp scripts"
     }
   ]
 }

@@ -21,7 +21,7 @@ function sonar(path, params) {
 
 const projectKey = z.string().describe('SonarQube project key, e.g. my-app or my-app-dev');
 
-const server = new McpServer({ name: 'sonarqube-mcp', version: '0.1.2' });
+const server = new McpServer({ name: 'sonarqube-mcp', version: '0.1.3' });
 
 server.tool(
   'list_issues',
