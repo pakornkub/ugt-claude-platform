@@ -283,10 +283,11 @@ const VERSION_SOURCES = [
   'ugt-python-platform',
   'ugt-devops-mcp',
 ];
-const versionCheck = { name: 'Doc versions match plugin.json (README.md + docs/web/index.html)', files: {} };
+const versionCheck = { name: 'Doc versions match plugin.json (README.md + docs/web/index.html + reference.html)', files: {} };
 try {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const indexHtml = readFileSync(join(ROOT, 'docs/web/index.html'), 'utf8');
+  const referenceHtml = readFileSync(join(ROOT, 'docs/web/reference.html'), 'utf8');
   const problems = [];
   for (const name of VERSION_SOURCES) {
     const { version } = JSON.parse(
@@ -298,6 +299,9 @@ try {
     }
     if (!new RegExp(`class="ver">v${v}[^<]*</span>\\s*<h3>${name}</h3>`).test(indexHtml)) {
       problems.push(`  ✘ docs/web/index.html — version card for ${name} does not say v${version}`);
+    }
+    if (!new RegExp(`<td><code>${name}</code></td><td>${v}</td>`).test(referenceHtml)) {
+      problems.push(`  ✘ docs/web/reference.html — plugin table row for ${name} does not say ${version}`);
     }
   }
   versionCheck.problems = problems;
