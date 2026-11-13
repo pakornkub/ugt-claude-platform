@@ -1,0 +1,35 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-help. S* queries must route to ugt-help; N* queries must NOT — each N names the correct destination instead. The risky neighbours are ugt-nextjs-full-setup ('ต้องเตรียมอะไรบ้าง'), mattpocock-skills:ask-matt (another router), Claude Code's built-in /help, and the word 'help' meaning ordinary help.",
+  "method": "3 independent judges, randomized order, query ids blinded, full skill listing incl. superpowers + mattpocock + frontend-design distractors",
+  "baseline_result": {
+    "date": "2026-11-13",
+    "judges": 3,
+    "judgments": 60,
+    "primary_accuracy": "60/60 (100%)",
+    "secondary_accuracy": "25/30",
+    "method_note": "Judges ran as 3 sonnet subagents, each with its own shuffled order and blinded ids (Q1..Q20), given the skill listing as TEXT generated from the repo SKILL.md frontmatter (19 ugt skills incl. ugt-help) plus distractors from the installed superpowers 7.0.2, mattpocock-skills 1.3.1 (engineering/) and frontend-design caches — 55 entries. Instructed to answer only from the listing.",
+    "note": "S-side 30/30; no N query was pulled into ugt-help — the full-setup overlap ('ต้องเตรียมอะไรบ้างก่อนขึ้น server'), the other router (ask-matt), Claude Code's /help, 'help me fix' and 'หน้า help ในแอป' all stayed out. Secondary misses touch no ugt skill: N8 → mattpocock-skills:wayfinder 2/3 (a fair reading of 'plan a huge chunk of work', now accepted) · N9 → none 3/3 instead of brainstorming/frontend-design (judges answer an app-feature request without a skill)."
+  },
+  "queries": {
+    "S1": { "prompt": "/ugt-help", "expected": "ugt-help" },
+    "S2": { "prompt": "ลง plugin ugt เสร็จแล้ว ต้องทำอะไรต่อ", "expected": "ugt-help" },
+    "S3": { "prompt": "เพิ่งติดตั้ง ugt-nextjs-standard-superpowers ไม่รู้จะเริ่มตรงไหนก่อนดี", "expected": "ugt-help" },
+    "S4": { "prompt": "ตัวช่วย ugt อันไหนมันทำงานเองอยู่แล้ว อันไหนต้องพิมพ์สั่งเอง", "expected": "ugt-help" },
+    "S5": { "prompt": "โปรเจคนี้ทำ setup ตามมาตรฐานไปถึงไหนแล้ว ยังขาดอะไรอีก", "expected": "ugt-help" },
+    "S6": { "prompt": "I just installed the ugt plugins, what should I do first?", "expected": "ugt-help" },
+    "S7": { "prompt": "รับโปรเจคนี้ต่อจากพี่อีกคน ไม่รู้ว่าเขาตั้งอะไรไว้แล้วบ้าง ต้องเริ่มยังไง", "expected": "ugt-help" },
+    "S8": { "prompt": "ugt มีคำสั่งอะไรบ้าง ต้องใช้ตัวไหนตอนไหน", "expected": "ugt-help" },
+    "S9": { "prompt": "ลง ugt-python-platform ในโปรเจค fastapi แล้ว ต่อไปทำไง", "expected": "ugt-help" },
+    "S10": { "prompt": "งงมาก ลง plugin มาเยอะแยะ ไม่รู้ว่าต้องใช้อะไรตอนไหน", "expected": "ugt-help" },
+    "N1": { "prompt": "ทำให้โปรเจคนี้ deploy ได้หน่อย ต้องเตรียมอะไรบ้างก่อนขึ้น server", "expected": "ugt-nextjs-full-setup" },
+    "N2": { "prompt": "help me fix this TypeError on the login page, it crashes after submit", "expected": "superpowers:systematic-debugging / mattpocock-skills:diagnosing-bugs" },
+    "N3": { "prompt": "ugt-nextjs-auth-setup มันทำอะไรได้บ้าง อธิบายละเอียดหน่อย", "expected": "(no skill — explain one skill directly, per the boundary clause)" },
+    "N4": { "prompt": "อัปเดต plugin แล้ว ไฟล์ component ในโปรเจคตามไหม", "expected": "ugt-nextjs-kit-sync" },
+    "N5": { "prompt": "จบงานแล้ว บันทึกไว้ให้คนต่อไปหน่อย", "expected": "ugt-handoff" },
+    "N6": { "prompt": "คีย์ลัดของ claude code มีอะไรบ้าง ดูจาก /help ได้ไหม", "expected": "(no skill — Claude Code built-in, not ugt)" },
+    "N7": { "prompt": "อ่าน requirement ใน docs/requirements แล้วสรุปแยก feature ให้หน่อย", "expected": "ugt-requirements" },
+    "N8": { "prompt": "จะวางแผนงานใหญ่หลาย session ควรใช้ skill ตัวไหนของ mattpocock", "expected": "mattpocock-skills:ask-matt / mattpocock-skills:wayfinder" },
+    "N9": { "prompt": "ช่วยทำหน้า help คู่มือการใช้งานในแอปให้ผู้ใช้ระบบหน่อย", "expected": "superpowers:brainstorming / frontend-design:frontend-design (keyword trap — an app feature)" },
+    "N10": { "prompt": "โปรเจคนี้ยังไม่มี project context สร้างให้หน่อย", "expected": "ugt-context" }
+  }
+}
