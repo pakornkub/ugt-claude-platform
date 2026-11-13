@@ -1,5 +1,10 @@
 # Changelog — ugt-core
 
+## 2.19.1 (2026-11-13)
+
+- `ugt-help` (หลัง code-review + behavior eval ของ 2.19.0): คำตอบบอกขั้นถัดไปไม่เกิน 2 ข้อจริง ห้ามแอบเพิ่มข้อที่ 3 มาในรูปเงื่อนไขหรือหมายเหตุ · รายการ "ทำงานเอง" และ "ต้องสั่งเอง" ให้เหลืออย่างละบรรทัดเดียว (ไม่เกิน 3 อย่าง) ทั้งคำตอบไม่เกินหนึ่งหน้าจอ · แถว `/ugt-context` ใช้กับ Python/PHP ได้ด้วย (ดูจาก `Jenkinsfile`) · ระบุว่า hook เตือน MCP เก่าเป็นของ `ugt-devops-mcp`
+- eval ใหม่ `plugins/ugt-core/evals/` 3 case (`help-fresh-requirements` · `help-in-progress` · `help-python`) ผ่าน 36/36 (2 รอบต่อ case, $0.94) · รอบแรก 33/36: ข้อที่ไม่ผ่านทั้งหมดอยู่ที่ grader `short-shape` (คำตอบมีขั้นที่ 3 แฝงมา และไล่ชื่อ skill ไป 8–10 ตัว)
+
 ## 2.19.0 (2026-11-13)
 
 - **skill ใหม่ `ugt-help`** — ตอบว่า "ลง plugin แล้วทำไงต่อ" ในแชตโดยไม่ต้องเปิดเว็บ · อ่านสถานะโปรเจค (stack · บล็อก `ugt:start` · requirements/brief · project-context · handoff · DESIGN.md · Jenkinsfile) แล้วบอกขั้นถัดไป 1–2 ข้อ + แยกให้เห็นว่าอะไรทำงานเอง (clean-code, pitfalls, hook) อะไรต้องสั่ง (`/ugt-handoff`, `/ugt-nextjs-kit-sync`, `/ugt-model-mode`, `/ugt-contribute`, ขั้นของ mattpocock) · อ่านอย่างเดียว ไม่ติดตั้งอะไรเอง · ไม่ไล่รายการ skill ทั้งหมด (เมนู `/` มีอยู่แล้ว) · trigger eval 3 judge แบบ blind: 60/60 (ไม่มีคำถามกับดักตัวไหนถูกดึงเข้า ugt-help — ทั้ง full-setup, ask-matt, `/help` ของ Claude Code, "help me fix")
