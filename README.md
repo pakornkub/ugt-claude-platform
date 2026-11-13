@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.88.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.7 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-devops-mcp` | 0.1.2 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
+| `ugt-devops-mcp` | 0.1.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
 | `ugt-core` | 2.18.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -99,7 +99,7 @@ plugin ของ ugt ระดับ project` ให้รันคำสั่�
 
 ตอนเปิดใช้จะถาม URL ของ Jenkins/SonarQube + username + **API token ส่วนตัว**
 (ไม่ใช่รหัสผ่าน — Jenkins: user → Configure → API Token · SonarQube: My Account →
-Security → Generate token แบบ User) · token เก็บใน credential store ของเครื่อง
+Security → Generate token แบบ User) · token เก็บที่เดียวกับ credential ที่ Claude Code ใช้ login (macOS: Keychain · Windows: `~/.claude/.credentials.json` ในโปรไฟล์ของ user)
 ไม่อยู่ใน env var · แก้ค่าทีหลัง: `/plugin` → `ugt-devops-mcp` → configure ·
 ใช้แค่ตัวเดียวก็ได้ ตัวที่ไม่กรอกจะไม่ทำงาน (ขึ้น error ใน `/mcp` เฉย ๆ)
 
