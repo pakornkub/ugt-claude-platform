@@ -758,7 +758,13 @@ check('Excel/CSV export goes through lib/export.ts', () => {
     const rel = relative(ROOT, file).split('\\').join('/');
     if (rel === 'lib/export.ts' || rel === 'src/lib/export.ts') continue;
     const body = readFileSync(file, 'utf8');
-    const rolled = /from\s+['"]exceljs['"]/.test(body) || /['"]text\/csv/.test(body);
+    // An export WRITES a file. Merely naming the format — an upload MIME allowlist,
+    // an Excel/CSV import parser (`file.type === 'text/csv'`, `xlsx.load`) — is not one.
+    const writesExcel = /from\s+['"]exceljs['"]/.test(body) && /\.(xlsx|csv)\.write/.test(body);
+    const writesCsv =
+      /['"]text\/csv/.test(body) &&
+      /Content-Disposition|new Blob\(|createObjectURL|Content-Type['"]?\s*[:,]\s*['"]text\/csv/i.test(body);
+    const rolled = writesExcel || writesCsv;
     if (rolled) offenders.push(rel);
     if (rolled || /from\s+['"]@\/lib\/export['"]/.test(body)) exports = true;
   }
