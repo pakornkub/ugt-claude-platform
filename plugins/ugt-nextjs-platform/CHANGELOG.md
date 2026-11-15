@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **design-setup verify: ด่านฟ้อนต์ Inter ไม่มีวันผ่าน** — `verify.mjs` ร้อง "Inter not wired" ทั้งที่ `app/layout.tsx` import `Inter` จาก `next/font/google` แล้ว → regex ของด่านนี้มีอักขระ backspace (0x08) จริงในไฟล์แทน `\b` (`cat -A` เห็นเป็น `^H`) จึงจับได้เฉพาะโค้ดที่มี backspace → เปลี่ยนเป็น `\b` · origin ugt-lube-monitoring · 2026-11-15
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
