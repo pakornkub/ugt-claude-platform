@@ -1,6 +1,6 @@
 {
   "skill_name": "ugt-nextjs-system-test",
-  "notes": "Behavior evals for the gates. Evals 1 and 2 are runnable as `claude plugin eval` cases (plugins/ugt-nextjs-platform/evals/system-test-no-docker and system-test-live-gates) — they need no Docker and no network: the point is that the agent STOPS. Eval 3 needs a machine with Docker and a project that finished full-setup; it is graded by hand from the transcript + `docker compose ps`. Prompts are Thai on purpose: they are what org users type.",
+  "notes": "Behavior evals for the gates. Evals 1 and 2 are runnable as `claude plugin eval` cases (plugins/ugt-nextjs-platform/evals/system-test-no-docker and system-test-live-gates) — they need no Docker and no network: the point is that the agent STOPS. Both are tagged `needs-shell`: the agent must run `docker info` / `node env-ready.mjs`, and `claude plugin eval` on Windows gives the agent no Bash (no sandbox backend) — run them where the eval sandbox has a shell (Linux/macOS/WSL), and `system-test-no-docker` only where Docker is absent from that sandbox. Eval 3 needs a machine with Docker and a project that finished full-setup; it is graded by hand from the transcript + `docker compose ps`. Prompts are Thai on purpose: they are what org users type.",
   "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
   "evals": [
     {

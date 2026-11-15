@@ -92,7 +92,11 @@ Then fit the compose file to the project — the asset is the kit-wide shape:
   install (`[MAIL]` + the `mailpit` service, `[UPLOAD]` + the `storage`
   volume, `[DB]` + `sqlserver`/`db-init`/`migrate`, `[AUTH: SSO]` +
   `keycloak` + `realm-smoke.json`). Login methods other than SSO (LDAP/Local)
-  have no smoke stand-in: mark their checklist lines BLOCKED.
+  have no smoke stand-in: mark their checklist lines BLOCKED. Upload with
+  virus scan on (`[SCAN]` — `CLAMAV_HOST` in `docker-compose.dev.yml`) → copy
+  the project's `clamav` service and its `CLAMAV_*` lines into the smoke file
+  (drop its bind-mounted signature volume); without it every upload fails
+  closed and the Upload lines would be false FAILs.
 - **Project env**: every key in section 6 of `docker-compose.dev.yml`'s
   `environment:` gets a line in the smoke `app` service with a harmless test
   value (an external API key → empty, so the feature's fallback path runs).
@@ -120,7 +124,9 @@ IS a finding: the deploy would fail the same way).
 
 ### 3.3 Test
 
-Open the `smoke` launch configuration with `preview_start`, run §5. Smoke
+Open the `smoke` launch configuration with `preview_start` (it is the bare
+origin — a localhost launch URL cannot carry a path), navigate to
+`http://localhost:3100<basePath-dev>`, run §5. Smoke
 users (all password `Smoke-Pass-1`): `smoke-admin` logs in first and takes
 `/admin/setup`; `smoke-user1..3` get one role each from the admin pages — that
 assignment is itself a checklist line. Mail lands in Mailpit at
@@ -135,20 +141,18 @@ telling the user the command.
 
 ## 4. Live mode
 
-### 4.1 Preconditions
+### 4.1 Pick the target, then pass its gate
 
-1. The user confirmed the admin team finished `docs/admin-handoff.md`.
-2. `node <skill-dir>/scripts/env-ready.mjs` (cwd = project root) exits 0
-   **and** its last line is `✔ env ready for the live test` (no output at
-   all = the script did not run — treat as not ready). ✘ lines → show them, say which value goes where
-   (`docs/admin-handoff.md` "ส่งกลับ" table → `.env.local`), stop.
+The user confirmed the admin team finished `docs/admin-handoff.md`. The two
+targets run on different config, so each has its own gate (cwd = project
+root). Pass = exit 0 **and** the last line is `✔ env ready for the live test`
+(no output at all = the script did not run — treat as not ready). ✘ lines →
+show them, say which value goes where, stop.
 
-### 4.2 Pick the target
-
-| Target | Use when | Notes |
-| --- | --- | --- |
-| Deployed DEV URL (`__APP_URL_DEV__` in `docs/admin-handoff.md`) | `develop` has been deployed by Jenkins | Preferred — it is what users get; Keycloak's redirect URI already allows it; Jenkins already migrated |
-| Local `npm run dev` with `.env.local` | no dev deploy yet | Works only if the Keycloak client also allows `http://localhost:<port><basePath>/api/auth/callback/keycloak` — a refused `redirect_uri` is a BLOCKED, not something to work around. Needs `npx prisma migrate deploy` on the dev DB first: ask before running it |
+| Target | Use when | Gate | Notes |
+| --- | --- | --- | --- |
+| Deployed DEV URL (`__APP_URL_DEV__` in `docs/admin-handoff.md`) | the user says `develop` is deployed, or gives the dev URL | `node <skill-dir>/scripts/env-ready.mjs --url <dev-url>` — dev basePath + `/api/health` 200; `.env.local` is not involved (the server runs on Jenkins' env) | Preferred — it is what users get; Keycloak's redirect URI already allows it; Jenkins already migrated |
+| Local `npm run dev` with `.env.local` | otherwise (no dev deploy yet, or not said) | `node <skill-dir>/scripts/env-ready.mjs` — reads `.env.local`; ✘ → value comes from `docs/admin-handoff.md` "ส่งกลับ" table → `.env.local` (mention the deployed target as the alternative) | Works only if the Keycloak client also allows `http://localhost:<port><basePath>/api/auth/callback/keycloak` — a refused `redirect_uri` is a BLOCKED, not something to work around. Needs `npx prisma migrate deploy` on the dev DB first: ask before running it |
 
 Open the target with `preview_start` (URL configuration, or the `dev` one for
 a local server).
@@ -186,15 +190,19 @@ One table, then one question:
 Then: totals (PASS / FAIL / BLOCKED), the mode and target, and the question
 "แก้ข้อไหนก่อน" with the FAILs as options. Fix only what the user picks, re-run
 those lines (container: `docker compose -f docker-compose.smoke.yml up -d --build --no-deps app`
-— `--no-deps` so `migrate` and the seed don't run again; a schema change instead
-needs `up -d --build migrate app`),
+— `--no-deps` so `migrate` and the seed don't run again; a schema change first
+runs only the migration: `docker compose -f docker-compose.smoke.yml run --rm --build migrate npx prisma migrate deploy`
+— never `up migrate`, whose command re-runs the seed on a filled DB),
 report again.
 
 ## 7. Close
 
 - `.claude/state/handoff.md`: the result line under Done (date · mode ·
   PASS/FAIL/BLOCKED counts); every open FAIL/BLOCKED under Next — or tell the
-  user to run `/ugt-handoff`, which writes the same homes.
+  user to run `/ugt-handoff`, which writes the same homes. A live run that
+  walked the whole checklist also removes the full-setup line
+  "… → `/ugt-nextjs-system-test` (live)" from Next — that step is done
+  (`ugt-help` routes here while the line is there).
 - A FAIL that is true for every project on the stack (a kit bug) →
   `/ugt-contribute` after the fix, not a silent local patch.
 - Live mode: delete the `[TEST]` records you created, through the UI.

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- `ugt-help`: แถวใหม่ — Next.js ที่ `handoff.md` รอ admin หรือผู้ใช้บอกว่า admin ทำเสร็จแล้ว → `/ugt-nextjs-system-test` · เพิ่มในรายการ "ต้องสั่งเอง"
+- `ugt-help`: แถวใหม่ (ถัดจากแถว "In progress") — Next.js ที่ `handoff.md` Next ยังมีบรรทัด `/ugt-nextjs-system-test` หรือผู้ใช้บอกว่า admin ทำเสร็จแล้ว → `/ugt-nextjs-system-test` · เพิ่มในรายการ "ต้องสั่งเอง"
 
 
 ## 2.19.1 (2026-11-13)

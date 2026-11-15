@@ -49,8 +49,8 @@ recommend only skills that are actually listed.
 | Next.js, no `ugt:start` block | `/ugt-nextjs-full-setup` (asks once, installs database → test-lint → design → auth → cicd) |
 | Python / PHP, no `Jenkinsfile` | `/ugt-python-cicd-setup` · `/ugt-php-cicd-setup` |
 | Setup done (`ugt:start` block or `Jenkinsfile`), no `docs/project-context/` | `/ugt-context` |
-| Next.js: `handoff.md` Next waits on the admin team, or the user says the admin work is done | `/ugt-nextjs-system-test` — live mode once the admin values are in `.env.local` (container mode any time Docker is installed) |
 | `handoff.md` has "In progress" | continue that item — quote it |
+| Next.js: `handoff.md` Next still has the `/ugt-nextjs-system-test` line, or the user says the admin work is done | `/ugt-nextjs-system-test` — live mode once the admin work is done (container mode any time Docker is installed) |
 | Brief exists, board has unbuilt features | build one feature per session — superpowers: "สร้าง feature X ตาม docs/requirements-brief/NN.md" · mattpocock: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` |
 | Everything present | nothing to set up — just describe the work; end each chunk with `/ugt-handoff` |
 

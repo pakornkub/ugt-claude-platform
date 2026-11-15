@@ -5,6 +5,10 @@
 // host:port only).
 //
 //   node <skill-dir>/scripts/env-ready.mjs [env-file=.env.local] [--no-net]
+//   node <skill-dir>/scripts/env-ready.mjs --url <deployed-dev-url>
+//
+// --url = the deployed DEV target: it runs on Jenkins' env, not .env.local, so
+// only the URL is checked (dev basePath + /api/health 200).
 //
 // exit 0 = ready (warnings allowed) · exit 1 = not ready — report the ✘ lines
 // to the user and stop; never "fix" them by editing the file yourself.
@@ -26,10 +30,10 @@ export function parseEnv(text) {
 }
 
 const PLACEHOLDER = /CHANGE_ME|__[A-Z0-9_]+__|KEYCLOAK_HOST|\/realms\/REALM\b/;
-// Every org project has a database. A module's keys are all-or-nothing: one key of the
-// group present (= module installed) makes every key of the group required — a missing
-// or commented-out line must not read as "ready".
-const ALWAYS = ['DATABASE_URL'];
+// A module's keys are all-or-nothing: one key of the group present (= module installed)
+// makes every key of the group required — a missing or commented-out line must not read
+// as "ready". DATABASE_URL is required whenever the project has Prisma (`db`), even when
+// the line is gone from the file.
 const GROUPS = [
   ['BETTER_AUTH_SECRET', 'BETTER_AUTH_URL'],
   ['KEYCLOAK_ISSUER', 'KEYCLOAK_CLIENT_ID', 'KEYCLOAK_CLIENT_SECRET'],
@@ -44,13 +48,25 @@ export function dbTarget(url) {
   return { host: m[1], port, db };
 }
 
-export function staticChecks(env) {
+// deployed DEV URL: the org dev basePath is /<project>-dev
+export function devUrlProblem(url) {
+  let u;
+  try {
+    u = new URL(url);
+  } catch {
+    return `${url} is not a URL`;
+  }
+  const bp = u.pathname.replace(/\/+$/, '');
+  return bp.endsWith('-dev') ? null : `${url} is not a dev URL (basePath must end in -dev) — live tests run on dev only`;
+}
+
+export function staticChecks(env, { db = true } = {}) {
   const out = [];
   const fail = (msg) => out.push({ level: 'fail', msg });
   const warn = (msg) => out.push({ level: 'warn', msg });
 
   for (const [k, v] of env) if (PLACEHOLDER.test(v)) fail(`${k} still holds a placeholder`);
-  const required = [...ALWAYS, ...GROUPS.filter((g) => g.some((k) => env.has(k))).flat()];
+  const required = [...(db || env.has('DATABASE_URL') ? ['DATABASE_URL'] : []), ...GROUPS.filter((g) => g.some((k) => env.has(k))).flat()];
   for (const k of required) {
     if (!env.has(k)) fail(`${k} is missing`);
     else if (env.get(k) === '') fail(`${k} is empty`);
@@ -138,18 +154,38 @@ export async function netChecks(env) {
   return out;
 }
 
+async function urlChecks(url) {
+  const problem = devUrlProblem(url);
+  if (problem) return [{ level: 'fail', msg: problem }];
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // org standard: internal-CA certs on the intranet
+  const health = `${url.replace(/\/+$/, '')}/api/health`;
+  let status;
+  try {
+    status = (await fetch(health, { signal: AbortSignal.timeout(8000) })).status;
+  } catch (e) {
+    status = e?.cause?.code ?? e?.name ?? 'request failed';
+  }
+  return [{ level: status === 200 ? 'ok' : 'fail', msg: `${health} → ${status}${status === 200 ? '' : ' (deployed? VPN?)'}` }];
+}
+
 async function main() {
   const args = process.argv.slice(2);
-  const file = args.find((a) => !a.startsWith('--')) ?? '.env.local';
-  if (!existsSync(file)) {
-    console.log(`✘ ${file} not found — copy .env.example and fill the values from docs/admin-handoff.md`);
-    process.exit(1);
+  const urlAt = args.indexOf('--url');
+  let results;
+  if (urlAt !== -1) {
+    results = await urlChecks(args[urlAt + 1] ?? '');
+  } else {
+    const file = args.find((a) => !a.startsWith('--')) ?? '.env.local';
+    if (!existsSync(file)) {
+      console.log(`✘ ${file} not found — copy .env.example and fill the values from docs/admin-handoff.md`);
+      process.exit(1);
+    }
+    const env = parseEnv(readFileSync(file, 'utf8'));
+    results = staticChecks(env, { db: existsSync('prisma') || existsSync('prisma.config.ts') });
+    // network checks only once the file itself is right — no point probing a placeholder host
+    if (!args.includes('--no-net') && !results.some((r) => r.level === 'fail'))
+      results.push(...(await netChecks(env)));
   }
-  const env = parseEnv(readFileSync(file, 'utf8'));
-  const results = staticChecks(env);
-  // network checks only once the file itself is right — no point probing a placeholder host
-  if (!args.includes('--no-net') && !results.some((r) => r.level === 'fail'))
-    results.push(...(await netChecks(env)));
   const icon = { ok: '✔', warn: '!', fail: '✘' };
   for (const r of results) console.log(`${icon[r.level]} ${r.msg}`);
   const failed = results.filter((r) => r.level === 'fail').length;

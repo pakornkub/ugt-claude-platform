@@ -1,7 +1,7 @@
 // node --test plugins/ugt-nextjs-platform/skills/ugt-nextjs-system-test/scripts/env-ready.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseEnv, staticChecks, dbTarget } from './env-ready.mjs';
+import { parseEnv, staticChecks, dbTarget, devUrlProblem } from './env-ready.mjs';
 
 const fails = (text) =>
   staticChecks(parseEnv(text))
@@ -60,6 +60,16 @@ test('an empty file or a half-filled module is not ready', () => {
   assert.deepEqual(fails(''), ['DATABASE_URL is missing']);
   const noSecret = READY.replace(/^KEYCLOAK_CLIENT_SECRET=.*$/m, '# KEYCLOAK_CLIENT_SECRET=');
   assert.deepEqual(fails(noSecret), ['KEYCLOAK_CLIENT_SECRET is missing']);
+});
+
+test('a project without Prisma does not need DATABASE_URL', () => {
+  assert.deepEqual(staticChecks(parseEnv(''), { db: false }).filter((r) => r.level === 'fail'), []);
+});
+
+test('a deployed URL must be the dev one', () => {
+  assert.equal(devUrlProblem('https://apps.example.com/expense-portal-dev/'), null);
+  assert.match(devUrlProblem('https://apps.example.com/expense-portal'), /not a dev URL/);
+  assert.match(devUrlProblem('apps.example.com'), /not a URL/);
 });
 
 test('a quoted value with a trailing comment keeps its content', () => {

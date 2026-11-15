@@ -404,10 +404,14 @@ How:
    - **ทดสอบใน container ตอนนี้ (ต้องมี Docker)** → invoke
      `ugt-nextjs-system-test` in `container` mode (its gates take over: Docker
      missing = stop with the install line).
-   - **ยังไม่ทดสอบ — รอ admin** → write under `## Next` in
-     `.claude/state/handoff.md`: "รอ admin ทำ `docs/admin-handoff.md` → เติม
-     `.env.local` → `/ugt-nextjs-system-test` (live)" — the full system test
-     after the admin work is not optional, it is the next step.
+   - **ยังไม่ทดสอบ — รอ admin** → nothing more here.
+
+   Either answer, `.claude/state/handoff.md` `## Next` must hold exactly one
+   line "After the admin work: `/ugt-nextjs-system-test` (live mode) …" — the
+   state asset carries it; a project whose existing `.claude/state/` was kept
+   gets it added once. The live test after the admin work is not optional, a
+   container run does not replace it, and the system-test skill removes the
+   line once the live run is done.
 
    **Items 2–3 go in the closing chat message itself**, even when you also wrote a
    finish-guide doc (e.g. because nothing could be run here). "See docs/…" alone does
@@ -421,8 +425,9 @@ How:
    `ugt-nextjs-system-test` will check (one line per installed module), then the
    one question above, last
 4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
-   themselves next (it is user-invoked only — this skill cannot run it, and
-   §2.5 forbids trying). It writes `docs/agents/*.md` and its own
+   themselves (it is user-invoked only — this skill cannot run it, and
+   §2.5 forbids trying) — as a line in closing section 5 ยังไม่ได้รัน, so the
+   test question still ends the message. It writes `docs/agents/*.md` and its own
    `## Agent skills` section in `CLAUDE.md` outside our markers, so the two
    never collide whichever runs first.
 
@@ -463,13 +468,9 @@ node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module
       been told to forward it (it is a FILE, not a chat message)
 - [ ] `npm run build` passes
 - [ ] the close-out ended with the one test question (§5.3) and started no
-      test before the answer; "รอ admin" → the line is in `handoff.md` `## Next`
+      test before the answer; `handoff.md` `## Next` has the system-test line exactly once
 - [ ] preserve mode (§2 Q0): DESIGN.md §10 records ยึดของเดิม and
       `globals.css --primary` is the measured value, not org indigo (design
       verify) · no `<AdminNav>` rendered beside the project's own shell (auth
       verify) · no SQLite/mock store left beside Prisma and at least one
       screen imports `@/lib/prisma` (database verify)
-- [ ] login works with every enabled method → protected page reachable →
-      logout clears the cookie
-- [ ] `/admin/setup` grants Administrator on one click
-- [ ] push `develop` → pipeline green through all stages
