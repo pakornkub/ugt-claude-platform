@@ -1,7 +1,9 @@
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-mail-setup/lib/email.ts
-// kit-hash: d7d236ac28dc
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-mail-setup/lib/email.ts
+// kit-hash: fd377349f8bb
 // source: ugt-hrms lib/email.ts — installed by ugt-nextjs-mail-setup
-import nodemailer from 'nodemailer';
+// named type import, not `nodemailer.SendMailOptions`: nodemailer 10 ships its own
+// types without that namespace (works with 7 + @types/nodemailer too)
+import nodemailer, { type SendMailOptions } from 'nodemailer';
 import { env } from '@/lib/env';
 import {
   buildDevBanner,
@@ -26,7 +28,7 @@ export interface MailOptions {
   html: string;
   cc?: string | string[];
   bcc?: string | string[];
-  attachments?: nodemailer.SendMailOptions['attachments'];
+  attachments?: SendMailOptions['attachments'];
 }
 
 /**

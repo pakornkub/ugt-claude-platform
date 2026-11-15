@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **mail-setup: `lib/email.ts` typecheck ไม่ผ่านหลังติดตั้งใหม่** — `TS2503: Cannot find namespace 'nodemailer'` ที่ `nodemailer.SendMailOptions['attachments']` → บรรทัดติดตั้งไม่ระบุเวอร์ชัน ได้ `nodemailer@10` + `@types/nodemailer@8` ซึ่งไม่มี namespace นั้นแล้ว → pin `nodemailer@^7` + `@types/nodemailer@^7` ใน §4.1 + แถวอาการ · origin ugt-lube-monitoring · 2026-11-15
+- **mail-setup: `lib/email.ts` typecheck ไม่ผ่านหลังติดตั้งใหม่** — `TS2503: Cannot find namespace 'nodemailer'` ที่ `nodemailer.SendMailOptions['attachments']` → บรรทัดติดตั้งไม่ระบุเวอร์ชัน ได้ `nodemailer@10` + `@types/nodemailer@8` ซึ่งไม่มี namespace นั้นแล้ว (nodemailer 10 มี type ของตัวเอง) → kit `lib/email.ts` เปลี่ยนเป็น `import nodemailer, { type SendMailOptions } from 'nodemailer'` (typecheck ผ่านทั้ง 10.3.1, 10.1.0 + `@types` 8.0.2 และ 7 + `@types` 7.0.12) · ไม่ pin กลับ 7 (major เก่าที่หยุดออกรุ่นแล้ว) · แถวอาการชี้ไป `/ugt-nextjs-kit-sync` · origin ugt-lube-monitoring · 2026-11-15 · asset: ugt-nextjs-mail-setup/lib/email.ts
 
 ## 4.88.1 (2026-11-12)
 
