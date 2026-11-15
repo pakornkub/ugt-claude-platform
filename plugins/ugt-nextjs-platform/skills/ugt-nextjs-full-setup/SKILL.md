@@ -146,7 +146,7 @@ prototype data layer or a fake login; skip on a bare scaffold):**
 **Module-specific questions** — **open the Interview section in the SKILL.md of
 every selected child skill and fold its questions into this same batch**
 (example topics, not the full list: DB: server, database name, existing or new,
-stored procedures needed · Design: prototype/brand to match?, primary color,
+stored procedures needed, project owner (the one SQL login, prod + dev) · Design: prototype/brand to match?, primary color,
 shell sidebar/topbar, dark mode, ภาษา UI · Auth: Keycloak client exists yet,
 AD details, org email domains, directory view, scope/approval · CI: Sentry?, deploy target).
 **Never ask "who is the first admin"** — auth-setup §3 Q5 forbids it (the
@@ -390,7 +390,7 @@ How:
    message**: if CI was installed, `ugt-nextjs-cicd-setup` has already
    written `docs/admin-handoff.md` (from its
    `assets/admin-handoff.template.md` — overview table + one table per system
-   (DB, server folders, Jenkins, GitHub, SonarQube, Keycloak, nginx, cron) + one "ส่งกลับ" table); confirm
+   (DB, server folders, Jenkins, GitHub, SonarQube, Keycloak, reverse proxy) + one "ส่งกลับ" table); confirm
    it exists, has no `__...__` left, and tell the user to forward that file
    to the admin/DevOps team and wait for the returned values to fill
    `.env.local`. If CI was NOT installed but Auth was, render the same

@@ -8,9 +8,11 @@ RENDER RULES (delete this comment block in the rendered file):
   [DB] = Prisma/SQL Server · [LINKED] = reads over a linked server · [VOLUME] = compose has
   an /home/docker02/appdata bind · [UPLOAD] = ugt-nextjs-upload-setup installed ·
   [SSO] = Keycloak login · [SENTRY] = Sentry · [BASEPATH] = served under a basePath ·
-  [CRON] = has scheduled jobs (one cron-table row per job; with a compose cron service drop section I and its row, keep the nginx deny) ·
+  [CRON] = has scheduled jobs (they run in the project's own compose `cron` service — the admin sets up no cron; only the reverse-proxy cron bullet + the note under the overview) ·
   [AUTH] = ugt-nextjs-auth-setup installed · [FIRST] = first org project on this Jenkins/Docker host
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
+- Section H is words only — never paste nginx (or any proxy) config into this file; the admin
+  writes the entry the way every other project on that server is done.
 -->
 # คำขอตั้งค่าระบบ — __PROJECT_DISPLAY_NAME__ (`__PROJECT_NAME__`)
 
@@ -21,16 +23,17 @@ RENDER RULES (delete this comment block in the rendered file):
 
 | # | ใครทำ | ระบบ | ทำอะไร | ดูตาราง |
 | --- | --- | --- | --- | --- |
-| 1 | DBA | SQL Server | สร้าง database 3 ตัว + login 2 ตัว | [A](#a-sql-server--database--login) <!-- [DB] --> |
+| 1 | DBA | SQL Server | สร้าง database 2 ตัว + login ของเจ้าของโปรเจค 1 ตัว (ใช้ทั้ง prod และ dev) | [A](#a-sql-server--database--login) <!-- [DB] --> |
 | 2 | Admin | Server (Docker host) | เตรียม folder เก็บไฟล์ + ตั้ง backup | [B](#b-server--folder-เก็บไฟล์) <!-- [VOLUME] --> |
 | 3 | Admin | Jenkins | สร้าง credential | [C](#c-jenkins--credentials) |
-| 4 | Admin | Jenkins | สร้าง pipeline job | [D](#d-jenkins--pipeline-job) |
+| 4 | Admin | Jenkins | สร้าง pipeline job 2 ตัว (prod / dev แยกกัน) | [D](#d-jenkins--pipeline-job-prod--dev) |
 | 5 | Admin | GitHub | ตั้ง webhook ไป Jenkins | [E](#e-github--webhook) |
 | 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
 | 7 | Admin | Keycloak | สร้าง client SSO | [G](#g-keycloak--client-sso) <!-- [SSO] --> |
-| 8 | Admin | Nginx | เพิ่ม reverse proxy | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] or [CRON] --> |
-| 9 | Admin | Server prod (Docker host) | ตั้ง cron รัน job | [I](#i-server--cron) <!-- [CRON] --> |
-| 10 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
+| 8 | Admin | Nginx | สร้าง reverse proxy ของโปรเจค | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] or [CRON] --> |
+| 9 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
+
+> job ตั้งเวลา (__JOB_LIST__) รันใน container `__PROJECT_NAME__-cron` ซึ่ง deploy มาพร้อมแอป — **ไม่ต้องตั้ง cron บน server** <!-- [CRON] -->
 
 ---
 
@@ -43,11 +46,11 @@ RENDER RULES (delete this comment block in the rendered file):
 | --- | --- | --- | --- |
 | Database prod | prod | `__DB_NAME_PROD__` | — |
 | Database dev | dev | `__DB_NAME_DEV__` | — |
-| Database shadow (ว่างไว้ ห้ามใส่ข้อมูล) | dev | `__DB_NAME_DEV___shadow` | — |
-| Login prod | prod | `__DB_LOGIN_PROD__` | ใน `__DB_NAME_PROD__`: `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` |
-| Login dev | dev | `__DB_LOGIN_DEV__` | ใน `__DB_NAME_DEV__`: เหมือน login prod · ใน `__DB_NAME_DEV___shadow`: `db_owner` |
-| อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | prod + dev | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ทั้ง 2 login |
+| Login ของเจ้าของโปรเจค (__PROJECT_OWNER__) — **ตัวเดียว ใช้ทั้ง prod และ dev** | prod + dev (ชื่อเดียวกันทั้ง 2 server) | ตามมาตรฐานชื่อ login ขององค์กร (แจ้งชื่อในตารางส่งกลับ) | ใน `__DB_NAME_PROD__` และ `__DB_NAME_DEV__`: `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` · **server dev เท่านั้น**: `dbcreator` |
+| อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | prod + dev | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ login ข้างบน |
 
+> `dbcreator` บน dev: ตอนสร้าง migration Prisma สร้าง database ชั่วคราวแล้วลบเอง (ไม่ต้องสร้าง shadow database ไว้) · server prod ไม่ต้องให้สิทธิ์นี้
+>
 > ตารางสร้างเองตอน deploy (pipeline รัน migration) — DBA ไม่ต้องสร้างตาราง
 
 <!-- [VOLUME] -->
@@ -74,17 +77,20 @@ RENDER RULES (delete this comment block in the rendered file):
 | `sentry-dsn-__PROJECT_NAME__` <!-- [SENTRY] --> | Secret text | Sentry DSN |
 | `nvd` <!-- [FIRST] --> | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมทุกโปรเจคบน server |
 
-### D. Jenkins — Pipeline job
+### D. Jenkins — Pipeline job (prod / dev)
 
-ที่: **Dashboard → New Item**
+ที่: **Dashboard → New Item** · สร้าง **2 job แยกกัน** (ไม่ใช้ Multibranch)
 
-| ช่อง | ใส่ค่า |
-| --- | --- |
-| Item name | `__PROJECT_NAME__` |
-| Type | Multibranch Pipeline |
-| Branch Sources → GitHub → Repository URL | `__REPO_URL__` |
-| Discover branches | `main`, `develop` |
-| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) |
+| ช่อง | job prod | job dev |
+| --- | --- | --- |
+| Item name | `__PROJECT_NAME__` | `__PROJECT_NAME__-dev` |
+| Type | Pipeline | Pipeline |
+| Build Triggers | GitHub hook trigger for GITScm polling | 〃 |
+| Pipeline → Definition | Pipeline script from SCM → Git | 〃 |
+| Repository URL | `__REPO_URL__` | 〃 |
+| Branch Specifier | `*/main` | `*/develop` |
+| Script Path | `Jenkinsfile` | `Jenkinsfile` |
+| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) | **ปิด** |
 
 ### E. GitHub — Webhook
 
@@ -124,27 +130,13 @@ RENDER RULES (delete this comment block in the rendered file):
 <!-- [BASEPATH] or [UPLOAD] or [CRON] -->
 ### H. Nginx — Reverse proxy
 
-ที่: **ไฟล์ nginx ของ server** (เพิ่มแล้ว `nginx -s reload`)
+Admin สร้าง reverse proxy ของโปรเจคตามรูปแบบที่ใช้กับโปรเจคอื่นบน server ให้ครอบคลุมข้อต่อไปนี้:
 
-| Server | เพิ่ม |
-| --- | --- |
-| dev <!-- [BASEPATH] --> | `location __BASE_PATH_DEV__ { proxy_pass http://127.0.0.1:__PORT_DEV__; proxy_set_header Host $host; }` |
-| prod + dev <!-- [CRON] --> | `location ^~ __BASE_PATH_PROD__/api/cron/ { deny all; }` (และของ dev) — job เรียกจากใน container เท่านั้น ห้ามเข้าจากนอก |
-| prod + dev <!-- [UPLOAD] --> | `client_max_body_size __UPLOAD_MAX_MB__m;` ใน location ของโปรเจค (ไม่ตั้ง = อัปโหลดไฟล์ใหญ่ได้ 413) |
+- path `__BASE_PATH_PROD__` → แอป prod (port `APP_PORT` prod) และ path `__BASE_PATH_DEV__` → แอป dev (port `APP_PORT` dev) <!-- [BASEPATH] -->
+- ขนาด request ต้องรับไฟล์แนบได้ถึง **__UPLOAD_MAX_MB__ MB** (ถ้าไม่ตั้ง อัปโหลดไฟล์ใหญ่จะได้ 413) <!-- [UPLOAD] -->
+- **ปิด** path `__BASE_PATH_PROD__/api/cron/` และ `__BASE_PATH_DEV__/api/cron/` จากภายนอก (job เรียกจากใน container เท่านั้น) <!-- [CRON] -->
 
-> port `__PORT_DEV__` เป็นค่าเสนอ — ถ้าจัดสรร port อื่น ใช้ port นั้นแทนแล้วแจ้งในตารางส่งกลับ
-
-<!-- [CRON] -->
-### I. Server — Cron
-
-ที่: **Docker host prod → `sudo crontab -u jenkins -e`** (crontab ของ user `jenkins` — เจ้าของ `/home/docker02/appdata` และอยู่ใน group `docker`) (job ทุกตัวของระบบตั้งที่นี่ที่เดียว — dev ไม่ต้องตั้ง)
-
-| Job | รอบเวลา | บรรทัดที่เพิ่มใน crontab |
-| --- | --- | --- |
-| (ครั้งแรก) สร้าง folder log | — | `sudo -u jenkins mkdir -p /home/docker02/appdata/__PROJECT_NAME__/logs` (รันมือ 1 ครั้ง) |
-| `__JOB_NAME__` | __JOB_WHEN__ | `__CRON_SCHEDULE__ docker exec __PROJECT_NAME__ node -e "fetch('http://127.0.0.1:3000__BASE_PATH_PROD__/api/cron/__JOB_NAME__',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET},signal:AbortSignal.timeout(600000)}).then(async r=>{console.log(new Date().toISOString(),r.status,await r.text());process.exit(r.ok?0:1)},e=>{console.error(e);process.exit(1)})" >> /home/docker02/appdata/__PROJECT_NAME__/logs/cron.log 2>&1` |
-
-<!-- one row per job · after adding: run the docker exec part once by hand, expect {"ok":true…} -->
+> port ที่ทีมพัฒนาใช้ไว้ก่อนคือ prod `__PORT_PROD__` / dev `__PORT_DEV__` — ถ้าจัดสรร port อื่น แจ้งในตารางส่งกลับ
 
 ---
 
@@ -154,12 +146,13 @@ RENDER RULES (delete this comment block in the rendered file):
 | --- | --- | --- |
 | SQL Server prod — host:port <!-- [DB] --> | ตาราง A | |
 | SQL Server dev — host:port <!-- [DB] --> | ตาราง A | |
-| รหัสผ่าน `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| ชื่อ login ของเจ้าของโปรเจค (ใช้ทั้ง prod และ dev) <!-- [DB] --> | ตาราง A | |
+| รหัสผ่านของ login นั้น <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
 | `APP_PORT` prod | port ที่จัดสรรบน server prod (ทีมพัฒนาใช้ `__PORT_PROD__` ไว้ก่อน) | |
 | `APP_PORT` dev | port ที่จัดสรรบน server dev (ทีมพัฒนาใช้ `__PORT_DEV__` ไว้ก่อน) | |
 | `KEYCLOAK_ISSUER` <!-- [SSO] --> | `https://<keycloak-host>/realms/__REALM__` | |
 | `KEYCLOAK_CLIENT_SECRET` <!-- [SSO] --> | Keycloak → Clients → `__PROJECT_NAME__` → Credentials | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
-| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` | |
+| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` และ `__PROJECT_NAME__-dev` | |
 
 ## หลังระบบขึ้นแล้ว
 

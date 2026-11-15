@@ -88,7 +88,7 @@ as a starting point that the first real project will sharpen.
    (`files:create`, `files:read`); decide which roles get them.
 4. **Retention** — ไฟล์ที่ถูกลบ (soft delete) เก็บไว้กี่**วัน**ก่อนลบจริง
    (default **90**, ขั้นต่ำ 7 — route ปฏิเสธค่าที่ต่ำกว่า) และ sweep รันเวลาไหน
-   (default ทุกวัน 02:00) → ติดตั้ง retention sweep §4.7 (host cron →
+   (default ทุกวัน 02:00) → ติดตั้ง retention sweep §4.7 (cron service ใน compose prod →
    `app/api/cron/attachments-sweep`) · ตอบ "เก็บตลอด" = ไม่ติดตั้ง sweep แต่บอกตรง ๆ
    ว่าไฟล์ที่ลบแล้วกินดิสก์ตลอดไป และแถว orphan ของ pattern A/C จะไม่มีใครกวาด —
    บันทึกคำตอบไว้ใน `docs/project-context/decisions.md` (or `docs/adr/` when the project keeps ADRs)
@@ -191,7 +191,10 @@ snippet (clamav service, `start_period` 5 นาที, persisted signature DB,
 เปิด virus scan ตาม §3 Q5 (default: ไม่เอา).
 **[SWEEP]** uncomment `# CRON_SECRET: ${CRON_SECRET}  # [CRON]` in **both**
 compose files (fixed list, section 1 — never move it or add a key), or every
-cron call answers 401.
+cron call answers 401 · keep (or restore from the cicd assets) the `[CRON]` blocks —
+supercronic in the Dockerfile + the `cron` service in `docker-compose.yml` only — and
+add the sweep line to `jobs.crontab` (cicd `references/scheduled-jobs.md`; schedule =
+§3 Q4, default `0 2 * * *`).
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
 
@@ -200,14 +203,14 @@ step waits until after cicd-setup and runs as a close-out.
 Fill the template rows, never append prose (create the file from
 cicd-setup's `admin-handoff.template.md` if it does not exist yet): table B
 gets the `storage` prod/dev row pair (backup job · ห้ามลบ), table H gets the
-`client_max_body_size` row with `__UPLOAD_MAX_MB__`, and **[SCAN]** table B gets
+upload-size bullet with `__UPLOAD_MAX_MB__` (in words — no nginx snippet), and **[SCAN]** table B gets
 one more row for `clamav-db` whose "Admin ต้องทำ" cell reads
 `เผื่อ RAM ~2 GB ให้ container clamav`. The checklist below fails without it.
-**[SWEEP]** table I gets the `attachments-sweep` row (`__JOB_NAME__` =
-`attachments-sweep`, schedule = §3 Q4, default `ทุกวัน 02:00` / `0 2 * * *`) plus
-its one-off "สร้าง folder log" row, and table H keeps the `[CRON]`
-`location ^~ …/api/cron/ { deny all; }` row — if cicd-setup removed the `[CRON]`
-parts (no jobs back then), restore them from `admin-handoff.template.md`.
+**[SWEEP]** the admin sets up no cron (the job runs in the compose `cron` service): the
+`[CRON]` note under the overview lists the sweep (`ลบไฟล์แนบเก่า ทุกวัน 02:00`), and
+table H keeps the `[CRON]` bullet that blocks `…/api/cron/` from outside — if
+cicd-setup removed the `[CRON]` parts (no jobs back then), restore them from
+`admin-handoff.template.md`.
 
 ### 4.6 Health + migrate
 
@@ -221,7 +224,7 @@ npx prisma migrate dev --name add-attachments && npx prisma generate
 
 ### 4.7 [SWEEP] Retention sweep (§3 Q4)
 
-`app/api/cron/attachments-sweep/route.ts` (host cron, cicd
+`app/api/cron/attachments-sweep/route.ts` (the prod compose `cron` service, cicd
 `references/scheduled-jobs.md`) does three things per run, idempotently:
 rows whose owner is gone → **soft**-deleted (they wait out the window like any
 delete) · rows soft-deleted longer than `RETENTION_DAYS` → file, then row,
@@ -266,7 +269,7 @@ state is consistent instead (no `scanBuffer` call, rows stored `'unscanned'`,
 download guard `=== 'infected'`) and warns about a leftover clamav service.
 Paths resolve at the root first, then under `src/`. The `[SWEEP]` check fails
 when the route skips `CRON_SECRET`/`POST`, `RETENTION_DAYS` < 7, compose still
-comments `CRON_SECRET`, or handoff and route disagree; no route at all only warns.
+comments `CRON_SECRET`, or `jobs.crontab` and route disagree; no route at all only warns.
 
 Then by hand — these are the ones that catch real breakage:
 

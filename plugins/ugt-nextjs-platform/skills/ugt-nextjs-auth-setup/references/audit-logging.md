@@ -136,7 +136,7 @@ access is usually broader than source-data access.
 
 ## Retention
 
-→ moved to `audit-viewer-retention.md` §Retention (host-cron purge via `usp_PurgeActivityLogs`, viewer query floor).
+→ moved to `audit-viewer-retention.md` §Retention (compose cron-service purge via `usp_PurgeActivityLogs`, viewer query floor).
 
 ## Checklist
 

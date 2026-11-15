@@ -1,5 +1,9 @@
 # Changelog — ugt-python-platform
 
+## Unreleased
+
+- **admin-handoff ตาราง D: Jenkins = 2 job แบบ Pipeline ไม่ใช้ Multibranch** — มติผู้ดูแล 2026-11-16 (contract `cicd.md` § Branch model) → `__PROJECT_NAME__` (`*/main`) + `__PROJECT_NAME__-dev` (`*/develop`) · Pipeline script from SCM · Script Path `Jenkinsfile` · Lightweight checkout ปิด · trigger "GitHub hook trigger for GITScm polling" · แก้แค่ข้อความ (Jenkinsfile ใช้ `GIT_BRANCH` ได้อยู่แล้ว) · **ยังไม่ย้าย**: งานตั้งเวลายังเป็น host cron (contract ระบุเป็นช่วงเปลี่ยนผ่าน) และตาราง A ยังเป็น login 2 ตัว · origin ugt-lube-monitoring · 2026-11-16 · asset: admin-handoff.template.md
+
 ## 0.10.3 (2026-11-11)
 
 - **cicd-setup: env ใหม่ใส่ใน Jenkins Secret File แล้วไม่ถึงแอป** — compose ใช้ `.env` แค่แทนค่า `${VAR}` ในไฟล์ compose และ service ไม่มี `env_file:` → ตัวแปรที่ไม่อยู่ใน `environment:` ไม่เข้า container (ฟีเจอร์ปิดเงียบ ไม่มี error) → เพิ่มใน `environment:` ของ compose ทั้งสองไฟล์ใน PR เดียวกับที่เริ่มอ่าน · optional ใช้ `${VAR:-}` · origin ugt-hrms (RT-074) · 2026-11-05 · compose.md + คอมเมนต์ใน compose · asset: ugt-python-cicd-setup/docker-compose.yml, ugt-python-cicd-setup/docker-compose.dev.yml

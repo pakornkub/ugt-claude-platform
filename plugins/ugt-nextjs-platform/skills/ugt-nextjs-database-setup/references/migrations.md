@@ -26,33 +26,23 @@ throwaway database**: it replays every migration there to detect drift and to
 diff the schema. By default it tries to `CREATE DATABASE` / `DROP DATABASE` one
 next to `DATABASE_URL`.
 
-**On the org's shared SQL Server that fails**, and it is the first thing a new
-project hits: the app login is granted rights inside its own database only, not
-`CREATE DATABASE` on the instance. The error names permissions, not the shadow
-DB, so it reads like a wrong password.
+**On the org's shared SQL Server that fails unless the login may create
+databases**, and it is the first thing a new project hits: rights granted
+inside the project database (`db_datareader` · `db_datawriter` ·
+`db_ddladmin` · `EXECUTE`) do not include `CREATE DATABASE` on the instance.
+The error names permissions, not the shadow DB, so it reads like a wrong
+password or a missing grant on the project database.
 
-Fix — ask the DBA for **one pre-created empty database on the dev server**
-(e.g. `__DB_NAME___shadow`), and point Prisma at it explicitly:
+**Org rule (2026-11-16) — no pre-created shadow database, no
+`SHADOW_DATABASE_URL` / `shadowDatabaseUrl`.** The DBA grants the project
+login **`dbcreator` on the dev server only** (admin-handoff table A), and
+`migrate dev` creates and drops its own temporary shadow DB each run.
+`prisma.config.ts` carries `url` only. Production needs no extra right:
+`migrate deploy` never uses a shadow database.
 
-```ts
-// prisma.config.ts
-datasource: {
-  url: process.env['DATABASE_URL'],
-  // Pre-created empty DB, dev only. Prisma wipes it on every migrate dev —
-  // never point this at anything that holds data.
-  shadowDatabaseUrl: process.env['SHADOW_DATABASE_URL'],
-},
-```
-
-```bash
-# .env.local — same server/credentials, different database name
-SHADOW_DATABASE_URL="sqlserver://__DB_HOST__:__DB_PORT__;database=__DB_NAME___shadow;user=__DB_USER__;password=__DB_PASSWORD__;encrypt=true;trustServerCertificate=true"
-```
-
-Alternative when the DBA prefers it: grant the dev login `dbcreator` **on the
-dev server only** and let Prisma manage the shadow DB itself. Either way it is
-a dev/CI concern — production runs `migrate deploy`, which needs no shadow
-database and no extra rights.
+So when the first `migrate dev` fails with a permission error: check that the
+login really has `dbcreator` on the **dev** server (`SELECT IS_SRVROLEMEMBER('dbcreator')`
+→ `1`) before suspecting the password. Never run `migrate dev` against prod.
 
 ## 2. Hand-written migration SQL — always wrap in a transaction
 

@@ -4,6 +4,7 @@
 # Jenkinsfile Docker Build stage.
 #
 # Placeholders: __PROJECT_NAME__, __PORT_PROD__, __BASE_PATH_PROD__
+# [CRON] the `cron` service at the bottom — delete it if the project has no scheduled jobs.
 services:
   app:
     build:
@@ -36,7 +37,7 @@ services:
       # 1. runtime
       NODE_ENV: production
       NODE_TLS_REJECT_UNAUTHORIZED: '0' # org standard, always on: closed intranet + internal-CA Keycloak/LDAP
-      # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] host cron → /api/cron/<job>
+      # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] the cron service (jobs.crontab) → /api/cron/<job>
       # 2. database
       DATABASE_URL: ${DATABASE_URL} # [DB]
       # 3. auth
@@ -82,6 +83,32 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+
+  # [CRON] scheduled jobs (jobs.crontab) — prod only, deployed together with the app.
+  # Never in docker-compose.dev.yml (the job would run in both environments). Delete if no jobs.
+  cron:
+    image: __PROJECT_NAME__:latest
+    pull_policy: never
+    container_name: __PROJECT_NAME__-cron
+    restart: unless-stopped
+    command: ['supercronic', '/app/jobs.crontab']
+    networks:
+      - proxy-network # reaches the app as http://__PROJECT_NAME__:3000
+    environment:
+      TZ: Asia/Bangkok
+      CRON_SECRET: ${CRON_SECRET}
+    healthcheck:
+      disable: true # the image HEALTHCHECK probes a web server this service does not run
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
 
 networks:
   # Shared reverse-proxy network on the Docker host (created once, externally)

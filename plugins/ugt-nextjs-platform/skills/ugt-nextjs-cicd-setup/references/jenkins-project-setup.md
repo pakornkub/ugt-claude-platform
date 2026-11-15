@@ -1,6 +1,6 @@
 # Jenkins project-level setup (repeated for every project)
 
-What the admin prepares in Jenkins/GitHub/nginx for each new project — moved out of `jenkins-one-time-setup.md` §B (the server-level part and the frequent pitfalls stay there). Section numbers B1–B4 are kept so existing citations still match.
+What the admin prepares in Jenkins/GitHub/the reverse proxy for each new project — moved out of `jenkins-one-time-setup.md` §B (the server-level part and the frequent pitfalls stay there). Section numbers B1–B4 are kept so existing citations still match.
 
 ## B. Project level (every project)
 
@@ -25,15 +25,29 @@ holding secrets (e.g. `dc-nvd.properties`) must be deleted in `post { always }`.
 
 ### B2. Pipeline job config
 
-- Create a Pipeline (or Multibranch Pipeline) job pointing at the repo +
-  branches `main` and `develop`
+**Org rule (2026-11-16): prod and dev are always two separate Pipeline jobs —
+never Multibranch.**
+
+| Field | Job prod | Job dev |
+| --- | --- | --- |
+| Item name | `__PROJECT_NAME__` | `__PROJECT_NAME__-dev` |
+| Type | Pipeline | Pipeline |
+| Build Triggers | GitHub hook trigger for GITScm polling | same |
+| Pipeline → Definition | Pipeline script from SCM → Git, repo URL | same |
+| Branch Specifier | `*/main` | `*/develop` |
+| Script Path | `Jenkinsfile` | `Jenkinsfile` |
+| Lightweight checkout | off | off |
+
+- One webhook (§B3) serves both jobs: each polls its own branch and builds only
+  when that branch changed
 - **Disable "Lightweight checkout"** — Configure → Pipeline → SCM → uncheck.
   Otherwise Jenkins fetches only the Jenkinsfile → later stages find an
   incomplete workspace / the pipeline runs stale code
-- Branch detection in the Jenkinsfile already handles both job types:
-  `def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())`
-  (Multibranch provides `BRANCH_NAME` directly · plain Pipeline provides
-  `GIT_BRANCH` = `origin/main`, needing the prefix stripped)
+- Branch detection in the Jenkinsfile:
+  `def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` — a
+  plain Pipeline job has no `BRANCH_NAME`; `GIT_BRANCH` = `origin/develop`
+  → `develop` (the `BRANCH_NAME` half stays only so an old Multibranch job
+  still resolves)
 
 ### B3. GitHub webhook
 
@@ -48,16 +62,13 @@ GitHub repo → Settings → Webhooks → Add webhook:
 If Jenkins sits on an internal network GitHub can't reach → use
 `pollSCM('H/5 * * * *')` in `triggers {}` instead.
 
-### B4. Reverse proxy (nginx) for the dev environment
+### B4. Reverse proxy
 
-Add a `location` block on the Docker host for the dev container:
+The admin creates the project's reverse-proxy entry the way every other project
+on that server is done — the handoff states **what** it must cover, in words,
+never a config snippet:
 
-```nginx
-location __BASE_PATH_DEV__ {
-    proxy_pass http://127.0.0.1:__PORT_DEV__;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
+- prod path `__BASE_PATH_PROD__` → host port `APP_PORT` prod · dev path
+  `__BASE_PATH_DEV__` → host port `APP_PORT` dev
+- request-size limit ≥ `UPLOAD_MAX_BYTES` when upload-setup is installed (413 otherwise)
+- `<basePath>/api/cron/` blocked from outside when the project has scheduled jobs

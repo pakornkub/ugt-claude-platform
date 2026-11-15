@@ -50,20 +50,22 @@ worse than no gate because it manufactures false confidence.
 
 ## Branch / per-branch values
 
-`main` = prod · `develop` = dev (everything suffixed `-dev`)
+`main` = prod · `develop` = dev (everything suffixed `-dev`) — two plain **Pipeline**
+jobs in Jenkins (`<project>` on `*/main`, `<project>-dev` on `*/develop`), never Multibranch
 
 Branch-dependent values **must** be resolved inside `script {}` from
 `env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last()` — never in the
 global `environment {}` block (global = one value for every branch).
 
-## Scheduled jobs — host cron, or a cron service in the prod compose (org decision 2026-10-09)
+## Scheduled jobs — a cron service in the prod compose (org decision 2026-10-09 · container-only 2026-11-16)
 
-- Every scheduled/recurring job = one **host cron** line in the admin handoff
-  cron table → `docker exec <container> node -e "fetch(…)"` the app's `/api/cron/<job>` route (secret read inside the container, never in argv)
-  (`references/scheduled-jobs.md`) — **or** a `cron` service in `docker-compose.yml` only
-  (supercronic + repo `jobs.crontab`, `TZ: Asia/Bangkok`, `tzdata` + `supercronic -test` in the
-  Dockerfile; never in `docker-compose.dev.yml`). **No in-app scheduler**: no `node-cron`,
-  `node-schedule`, `setInterval` loops, no SQL Agent job, no Jenkins timer
+- Every scheduled/recurring job = one line in the repo's `jobs.crontab`, run by the `cron`
+  service in `docker-compose.yml` only (supercronic, `TZ: Asia/Bangkok`, `tzdata` +
+  `supercronic -test` in the Dockerfile) → `node -e "fetch(…)"` the app's `/api/cron/<job>`
+  route (`references/scheduled-jobs.md`) — deploys together with the app. Never in
+  `docker-compose.dev.yml` (dev: call the route by hand). **No host crontab** line, **no
+  in-app scheduler** (`node-cron`, `node-schedule`, `setInterval` loops), no SQL Agent job,
+  no Jenkins timer
 - `/api/cron/*` routes: `POST` only · `Authorization: Bearer ${CRON_SECRET}`
   checked first (401 otherwise) · idempotent · destructive jobs keep the
   in-code date guard (pitfalls `hardening.md` §4)

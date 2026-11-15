@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.61.4 · ugt-nextjs-database-setup/prisma.config.ts
-// kit-hash: fc30d0c06530
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-database-setup/prisma.config.ts
+// kit-hash: 02d66d8e0be7
 // Prisma CLI config — the ONLY place the datasource url lives.
 // (schema.prisma must NOT contain a url field — Prisma 7 + driver adapter.)
 // Requires dev deps: prisma, tsx, dotenv.
@@ -27,12 +27,8 @@ export default defineConfig({
     // prisma.config.ts runs outside the app — direct process.env access is
     // allowed HERE ONLY. App code must import from '@/lib/env'.
     url: process.env['DATABASE_URL'],
-    // Dev-only, used by `prisma migrate dev` (never by `migrate deploy`): the
-    // app login on the shared org server cannot CREATE DATABASE, so Prisma
-    // can't make its own shadow DB and migrate dev dies on a permission error
-    // that never mentions the shadow database. Point this at a pre-created
-    // EMPTY dev database — Prisma wipes it on every run.
-    // Remove the line when the dev login may create databases itself.
-    shadowDatabaseUrl: process.env['SHADOW_DATABASE_URL'],
+    // No shadowDatabaseUrl: `migrate dev` creates/drops its own temporary
+    // shadow DB — the login holds `dbcreator` on the DEV server only
+    // (references/migrations.md §1.1). `migrate deploy` (prod) needs none.
   },
 });

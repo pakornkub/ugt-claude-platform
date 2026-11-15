@@ -50,8 +50,9 @@ Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'
 
 - Define a minimum retention window in the project docs (e.g. 180 days)
 - The schema has no `expiresAt`/soft-delete → purge on a schedule. Scheduling is
-  **host cron only** (org decision 2026-10-09 — no SQL Agent job): the delete
-  lives in a stored procedure, and a cron route calls it
+  **the prod compose `cron` service only** (org decision 2026-10-09, container-only
+  2026-11-16 — no SQL Agent job, no host crontab): the delete lives in a stored
+  procedure, and a cron route calls it via a `jobs.crontab` line
   (cicd-setup `references/scheduled-jobs.md`):
 
 ```sql

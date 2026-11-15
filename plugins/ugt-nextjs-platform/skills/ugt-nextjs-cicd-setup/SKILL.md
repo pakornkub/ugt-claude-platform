@@ -60,7 +60,7 @@ Skill layout:
 | `references/jenkins-project-setup.md` | what the admin repeats per project (credentials/job config/webhook/dev reverse proxy) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule, compose, reverse proxy |
-| `references/scheduled-jobs.md` | host cron → `POST /api/cron/<job>` + `CRON_SECRET` (route shape, crontab line) · alternative: cron service in the prod compose |
+| `references/scheduled-jobs.md` | `cron` service in the prod compose (supercronic + `jobs.crontab`) → `POST /api/cron/<job>` + `CRON_SECRET` — never the host crontab |
 | `references/version-skew.md` | `deploymentId` ← `NEXT_DEPLOYMENT_ID` build arg — a tab left open across a deploy |
 | `references/external-config-handoff.md` | the three docs above, pulled into **one table** with this project's real substituted names — what actually gets handed to the admin |
 
@@ -86,13 +86,18 @@ post: emailext (success/unstable/failure/aborted) + cleanWs
 | `main` | prod | container name, host port, basePath, sonar projectKey, env credential |
 | `develop` | dev | everything suffixed `-dev` + separate compose file |
 
+Jenkins: **two plain Pipeline jobs** — `<project>` (branch `*/main`) and
+`<project>-dev` (branch `*/develop`), both "Pipeline script from SCM" on the same
+`Jenkinsfile` — **never Multibranch** (org rule 2026-11-16, `references/jenkins-project-setup.md` §B2).
+
 The `-dev` basePath suffix is also what the app reads to show its **DEV
 environment bar** and `[DEV] ` tab title (`ugt-nextjs-design-setup` Step 3.3 → `references/root-layout.md`,
 `isDevEnvironment()`) — keep `__BASE_PATH_DEV__` ending in `-dev`; a project deployed
 without a basePath has no dev/prod signal and gets no bar.
 
 All per-branch values resolve inside `script {}` from
-`def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` —
+`def br = (env.BRANCH_NAME ?: env.GIT_BRANCH?.tokenize('/')?.last())` (a plain
+Pipeline job has no `BRANCH_NAME`; `GIT_BRANCH` = `origin/develop` → `develop`) —
 never put branch-specific values in the global `environment {}`.
 
 ### 2.3 Quality Gate thresholds (org standard — on New Code)
@@ -161,9 +166,9 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
 7. **Volume?** — มี path ที่ต้อง persist ข้าม deploy ไหม (เช่น uploads) →
    รายชื่อ → บล็อก `[VOLUME]` ในทั้ง 2 compose; ไม่มี → ลบบล็อก `[VOLUME]`
 8. **Scheduled jobs?** (งานที่ต้องรันตามเวลา: ชื่อ · ทำอะไร · ทุกเมื่อ) — มี →
-   `[CRON]` (route ต่อ job, `CRON_SECRET`, แถวในตาราง cron ของ handoff,
-   `references/scheduled-jobs.md`) · ไม่มี → ลบทุกอย่างที่ติด `[CRON]` · มี → ถามต่อ: host cron
-   (default) หรือ cron service ใน compose prod (admin ไม่ต้องแก้ crontab — ส่วนท้าย `scheduled-jobs.md`)
+   `[CRON]`: route ต่อ job + `CRON_SECRET` + `cron` service ใน compose prod
+   (`references/scheduled-jobs.md`) — วิธีเดียว ไม่ถาม host cron (มติ 2026-11-16) ·
+   ไม่มี → ลบทุกอย่างที่ติด `[CRON]`
 
 ## 4. Setup Steps
 
@@ -212,13 +217,13 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__REQUESTER__` | ชื่อ/อีเมลผู้ขอ (คนที่ admin ติดต่อกลับ) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
-| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` (shadow = `<dev>_shadow` ตาม `SHADOW_DATABASE_URL`) |
-| `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | SQL login — จาก `.env.local`; ยังเป็น `CHANGE_ME_DB_USER` → เสนอ `<project>_app` / `<project>_dev` |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
+| `__PROJECT_OWNER__` | เจ้าของโปรเจค — SQL login เป็นของคนนี้ ตัวเดียวใช้ทั้ง prod และ dev (admin สร้าง แล้วส่งชื่อกลับในตาราง "ส่งกลับ"); ไม่ได้บอก → ใช้ค่าเดียวกับ `__REQUESTER__` |
 | `__LINKED_SERVER__` / `__LINKED_OBJECTS__` | ชื่อ linked server + object 4 ส่วนที่อ่าน (database-setup Q3) |
 | `__VOLUME__` | ชื่อ volume ใน compose (`uploads`, `storage`, …) — หนึ่งคู่แถว prod/dev ต่อ volume |
 | `__REALM__` | realm Keycloak ขององค์กร (ค่าเดียวกับ auth-setup) |
 | `__UPLOAD_MAX_MB__` | `UPLOAD_MAX_BYTES` ÷ 1 048 576 ปัดขึ้น (upload-setup) |
-| `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` | ต่อ job หนึ่งแถว: ชื่อ route ใต้ `app/api/cron/` · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) — `references/scheduled-jobs.md` |
+| `__JOB_LIST__` | job ตั้งเวลาภาษาคน คั่นด้วย `, ` ("ลบไฟล์แนบเก่า ทุกวัน 02:00") — แค่บอก admin ว่ามี ไม่ต้องตั้งอะไร |
 
 ### 4.3 Adjust per interview answers
 
@@ -240,9 +245,11 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `.env.example` section 1 (real value ≥ 32 chars in `.env`/`.env.dev`, different per env) ·
   `lib/env.ts`: `CRON_SECRET: z.string().min(32).optional()` in `server` **and**
   `CRON_SECRET: process.env.CRON_SECRET` in `runtimeEnv` · one `app/api/cron/<job>/route.ts`
-  per job (`references/scheduled-jobs.md` shape) · one row per job in the handoff cron table —
-  **or**, cron service: Dockerfile block + `jobs.crontab` + `cron` service in `docker-compose.yml`
-  only, and drop handoff section I + its row 9 (keep the nginx `deny` row)
+  per job + one line per job in `jobs.crontab` at the repo root (`references/scheduled-jobs.md`) ·
+  keep the `[CRON]` blocks of the Dockerfile (supercronic) and `docker-compose.yml` (`cron`
+  service — **never** in `docker-compose.dev.yml`) · handoff: the `[CRON]` note + the
+  `/api/cron/` bullet in H. **No jobs** → delete every `[CRON]` block (Dockerfile too — its
+  `COPY jobs.crontab` fails the build without the file)
 - No basePath → basePath = empty, health path = `/api/health`
 - Check `package.json` has the scripts the pipeline calls: `lint`,
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
@@ -336,7 +343,7 @@ Checklist §6
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
-| Scheduled jobs = host cron → `docker exec` `node -e "fetch(…)"` → `POST /api/cron/<job>` + `CRON_SECRET`, one row per job in the handoff cron table — or a `cron` service in `docker-compose.yml` only (`references/scheduled-jobs.md`) | `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
+| Scheduled jobs = the `cron` service in `docker-compose.yml` (supercronic + `jobs.crontab`) → `POST /api/cron/<job>` + `CRON_SECRET` — deploys with the app (`references/scheduled-jobs.md`) | Host crontab lines, `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`references/version-skew.md`) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |
@@ -387,7 +394,7 @@ in and handed over covers this list by exact project name; the items:**
 - [ ] Both webhooks: GitHub → Jenkins (`/github-webhook/`) and
       SonarQube → Jenkins (`/sonarqube-webhook/`)
 - [ ] SonarQube prod+dev projects created + the §2.3 Quality Gate assigned to both
-- [ ] Lightweight checkout disabled in the job config
+- [ ] Two Pipeline jobs (`<project>` on `*/main`, `<project>-dev` on `*/develop`) — not Multibranch · Lightweight checkout disabled in both
 
 **Live run:**
 

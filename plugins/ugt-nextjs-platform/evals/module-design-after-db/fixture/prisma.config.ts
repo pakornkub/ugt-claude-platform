@@ -27,12 +27,8 @@ export default defineConfig({
     // prisma.config.ts runs outside the app — direct process.env access is
     // allowed HERE ONLY. App code must import from '@/lib/env'.
     url: process.env['DATABASE_URL'],
-    // Dev-only, used by `prisma migrate dev` (never by `migrate deploy`): the
-    // app login on SQLDEV01 cannot CREATE DATABASE, so Prisma can't make its
-    // own shadow DB and migrate dev dies on a permission error that never
-    // mentions the shadow database. Point this at the pre-created EMPTY
-    // database LeaveRequest_shadow — Prisma wipes it on every run.
-    // Remove the line when the dev login may create databases itself.
-    shadowDatabaseUrl: process.env['SHADOW_DATABASE_URL'],
+    // No shadowDatabaseUrl: `migrate dev` creates/drops its own temporary
+    // shadow DB — the login holds `dbcreator` on the DEV server only
+    // (references/migrations.md §1.1). `migrate deploy` (prod) needs none.
   },
 });

@@ -116,11 +116,11 @@ check('Quality Gate actually blocks the pipeline', () => {
     : { ok: false, msg: 'waitForQualityGate without abortPipeline: true → gate goes red while the pipeline stays green' };
 });
 
-check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
+check('Scheduled jobs go through the prod compose cron service, not an in-app scheduler', () => {
   const deps = { ...(pkg?.dependencies ?? {}), ...(pkg?.devDependencies ?? {}) };
   const schedulers = ['node-cron', 'node-schedule', 'cron', 'toad-scheduler', 'agenda', 'bree'].filter((d) => d in deps);
   if (schedulers.length) {
-    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from host cron or a prod compose cron service → /api/cron/<job> (references/scheduled-jobs.md)` };
+    return { ok: false, msg: `package.json has ${schedulers.join(', ')} — org rule: jobs run from the prod compose cron service → /api/cron/<job> (references/scheduled-jobs.md)` };
   }
   const cronDir = ['app/api/cron', 'src/app/api/cron'].find((d) => has(d));
   if (!cronDir) return { ok: true };
@@ -148,9 +148,21 @@ check('Scheduled jobs go through host cron, not an in-app scheduler', () => {
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
-check('A compose cron service runs on prod only, in Bangkok time', () => {
-  // references/scheduled-jobs.md, last section: docker-compose.yml only, TZ set
+check('The compose cron service is wired, prod only, in Bangkok time', () => {
+  // references/scheduled-jobs.md: routes ⇔ jobs.crontab ⇔ Dockerfile supercronic ⇔ cron service in docker-compose.yml only
   const live = (f) => (has(f) ? read(f).split('\n').filter((l) => !l.trim().startsWith('#')).join('\n') : '');
+  const hasRoutes = ['app/api/cron', 'src/app/api/cron'].some((d) => has(d));
+  const dockerCron = /jobs\.crontab|supercronic/.test(live('Dockerfile'));
+  const composeCron = /supercronic/.test(live('docker-compose.yml'));
+  if (hasRoutes && !(has('jobs.crontab') && dockerCron && composeCron)) {
+    return { ok: false, msg: 'app/api/cron/ exists but the cron service is incomplete — need jobs.crontab + the Dockerfile [CRON] block + the cron service in docker-compose.yml (no host crontab — references/scheduled-jobs.md)' };
+  }
+  if (!hasRoutes && (dockerCron || composeCron)) {
+    return { ok: false, msg: 'no app/api/cron/ routes but the [CRON] blocks are still in Dockerfile/docker-compose.yml — delete them (COPY jobs.crontab breaks the build without the file)' };
+  }
+  if (dockerCron && !has('jobs.crontab')) {
+    return { ok: false, msg: 'Dockerfile copies jobs.crontab but the file is missing at the repo root — docker build fails' };
+  }
   if (/supercronic|crond\b/.test(live('docker-compose.dev.yml'))) {
     return { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only, or every job runs twice (references/scheduled-jobs.md)' };
   }
