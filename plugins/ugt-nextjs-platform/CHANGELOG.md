@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **design-setup verify: ด่าน "No Radix" ล้มเพราะไฟล์ kit เอง** — ทุกโปรเจคที่ติดตั้ง `ui/responsive-popover.tsx` ได้ ✘ `asChild` → ด่านสแกน idiom ของ Radix บนโค้ดดิบ และ JSDoc ของไฟล์นั้นเขียนว่า "Base UI ไม่มี `asChild`" → สแกนหลังตัดคอมเมนต์ (`stripComments` ย้ายขึ้นเป็น helper กลางใช้ร่วมกับด่าน DataTable id) · origin ugt-lube-monitoring · 2026-11-15
+- **design-setup verify: ด่านฟ้อนต์ Inter ไม่มีวันผ่าน** — `verify.mjs` ร้อง "Inter not wired" ทั้งที่ `app/layout.tsx` import `Inter` จาก `next/font/google` แล้ว → regex ของด่านนี้มีอักขระ backspace (0x08) จริงในไฟล์แทน `\b` (`cat -A` เห็นเป็น `^H`) จึงจับได้เฉพาะโค้ดที่มี backspace → เปลี่ยนเป็น `\b` · origin ugt-lube-monitoring · 2026-11-15
 
 ## 4.88.1 (2026-11-12)
 

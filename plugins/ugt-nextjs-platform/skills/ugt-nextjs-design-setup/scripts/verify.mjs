@@ -220,7 +220,7 @@ check('layout.tsx wires the agreed font via next/font', () => {
   const problems = [];
   // next/font/google (Inter / Noto_Sans_Thai) or next/font/local files (inter-*.woff2 / noto-sans-thai-*.woff2)
   if (!/Noto_Sans_Thai|noto-sans-thai[^'"]*\.woff2/.test(l)) problems.push('Noto Sans Thai not wired (Noto_Sans_Thai or a noto-sans-thai*.woff2 file)');
-  if (!/Inter|inter[^'"]*\.woff2/.test(l)) problems.push('Inter not wired (Inter or an inter*.woff2 file)');
+  if (!/\bInter\b|inter[^'"]*\.woff2/.test(l)) problems.push('Inter not wired (Inter or an inter*.woff2 file)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
