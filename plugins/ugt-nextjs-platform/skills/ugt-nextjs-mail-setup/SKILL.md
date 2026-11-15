@@ -25,6 +25,7 @@ description: >
 | Relay rejects the sender | `SMTP_FROM` is not an address the relay authorises |
 | Links in the email 404 | URL built without the basePath |
 | An approval fails because the mail step threw | send called inside the transaction / outside `try/catch` — mail must never fail the work |
+| `tsc` / `next build` fails in `lib/email.ts`: `Cannot find namespace 'nodemailer'` | `lib/email.ts` copied before the fix uses the `nodemailer.SendMailOptions` namespace, which nodemailer 10's own types don't have — `/ugt-nextjs-kit-sync` (the kit file imports `type SendMailOptions`); never pin nodemailer back to 7 |
 
 ## 1. Overview
 
@@ -94,7 +95,10 @@ npm install nodemailer
 npm install -D @types/nodemailer
 ```
 
-**No shell?** Add these packages to `package.json` by hand at the same ranges and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
+Latest major on purpose (nodemailer 10 ships its own types; `@types/nodemailer`
+only matters on 7) — `lib/email.ts` typechecks on both.
+
+**No shell?** Add these packages to `package.json` by hand and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
 
 ### 4.2 Copy assets
 
