@@ -9,7 +9,9 @@ description: >
   across a linked server, a stored-procedure call that times out (mssql
   15-second default), a raw GROUP BY failing with error 8120, setting up type-safe env validation, or debugging MSSQL
   migration problems (column renames that would drop data, filtered unique
-  indexes Prisma can't express, `url` in the wrong place breaking generate).
+  indexes Prisma can't express, `url` in the wrong place breaking generate),
+  or `next build` panicking on Windows over `powershell-utils` (Turbopack
+  bundling the mssql driver).
   Load it before touching `prisma/schema.prisma` even for a one-field change —
   a column that collides with a T-SQL reserved word or misses an audit column
   costs a data migration later.
@@ -156,6 +158,13 @@ closing summary must list them under "env vars needing real values".
   `@/lib/env` (exception: `prisma.config.ts`, which runs outside the app)
 - **Run `npx prisma generate` after every `prisma migrate dev`** and after
   every schema change
+- **Keep the SQL Server driver out of the bundle** — add to `next.config.ts`:
+  `serverExternalPackages: ['@prisma/adapter-mssql', 'mssql', 'tedious']`.
+  Without it `next build` (Turbopack) **panics on Windows** resolving
+  `powershell-utils`: `@prisma/adapter-mssql` → `tedious` → `@azure/identity`
+  → `open` names `powershell.exe` by absolute path and Turbopack tries to
+  bundle it. As externals they load as plain Node dependencies, and
+  `output: 'standalone'` still traces them into the image
 
 ### 4. Build the schema + migrate
 
@@ -246,6 +255,8 @@ failure) — the rest must be run by hand:
 - [ ] `npx prisma validate` passes
 - [ ] `npx prisma generate` passes (and is re-run after every migrate)
 - [ ] `schema.prisma` has no `url` in the datasource; `prisma.config.ts` has it
+- [ ] `next.config.ts` `serverExternalPackages` lists `@prisma/adapter-mssql`,
+      `mssql`, `tedious`
 - [ ] no direct `process.env` reads outside `lib/env.ts` / `prisma.config.ts`
 - [ ] every model has `@@map("PascalCasePlural")` and every field
       `@map("PascalCase")` — except the auth/RBAC tables installed by

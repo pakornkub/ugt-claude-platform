@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **database-setup: `next build` panic บน Windows (`powershell-utils`)** — Turbopack ล้มตอน resolve `powershell-utils` → สาย `@prisma/adapter-mssql` → `tedious` → `@azure/identity` → `open` อ้าง `powershell.exe` ด้วย absolute path แล้ว Turbopack พยายาม bundle → `serverExternalPackages: ['@prisma/adapter-mssql', 'mssql', 'tedious']` ใน `next.config.ts` (§3 Critical rules + checklist + คำใน description) · origin ugt-lube-monitoring · 2026-11-15
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
