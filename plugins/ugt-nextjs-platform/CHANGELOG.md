@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **design-setup verify: ด่าน "Excel/CSV export goes through lib/export.ts" จับไฟล์ที่ไม่ได้ export** — upload MIME allowlist (`'text/csv'` ในรายการ) หรือ parser นำเข้า Excel/CSV (`file.type === 'text/csv'`, import `exceljs` เพื่ออ่าน) ถูกนับเป็น "Hand-rolled export" → ด่านดูแค่ว่าไฟล์มีสตริง `text/csv` หรือ import `exceljs` → นับเฉพาะไฟล์ที่ **เขียน** ไฟล์ออก: `exceljs` + `.xlsx/.csv.write*` หรือ `text/csv` คู่กับ `Content-Disposition` / `new Blob(` / `createObjectURL` / `Content-Type: text/csv` · origin ugt-lube-monitoring · 2026-11-15
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
