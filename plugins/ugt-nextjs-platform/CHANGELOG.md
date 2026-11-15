@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **kit: `combobox.tsx` typecheck ไม่ผ่านกับ `@base-ui/react` 1.9** — `tsc`/`next build` ล้มที่ `onOpenChange={setOpen}` → 1.9 แยก type ของ `onOpenChange` เป็น `Combobox.Root.OpenChangeEventDetails` (≤1.8 ใช้ `ChangeEventDetails` — 4.88.1 จึงแก้ได้แค่ฝั่งรุ่นเก่า) → ดึง type จากพารามิเตอร์ของ `onOpenChange` เอง (`Parameters<NonNullable<Root.Props<…>['onOpenChange']>>[1]`) ใช้ได้ทุกรุ่น ทั้ง `setOpen` และ cast ใน `onOpenChange` ของ Sheet · origin ugt-lube-monitoring · 2026-11-15 · asset: ugt-nextjs-design-setup/ui/combobox.tsx
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
