@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **mail-setup: `lib/email.ts` typecheck ไม่ผ่านหลังติดตั้งใหม่** — `TS2503: Cannot find namespace 'nodemailer'` ที่ `nodemailer.SendMailOptions['attachments']` → บรรทัดติดตั้งไม่ระบุเวอร์ชัน ได้ `nodemailer@10` + `@types/nodemailer@8` ซึ่งไม่มี namespace นั้นแล้ว → pin `nodemailer@^7` + `@types/nodemailer@^7` ใน §4.1 + แถวอาการ · origin ugt-lube-monitoring · 2026-11-15
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx

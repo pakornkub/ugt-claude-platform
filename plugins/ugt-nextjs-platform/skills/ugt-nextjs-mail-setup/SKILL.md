@@ -25,6 +25,7 @@ description: >
 | Relay rejects the sender | `SMTP_FROM` is not an address the relay authorises |
 | Links in the email 404 | URL built without the basePath |
 | An approval fails because the mail step threw | send called inside the transaction / outside `try/catch` — mail must never fail the work |
+| `tsc` / `next build` fails in `lib/email.ts`: `Cannot find namespace 'nodemailer'` | unpinned install pulled `nodemailer@10` + `@types/nodemailer@8` — pin both to `^7` (§4.1) |
 
 ## 1. Overview
 
@@ -89,9 +90,15 @@ assembled in code at send time; only the inner prose is stored and editable.
 
 ### 4.1 Dependencies
 
+**Pin major 7 for both — do NOT drop the range.** `lib/email.ts` types its
+attachments as `nodemailer.SendMailOptions['attachments']`; with
+`nodemailer@10` + `@types/nodemailer@8` (what an unpinned install resolves to)
+that namespace is gone and `tsc` fails with `TS2503: Cannot find namespace
+'nodemailer'`.
+
 ```bash
-npm install nodemailer
-npm install -D @types/nodemailer
+npm install nodemailer@^7
+npm install -D @types/nodemailer@^7
 ```
 
 **No shell?** Add these packages to `package.json` by hand at the same ranges and list the commands under "ยังไม่ได้รัน" — `ugt-nextjs-full-setup` §3 *No shell*.
