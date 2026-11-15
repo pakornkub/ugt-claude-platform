@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **design-setup verify: ด่าน "No Radix" ล้มเพราะไฟล์ kit เอง** — ทุกโปรเจคที่ติดตั้ง `ui/responsive-popover.tsx` ได้ ✘ `asChild` → ด่านสแกน idiom ของ Radix บนโค้ดดิบ และ JSDoc ของไฟล์นั้นเขียนว่า "Base UI ไม่มี `asChild`" → สแกนหลังตัดคอมเมนต์ (`stripComments` ย้ายขึ้นเป็น helper กลางใช้ร่วมกับด่าน DataTable id) · origin ugt-lube-monitoring · 2026-11-15
+
 ## 4.88.1 (2026-11-12)
 
 - **kit: `combobox.tsx` / `tiptap-editor.tsx` typecheck ไม่ผ่าน** — `tsc` ล้มในโปรเจคที่ติดตั้งสองชิ้นนี้ → combobox อ้าง `Combobox.Root.OpenChangeEventDetails` ซึ่ง Base UI ไม่มี (ทั้ง 1.6 และ 1.8 ชื่อ `ChangeEventDetails`) · ปุ่ม HTML source ของ tiptap ส่ง `title` ให้ `ToolbarButton` ที่รับ `label` (ปุ่มเลยไม่มี `aria-label`) → แก้ชื่อ type + ส่ง `label` · เจอตอน review หลัง merge 4.88.0 · 2026-11-11 · asset: ugt-nextjs-design-setup/ui/combobox.tsx, ugt-nextjs-design-setup/ui/tiptap-editor.tsx
