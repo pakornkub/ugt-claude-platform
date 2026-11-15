@@ -1,5 +1,10 @@
 # Changelog — ugt-core
 
+## Unreleased
+
+- `ugt-help`: แถวใหม่ (ถัดจากแถว "In progress") — Next.js ที่ `handoff.md` Next ยังมีบรรทัด `/ugt-nextjs-system-test` หรือผู้ใช้บอกว่า admin ทำเสร็จแล้ว → `/ugt-nextjs-system-test` · เพิ่มในรายการ "ต้องสั่งเอง"
+
+
 ## 2.19.1 (2026-11-13)
 
 - `ugt-help` (หลัง code-review + behavior eval ของ 2.19.0): คำตอบบอกขั้นถัดไปไม่เกิน 2 ข้อจริง ห้ามแอบเพิ่มข้อที่ 3 มาในรูปเงื่อนไขหรือหมายเหตุ · รายการ "ทำงานเอง" และ "ต้องสั่งเอง" ให้เหลืออย่างละบรรทัดเดียว (ไม่เกิน 3 อย่าง) ทั้งคำตอบไม่เกินหนึ่งหน้าจอ · แถว `/ugt-context` ใช้กับ Python/PHP ได้ด้วย (ดูจาก `Jenkinsfile`) · ระบุว่า hook เตือน MCP เก่าเป็นของ `ugt-devops-mcp`

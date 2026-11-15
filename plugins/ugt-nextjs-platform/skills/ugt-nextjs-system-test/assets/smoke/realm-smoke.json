@@ -1,0 +1,63 @@
+{
+  "realm": "smoke",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "__PROJECT_NAME__",
+      "name": "__PROJECT_NAME__ (smoke)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "smoke-client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3100/*"],
+      "webOrigins": ["http://localhost:3100"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3100/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "smoke-admin",
+      "email": "smoke-admin@smoke.test",
+      "emailVerified": true,
+      "firstName": "Smoke",
+      "lastName": "Admin",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "Smoke-Pass-1", "temporary": false }]
+    },
+    {
+      "username": "smoke-user1",
+      "email": "smoke-user1@smoke.test",
+      "emailVerified": true,
+      "firstName": "Smoke",
+      "lastName": "User One",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "Smoke-Pass-1", "temporary": false }]
+    },
+    {
+      "username": "smoke-user2",
+      "email": "smoke-user2@smoke.test",
+      "emailVerified": true,
+      "firstName": "Smoke",
+      "lastName": "User Two",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "Smoke-Pass-1", "temporary": false }]
+    },
+    {
+      "username": "smoke-user3",
+      "email": "smoke-user3@smoke.test",
+      "emailVerified": true,
+      "firstName": "Smoke",
+      "lastName": "User Three",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "Smoke-Pass-1", "temporary": false }]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: system-test-live-gates
+plugins: ["../..", "../../../ugt-core"]
+context:
+  scaffold_script: scaffold.sh
+---
+runs: 2
+max_turns: 20
+timeout_seconds: 600
+model: opus
+tags: ["behavior","gates","needs-shell"]
+allowed_tools: ["Read","Glob","Grep","Write","Edit","Skill","Bash"]

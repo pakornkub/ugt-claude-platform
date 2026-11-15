@@ -20,7 +20,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.88.1 | ตัวช่วย 11 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.88.1 | ตัวช่วย 12 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.7 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-devops-mcp` | 0.1.3 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
@@ -55,6 +55,7 @@ context ใหม่ที่อ่านโปรเจคซ้ำ) ส่ว�
 | `ugt-nextjs-mail-setup` | ระบบส่งอีเมลผ่าน relay บริษัท — template แก้ได้จากหน้า admin + โหมดทดสอบที่เมลเข้าตัวเองแทนคนจริง | "ต้องส่งเมลแจ้งเตือน" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-upload-setup` | แนบไฟล์: เก็บบน volume + สแกนไวรัส + ดาวน์โหลดผ่านการตรวจสิทธิ์ทุกครั้ง | "ผู้ใช้ต้องแนบไฟล์" (ตัวเลือกตอนติดตั้ง) |
 | `ugt-nextjs-cicd-setup` | ต่อ Jenkins ให้ตรวจ-ทดสอบ-deploy อัตโนมัติเมื่อ push | งาน CI/CD + แก้ pipeline แดง |
+| `ugt-nextjs-system-test` | **ทดสอบทั้งระบบที่รันจริง** ตาม checklist เดียว (login, สิทธิ์แต่ละ role, ข้อมูล, เมล, ไฟล์แนบ, deploy) แล้วรายงานก่อนแก้ — โหมด container (ระบบจำลองใน Docker: SQL Server + Keycloak + Mailpit + แอปจาก Dockerfile) หรือโหมด live (DB/Keycloak/SMTP ของ dev จริง — เช็ค `.env.local` ก่อน, ผู้ใช้ login เอง) | ตอบคำถามท้าย full-setup ว่า "ทดสอบใน container" (ต้องมี Docker) · หลัง admin ทำ `admin-handoff` เสร็จ — "admin ทำเสร็จแล้ว" |
 | `ugt-nextjs-kit-sync` | เช็คว่าไฟล์ kit (ชุดไฟล์สำเร็จรูปที่ plugin copy เข้าโปรเจค — component, ตัวช่วย, proxy) ตกรุ่นจาก plugin ไหม แล้วเสนอทีละไฟล์ว่าจะทับของเดิม (ถ้าโปรเจคไม่เคยแก้) หรือรวมของสองฝั่ง (ถ้าโปรเจคแก้เอง) | หลัง `/plugin update` ทุกครั้ง |
 | `ugt-nextjs-clean-code` | เขียนโค้ดให้ผ่านเกณฑ์คุณภาพตั้งแต่ครั้งแรก | **ทำงานเองเมื่อแตะไฟล์โค้ด** |
 | `ugt-nextjs-pitfalls` | กับดักที่เคยพังจริงบน production (วันที่เลื่อน, cache, 404) | **ทำงานเองเมื่อแตะไฟล์ที่เสี่ยง** |

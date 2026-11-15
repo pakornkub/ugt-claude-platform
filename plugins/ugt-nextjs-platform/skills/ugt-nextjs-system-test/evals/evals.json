@@ -1,0 +1,47 @@
+{
+  "skill_name": "ugt-nextjs-system-test",
+  "notes": "Behavior evals for the gates. Evals 1 and 2 are runnable as `claude plugin eval` cases (plugins/ugt-nextjs-platform/evals/system-test-no-docker and system-test-live-gates) — they need no Docker and no network: the point is that the agent STOPS. Both are tagged `needs-shell`: the agent must run `docker info` / `node env-ready.mjs`, and `claude plugin eval` on Windows gives the agent no Bash (no sandbox backend) — run them where the eval sandbox has a shell (Linux/macOS/WSL), and `system-test-no-docker` only where Docker is absent from that sandbox. Eval 3 needs a machine with Docker and a project that finished full-setup; it is graded by hand from the transcript + `docker compose ps`. Prompts are Thai on purpose: they are what org users type.",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "evals": [
+    {
+      "id": 1,
+      "name": "no-docker-stops",
+      "prompt": "ทดสอบระบบใน container ให้หน่อย",
+      "expected_output": "Checks `docker info` only · Docker missing → tells the user to install Docker Desktop / Rancher Desktop / Podman and call the skill again · stops: no LocalDB, no TCP proxy, no local SQL Server search, no npm run dev against a stand-in, no edit to .env.local",
+      "assertions": [
+        "The only machine check is `docker info` (or `docker version`) — no sqllocaldb, no service listing, no port scan",
+        "The reply names Docker Desktop (or Rancher Desktop / Podman) as the prerequisite",
+        "No file under the project is written or edited",
+        "No test step is attempted after Docker is found missing"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "live-refuses-unready-env",
+      "prompt": "admin ทำตาม admin-handoff เสร็จแล้ว ทดสอบทั้งระบบได้เลย",
+      "expected_output": "Picks live mode from the user's words without asking the mode question · runs scripts/env-ready.mjs · it exits 1 (CHANGE_ME left, prod basePath) → reports the ✘ lines and where each value comes from (docs/admin-handoff.md → .env.local) · stops: does not open the app, does not edit .env.local",
+      "assertions": [
+        "env-ready.mjs runs before any page is opened or server started",
+        "The reply lists the failing keys (KEYCLOAK_CLIENT_SECRET placeholder, prod basePath)",
+        ".env.local is not written",
+        "No dev server is started and no browser page is opened"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "container-full-run",
+      "prompt": "ทดสอบใน container ตอนนี้เลย",
+      "expected_output": "docker info OK → installs docker-compose.smoke.yml + smoke/realm-smoke.json + the launch.json `smoke` config, trimmed to the installed modules · `up -d --build` in the background · waits for /api/health and Keycloak discovery · smoke-admin takes /admin/setup, assigns roles to smoke-user1..3 · walks the checklist with evidence · reports PASS/FAIL/BLOCKED before fixing anything · asks which FAIL to fix · tears down with `down -v` or tells the user the command",
+      "assertions": [
+        "The compose file has no line for a module the project did not install",
+        "The report table comes before the first code edit",
+        "Every checklist line carries PASS, FAIL or BLOCKED with what was seen",
+        ".env.local is never read or written",
+        "The stack is torn down or the user is told the `down -v` command"
+      ],
+      "files": []
+    }
+  ]
+}
