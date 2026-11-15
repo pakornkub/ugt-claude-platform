@@ -19,6 +19,8 @@ const read = (...s) => readFileSync(p(...s), 'utf8');
 // Root-only lookups here would false-fail exactly those projects.
 const hasIn = (...s) => has(...s) || has('src', ...s);
 const readIn = (...s) => (has(...s) ? read(...s) : read('src', ...s));
+/** Drop block, line and JSX comments — a JSDoc that only MENTIONS an idiom must not trip a scan */
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
 
 /** All .tsx under the app's own source dirs (skips build output and deps) */
 function sourceTsx() {
@@ -128,8 +130,10 @@ check('No Radix anywhere in the project (the kit is Base UI)', () => {
   for (const file of sourceTsx()) {
     const code = readFileSync(file, 'utf8');
     if (/\/\/ lint-ok:radix/.test(code)) continue;
+    // comments stripped: the kit's own responsive-popover.tsx JSDoc says "Base UI ไม่มี `asChild`"
+    const live = stripComments(code);
     for (const [re, why] of idioms) {
-      if (re.test(code)) problems.push(relative(ROOT, file) + ': ' + why);
+      if (re.test(live)) problems.push(relative(ROOT, file) + ': ' + why);
     }
   }
 
@@ -216,7 +220,7 @@ check('layout.tsx wires the agreed font via next/font', () => {
   const problems = [];
   // next/font/google (Inter / Noto_Sans_Thai) or next/font/local files (inter-*.woff2 / noto-sans-thai-*.woff2)
   if (!/Noto_Sans_Thai|noto-sans-thai[^'"]*\.woff2/.test(l)) problems.push('Noto Sans Thai not wired (Noto_Sans_Thai or a noto-sans-thai*.woff2 file)');
-  if (!/Inter|inter[^'"]*\.woff2/.test(l)) problems.push('Inter not wired (Inter or an inter*.woff2 file)');
+  if (!/\bInter\b|inter[^'"]*\.woff2/.test(l)) problems.push('Inter not wired (Inter or an inter*.woff2 file)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
@@ -326,7 +330,6 @@ check('Every <DataTable> passes a unique id (column prefs persist)', () => {
   // raw produced a false ✘ on every project with the full kit (eval run
   // 2026-09-09). Skip the kit dir and strip comments before matching.
   const files = sourceTsx().filter((f) => !/[\\/]components[\\/]ui[\\/]/.test(f));
-  const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
   const missing = [];
   const ids = new Map();
   for (const file of files) {
