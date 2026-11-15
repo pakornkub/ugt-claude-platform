@@ -17,7 +17,7 @@ Last updated: <YYYY-MM-DD>
 
 - Fill in real values in `.env.local`
 - Request from admins: <Keycloak client / Jenkins credentials / SonarQube project — per docs/admin-handoff.md>
-- Run the smoke tests from the `/ugt-nextjs-full-setup` checklist
+- After the admin work: `/ugt-nextjs-system-test` (live mode) — full system test on the real dev DB + Keycloak + SMTP
 
 ## Open Questions
 

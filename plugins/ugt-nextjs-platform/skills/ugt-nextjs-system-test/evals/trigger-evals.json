@@ -1,0 +1,19 @@
+{
+  "purpose": "Trigger-boundary regression set for ugt-nextjs-system-test. S* must route here (test the running system: after setup in containers, or after the admin team finished); N* must NOT — the sharp boundaries are unit tests (normal feature work / test-lint-setup), a red pipeline (cicd-setup), installing the stack (full-setup) and production.",
+  "method": "3 independent judges, randomized order, full skill listing incl. superpowers distractors",
+  "baseline_result": { "date": null, "note": "pending — run at the next release gate" },
+  "queries": {
+    "S1": { "prompt": "admin ทำตาม admin-handoff เสร็จแล้ว ทดสอบระบบให้หน่อย", "expected": "ugt-nextjs-system-test" },
+    "S2": { "prompt": "ทดสอบใน container ตอนนี้เลย", "expected": "ugt-nextjs-system-test" },
+    "S3": { "prompt": "อยากรู้ว่าระบบใช้งานได้จริงไหม login ได้ สิทธิ์ถูก ส่งเมลได้", "expected": "ugt-nextjs-system-test" },
+    "S4": { "prompt": "smoke test ทั้งระบบก่อน merge", "expected": "ugt-nextjs-system-test" },
+    "S5": { "prompt": "admin ส่งค่า DB กับ Keycloak กลับมาแล้ว ลองระบบบน dev ที", "expected": "ugt-nextjs-system-test" },
+    "S6": { "prompt": "เครื่องผมมี Docker แล้ว ลองระบบจำลองทั้งชุดให้ดูหน่อย", "expected": "ugt-nextjs-system-test" },
+    "N1": { "prompt": "เขียน unit test ให้ฟังก์ชันคำนวณคะแนนหน่อย", "expected": "(feature work / tdd — not this skill)" },
+    "N2": { "prompt": "ตั้ง vitest ให้โปรเจคนี้", "expected": "ugt-nextjs-test-lint-setup" },
+    "N3": { "prompt": "Jenkins แดงที่ stage Unit Tests", "expected": "ugt-nextjs-cicd-setup" },
+    "N4": { "prompt": "ทำให้โปรเจคนี้ deploy ได้", "expected": "ugt-nextjs-full-setup" },
+    "N5": { "prompt": "ลองกดบน production ดูหน่อยว่าใช้ได้ไหม", "expected": "(none — refuse prod testing; ask for the dev URL)" },
+    "N6": { "prompt": "ใส่ login SSO ให้หน่อย", "expected": "ugt-nextjs-auth-setup" }
+  }
+}

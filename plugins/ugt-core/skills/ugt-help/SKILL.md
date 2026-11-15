@@ -49,6 +49,7 @@ recommend only skills that are actually listed.
 | Next.js, no `ugt:start` block | `/ugt-nextjs-full-setup` (asks once, installs database → test-lint → design → auth → cicd) |
 | Python / PHP, no `Jenkinsfile` | `/ugt-python-cicd-setup` · `/ugt-php-cicd-setup` |
 | Setup done (`ugt:start` block or `Jenkinsfile`), no `docs/project-context/` | `/ugt-context` |
+| Next.js: `handoff.md` Next waits on the admin team, or the user says the admin work is done | `/ugt-nextjs-system-test` — live mode once the admin values are in `.env.local` (container mode any time Docker is installed) |
 | `handoff.md` has "In progress" | continue that item — quote it |
 | Brief exists, board has unbuilt features | build one feature per session — superpowers: "สร้าง feature X ตาม docs/requirements-brief/NN.md" · mattpocock: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` |
 | Everything present | nothing to set up — just describe the work; end each chunk with `/ugt-handoff` |
@@ -99,6 +100,7 @@ when the user says so.
 - `/ugt-handoff` — end of every work chunk ("จบงานแล้ว", "บันทึกไว้"). Skipping
   it means the next session starts blind.
 - `/ugt-nextjs-kit-sync` — after every `/plugin update`.
+- `/ugt-nextjs-system-test` — after the admin team finishes `docs/admin-handoff.md` (the full system test is required before go-live).
 - `/ugt-model-mode` — change the model preset (default `auto`).
 - `/ugt-contribute` — when a fixed gotcha is true for every project.
 - mattpocock pipeline: every step is typed by the user

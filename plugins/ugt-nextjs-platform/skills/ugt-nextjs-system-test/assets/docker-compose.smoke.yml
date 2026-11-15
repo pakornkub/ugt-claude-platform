@@ -1,0 +1,147 @@
+# Smoke compose — a throwaway copy of the org stack for `ugt-nextjs-system-test`
+# container mode. Local machine only, never deployed, never read by Jenkins.
+#
+#   docker compose -f docker-compose.smoke.yml up -d --build
+#   docker compose -f docker-compose.smoke.yml down -v      # wipes every container + volume
+#
+# Placeholders: __PROJECT_NAME__, __BASE_PATH_DEV__
+# Every value below is a test constant for this stack only — no real secret,
+# never a value from .env.local (this file does not read it; .dockerignore keeps
+# .env.* out of the image).
+#
+# Why the `net` service: Better Auth derives the Keycloak authorize URL (browser)
+# AND the token URL (server) from one KEYCLOAK_ISSUER. The app and Keycloak share
+# `net`'s network namespace, so http://localhost:8180 is Keycloak for the browser
+# on the host and for the app inside its container — one issuer, no hosts-file
+# edit. Keycloak listens on the same port it is published on (8180), so the
+# `iss` claim matches from both sides. `net` owns the namespace so an app
+# restart doesn't cut Keycloak off.
+#
+# Host ports: app 3100 · Keycloak 8180 · Mailpit UI 8125. A port already taken
+# → stop and report it; never change them silently (the realm's redirect URIs
+# and the URLs below must move together).
+name: __PROJECT_NAME__-smoke
+
+services:
+  net:
+    image: alpine:3.20
+    command: ['sleep', 'infinity']
+    ports:
+      - '3100:3100' # app — PORT=3100 inside too, so BETTER_AUTH_URL works for server-side self-fetches
+      - '8180:8180' # Keycloak
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: Smoke_Passw0rd!
+      MSSQL_COLLATION: Thai_CI_AS # org collation — a Latin1 default hides Thai sort/compare bugs
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "Smoke_Passw0rd!" -Q "SELECT 1" || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver: { condition: service_healthy }
+    # retries: SQL Server can restart once after first-boot setup even after the
+    # healthcheck passed ($$ = a literal $ for the shell, not compose interpolation)
+    entrypoint:
+      - /bin/bash
+      - -c
+      - >-
+        for i in $$(seq 1 30); do
+        /opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P 'Smoke_Passw0rd!'
+        -Q "IF DB_ID('smoke') IS NULL CREATE DATABASE smoke" && exit 0;
+        sleep 2; done; exit 1
+    restart: 'no'
+
+  # [DB] migrate + seed with the same builder image Jenkins uses for migrate.
+  # Project without a seed → drop `&& npx prisma db seed`. No database → delete
+  # sqlserver/db-init/migrate, the DATABASE_URL lines and `migrate` from
+  # app.depends_on. Build args = app's, so both share one cached `next build`.
+  migrate:
+    build:
+      context: .
+      target: builder
+      args:
+        NEXT_PUBLIC_BASE_PATH: __BASE_PATH_DEV__
+        NEXT_PUBLIC_APP_URL: http://localhost:3100__BASE_PATH_DEV__
+        NEXT_DEPLOYMENT_ID: smoke
+    depends_on:
+      db-init: { condition: service_completed_successfully }
+    environment:
+      DATABASE_URL: sqlserver://sqlserver:1433;database=smoke;user=sa;password=Smoke_Passw0rd!;encrypt=true;trustServerCertificate=true
+      SKIP_ENV_VALIDATION: '1'
+    command: ['sh', '-c', 'npx prisma migrate deploy && npx prisma db seed']
+    restart: 'no'
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    network_mode: service:net
+    depends_on: [net]
+    command: ['start-dev', '--import-realm', '--http-port=8180']
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    volumes:
+      - ./smoke/realm-smoke.json:/opt/keycloak/data/import/realm-smoke.json:ro
+
+  mailpit: # [MAIL] catches every mail; read it at http://localhost:8125
+    image: axllent/mailpit:v1.21
+    ports:
+      - '8125:8025'
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_BASE_PATH: __BASE_PATH_DEV__
+        NEXT_PUBLIC_APP_URL: http://localhost:3100__BASE_PATH_DEV__
+        NEXT_DEPLOYMENT_ID: smoke
+    network_mode: service:net
+    depends_on:
+      net: { condition: service_started }
+      migrate: { condition: service_completed_successfully }
+      keycloak: { condition: service_started }
+    # [UPLOAD] files land in a volume `down -v` removes
+    volumes:
+      - storage:/app/storage
+    environment:
+      # Same keys as docker-compose.dev.yml `environment:` — copy any project
+      # line from its section 6 here with a smoke value. Keep the [MODULE] tags:
+      # a module the project did not install loses its lines.
+      NODE_ENV: production
+      PORT: '3100'
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      CRON_SECRET: smoke-cron-secret # [CRON]
+      DATABASE_URL: sqlserver://sqlserver:1433;database=smoke;user=sa;password=Smoke_Passw0rd!;encrypt=true;trustServerCertificate=true # [DB]
+      BETTER_AUTH_SECRET: smoke-secret-not-for-any-real-environment-000 # [AUTH]
+      BETTER_AUTH_URL: http://localhost:3100 # [AUTH]
+      BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3100 # [AUTH]
+      ORG_EMAIL_DOMAINS: smoke.test # [AUTH] the realm's users are @smoke.test
+      KEYCLOAK_ISSUER: http://localhost:8180/realms/smoke # [AUTH: SSO]
+      KEYCLOAK_CLIENT_ID: __PROJECT_NAME__ # [AUTH: SSO]
+      KEYCLOAK_CLIENT_SECRET: smoke-client-secret # [AUTH: SSO]
+      SMTP_HOST: mailpit # [MAIL]
+      SMTP_PORT: '1025' # [MAIL]
+      SMTP_SECURE: 'false' # [MAIL]
+      SMTP_FROM: noreply@smoke.test # [MAIL]
+      STORAGE_ROOT: /app/storage # [UPLOAD]
+      UPLOAD_MAX_BYTES: '26214400' # [UPLOAD]
+      # 6. project-specific — smoke values here
+    # Overrides the image's HEALTHCHECK, which probes port 3000 + the PROD basePath
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3100__BASE_PATH_DEV__/api/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  storage:

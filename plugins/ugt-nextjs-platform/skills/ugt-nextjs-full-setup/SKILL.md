@@ -23,7 +23,8 @@ description: >
 
 Projects users build with AI usually have no login, no database, no CI. This
 skill is the entry point: inspect the stack → ask what to install → invoke the
-child skills in the correct order → summarize + smoke test.
+child skills in the correct order → summarize + one question: test in
+containers now (`ugt-nextjs-system-test`) or wait for the admin team.
 
 | Child skill | Installs |
 | --- | --- |
@@ -395,8 +396,18 @@ How:
    `.env.local`. If CI was NOT installed but Auth was, render the same
    template with only table G (Keycloak) + its "ส่งกลับ" rows into `docs/admin-handoff.md`
    (SSO needs a client either way).
-3. Attach a **smoke-test checklist** — the Verification Checklist below,
-   trimmed to what was actually installed.
+3. **Testing the running system is `ugt-nextjs-system-test`'s job, and it
+   starts only on the user's answer.** Never test on your own here — not on
+   whatever database the machine happens to have, not against `CHANGE_ME`
+   values, not by editing `.env.local`. End with exactly one question
+   (AskUserQuestion when available), nothing started before the answer:
+   - **ทดสอบใน container ตอนนี้ (ต้องมี Docker)** → invoke
+     `ugt-nextjs-system-test` in `container` mode (its gates take over: Docker
+     missing = stop with the install line).
+   - **ยังไม่ทดสอบ — รอ admin** → write under `## Next` in
+     `.claude/state/handoff.md`: "รอ admin ทำ `docs/admin-handoff.md` → เติม
+     `.env.local` → `/ugt-nextjs-system-test` (live)" — the full system test
+     after the admin work is not optional, it is the next step.
 
    **Items 2–3 go in the closing chat message itself**, even when you also wrote a
    finish-guide doc (e.g. because nothing could be run here). "See docs/…" alone does
@@ -404,9 +415,11 @@ How:
    sections, in this order (drop only one whose module was not installed):
    1. ไฟล์ที่เพิ่ม/แก้ (by module) · 2. env vars ที่ต้องเติมค่าจริง · 3. ส่งต่อ admin
    (`docs/admin-handoff.md`) · 4. ผู้ดูแลคนแรก — `/admin/setup` sentence (Auth) ·
-   5. **Smoke test** — the trimmed checklist · 6. ยังไม่ได้รัน — every command this
-   session could not run, as commands for the user (No shell: §3 — incl. the
-   packages added to `package.json` by hand and every `npx shadcn` component list)
+   5. ยังไม่ได้รัน — every command this session could not run, as commands for
+   the user (No shell: §3 — incl. the packages added to `package.json` by hand
+   and every `npx shadcn` component list) · 6. **ทดสอบระบบ** — what
+   `ugt-nextjs-system-test` will check (one line per installed module), then the
+   one question above, last
 4. **mattpocock bundle**: tell the user to run `/setup-matt-pocock-skills`
    themselves next (it is user-invoked only — this skill cannot run it, and
    §2.5 forbids trying). It writes `docs/agents/*.md` and its own
@@ -425,6 +438,7 @@ How:
 | Always Database → Quality → Design → Auth → CI | Install auth before a DB exists / before the design kit (its admin pages render with kit DataTable) / CI before test scripts exist |
 | Not Next.js → say it plainly | Adapt the assets to another stack yourself |
 | Summarize files + admin requests at the end | Finish silently with no checklist |
+| End with the one test question (§5.3) — container now, or wait for the admin | Smoke-test on your own: a LocalDB / proxy / stand-in DB, `CHANGE_ME` values, an edited `.env.local` |
 | Edit `CLAUDE.md` only inside the `ugt:start/end` block | Rewrite the whole `CLAUDE.md` (team content lost) |
 | Leave existing `.claude/state/` untouched | Reset team state because it "looks like a skeleton" |
 | Install the harness every time (step 4) | Install only code and stop — knowledge dies with the session |
@@ -432,8 +446,10 @@ How:
 ## Verification Checklist
 
 Every installed module has its own `verify.mjs`; this skill has one too, for
-the harness layer. Run them all, then walk the rest of this list — the last
-four items are the smoke test §5 Close out hands to the user:
+the harness layer. Run them all, then walk the rest of this list — the
+login, `/admin/setup` and pipeline items are checked in the running app by
+`ugt-nextjs-system-test` (container mode now, or live mode once the admin work
+is done — §5.3), never by this skill:
 
 ```bash
 node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module
@@ -446,6 +462,8 @@ node <skill-dir>/scripts/verify.mjs      # cwd = project root, once per module
 - [ ] `docs/admin-handoff.md` exists with no `__...__` left, and the user has
       been told to forward it (it is a FILE, not a chat message)
 - [ ] `npm run build` passes
+- [ ] the close-out ended with the one test question (§5.3) and started no
+      test before the answer; "รอ admin" → the line is in `handoff.md` `## Next`
 - [ ] preserve mode (§2 Q0): DESIGN.md §10 records ยึดของเดิม and
       `globals.css --primary` is the measured value, not org indigo (design
       verify) · no `<AdminNav>` rendered beside the project's own shell (auth

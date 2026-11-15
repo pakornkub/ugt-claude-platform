@@ -102,6 +102,7 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 | Build a feature / fix a bug | Don't auto-invoke any mattpocock skill — they are user-invoked. Read the relevant `docs/project-context/` files, then do the work directly with tests alongside; when the requirement is ambiguous, suggest `/grill-with-docs`. Full sequence and detours (prototype/triage/wayfinder) are at `/ask-matt` |
 <!-- [/PIPELINE:mattpocock] -->
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
+| Test the whole running system — after setup, or once the admin team is done | `/ugt-nextjs-system-test` — container mode (needs Docker) or live mode (dev only); it reports before fixing anything |
 | Finish work / hand off the session | `/ugt-handoff` |
 
 <!-- [PIPELINE:superpowers] -->

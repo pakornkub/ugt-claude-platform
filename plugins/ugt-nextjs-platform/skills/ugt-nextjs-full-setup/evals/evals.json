@@ -6,7 +6,7 @@
       "id": 1,
       "name": "vague-make-it-deployable",
       "prompt": "โปรเจคนี้ผมทำเองกับ ai จนใช้งานได้ในเครื่องแล้ว แต่ยังเอาขึ้น server จริงไม่ได้ ต้องทำอะไรบ้างครับ ถ้าจะให้ทีมใช้งานจริง",
-      "expected_output": "Inspects the project first, then asks one combined interview batch (modules + shared identity + selected child-skill questions), installs in order Database → Quality → Auth → CI plus the harness layer, closes with verify + summary + smoke tests",
+      "expected_output": "Inspects the project first, then asks one combined interview batch (modules + shared identity + selected child-skill questions), installs in order Database → Quality → Auth → CI plus the harness layer, closes with verify + summary + one question: test in containers now (ugt-nextjs-system-test) or wait for the admin team",
       "assertions": [
         "Interview questions are combined into a single message, not asked one-by-one over multiple rounds",
         "Questions cover module selection, project name, basePath, ports, URLs",
@@ -16,7 +16,7 @@
         "node scripts/verify.mjs of ugt-nextjs-full-setup exits 0",
         "Runs verify.mjs for every installed module and reports the results",
         "Closing summary lists env vars needing real values and items to request from admins",
-        "Attaches a smoke-test checklist matching what was actually installed"
+        "Ends with ONE question — test in containers now (needs Docker) or wait for the admin — and starts no test of its own before the answer"
       ],
       "files": [],
       "baseline_result_2026-09-13": {
