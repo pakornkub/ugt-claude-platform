@@ -14,8 +14,9 @@ export const basicAuth = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`)
 // Node's fetch throws a bare "fetch failed" — the real reason (TLS, DNS, refused) is only on err.cause
 export function fetchError(err, url) {
   const why = err.cause?.code ?? err.cause?.message;
-  const tls = /CERT|SIGNATURE|SELF_SIGNED/.test(why ?? '')
-    ? ' — server cert not trusted (often: server omits its intermediate cert). Plugin sets --use-system-ca (needs Node >= 22.15) so certs in the Windows store count; else NODE_EXTRA_CA_CERTS=<intermediate+root .pem>, or have the server send its full chain'
+  // chain-trust failures only — hostname mismatch / expiry have their own self-explanatory codes
+  const tls = /^(UNABLE_TO_VERIFY_LEAF_SIGNATURE|UNABLE_TO_GET_ISSUER_CERT(_LOCALLY)?|SELF_SIGNED_CERT_IN_CHAIN|DEPTH_ZERO_SELF_SIGNED_CERT)$/.test(why ?? '')
+    ? ' — cert chain not trusted (often: server omits its intermediate cert). Plugin sets NODE_USE_SYSTEM_CA=1 so the OS cert store counts (Node >= 22.15); else NODE_EXTRA_CA_CERTS=<intermediate+root .pem>, or have the server send its full chain'
     : '';
   return new Error(`${err.message}${why ? ` (${why})` : ''} — ${url.origin}${tls}`);
 }

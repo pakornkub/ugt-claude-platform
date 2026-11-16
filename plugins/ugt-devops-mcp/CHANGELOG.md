@@ -1,5 +1,14 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.5 (2026-11-17)
+
+แก้ตามผล code review หลัง merge 0.1.4:
+
+- **`NODE_OPTIONS=--use-system-ca` → `NODE_USE_SYSTEM_CA=1`**: flag ที่ใส่ใน `NODE_OPTIONS` ทำให้ Node ที่ไม่รู้จัก flag ปฏิเสธไม่ยอมเปิดเลย (`is not allowed in NODE_OPTIONS`, exit 9) คือทั้งสอง server จะพังบน Node < 22.15 รวมถึง SonarQube ที่เป็น http และไม่ต้องใช้ CA ด้วย ส่วนตัวแปร env ที่ Node ไม่รู้จัก จะถูกข้ามไปเฉย ๆ · อีกเรื่องคือ `NODE_OPTIONS` ของ plugin ไปทับค่า `NODE_OPTIONS` เดิมของ user (เช่น `--require` ของ proxy agent) · ทดสอบกับ Node 22.22 แล้ว: ปิดค่าที่ Claude Code ส่งมา แล้วตั้ง `NODE_USE_SYSTEM_CA=1` อย่างเดียว ได้ 200 จาก `ugtweb`
+- **hint เรื่อง cert แสดงเฉพาะกรณีที่ chain ไม่ trust** (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`, `UNABLE_TO_GET_ISSUER_CERT(_LOCALLY)`, `SELF_SIGNED_CERT_IN_CHAIN`, `DEPTH_ZERO_SELF_SIGNED_CERT`) · เดิม regex `CERT` ไปจับ `ERR_TLS_CERT_ALTNAME_INVALID`/`CERT_HAS_EXPIRED` ด้วย แล้วแนะนำผิดทาง · ข้อความเปลี่ยนจาก "Windows store" เป็น "OS cert store" (macOS ใช้ Keychain)
+- `package.json`/`package-lock.json` ค้างที่ 0.1.0 → 0.1.5 · test ใหม่ยืนยันว่า `getJson` ห่อ error ที่ `fetch` โยนมาจริง
+- **ยังไม่แก้:** ถ้า Windows เครื่องไหนไม่มี RapidSSL intermediate ใน store ก็ยังต่อ `ugtweb` ไม่ได้ ต้องแก้ที่ต้นเหตุคือให้ reverse proxy ส่ง full chain · ส่วน Claude Code ส่ง `NODE_USE_SYSTEM_CA=1` มาอยู่แล้วหรือไม่ (เครื่อง dev ส่ง) ทำให้ 0.1.4/0.1.5 อาจไม่ได้เปลี่ยนอะไรบนเครื่องที่ส่งมาอยู่แล้ว ต้องรอคำสั่งวินิจฉัยจากเครื่อง user
+
 ## 0.1.4 (2026-11-16)
 
 - **Jenkins เรียกไม่ได้บนเครื่อง user ทั้งที่ `/mcp` ขึ้น connected** — connected แปลว่าแค่โปรเซสเปิดขึ้นได้ (ตอนเปิดยังไม่ได้เรียก server) ทุก tool ตอบ `fetch failed` · สาเหตุจริง: `ugtweb.ube.co.th` ส่งมาแค่ cert ใบ leaf (`*.ube.co.th`) **ไม่ส่ง intermediate** `RapidSSL TLS RSA CA G1` (openssl: `unable to verify the first certificate`) · Node ใช้แค่ root ที่ bundle มาเลยต่อ chain ไม่ได้ → `UNABLE_TO_VERIFY_LEAF_SIGNATURE` · เครื่อง dev ผ่านตอน pilot เพราะ Claude Code ส่ง `NODE_USE_SYSTEM_CA=1` มาให้ child process และ Windows cache intermediate ไว้ใน `CurrentUserCA` แล้ว · แก้: ใส่ `NODE_OPTIONS=--use-system-ca` ใน env ของทั้งสอง server ใน `plugin.json` ให้ Node อ่าน cert store ของ Windows เอง (ทดสอบแล้ว: ปิด `NODE_USE_SYSTEM_CA` → fail · ใส่ flag → 200) · **ต้องใช้ Node ≥ 22.15**: Node เก่ากว่านี้ไม่รู้จัก flag ทำให้ server เปิดไม่ขึ้น · **ยังเหลือ:** ถ้าเครื่องไหนไม่มี intermediate ใน store จะยังพัง ต้องแก้ที่ต้นเหตุคือให้ admin ตั้ง reverse proxy ของ `ugtweb` ให้ส่ง full chain
