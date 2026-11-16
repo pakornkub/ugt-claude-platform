@@ -269,14 +269,15 @@ check('Storage binds under /home/docker02/appdata (no named volume) + no __*__ l
 });
 
 // [SWEEP] opt-out (SKILL.md §3 Q4 "เก็บตลอด"): installed = the route exists, or
-// jobs.crontab already schedules it (then a missing route is the bug).
+// the compose cron service already schedules it (then a missing route is the bug).
 const SWEEP = join('app', 'api', 'cron', 'attachments-sweep', 'route.ts');
 check('[SWEEP] retention sweep route is cron-guarded', () => {
-  // the prod compose cron service runs jobs.crontab (cicd references/scheduled-jobs.md) — never a host crontab
-  const scheduled = has('jobs.crontab') && /api\/cron\/attachments-sweep['"]/.test(read('jobs.crontab').replace(/^\s*#.*$/gm, ''));
+  // the prod compose `cron` service holds the crontab (cicd references/scheduled-jobs.md) — never a host crontab
+  const prod = has('docker-compose.yml') ? read('docker-compose.yml').split('\n').filter((l) => !l.trim().startsWith('#')).join('\n') : '';
+  const scheduled = /\bcrond\b/.test(prod) && /\/api\/cron\/attachments-sweep(?![\w-])/.test(prod);
   if (!has(SWEEP)) {
     return scheduled
-      ? { ok: false, msg: `jobs.crontab schedules attachments-sweep but ${SWEEP} is missing — every cron run 404s` }
+      ? { ok: false, msg: `docker-compose.yml cron service schedules attachments-sweep but ${SWEEP} is missing — every cron run 404s` }
       : { ok: 'warn', msg: 'no retention sweep — soft-deleted files are never removed (fine only if §3 Q4 = "เก็บตลอด", recorded in decisions)' };
   }
   const src = code(SWEEP);
@@ -289,7 +290,7 @@ check('[SWEEP] retention sweep route is cron-guarded', () => {
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
     if (!/^\s*CRON_SECRET\s*:/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — every cron call answers 401`);
   }
-  if (!scheduled) problems.push('jobs.crontab has no attachments-sweep line — the compose cron service never calls it (cicd references/scheduled-jobs.md)');
+  if (!scheduled) problems.push('the docker-compose.yml cron service has no attachments-sweep line — nothing ever calls the route (cicd references/scheduled-jobs.md)');
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 

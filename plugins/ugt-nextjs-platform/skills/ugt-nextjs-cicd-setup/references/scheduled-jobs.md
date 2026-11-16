@@ -7,8 +7,7 @@ line is invisible to the repo, does not move with a redeploy to another host, an
 admin to edit a server for every job change.
 
 The standalone image holds no scripts or `tsx`, so the job body lives in the app as a Route
-Handler and the cron service calls it over `proxy-network` with `node` (which the image always
-has) — `CRON_SECRET` never leaves the containers and nginx is not in the path.
+Handler; the cron service only calls it over `proxy-network`, and nginx is not in the path.
 
 ```ts
 // app/api/cron/audit-retention/route.ts — one route per job, POST only
@@ -38,85 +37,74 @@ export async function POST(request: Request) {
 - The reverse proxy blocks `<basePath>/api/cron/` from outside (admin handoff section H —
   in words, the admin writes the entry) — the bearer check is the second wall, not the only one
 - `CRON_SECRET` (≥ 32 chars, `openssl rand -base64 32`) lives in `.env.example`
-  section 1, `lib/env.ts` (`z.string().min(32).optional()`) and the compose
-  `[CRON]` lines — different value in prod and dev
+  section 1, `lib/env.ts` (`z.string().min(32).optional()`) and the app's compose
+  `[CRON]` line — different value in prod and dev
 - **Prod only**: the `cron` service exists in `docker-compose.yml` only; on dev call the
-  route by hand when testing (`docker exec __PROJECT_NAME__-dev node -e "fetch(…)"` with the
-  same body as the crontab line below, against `127.0.0.1:3000__BASE_PATH_DEV__`)
+  route by hand when testing:
+  `docker exec __PROJECT_NAME__-dev node -e "fetch('http://127.0.0.1:3000__BASE_PATH_DEV__/api/cron/<job>',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(async r=>console.log(r.status,await r.text()))"`
 - Forbidden: host crontab lines, `node-cron` / `node-schedule` / `setInterval` loops in the app
   (every container restart or second replica double-runs them, nobody sees
   them in the handoff), SQL Agent jobs, Jenkins timed builds for app work
 
-## The three pieces (all tagged `[CRON]` in the cicd assets)
+## The cron service (`[CRON]` in the `docker-compose.yml` asset)
 
-The Dockerfile and `docker-compose.yml` assets already carry the blocks below, tagged
-`[CRON]` — keep them when the project has jobs, delete them when it has none.
-
-**Dockerfile** — runner stage, right after the `addgroup`/`adduser` line (still root, and before
-the `COPY --from=builder` lines so the download stays cached).
-Pin + SHA1 from the release notes of `supercronic-linux-amd64`; Alpine has no
-`tzdata`, without it `TZ` is ignored and the schedule runs in UTC. No comment at
-the end of an `ARG` line (a Dockerfile has no inline comments):
-
-```dockerfile
-ARG SUPERCRONIC_VERSION=v0.2.49
-ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68
-RUN apk add --no-cache tzdata \
- && wget -qO /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" \
- && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
- && chmod +x /usr/local/bin/supercronic
-COPY --chown=nextjs:nodejs jobs.crontab ./
-# a broken crontab fails the build — Jenkins polls only the app container, so it would deploy green
-RUN supercronic -test /app/jobs.crontab
-```
-
-(The docker host needs `github.com` and `release-assets.githubusercontent.com` — where the
-release download redirects — at build time.)
-
-**`jobs.crontab`** at the repo root — one line per job; calls the app by its container name;
-output goes to `docker logs __PROJECT_NAME__-cron`:
-
-```
-# 02:00 Asia/Bangkok (the service TZ)
-0 2 * * * node -e "fetch('http://__PROJECT_NAME__:3000__BASE_PATH_PROD__/api/cron/audit-retention',{method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET},signal:AbortSignal.timeout(600000)}).then(async r=>{console.log(r.status,await r.text());process.exit(r.ok?0:1)},e=>{console.error(e);process.exit(1)})"
-```
-
-- `node -e` + `fetch` reads `CRON_SECRET` from the cron container's own environment — the
-  secret is never on a command line
-- Non-2xx → exit 1, and status + body land in the cron container's log
-
-**`docker-compose.yml` only** — never `docker-compose.dev.yml` (the job would run in
-both environments; `verify.mjs` fails it):
+Same shape as `ugt-hrms` runs in production: plain `alpine` with busybox `crond`, the
+crontab written at start-up from the service's own `command:`. No Dockerfile change, no
+extra file in the repo, nothing downloaded at build time. **`docker-compose.yml` only** —
+never `docker-compose.dev.yml` (the job would run in both environments; `verify.mjs` fails it):
 
 ```yaml
   cron:
-    image: __PROJECT_NAME__:latest
-    pull_policy: never
+    image: alpine:3.20
     container_name: __PROJECT_NAME__-cron
     restart: unless-stopped
-    command: ['supercronic', '/app/jobs.crontab']
+    depends_on:
+      - app
     networks:
-      - proxy-network # reaches the app as http://__PROJECT_NAME__:3000
+      - proxy-network
     environment:
-      TZ: Asia/Bangkok
-      CRON_SECRET: ${CRON_SECRET}
-    healthcheck:
-      disable: true # the image HEALTHCHECK probes a web server this service does not run
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 128M
+      TZ: ICT-7
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat > /etc/crontabs/root <<'CRONTAB'
+        0 2 * * * wget -qO- -T 600 --post-data= --header="Authorization: Bearer ${CRON_SECRET}" http://__PROJECT_NAME__:3000__BASE_PATH_PROD__/api/cron/audit-retention >/proc/1/fd/1 2>&1 && echo " [cron] audit-retention ok" >/proc/1/fd/1 || echo "[cron] audit-retention FAILED" >/proc/1/fd/1
+        CRONTAB
+        exec crond -f -l 8
 ```
 
-- The app keeps `CRON_SECRET` too (the route checks it) · Jenkinsfile unchanged
-  (`up -d` starts both, the health poll watches the app only)
-- The work runs in the app container, so a deploy during a job kills it, and supercronic
-  does not re-run a missed slot — keep jobs idempotent and don't push `main` at job time
-- Logs: `docker logs __PROJECT_NAME__-cron` (status + body per run) · the job's own
+(`logging` + `deploy.resources` as in the asset.) One crontab line per route under
+`app/api/cron/` — `verify.mjs` matches them. Why each piece looks the way it does:
+
+| Piece | Why |
+| --- | --- |
+| Crontab written by `command:` | A bind-mounted file would vanish under a restart — Jenkins runs `cleanWs()` after every build |
+| `${CRON_SECRET}` filled in by **compose** | busybox `crond` runs jobs with a minimal env of its own, so the container env never reaches the job. Compose reads it from the deploy `.env` (the app has the same value). Keep `crond -l 8`: a chattier level logs every command, token included |
+| `http://__PROJECT_NAME__:3000…` (container name) | Every org project names its service `app` on the shared `proxy-network` — `http://app:3000` can resolve to another project's container. The container name is unique |
+| `TZ: ICT-7` | A POSIX zone string (UTC+7) — musl understands it without `tzdata`, so the container installs nothing at start. The schedule above is Bangkok time |
+| `wget -qO- -T 600 --post-data=` | busybox wget: POST with an empty body, 10-minute read timeout, exit ≠ 0 on any non-2xx |
+| `>/proc/1/fd/1` + `ok` / `FAILED` | Job output goes to crond's stdout = `docker logs __PROJECT_NAME__-cron` — otherwise a 401/500 leaves no trace |
+| `depends_on: app` | Starts after the app; Jenkinsfile unchanged (`up -d` starts both, the health poll watches the app only) |
+
+- Changing a schedule = edit the line in `docker-compose.yml` and push — Jenkins redeploys it
+- The work runs in the app container, so a deploy during a job kills it, and crond does not
+  re-run a missed slot — keep jobs idempotent and don't push `main` at job time (or use the
+  hourly pattern below)
+- Logs: `docker logs __PROJECT_NAME__-cron` (body + ok/FAILED per run) · the job's own
   `console.log` stays in the app's `docker logs`
+
+## Option: hourly tick + the route decides (`ugt-hrms` `lib/services/cron-schedule.ts`)
+
+Default above = one exact time per job. When a missed run matters (a deploy at 02:00 must
+not cost a day) or users must change the run time from the app, use the pattern `ugt-hrms`
+ships instead: every crontab line fires **every hour** (`0 * * * *`, staggered minutes per
+job), and each route decides whether this tick does the work:
+
+- the run time lives in the database (an admin setting), not in the crontab
+- the route compares "now" with that hour and with its own last run — the `ActivityLogs`
+  row the job writes anyway is the "already ran this period" marker, so nothing new is stored
+- catch-up, not on-the-dot: once the hour has passed, any later tick of the same period runs it
+
+The cost is a small pure gate per route (`isCronDue({ now, runAtHour, lastRunAt, periodStart })`,
+unit-tested) — pick it per job, not for the whole project.

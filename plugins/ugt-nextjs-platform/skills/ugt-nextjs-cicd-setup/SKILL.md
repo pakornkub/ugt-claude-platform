@@ -60,7 +60,7 @@ Skill layout:
 | `references/jenkins-project-setup.md` | what the admin repeats per project (credentials/job config/webhook/dev reverse proxy) |
 | `references/sonarqube-setup.md` | creating projects, tokens, Quality Gate thresholds, suppression strategy |
 | `references/docker-deploy.md` | two-image deploy, migrate-then-deploy, health polling, build-arg rule, compose, reverse proxy |
-| `references/scheduled-jobs.md` | `cron` service in the prod compose (supercronic + `jobs.crontab`) → `POST /api/cron/<job>` + `CRON_SECRET` — never the host crontab |
+| `references/scheduled-jobs.md` | `cron` service in the prod compose (alpine + busybox crond, crontab in the service `command:`) → `POST /api/cron/<job>` + `CRON_SECRET` — never the host crontab |
 | `references/version-skew.md` | `deploymentId` ← `NEXT_DEPLOYMENT_ID` build arg — a tab left open across a deploy |
 | `references/external-config-handoff.md` | the three docs above, pulled into **one table** with this project's real substituted names — what actually gets handed to the admin |
 
@@ -245,11 +245,10 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
   `.env.example` section 1 (real value ≥ 32 chars in `.env`/`.env.dev`, different per env) ·
   `lib/env.ts`: `CRON_SECRET: z.string().min(32).optional()` in `server` **and**
   `CRON_SECRET: process.env.CRON_SECRET` in `runtimeEnv` · one `app/api/cron/<job>/route.ts`
-  per job + one line per job in `jobs.crontab` at the repo root (`references/scheduled-jobs.md`) ·
-  keep the `[CRON]` blocks of the Dockerfile (supercronic) and `docker-compose.yml` (`cron`
-  service — **never** in `docker-compose.dev.yml`) · handoff: the `[CRON]` note + the
-  `/api/cron/` bullet in H. **No jobs** → delete every `[CRON]` block (Dockerfile too — its
-  `COPY jobs.crontab` fails the build without the file)
+  per job + one crontab line per job in the `cron` service of `docker-compose.yml` (replace the
+  asset's `__JOB__` line; schedule in Bangkok time — `references/scheduled-jobs.md`) — **never**
+  in `docker-compose.dev.yml` · handoff: the `[CRON]` note + the `/api/cron/` bullet in H.
+  **No jobs** → delete the `[CRON]` service and lines
 - No basePath → basePath = empty, health path = `/api/health`
 - Check `package.json` has the scripts the pipeline calls: `lint`,
   `format:check`, `test:coverage`, `build` — add or adjust the stage if missing
@@ -343,7 +342,7 @@ Checklist §6
 | `.env` / `.env.dev` local, gitignored, mirror the real Jenkins credential | Committing either — same as `.env.local`, they hold real secrets |
 | `NODE_TLS_REJECT_UNAUTHORIZED: '0'` always on in both compose files + `.env.example`/`.env.local` section 1 (org standard, closed intranet) | Removing it, or moving it into the Jenkins Secret File — it is fixed infra, not a per-env secret |
 | compose `environment:` = the asset's fixed list, same order as `.env.example`; unused modules stay commented | Ad-hoc keys in a project-specific order — every project must read the same |
-| Scheduled jobs = the `cron` service in `docker-compose.yml` (supercronic + `jobs.crontab`) → `POST /api/cron/<job>` + `CRON_SECRET` — deploys with the app (`references/scheduled-jobs.md`) | Host crontab lines, `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
+| Scheduled jobs = the `cron` service in `docker-compose.yml` (alpine + busybox crond, app called by container name) → `POST /api/cron/<job>` + `CRON_SECRET` — deploys with the app (`references/scheduled-jobs.md`) | Host crontab lines, `node-cron` / `setInterval` in the app, SQL Agent jobs, Jenkins timers for app work |
 | Migrate before `compose up` — fail = no deploy | Deploy first, migrate later |
 | `deploymentId` in next.config + `NEXT_DEPLOYMENT_ID=${deployId}` build arg on **both** `docker build` commands (`references/version-skew.md`) | Ship without it — every redeploy breaks forms already open in a browser tab |
 | `disableConcurrentBuilds()` in `options {}` — the second push queues behind the first | Let two builds of one job migrate + `compose up` the same container together |

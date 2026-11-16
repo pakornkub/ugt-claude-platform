@@ -191,9 +191,9 @@ snippet (clamav service, `start_period` 5 นาที, persisted signature DB,
 เปิด virus scan ตาม §3 Q5 (default: ไม่เอา).
 **[SWEEP]** uncomment `# CRON_SECRET: ${CRON_SECRET}  # [CRON]` in **both**
 compose files (fixed list, section 1 — never move it or add a key), or every
-cron call answers 401 · keep (or restore from the cicd assets) the `[CRON]` blocks —
-supercronic in the Dockerfile + the `cron` service in `docker-compose.yml` only — and
-add the sweep line to `jobs.crontab` (cicd `references/scheduled-jobs.md`; schedule =
+cron call answers 401 · keep (or restore from the cicd `docker-compose.yml` asset) the
+`[CRON]` `cron` service — `docker-compose.yml` only — and add the sweep's crontab line to
+it (cicd `references/scheduled-jobs.md`: container name, never `http://app`; schedule =
 §3 Q4, default `0 2 * * *`).
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
@@ -269,7 +269,7 @@ state is consistent instead (no `scanBuffer` call, rows stored `'unscanned'`,
 download guard `=== 'infected'`) and warns about a leftover clamav service.
 Paths resolve at the root first, then under `src/`. The `[SWEEP]` check fails
 when the route skips `CRON_SECRET`/`POST`, `RETENTION_DAYS` < 7, compose still
-comments `CRON_SECRET`, or `jobs.crontab` and route disagree; no route at all only warns.
+comments `CRON_SECRET`, or the compose `cron` service and route disagree; no route at all only warns.
 
 Then by hand — these are the ones that catch real breakage:
 

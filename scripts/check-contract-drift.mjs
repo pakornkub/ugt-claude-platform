@@ -94,8 +94,8 @@ const CHECKS = [
   {
     name: 'Scheduled jobs: cron service in the prod compose, never a host crontab (2026-11-16)',
     files: {
-      [`${CORE}/contracts/cicd.md`]: [/cron service in the project's\s+own prod compose/, /never a host crontab/, /No in-app scheduler/],
-      [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/cron service in the prod compose/, /No host crontab/, /in-app scheduler/],
+      [`${CORE}/contracts/cicd.md`]: [/cron service in the project's\s+own prod compose/, /never a host crontab/, /No in-app scheduler/, /\*\*container name\*\*/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/cron service in the prod compose/, /No host crontab/, /in-app scheduler/, /never `http:\/\/app`/],
     },
   },
   {

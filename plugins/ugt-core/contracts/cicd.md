@@ -106,8 +106,9 @@ org path, never a named or anonymous Docker volume:
 ## Scheduled jobs = a cron service in the project's own prod compose (มติผู้ดูแล 2026-10-09 · container-only 2026-11-16)
 
 Every scheduled job / recurring task runs from a **cron service in the project's
-own `docker-compose.yml`** — a second service built from the app's own image runs a
-container cron daemon (supercronic) on a crontab committed to the repo. Jenkins
+own `docker-compose.yml`** — a second service runs a container cron daemon on a
+crontab committed to the repo (Next.js: plain alpine + busybox `crond`, the crontab
+in the service's own `command:` · Python: supercronic in the app image). Jenkins
 deploys it together with the app, so jobs move with every deploy, the repo shows
 every schedule, and the admin edits nothing on the server: **never a host crontab
 line**, and the admin handoff has no cron section. Nothing else schedules:
@@ -120,13 +121,17 @@ line**, and the admin handoff has no cron section. Nothing else schedules:
 - It is **not** an in-app scheduler: its own container and process, and a
   restart re-reads the same schedule. Jobs are idempotent, run on **prod only**
   (the service never appears in `docker-compose.dev.yml`; dev = run by hand when
-  testing), times in the service's `TZ` (set it — `Asia/Bangkok`), output in
-  `docker logs` (json-file rotation) plus the job's own log where it writes one
+  testing), times in the service's `TZ` (set it — Bangkok: `Asia/Bangkok`, or the
+  POSIX string `ICT-7` on an image without `tzdata`), output in `docker logs`
+  (json-file rotation) plus the job's own log where it writes one
+- A job that calls the app over HTTP uses its **container name**, never the compose service name: every
+  project's service is `app` on the shared `proxy-network`, so `app` can resolve to
+  another project's container
 - The reverse proxy blocks any HTTP job endpoint (Next.js `<basePath>/api/cron/`)
   from outside — stated in words in the admin handoff
 - Each stack defines how the crontab line reaches the code — Next.js
-  `ugt-nextjs-cicd-setup` `references/scheduled-jobs.md` (`node` `fetch` POST to the
-  app's `/api/cron/<job>` route with `CRON_SECRET`, over `proxy-network`) · Python
+  `ugt-nextjs-cicd-setup` `references/scheduled-jobs.md` (`wget` POST to the app's
+  `/api/cron/<job>` route with `CRON_SECRET`, over `proxy-network`) · Python
   `ugt-python-cicd-setup` `references/docker-deploy.md` §C
 
 **Transition:** the Python and PHP cicd skills still ship the older host-cron

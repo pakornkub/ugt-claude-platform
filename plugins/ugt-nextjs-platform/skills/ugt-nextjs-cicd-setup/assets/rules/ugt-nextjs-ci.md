@@ -59,10 +59,11 @@ global `environment {}` block (global = one value for every branch).
 
 ## Scheduled jobs — a cron service in the prod compose (org decision 2026-10-09 · container-only 2026-11-16)
 
-- Every scheduled/recurring job = one line in the repo's `jobs.crontab`, run by the `cron`
-  service in `docker-compose.yml` only (supercronic, `TZ: Asia/Bangkok`, `tzdata` +
-  `supercronic -test` in the Dockerfile) → `node -e "fetch(…)"` the app's `/api/cron/<job>`
-  route (`references/scheduled-jobs.md`) — deploys together with the app. Never in
+- Every scheduled/recurring job = one crontab line in the `cron` service of
+  `docker-compose.yml` only (alpine + busybox `crond`, `TZ: ICT-7`, `wget` POST to
+  `http://<container-name>:3000<basePath>/api/cron/<job>` — never `http://app`, the name
+  every project shares on `proxy-network`; `references/scheduled-jobs.md`) — deploys
+  together with the app. Never in
   `docker-compose.dev.yml` (dev: call the route by hand). **No host crontab** line, **no
   in-app scheduler** (`node-cron`, `node-schedule`, `setInterval` loops), no SQL Agent job,
   no Jenkins timer

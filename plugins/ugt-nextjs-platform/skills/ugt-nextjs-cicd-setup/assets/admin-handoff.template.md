@@ -33,7 +33,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | 8 | Admin | Nginx | สร้าง reverse proxy ของโปรเจค | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] or [CRON] --> |
 | 9 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
 
-> job ตั้งเวลา (__JOB_LIST__) รันใน container `__PROJECT_NAME__-cron` ซึ่ง deploy มาพร้อมแอป — **ไม่ต้องตั้ง cron บน server** · เครื่องที่ `docker build` (Jenkins / Docker host) ต้องออก `github.com` และ `release-assets.githubusercontent.com` ได้ตอน build (ดาวน์โหลด supercronic) <!-- [CRON] -->
+> job ตั้งเวลา (__JOB_LIST__) รันใน container `__PROJECT_NAME__-cron` ซึ่ง deploy มาพร้อมแอป — **ไม่ต้องตั้ง cron บน server** <!-- [CRON] -->
 
 ---
 

@@ -52,7 +52,7 @@ Required permission in `lib/permissions.ts`: `AUDIT_LOGS_READ: 'audit-logs:read'
 - The schema has no `expiresAt`/soft-delete → purge on a schedule. Scheduling is
   **the prod compose `cron` service only** (org decision 2026-10-09, container-only
   2026-11-16 — no SQL Agent job, no host crontab): the delete lives in a stored
-  procedure, and a cron route calls it via a `jobs.crontab` line
+  procedure, and a cron route calls it via a crontab line in that service
   (cicd-setup `references/scheduled-jobs.md`):
 
 ```sql

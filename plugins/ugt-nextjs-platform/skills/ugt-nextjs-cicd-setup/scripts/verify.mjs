@@ -141,37 +141,41 @@ check('Scheduled jobs go through the prod compose cron service, not an in-app sc
     if (!/export\s+(async\s+)?function\s+POST\b|export\s+const\s+POST\b/.test(src)) problems.push(`${r} exports no POST — the cron call is a POST, every run would get 405`);
   }
   for (const f of ['docker-compose.yml', 'docker-compose.dev.yml'].filter((x) => has(x))) {
-    // a compose cron service carries its own CRON_SECRET line — the app's must be live too
-    const want = /supercronic/.test(read(f)) ? 2 : 1;
-    if ((read(f).match(/^\s*(-\s*)?CRON_SECRET\s*[:=]/gm) ?? []).length < want) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
+    // the app's own line (the cron service only interpolates ${CRON_SECRET} into its crontab)
+    if (!/^\s*(-\s*)?CRON_SECRET\s*[:=]/m.test(read(f))) problems.push(`${f}: CRON_SECRET line still commented — the routes will 401 every cron call`);
   }
   return problems.length ? { ok: false, msg: problems.join(' · ') } : { ok: true };
 });
 
 check('The compose cron service is wired, prod only, in Bangkok time', () => {
-  // references/scheduled-jobs.md: routes ⇔ jobs.crontab ⇔ Dockerfile supercronic ⇔ cron service in docker-compose.yml only
+  // references/scheduled-jobs.md: one crontab line per /api/cron/<job> route, inside the
+  // busybox-crond `cron` service of docker-compose.yml only — never the host, never dev
   const live = (f) => (has(f) ? read(f).split('\n').filter((l) => !l.trim().startsWith('#')).join('\n') : '');
-  const hasRoutes = ['app/api/cron', 'src/app/api/cron'].some((d) => has(d));
-  const dockerCron = /jobs\.crontab|supercronic/.test(live('Dockerfile'));
-  const composeCron = /supercronic/.test(live('docker-compose.yml'));
-  if (hasRoutes && !(has('jobs.crontab') && dockerCron && composeCron)) {
-    return { ok: false, msg: 'app/api/cron/ exists but the cron service is incomplete — need jobs.crontab + the Dockerfile [CRON] block + the cron service in docker-compose.yml (no host crontab — references/scheduled-jobs.md)' };
+  if (/supercronic|jobs\.crontab/.test(live('Dockerfile') + live('docker-compose.yml'))) {
+    return { ok: false, msg: 'supercronic / jobs.crontab left over — the kit runs busybox crond in alpine now: drop the Dockerfile [CRON] block + jobs.crontab, use the cron service of the cicd docker-compose.yml asset' };
   }
-  if (!hasRoutes && (dockerCron || composeCron)) {
-    return { ok: false, msg: 'no app/api/cron/ routes but the [CRON] blocks are still in Dockerfile/docker-compose.yml — delete them (COPY jobs.crontab breaks the build without the file)' };
+  const cronDir = ['app/api/cron', 'src/app/api/cron'].find((d) => has(d));
+  const jobs = cronDir
+    ? readdirSync(p(cronDir), { withFileTypes: true }).filter((e) => e.isDirectory() && ['route.ts', 'route.js'].some((f) => has(cronDir, e.name, f))).map((e) => e.name)
+    : [];
+  const cron = live('docker-compose.yml').split(/\n(?= {2}[\w-]+:\s*$)/m).find((b) => /\bcrond\b/.test(b));
+  if (jobs.length && !cron) {
+    return { ok: false, msg: `${cronDir}/ has ${jobs.join(', ')} but docker-compose.yml has no cron service — nothing ever calls them (no host crontab — references/scheduled-jobs.md)` };
   }
-  if (dockerCron && !has('jobs.crontab')) {
-    return { ok: false, msg: 'Dockerfile copies jobs.crontab but the file is missing at the repo root — docker build fails' };
+  if (!jobs.length && cron) {
+    return { ok: false, msg: 'docker-compose.yml runs a cron service but there is no app/api/cron/<job> route — delete the [CRON] service' };
   }
-  if (/supercronic|crond\b/.test(live('docker-compose.dev.yml'))) {
+  if (/\bcrond\b/.test(live('docker-compose.dev.yml'))) {
     return { ok: false, msg: 'docker-compose.dev.yml runs a cron daemon — the cron service is prod only, or every job runs twice (references/scheduled-jobs.md)' };
   }
-  // the service block that runs supercronic, so a TZ on the app service does not count
-  const cron = live('docker-compose.yml').split(/\n(?= {2}[\w-]+:\s*$)/m).find((b) => /supercronic/.test(b));
-  if (cron && !/\bTZ\s*[:=]\s*['"]?Asia\/Bangkok/.test(cron)) {
-    return { ok: false, msg: 'docker-compose.yml: the cron service has no TZ: Asia/Bangkok — the image is UTC, so every job runs 7 hours late (references/scheduled-jobs.md)' };
-  }
-  return { ok: true };
+  if (!cron) return { ok: true };
+  const problems = [];
+  const missing = jobs.filter((j) => !new RegExp(`/api/cron/${j}(?![\\w-])`).test(cron));
+  if (missing.length) problems.push(`no crontab line for ${missing.join(', ')} — that route never runs`);
+  if (/__[A-Z][A-Z0-9_]*__/.test(cron)) problems.push('placeholder left in the crontab (e.g. __JOB__)');
+  if (/https?:\/\/app:/.test(cron)) problems.push('calls http://app:… — every project names its service `app` on proxy-network; call the app by its container name');
+  if (!/\bTZ\s*[:=]\s*['"]?(ICT-7|Asia\/Bangkok)/.test(cron)) problems.push('the cron service has no TZ: ICT-7 — alpine is UTC, so every job runs 7 hours late');
+  return problems.length ? { ok: false, msg: `docker-compose.yml cron service: ${problems.join(' · ')}` } : { ok: true };
 });
 
 check('Builds of the same job never overlap (disableConcurrentBuilds)', () => {
@@ -368,6 +372,14 @@ check('NODE_TLS_REJECT_UNAUTHORIZED=0 on in compose + .env.example (org standard
   const off = files.filter((f) => !/^\s*NODE_TLS_REJECT_UNAUTHORIZED\s*[:=]\s*['"]?0['"]?/m.test(read(f)));
   return off.length
     ? { ok: false, msg: `Missing or commented out in: ${off.join(', ')} — SSO/LDAP against the internal-CA servers fails without it` }
+    : { ok: true };
+});
+
+check('TZ: Asia/Bangkok on the app in both compose files (org standard)', () => {
+  const files = ['docker-compose.yml', 'docker-compose.dev.yml'].filter((f) => has(f));
+  const off = files.filter((f) => !/^\s*TZ\s*[:=]\s*['"]?Asia\/Bangkok/m.test(read(f)));
+  return off.length
+    ? { ok: false, msg: `No TZ: Asia/Bangkok in: ${off.join(', ')} — the container runs UTC, so every local date ("today", month cutoff) is 7 hours off` }
     : { ok: true };
 });
 
