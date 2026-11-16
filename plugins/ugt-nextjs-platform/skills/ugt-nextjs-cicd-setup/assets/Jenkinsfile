@@ -12,6 +12,10 @@
 //   __APP_URL_PROD__          e.g. https://apps.example.com/my-app
 //   __APP_URL_DEV__           e.g. https://apps.example.com/my-app-dev
 //
+// Jenkins: two plain Pipeline jobs on this same file — __PROJECT_NAME__ (*/main) and
+// __PROJECT_NAME__-dev (*/develop), never Multibranch. They have no BRANCH_NAME, so every
+// `br` below falls back to GIT_BRANCH (`origin/develop` → tokenize → `develop`).
+//
 // Sections marked [DB] are OPTIONAL — delete them if the project has no
 // database / Prisma migrations.
 // Sections marked [SENTRY] are OPTIONAL — delete if the project has no Sentry.
@@ -336,7 +340,10 @@ pipeline {
                         // `docker-compose` (v1) has been EOL since mid-2023 and ships with
                         // no current Docker Engine; a host that still only has v1 needs
                         // this one line changed back (`docker-compose -f ...`).
-                        sh "docker compose -f ${composeFile} up -d --no-build"
+                        // -p pins the compose project to the job name (= image name): the project otherwise
+                        // comes from the workspace dir, and a concurrent "@2" workspace or a moved job then
+                        // treats the running container as foreign → "container name already in use" (ugt-hrms #309).
+                        sh "docker compose -p ${imageName} -f ${composeFile} up -d --no-build"
 
                         // Wait until container is healthy (max 4 minutes = 24 × 10s).
                         // Poll docker inspect health status — not wget — so the result

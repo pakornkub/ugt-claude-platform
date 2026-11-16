@@ -30,6 +30,13 @@ file, separate env credential, separate Sonar project). Per-branch values are
 resolved inside the pipeline script from the branch name — never in global
 environment blocks.
 
+Jenkins: prod and dev are always **two separate Pipeline jobs** on the same
+`Jenkinsfile` — `<project>` (branch `*/main`) and `<project>-dev` (branch
+`*/develop`), "Pipeline script from SCM", Lightweight checkout off, trigger
+"GitHub hook trigger for GITScm polling" — **never Multibranch** (มติผู้ดูแล
+2026-11-16). A plain Pipeline job has no `BRANCH_NAME`; the branch comes from
+`GIT_BRANCH` (`origin/develop` → `develop`).
+
 ## Quality Gate thresholds (on New Code — identical for every language)
 
 | Condition | Threshold |
@@ -96,36 +103,41 @@ org path, never a named or anonymous Docker volume:
   (single declared exception: WordPress `wp-content`)
 - Host file backup covers `/home/docker02/appdata` once for every project
 
-## Scheduled jobs = host cron, or a compose cron service where documented (มติผู้ดูแล 2026-10-09)
+## Scheduled jobs = a cron service in the project's own prod compose (มติผู้ดูแล 2026-10-09 · container-only 2026-11-16)
 
-Every scheduled job / recurring task runs from the **host crontab** of the
-Docker host (the `jenkins` user's crontab — it owns `/home/docker02/appdata`
-and is in group `docker`) — one crontab line per job, set by the server admin from the
-project's admin handoff (cron table) — or, where documented, the compose cron
-service below. Nothing else schedules:
+Every scheduled job / recurring task runs from a **cron service in the project's
+own `docker-compose.yml`** — a second service runs a container cron daemon on a
+crontab committed to the repo (Next.js: plain alpine + busybox `crond`, the crontab
+in the service's own `command:` · Python: supercronic in the app image). Jenkins
+deploys it together with the app, so jobs move with every deploy, the repo shows
+every schedule, and the admin edits nothing on the server: **never a host crontab
+line**, and the admin handoff has no cron section. Nothing else schedules:
 
 - **No in-app scheduler** — no `node-cron` / `node-schedule` / `setInterval`
   loops, no APScheduler / Celery beat / `schedule`, no Laravel `schedule:run`
-  driver (each artisan command gets its own crontab line instead)
+  driver
 - **No SQL Agent job** and no Jenkins timed build for application work
   (Jenkins timers stay for CI upkeep only, e.g. the NVD update job)
-- Each stack defines how the crontab line reaches the code (Next.js: `docker
-  exec` → `node` `fetch` POST to the app's `/api/cron/<job>` route with `CRON_SECRET` · Python
-  web/PHP: `docker exec <container> <command>` · Python batch: `docker compose
-  run --rm job`) — jobs are idempotent, log to
-  `/home/docker02/appdata/<project>/logs/cron.log`, and run on **prod only**
-  (dev = run by hand when testing)
+- It is **not** an in-app scheduler: its own container and process, and a
+  restart re-reads the same schedule. Jobs are idempotent, run on **prod only**
+  (the service never appears in `docker-compose.dev.yml`; dev = run by hand when
+  testing), times in the service's `TZ` (set it — Bangkok: `Asia/Bangkok`, or the
+  POSIX string `ICT-7` on an image without `tzdata`), output in `docker logs`
+  (json-file rotation) plus the job's own log where it writes one
+- A job that calls the app over HTTP uses its **container name**, never the compose service name: every
+  project's service is `app` on the shared `proxy-network`, so `app` can resolve to
+  another project's container
+- The reverse proxy blocks any HTTP job endpoint (Next.js `<basePath>/api/cron/`)
+  from outside — stated in words in the admin handoff
+- Each stack defines how the crontab line reaches the code — Next.js
+  `ugt-nextjs-cicd-setup` `references/scheduled-jobs.md` (`wget` POST to the app's
+  `/api/cron/<job>` route with `CRON_SECRET`, over `proxy-network`) · Python
+  `ugt-python-cicd-setup` `references/docker-deploy.md` §C
 
-**Alternative — a cron service in the prod compose file**, only on a stack whose
-cicd skill documents it (today: Python `ugt-python-cicd-setup` `references/docker-deploy.md` §C ·
-Next.js `ugt-nextjs-cicd-setup` `references/scheduled-jobs.md`, which still calls `/api/cron/<job>`; PHP: host cron only). A second service in `docker-compose.yml`, built
-from the app's own image, runs a container cron daemon (supercronic) on a crontab
-committed to the repo; Jenkins deploys it with the app, so the job needs no host
-crontab line and the handoff has no cron table. It is **not** an in-app scheduler:
-its own container and process, one per environment, and a restart re-reads the same
-schedule. Same rules as host cron: idempotent jobs, **prod only** (the service never
-appears in `docker-compose.dev.yml`), times in the service's `TZ` (set it), output in
-`docker logs` (json-file rotation) plus the job's own log where it writes one.
+**Transition:** the Python and PHP cicd skills still ship the older host-cron
+default (Python: host cron + the compose service as an option · PHP: host cron
+only) until their kits are migrated — a new project on those stacks follows this
+contract and uses the compose service by hand.
 
 ## Server names (must match exactly)
 

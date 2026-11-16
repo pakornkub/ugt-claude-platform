@@ -138,7 +138,7 @@ host, not a normal configuration.
 
 ## B. Project level (every project)
 
-→ moved to `jenkins-project-setup.md` (§B1 Credentials · §B2 Pipeline job config · §B3 GitHub webhook · §B4 Reverse proxy (nginx) for the dev environment).
+→ moved to `jenkins-project-setup.md` (§B1 Credentials · §B2 Pipeline job config · §B3 GitHub webhook · §B4 Reverse proxy).
 
 ---
 

@@ -21,7 +21,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | 1 | DBA | Database server | สร้าง database 2 ตัว + login 2 ตัว | [A](#a-database--login) <!-- [DB] --> |
 | 2 | Admin | Server (Docker host) | เตรียม folder เก็บไฟล์ + ตั้ง backup | [B](#b-server--folder-เก็บไฟล์) <!-- [VOLUME] --> |
 | 3 | Admin | Jenkins | สร้าง credential | [C](#c-jenkins--credentials) |
-| 4 | Admin | Jenkins | สร้าง pipeline job | [D](#d-jenkins--pipeline-job) |
+| 4 | Admin | Jenkins | สร้าง pipeline job 2 ตัว (prod / dev แยกกัน) | [D](#d-jenkins--pipeline-job-prod--dev) |
 | 5 | Admin | GitHub | ตั้ง webhook ไป Jenkins | [E](#e-github--webhook) |
 | 6 | Admin | SonarQube | สร้าง 2 project + Quality Gate + webhook | [F](#f-sonarqube) |
 | 7 | Admin | Server prod (Docker host) | ตั้ง cron รัน job | [G](#g-server--cron) <!-- [CRON] --> |
@@ -66,17 +66,24 @@ RENDER RULES (delete this comment block in the rendered file):
 | `env-__PROJECT_NAME__-dev` | Secret file | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod |
 | `nvd` <!-- [FIRST] --> | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมทุกโปรเจคบน server |
 
-### D. Jenkins — Pipeline job
+### D. Jenkins — Pipeline job (prod / dev)
 
-ที่: **Dashboard → New Item**
+ที่: **Dashboard → New Item** · สร้าง **2 job แยกกัน** (ไม่ใช้ Multibranch)
 
-| ช่อง | ใส่ค่า |
-| --- | --- |
-| Item name | `__PROJECT_NAME__` |
-| Type | Multibranch Pipeline |
-| Branch Sources → GitHub → Repository URL | `__REPO_URL__` |
-| Discover branches | `main`, `develop` |
-| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) |
+| ช่อง | job prod | job dev |
+| --- | --- | --- |
+| Item name | `__PROJECT_NAME__` | `__PROJECT_NAME__-dev` |
+| Type | Pipeline | Pipeline |
+| Build Triggers | GitHub hook trigger for GITScm polling | 〃 |
+| Pipeline → Definition | Pipeline script from SCM → Git | 〃 |
+| Repository URL | `__REPO_URL__` | 〃 |
+| Branch Specifier | `*/main` | `*/develop` |
+| Script Path | `Jenkinsfile` | `Jenkinsfile` |
+| Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) | **ปิด** |
+
+> สร้างเสร็จกด **Build Now** ให้แต่ละ job 1 ครั้ง — GitHub hook trigger เริ่มทำงานหลัง job รันครั้งแรกเท่านั้น
+>
+> ย้ายจาก Multibranch job เดิม: ลบ container เดิมก่อน build ครั้งแรก `docker rm -f __PROJECT_NAME__ __PROJECT_NAME__-dev` (ไม่งั้นได้ "container name already in use") แล้วลบ Multibranch job · ข้อมูลใน `/home/docker02/appdata` ไม่หาย
 
 ### E. GitHub — Webhook
 
@@ -120,7 +127,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | รหัสผ่าน `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
 | `APP_PORT` prod | port ที่จัดสรรบน server prod (ทีมพัฒนาใช้ `8081` ไว้ก่อน) | |
 | `APP_PORT` dev | port ที่จัดสรรบน server dev (ทีมพัฒนาใช้ `8082` ไว้ก่อน) | |
-| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` | |
+| ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` และ `__PROJECT_NAME__-dev` | |
 
 <!-- [FIRST] -->
 ## ภาคผนวก — ครั้งแรกของ server (ข้ามถ้า server นี้มีโปรเจคมาตรฐานเดียวกันแล้ว)

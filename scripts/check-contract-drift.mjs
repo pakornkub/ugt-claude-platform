@@ -92,12 +92,30 @@ const CHECKS = [
     },
   },
   {
-    name: 'Scheduled jobs: host cron (or a documented compose cron service)',
+    name: 'Scheduled jobs: cron service in the prod compose, never a host crontab (2026-11-16)',
     files: {
-      [`${CORE}/contracts/cicd.md`]: [/host crontab/, /No in-app scheduler/],
-      [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/host cron/, /in-app scheduler/],
+      [`${CORE}/contracts/cicd.md`]: [/cron service in the project's\s+own prod compose/, /never a host crontab/, /No in-app scheduler/, /\*\*container name\*\*/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/rules/ugt-nextjs-ci.md`]: [/cron service in the prod compose/, /No host crontab/, /in-app scheduler/, /never `http:\/\/app`/],
+    },
+  },
+  {
+    // python/php kits still ship host cron — the contract names them under "Transition".
+    // When a kit migrates, move its rules file into the check above and drop it here.
+    name: 'Scheduled jobs: python/php host cron is a declared transition',
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/\*\*Transition:\*\* the Python and PHP cicd skills still ship/],
       [`${PY}/ugt-python-cicd-setup/assets/rules/ugt-python-ci.md`]: [/host cron/, /in-app scheduler/],
       [`${PHP}/ugt-php-cicd-setup/assets/rules/ugt-php-ci.md`]: [/host cron/, /in-app scheduler/],
+    },
+  },
+  {
+    name: 'Jenkins: prod + dev = two Pipeline jobs, never Multibranch (2026-11-16)',
+    files: {
+      [`${CORE}/contracts/cicd.md`]: [/two separate Pipeline jobs/, /never Multibranch/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/SKILL.md`]: [/two plain Pipeline jobs/, /never Multibranch/],
+      [`${NEXT}/ugt-nextjs-cicd-setup/assets/admin-handoff.template.md`]: [/2 job แยกกัน/, /ไม่ใช้ Multibranch/],
+      [`${PY}/ugt-python-cicd-setup/assets/admin-handoff.template.md`]: [/2 job แยกกัน/, /ไม่ใช้ Multibranch/],
+      [`${PHP}/ugt-php-cicd-setup/assets/admin-handoff.template.md`]: [/2 job แยกกัน/, /ไม่ใช้ Multibranch/],
     },
   },
   {

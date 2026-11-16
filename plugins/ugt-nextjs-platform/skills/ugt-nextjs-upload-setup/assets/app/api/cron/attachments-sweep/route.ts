@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.78.0 · ugt-nextjs-upload-setup/app/api/cron/attachments-sweep/route.ts
-// kit-hash: 2b986fa3b1da
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-upload-setup/app/api/cron/attachments-sweep/route.ts
+// kit-hash: 8dd4540c612e
 import { timingSafeEqual } from 'node:crypto';
 import { readdir, stat } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
@@ -9,8 +9,8 @@ import { deleteStoredFile } from '@/lib/storage';
 import { retentionCutoff } from '@/lib/jobs/retention-cutoff';
 
 /**
- * Attachment retention sweep — called by host cron, never by a user
- * (cicd references/scheduled-jobs.md; crontab row = admin handoff table I).
+ * Attachment retention sweep — called by the prod compose `cron` service, never by
+ * a user (cicd references/scheduled-jobs.md; schedule = a crontab line in that service).
  *
  *   1. rows whose owning record is gone (pattern A/C orphans) → SOFT-deleted,
  *      so they wait out the retention window and stay recoverable

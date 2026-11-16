@@ -61,7 +61,10 @@ Full detail (reserved-word table, rationale per rule) → `references/naming-con
    (`.env.local` = the dev/local DB); the dev/prod split arrives later with
    cicd-setup §4.5 (`env-<project>` / `env-<project>-dev` credentials), so
    don't ask "separate dev and prod?" here — nothing in this skill consumes
-   the answer
+   the answer. **SQL login** = the project owner's own SQL login — one name on
+   both prod and dev, created by the admin team (cicd admin-handoff table A);
+   ask who the owner is and, if the login already exists, its name — never
+   propose per-environment `<project>_app` / `<project>_dev` logins
 3. Will it call **stored procedures** or read across a **linked server**?
    (affects the raw-SQL patterns — and `requestTimeout`: the copied
    `lib/prisma.ts` ships 5 นาที for long SPs; **no SPs → lower it to the
@@ -128,7 +131,7 @@ closing summary must list them under "env vars needing real values".
 | `__DB_HOST__` | SQL Server hostname/IP |
 | `__DB_PORT__` | port (usually `1433`) |
 | `__DB_NAME__` | database name |
-| `__DB_USER__` | SQL login |
+| `__DB_USER__` | SQL login — the **project owner's own SQL login**: one name on both the prod and dev servers, created by the admin team (cicd admin-handoff table A) |
 | `__DB_PASSWORD__` | password (`.env.local` only — never committed) |
 | `__PROJECT_NAME__` | project name (used in comments/app name) |
 | `__EXT__` | prefix of read-only tables populated externally (if any) |
@@ -182,10 +185,11 @@ closing summary must list them under "env vars needing real values".
    install time) → write `0_init` offline with `migrate diff` and let the
    pipeline's `migrate deploy` apply it → `references/migrations.md` §5
    trap (c): the hand-written `migration_lock.toml` must say `mssql`
-   > **First `migrate dev` on the shared org server fails without a shadow
-   > database** — the app login has no `CREATE DATABASE` right and the error
-   > talks about permissions, not the shadow DB. Set `shadowDatabaseUrl` to a
-   > pre-created empty dev database → `references/migrations.md` §1.1
+   > **First `migrate dev` on the shared org server needs `dbcreator` on the
+   > dev server** — Prisma creates/drops its own temporary shadow DB; without
+   > the right the error talks about permissions, not the shadow DB. No
+   > `shadowDatabaseUrl` / pre-created shadow DB (org rule) →
+   > `references/migrations.md` §1.1
 3. `npx prisma generate`
 4. Check for reserved words before every migrate → `references/naming-conventions.md`
 

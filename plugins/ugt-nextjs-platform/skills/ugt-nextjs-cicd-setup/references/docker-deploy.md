@@ -158,7 +158,7 @@ starts reading it. Optional ones as `VAR: ${VAR:-}` — the app then receives
 
 ```
 https://<domain>__BASE_PATH_PROD__  ← nginx (TLS termination)
-   ↓ proxy_pass
+   ↓ forwards to
 http://127.0.0.1:__PORT_PROD____BASE_PATH_PROD__
    ↓
 container (port 3000, basePath = __BASE_PATH_PROD__)
