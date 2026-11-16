@@ -142,6 +142,7 @@ compose files (`[AUTH]`).
 | `/admin/users` | displays canonical (legacy rows until their next login) |
 | `createLocalUserAction` · `create-first-user.ts` | **refuse** any org domain — `ORG_EMAIL_NOT_LOCAL` |
 | `lib/auth.ts` `hooks.before` on `/sign-in/email` + `localLoginAction` | **refuse** Local sign-in with an org email — `ORG_EMAIL_USE_SSO` |
+| Feature code (approvers, matching HR / linked-server rows, filters, recipients) | compare `toCanonicalEmail` on **both** sides · look up with `email: { in: orgEmailVariants(x) }` · store/send canonical — contract `auth.md` § Accounts: the org domains are one mailbox. Rule copy: `.claude/rules/ugt-nextjs-auth.md` |
 
 ### The shared-account hole, and how each path closes it
 

@@ -136,6 +136,14 @@ const CHECKS = [
     },
   },
   {
+    name: 'Org email domains are one mailbox — feature code compares normalized emails',
+    files: {
+      [`${CORE}/contracts/auth.md`]: [/org email domains are one mailbox/i, /both sides/i],
+      [`${NEXT}/ugt-nextjs-auth-setup/assets/rules/ugt-nextjs-auth.md`]: [/Feature code too/, /orgEmailVariants\(x\)/],
+      [`${NEXT}/ugt-nextjs-auth-setup/references/org-identity.md`]: [/Feature code/, /both\*\* sides/],
+    },
+  },
+  {
     name: 'Session policy: 8h lifetime, refresh at 30m remaining',
     files: {
       [`${CORE}/contracts/auth.md`]: [/8 hours/, /30 minutes/],
