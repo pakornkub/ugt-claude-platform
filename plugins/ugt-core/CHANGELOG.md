@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## Unreleased
+
+- **contract `auth.md` § Accounts: โดเมนอีเมลองค์กรคือกล่องเดียวกัน** — `x@ube.com` = `x@ube.co.th` (ไม่สนตัวพิมพ์) ทุก stack ทุก feature ไม่ใช่แค่ login: เก็บ/แสดงแบบ canonical (โดเมนแรกในรายการของโปรเจค) และเทียบ/ค้นอีเมลหลัง normalize **ทั้งสองฝั่ง** — เดิมกติกาครอบแค่ login (Next.js `ORG_EMAIL_DOMAINS` ตั้งแต่ 4.79.0) โค้ด feature ที่เทียบอีเมลดิบหาคนเดียวกันอีกโดเมนไม่เจอ · drift check ใหม่ผูก contract ↔ rule + reference ของ auth-setup · มติผู้ดูแล 2026-11-16
+
 ## 2.20.0 (2026-11-16)
 
 - **contract `cicd.md`: งานตั้งเวลา = service cron ใน compose prod ของโปรเจค (ไม่ใช้ host crontab) + Jenkins 2 Pipeline job ไม่ใช้ Multibranch** — มติผู้ดูแล 2026-11-16 → § Scheduled jobs เขียนใหม่ (host cron เลิกเป็นค่าเริ่มต้น · Python/PHP ระบุเป็นช่วงเปลี่ยนผ่านจนกว่า kit จะย้าย) · § Branch model เพิ่มกติกา job · `scripts/check-contract-drift.mjs`: เช็คตัวใหม่ (cron service · Python/PHP transition · Pipeline job 2 ตัว) · origin ugt-lube-monitoring · 2026-11-16

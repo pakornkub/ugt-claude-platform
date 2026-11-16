@@ -71,6 +71,13 @@ scheduled cleanup job and in the viewer query.
   directory — **never keyed to an email address**. It is applied when the
   matching identity first signs in; an admin's explicit role choice on an
   existing user wins over (and removes) a pending one.
+- **The org email domains are one mailbox** — `x@ube.com` and `x@ube.co.th`
+  are the same person, case-insensitive. Every stack, every feature (not only
+  login) treats them as equal: store and show one canonical spelling (the
+  first domain of the project's org-domain list), and compare or look up an
+  email only after normalizing **both sides** — data from AD, HR, a linked
+  server or another system may carry either domain. Comparing raw email
+  strings misses the same person on the other domain.
 - **No Local (password) accounts on the org email domains** — those mailboxes
   belong to SSO/LDAP. Local accounts can be neither created nor signed in on
   them.

@@ -195,6 +195,12 @@ employee view over a linked server — `lib/directory.ts`.
 - `ORG_EMAIL_DOMAINS` (first = canonical): emails from SSO/LDAP/HR go through
   `toCanonicalEmail` before they are stored, shown or mailed. A Local account
   may never be created on, or sign in with, an org domain (`isOrgEmail`).
+- **Feature code too** — `x@ube.com` and `x@ube.co.th` are one mailbox. Never
+  compare or look up an email as a raw string: compare
+  `toCanonicalEmail(a) === toCanonicalEmail(b)`, query
+  `where: { email: { in: orgEmailVariants(x) } }` (raw SQL: `IN` over the same
+  list), and run `toCanonicalEmail` on any email you store or send. Data from
+  HR, a linked server or another system may hold either domain.
 - SSO/LDAP must never link into a row that is not the same AD username — keep
   the clash checks in `mapProfileToUser` and `ldapLoginAction`. Prisma's
   `NOT { ldapUsername }` silently drops NULL rows (the Local ones); spell out
