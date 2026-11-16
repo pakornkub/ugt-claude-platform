@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.90.0 | ตัวช่วย 12 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.4 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.8 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-devops-mcp` | 0.1.4 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
+| `ugt-devops-mcp` | 0.1.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
 | `ugt-core` | 2.21.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -104,7 +104,7 @@ plugin ของ ugt ระดับ project` ให้รันคำสั่�
 Security → Generate token แบบ User) · token เก็บที่เดียวกับ credential ที่ Claude Code ใช้ login (macOS: Keychain · Windows: `~/.claude/.credentials.json` ในโปรไฟล์ของ user)
 ไม่อยู่ใน env var · แก้ค่าทีหลัง: `/plugin` → `ugt-devops-mcp` → configure ·
 ใช้แค่ตัวเดียวก็ได้ ตัวที่ไม่กรอกจะไม่ทำงาน (ขึ้น error ใน `/mcp` เฉย ๆ) ·
-ต้องใช้ **Node ≥ 22.15** (plugin เปิด `--use-system-ca` ให้ Node ใช้ cert store ของ Windows — จำเป็นเพราะ `ugtweb` ไม่ส่ง intermediate cert มา · Node เก่ากว่านี้ server จะเปิดไม่ขึ้น)
+แนะนำ **Node ≥ 22.15** (plugin ตั้ง `NODE_USE_SYSTEM_CA=1` ให้ Node ใช้ cert store ของเครื่อง — จำเป็นเพราะ `ugtweb` ไม่ส่ง intermediate cert มา · Node เก่ากว่านี้ไม่พัง แต่จะต่อ Jenkins ที่ https ไม่ได้)
 
 **เคยติดตั้งด้วยสคริปต์ `install-jenkins-mcp.ps1` / `install-sonarqube-mcp.ps1`**
 → ลบของเดิมก่อน ไม่งั้น tool ขึ้นซ้ำสองชุด แล้ว restart Claude Code (ลืมก็ไม่เป็นไร —
