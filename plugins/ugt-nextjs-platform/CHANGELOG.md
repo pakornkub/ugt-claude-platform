@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.90.0 (2026-11-16)
 
 - **auth: `ORG_EMAIL_DOMAINS=ube.co.th,ube.com` เป็นค่ามาตรฐาน (`ube.co.th` = โดเมนหลัก)** — มติผู้ดูแล 2026-11-16 (contract core `auth.md`) · `env.example` ใส่ค่านี้เลยแทน `__COMPANY_DOMAIN__` · interview ข้อ 4b ไม่ต้องถามแล้ว (ถามเฉพาะโปรเจคของ org อื่น) · ตัวอย่างใน `lib/org-email.ts` + test, compose ทั้ง 2 ไฟล์, `org-identity.md`, `verification.md`, rule ตาม · `verify.mjs`: ด่าน `ORG_EMAIL_DOMAINS` ล้มถ้ารายการมีโดเมน ube แต่ตัวแรกไม่ใช่ `ube.co.th` · **โปรเจคที่ตั้ง `ube.com` เป็นตัวแรกไว้**: สลับเป็น `ube.co.th,ube.com` ใน env ของ prod/dev — แถวเดิมถูกเขียนเป็น `@ube.co.th` เองตอน login ครั้งถัดไป (SSO: session hook · LDAP: upsert) · asset: ugt-nextjs-auth-setup/lib/org-email.ts, ugt-nextjs-auth-setup/lib/org-email.test.ts
 

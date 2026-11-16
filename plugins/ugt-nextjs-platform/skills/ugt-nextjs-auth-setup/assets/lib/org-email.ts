@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/lib/org-email.ts
+// kit: ugt-nextjs-platform 4.90.0 · ugt-nextjs-auth-setup/lib/org-email.ts
 // kit-hash: 49c5456bb7a8
 // installed by ugt-nextjs-auth-setup — every project with SSO or LDAP
 //

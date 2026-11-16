@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.21.0 (2026-11-16)
 
 - **contract `auth.md` § Accounts: โดเมนหลักขององค์กร = `ube.co.th`** — มติผู้ดูแล 2026-11-16 · รายการโดเมนของโปรเจคเป็น `ube.co.th,ube.com` (ตัวแรก = canonical) · อีเมลที่เก็บ/แสดง/ส่งเป็น `@ube.co.th` เสมอ
 
