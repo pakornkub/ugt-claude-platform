@@ -73,8 +73,9 @@ scheduled cleanup job and in the viewer query.
   existing user wins over (and removes) a pending one.
 - **The org email domains are one mailbox** — `x@ube.com` and `x@ube.co.th`
   are the same person, case-insensitive. Every stack, every feature (not only
-  login) treats them as equal: store and show one canonical spelling (the
-  first domain of the project's org-domain list), and compare or look up an
+  login) treats them as equal: store and show one canonical spelling —
+  **`ube.co.th`** (มติผู้ดูแล 2026-11-16; first in the project's org-domain
+  list, `ube.co.th,ube.com`) — and compare or look up an
   email only after normalizing **both sides** — data from AD, HR, a linked
   server or another system may carry either domain. Comparing raw email
   strings misses the same person on the other domain.

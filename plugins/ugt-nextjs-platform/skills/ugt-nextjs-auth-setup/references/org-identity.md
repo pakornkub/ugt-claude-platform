@@ -128,8 +128,9 @@ WHERE NoRoleNotifiedAt IS NULL`, so parallel logins send one mail), then send
 
 ## 5. Org email domains — `ORG_EMAIL_DOMAINS`
 
-Comma list, **first = canonical** (`ube.com,ube.co.th`). Each entry must be a
-hostname — `ube.com;ube.co.th` or a space-separated list throws at startup
+Comma list, **first = canonical**. Org value: **`ube.co.th,ube.com`** —
+`ube.co.th` is the canonical domain (มติผู้ดูแล 2026-11-16). Each entry must be a
+hostname — `ube.co.th;ube.com` or a space-separated list throws at startup
 (`parseOrgDomains`) instead of silently matching nothing. Declared in
 `lib/env.ts` server block as `z.string().optional()`; env section 3 and both
 compose files (`[AUTH]`).

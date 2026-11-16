@@ -192,7 +192,7 @@ employee view over a linked server — `lib/directory.ts`.
   applies the pending role only where `roleId IS NULL`, mails admins once about
   a user with no role. Everything in it swallows errors; the mail is
   fire-and-forget — a login never fails or waits on it.
-- `ORG_EMAIL_DOMAINS` (first = canonical): emails from SSO/LDAP/HR go through
+- `ORG_EMAIL_DOMAINS=ube.co.th,ube.com` (first = canonical — `ube.co.th` is the org standard): emails from SSO/LDAP/HR go through
   `toCanonicalEmail` before they are stored, shown or mailed. A Local account
   may never be created on, or sign in with, an org domain (`isOrgEmail`).
 - **Feature code too** — `x@ube.com` and `x@ube.co.th` are one mailbox. Never

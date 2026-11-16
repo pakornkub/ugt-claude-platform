@@ -528,6 +528,11 @@ check('ORG_EMAIL_DOMAINS: normalized from SSO/LDAP/HR, refused for Local', () =>
   if (envFile && !/^ORG_EMAIL_DOMAINS=\S/m.test(read(envFile))) {
     return { ok: 'warn', msg: `${envFile} has no ORG_EMAIL_DOMAINS value — fine only if the org has a single mail domain and no Local accounts on it` };
   }
+  const list = (envFile && read(envFile).match(/^ORG_EMAIL_DOMAINS=(.*)$/m)?.[1]) || '';
+  const doms = list.split(',').map((d) => d.trim().replace(/^@/, '').toLowerCase()).filter(Boolean);
+  if (doms.some((d) => d === 'ube.com' || d === 'ube.co.th') && doms[0] !== 'ube.co.th') {
+    return { ok: false, msg: `${envFile} ORG_EMAIL_DOMAINS starts with ${doms[0]} — the org canonical domain is ube.co.th (ORG_EMAIL_DOMAINS=ube.co.th,ube.com)` };
+  }
   return { ok: true };
 });
 

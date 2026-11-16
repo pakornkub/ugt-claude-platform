@@ -1,14 +1,14 @@
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/org-email.test.ts
-// kit-hash: c2f57aac2809
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/lib/org-email.test.ts
+// kit-hash: 8862f4d72e5a
 // installed by ugt-nextjs-auth-setup alongside lib/org-email.ts
 import { describe, expect, it } from 'vitest';
 import { isOrgEmail, orgEmailVariants, parseOrgDomains, toCanonicalEmail } from './org-email';
 
-const domains = parseOrgDomains(' ube.com, @UBE.co.th ,');
+const domains = parseOrgDomains(' ube.co.th, @UBE.com ,');
 
 describe('org email domains', () => {
   it('parses the env list — first entry is canonical', () => {
-    expect(domains).toEqual(['ube.com', 'ube.co.th']);
+    expect(domains).toEqual(['ube.co.th', 'ube.com']);
   });
 
   it('treats an unset/empty list as "off"', () => {
@@ -38,13 +38,13 @@ describe('org email domains', () => {
   });
 
   it('moves org mail onto the canonical domain, lowercased', () => {
-    expect(toCanonicalEmail('Somchai.J@UBE.co.th', domains)).toBe('somchai.j@ube.com');
-    expect(toCanonicalEmail('somchai.j@ube.com', domains)).toBe('somchai.j@ube.com');
+    expect(toCanonicalEmail('Somchai.J@UBE.com', domains)).toBe('somchai.j@ube.co.th');
+    expect(toCanonicalEmail('somchai.j@ube.co.th', domains)).toBe('somchai.j@ube.co.th');
     expect(toCanonicalEmail('Vendor@Partner.com', domains)).toBe('Vendor@Partner.com');
   });
 
   it('lists every equivalent form for lookups', () => {
-    expect(orgEmailVariants('A@ube.co.th', domains).sort()).toEqual(['A@ube.co.th', 'a@ube.co.th', 'a@ube.com'].sort());
+    expect(orgEmailVariants('A@ube.com', domains).sort()).toEqual(['A@ube.com', 'a@ube.co.th', 'a@ube.com'].sort());
     expect(orgEmailVariants('x@partner.com', domains)).toEqual(['x@partner.com']);
   });
 });
