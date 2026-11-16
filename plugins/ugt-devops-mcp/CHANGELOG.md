@@ -1,5 +1,11 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.4 (2026-11-16)
+
+- **Jenkins เรียกไม่ได้บนเครื่อง user ทั้งที่ `/mcp` ขึ้น connected** — connected แปลว่าแค่โปรเซสเปิดขึ้นได้ (ตอนเปิดยังไม่ได้เรียก server) ทุก tool ตอบ `fetch failed` · สาเหตุจริง: `ugtweb.ube.co.th` ส่งมาแค่ cert ใบ leaf (`*.ube.co.th`) **ไม่ส่ง intermediate** `RapidSSL TLS RSA CA G1` (openssl: `unable to verify the first certificate`) · Node ใช้แค่ root ที่ bundle มาเลยต่อ chain ไม่ได้ → `UNABLE_TO_VERIFY_LEAF_SIGNATURE` · เครื่อง dev ผ่านตอน pilot เพราะ Claude Code ส่ง `NODE_USE_SYSTEM_CA=1` มาให้ child process และ Windows cache intermediate ไว้ใน `CurrentUserCA` แล้ว · แก้: ใส่ `NODE_OPTIONS=--use-system-ca` ใน env ของทั้งสอง server ใน `plugin.json` ให้ Node อ่าน cert store ของ Windows เอง (ทดสอบแล้ว: ปิด `NODE_USE_SYSTEM_CA` → fail · ใส่ flag → 200) · **ต้องใช้ Node ≥ 22.15**: Node เก่ากว่านี้ไม่รู้จัก flag ทำให้ server เปิดไม่ขึ้น · **ยังเหลือ:** ถ้าเครื่องไหนไม่มี intermediate ใน store จะยังพัง ต้องแก้ที่ต้นเหตุคือให้ admin ตั้ง reverse proxy ของ `ugtweb` ให้ส่ง full chain
+- **error บอกสาเหตุจริง** — เดิม tool ตอบแค่ `fetch failed` เพราะรหัสจริงอยู่ใน `err.cause` · ตอนนี้ `getJson` แนบรหัส (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`, `ENOTFOUND`, `ECONNREFUSED`, …) + origin ของ server และถ้าเป็นเรื่อง cert จะบอกวิธีแก้ (Node ≥ 22.15 + CA อยู่ใน cert store หรือ `NODE_EXTRA_CA_CERTS`) · test ใหม่ใน `http.test.mjs`
+- ทดสอบบนเครื่อง dev (Node 22.22): `list_jobs` ผ่าน flag ใหม่กับ Jenkins จริงได้ · sonarqube server เปิดขึ้นพร้อม flag · host ที่ cert self-signed ขึ้นข้อความใหม่ถูกต้อง · ยังไม่ได้ลองบนเครื่อง user ที่เจอปัญหา
+
 ## 0.1.3 (2026-11-12)
 
 - **แก้คำอธิบายที่เก็บ token** — 0.1.0 เขียนว่าเก็บใน credential store / Credential Manager ของเครื่อง แต่ pilot บน Windows พบว่า Claude Code เก็บ `sensitive` userConfig ไว้ใน `~/.claude/.credentials.json` (คีย์ `pluginSecrets`, ไฟล์เดียวกับ token login ของ Claude Code) ไม่ใช่ Windows Credential Manager · ค่าไม่ลับ (URL, user) อยู่ `~/.claude/settings.json` คีย์ `pluginConfigs` · ทั้งคู่อยู่ถาวรข้าม restart/update · แก้ `plugin.json`, `marketplace.json`, README

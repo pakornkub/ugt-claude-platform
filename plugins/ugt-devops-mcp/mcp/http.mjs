@@ -11,8 +11,22 @@ export const apiUrl = (base, path) => new URL(path.replace(/^\/+/, ''), base.end
 
 export const basicAuth = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
 
+// Node's fetch throws a bare "fetch failed" — the real reason (TLS, DNS, refused) is only on err.cause
+export function fetchError(err, url) {
+  const why = err.cause?.code ?? err.cause?.message;
+  const tls = /CERT|SIGNATURE|SELF_SIGNED/.test(why ?? '')
+    ? ' — server cert not trusted (often: server omits its intermediate cert). Plugin sets --use-system-ca (needs Node >= 22.15) so certs in the Windows store count; else NODE_EXTRA_CA_CERTS=<intermediate+root .pem>, or have the server send its full chain'
+    : '';
+  return new Error(`${err.message}${why ? ` (${why})` : ''} — ${url.origin}${tls}`);
+}
+
 export async function getJson(url, authHeader, { json = true } = {}) {
-  const res = await fetch(url, { headers: { Authorization: authHeader }, signal: AbortSignal.timeout(30_000) });
+  let res;
+  try {
+    res = await fetch(url, { headers: { Authorization: authHeader }, signal: AbortSignal.timeout(30_000) });
+  } catch (err) {
+    throw fetchError(err, url);
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     // Jenkins error pages are full HTML (with a CSRF crumb) — only JSON/text bodies help the caller
