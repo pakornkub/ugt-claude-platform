@@ -1,6 +1,6 @@
 # Changelog — ugt-php-platform
 
-## Unreleased
+## 0.8.8 (2026-11-16)
 
 - **admin-handoff ตาราง D: Jenkins = 2 job แบบ Pipeline ไม่ใช้ Multibranch** — มติผู้ดูแล 2026-11-16 (contract `cicd.md` § Branch model) → `__PROJECT_NAME__` (`*/main`) + `__PROJECT_NAME__-dev` (`*/develop`) · Pipeline script from SCM · Script Path `Jenkinsfile` · Lightweight checkout ปิด · trigger "GitHub hook trigger for GITScm polling" · แก้แค่ข้อความ (Jenkinsfile ใช้ `GIT_BRANCH` ได้อยู่แล้ว) · **ยังไม่ย้าย**: งานตั้งเวลายังเป็น host cron (contract ระบุเป็นช่วงเปลี่ยนผ่าน) และตาราง A ยังเป็น login 2 ตัว · origin ugt-lube-monitoring · 2026-11-16 · asset: admin-handoff.template.md
 - **หลัง code-review ของ PR นี้** — Jenkinsfile deploy ใช้ `docker compose -p ${imageName}` (ชื่อ compose project ไม่ขึ้นกับโฟลเดอร์ workspace) · handoff ตาราง D: กด **Build Now** ครั้งแรกให้ทั้ง 2 job + ขั้นย้ายจาก Multibranch (`docker rm -f` container เดิมครั้งเดียว)

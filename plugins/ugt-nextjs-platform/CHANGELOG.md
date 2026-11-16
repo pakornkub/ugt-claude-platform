@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.89.0 (2026-11-16)
 
 - **มติผู้ดูแล 2026-11-16: กติกา infra 5 ข้อสำหรับโปรเจคถัดไป** — admin-handoff ของ ugt-lube-monitoring ต้องแก้มือหลายจุดก่อนส่ง admin (ขอ shadow database, login 2 ตัว, แนบ config nginx, job แบบ Multibranch, ตาราง host crontab) → kit สอนแบบเดิมที่องค์กรไม่ใช้แล้ว → แก้ตามมติ:
   1. **ไม่มี shadow database** — ตัด `SHADOW_DATABASE_URL` / `shadowDatabaseUrl` ออกจาก `env.example`, `prisma.config.ts`, SKILL.md และ fixture ของ eval · DBA ให้ login สิทธิ์ `dbcreator` **บน server dev เท่านั้น** แล้ว `prisma migrate dev` สร้าง/ลบ shadow ชั่วคราวเอง · prod ไม่ต้องมีสิทธิ์เพิ่ม (`migrate deploy` ไม่ใช้ shadow) · `migrations.md` §1.1 เขียนใหม่ (ยังอธิบายว่าทำไม `migrate dev` ต้องมี shadow และ error ดูเหมือนรหัสผิด)

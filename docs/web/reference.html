@@ -102,6 +102,8 @@
     <a href="#skill-ugt-nextjs-mail-setup">mail-setup</a>
     <a href="#skill-ugt-nextjs-upload-setup">upload-setup</a>
     <a href="#skill-ugt-nextjs-cicd-setup">cicd-setup</a>
+    <div class="grp">ทดสอบ</div>
+    <a href="#skill-ugt-nextjs-system-test">system-test · ทั้งระบบ</a>
     <div class="grp">ทำงานเองระหว่างเขียนโค้ด</div>
     <a href="#skill-ugt-nextjs-clean-code">clean-code</a>
     <a href="#skill-ugt-nextjs-pitfalls">pitfalls</a>
@@ -149,10 +151,10 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.88.1</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.19.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
-      <tr><td><code>ugt-python-platform</code></td><td>0.10.3</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
-      <tr><td><code>ugt-php-platform</code></td><td>0.8.7</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.89.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.20.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-python-platform</code></td><td>0.10.4</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
+      <tr><td><code>ugt-php-platform</code></td><td>0.8.8</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
       <tr><td><code>ugt-devops-mcp</code></td><td>0.1.3</td><td>ไม่บังคับ ใช้ได้ทุก stack — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · แทนสคริปต์ <code>install-*-mcp.ps1</code> เดิม</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
     </tbody>
   </table></div>
@@ -315,7 +317,7 @@
     <li class="no">ห้ามรายงานว่า "ต่อ database แล้ว" ทั้งที่หน้าจอยังอ่าน store เดิม</li>
     <li>แก้ <code>CLAUDE.md</code> เฉพาะใน block <code>ugt:start/end</code> · ห้ามรีเซ็ต <code>.claude/state/</code> ที่มีอยู่</li>
     <li>ติดตั้ง harness ทุกครั้ง แม้เลือกโมดูลเดียว</li>
-    <li>ข้อความปิดงานต้องมีครบ 6 ส่วน: ไฟล์ที่เพิ่ม/แก้ · env ที่ต้องเติมค่าจริง · ส่งต่อ admin · ผู้ดูแลคนแรก (<code>/admin/setup</code>) · smoke test · ยังไม่ได้รัน — เขียนในแชทเลย ไม่ใช่แค่ "ดูไฟล์ docs/…"</li>
+    <li>ข้อความปิดงานต้องมีครบ 6 ส่วน: ไฟล์ที่เพิ่ม/แก้ · env ที่ต้องเติมค่าจริง · ส่งต่อ admin · ผู้ดูแลคนแรก (<code>/admin/setup</code>) · ยังไม่ได้รัน · ปิดด้วยคำถามเดียว "ทดสอบใน container ตอนนี้ / รอ admin" (<a href="#skill-ugt-nextjs-system-test">system-test</a>) — ห้ามทดสอบเองก่อนได้คำตอบ — เขียนในแชทเลย ไม่ใช่แค่ "ดูไฟล์ docs/…"</li>
     <li>bundle mattpocock: บอกผู้ใช้ให้รัน <code>/setup-matt-pocock-skills</code> เอง (ตัวช่วยรันแทนไม่ได้)</li>
   </ul>
 
@@ -1449,7 +1451,7 @@ npx prisma migrate dev --name add-app-settings &amp;&amp; npx prisma generate</p
   <ul class="opt-grid">
     <li><b>Virus scan [SCAN]</b> (opt-in): ทำตามทุก marker — copy <code>lib/virus-scan.ts</code>, ใส่บล็อก scan กลับใน route อัปโหลด (<code>scanStatus = 'clean'</code>), ด่านดาวน์โหลดเป็น <code>!== 'clean'</code>, env <code>CLAMAV_*</code>, service clamav + <code>clamav-db</code>, <code>pingScanner()</code> ใน <code>/api/health</code> · ไม่เปิด = แถวเก็บเป็น <code>'unscanned'</code> และด่านเป็น <code>=== 'infected'</code></li>
     <li><b>การผูกไฟล์กับ record</b>: <b>A</b> polymorphic (<code>entityType</code> + <code>entityId</code> — ที่ skeleton ให้มา) เหมาะเมื่อหลายชนิดและเพิ่มเรื่อย ๆ แต่เกิดแถวกำพร้า · <b>B</b> FK จริงต่อชนิด เหมาะเมื่อ 1–2 ชนิดและห้ามมีกำพร้า · <b>C</b> คอลัมน์บนตารางธุรกิจ เมื่อมีไฟล์เดียวต่อ record ตลอดไป · ผสมได้</li>
-    <li><b>Retention sweep [SWEEP]</b>: service <code>cron</code> ใน compose prod (บรรทัดใน <code>jobs.crontab</code>) → <code>POST /api/cron/attachments-sweep</code> ทำงานซ้ำได้ปลอดภัย · <code>RETENTION_DAYS</code> &lt; 7 ถูกปฏิเสธในโค้ด · <code>OWNERS</code> ใส่หนึ่งรายการต่อ <code>entityType</code> ของ pattern A/C · ทดลองก่อนด้วย <code>?dryRun=1</code></li>
+    <li><b>Retention sweep [SWEEP]</b>: service <code>cron</code> ใน compose prod (บรรทัดใน crontab ที่ <code>command:</code> ของ service) → <code>POST /api/cron/attachments-sweep</code> ทำงานซ้ำได้ปลอดภัย · <code>RETENTION_DAYS</code> &lt; 7 ถูกปฏิเสธในโค้ด · <code>OWNERS</code> ใส่หนึ่งรายการต่อ <code>entityType</code> ของ pattern A/C · ทดลองก่อนด้วย <code>?dryRun=1</code></li>
     <li>[SWEEP] ต้องมี <code>CRON_SECRET</code> — ถ้า cicd-setup ยังไม่ได้เพิ่ม ให้ทำขั้น <code>[CRON]</code> ของ cicd ตอนนี้</li>
   </ul>
 
@@ -1584,7 +1586,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
       <tr><td>5 ใช้ Sentry ไหม</td><td>ไม่ใช้ → ตัดบล็อก <code>[SENTRY]</code> + credential</td></tr>
       <tr><td>6 ปลายทาง deploy</td><td>Docker host ไหน, Jenkins อยู่เครื่องเดียวกับ Docker หรือ mount socket, compose v1/v2, host ของ Jenkins (สำหรับ webhook) · repo URL อ่านจาก <code>git remote</code></td></tr>
       <tr><td>7 มี path ที่ต้องเก็บข้าม deploy ไหม (volume)</td><td>มี → บล็อก <code>[VOLUME]</code> · ไม่มี → ลบทุกบล็อก <code>[VOLUME]</code> รวมใน Jenkinsfile</td></tr>
-      <tr><td>8 มีงานตั้งเวลาไหม (ชื่อ · ทำอะไร · เมื่อไหร่)</td><td>มี → <code>[CRON]</code>: route ต่องาน + <code>CRON_SECRET</code> + service <code>cron</code> ใน compose prod + <code>jobs.crontab</code> (วิธีเดียว — ไม่มี host cron, มติ 2026-11-16) · ไม่มี → ลบทุก <code>[CRON]</code></td></tr>
+      <tr><td>8 มีงานตั้งเวลาไหม (ชื่อ · ทำอะไร · เมื่อไหร่)</td><td>มี → <code>[CRON]</code>: route ต่องาน + <code>CRON_SECRET</code> + service <code>cron</code> ใน compose prod — crontab อยู่ใน <code>command:</code> (วิธีเดียว — ไม่มี host cron, มติ 2026-11-16) · ไม่มี → ลบทุก <code>[CRON]</code></td></tr>
     </tbody>
   </table></div>
 
@@ -1648,7 +1650,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <li><b>Quality Gate</b> (บน New Code): <code>new_coverage</code> ≥ 60% · <code>new_violations</code> = 0 · <code>new_duplicated_lines_density</code> ≤ 3% · <code>new_security_hotspots_reviewed</code> = 100% · OWASP: CRITICAL ≥ 1 = fail, HIGH ≥ 1 = unstable</li>
     <li><b>Credential</b>: <code>nvd</code> (ใช้ร่วมทุกโปรเจค) · <code>env-&lt;project&gt;</code> · <code>env-&lt;project&gt;-dev</code> · <code>sentry-dsn-&lt;project&gt;</code> (ถ้าใช้) · token ของ SonarQube ผูกที่ System → SonarQube servers</li>
     <li><b>compose <code>environment:</code></b> เป็นรายการคงที่ — uncomment บรรทัดของโมดูลที่ติดตั้งแล้ว (<code>[AUTH]</code>, <code>[AUTH: SSO]</code>/<code>[AUTH: LDAP]</code>, <code>[MAIL]</code>, <code>[UPLOAD]</code>) ห้ามสลับลำดับ ห้ามลบบรรทัดที่ comment</li>
-    <li><b>งานตั้งเวลา</b> = service <code>cron</code> ใน <code>docker-compose.yml</code> ของ prod (supercronic + <code>jobs.crontab</code>, ต้องมี <code>TZ</code> + <code>tzdata</code>, deploy ไปพร้อมแอป — ห้าม host crontab) → <code>node -e "fetch(…)"</code> ผ่าน <code>proxy-network</code> → <code>POST /api/cron/&lt;job&gt;</code> + <code>CRON_SECRET</code> (≥ 32 ตัว ต่างกัน prod/dev) · ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · reverse proxy ปิด <code>/api/cron/</code> จากภายนอก (handoff เขียนเป็นคำ ไม่แนบ config)</li>
+    <li><b>งานตั้งเวลา</b> = service <code>cron</code> ใน <code>docker-compose.yml</code> ของ prod (<code>alpine:3.20</code> + busybox <code>crond</code>, crontab ใน <code>command:</code>, <code>TZ: ICT-7</code>, deploy ไปพร้อมแอป — ห้าม host crontab · Dockerfile ไม่ต้องแก้) → <code>wget</code> ผ่าน <code>proxy-network</code> ด้วย<b>ชื่อ container</b> ของแอป (ห้าม <code>http://app</code> — ทุกโปรเจคชื่อ service <code>app</code>) · output + <code>FAILED</code> ลง <code>docker logs &lt;project&gt;-cron</code> · แอปทั้ง 2 compose ตั้ง <code>TZ: Asia/Bangkok</code> → <code>POST /api/cron/&lt;job&gt;</code> + <code>CRON_SECRET</code> (≥ 32 ตัว ต่างกัน prod/dev) · ห้าม <code>node-cron</code> / <code>setInterval</code> / SQL Agent job / Jenkins timer · reverse proxy ปิด <code>/api/cron/</code> จากภายนอก (handoff เขียนเป็นคำ ไม่แนบ config)</li>
     <li><b>ไม่มี basePath</b> → basePath ว่าง health path = <code>/api/health</code> (และไม่มีแถบ DEV)</li>
     <li><b>Persistent data</b>: bind mount ใต้ <code>/home/docker02/appdata/&lt;project&gt;/&lt;name&gt;</code> (dev = <code>&lt;project&gt;-dev</code>) · stage Deploy สร้าง path + chown ให้</li>
     <li>Host มีแต่ <code>docker-compose</code> v1 → เปลี่ยน stage Deploy กลับเป็นแบบมีขีด และแจ้งผู้ดูแล host (v1 EOL แล้ว)</li>
@@ -1782,8 +1784,8 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <p><b>วิธีแก้:</b> export <code>POST</code> อย่างเดียว พร้อมเช็ค <code>CRON_SECRET</code> แบบ <code>timingSafeEqual</code></p>
   </div></details>
   <details class="acc"><summary>[cron service] job รันช้าไป 7 ชั่วโมง หรือ pipeline เขียวแต่ job ไม่เคยรัน</summary><div class="body">
-    <p><b>สาเหตุ:</b> service <code>cron</code> ไม่มี <code>TZ</code> หรือ image Alpine ไม่มี <code>tzdata</code> (เวลาเป็น UTC) · crontab ผิดแล้ว container cron restart วน ซึ่ง health poll ของ Jenkins ไม่เห็นเพราะดูแค่ container แอป</p>
-    <p><b>วิธีแก้:</b> <code>apk add --no-cache tzdata</code> ใน runner + <code>TZ: Asia/Bangkok</code> ใน service <code>cron</code> · <code>RUN supercronic -test /app/jobs.crontab</code> ใน Dockerfile ให้ build แดงแทน · ดู <code>docker logs &lt;project&gt;-cron</code></p>
+    <p><b>สาเหตุ:</b> service <code>cron</code> ไม่มี <code>TZ: ICT-7</code> (busybox ไม่มี tzdata — เวลาเป็น UTC) · เรียก <code>http://app:3000</code> แล้วไปโดนแอปของโปรเจคอื่นบน <code>proxy-network</code> · <code>CRON_SECRET</code> ว่างเพราะไม่อยู่ใน env ตอน compose แทนค่า <code>${CRON_SECRET}</code> — health poll ของ Jenkins ไม่เห็นเพราะดูแค่ container แอป</p>
+    <p><b>วิธีแก้:</b> <code>TZ: ICT-7</code> ใน service <code>cron</code> · URL ใช้ชื่อ container (<code>http://&lt;project&gt;:3000&lt;basePath&gt;/api/cron/&lt;job&gt;</code>) · ดู <code>docker logs &lt;project&gt;-cron</code> (บรรทัด <code>ok</code> / <code>FAILED</code>) · เช็คการเชื่อมต่อ: <code>docker exec &lt;project&gt;-cron wget -qO- http://&lt;project&gt;:3000&lt;basePath&gt;/api/health</code></p>
   </div></details>
   <details class="acc"><summary>เผลอ commit <code>.env</code> ที่มีค่าจริง</summary><div class="body">
     <p><b>สาเหตุ:</b> <code>.gitignore</code> ไม่ครอบ <code>.env</code>, <code>.env.dev</code></p>
@@ -1804,6 +1806,72 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
 </section>
 
 <!-- ===== ref-part-b: clean-code · pitfalls · kit-sync · core skills · python/php · bundles · contracts ===== -->
+
+<section id="skill-ugt-nextjs-system-test" class="skill">
+  <h2><code>ugt-nextjs-system-test</code></h2>
+  <p class="lead">ทดสอบทั้งระบบที่รันจริง (login, สิทธิ์แต่ละ role, ข้อมูล, เมล, ไฟล์แนบ, deploy) ตาม checklist เดียว แล้วรายงานก่อนแก้</p>
+  <p><span class="badge">ugt-nextjs-platform</span> <span class="badge">เรียกเอง</span> <span class="badge">ใหม่ 4.89.0</span></p>
+
+  <div class="prose">
+    <p>skill ติดตั้งตรวจได้แค่ไฟล์ (<code>verify.mjs</code>) — ตัวนี้พิสูจน์ว่าระบบใช้งานได้จริง และกันทางลัดที่เคยเกิด: สร้าง DB เองจากของที่เครื่องมี, ทดสอบกับค่า <code>CHANGE_ME</code>, แก้ <code>.env.local</code> ให้เทสต์ผ่าน, แก้ก่อนผู้ใช้เห็นผล</p>
+
+    <dl class="glance" aria-label="สรุปย่อ">
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>ใช้เมื่อ</dt><dd>full-setup จบแล้วเลือก "ทดสอบใน container" · หรือ admin ทำ <code>docs/admin-handoff.md</code> เสร็จแล้ว</dd></div>
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-listcheck"/></svg>ต้องมีก่อน</dt><dd>container: Docker · live: ค่าจาก admin ครบ (dev deploy แล้ว หรือ <code>.env.local</code>)</dd></div>
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-package"/></svg>ได้อะไร</dt><dd>ตาราง PASS / FAIL / BLOCKED พร้อมหลักฐาน แล้วถาม "แก้ข้อไหนก่อน"</dd></div>
+  </dl>
+
+  <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg></span>ใช้เมื่อไหร่</h3>
+    <div class="say">/ugt-nextjs-system-test</div>
+    <div class="say">admin ทำเสร็จแล้ว</div>
+    <div class="say">ทดสอบทั้งระบบ</div>
+    <div class="say">เช็คว่าใช้งานได้จริงไหม</div>
+    <div class="callout"><b>ไม่ใช่งานของตัวนี้</b>เขียน unit test → งานปกติ (<a href="#skill-ugt-nextjs-test-lint-setup">test-lint-setup</a> ตั้งเครื่องมือไว้แล้ว) · ทดสอบบน prod → ไม่ทำ (dev เท่านั้น)</div>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-workflow"/></svg></span>2 โหมด</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>โหมด</th><th>เมื่อไหร่</th><th>รันกับอะไร</th></tr></thead>
+      <tbody>
+        <tr><td><code>container</code></td><td>หลัง setup ก่อน admin ตอบ — ต้องมี Docker</td><td><code>docker-compose.smoke.yml</code>: SQL Server <code>Thai_CI_AS</code> · Keycloak realm <code>smoke</code> (user ทดสอบ รหัสเดียวกันทุกคน) · Mailpit · แอปจาก <code>Dockerfile</code> ของโปรเจค</td></tr>
+        <tr><td><code>live</code></td><td>หลังผู้ใช้ยืนยันว่า admin ทำเสร็จ</td><td>dev จริง — URL ที่ deploy แล้ว (แนะนำ) หรือ <code>npm run dev</code> กับ <code>.env.local</code> · ผ่านด่าน <code>env-ready.mjs</code> ก่อนเสมอ</td></tr>
+      </tbody>
+    </table></div>
+    <ol class="steps">
+      <li><b>ถามก่อน</b> — เรียกจาก full-setup คำตอบของคำถามปิดงานคือการอนุญาต · เรียกเองและไม่ได้บอกโหมด → ถาม 1 ข้อ</li>
+      <li><b>container</b>: เช็คเครื่องแค่ <code>docker info</code> → copy ไฟล์ smoke เข้าโปรเจค ตัดส่วนของ module ที่ไม่ได้ติดตั้ง → <code>up -d --build</code> → รอ <code>/api/health</code> และ Keycloak discovery ตอบ 200</li>
+      <li><b>live</b>: <code>env-ready.mjs</code> (หรือ <code>--url &lt;dev-url&gt;</code>) ต้องจบด้วย <code>✔ env ready for the live test</code> → ผู้ใช้ login SSO เองใน browser pane</li>
+      <li><b>ไล่ checklist</b> — กลางของ kit (<code>references/checklist.md</code>) + ของโปรเจค (<code>docs/project-context/system-test.md</code> ไม่มีจะร่างให้ ติด <code>(draft)</code>) · หลักฐานจากหน้าจอ / network / console / Mailpit / logs เท่านั้น</li>
+      <li><b>รายงาน</b> → ผู้ใช้เลือกข้อที่จะแก้ → แก้ → รันเฉพาะข้อนั้นซ้ำ</li>
+      <li><b>ปิด</b>: ผลลง <code>handoff.md</code> · container <code>down -v</code> · live ลบ record <code>[TEST]</code> ผ่าน UI · FAIL ที่เป็นบั๊กของ kit → <code>/ugt-contribute</code></li>
+    </ol>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-package"/></svg></span>ได้อะไร / เขียนไฟล์ไหน</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ไฟล์</th><th>ใช้ทำอะไร</th></tr></thead>
+      <tbody>
+        <tr><td><code>docker-compose.smoke.yml</code> · <code>smoke/realm-smoke.json</code></td><td>stack ทดสอบ (ค่าทดสอบล้วน commit ได้) — port 3100 / 8180 / 8125</td></tr>
+        <tr><td><code>.claude/launch.json</code> (config <code>smoke</code>)</td><td>ให้ <code>preview_start</code> เปิดแอปใน container</td></tr>
+        <tr><td><code>docs/project-context/system-test.md</code></td><td>flow เฉพาะของโปรเจค — ผู้ใช้ยืนยันบรรทัด <code>(draft)</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span>กฎที่ห้ามพลาด</h3>
+    <ul class="checklist">
+      <li class="no">ไม่มี Docker → บอกให้ติดตั้งแล้วหยุด — ห้าม LocalDB / TCP proxy / DB จำลองที่สร้างเอง</li>
+      <li class="no">ห้ามอ่าน แก้ หรือ copy <code>.env.local</code> เพื่อทดสอบ — ✘ ของ <code>env-ready.mjs</code> เป็นงานของผู้ใช้</li>
+      <li>dev เท่านั้น — basePath prod หรือ DB localhost ถูกปฏิเสธ</li>
+      <li class="no">ห้ามพิมพ์ ขอ หรือเก็บรหัสผ่านจริง — ผู้ใช้ login เอง</li>
+      <li class="no">ห้าม <code>migrate reset</code> / <code>db push</code> / DELETE ดิบ / seed ทับ บน dev DB</li>
+      <li>รายงานก่อนแก้ทุกครั้ง · ห้ามให้ PASS จากการอ่านโค้ด</li>
+    </ul>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg></span>อาการที่เจอบ่อย</h3>
+    <details class="acc"><summary>port 3100 / 8180 / 8125 ถูกใช้อยู่</summary><div class="body"><p><b>สาเหตุ:</b> port ผูกกับ redirect URI ของ realm <code>smoke</code><br><b>วิธีแก้:</b> ปิดโปรแกรมที่ใช้ port นั้น แล้วเรียกใหม่ — skill รายงานแล้วหยุด ไม่เปลี่ยน port เอง</p></div></details>
+    <details class="acc"><summary>service <code>migrate</code> ล้มตอน up</summary><div class="body"><p><b>สาเหตุ:</b> migration หรือ image build พังจริง<br><b>วิธีแก้:</b> นับเป็น FAIL ข้อแรก — deploy จริงจะพังแบบเดียวกัน</p></div></details>
+    <details class="acc"><summary>live บน localhost แล้ว Keycloak ปฏิเสธ <code>redirect_uri</code></summary><div class="body"><p><b>สาเหตุ:</b> client ของ dev อนุญาตแค่ URL ที่ deploy<br><b>วิธีแก้:</b> ทดสอบกับ dev URL ที่ deploy แล้ว (<code>env-ready.mjs --url</code>) — ข้อนี้เป็น BLOCKED ไม่ใช่สิ่งที่ต้องหาทางอ้อม</p></div></details>
+    <details class="acc"><summary>อัปโหลดล้มทุกไฟล์ใน container</summary><div class="body"><p><b>สาเหตุ:</b> โปรเจคเปิดสแกนไวรัส <code>[SCAN]</code> แต่ stack ทดสอบไม่มี ClamAV (fail closed)<br><b>วิธีแก้:</b> copy service <code>clamav</code> + <code>CLAMAV_*</code> จาก <code>docker-compose.dev.yml</code> เข้า smoke file</p></div></details>
+  </div>
+</section>
 
 <section id="skill-ugt-nextjs-clean-code" class="skill">
   <h2><code>ugt-nextjs-clean-code</code></h2>
@@ -2732,7 +2800,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
-  <p><span class="badge">ugt-python-platform 0.10.3</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-python-platform 0.10.4</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>ยังไม่ผ่าน pilot ทุก shape</b>FastAPI · Flask · Django · Batch job ยังไม่เคยรันกับโปรเจคจริง — ค่าคงที่ถูกตรวจด้วยเหตุผลแล้วแต่ยังไม่ผ่าน build จริง · โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้ แล้วส่ง feedback กลับเป็น PR ที่ platform · plugin นี้ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -2831,7 +2899,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-php-cicd-setup" class="skill">
   <h2><code>ugt-php-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค PHP ที่มีอยู่แล้ว — Laravel, CodeIgniter, PHP legacy และ WordPress</p>
-  <p><span class="badge">ugt-php-platform 0.8.7</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-php-platform 0.8.8</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>สถานะ pilot ราย shape</b>PHP legacy (ไม่มี framework) <b>ผ่าน pilot</b> — <code>ugt-mscpl-ana</code> (2026-08) · <code>ugt-bd-forecast</code> (2026-09-03) · Laravel · CodeIgniter (CI3/CI4) · WordPress <b>ยังไม่ผ่าน</b> · plugin ยังไม่ tag · ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -3120,7 +3188,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.88.1</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.89.0</span></div></footer>
 
 <script>
 (() => {

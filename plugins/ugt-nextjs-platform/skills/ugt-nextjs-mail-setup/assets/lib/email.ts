@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-mail-setup/lib/email.ts
+// kit: ugt-nextjs-platform 4.89.0 · ugt-nextjs-mail-setup/lib/email.ts
 // kit-hash: fd377349f8bb
 // source: ugt-hrms lib/email.ts — installed by ugt-nextjs-mail-setup
 // named type import, not `nodemailer.SendMailOptions`: nodemailer 10 ships its own

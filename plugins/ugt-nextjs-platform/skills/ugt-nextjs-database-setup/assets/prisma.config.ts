@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-database-setup/prisma.config.ts
+// kit: ugt-nextjs-platform 4.89.0 · ugt-nextjs-database-setup/prisma.config.ts
 // kit-hash: 02d66d8e0be7
 // Prisma CLI config — the ONLY place the datasource url lives.
 // (schema.prisma must NOT contain a url field — Prisma 7 + driver adapter.)

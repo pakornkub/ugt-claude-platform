@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/proxy.ts
+// kit: ugt-nextjs-platform 4.89.0 · ugt-nextjs-auth-setup/proxy.ts
 // kit-hash: 5d6ad353d948
 // proxy.ts — Next.js 16 route protection (Next.js 16 uses proxy.ts, not middleware.ts;
 // on Next.js 15 or older this same content must be named middleware.ts instead).

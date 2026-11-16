@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.20.0 (2026-11-16)
 
 - **contract `cicd.md`: งานตั้งเวลา = service cron ใน compose prod ของโปรเจค (ไม่ใช้ host crontab) + Jenkins 2 Pipeline job ไม่ใช้ Multibranch** — มติผู้ดูแล 2026-11-16 → § Scheduled jobs เขียนใหม่ (host cron เลิกเป็นค่าเริ่มต้น · Python/PHP ระบุเป็นช่วงเปลี่ยนผ่านจนกว่า kit จะย้าย) · § Branch model เพิ่มกติกา job · `scripts/check-contract-drift.mjs`: เช็คตัวใหม่ (cron service · Python/PHP transition · Pipeline job 2 ตัว) · origin ugt-lube-monitoring · 2026-11-16
 - `ugt-help`: แถวใหม่ (ถัดจากแถว "In progress") — Next.js ที่ `handoff.md` Next ยังมีบรรทัด `/ugt-nextjs-system-test` หรือผู้ใช้บอกว่า admin ทำเสร็จแล้ว → `/ugt-nextjs-system-test` · เพิ่มในรายการ "ต้องสั่งเอง"

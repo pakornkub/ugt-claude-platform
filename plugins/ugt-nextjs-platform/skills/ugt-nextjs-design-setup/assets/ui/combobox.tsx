@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/combobox.tsx
+// kit: ugt-nextjs-platform 4.89.0 · ugt-nextjs-design-setup/ui/combobox.tsx
 // kit-hash: 8adcee2afef4
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';

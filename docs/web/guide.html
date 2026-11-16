@@ -314,7 +314,7 @@
         <tr><td>2</td><td>env vars ที่ต้องเติมค่าจริง</td><td>เติมใน <code>.env.local</code> เมื่อได้ค่าจาก admin</td></tr>
         <tr><td>3</td><td>ส่งต่อ admin (<code>docs/admin-handoff.md</code>)</td><td>ส่ง<b>ไฟล์</b>นี้ให้ทีม admin/DevOps</td></tr>
         <tr><td>4</td><td>ผู้ดูแลคนแรก</td><td>ให้คนที่ควรเป็น admin login คนแรก</td></tr>
-        <tr><td>5</td><td>Smoke test</td><td>ทดสอบตามรายการ</td></tr>
+        <tr><td>5</td><td>คำถามทดสอบ (ท้ายสุด)</td><td>เลือก "ทดสอบใน container ตอนนี้" (ต้องมี Docker) หรือ "ยังไม่ทดสอบ — รอ admin"</td></tr>
         <tr><td>6</td><td>ยังไม่ได้รัน</td><td>รันคำสั่งที่ Claude รันเองไม่ได้</td></tr>
       </tbody>
     </table></div>
@@ -327,7 +327,7 @@
       </li>
       <li>
         <h3>ส่ง <code>docs/admin-handoff.md</code> ให้ admin</h3>
-        <p>ในไฟล์มีขั้นตอนรวมและตารางแยกระบบ: SQL Server, folder บน server, Jenkins, GitHub webhook, SonarQube, Keycloak, Nginx, cron (มีเฉพาะที่โปรเจคใช้)</p>
+        <p>ในไฟล์มีขั้นตอนรวมและตารางแยกระบบ: SQL Server (login ของเจ้าของโปรเจคตัวเดียว ใช้ทั้ง prod/dev), folder บน server, Jenkins (2 job แบบ Pipeline), GitHub webhook, SonarQube, Keycloak, reverse proxy (เขียนเป็นคำ ไม่แนบ config) — มีเฉพาะที่โปรเจคใช้ · งานตั้งเวลาไม่ต้องให้ admin ตั้ง (service <code>cron</code> deploy ไปกับแอป)</p>
         <p>ท้ายไฟล์มีตาราง "ส่งกลับ" ให้ admin กรอก รหัสผ่านและ secret ให้ส่งทางช่องทางปลอดภัย ไม่กรอกในไฟล์</p>
       </li>
       <li>
@@ -340,13 +340,9 @@
         <p>โปรเจคที่ใช้รหัสผ่านอย่างเดียว (ไม่มี SSO/AD) ต้องสร้างบัญชีแรกด้วย <code>npx tsx scripts/create-first-user.ts</code> ก่อน แล้วค่อยเข้า <code>/admin/setup</code></p>
       </li>
       <li>
-        <h3>Smoke test</h3>
-        <ul class="checklist">
-          <li><code>npm run build</code> ผ่าน</li>
-          <li>login ได้ทุกวิธีที่เปิด → เข้าหน้าที่ต้อง login ได้ → logout แล้ว cookie หาย</li>
-          <li><code>/admin/setup</code> กดครั้งเดียวได้ Administrator</li>
-          <li>push branch <code>develop</code> → pipeline เขียวทุก stage</li>
-        </ul>
+        <h3>ทดสอบทั้งระบบ — <code>/ugt-nextjs-system-test</code></h3>
+        <p>full-setup ปิดงานด้วยคำถามเดียว: <b>ทดสอบใน container ตอนนี้</b> (ต้องมี Docker — ได้ SQL Server, Keycloak realm ทดสอบ, Mailpit และแอปจาก <code>Dockerfile</code> ของโปรเจค) หรือ <b>รอ admin</b> (เขียนบรรทัดไว้ใน <code>handoff.md</code>)</p>
+        <p>admin ส่งค่ากลับและ <code>develop</code> deploy แล้ว → พิมพ์ "admin ทำเสร็จแล้ว" หรือ <code>/ugt-nextjs-system-test</code> → ทดสอบกับ dev จริง (คุณ login SSO เอง) ตาม checklist เดียว แล้วรายงาน PASS / FAIL / BLOCKED ก่อนแก้ทุกครั้ง</p>
       </li>
       <li>
         <h3>bundle mattpocock เท่านั้น</h3>
@@ -840,7 +836,7 @@
   </main>
 </div>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.88.1</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.89.0</span></div></footer>
 
 <script>
   // highlight the TOC entry of the chapter in view
