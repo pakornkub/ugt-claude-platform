@@ -40,8 +40,8 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
 - [ ] [Mail + SSO/LDAP] A first login with no role mails every `users:update`
       holder once; a second login sends nothing; with SMTP down the login is
       still instant
-- [ ] [SSO/LDAP] With `ORG_EMAIL_DOMAINS=ube.com,ube.co.th`: a user whose AD
-      mail is `x@ube.co.th` is stored and shown as `x@ube.com`; "เพิ่มผู้ใช้
+- [ ] [SSO/LDAP] With `ORG_EMAIL_DOMAINS=ube.co.th,ube.com`: a user whose AD
+      mail is `X@UBE.com` is stored and shown as `x@ube.co.th`; "เพิ่มผู้ใช้
       local" with `y@ube.co.th` → refused on the email field; a Local row made
       earlier on an org email can no longer sign in (`ORG_EMAIL_USE_SSO`), and an
       SSO/LDAP login of the employee holding that mailbox is refused instead of

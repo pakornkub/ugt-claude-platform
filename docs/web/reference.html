@@ -982,7 +982,7 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
       <tr><td>2 deploy ใต้ basePath / โดเมนกลางไหม</td><td>ใช้ตั้งชื่อ cookie ไม่ให้ชนแอปอื่น และ redirect URI</td></tr>
       <tr><td>3 [SSO] มี Keycloak client แล้วหรือยัง</td><td>มี → ขอ <code>KEYCLOAK_ISSUER</code> / <code>CLIENT_ID</code> / <code>CLIENT_SECRET</code> · ยังไม่มี → เขียนคำขอเป็นไฟล์ <code>docs/admin-handoff.md</code> (ตาราง G)</td></tr>
       <tr><td>4 [LDAP] รายละเอียด AD</td><td><code>LDAP_URL</code>, <code>LDAP_BASE_DN</code>, <code>LDAP_DOMAIN</code> = UPN แบบ DNS (<code>ube.co.th</code> ไม่ใช่ <code>UBE</code>)</td></tr>
-      <tr><td>4b [SSO/LDAP] โดเมนอีเมลขององค์กร</td><td>→ <code>ORG_EMAIL_DOMAINS</code> คั่นด้วย comma ตัวแรก = ตัวหลัก</td></tr>
+      <tr><td>4b [SSO/LDAP] โดเมนอีเมลขององค์กร</td><td>ไม่ต้องถาม → <code>ORG_EMAIL_DOMAINS=ube.co.th,ube.com</code> (ตัวแรก = ตัวหลัก · มาตรฐานองค์กร <code>ube.co.th</code>)</td></tr>
       <tr><td>5 admin คนแรก</td><td><b>ไม่ถาม</b> — คนแรกที่ login ไป <code>/admin/setup</code> แล้วกดปุ่มเดียว</td></tr>
       <tr><td>6 มีฐานพนักงานกลางให้อ่านผ่าน linked server ไหม</td><td>default <b>มี</b> → ขอชื่อ view 4 ส่วน + คอลัมน์ · ตามด้วย: เห็นเฉพาะของตัวเอง+ทีมไหม (→ <code>lib/scope.ts</code>) · มี workflow อนุมัติไหม (→ <code>lib/approval-chain.ts</code> + view สายอนุมัติ) — ทั้งสองข้อ default ใช่</td></tr>
       <tr><td>7 [Local] ติดตั้ง mail-setup แล้วหรือยัง</td><td>แล้ว → ติดตั้ง reset รหัสผ่านทางอีเมลเลย · ยัง → ติดตั้ง auth แบบไม่มีส่วน reset ก่อน แล้วค่อยย้อนมาเติม (ห้ามรัน mail ก่อน — mail ต้องการ auth)</td></tr>
@@ -1035,7 +1035,7 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
     <li>Permission ≠ scope: route ที่รับ empCode/owner id จากฝั่ง client ต้องเช็ค <code>lib/scope.ts</code> และตอบ <b>404</b> เมื่อไม่อยู่ในขอบเขต</li>
     <li>ไม่มีการสมัครเอง (<code>disableSignUp: true</code>) · ไม่สร้างบัญชี SSO/LDAP ล่วงหน้า · ตั้ง role ล่วงหน้าได้ โดยผูกกับ EmpCode/AD login (ไม่ใช่อีเมล)</li>
     <li>อีเมลโดเมนองค์กรเป็นของ SSO/LDAP — สร้างบัญชี Local บนโดเมนเหล่านั้นไม่ได้</li>
-    <li><code>@ube.com</code> = <code>@ube.co.th</code> (กล่องเดียวกัน) <b>ในโค้ด feature ด้วย</b> ไม่ใช่แค่ login — เทียบด้วย <code>toCanonicalEmail</code> ทั้งสองฝั่ง · ค้น DB ด้วย <code>email: { in: orgEmailVariants(x) }</code> · ห้ามเทียบอีเมลดิบ</li>
+    <li><code>@ube.com</code> = <code>@ube.co.th</code> (กล่องเดียวกัน · เก็บ/แสดงเป็น <code>ube.co.th</code>) <b>ในโค้ด feature ด้วย</b> ไม่ใช่แค่ login — เทียบด้วย <code>toCanonicalEmail</code> ทั้งสองฝั่ง · ค้น DB ด้วย <code>email: { in: orgEmailVariants(x) }</code> · ห้ามเทียบอีเมลดิบ</li>
     <li>[Local] นโยบายรหัสผ่านอยู่ใน <code>lib/password-policy.ts</code> ไฟล์เดียว · ลิงก์ reset ใช้ได้ครั้งเดียว 1 ชั่วโมง · ตอบเหมือนกันไม่ว่าอีเมลมีจริงหรือไม่ · เปลี่ยนรหัสแล้วตัด session อื่นทิ้ง · เปลี่ยนรหัสเองต้องใส่รหัสเดิม</li>
     <li>Audit log ทุก event ของ auth และทุก mutation ที่มีสิทธิ์พิเศษ — ห้ามทำให้ login พัง · ชื่อ action มาจาก <code>AUDIT_ACTIONS</code> เท่านั้น · ห้าม UPDATE/DELETE <code>ActivityLogs</code></li>
     <li>Logout ใช้ <code>&lt;form action={logoutAction}&gt;</code> (SSO ใช้ <code>ssoLogoutAction</code>) ห้าม <code>signOut()</code> จาก auth-client</li>

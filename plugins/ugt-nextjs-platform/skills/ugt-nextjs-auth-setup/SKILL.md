@@ -151,8 +151,8 @@ message, or back-to-back AskUserQuestion calls (≤4 per call):
    = UPN suffix in DNS form (`ube.co.th`, not NetBIOS `UBE` — bind is `user@LDAP_DOMAIN`)
    (internal-CA TLS is not a question — `NODE_TLS_REJECT_UNAUTHORIZED=0` is org
    standard, already in env section 1 and both compose files)
-4b. **[SSO or LDAP] Org email domains?** → `ORG_EMAIL_DOMAINS`, comma list,
-   canonical first (§2 item 11) — every domain the org's mailboxes use
+4b. **[SSO or LDAP] Org email domains — not a question.** `ORG_EMAIL_DOMAINS=ube.co.th,ube.com`
+   (org standard, `ube.co.th` canonical — §2 item 11); ask only if the project serves another org
 5. **First admin — not a question.** SSO/LDAP rows can't be pre-created
    (มติ 2026-08-11) and pre-assigning needs a running app with an admin, so
    nothing could be seeded from a name given here; the
