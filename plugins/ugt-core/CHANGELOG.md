@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.20.1 (2026-11-16)
 
 - **contract `auth.md` § Accounts: โดเมนอีเมลองค์กรคือกล่องเดียวกัน** — `x@ube.com` = `x@ube.co.th` (ไม่สนตัวพิมพ์) ทุก stack ทุก feature ไม่ใช่แค่ login: เก็บ/แสดงแบบ canonical (โดเมนแรกในรายการของโปรเจค) และเทียบ/ค้นอีเมลหลัง normalize **ทั้งสองฝั่ง** — เดิมกติกาครอบแค่ login (Next.js `ORG_EMAIL_DOMAINS` ตั้งแต่ 4.79.0) โค้ด feature ที่เทียบอีเมลดิบหาคนเดียวกันอีกโดเมนไม่เจอ · drift check ใหม่ผูก contract ↔ rule + reference ของ auth-setup · มติผู้ดูแล 2026-11-16
 
