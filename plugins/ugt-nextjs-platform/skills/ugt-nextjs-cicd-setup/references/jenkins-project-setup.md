@@ -40,6 +40,15 @@ never Multibranch.**
 
 - One webhook (§B3) serves both jobs: each polls its own branch and builds only
   when that branch changed
+- **Build Now once per new job** — the GitHub hook trigger only fires for a job
+  that has run at least once (polling needs the SCM from a first build)
+- **Moving an existing Multibranch project**: its containers belong to another
+  compose project (the old workspace dir), so the first deploy from the new job
+  fails with "container name already in use" → `docker rm -f __PROJECT_NAME__
+  __PROJECT_NAME__-dev` once, then build, then delete the Multibranch job
+  (bind-mounted data under `/home/docker02/appdata` is untouched). From then on
+  the Jenkinsfile's `docker compose -p ${imageName}` keeps the project name fixed,
+  so a concurrent `@2` workspace or a recreated job never does this again
 - **Disable "Lightweight checkout"** — Configure → Pipeline → SCM → uncheck.
   Otherwise Jenkins fetches only the Jenkinsfile → later stages find an
   incomplete workspace / the pipeline runs stale code

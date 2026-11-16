@@ -118,7 +118,7 @@ OWASP publisher: **fail** at CRITICAL ≥ 1 · **unstable** at HIGH ≥ 1
 | --- | --- | --- |
 | `nvd` | Secret text | NVD API key (shared by all projects) |
 | `env-<project>` | Secret file | prod `.env` → `cp` into the workspace at Deploy |
-| `env-<project>-dev` | Secret file | dev `.env` (separate DB + fresh secrets) |
+| `env-<project>-dev` | Secret file | dev `.env` (dev DB + fresh app secrets; the SQL login is the owner's one login, same as prod) |
 | `sentry-dsn-<project>` | Secret text | client-side DSN (optional) |
 | SonarQube token | — | bound in System → SonarQube servers (`withSonarQubeEnv`) — never bound manually in the Jenkinsfile |
 

@@ -96,6 +96,6 @@ Add these to `docs/admin-handoff.md`:
   be recreated freely (`down` / `up -d` is safe), the directory cannot.
 - [SCAN, if enabled] clamav needs roughly **2 GB RAM** and refreshes
   signatures on its own (`freshclam` runs inside the image).
-- If a reverse proxy sits in front, raise its body limit to match
-  `UPLOAD_MAX_BYTES` (nginx: `client_max_body_size`), otherwise large uploads
-  fail at the proxy with a 413 the app never sees.
+- The reverse proxy must accept request bodies up to `UPLOAD_MAX_BYTES`, otherwise
+  large uploads fail at the proxy with a 413 the app never sees — say it in words
+  in handoff section H (the admin writes the entry; never paste proxy config).

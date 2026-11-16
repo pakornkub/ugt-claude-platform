@@ -20,7 +20,7 @@ rows below. Full checklist: `jenkins-one-time-setup.md` §A.
 | # | System | Item | Name/value for **this project** | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | Jenkins | Credential — prod env | `env-__PROJECT_NAME__` (Secret file) | Upload the prod `.env` contents. Deploy stage `cp`s it to `.env` in the workspace. |
-| 2 | Jenkins | Credential — dev env | `env-__PROJECT_NAME__-dev` (Secret file) | Separate `DATABASE_URL` + fresh secrets — never share with prod. |
+| 2 | Jenkins | Credential — dev env | `env-__PROJECT_NAME__-dev` (Secret file) | Dev database in `DATABASE_URL` + fresh app secrets (`BETTER_AUTH_SECRET`, `CRON_SECRET`, …) — never prod's. The SQL login is the one shared value: the project owner's single login on prod and dev (org rule 2026-11-16, admin-handoff table A). |
 | 3 | Jenkins | Credential — Sentry DSN | `sentry-dsn-__PROJECT_NAME__` (Secret text) | Only if the project uses Sentry — delete this row otherwise. |
 | 4 | Jenkins | Pipeline jobs | Two **Pipeline** jobs: `__PROJECT_NAME__` (`*/main`) + `__PROJECT_NAME__-dev` (`*/develop`) — never Multibranch · Pipeline script from SCM, Script Path `Jenkinsfile`, **Lightweight checkout disabled**, trigger "GitHub hook trigger for GITScm polling" | See `jenkins-project-setup.md` §B2. |
 | 5 | Jenkins | GitHub webhook | `http://<jenkins-host>:8080/github-webhook/`, event: push only | See `jenkins-project-setup.md` §B3. |

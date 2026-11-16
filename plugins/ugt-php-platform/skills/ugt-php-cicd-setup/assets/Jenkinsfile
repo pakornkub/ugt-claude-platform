@@ -295,13 +295,16 @@ pipeline {
                         // this one line changed back (`docker-compose -f ...`).
                         //
                         // [WP] shape = wordpress → ใช้บรรทัดนี้แทน (ลบบรรทัดข้างล่าง):
-                        //   sh "docker compose -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
+                        //   sh "docker compose -p ${imageName} -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
                         // image `wordpress:*` ประกาศ `VOLUME /var/www/html` เอง → webroot ทั้งก้อน
                         // เป็น anonymous volume ที่ compose ยกของเดิมจาก container ก่อนหน้ามาใช้ต่อ
                         // แปลว่าไฟล์ที่เปลี่ยนใน image ใหม่ (รวม api/health/index.php) ไม่มีวันขึ้นถึง
                         // container ตั้งแต่ deploy รอบที่ 2 · flag นี้แตะเฉพาะ anonymous volume —
                         // `wp-content` เป็น bind mount ที่ตั้งชื่อไว้ จึงไม่โดนแตะ (→ references/wordpress-deploy.md)
-                        sh "docker compose -f ${composeFile} up -d --no-build"
+                        // -p pins the compose project to the job name (= image name): the project otherwise
+                        // comes from the workspace dir, and a concurrent "@2" workspace or a moved job then
+                        // treats the running container as foreign → "container name already in use" (ugt-hrms #309).
+                        sh "docker compose -p ${imageName} -f ${composeFile} up -d --no-build"
 
                         // [WEB] Wait until container is healthy (max 4 minutes = 24 × 10s).
                         // Poll docker inspect health status — not wget — so the result

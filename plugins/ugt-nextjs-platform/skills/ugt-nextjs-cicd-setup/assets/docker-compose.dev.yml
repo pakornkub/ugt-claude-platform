@@ -35,7 +35,8 @@ services:
       # CRON_SECRET: ${CRON_SECRET}                                 # [CRON] dev has no cron service — call /api/cron/<job> by hand
       SENTRY_ENVIRONMENT: development # [SENTRY] distinguishes dev events; DSN is shared
       # Dev .env MUST differ from prod in at least DATABASE_URL (separate dev DB)
-      # and BETTER_AUTH_SECRET (never share secrets between environments)
+      # and BETTER_AUTH_SECRET (never share app secrets between environments — the
+      # SQL login is the one shared value: the project owner's single login, org rule 2026-11-16)
       # 2. database
       DATABASE_URL: ${DATABASE_URL} # [DB]
       # 3. auth

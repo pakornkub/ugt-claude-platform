@@ -81,6 +81,10 @@ RENDER RULES (delete this comment block in the rendered file):
 | Script Path | `Jenkinsfile` | `Jenkinsfile` |
 | Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) | **ปิด** |
 
+> สร้างเสร็จกด **Build Now** ให้แต่ละ job 1 ครั้ง — GitHub hook trigger เริ่มทำงานหลัง job รันครั้งแรกเท่านั้น
+>
+> ย้ายจาก Multibranch job เดิม: ลบ container เดิมก่อน build ครั้งแรก `docker rm -f __PROJECT_NAME__ __PROJECT_NAME__-dev` (ไม่งั้นได้ "container name already in use") แล้วลบ Multibranch job · ข้อมูลใน `/home/docker02/appdata` ไม่หาย
+
 ### E. GitHub — Webhook
 
 ที่: **repo → Settings → Webhooks → Add webhook**

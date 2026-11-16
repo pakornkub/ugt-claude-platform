@@ -128,7 +128,7 @@ anonymous volume — `-V` / `--renew-anon-volumes` คือ flag ที่ส�
 
 ```groovy
 // [WP] shape = wordpress เท่านั้น — webroot ของ image นี้เป็น anonymous volume
-sh "docker compose -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
+sh "docker compose -p ${imageName} -f ${composeFile} up -d --no-build --force-recreate --renew-anon-volumes"
 ```
 
 - ปลอดภัยกับข้อมูลผู้ใช้: flag นี้แตะเฉพาะ **anonymous** volume — `wp-content`

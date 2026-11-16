@@ -33,7 +33,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | 8 | Admin | Nginx | สร้าง reverse proxy ของโปรเจค | [H](#h-nginx--reverse-proxy) <!-- [BASEPATH] or [UPLOAD] or [CRON] --> |
 | 9 | ทุกคน | — | ส่งค่ากลับทีมพัฒนา | [ส่งกลับ](#ส่งกลับ) |
 
-> job ตั้งเวลา (__JOB_LIST__) รันใน container `__PROJECT_NAME__-cron` ซึ่ง deploy มาพร้อมแอป — **ไม่ต้องตั้ง cron บน server** <!-- [CRON] -->
+> job ตั้งเวลา (__JOB_LIST__) รันใน container `__PROJECT_NAME__-cron` ซึ่ง deploy มาพร้อมแอป — **ไม่ต้องตั้ง cron บน server** · เครื่องที่ `docker build` (Jenkins / Docker host) ต้องออก `github.com` และ `release-assets.githubusercontent.com` ได้ตอน build (ดาวน์โหลด supercronic) <!-- [CRON] -->
 
 ---
 
@@ -91,6 +91,10 @@ RENDER RULES (delete this comment block in the rendered file):
 | Branch Specifier | `*/main` | `*/develop` |
 | Script Path | `Jenkinsfile` | `Jenkinsfile` |
 | Lightweight checkout | **ปิด** (เปิดไว้ stage แรกพัง) | **ปิด** |
+
+> สร้างเสร็จกด **Build Now** ให้แต่ละ job 1 ครั้ง — GitHub hook trigger เริ่มทำงานหลัง job รันครั้งแรกเท่านั้น
+>
+> ย้ายจาก Multibranch job เดิม: ลบ container เดิมก่อน build ครั้งแรก `docker rm -f __PROJECT_NAME__ __PROJECT_NAME__-dev` (ไม่งั้นได้ "container name already in use") แล้วลบ Multibranch job · ข้อมูลใน `/home/docker02/appdata` ไม่หาย
 
 ### E. GitHub — Webhook
 

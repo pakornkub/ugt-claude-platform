@@ -340,7 +340,10 @@ pipeline {
                         // `docker-compose` (v1) has been EOL since mid-2023 and ships with
                         // no current Docker Engine; a host that still only has v1 needs
                         // this one line changed back (`docker-compose -f ...`).
-                        sh "docker compose -f ${composeFile} up -d --no-build"
+                        // -p pins the compose project to the job name (= image name): the project otherwise
+                        // comes from the workspace dir, and a concurrent "@2" workspace or a moved job then
+                        // treats the running container as foreign → "container name already in use" (ugt-hrms #309).
+                        sh "docker compose -p ${imageName} -f ${composeFile} up -d --no-build"
 
                         // Wait until container is healthy (max 4 minutes = 24 × 10s).
                         // Poll docker inspect health status — not wget — so the result
