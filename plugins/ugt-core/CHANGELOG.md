@@ -1,6 +1,6 @@
 # Changelog — ugt-core
 
-## Unreleased
+## 2.21.1 (2026-11-17)
 
 - **`ugt-requirements`: glossary ของ mattpocock bundle คือ `GLOSSARY.md`** — mattpocock-skills 1.3.1 เปลี่ยนชื่อจาก `CONTEXT.md` → ขั้น 3 อ่าน `GLOSSARY.md` (รุ่นเก่ายังเป็น `CONTEXT.md`) และย่อหน้า `/grill-with-docs` ตาม · origin ugt-rd-laboratory · 2026-11-17
 

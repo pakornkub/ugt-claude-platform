@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.90.1 (2026-11-17)
 
 - **full-setup `CLAUDE-block.md` (bundle mattpocock): glossary ชื่อ `GLOSSARY.md` ไม่ใช่ `CONTEXT.md`** — mattpocock-skills 1.3.1 (`domain-modeling`, `setup-matt-pocock-skills` → `docs/agents/domain.md`) เขียน/อ่าน `GLOSSARY.md` ที่ root แล้ว ไม่มีการอ้าง `CONTEXT.md` เหลือ แต่บล็อกใน CLAUDE.md ยังสั่งให้อ่าน/ห้ามแตะ `CONTEXT.md` → session อ่านไฟล์ผิดชื่อ ส่วน glossary จริงไม่มีใครอ่าน · เปลี่ยนทั้ง 3 จุดเป็น `GLOSSARY.md` (บอกว่ารุ่นเก่าใช้ `CONTEXT.md`) · โปรเจคที่ติดตั้งแล้ว: re-apply บล็อก ugt (full-setup step 4.1) · origin ugt-rd-laboratory · 2026-11-17
 
