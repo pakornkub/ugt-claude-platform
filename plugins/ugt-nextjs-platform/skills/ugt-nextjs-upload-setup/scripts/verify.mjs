@@ -222,6 +222,27 @@ check('Upload is a Route Handler, not a Server Action', () => {
     : { ok: true };
 });
 
+// SKILL.md §4.4: proxy.ts buffers every request body up to
+// experimental.proxyClientMaxBodySize (Next default 10 MB) — without it, uploads
+// between 10 MB and UPLOAD_MAX_BYTES reach the route truncated and fail
+check('next.config raises proxyClientMaxBodySize to the upload cap', () => {
+  if (!has('proxy.ts') && !has('middleware.ts')) return { ok: true, msg: 'no proxy.ts — nothing buffers the body' };
+  const cfg = ['next.config.ts', 'next.config.mjs', 'next.config.js'].find((f) => existsSync(join(ROOT, f)));
+  if (!cfg) return { ok: false, msg: 'no next.config.* at the project root' };
+  const m = code(cfg).match(/proxyClientMaxBodySize\s*:\s*(?:['"`](\d+(?:\.\d+)?)\s*(kb|mb|gb)['"`]|(\d[\d_]*))/i);
+  if (!m) return { ok: false, msg: `${cfg} has no experimental.proxyClientMaxBodySize — uploads over 10 MB fail with a 500 (SKILL.md §4.4)` };
+  const unit = { kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
+  const limit = m[3] ? Number(m[3].replace(/_/g, '')) : Number(m[1]) * unit[m[2].toLowerCase()];
+  // the cap as configured: env files and the compose default (${UPLOAD_MAX_BYTES:-N})
+  const caps = ['.env.example', '.env', 'docker-compose.yml', 'docker-compose.dev.yml']
+    .filter((f) => existsSync(join(ROOT, f)))
+    .flatMap((f) => [...readFileSync(join(ROOT, f), 'utf8').matchAll(/UPLOAD_MAX_BYTES(?:\s*[=:]\s*['"]?|:-)(\d+)/g)].map((x) => Number(x[1])));
+  const cap = Math.max(0, ...caps);
+  return cap > limit
+    ? { ok: false, msg: `${cfg} proxyClientMaxBodySize is ${limit} bytes but UPLOAD_MAX_BYTES is ${cap} — uploads between the two fail` }
+    : { ok: true };
+});
+
 check('Attachments model exists with soft-delete columns', () => {
   if (!has('prisma/schema.prisma')) return { ok: false, msg: 'No prisma/schema.prisma' };
   const schema = read('prisma/schema.prisma');
