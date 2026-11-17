@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
+// kit: ugt-nextjs-platform 4.91.0 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
 // kit-hash: c7c308a4b546
 'use server';
 

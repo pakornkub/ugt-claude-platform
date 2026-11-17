@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-upload-setup/app/api/files/route.ts
+// kit: ugt-nextjs-platform 4.91.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
 // kit-hash: de37aa3cb186
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
