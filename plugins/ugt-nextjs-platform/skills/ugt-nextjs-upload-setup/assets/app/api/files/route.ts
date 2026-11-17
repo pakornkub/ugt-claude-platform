@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.60.0 · ugt-nextjs-upload-setup/app/api/files/route.ts
-// kit-hash: 480106039b00
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-upload-setup/app/api/files/route.ts
+// kit-hash: de37aa3cb186
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
@@ -34,7 +34,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: { code: 'FORBIDDEN_UPLOAD' } }, { status: 403 });
   }
 
-  const form = await request.formData();
+  const maxBytes = Number(env.UPLOAD_MAX_BYTES);
+  const tooLarge = () =>
+    // ไม่มี message ที่นี่ — client แปล code + maxMb เอง (มติ 2.6: server คืน
+    // code เสมอ ไม่คืนข้อความสำเร็จรูป)
+    NextResponse.json(
+      { success: false, error: { code: 'FILE_TOO_LARGE', maxMb: Math.floor(maxBytes / 1024 / 1024) } },
+      { status: 413 }
+    );
+
+  // ตอบ 413 ก่อน parse: proxy.ts รันทุก request และตัด body ที่
+  // `experimental.proxyClientMaxBodySize` (default 10 MB) — body ที่โดนตัดครึ่ง
+  // ทำให้ formData() throw เป็น 500 (SKILL.md §4.4)
+  if (Number(request.headers.get('content-length') ?? 0) > maxBytes) return tooLarge();
+
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST' } }, { status: 400 });
+  }
   const file = form.get('file');
   const entityType = String(form.get('entityType') ?? '');
   const entityId = String(form.get('entityId') ?? '');
@@ -43,15 +62,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST' } }, { status: 400 });
   }
 
-  const maxBytes = Number(env.UPLOAD_MAX_BYTES);
-  if (file.size > maxBytes) {
-    // ไม่มี message ที่นี่ — client แปล code + maxMb เอง (มติ 2.6: server คืน
-    // code เสมอ ไม่คืนข้อความสำเร็จรูป)
-    return NextResponse.json(
-      { success: false, error: { code: 'FILE_TOO_LARGE', maxMb: Math.floor(maxBytes / 1024 / 1024) } },
-      { status: 413 }
-    );
-  }
+  if (file.size > maxBytes) return tooLarge(); // body ไม่มี Content-Length (chunked)
 
   const bytes = Buffer.from(await file.arrayBuffer());
 

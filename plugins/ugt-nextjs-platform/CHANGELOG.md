@@ -1,5 +1,10 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **upload-setup: แนบไฟล์เกิน 10 MB ได้ 500 ("อัปโหลดไม่สำเร็จ")** — ไฟล์ระหว่าง 10 MB ถึง `UPLOAD_MAX_BYTES` ล้มทุกครั้ง log `Request body exceeded 10MB` → `Failed to parse body as FormData` → `proxy.ts` ของ auth-setup รันทุก request และ buffer body ได้แค่ `experimental.proxyClientMaxBodySize` (default ของ Next 10 MB) route จึงได้ multipart ที่ขาดครึ่ง → §4.4 ตั้ง `proxyClientMaxBodySize` ใน `next.config.ts` = ขนาดเดียวกับ `UPLOAD_MAX_BYTES` · route ตอบ 413 `FILE_TOO_LARGE` เมื่อ `Content-Length` เกิน cap ก่อน parse และ 400 `BAD_REQUEST` เมื่อ parse body ไม่ได้ (เดิม 500) · แถว symptom + checklist ใหม่ · origin ugt-lube-monitoring (system test container: 15 MB ผ่าน, 27 MB ได้ข้อความ "ใหญ่เกิน") · 2026-11-17 · asset: ugt-nextjs-upload-setup/app/api/files/route.ts
+- **auth-setup: `/admin/setup` ไม่เขียน audit** — คนแรกที่กดรับสิทธิ์ Administrator ทั้งระบบไม่มีแถวใน `/admin/audit-logs` ขัด contract core `auth.md` (audit หลังทุก privileged mutation) → `initializeAdminAction` ไม่มี audit call → เพิ่ม `ADMIN_BOOTSTRAP: 'admin.bootstrap'` ใน `audit-actions.ts` + เขียน ActivityLog (actor = admin คนใหม่, detail = role id/name + จำนวน permission) หลัง assign role แบบ non-blocking · `audit-logging.md` / `rbac.md` / `verification.md` ตาม · origin ugt-lube-monitoring · 2026-11-17 · asset: ugt-nextjs-auth-setup/lib/actions/admin-setup.ts, ugt-nextjs-auth-setup/lib/audit-actions.ts
+
 ## 4.90.1 (2026-11-17)
 
 - **full-setup `CLAUDE-block.md` (bundle mattpocock): glossary ชื่อ `GLOSSARY.md` ไม่ใช่ `CONTEXT.md`** — mattpocock-skills 1.3.1 (`domain-modeling`, `setup-matt-pocock-skills` → `docs/agents/domain.md`) เขียน/อ่าน `GLOSSARY.md` ที่ root แล้ว ไม่มีการอ้าง `CONTEXT.md` เหลือ แต่บล็อกใน CLAUDE.md ยังสั่งให้อ่าน/ห้ามแตะ `CONTEXT.md` → session อ่านไฟล์ผิดชื่อ ส่วน glossary จริงไม่มีใครอ่าน · เปลี่ยนทั้ง 3 จุดเป็น `GLOSSARY.md` (บอกว่ารุ่นเก่าใช้ `CONTEXT.md`) · โปรเจคที่ติดตั้งแล้ว: re-apply บล็อก ugt (full-setup step 4.1) · origin ugt-rd-laboratory · 2026-11-17

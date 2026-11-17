@@ -65,7 +65,8 @@ Rows tagged `[SSO]` / `[LDAP]` / `[Local]` / `[Directory]` / `[Scope]` /
       `/admin/setup` (no blank permission-less page); after bootstrap the
       redirect stops for everyone
 - [ ] `/admin/setup` works: one click grants Administrator and redirects to
-      `/admin/users`; revisiting `/admin/setup` redirects away
+      `/admin/users`; revisiting `/admin/setup` redirects away ·
+      `/admin/audit-logs` shows one `admin.bootstrap` row for that user
 - [ ] NavUser (bottom of the sidebar): opening the menu and clicking
       "บัญชีผู้ใช้" really opens the profile card, and "ออกจากระบบ" really logs
       out — this catches a leftover Radix `onSelect`/`asChild` (§7)
