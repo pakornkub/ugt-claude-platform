@@ -23,7 +23,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-nextjs-platform` | 4.90.1 | ตัวช่วย 12 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.4 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.8 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
-| `ugt-devops-mcp` | 0.1.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
+| `ugt-devops-mcp` | 0.1.6 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
 | `ugt-core` | 2.21.1 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -349,6 +349,10 @@ update ทับให้ ไฟล์ที่โปรเจคแก้เอ
      design-preview ตรวจด้วยสคริปต์ถัดไป)
    - `check-preview-tokens` เช็คว่า**สี**ใน design-preview ยังตรงกับ token ที่
      ติดตั้งจริง — โครงหน้าและข้อความยังต้องดูด้วยตาตามข้อ 4
+   - **แก้ `plugins/ugt-devops-mcp/src/` หรือ bump dependency ของมัน** → build ใหม่แล้ว
+     commit `mcp/` ด้วย: `cd scripts/devops-mcp && npm ci && node build.mjs`
+     (`--check` = ยืนยันว่า `mcp/` ตรงกับ `src/`) · plugin นี้ต้องไม่มี
+     `package.json` เพราะ Claude Code จะรัน `npm ci` ตอนติดตั้ง ซึ่ง timeout 60 วินาทีบนเน็ตบริษัท
 6. `claude plugin validate ./plugins/<ชื่อ> --strict`
 7. tag แบบ `<plugin>--v<version>` แล้ว push พร้อม tag (ถ้ามี dependency ใหม่
    push tag ของ dependency ก่อน) · **ยกเว้น `ugt-python-platform`,
