@@ -1,6 +1,6 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.91.1 (2026-11-17)
 
 - **upload-setup: โปรเจค Next.js 15 ตั้งค่าไม่ติด** — 4.91.0 สั่ง `experimental.proxyClientMaxBodySize` อย่างเดียว แต่ Next 15 (auth ลง `middleware.ts`) ใช้ชื่อ `middlewareClientMaxBodySize` และเงียบเฉยกับชื่อใหม่ → ทำตาม §4.4 แล้วไฟล์เกิน 10 MB ยังได้ 500 · §4.4 + แถวอาการ + checklist บอกทั้งสองชื่อ · `verify.mjs` อ่านเวอร์ชัน `next` จาก package.json แล้ว fail เมื่อ Next 15 ใช้ `proxyClientMaxBodySize` (รับ `middlewareClientMaxBodySize` บน 16 ด้วย เพราะยังเป็น alias) · eval ใหม่ `module-upload-after-auth` (fixture Next 15) + grader `admin-setup-audited` ใน `module-auth-after-design` · พบตอนรัน eval หลัง release 4.91.0
 
