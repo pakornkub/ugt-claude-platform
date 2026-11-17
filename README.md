@@ -104,7 +104,15 @@ plugin ของ ugt ระดับ project` ให้รันคำสั่�
 Security → Generate token แบบ User) · token เก็บที่เดียวกับ credential ที่ Claude Code ใช้ login (macOS: Keychain · Windows: `~/.claude/.credentials.json` ในโปรไฟล์ของ user)
 ไม่อยู่ใน env var · แก้ค่าทีหลัง: `/plugin` → `ugt-devops-mcp` → configure ·
 ใช้แค่ตัวเดียวก็ได้ ตัวที่ไม่กรอกจะไม่ทำงาน (ขึ้น error ใน `/mcp` เฉย ๆ) ·
-แนะนำ **Node ≥ 22.15** (plugin ตั้ง `NODE_USE_SYSTEM_CA=1` ให้ Node ใช้ cert store ของเครื่อง — จำเป็นเพราะ `ugtweb` ไม่ส่ง intermediate cert มา · Node เก่ากว่านี้ไม่พัง แต่จะต่อ Jenkins ที่ https ไม่ได้)
+แนะนำ **Node ≥ 22.15** (plugin ตั้ง `NODE_USE_SYSTEM_CA=1` ให้ Node ใช้ cert store ของเครื่องด้วย · Node เก่ากว่านี้ไม่พัง แค่ใช้ cert ที่มากับ Node อย่างเดียว)
+
+**`/mcp` ขึ้น connected แต่ทุก tool ตอบ `fetch failed (UNABLE_TO_VERIFY_LEAF_SIGNATURE)`** —
+connected แปลว่าแค่โปรเซสเปิดขึ้น ยังไม่ได้เรียก server · รหัสนี้แปลว่า **server ส่ง cert มาไม่ครบ chain**
+(ส่งแค่ใบของเว็บ ไม่ส่ง intermediate) browser เปิดได้ปกติเพราะไปโหลด intermediate มาเอง แต่ Node/curl/Python ไม่โหลด
+→ บางเครื่องผ่าน (Windows เคย cache intermediate ไว้) บางเครื่องไม่ผ่าน · เช็คด้วย
+`openssl s_client -connect <host>:443 -servername <host> -showcerts` ต้องเห็น cert 2 ใบและ `Verify return code: 0` ·
+แก้ที่ server: ต่อ intermediate ไว้ท้ายไฟล์ที่ `ssl_certificate` ของ nginx ชี้ (ใบเว็บก่อน ตามด้วย intermediate) แล้ว `nginx -s reload`
+— เคยเกิดกับ `ugtweb.ube.co.th` หลังต่ออายุ cert ก.ย. 2026 (แก้แล้ว 2026-11-17) · **อย่า**แก้ด้วย `NODE_TLS_REJECT_UNAUTHORIZED=0` (ปิดการตรวจ cert ทั้งเครื่อง)
 
 **เคยติดตั้งด้วยสคริปต์ `install-jenkins-mcp.ps1` / `install-sonarqube-mcp.ps1`**
 → ลบของเดิมก่อน ไม่งั้น tool ขึ้นซ้ำสองชุด แล้ว restart Claude Code (ลืมก็ไม่เป็นไร —
