@@ -1,4 +1,4 @@
-// node --test plugins/ugt-devops-mcp/mcp/http.test.mjs
+// node --test plugins/ugt-devops-mcp/src/http.test.mjs
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apiUrl, env, fetchError, getJson } from './http.mjs';

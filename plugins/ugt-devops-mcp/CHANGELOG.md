@@ -1,5 +1,10 @@
 # Changelog — ugt-devops-mcp
 
+## 0.1.6 (2026-11-17)
+
+- **ติดตั้ง/อัปเดตไม่ต้องรัน npm แล้ว** — เดิม plugin มี `package.json` ทำให้ Claude Code รัน `npm ci` ตอน install/update ซึ่งมี timeout 60 วินาที แต่บนเน็ตบริษัทใช้ 47–55 วินาที (95 แพ็กเกจ) · 2026-11-17 อัปเดตเป็น 0.1.5 แล้วเกินเวลา → ไม่มี `node_modules` → server พังตอนเริ่ม (`ERR_MODULE_NOT_FOUND @modelcontextprotocol/sdk`) และ `claude mcp list` ขึ้น `Connection closed` ทั้ง Jenkins และ SonarQube · ตอนนี้ bundle SDK + zod ด้วย esbuild ไว้ใน `mcp/` (commit ไว้ในตัว plugin · server ละไฟล์ + chunk ร่วม ~1.3 MB) · source ย้ายไป `src/` · `package.json`/lock + ตัว build อยู่ที่ `scripts/devops-mcp/` นอก plugin · `node build.mjs --check` ยืนยันว่า `mcp/` ตรงกับ `src/` · ทดสอบจากสำเนาที่ไม่มี `node_modules`: ทั้งสอง server ตอบ `initialize`/`tools/list`/`tools/call` ได้
+- **เครื่องที่อัปเดต 0.1.5 ไม่สำเร็จ**: อัปเดตเป็น 0.1.6 ได้เลยโดยไม่ต้องรัน npm เอง (ถ้ายังค้างที่ 0.1.5 และอยากใช้ก่อน: `npm ci --ignore-scripts --workspaces=false --no-audit --no-fund` ในโฟลเดอร์ `~/.claude/plugins/cache/ugt/ugt-devops-mcp/0.1.5/`)
+
 ## 0.1.5 (2026-11-17)
 
 แก้ตามผล code review หลัง merge 0.1.4:
