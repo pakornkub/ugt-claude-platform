@@ -222,24 +222,29 @@ check('Upload is a Route Handler, not a Server Action', () => {
     : { ok: true };
 });
 
-// SKILL.md §4.4: proxy.ts buffers every request body up to
-// experimental.proxyClientMaxBodySize (Next default 10 MB) — without it, uploads
-// between 10 MB and UPLOAD_MAX_BYTES reach the route truncated and fail
-check('next.config raises proxyClientMaxBodySize to the upload cap', () => {
+// SKILL.md §4.4: proxy.ts (Next 15: middleware.ts) buffers every request body up
+// to experimental.proxyClientMaxBodySize (Next 15: middlewareClientMaxBodySize,
+// still an alias on 16), default 10 MB — without it, uploads between 10 MB and
+// UPLOAD_MAX_BYTES reach the route truncated and fail
+check('next.config raises the proxy body limit to the upload cap', () => {
   if (!has('proxy.ts') && !has('middleware.ts')) return { ok: true, msg: 'no proxy.ts — nothing buffers the body' };
   const cfg = ['next.config.ts', 'next.config.mjs', 'next.config.js'].find((f) => existsSync(join(ROOT, f)));
   if (!cfg) return { ok: false, msg: 'no next.config.* at the project root' };
-  const m = code(cfg).match(/proxyClientMaxBodySize\s*:\s*(?:['"`](\d+(?:\.\d+)?)\s*(kb|mb|gb)['"`]|(\d[\d_]*))/i);
-  if (!m) return { ok: false, msg: `${cfg} has no experimental.proxyClientMaxBodySize — uploads over 10 MB fail with a 500 (SKILL.md §4.4)` };
+  const pkg = existsSync(join(ROOT, 'package.json')) ? JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) : {};
+  const nextMajor = Number(String(pkg.dependencies?.next ?? '').match(/\d+/)?.[0] ?? 16);
+  const key = nextMajor < 16 ? 'middlewareClientMaxBodySize' : 'proxyClientMaxBodySize';
+  const m = code(cfg).match(/(proxy|middleware)ClientMaxBodySize\s*:\s*(?:['"`](\d+(?:\.\d+)?)\s*(kb|mb|gb)['"`]|(\d[\d_]*))/i);
+  if (!m) return { ok: false, msg: `${cfg} has no experimental.${key} — uploads over 10 MB fail with a 500 (SKILL.md §4.4)` };
+  if (nextMajor < 16 && m[1] === 'proxy') return { ok: false, msg: `Next ${nextMajor} ignores proxyClientMaxBodySize — rename it to experimental.middlewareClientMaxBodySize (SKILL.md §4.4)` };
   const unit = { kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
-  const limit = m[3] ? Number(m[3].replace(/_/g, '')) : Number(m[1]) * unit[m[2].toLowerCase()];
+  const limit = m[4] ? Number(m[4].replace(/_/g, '')) : Number(m[2]) * unit[m[3].toLowerCase()];
   // the cap as configured: env files and the compose default (${UPLOAD_MAX_BYTES:-N})
   const caps = ['.env.example', '.env', 'docker-compose.yml', 'docker-compose.dev.yml']
     .filter((f) => existsSync(join(ROOT, f)))
     .flatMap((f) => [...readFileSync(join(ROOT, f), 'utf8').matchAll(/UPLOAD_MAX_BYTES(?:\s*[=:]\s*['"]?|:-)(\d+)/g)].map((x) => Number(x[1])));
   const cap = Math.max(0, ...caps);
   return cap > limit
-    ? { ok: false, msg: `${cfg} proxyClientMaxBodySize is ${limit} bytes but UPLOAD_MAX_BYTES is ${cap} — uploads between the two fail` }
+    ? { ok: false, msg: `${cfg} ${m[1]}ClientMaxBodySize is ${limit} bytes but UPLOAD_MAX_BYTES is ${cap} — uploads between the two fail` }
     : { ok: true };
 });
 

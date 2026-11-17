@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **upload-setup: โปรเจค Next.js 15 ตั้งค่าไม่ติด** — 4.91.0 สั่ง `experimental.proxyClientMaxBodySize` อย่างเดียว แต่ Next 15 (auth ลง `middleware.ts`) ใช้ชื่อ `middlewareClientMaxBodySize` และเงียบเฉยกับชื่อใหม่ → ทำตาม §4.4 แล้วไฟล์เกิน 10 MB ยังได้ 500 · §4.4 + แถวอาการ + checklist บอกทั้งสองชื่อ · `verify.mjs` อ่านเวอร์ชัน `next` จาก package.json แล้ว fail เมื่อ Next 15 ใช้ `proxyClientMaxBodySize` (รับ `middlewareClientMaxBodySize` บน 16 ด้วย เพราะยังเป็น alias) · eval ใหม่ `module-upload-after-auth` (fixture Next 15) + grader `admin-setup-audited` ใน `module-auth-after-design` · พบตอนรัน eval หลัง release 4.91.0
+
 ## 4.91.0 (2026-11-17)
 
 - **upload-setup: แนบไฟล์เกิน 10 MB ได้ 500 ("อัปโหลดไม่สำเร็จ")** — ไฟล์ระหว่าง 10 MB ถึง `UPLOAD_MAX_BYTES` ล้มทุกครั้ง log `Request body exceeded 10MB` → `Failed to parse body as FormData` → `proxy.ts` ของ auth-setup รันทุก request และ buffer body ได้แค่ `experimental.proxyClientMaxBodySize` (default ของ Next 10 MB) route จึงได้ multipart ที่ขาดครึ่ง → §4.4 ตั้ง `proxyClientMaxBodySize` ใน `next.config.ts` = ขนาดเดียวกับ `UPLOAD_MAX_BYTES` · route ตอบ 413 `FILE_TOO_LARGE` เมื่อ `Content-Length` เกิน cap ก่อน parse และ 400 `BAD_REQUEST` เมื่อ parse body ไม่ได้ (เดิม 500) · แถว symptom + checklist ใหม่ · `verify.mjs` ด่านใหม่: มี `proxy.ts` แต่ `next.config` ไม่ตั้ง `proxyClientMaxBodySize` หรือตั้งต่ำกว่า `UPLOAD_MAX_BYTES` (`.env*` / ค่า default ใน compose) → ✘ · **โปรเจคที่ติดตั้ง upload ไว้แล้ว**: kit-sync ได้แค่ route ใหม่ ไม่แตะ `next.config.ts` → เพิ่ม `experimental.proxyClientMaxBodySize` เอง (§4.4) ไม่งั้นไฟล์เกิน 10 MB ยังอัปโหลดไม่ได้ (เปลี่ยนจาก 500 เป็น 413/400) · origin ugt-lube-monitoring (system test container: 15 MB ผ่าน, 27 MB ได้ข้อความ "ใหญ่เกิน") · 2026-11-17 · asset: ugt-nextjs-upload-setup/app/api/files/route.ts
