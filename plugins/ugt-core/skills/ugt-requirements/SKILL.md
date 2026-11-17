@@ -42,7 +42,8 @@ scaffolds, or writes code — the handoff at the end is where its job stops.
    whole repo unprompted.
 2. Read **every** readable file in the folder (recursively): Markdown, text,
    CSV, images and PDFs via the Read tool.
-3. If a root `CONTEXT.md` (domain glossary) or `docs/adr/` exists — written
+3. If a root `GLOSSARY.md` (domain glossary; `CONTEXT.md` in projects set up
+   with an older mattpocock-skills) or `docs/adr/` exists — written
    by the mattpocock pipeline's `domain-modeling`, and they keep growing
    with every grill — always read them as sources too: list them in the
    overview's **Sources** section like any other file and cite them in the
@@ -122,7 +123,7 @@ an unmarked guess is worse than a gap, because nobody knows to question it.
 
 That pipeline already owns "find what the documents don't say": `/wayfinder`
 (a whole project, decision tickets on the tracker) and `/grill-with-docs`
-(one feature, writing `CONTEXT.md`/ADRs as it goes). Running the full brief
+(one feature, writing `GLOSSARY.md`/ADRs as it goes). Running the full brief
 next to it produces a second, competing set of open questions. So when
 `mattpocock-skills` is installed, this skill writes **only**:
 

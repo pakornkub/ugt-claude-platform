@@ -209,7 +209,7 @@ Claude ถามไม่กี่ข้อ (สีหลักของแบ�
 | --- | --- | --- |
 | `/setup-matt-pocock-skills` | **ครั้งเดียวต่อโปรเจค ก่อนเริ่มใช้ flow** (รันหลัง full-setup ก็ได้ — สองตัวแก้ `CLAUDE.md` คนละส่วน ไม่ทับกัน) | ตั้งค่า issue tracker + label ที่ `/to-spec` และ `/to-tickets` ต้องใช้ — ข้ามขั้นนี้แล้ว flow จะสะดุดตั้งแต่ `/to-spec` |
 | `/ugt-requirements` | มีโฟลเดอร์เอกสาร requirement | บน bundle นี้ทำงาน **thin mode**: สรุประบบ + รายชื่อ feature ลง board เท่านั้น — "หาสิ่งที่เอกสารไม่ได้บอก" เป็นงานของ `/wayfinder` (ทั้งโปรเจค) หรือ `/grill-with-docs` (ทีละ feature) |
-| `/grill-with-docs` | มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม | AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น `CONTEXT.md`/ADR ในโปรเจค |
+| `/grill-with-docs` | มี requirement/เอกสารอยู่แล้วแต่ยังมีจุดกำกวม | AI ไล่ถามจนไม่มีจุดที่ต้องเดาเอง เก็บเป็น `GLOSSARY.md`/ADR ในโปรเจค |
 | `/to-spec` | requirement ชัดแล้ว | เปลี่ยนบทสนทนาให้กลายเป็น spec พร้อมทำต่อ |
 | `/to-tickets` | มี spec แล้ว | แตกเป็นงานย่อย พร้อมลำดับก่อน-หลัง |
 | `/implement` | มี ticket แล้ว | ลงมือเขียนโค้ดจริง (ขับ `/tdd` ข้างในและปิดท้ายด้วย `/code-review` ให้เอง) |
@@ -222,7 +222,7 @@ superpowers ที่เดินทั้ง pipeline เอง) ยกเว�
 แลกมาด้วยการคุมได้ละเอียดกว่าและ token ต่ำกว่า ลำดับเต็มพร้อมทางแยก
 (prototype/triage/wayfinder) ดูที่ `/ask-matt`
 
-`CONTEXT.md` และ `docs/adr/` ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ
+`GLOSSARY.md` และ `docs/adr/` ที่คำสั่งพวกนี้สร้างเป็นคนละที่เก็บกับ
 `docs/project-context/` โดยตั้งใจ — Claude จะอ่านทั้งคู่ตอนเริ่มงานให้เอง
 ไม่ต้อง copy เนื้อหาข้ามที่กันเอง · บน bundle นี้ **ไม่มี `decisions.md`**
 (มติอยู่ที่ ADR ที่เดียว) และ full-setup วาง `CODING_STANDARDS.md` ไว้ให้

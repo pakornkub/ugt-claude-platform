@@ -1,5 +1,9 @@
 # Changelog — ugt-core
 
+## Unreleased
+
+- **`ugt-requirements`: glossary ของ mattpocock bundle คือ `GLOSSARY.md`** — mattpocock-skills 1.3.1 เปลี่ยนชื่อจาก `CONTEXT.md` → ขั้น 3 อ่าน `GLOSSARY.md` (รุ่นเก่ายังเป็น `CONTEXT.md`) และย่อหน้า `/grill-with-docs` ตาม · origin ugt-rd-laboratory · 2026-11-17
+
 ## 2.21.0 (2026-11-16)
 
 - **contract `auth.md` § Accounts: โดเมนหลักขององค์กร = `ube.co.th`** — มติผู้ดูแล 2026-11-16 · รายการโดเมนของโปรเจคเป็น `ube.co.th,ube.com` (ตัวแรก = canonical) · อีเมลที่เก็บ/แสดง/ส่งเป็น `@ube.co.th` เสมอ

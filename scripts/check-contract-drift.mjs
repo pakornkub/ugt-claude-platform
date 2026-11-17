@@ -235,16 +235,16 @@ const CHECKS = [
     },
   },
   {
-    // review 2026-09-01: the CONTEXT.md/docs-adr vs docs/project-context
+    // review 2026-09-01: the GLOSSARY.md/docs-adr vs docs/project-context
     // separation rule lives in three places — pin that each copy names all
     // three homes (wording may differ; the cross-reference must not vanish)
-    name: 'Knowledge homes: CONTEXT.md + docs/adr/ + docs/project-context/ cross-referenced',
+    name: 'Knowledge homes: GLOSSARY.md + docs/adr/ + docs/project-context/ cross-referenced',
     files: {
       [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [
-        /CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//,
+        /GLOSSARY\.md/, /docs\/adr\//, /docs\/project-context\//,
       ],
-      'README.md': [/CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//],
-      'docs/web/index.html': [/CONTEXT\.md/, /docs\/adr\//, /docs\/project-context\//],
+      'README.md': [/GLOSSARY\.md/, /docs\/adr\//, /docs\/project-context\//],
+      'docs/web/index.html': [/GLOSSARY\.md/, /docs\/adr\//, /docs\/project-context\//],
     },
   },
   {

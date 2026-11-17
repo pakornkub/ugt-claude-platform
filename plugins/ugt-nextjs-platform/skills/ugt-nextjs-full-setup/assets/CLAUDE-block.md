@@ -166,12 +166,12 @@ test/lint suite) and update the board via `/ugt-handoff`.
   shadowing a platform skill — extend under a new name
 <!-- [PIPELINE:mattpocock] -->
 - **โปรเจคที่ใช้ mattpocock bundle**: `grill-with-docs`/`domain-modeling`
-  สร้าง/ดูแล `CONTEXT.md` (root, glossary) และ `docs/adr/`
+  สร้าง/ดูแล `GLOSSARY.md` (root, glossary — bundle รุ่นเก่าใช้ชื่อ `CONTEXT.md`) และ `docs/adr/`
   (การตัดสินใจทางเทคนิค) เอง — คนละที่เก็บกับ `docs/project-context/`
   โดยตั้งใจ **ห้าม copy เนื้อหาข้ามกัน**: เริ่มงานอ่านทั้งคู่
-  (`docs/project-context/00-index.md` + `CONTEXT.md`/`docs/adr/` ถ้ามี)
+  (`docs/project-context/00-index.md` + `GLOSSARY.md`/`docs/adr/` ถ้ามี)
   แต่เขียนแค่ที่เจ้าของมันเขียน — `/ugt-handoff` ดูแลเฉพาะ
-  `docs/project-context/` + `handoff.md` ไม่แตะ `CONTEXT.md` ไม่แก้ ADR เดิม — มติใหม่ที่ยังไม่มี ADR
+  `docs/project-context/` + `handoff.md` ไม่แตะ `GLOSSARY.md` ไม่แก้ ADR เดิม — มติใหม่ที่ยังไม่มี ADR
   เพิ่มเป็นไฟล์ใหม่ `docs/adr/NNNN-<slug>.md` ตามรูปแบบเดิมได้ (ugt-handoff ตาราง decisions)
 - `.scratch/<feature>/` (spec + tickets + `Status:` ต่อ ticket) เป็นของ
   `/to-spec`/`/to-tickets`/`/implement` — ระดับ **ticket** · `board.md` +
