@@ -131,7 +131,9 @@ Route group `(admin-setup)` → `/admin/setup` (templates in
    2. seed **ALL_PERMISSIONS** → `permission.createMany` (table known empty)
    3. create `Administrator` role, `isSystem: true`, connected to every permission
    4. assign `roleId` to the current user
-   5. `redirect('/admin/users')`
+   5. audit `admin.bootstrap` (actor = the new admin, detail = role id/name +
+      permission count) — non-blocking
+   6. `redirect('/admin/users')`
 
 Operational flow for a fresh deployment: first person logs in (any method) →
 visits `/admin/setup` → clicks once → becomes Administrator → lands on

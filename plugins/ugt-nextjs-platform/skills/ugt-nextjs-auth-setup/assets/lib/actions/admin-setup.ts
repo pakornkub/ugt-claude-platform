@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.46.1 · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
-// kit-hash: ec03fafd3ab8
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/lib/actions/admin-setup.ts
+// kit-hash: c7c308a4b546
 'use server';
 
 // lib/actions/admin-setup.ts — first-admin bootstrap Server Action.
@@ -10,6 +10,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { syncPermissionsIfNeeded } from '@/lib/permissions-sync';
 import { isAdminInitialized } from '@/lib/get-user-permissions';
+import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 
 type PermissionIdRow = { id: string };
 
@@ -59,6 +60,18 @@ export async function initializeAdminAction(): Promise<{
     where: { id: session.user.id },
     data: { roleId: adminRole.id },
   });
+
+  // 5. Audit — คนแรกที่ได้สิทธิ์ทั้งระบบต้องมีร่องรอย (contract auth.md: audit
+  // หลังทุก privileged mutation) · non-blocking เหมือน auditLog ใน admin-roles.ts
+  await prisma.activityLog
+    .create({
+      data: {
+        userId: session.user.id,
+        action: AUDIT_ACTIONS.ADMIN_BOOTSTRAP,
+        detail: JSON.stringify({ roleId: adminRole.id, roleName: adminRole.name, permissionCount: permissions.length }),
+      },
+    })
+    .catch(() => {});
 
   redirect('/admin/users'); // shipped by ugt-nextjs-auth-setup's (admin) route group
 }

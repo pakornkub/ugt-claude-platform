@@ -60,6 +60,7 @@ export const AUDIT_ACTIONS = {
   LOGIN_FAILED: 'login.failed',
   LOGOUT: 'logout',
   LOGOUT_SSO: 'logout.sso',
+  ADMIN_BOOTSTRAP: 'admin.bootstrap',
   USERS_CREATE: 'users.create',
   USERS_ROLE_ASSIGN: 'users.role-assign',
   USERS_PASSWORD_SET: 'users.password-set',
@@ -74,7 +75,7 @@ export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
 
 **Org-mandated set** (contract §2 item 4 — the assets already write all of
 these): `login.success` · `login.failed` · `logout` · `logout.sso` ·
-`users.create` · `users.role-assign` · `roles.create` · `roles.update` ·
+`admin.bootstrap` · `users.create` · `users.role-assign` · `roles.create` · `roles.update` ·
 `roles.delete`, plus for local accounts `password.reset.requested` ·
 `password.reset` · `password.reset.refused` · `password.change` ·
 `password.change.failed` · `users.password-set`, and with an HR view

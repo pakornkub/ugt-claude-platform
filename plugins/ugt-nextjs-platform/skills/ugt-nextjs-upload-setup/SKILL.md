@@ -7,7 +7,8 @@ description: >
   `Attachments` table, an upload Route Handler, a permission-guarded download
   route, and the compose/Dockerfile changes the volume needs. Reach for it too
   on upload symptoms with documented causes here: files vanishing after a
-  deploy, uploads failing around 1 MB, a 413 that never reaches the app, files
+  deploy, uploads failing around 1 MB, uploads over 10 MB failing with a 500
+  ("แนบไฟล์เกิน 10 MB ไม่ได้"), a 413 that never reaches the app, files
   readable by anyone who knows the URL, an uploaded .svg/.html running as script
   on your own domain. Needs database, auth and the org UI kit
   (ugt-nextjs-design-setup) installed first. Not for exporting/downloading
@@ -23,6 +24,7 @@ description: >
 | Uploaded files vanish after a deploy | stored inside the container instead of on a volume |
 | Uploads fail around 1 MB | Server Action `bodySizeLimit` default — use the Route Handler in this kit |
 | A 413 that never reaches the app | reverse-proxy body limit |
+| Files between 10 MB and `UPLOAD_MAX_BYTES` fail with a 500 / "อัปโหลดไม่สำเร็จ" — log `Request body exceeded 10MB` then `Failed to parse body as FormData` | `proxy.ts` runs on every request and buffers the body only up to `experimental.proxyClientMaxBodySize` (Next default **10 MB**), so the route gets a truncated multipart body — set it in `next.config.ts` (§4.4); the kit route answers 413/400 instead of 500 |
 | Files readable by anyone who knows the URL | served from `public/` — no auth there, ever |
 | An uploaded `.svg`/`.html` runs as script on your domain | served inline with its own MIME type instead of `application/octet-stream` + attachment |
 | `verify.mjs` fails on `lib/virus-scan.ts` / "no clamav service" / "No app/api/files/route.ts" in a project that chose **no** virus scan (the default, §3 Q5) or keeps its code under `src/` | the scan-off detection only recognised a root `app/` layout; fixed in 4.74.0 — the scanner checks run only when `lib/virus-scan.ts` or `CLAMAV_HOST` exists, and every path also resolves under `src/` |
@@ -198,6 +200,21 @@ it (cicd `references/scheduled-jobs.md`: container name, never `http://app`; sch
 These files are written by cicd-setup — when running under full-setup, this
 step waits until after cicd-setup and runs as a close-out.
 
+**`next.config.ts` — raise the proxy body limit to the upload cap.** auth-setup's
+`proxy.ts` runs on every request (the upload route included) and buffers the
+body only up to `experimental.proxyClientMaxBodySize` — Next's default is
+**10 MB**, so anything bigger reaches the route truncated and `formData()`
+throws. Set it to §3 Q1's size (the same number as `UPLOAD_MAX_BYTES` and the
+reverse-proxy limit in table H) — a literal, next.config is read at build time:
+
+```ts
+experimental: {
+  // proxy.ts buffers every request body — the 10 MB default cuts larger uploads.
+  // Keep equal to UPLOAD_MAX_BYTES (env) and the reverse-proxy limit.
+  proxyClientMaxBodySize: '__UPLOAD_MAX_MB__mb',
+},
+```
+
 ### 4.5 Handoff to the admin team
 
 Fill the template rows, never append prose (create the file from
@@ -282,6 +299,9 @@ Then by hand — these are the ones that catch real breakage:
 - [ ] Upload an `.svg` containing `<script>` → downloads as a file, never renders
 - [ ] Upload something just over `UPLOAD_MAX_BYTES` → clean 413 from the app
       (if the proxy answers instead, raise its limit)
+- [ ] Upload a file between 10 MB and `UPLOAD_MAX_BYTES` → 201 and the file
+      downloads intact (a 500 / `Failed to parse body as FormData` means
+      `proxyClientMaxBodySize` is missing from `next.config.ts`, §4.4)
 - [ ] `canReadAttachment` no longer returns `false` for every case
 - [ ] [SWEEP] the dry run (§4.7) answers 200 with `"dryRun":true` and counts that
       make sense; the same call without the bearer header → 401 · `OWNERS` has an
