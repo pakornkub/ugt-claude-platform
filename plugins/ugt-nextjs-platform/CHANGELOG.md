@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **full-setup `CLAUDE-block.md` (bundle mattpocock): glossary ชื่อ `GLOSSARY.md` ไม่ใช่ `CONTEXT.md`** — mattpocock-skills 1.3.1 (`domain-modeling`, `setup-matt-pocock-skills` → `docs/agents/domain.md`) เขียน/อ่าน `GLOSSARY.md` ที่ root แล้ว ไม่มีการอ้าง `CONTEXT.md` เหลือ แต่บล็อกใน CLAUDE.md ยังสั่งให้อ่าน/ห้ามแตะ `CONTEXT.md` → session อ่านไฟล์ผิดชื่อ ส่วน glossary จริงไม่มีใครอ่าน · เปลี่ยนทั้ง 3 จุดเป็น `GLOSSARY.md` (บอกว่ารุ่นเก่าใช้ `CONTEXT.md`) · โปรเจคที่ติดตั้งแล้ว: re-apply บล็อก ugt (full-setup step 4.1) · origin ugt-rd-laboratory · 2026-11-17
+
 ## 4.90.0 (2026-11-16)
 
 - **auth: `ORG_EMAIL_DOMAINS=ube.co.th,ube.com` เป็นค่ามาตรฐาน (`ube.co.th` = โดเมนหลัก)** — มติผู้ดูแล 2026-11-16 (contract core `auth.md`) · `env.example` ใส่ค่านี้เลยแทน `__COMPANY_DOMAIN__` · interview ข้อ 4b ไม่ต้องถามแล้ว (ถามเฉพาะโปรเจคของ org อื่น) · ตัวอย่างใน `lib/org-email.ts` + test, compose ทั้ง 2 ไฟล์, `org-identity.md`, `verification.md`, rule ตาม · `verify.mjs`: ด่าน `ORG_EMAIL_DOMAINS` ล้มถ้ารายการมีโดเมน ube แต่ตัวแรกไม่ใช่ `ube.co.th` · **โปรเจคที่ตั้ง `ube.com` เป็นตัวแรกไว้**: สลับเป็น `ube.co.th,ube.com` ใน env ของ prod/dev — แถวเดิมถูกเขียนเป็น `@ube.co.th` เองตอน login ครั้งถัดไป (SSO: session hook · LDAP: upsert) · asset: ugt-nextjs-auth-setup/lib/org-email.ts, ugt-nextjs-auth-setup/lib/org-email.test.ts
