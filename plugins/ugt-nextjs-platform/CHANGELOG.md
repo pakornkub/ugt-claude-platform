@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **cicd-setup: ตาราง A ของ `docs/admin-handoff.md` = script ให้ DBA รัน ไม่ใช่ขั้นตอนทำมือใน SSMS** — asset ใหม่ `assets/admin-db-setup.template.sql` render คู่กับ handoff (§4.6) เป็น `docs/admin-db-setup.sql` (prod/dev server เดียวกัน) หรือ `-prod.sql` + `-dev.sql` (แยก server → `dbcreator` อยู่ไฟล์ dev เท่านั้น) · SQLCMD mode, idempotent, `Thai_CI_AS`, query ตรวจผลท้ายแต่ละ database · interview Q4a–c: ชื่อ login (หรือเว้นว่างให้ DBA) · prod/dev server เดียวกันไหม · สิทธิ์ `db_datareader`/`db_datawriter`/`db_ddladmin`/`GRANT EXECUTE` (default ตามมติ 2026-11-16) หรือ `db_owner` · รหัสผ่านไม่ถาม ไม่อยู่ใน git — `:setvar LoginPassword ""` เสมอ DBA กรอกตอนรัน · `verify.mjs` ด่านใหม่: ตาราง A ลิงก์ script → ไฟล์ต้องมี ไม่มี placeholder/tag ค้าง และ `LoginPassword` ว่าง (✘) · ตาราง A แบบทำมือเดิม → ! ให้ re-render · **โปรเจคที่ติดตั้งแล้ว**: render template เองแล้วแทนตาราง A (§4.6) · origin ugt-rd-laboratory (ทำ script มือ) · 2026-11-18
+
 ## 4.91.1 (2026-11-17)
 
 - **upload-setup: โปรเจค Next.js 15 ตั้งค่าไม่ติด** — 4.91.0 สั่ง `experimental.proxyClientMaxBodySize` อย่างเดียว แต่ Next 15 (auth ลง `middleware.ts`) ใช้ชื่อ `middlewareClientMaxBodySize` และเงียบเฉยกับชื่อใหม่ → ทำตาม §4.4 แล้วไฟล์เกิน 10 MB ยังได้ 500 · §4.4 + แถวอาการ + checklist บอกทั้งสองชื่อ · `verify.mjs` อ่านเวอร์ชัน `next` จาก package.json แล้ว fail เมื่อ Next 15 ใช้ `proxyClientMaxBodySize` (รับ `middlewareClientMaxBodySize` บน 16 ด้วย เพราะยังเป็น alias) · eval ใหม่ `module-upload-after-auth` (fixture Next 15) + grader `admin-setup-audited` ใน `module-auth-after-design` · พบตอนรัน eval หลัง release 4.91.0

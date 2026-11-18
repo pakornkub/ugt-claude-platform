@@ -403,6 +403,26 @@ check('docs/admin-handoff.md rendered (no __*__ left)', () => {
     : { ok: true };
 });
 
+check('docs/admin-db-setup*.sql rendered for table A (no password, no placeholders)', () => {
+  const handoff = has('docs/admin-handoff.md') ? read('docs/admin-handoff.md') : '';
+  if (!/### A\. SQL Server/.test(handoff)) return { ok: true }; // no [DB] table A
+  const linked = [...new Set([...handoff.matchAll(/admin-db-setup(?:-prod|-dev)?\.sql/g)].map((m) => m[0]))];
+  if (!linked.length) {
+    return { ok: 'warn', msg: 'table A still lists manual SSMS steps — re-render it from the template so it points at docs/admin-db-setup*.sql (§4.6)' };
+  }
+  const bad = [];
+  for (const f of linked) {
+    if (!has('docs', f)) { bad.push(`docs/${f} missing (table A links it)`); continue; }
+    const sql = read('docs', f);
+    if (/RENDER RULES/.test(sql)) bad.push(`${f}: RENDER RULES header left in`);
+    const hits = [...new Set([...sql.matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
+    if (hits.length) bad.push(`${f}: placeholders ${hits.join(', ')}`);
+    if (/--\s*\[(PROD|DEV|OWNER|RWX)\]/.test(sql)) bad.push(`${f}: [PROD]/[DEV]/[OWNER]/[RWX] tags left in`);
+    if (!/:setvar\s+LoginPassword\s+""/.test(sql)) bad.push(`${f}: LoginPassword is not "" — a password in git is a leaked secret; empty it and rotate the password`);
+  }
+  return bad.length ? { ok: false, msg: bad.join(' · ') } : { ok: true };
+});
+
 check('Every compose /home/docker02/appdata bind has its mkdir -p in the Jenkinsfile', () => {
   // The documented root:root failure (§4.3): a bind mount whose host dir the
   // Deploy stage never creates/chowns → docker creates it as root and the app

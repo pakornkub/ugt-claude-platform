@@ -157,7 +157,18 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
 3. **basePath?** (deployed under a reverse-proxy subpath?) — if yes, get the
    prod/dev paths + full app URLs
 4. **Database?** — Prisma present → keep the [DB] sections (migrate step +
-   builder image); absent → cut them
+   builder image); absent → cut them. **DB = yes → three more, for
+   `docs/admin-db-setup*.sql`** (§4.6 — the DBA runs it instead of clicking through SSMS):
+   - 4a. **SQL login name** of the project owner — known → goes into `:setvar LoginName`;
+     unknown → leave it `""`, the DBA picks it by the org naming rule and returns it
+   - 4b. **prod and dev on the same SQL Server?** — same → one `admin-db-setup.sql`
+     (`[SAME]`); separate → `admin-db-setup-prod.sql` + `admin-db-setup-dev.sql`
+     (`[SPLIT]`, `dbcreator` only in the dev file)
+   - 4c. **Rights in both databases** — `db_datareader` · `db_datawriter` · `db_ddladmin` ·
+     `GRANT EXECUTE` (`[RWX]`, org default, มติ 2026-11-16) or `db_owner` (`[OWNER]`,
+     simpler; DBA's call)
+   - **Never ask for the password** — `:setvar LoginPassword ""` stays empty in git; the
+     DBA types it at run time and sends it back over a secure channel
 5. **Sentry?** — absent → cut the [SENTRY] sections + credential
 6. **Deploy target** — which Docker host, is Jenkins on the same machine as the
    Docker daemon or socket-mounted, `docker-compose` v1 or v2 · **Jenkins host**
@@ -217,13 +228,22 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__REQUESTER__` | ชื่อ/อีเมลผู้ขอ (คนที่ admin ติดต่อกลับ) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
-| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` จากชื่อโปรเจค (`ugt-rd-laboratory` → `UGT_RdLaboratory` / `UGT_RdLaboratory_Dev`) (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
+| `__DB_ROLES__` | Q4c — `` `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` `` หรือ `` `db_owner` `` |
+| `__LOGIN_NAME_HINT__` | Q4a — รู้ชื่อ → `` กรอกไว้แล้ว: `<ชื่อ>` ``; ไม่รู้ → `ตามมาตรฐานชื่อ login ขององค์กร` |
 | `__PROJECT_OWNER__` | เจ้าของโปรเจค — SQL login เป็นของคนนี้ ตัวเดียวใช้ทั้ง prod และ dev (admin สร้าง แล้วส่งชื่อกลับในตาราง "ส่งกลับ"); ไม่ได้บอก → ใช้ค่าเดียวกับ `__REQUESTER__` |
 | `__LINKED_SERVER__` / `__LINKED_OBJECTS__` | ชื่อ linked server + object 4 ส่วนที่อ่าน (database-setup Q3) |
 | `__VOLUME__` | ชื่อ volume ใน compose (`uploads`, `storage`, …) — หนึ่งคู่แถว prod/dev ต่อ volume |
 | `__REALM__` | realm Keycloak ขององค์กร (ค่าเดียวกับ auth-setup) |
 | `__UPLOAD_MAX_MB__` | `UPLOAD_MAX_BYTES` ÷ 1 048 576 ปัดขึ้น (upload-setup) |
 | `__JOB_LIST__` | job ตั้งเวลาภาษาคน คั่นด้วย `, ` ("ลบไฟล์แนบเก่า ทุกวัน 02:00") — แค่บอก admin ว่ามี ไม่ต้องตั้งอะไร |
+
+**Only in `admin-db-setup.template.sql`** (plus `__PROJECT_NAME__` / `__PROJECT_DISPLAY_NAME__` / `__DB_NAME_*__`):
+
+| Placeholder | Meaning |
+| --- | --- |
+| `__LOGIN_NAME__` | Q4a — ชื่อ login หรือว่าง (`:setvar LoginName ""`) |
+| `__TARGET_SERVER__` | `SQL Server ที่มีทั้ง prod และ dev` (`[SAME]`) · `SQL Server prod` / `SQL Server dev` (`[SPLIT]` — คนละไฟล์) |
 
 ### 4.3 Adjust per interview answers
 
@@ -315,6 +335,11 @@ not a style nit.
   not the first project on the server → no appendix), the overview table's #
   column renumbered (section letters/anchors stay fixed — gaps are fine), the rules
   comment and tag comments stripped.
+  **[DB] → in the same step render `assets/admin-db-setup.template.sql`** per its RENDER
+  RULES header: Q4b same server → `docs/admin-db-setup.sql`; separate →
+  `docs/admin-db-setup-prod.sql` + `docs/admin-db-setup-dev.sql`. Table A only links the
+  script — the DBA runs it in SQLCMD mode (idempotent, `Thai_CI_AS`, check query at the end).
+  `LoginPassword` stays `""` — a typed password in a committed file is a leak (verify fails).
   Shape is fixed: one overview table (who · system · what · link), then one
   table per system (menu path on top, `ช่อง | ใส่ค่า` rows), then one
   "ส่งกลับ" table — never add prose sections or explanations; the why lives
@@ -379,6 +404,8 @@ server side still needs admin confirmation.
       healthcheck uses `127.0.0.1` + the right basePath per env
 - [ ] `package.json` has scripts: `lint`, `format:check`, `test:coverage`,
       `build` · the test runner emits `test-results/junit.xml` when `CI=true`
+- [ ] [DB] `docs/admin-db-setup.sql` (or the `-prod`/`-dev` pair) exists, table A links it,
+      no `__*__`/tags left, `:setvar LoginPassword ""` empty
 - [ ] `.env` and `.env.dev` exist locally with `APP_PORT` set, and both are
       gitignored (`git check-ignore .env .env.dev` — exit 0, they're ignored)
 
