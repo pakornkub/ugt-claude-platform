@@ -1,0 +1,132 @@
+-- RENDER RULES (delete every line from here through END RENDER RULES in the rendered file):
+-- - Rendered together with docs/admin-handoff.md (SKILL.md §4.6), only when the project has [DB].
+-- - Substitute every __...__ (SKILL.md §4.2). `grep -n "__[A-Z]" docs/admin-db-setup*.sql` must find nothing.
+-- - Interview Q4b — prod and dev on ONE SQL Server → render once to docs/admin-db-setup.sql keeping [PROD] and [DEV].
+--   Separate servers → render twice: docs/admin-db-setup-prod.sql keeps [PROD] only,
+--   docs/admin-db-setup-dev.sql keeps [DEV] only (so dbcreator lands on the dev server only).
+-- - Interview Q4c — keep [OWNER] (db_owner) or [RWX] (db_datareader + db_datawriter + db_ddladmin + GRANT EXECUTE), never both.
+-- - A line ending in `-- [X]` belongs to X. A line that is only `-- [X]` heads a batch that runs through its GO.
+--   Kept → strip the tag (and the trailing spaces before it). Not kept → delete the line / the whole batch.
+-- - LoginName = the name from Q4a, or CHANGE_ME when unknown. LoginPassword stays "CHANGE_ME" ALWAYS — the DBA types it at run time;
+--   a password in this file is a leaked secret in git (verify.mjs fails on it).
+-- END RENDER RULES
+/* =============================================================================
+   __PROJECT_DISPLAY_NAME__ (__PROJECT_NAME__) — สร้าง Database + Login  (admin-handoff.md ตาราง A)
+
+   รันที่: __TARGET_SERVER__ · ครั้งเดียว · รันซ้ำได้ (ของที่มีอยู่แล้วจะข้าม ไม่เปลี่ยนรหัสผ่าน login เดิม)
+
+   วิธีรัน (SSMS):
+     1. เปิดไฟล์นี้ → เมนู Query → SQLCMD Mode (ต้องเปิด ไม่งั้น :setvar error)
+     2. แทน CHANGE_ME ใน 2 บรรทัด :setvar ด้านล่าง → F5
+     3. ผลตรวจสิทธิ์ต้องเป็น 1 ทุกคอลัมน์ · ผลตรวจค่า database ท้ายไฟล์ตรงตามที่เขียนไว้
+     4. ปิดไฟล์โดยไม่ save — รหัสผ่านห้ามอยู่ในไฟล์ / ห้าม commit
+   sqlcmd: :setvar ในไฟล์ชนะค่า -v เสมอ → ใช้ copy นอก repo ที่กรอก :setvar แล้ว
+           sqlcmd -S <host> -E -i <copy>.sql  แล้วลบ copy ทิ้ง
+
+   ไม่ต้องสร้างตาราง — pipeline รัน migration ตอน deploy
+   ============================================================================= */
+
+SET NOEXEC OFF; -- ล้างค่าที่ค้างจากการรันผิดโหมดครั้งก่อนใน query window เดียวกัน
+GO
+
+:setvar LoginName "__LOGIN_NAME__"
+:setvar LoginPassword "CHANGE_ME"
+-- รหัสผ่านห้ามมีเครื่องหมาย ' (single quote)
+:on error exit
+GO
+
+-- ด่านกันรันผิดโหมด: SQLCMD Mode ปิด → $(...) ไม่ถูกแทนค่าและ SSMS รัน batch ถัดไปต่อ
+-- (ไม่มีด่านนี้จะได้ login ชื่อ "$(LoginName)" รหัส "$(LoginPassword)" จริง) → NOEXEC หยุดทุก batch ที่เหลือ
+IF LEFT(N'$(LoginName)', 2) = N'$' + N'(' OR N'$(LoginName)' IN (N'', N'CHANGE_ME') OR N'$(LoginPassword)' IN (N'', N'CHANGE_ME')
+BEGIN
+    RAISERROR(N'หยุด: เปิด Query → SQLCMD Mode และกรอก :setvar LoginName / LoginPassword ก่อนรัน — ยังไม่มีอะไรถูกสร้าง', 16, 1);
+    SET NOEXEC ON;
+END
+GO
+
+USE master;
+GO
+
+-- ค่ามาตรฐานของ database (ทุกบรรทัดรันซ้ำได้):
+--   Read Committed Snapshot ON — อ่านไม่ถูก block โดยการเขียน (ROLLBACK IMMEDIATE ตัด connection ที่ค้างใน DB นั้น — ทำเฉพาะตอนยังไม่เปิด)
+--   Recovery FULL — ต้องมี job backup transaction log ไม่งั้นไฟล์ log โตไม่หยุด
+--   Compatibility level __COMPAT_LEVEL__ · Containment NONE (ค่า default ของ CREATE DATABASE — ตรวจในผลท้าย script)
+
+-- [PROD]
+IF DB_ID(N'__DB_NAME_PROD__') IS NULL
+    CREATE DATABASE [__DB_NAME_PROD__] COLLATE Thai_CI_AS;
+IF (SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name = N'__DB_NAME_PROD__') = 0
+    ALTER DATABASE [__DB_NAME_PROD__] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE [__DB_NAME_PROD__] SET RECOVERY FULL;
+ALTER DATABASE [__DB_NAME_PROD__] SET COMPATIBILITY_LEVEL = __COMPAT_LEVEL__;
+GO
+
+-- [DEV]
+IF DB_ID(N'__DB_NAME_DEV__') IS NULL
+    CREATE DATABASE [__DB_NAME_DEV__] COLLATE Thai_CI_AS;
+IF (SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name = N'__DB_NAME_DEV__') = 0
+    ALTER DATABASE [__DB_NAME_DEV__] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE [__DB_NAME_DEV__] SET RECOVERY FULL;
+ALTER DATABASE [__DB_NAME_DEV__] SET COMPATIBILITY_LEVEL = __COMPAT_LEVEL__;
+GO
+
+IF SUSER_ID(N'$(LoginName)') IS NULL
+    CREATE LOGIN [$(LoginName)]
+        WITH PASSWORD = N'$(LoginPassword)',
+             CHECK_POLICY = ON,
+             CHECK_EXPIRATION = OFF; -- login ของแอป: รหัสหมดอายุ = ระบบล่ม
+GO
+
+-- [DEV]
+-- dbcreator: Prisma `migrate dev` สร้าง/ลบ shadow database ชั่วคราวเอง (ไม่ต้องสร้าง shadow database ไว้)
+IF IS_SRVROLEMEMBER(N'dbcreator', N'$(LoginName)') = 0
+    ALTER SERVER ROLE [dbcreator] ADD MEMBER [$(LoginName)];
+SELECT N'$(LoginName)' AS [Login], IS_SRVROLEMEMBER(N'dbcreator', N'$(LoginName)') AS [dbcreator];
+GO
+
+-- [PROD]
+USE [__DB_NAME_PROD__];
+IF USER_ID(N'$(LoginName)') IS NULL
+    CREATE USER [$(LoginName)] FOR LOGIN [$(LoginName)];
+ALTER ROLE [db_owner] ADD MEMBER [$(LoginName)];  -- [OWNER]
+ALTER ROLE [db_datareader] ADD MEMBER [$(LoginName)];  -- [RWX]
+ALTER ROLE [db_datawriter] ADD MEMBER [$(LoginName)];  -- [RWX]
+ALTER ROLE [db_ddladmin] ADD MEMBER [$(LoginName)];  -- [RWX]
+GRANT EXECUTE TO [$(LoginName)];  -- [RWX]
+SELECT DB_NAME() AS [Database]
+     , IS_ROLEMEMBER(N'db_owner', N'$(LoginName)') AS [db_owner]  -- [OWNER]
+     , IS_ROLEMEMBER(N'db_datareader', N'$(LoginName)') AS [db_datareader]  -- [RWX]
+     , IS_ROLEMEMBER(N'db_datawriter', N'$(LoginName)') AS [db_datawriter]  -- [RWX]
+     , IS_ROLEMEMBER(N'db_ddladmin', N'$(LoginName)') AS [db_ddladmin]  -- [RWX]
+     , (SELECT COUNT(*) FROM sys.database_permissions WHERE grantee_principal_id = USER_ID(N'$(LoginName)') AND class = 0 AND permission_name = N'EXECUTE' AND state = N'G') AS [EXECUTE]  -- [RWX]
+;
+GO
+
+-- [DEV]
+USE [__DB_NAME_DEV__];
+IF USER_ID(N'$(LoginName)') IS NULL
+    CREATE USER [$(LoginName)] FOR LOGIN [$(LoginName)];
+ALTER ROLE [db_owner] ADD MEMBER [$(LoginName)];  -- [OWNER]
+ALTER ROLE [db_datareader] ADD MEMBER [$(LoginName)];  -- [RWX]
+ALTER ROLE [db_datawriter] ADD MEMBER [$(LoginName)];  -- [RWX]
+ALTER ROLE [db_ddladmin] ADD MEMBER [$(LoginName)];  -- [RWX]
+GRANT EXECUTE TO [$(LoginName)];  -- [RWX]
+SELECT DB_NAME() AS [Database]
+     , IS_ROLEMEMBER(N'db_owner', N'$(LoginName)') AS [db_owner]  -- [OWNER]
+     , IS_ROLEMEMBER(N'db_datareader', N'$(LoginName)') AS [db_datareader]  -- [RWX]
+     , IS_ROLEMEMBER(N'db_datawriter', N'$(LoginName)') AS [db_datawriter]  -- [RWX]
+     , IS_ROLEMEMBER(N'db_ddladmin', N'$(LoginName)') AS [db_ddladmin]  -- [RWX]
+     , (SELECT COUNT(*) FROM sys.database_permissions WHERE grantee_principal_id = USER_ID(N'$(LoginName)') AND class = 0 AND permission_name = N'EXECUTE' AND state = N'G') AS [EXECUTE]  -- [RWX]
+;
+GO
+
+-- ตรวจค่า database: RCSI = 1 · Recovery = FULL · Compat = __COMPAT_LEVEL__ · Containment = NONE
+-- (แยก server: database ของอีก server ไม่อยู่ในผล — ปกติ)
+SELECT name AS [Database],
+       is_read_committed_snapshot_on AS [RCSI],
+       recovery_model_desc AS [Recovery],
+       compatibility_level AS [Compat],
+       containment_desc AS [Containment]
+FROM sys.databases
+WHERE name IN (N'__DB_NAME_PROD__', N'__DB_NAME_DEV__');
+GO

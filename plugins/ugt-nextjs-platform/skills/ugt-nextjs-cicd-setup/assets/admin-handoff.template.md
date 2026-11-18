@@ -9,7 +9,10 @@ RENDER RULES (delete this comment block in the rendered file):
   an /home/docker02/appdata bind · [UPLOAD] = ugt-nextjs-upload-setup installed ·
   [SSO] = Keycloak login · [SENTRY] = Sentry · [BASEPATH] = served under a basePath ·
   [CRON] = has scheduled jobs (they run in the project's own compose `cron` service — the admin sets up no cron; only the reverse-proxy cron bullet + the note under the overview) ·
-  [AUTH] = ugt-nextjs-auth-setup installed · [FIRST] = first org project on this Jenkins/Docker host
+  [AUTH] = ugt-nextjs-auth-setup installed · [FIRST] = first org project on this Jenkins/Docker host ·
+  [SAME] / [SPLIT] = prod and dev on one SQL Server / on separate ones (interview Q4b — keep exactly one)
+- [DB] → table A points at `docs/admin-db-setup*.sql`, rendered from `assets/admin-db-setup.template.sql`
+  in the same step (SKILL.md §4.6) — never write the CREATE/GRANT steps into this file by hand.
 - Tags live in HTML comments (invisible when rendered) — strip them after deciding.
 - Section H is words only — never paste nginx (or any proxy) config into this file; the admin
   writes the entry the way every other project on that server is done.
@@ -23,7 +26,7 @@ RENDER RULES (delete this comment block in the rendered file):
 
 | # | ใครทำ | ระบบ | ทำอะไร | ดูตาราง |
 | --- | --- | --- | --- | --- |
-| 1 | DBA | SQL Server | สร้าง database 2 ตัว + login ของเจ้าของโปรเจค 1 ตัว (ใช้ทั้ง prod และ dev) | [A](#a-sql-server--database--login) <!-- [DB] --> |
+| 1 | DBA | SQL Server | รัน script ในตาราง A — database 2 ตัว + login ของเจ้าของโปรเจค 1 ตัว (ใช้ทั้ง prod และ dev) | [A](#a-sql-server--database--login) <!-- [DB] --> |
 | 2 | Admin | Server (Docker host) | เตรียม folder เก็บไฟล์ + ตั้ง backup | [B](#b-server--folder-เก็บไฟล์) <!-- [VOLUME] --> |
 | 3 | Admin | Jenkins | สร้าง credential | [C](#c-jenkins--credentials) |
 | 4 | Admin | Jenkins | สร้าง pipeline job 2 ตัว (prod / dev แยกกัน) | [D](#d-jenkins--pipeline-job-prod--dev) |
@@ -40,16 +43,29 @@ RENDER RULES (delete this comment block in the rendered file):
 <!-- [DB] -->
 ### A. SQL Server — Database + Login
 
-ที่: **SSMS → server ตามคอลัมน์ "Server"** · login ใช้ SQL authentication
+**รัน script ครั้งเดียวจบ — ไม่ต้องสร้างอะไรด้วยมือ** · login ใช้ SQL authentication
 
-| สร้าง | Server | ชื่อ (พิมพ์ตามนี้) | สิทธิ์ที่ต้องให้ |
-| --- | --- | --- | --- |
-| Database prod | prod | `__DB_NAME_PROD__` | — |
-| Database dev | dev | `__DB_NAME_DEV__` | — |
-| Login ของเจ้าของโปรเจค (__PROJECT_OWNER__) — **ตัวเดียว ใช้ทั้ง prod และ dev** | prod + dev (ชื่อเดียวกันทั้ง 2 server) | ตามมาตรฐานชื่อ login ขององค์กร (แจ้งชื่อในตารางส่งกลับ) | ใน `__DB_NAME_PROD__` และ `__DB_NAME_DEV__`: `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` · **server dev เท่านั้น**: `dbcreator` |
-| อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | prod + dev | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ login ข้างบน |
+| Server | รัน script |
+| --- | --- |
+| prod + dev (เครื่องเดียวกัน) <!-- [SAME] --> | [`admin-db-setup.sql`](admin-db-setup.sql) |
+| prod <!-- [SPLIT] --> | [`admin-db-setup-prod.sql`](admin-db-setup-prod.sql) |
+| dev <!-- [SPLIT] --> | [`admin-db-setup-dev.sql`](admin-db-setup-dev.sql) |
 
-> `dbcreator` บน dev: ตอนสร้าง migration Prisma สร้าง database ชั่วคราวแล้วลบเอง (ไม่ต้องสร้าง shadow database ไว้) · server prod ไม่ต้องให้สิทธิ์นี้
+1. SSMS → เปิด script → เมนู **Query → SQLCMD Mode** (ต้องเปิด ไม่งั้น `:setvar` error)
+2. แทน `CHANGE_ME` ใน 2 บรรทัดบนสุด: `LoginName` (__LOGIN_NAME_HINT__) · `LoginPassword` (ห้ามมี `'`) — กรอกตอนรันเท่านั้น ปิดไฟล์โดยไม่ save
+3. F5 → ผลตรวจท้าย script ต้องเป็น `1` ทุกคอลัมน์ → แจ้งชื่อ login ในตารางส่งกลับ (รหัสส่งช่องทางปลอดภัย)
+
+| script สร้าง | ชื่อ | สิทธิ์ |
+| --- | --- | --- |
+| Database prod · dev — collation `Thai_CI_AS` · Read Committed Snapshot `ON` · Recovery model `Full` · Compatibility level `__COMPAT_LEVEL__` · Containment `None` | `__DB_NAME_PROD__` · `__DB_NAME_DEV__` | — |
+| Login ของเจ้าของโปรเจค (__PROJECT_OWNER__) — **ตัวเดียว ใช้ทั้ง prod และ dev** | ตาม `LoginName` | __DB_ROLES__ ใน database ทั้ง 2 ตัว · server role `dbcreator` **server dev เท่านั้น** |
+| ไม่อยู่ใน script — ทำมือ: อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ login ข้างบน (prod + dev) |
+
+> 2 server: รันไฟล์ละ server ด้วย `LoginName` และรหัสผ่านเดียวกัน <!-- [SPLIT] -->
+>
+> `dbcreator`: ตอนสร้าง migration Prisma สร้าง database ชั่วคราวแล้วลบเอง (ไม่ต้องสร้าง shadow database ไว้)
+>
+> ⚠️ Recovery model `Full` → **ต้องตั้ง job backup transaction log ของทั้ง 2 database** ไม่งั้นไฟล์ log โตไม่หยุดจน disk เต็ม
 >
 > ตารางสร้างเองตอน deploy (pipeline รัน migration) — DBA ไม่ต้องสร้างตาราง
 
