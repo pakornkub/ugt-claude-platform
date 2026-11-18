@@ -232,7 +232,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__REQUESTER__` | ชื่อ/อีเมลผู้ขอ (คนที่ admin ติดต่อกลับ) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
-| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` จากชื่อโปรเจค (`ugt-rd-laboratory` → `UGT_RdLaboratory` / `UGT_RdLaboratory_Dev`) (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_DEV` จากชื่อโปรเจค (`ugt-rd-laboratory` → `UGT_RdLaboratory` / `UGT_RdLaboratory_DEV`) (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
 | `__DB_ROLES__` | Q4c — `` `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` `` หรือ `` `db_owner` `` |
 | `__COMPAT_LEVEL__` | Q4d — `150` (SQL Server 2019, default) · `160` (2022) — also in the SQL template |
 | `__LOGIN_NAME_HINT__` | Q4a — รู้ชื่อ → `` กรอกไว้แล้ว: `<ชื่อ>` ``; ไม่รู้ → `ตามมาตรฐานชื่อ login ขององค์กร` |

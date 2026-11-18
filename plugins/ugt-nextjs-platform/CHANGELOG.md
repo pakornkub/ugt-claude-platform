@@ -1,6 +1,7 @@
 # Changelog — ugt-nextjs-platform
 
 ## Unreleased
+- **cicd-setup: ชื่อ database dev ที่เสนอเป็น `<ชื่อระบบ>_DEV` (เดิม `_Dev`)** — มาตรฐานองค์กร 2026-11-18 · โปรเจคที่ตั้งไว้แล้วไม่ต้องเปลี่ยน
 
 - **cicd-setup: ตาราง A ของ `docs/admin-handoff.md` = script ให้ DBA รัน ไม่ใช่ขั้นตอนทำมือใน SSMS** — asset ใหม่ `assets/admin-db-setup.template.sql` render คู่กับ handoff (§4.6) เป็น `docs/admin-db-setup.sql` (prod/dev server เดียวกัน) หรือ `-prod.sql` + `-dev.sql` (แยก server → `dbcreator` อยู่ไฟล์ dev เท่านั้น) · SQLCMD mode, idempotent, `Thai_CI_AS`, query ตรวจผลท้ายแต่ละ database · interview Q4a–c: ชื่อ login (หรือเว้นว่างให้ DBA) · prod/dev server เดียวกันไหม · สิทธิ์ `db_datareader`/`db_datawriter`/`db_ddladmin`/`GRANT EXECUTE` (default ตามมติ 2026-11-16) หรือ `db_owner` · Q4d: version SQL Server → compatibility level (`150` = 2019 default) · ค่า database มาตรฐาน: Read Committed Snapshot ON (`WITH ROLLBACK IMMEDIATE` เฉพาะตอนยังไม่เปิด) · Recovery FULL (ตาราง A เตือนให้ตั้ง job backup log) · Containment NONE (ตรวจอย่างเดียว) + query ตรวจจาก `sys.databases` ท้าย script · รหัสผ่านไม่ถาม ไม่อยู่ใน git — `:setvar LoginPassword ""` เสมอ DBA กรอกตอนรัน · `verify.mjs` ด่านใหม่: ตาราง A ลิงก์ script → ไฟล์ต้องมี ไม่มี placeholder/tag ค้าง และ `LoginPassword` ว่าง (✘) · ตาราง A แบบทำมือเดิม → ! ให้ re-render · **โปรเจคที่ติดตั้งแล้ว**: render template เองแล้วแทนตาราง A (§4.6) · origin ugt-rd-laboratory (ทำ script มือ) · 2026-11-18
 

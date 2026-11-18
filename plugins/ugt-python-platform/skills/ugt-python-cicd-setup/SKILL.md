@@ -140,7 +140,7 @@ contract ร่วมที่ **ทุกโปรเจคทำเหมื�
    shape web เลือกได้: host cron (default) หรือ cron service ใน compose prod
    (`references/docker-deploy.md` §C "ทางเลือก" — ไม่มีตาราง cron) ·
    และ (ถ้ามี DB) ชื่อ database + login ของ prod/dev → `__DB_NAME_*__` / `__DB_LOGIN_*__`
-   — ไม่รู้ให้เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` และ `<project>_app` / `<project>_dev`
+   — ไม่รู้ให้เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_DEV` และ `<project>_app` / `<project>_dev`
 
 ## 5. Setup Steps
 
@@ -216,7 +216,7 @@ render เอกสารส่ง admin (§5.7):
 | `__REQUESTER__` | ชื่อผู้ขอ (ทีมพัฒนา) |
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | host ของ Jenkins ที่ใช้ตั้ง webhook |
-| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database prod/dev — จากคำตอบ interview; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` |
+| `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database prod/dev — จากคำตอบ interview; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_DEV` |
 | `__DB_LOGIN_PROD__` / `__DB_LOGIN_DEV__` | login ของ DB — ไม่รู้ → เสนอ `<project>_app` / `<project>_dev` |
 | `__VOLUME__` | ชื่อ volume ใน compose — หนึ่งคู่แถว prod/dev ต่อ volume |
 | `__JOB_NAME__` / `__JOB_WHEN__` / `__CRON_SCHEDULE__` / `__JOB_CMD__` | ต่อ job หนึ่งแถวในตาราง cron: ชื่อ job · รอบเวลาภาษาคน ("ทุกวัน 02:00") · cron 5 ช่อง (`0 2 * * *`) · คำสั่ง — batch: `cd /opt/apps/<project> && docker compose run --rm job` · web: `docker exec <project> python -m <module>` (`references/docker-deploy.md`) |
