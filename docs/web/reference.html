@@ -151,10 +151,10 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.91.1</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.92.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
       <tr><td><code>ugt-core</code></td><td>2.21.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
-      <tr><td><code>ugt-python-platform</code></td><td>0.10.4</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
-      <tr><td><code>ugt-php-platform</code></td><td>0.8.8</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
+      <tr><td><code>ugt-python-platform</code></td><td>0.10.5</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
+      <tr><td><code>ugt-php-platform</code></td><td>0.8.9</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
       <tr><td><code>ugt-devops-mcp</code></td><td>0.1.6</td><td>ไม่บังคับ ใช้ได้ทุก stack — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · แทนสคริปต์ <code>install-*-mcp.ps1</code> เดิม</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
     </tbody>
   </table></div>
@@ -1639,6 +1639,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
       <tr><td><code>app/api/health/route.ts</code></td><td>healthcheck — ไม่ต้อง login, 200 healthy / 503 เมื่อ DB ล่ม, ไม่บอกเวอร์ชัน/commit</td></tr>
       <tr><td><code>next.config</code></td><td><code>output: 'standalone'</code> · <code>deploymentId</code> · <code>basePath</code> (เมื่อใช้)</td></tr>
       <tr><td><code>docs/admin-handoff.md</code></td><td>ไฟล์ส่งทีม admin: ตารางภาพรวม + ตารางต่อระบบ (DB, โฟลเดอร์ server, Jenkins, GitHub, SonarQube, Keycloak, nginx, cron) + ตาราง "ส่งกลับ"</td></tr>
+      <tr><td><code>docs/admin-db-setup.sql</code> (แยก server: <code>-prod.sql</code> + <code>-dev.sql</code>)</td><td>script ตาราง A ให้ DBA รันใน SSMS โหมด SQLCMD — สร้าง login + database (<code>Thai_CI_AS</code>, RCSI, Recovery FULL) + สิทธิ์ · รหัสผ่านเป็น <code>CHANGE_ME</code> เสมอ DBA แทนค่าตอนรัน · ไม่เปิด SQLCMD Mode หรือยังไม่แทนค่า → หยุด ไม่สร้างอะไร</td></tr>
       <tr><td><code>.env</code> · <code>.env.dev</code> (ในเครื่อง)</td><td>ให้ <code>docker compose</code> ทดสอบในเครื่องได้ — ค่าจริง ห้าม commit</td></tr>
       <tr><td><code>app/api/cron/&lt;job&gt;/route.ts</code></td><td>[CRON] หนึ่ง route ต่องาน (<code>POST</code> เท่านั้น)</td></tr>
       <tr><td><code>.claude/rules/ugt-nextjs-ci.md</code></td><td>กฎที่โหลดเองเมื่อแตะไฟล์ CI</td></tr>
@@ -2801,7 +2802,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
-  <p><span class="badge">ugt-python-platform 0.10.4</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-python-platform 0.10.5</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>ยังไม่ผ่าน pilot ทุก shape</b>FastAPI · Flask · Django · Batch job ยังไม่เคยรันกับโปรเจคจริง — ค่าคงที่ถูกตรวจด้วยเหตุผลแล้วแต่ยังไม่ผ่าน build จริง · โปรเจคแรกของแต่ละ shape ต้องเผื่อเวลาไล่แก้ แล้วส่ง feedback กลับเป็น PR ที่ platform · plugin นี้ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -2900,7 +2901,7 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
 <section id="skill-ugt-php-cicd-setup" class="skill">
   <h2><code>ugt-php-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค PHP ที่มีอยู่แล้ว — Laravel, CodeIgniter, PHP legacy และ WordPress</p>
-  <p><span class="badge">ugt-php-platform 0.8.8</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
+  <p><span class="badge">ugt-php-platform 0.8.9</span> <span class="badge">เรียกเอง</span> <span class="badge warn">pilot — ยังไม่ tag</span></p>
 
   <div class="prose">
     <div class="callout warn"><b>สถานะ pilot ราย shape</b>PHP legacy (ไม่มี framework) <b>ผ่าน pilot</b> — <code>ugt-mscpl-ana</code> (2026-08) · <code>ugt-bd-forecast</code> (2026-09-03) · Laravel · CodeIgniter (CI3/CI4) · WordPress <b>ยังไม่ผ่าน</b> · plugin ยังไม่ tag · ครอบแค่ delivery pipeline ยังไม่มี database/auth</div>
@@ -3189,7 +3190,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.91.1</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.92.0</span></div></footer>
 
 <script>
 (() => {
