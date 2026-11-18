@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 4.93.1 (2026-11-18)
+
+- **ห้ามพิมพ์ secret ใน env เอง** — eval module-auth-after-design เจอ agent ที่ไม่มี shell แต่งค่า `BETTER_AUTH_SECRET` ที่ดูสุ่มขึ้นมาเอง (เดาได้) · env-files.md / auth asset-map / cicd §4.5 / full-setup Q9: ต้องได้จากการรันคำสั่ง, ไม่มี shell → คง `CHANGE_ME` + ใส่คำสั่งใต้ "ยังไม่ได้รัน" · eval: grader ค่าใน `.env`/`.env.dev`/`.env.local` + `(DEV)` ใน Jenkinsfile (run-through-db-quality-ci 22/22) และ section 3 / client `-dev` / secret ไม่ถูกแต่ง (module-auth-after-design 14/14 หลังแก้)
+
 ## 4.93.0 (2026-11-18)
 
 - **setup เติมค่าจริงลง `.env` / `.env.dev` / `.env.local` ให้ครบ ไม่ทิ้งค่า default ให้ผู้ใช้แก้เอง** (จากการทดสอบ 2026-11-18) — ตารางเดียวที่ `ugt-nextjs-database-setup` `references/env-files.md` (database/auth/cicd/full-setup ชี้มาที่นี่): `BETTER_AUTH_SECRET` (+ `CRON_SECRET`) สร้างใหม่ทุกไฟล์ (`openssl rand -base64 32` หรือ `node -e` บน Windows) · `BETTER_AUTH_URL`/`TRUSTED_ORIGINS` = domain (prod/dev) หรือ `http://localhost:3000` (local) · basePath `/P` · `/P-dev` · `/P-dev` · `NEXT_PUBLIC_APP_URL` `D/P` · `D/P-dev` · `http://localhost:3000/P-dev` · ชื่อแอป dev/local ต่อท้าย ` (DEV)` · `KEYCLOAK_ISSUER` = `<domain>/keycloak/realms/ugt` · `KEYCLOAK_CLIENT_ID` `P` / `P-dev` / `P-dev` · interview ถาม domain (default `https://ugtweb.ube.co.th`) แล้วคำนวณ URL แทนการถาม URL เต็ม · เหลือ `CHANGE_ME` แค่ค่าที่ admin ส่งกลับ
