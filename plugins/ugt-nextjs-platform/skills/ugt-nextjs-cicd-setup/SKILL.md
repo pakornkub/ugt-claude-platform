@@ -167,6 +167,10 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
    - 4c. **Rights in both databases** — `db_datareader` · `db_datawriter` · `db_ddladmin` ·
      `GRANT EXECUTE` (`[RWX]`, org default, มติ 2026-11-16) or `db_owner` (`[OWNER]`,
      simpler; DBA's call)
+   - 4d. **SQL Server version** → compatibility level (`2019` = `150`, org default ·
+     `2022` = `160`; older than 2019 → ask, `150` fails there). The other database settings
+     are fixed, not asked: `Thai_CI_AS` · Read Committed Snapshot ON · Recovery FULL
+     (table A warns the DBA to schedule log backups) · Containment NONE
    - **Never ask for the password** — `:setvar LoginPassword ""` stays empty in git; the
      DBA types it at run time and sends it back over a secure channel
 5. **Sentry?** — absent → cut the [SENTRY] sections + credential
@@ -230,6 +234,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
 | `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_Dev` จากชื่อโปรเจค (`ugt-rd-laboratory` → `UGT_RdLaboratory` / `UGT_RdLaboratory_Dev`) (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
 | `__DB_ROLES__` | Q4c — `` `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` `` หรือ `` `db_owner` `` |
+| `__COMPAT_LEVEL__` | Q4d — `150` (SQL Server 2019, default) · `160` (2022) — also in the SQL template |
 | `__LOGIN_NAME_HINT__` | Q4a — รู้ชื่อ → `` กรอกไว้แล้ว: `<ชื่อ>` ``; ไม่รู้ → `ตามมาตรฐานชื่อ login ขององค์กร` |
 | `__PROJECT_OWNER__` | เจ้าของโปรเจค — SQL login เป็นของคนนี้ ตัวเดียวใช้ทั้ง prod และ dev (admin สร้าง แล้วส่งชื่อกลับในตาราง "ส่งกลับ"); ไม่ได้บอก → ใช้ค่าเดียวกับ `__REQUESTER__` |
 | `__LINKED_SERVER__` / `__LINKED_OBJECTS__` | ชื่อ linked server + object 4 ส่วนที่อ่าน (database-setup Q3) |

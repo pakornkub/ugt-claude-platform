@@ -57,13 +57,15 @@ RENDER RULES (delete this comment block in the rendered file):
 
 | script สร้าง | ชื่อ | สิทธิ์ |
 | --- | --- | --- |
-| Database prod · dev (collation `Thai_CI_AS`) | `__DB_NAME_PROD__` · `__DB_NAME_DEV__` | — |
+| Database prod · dev — collation `Thai_CI_AS` · Read Committed Snapshot `ON` · Recovery model `Full` · Compatibility level `__COMPAT_LEVEL__` · Containment `None` | `__DB_NAME_PROD__` · `__DB_NAME_DEV__` | — |
 | Login ของเจ้าของโปรเจค (__PROJECT_OWNER__) — **ตัวเดียว ใช้ทั้ง prod และ dev** | ตาม `LoginName` | __DB_ROLES__ ใน database ทั้ง 2 ตัว · server role `dbcreator` **server dev เท่านั้น** |
 | ไม่อยู่ใน script — ทำมือ: อ่านข้ามระบบ (linked server) <!-- [LINKED] --> | `__LINKED_SERVER__` → `__LINKED_OBJECTS__` | `SELECT` อย่างเดียว ให้ login ข้างบน (prod + dev) |
 
 > 2 server: รันไฟล์ละ server ด้วย `LoginName` และรหัสผ่านเดียวกัน <!-- [SPLIT] -->
 >
 > `dbcreator`: ตอนสร้าง migration Prisma สร้าง database ชั่วคราวแล้วลบเอง (ไม่ต้องสร้าง shadow database ไว้)
+>
+> ⚠️ Recovery model `Full` → **ต้องตั้ง job backup transaction log ของทั้ง 2 database** ไม่งั้นไฟล์ log โตไม่หยุดจน disk เต็ม
 >
 > ตารางสร้างเองตอน deploy (pipeline รัน migration) — DBA ไม่ต้องสร้างตาราง
 

@@ -18,7 +18,7 @@
    วิธีรัน (SSMS):
      1. เปิดไฟล์นี้ → เมนู Query → SQLCMD Mode (ต้องเปิด ไม่งั้น :setvar error)
      2. กรอก 2 บรรทัด :setvar ด้านล่าง → F5
-     3. ผลตรวจท้ายแต่ละ database ต้องเป็น 1 ทุกคอลัมน์
+     3. ผลตรวจสิทธิ์ต้องเป็น 1 ทุกคอลัมน์ · ผลตรวจค่า database ท้ายไฟล์ตรงตามที่เขียนไว้
      4. ปิดไฟล์โดยไม่ save — รหัสผ่านห้ามอยู่ในไฟล์ / ห้าม commit
    sqlcmd: :setvar ในไฟล์ชนะค่า -v เสมอ → ใช้ copy นอก repo ที่กรอก :setvar แล้ว
            sqlcmd -S <host> -E -i <copy>.sql  แล้วลบ copy ทิ้ง
@@ -38,14 +38,27 @@ GO
 USE master;
 GO
 
+-- ค่ามาตรฐานของ database (ทุกบรรทัดรันซ้ำได้):
+--   Read Committed Snapshot ON — อ่านไม่ถูก block โดยการเขียน (ROLLBACK IMMEDIATE ตัด connection ที่ค้างใน DB นั้น — ทำเฉพาะตอนยังไม่เปิด)
+--   Recovery FULL — ต้องมี job backup transaction log ไม่งั้นไฟล์ log โตไม่หยุด
+--   Compatibility level __COMPAT_LEVEL__ · Containment NONE (ค่า default ของ CREATE DATABASE — ตรวจในผลท้าย script)
+
 -- [PROD]
 IF DB_ID(N'__DB_NAME_PROD__') IS NULL
     CREATE DATABASE [__DB_NAME_PROD__] COLLATE Thai_CI_AS;
+IF (SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name = N'__DB_NAME_PROD__') = 0
+    ALTER DATABASE [__DB_NAME_PROD__] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE [__DB_NAME_PROD__] SET RECOVERY FULL;
+ALTER DATABASE [__DB_NAME_PROD__] SET COMPATIBILITY_LEVEL = __COMPAT_LEVEL__;
 GO
 
 -- [DEV]
 IF DB_ID(N'__DB_NAME_DEV__') IS NULL
     CREATE DATABASE [__DB_NAME_DEV__] COLLATE Thai_CI_AS;
+IF (SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name = N'__DB_NAME_DEV__') = 0
+    ALTER DATABASE [__DB_NAME_DEV__] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE [__DB_NAME_DEV__] SET RECOVERY FULL;
+ALTER DATABASE [__DB_NAME_DEV__] SET COMPATIBILITY_LEVEL = __COMPAT_LEVEL__;
 GO
 
 IF SUSER_ID(N'$(LoginName)') IS NULL
@@ -96,4 +109,15 @@ SELECT DB_NAME() AS [Database]
      , IS_ROLEMEMBER(N'db_ddladmin', N'$(LoginName)') AS [db_ddladmin]  -- [RWX]
      , (SELECT COUNT(*) FROM sys.database_permissions WHERE grantee_principal_id = USER_ID(N'$(LoginName)') AND class = 0 AND permission_name = N'EXECUTE' AND state = N'G') AS [EXECUTE]  -- [RWX]
 ;
+GO
+
+-- ตรวจค่า database: RCSI = 1 · Recovery = FULL · Compat = __COMPAT_LEVEL__ · Containment = NONE
+-- (แยก server: database ของอีก server ไม่อยู่ในผล — ปกติ)
+SELECT name AS [Database],
+       is_read_committed_snapshot_on AS [RCSI],
+       recovery_model_desc AS [Recovery],
+       compatibility_level AS [Compat],
+       containment_desc AS [Containment]
+FROM sys.databases
+WHERE name IN (N'__DB_NAME_PROD__', N'__DB_NAME_DEV__');
 GO
