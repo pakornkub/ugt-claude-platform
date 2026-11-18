@@ -418,7 +418,8 @@ check('docs/admin-db-setup*.sql rendered for table A (no password, no placeholde
     const hits = [...new Set([...sql.matchAll(/__[A-Z][A-Z0-9_]*__/g)].map((m) => m[0]))];
     if (hits.length) bad.push(`${f}: placeholders ${hits.join(', ')}`);
     if (/--\s*\[(PROD|DEV|OWNER|RWX)\]/.test(sql)) bad.push(`${f}: [PROD]/[DEV]/[OWNER]/[RWX] tags left in`);
-    if (!/:setvar\s+LoginPassword\s+""/.test(sql)) bad.push(`${f}: LoginPassword is not "" — a password in git is a leaked secret; empty it and rotate the password`);
+    // "" accepted too: scripts rendered before the CHANGE_ME dummy
+    if (!/:setvar\s+LoginPassword\s+"(CHANGE_ME)?"/.test(sql)) bad.push(`${f}: LoginPassword is not "CHANGE_ME" — a password in git is a leaked secret; reset it to the dummy and rotate the password`);
   }
   return bad.length ? { ok: false, msg: bad.join(' · ') } : { ok: true };
 });

@@ -7,7 +7,7 @@
 -- - Interview Q4c — keep [OWNER] (db_owner) or [RWX] (db_datareader + db_datawriter + db_ddladmin + GRANT EXECUTE), never both.
 -- - A line ending in `-- [X]` belongs to X. A line that is only `-- [X]` heads a batch that runs through its GO.
 --   Kept → strip the tag (and the trailing spaces before it). Not kept → delete the line / the whole batch.
--- - LoginName = the name from Q4a, or "" when unknown. LoginPassword stays "" ALWAYS — the DBA types it at run time;
+-- - LoginName = the name from Q4a, or CHANGE_ME when unknown. LoginPassword stays "CHANGE_ME" ALWAYS — the DBA types it at run time;
 --   a password in this file is a leaked secret in git (verify.mjs fails on it).
 -- END RENDER RULES
 /* =============================================================================
@@ -17,7 +17,7 @@
 
    วิธีรัน (SSMS):
      1. เปิดไฟล์นี้ → เมนู Query → SQLCMD Mode (ต้องเปิด ไม่งั้น :setvar error)
-     2. กรอก 2 บรรทัด :setvar ด้านล่าง → F5
+     2. แทน CHANGE_ME ใน 2 บรรทัด :setvar ด้านล่าง → F5
      3. ผลตรวจสิทธิ์ต้องเป็น 1 ทุกคอลัมน์ · ผลตรวจค่า database ท้ายไฟล์ตรงตามที่เขียนไว้
      4. ปิดไฟล์โดยไม่ save — รหัสผ่านห้ามอยู่ในไฟล์ / ห้าม commit
    sqlcmd: :setvar ในไฟล์ชนะค่า -v เสมอ → ใช้ copy นอก repo ที่กรอก :setvar แล้ว
@@ -30,14 +30,14 @@ SET NOEXEC OFF; -- ล้างค่าที่ค้างจากการ�
 GO
 
 :setvar LoginName "__LOGIN_NAME__"
-:setvar LoginPassword ""
+:setvar LoginPassword "CHANGE_ME"
 -- รหัสผ่านห้ามมีเครื่องหมาย ' (single quote)
 :on error exit
 GO
 
 -- ด่านกันรันผิดโหมด: SQLCMD Mode ปิด → $(...) ไม่ถูกแทนค่าและ SSMS รัน batch ถัดไปต่อ
 -- (ไม่มีด่านนี้จะได้ login ชื่อ "$(LoginName)" รหัส "$(LoginPassword)" จริง) → NOEXEC หยุดทุก batch ที่เหลือ
-IF LEFT(N'$(LoginName)', 2) = N'$' + N'(' OR N'$(LoginName)' = N'' OR N'$(LoginPassword)' = N''
+IF LEFT(N'$(LoginName)', 2) = N'$' + N'(' OR N'$(LoginName)' IN (N'', N'CHANGE_ME') OR N'$(LoginPassword)' IN (N'', N'CHANGE_ME')
 BEGIN
     RAISERROR(N'หยุด: เปิด Query → SQLCMD Mode และกรอก :setvar LoginName / LoginPassword ก่อนรัน — ยังไม่มีอะไรถูกสร้าง', 16, 1);
     SET NOEXEC ON;

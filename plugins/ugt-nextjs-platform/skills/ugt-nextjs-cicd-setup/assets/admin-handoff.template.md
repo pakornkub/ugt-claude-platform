@@ -52,7 +52,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | dev <!-- [SPLIT] --> | [`admin-db-setup-dev.sql`](admin-db-setup-dev.sql) |
 
 1. SSMS → เปิด script → เมนู **Query → SQLCMD Mode** (ต้องเปิด ไม่งั้น `:setvar` error)
-2. กรอก 2 บรรทัดบนสุด: `LoginName` (__LOGIN_NAME_HINT__) · `LoginPassword` (ห้ามมี `'`) — กรอกตอนรันเท่านั้น ปิดไฟล์โดยไม่ save
+2. แทน `CHANGE_ME` ใน 2 บรรทัดบนสุด: `LoginName` (__LOGIN_NAME_HINT__) · `LoginPassword` (ห้ามมี `'`) — กรอกตอนรันเท่านั้น ปิดไฟล์โดยไม่ save
 3. F5 → ผลตรวจท้าย script ต้องเป็น `1` ทุกคอลัมน์ → แจ้งชื่อ login ในตารางส่งกลับ (รหัสส่งช่องทางปลอดภัย)
 
 | script สร้าง | ชื่อ | สิทธิ์ |

@@ -171,7 +171,7 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
      `2022` = `160`; older than 2019 → ask, `150` fails there). The other database settings
      are fixed, not asked: `Thai_CI_AS` · Read Committed Snapshot ON · Recovery FULL
      (table A warns the DBA to schedule log backups) · Containment NONE
-   - **Never ask for the password** — `:setvar LoginPassword ""` stays empty in git; the
+   - **Never ask for the password** — `:setvar LoginPassword "CHANGE_ME"` stays a dummy in git; the
      DBA types it at run time and sends it back over a secure channel
 5. **Sentry?** — absent → cut the [SENTRY] sections + credential
 6. **Deploy target** — which Docker host, is Jenkins on the same machine as the
@@ -247,7 +247,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 
 | Placeholder | Meaning |
 | --- | --- |
-| `__LOGIN_NAME__` | Q4a — ชื่อ login หรือว่าง (`:setvar LoginName ""`) |
+| `__LOGIN_NAME__` | Q4a — ชื่อ login หรือ `CHANGE_ME` เมื่อยังไม่รู้ |
 | `__TARGET_SERVER__` | `SQL Server ที่มีทั้ง prod และ dev` (`[SAME]`) · `SQL Server prod` / `SQL Server dev` (`[SPLIT]` — คนละไฟล์) |
 
 ### 4.3 Adjust per interview answers
@@ -344,7 +344,7 @@ not a style nit.
   RULES header: Q4b same server → `docs/admin-db-setup.sql`; separate →
   `docs/admin-db-setup-prod.sql` + `docs/admin-db-setup-dev.sql`. Table A only links the
   script — the DBA runs it in SQLCMD mode (idempotent, `Thai_CI_AS`, check query at the end).
-  `LoginPassword` stays `""` — a typed password in a committed file is a leak (verify fails).
+  `LoginPassword` stays `"CHANGE_ME"` — a typed password in a committed file is a leak (verify fails).
   Shape is fixed: one overview table (who · system · what · link), then one
   table per system (menu path on top, `ช่อง | ใส่ค่า` rows), then one
   "ส่งกลับ" table — never add prose sections or explanations; the why lives
@@ -410,7 +410,7 @@ server side still needs admin confirmation.
 - [ ] `package.json` has scripts: `lint`, `format:check`, `test:coverage`,
       `build` · the test runner emits `test-results/junit.xml` when `CI=true`
 - [ ] [DB] `docs/admin-db-setup.sql` (or the `-prod`/`-dev` pair) exists, table A links it,
-      no `__*__`/tags left, `:setvar LoginPassword ""` empty
+      no `__*__`/tags left, `:setvar LoginPassword "CHANGE_ME"` (dummy)
 - [ ] `.env` and `.env.dev` exist locally with `APP_PORT` set, and both are
       gitignored (`git check-ignore .env .env.dev` — exit 0, they're ignored)
 
