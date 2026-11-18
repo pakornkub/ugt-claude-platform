@@ -10,7 +10,7 @@ separate redirect URIs, separate audit trail).
 | Setting | Value |
 | --- | --- |
 | Client type | OpenID Connect |
-| Client ID | `__PROJECT_NAME__` (the app slug — conventionally the same as the basePath slug) |
+| Client ID | **two clients**: `__PROJECT_NAME__` (prod) and `__PROJECT_NAME__-dev` (dev deploy + `next dev` on localhost) — the app slug, same as the basePath slug |
 | Client authentication | **On** (confidential client — a client secret is issued) |
 | Standard flow (Authorization Code) | **On** |
 | Direct access grants / implicit flow / service accounts | Off (not used) |
@@ -33,11 +33,12 @@ basePath the URI must include it:
 literal string, so one missing or extra `/` (or a trailing one) is rejected the
 same way a wrong host would be.
 
-Register one entry per environment, e.g.:
+Register per client, e.g. (`ugtweb.ube.co.th`, project `expense-portal`):
 
 ```
-http://localhost:3000/__BASE_PATH__/api/auth/callback/keycloak   (dev)
-https://__APP_HOST__/__BASE_PATH__/api/auth/callback/keycloak      (prod)
+client expense-portal       https://ugtweb.ube.co.th/expense-portal/api/auth/callback/keycloak
+client expense-portal-dev   https://ugtweb.ube.co.th/expense-portal-dev/api/auth/callback/keycloak
+                            http://localhost:3000/expense-portal-dev/api/auth/callback/keycloak
 ```
 
 This exact URI must also be passed as `redirectURI` in `lib/auth.ts` — Keycloak
@@ -48,8 +49,8 @@ rejects the login with *"Invalid parameter: redirect_uri"* on any mismatch
 
 | Var | Where it comes from |
 | --- | --- |
-| `KEYCLOAK_ISSUER` | `https://__KEYCLOAK_HOST__/realms/__REALM__` — verify by opening `<issuer>/.well-known/openid-configuration` in a browser |
-| `KEYCLOAK_CLIENT_ID` | the Client ID created above |
+| `KEYCLOAK_ISSUER` | `https://__KEYCLOAK_HOST__/realms/__REALM__` — org: `<domain>/keycloak/realms/ugt` (e.g. `https://ugtweb.ube.co.th/keycloak/realms/ugt`); verify by opening `<issuer>/.well-known/openid-configuration` in a browser |
+| `KEYCLOAK_CLIENT_ID` | `__PROJECT_NAME__` in `.env` · `__PROJECT_NAME__-dev` in `.env.dev` / `.env.local` |
 | `KEYCLOAK_CLIENT_SECRET` | Keycloak → client → *Credentials* tab |
 
 If Keycloak is served under a path prefix, the prefix is part of the issuer
@@ -89,8 +90,8 @@ missing; put it back. Never put it in the Jenkins Secret File credential.
 
 ## Checklist before wiring the app
 
-- [ ] Client created in the org realm with Client ID = `__PROJECT_NAME__`
-- [ ] Client authentication ON; secret copied to `KEYCLOAK_CLIENT_SECRET`
+- [ ] Clients `__PROJECT_NAME__` and `__PROJECT_NAME__-dev` created in the org realm
+- [ ] Client authentication ON; each secret copied to `KEYCLOAK_CLIENT_SECRET` of its own env file
 - [ ] PKCE method S256 set
 - [ ] Redirect URI(s) registered exactly as `<BETTER_AUTH_URL>/__BASE_PATH__/api/auth/callback/keycloak` (slashes included)
 - [ ] `KEYCLOAK_ISSUER` verified via `/.well-known/openid-configuration`

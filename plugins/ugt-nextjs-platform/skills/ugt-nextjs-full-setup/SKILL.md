@@ -135,13 +135,19 @@ prototype data layer or a fake login; skip on a bare scaffold):**
 
 6. Project name in kebab-case (e.g. `expense-portal`) + display name
 7. Deployed under a basePath / shared domain? If yes → basePath prod/dev
-   (e.g. `/expense-portal`, `/expense-portal-dev`)
+   (org default `/<project>`, `/<project>-dev`)
 8. Host ports prod / dev (e.g. 3000 / 3001)
-9. Full app URLs prod / dev including basePath (e.g. `https://apps.example.com/expense-portal`)
+9. Domain (org default `https://ugtweb.ube.co.th`) → URLs prod `<domain>/<project>`,
+   dev `<domain>/<project>-dev`; no basePath → ask the full URLs instead
 
    Ask 6–9 as four separate numbered items — "basePath?" alone does not yield
-   the URLs, and Q9 feeds the Keycloak redirect URIs and the compose env
-   (eval 2026-09-13: one run merged 7+9 and lost the URLs).
+   the URLs, and Q9 feeds the Keycloak redirect URIs, `KEYCLOAK_ISSUER`
+   (`<domain>/keycloak/realms/ugt`) and every env file
+   (eval 2026-09-13: one run merged 7+9 and lost the URLs). The installer then
+   **fills** `.env.local` / `.env.dev` / `.env` from these answers — secrets
+   generated, URLs/basePath/app name/client ID per file — per
+   `ugt-nextjs-database-setup` `references/env-files.md`; only admin-returned
+   values stay `CHANGE_ME`.
 
 **Module-specific questions** — **open the Interview section in the SKILL.md of
 every selected child skill and fold its questions into this same batch**

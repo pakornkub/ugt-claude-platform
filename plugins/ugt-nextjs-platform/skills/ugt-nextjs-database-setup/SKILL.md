@@ -118,7 +118,10 @@ npm install --save-dev prisma@7.9.1 tsx dotenv @types/mssql
 
 **Keep the env files distinct**: `.env.example` = generic placeholders only
 (committable) · `.env.local` = real values (never committed) — the values from
-the placeholder table below go into `.env.local` only. **SQL login unknown at
+the placeholder table below go into `.env.local` only, and section 1 is
+**filled, not left at the example's defaults**: basePath `/<project>-dev`, app
+name `<display name> (DEV)`, `http://localhost:3000/<project>-dev`
+(`references/env-files.md` — the per-file table every setup skill follows). **SQL login unknown at
 install time** (admin has not returned credentials yet): write
 `CHANGE_ME_DB_USER` / `CHANGE_ME_DB_PASSWORD` in `.env.local`, never an
 invented value — `verify.mjs` recognises `CHANGE_ME` as a placeholder, and the

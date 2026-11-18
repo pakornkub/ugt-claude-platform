@@ -219,6 +219,7 @@ pipeline {
                     // never runtime environment
                     def basePath  = isProd ? '__BASE_PATH_PROD__' : '__BASE_PATH_DEV__'
                     def appUrl    = isProd ? '__APP_URL_PROD__'   : '__APP_URL_DEV__'
+                    def appName   = isProd ? env.NEXT_PUBLIC_APP_NAME : "${env.NEXT_PUBLIC_APP_NAME} (DEV)"
                     def imageName = isProd ? '__PROJECT_NAME__'   : '__PROJECT_NAME__-dev'
                     def buildNum  = env.BUILD_NUMBER
                     // deploymentId: build number + commit — BUILD_NUMBER alone restarts at 1 when the
@@ -245,7 +246,7 @@ pipeline {
                                 --target builder \\
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
-                                --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
+                                --build-arg NEXT_PUBLIC_APP_NAME="${appName}" \\
                                 --build-arg NEXT_DEPLOYMENT_ID=${deployId} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:${buildNum}-builder \\
@@ -254,7 +255,7 @@ pipeline {
                                 --network host \\
                                 --build-arg NEXT_PUBLIC_BASE_PATH=${basePath} \\
                                 --build-arg NEXT_PUBLIC_APP_URL=${appUrl} \\
-                                --build-arg NEXT_PUBLIC_APP_NAME="${env.NEXT_PUBLIC_APP_NAME}" \\
+                                --build-arg NEXT_PUBLIC_APP_NAME="${appName}" \\
                                 --build-arg NEXT_DEPLOYMENT_ID=${deployId} \\
                                 --build-arg NEXT_PUBLIC_SENTRY_DSN="\$NEXT_PUBLIC_SENTRY_DSN" \\
                                 -t ${imageName}:latest \\

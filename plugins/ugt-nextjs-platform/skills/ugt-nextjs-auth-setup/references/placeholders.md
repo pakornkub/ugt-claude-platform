@@ -4,8 +4,8 @@
 | --- | --- | --- |
 | `__PROJECT_NAME__` | app slug / Keycloak Client ID | `expense-portal` |
 | `__BASE_PATH__` | Next.js basePath (no leading `/` when used as a cookie prefix) | `expense-portal` |
-| `__KEYCLOAK_HOST__` | the org's central Keycloak host | — |
-| `__REALM__` | the org's central realm | — |
+| `__KEYCLOAK_HOST__` | the org's central Keycloak host — the app domain's host + `/keycloak` | `ugtweb.ube.co.th/keycloak` |
+| `__REALM__` | the org's central realm | `ugt` |
 | `__LDAP_HOST__` | AD server hostname | — |
 | `__AD_BASE_DN__` | full AD base DN (one `DC=` per label) | `DC=example,DC=com` |
 | `__COMPANY_DOMAIN__` | org email/UPN domain | `company.co.th` |
@@ -22,6 +22,9 @@
 - **`env.example`/`.env.local`/`.env` ต้องแทน token ด้วยค่าจริงเหมือนกัน** —
   ตัวตรวจ (`scripts/verify.mjs` §"No `__*__` placeholders left") สแกนทั้งสาม
   ไฟล์นี้ด้วย ไม่ได้จำกัดแค่ `.ts` / `.tsx` / `.prisma`
+- **ไฟล์ env จริงต่างกันต่อ environment** — `KEYCLOAK_CLIENT_ID` = `__PROJECT_NAME__`
+  เฉพาะ `.env` (prod); `.env.dev` / `.env.local` เป็น `<project>-dev` · secret สร้างใหม่
+  ทุกไฟล์ — ตารางเต็ม: `ugt-nextjs-database-setup` `references/env-files.md`
 
 ## App title — no placeholder
 

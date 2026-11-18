@@ -11,8 +11,8 @@ Manage Jenkins → Credentials → (global) → Add Credentials:
 | Credential ID | Type | Value |
 | --- | --- | --- |
 | `nvd` | Secret text | NVD API key (free at nvd.nist.gov) — without it OWASP DC is extremely slow (rate limit 5 req/30s) |
-| `env-__PROJECT_NAME__` | Secret file | upload `.env.production` — the Deploy stage `cp`s it to `.env` |
-| `env-__PROJECT_NAME__-dev` | Secret file | upload `.env.development` — same shape as prod but **separate DATABASE_URL + fresh auth secrets** |
+| `env-__PROJECT_NAME__` | Secret file | upload the project's `.env` — the Deploy stage `cp`s it to `.env` |
+| `env-__PROJECT_NAME__-dev` | Secret file | upload the project's `.env.dev` — same shape as prod but **separate DATABASE_URL + fresh auth secrets + the `-dev` Keycloak client** |
 | `sentry-dsn-__PROJECT_NAME__` | Secret text | the `NEXT_PUBLIC_SENTRY_DSN` value (if the project uses Sentry) — prod/dev share one DSN, split by the `SENTRY_ENVIRONMENT` runtime var |
 
 > `nvd` is a server-level credential shared by every project — create it once.

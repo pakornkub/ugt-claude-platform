@@ -89,7 +89,7 @@ RENDER RULES (delete this comment block in the rendered file):
 | ID (พิมพ์ตามนี้) | Kind | ใส่อะไร |
 | --- | --- | --- |
 | `env-__PROJECT_NAME__` | Secret file | ไฟล์ `.env` ของ **prod** (ทีมพัฒนาส่งให้ทางช่องทางปลอดภัย) |
-| `env-__PROJECT_NAME__-dev` | Secret file | ไฟล์ `.env` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod |
+| `env-__PROJECT_NAME__-dev` | Secret file | ไฟล์ `.env.dev` ของ **dev** — ห้ามใช้ไฟล์เดียวกับ prod |
 | `sentry-dsn-__PROJECT_NAME__` <!-- [SENTRY] --> | Secret text | Sentry DSN |
 | `nvd` <!-- [FIRST] --> | Secret text | NVD API key (ฟรีที่ nvd.nist.gov) — ใช้ร่วมทุกโปรเจคบน server |
 
@@ -134,18 +134,18 @@ RENDER RULES (delete this comment block in the rendered file):
 <!-- [SSO] -->
 ### G. Keycloak — Client (SSO)
 
-ที่: **realm `__REALM__` → Clients → Create client** (1 client ต่อ 1 โปรเจค)
+ที่: **realm `__REALM__` → Clients → Create client** — **2 client** (prod / dev) ตั้งค่าเหมือนกัน ต่างแค่ Client ID กับ redirect URI
 
-| ช่อง | ใส่ค่า |
-| --- | --- |
-| Client type | OpenID Connect |
-| Client ID | `__PROJECT_NAME__` |
-| Client authentication | On |
-| Standard flow | On · ช่องอื่น (Direct access / Implicit / Service accounts) **Off** |
-| Valid redirect URIs | `__APP_URL_DEV__/api/auth/callback/keycloak` |
-| 〃 (บรรทัดที่ 2) | `__APP_URL_PROD__/api/auth/callback/keycloak` |
-| Web origins | `+` |
-| Advanced → PKCE Method | S256 |
+| ช่อง | client prod | client dev |
+| --- | --- | --- |
+| Client type | OpenID Connect | 〃 |
+| Client ID | `__PROJECT_NAME__` | `__PROJECT_NAME__-dev` |
+| Client authentication | On | 〃 |
+| Standard flow | On · ช่องอื่น (Direct access / Implicit / Service accounts) **Off** | 〃 |
+| Valid redirect URIs | `__APP_URL_PROD__/api/auth/callback/keycloak` | `__APP_URL_DEV__/api/auth/callback/keycloak` |
+| 〃 (บรรทัดที่ 2) | — | `http://localhost:3000__BASE_PATH_DEV__/api/auth/callback/keycloak` (เครื่องนักพัฒนา) |
+| Web origins | `+` | `+` |
+| Advanced → PKCE Method | S256 | S256 |
 
 <!-- [BASEPATH] or [UPLOAD] or [CRON] -->
 ### H. Nginx — Reverse proxy
@@ -170,8 +170,8 @@ Admin สร้าง reverse proxy ของโปรเจคตามรู�
 | รหัสผ่านของ login นั้น <!-- [DB] --> | ตาราง A | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
 | `APP_PORT` prod | port ที่จัดสรรบน server prod (ทีมพัฒนาใช้ `__PORT_PROD__` ไว้ก่อน) | |
 | `APP_PORT` dev | port ที่จัดสรรบน server dev (ทีมพัฒนาใช้ `__PORT_DEV__` ไว้ก่อน) | |
-| `KEYCLOAK_ISSUER` <!-- [SSO] --> | `https://<keycloak-host>/realms/__REALM__` | |
-| `KEYCLOAK_CLIENT_SECRET` <!-- [SSO] --> | Keycloak → Clients → `__PROJECT_NAME__` → Credentials | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| `KEYCLOAK_CLIENT_SECRET` prod <!-- [SSO] --> | Keycloak → Clients → `__PROJECT_NAME__` → Credentials | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
+| `KEYCLOAK_CLIENT_SECRET` dev <!-- [SSO] --> | Keycloak → Clients → `__PROJECT_NAME__-dev` → Credentials | ⚠️ **ส่งช่องทางปลอดภัย ห้ามกรอกที่นี่** |
 | ลิงก์ Jenkins job | หน้า job `__PROJECT_NAME__` และ `__PROJECT_NAME__-dev` | |
 
 ## หลังระบบขึ้นแล้ว

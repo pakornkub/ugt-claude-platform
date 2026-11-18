@@ -980,7 +980,7 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
     <tbody>
       <tr><td>1 วิธี login: SSO / LDAP / Local</td><td>default <b>SSO อย่างเดียว</b> · ส่วนของวิธีที่ไม่เลือกถูกลบทิ้ง</td></tr>
       <tr><td>2 deploy ใต้ basePath / โดเมนกลางไหม</td><td>ใช้ตั้งชื่อ cookie ไม่ให้ชนแอปอื่น และ redirect URI</td></tr>
-      <tr><td>3 [SSO] มี Keycloak client แล้วหรือยัง</td><td>มี → ขอ <code>KEYCLOAK_ISSUER</code> / <code>CLIENT_ID</code> / <code>CLIENT_SECRET</code> · ยังไม่มี → เขียนคำขอเป็นไฟล์ <code>docs/admin-handoff.md</code> (ตาราง G)</td></tr>
+      <tr><td>3 [SSO] มี Keycloak client (<code>&lt;project&gt;</code> + <code>&lt;project&gt;-dev</code>) แล้วหรือยัง</td><td>มี → ขอ <code>CLIENT_SECRET</code> ของแต่ละ client (issuer = <code>&lt;domain&gt;/keycloak/realms/ugt</code> กับ Client ID คำนวณเอง) · ยังไม่มี → เขียนคำขอเป็นไฟล์ <code>docs/admin-handoff.md</code> (ตาราง G)</td></tr>
       <tr><td>4 [LDAP] รายละเอียด AD</td><td><code>LDAP_URL</code>, <code>LDAP_BASE_DN</code>, <code>LDAP_DOMAIN</code> = UPN แบบ DNS (<code>ube.co.th</code> ไม่ใช่ <code>UBE</code>)</td></tr>
       <tr><td>4b [SSO/LDAP] โดเมนอีเมลขององค์กร</td><td>ไม่ต้องถาม → <code>ORG_EMAIL_DOMAINS=ube.co.th,ube.com</code> (ตัวแรก = ตัวหลัก · มาตรฐานองค์กร <code>ube.co.th</code>)</td></tr>
       <tr><td>5 admin คนแรก</td><td><b>ไม่ถาม</b> — คนแรกที่ login ไป <code>/admin/setup</code> แล้วกดปุ่มเดียว</td></tr>
@@ -1029,7 +1029,7 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
 
   <h3 class="sec-h"><span class="n">6</span>กฎที่ห้ามพลาด</h3>
   <ul class="checklist">
-    <li>Keycloak กลางตัวเดียว แต่ <b>หนึ่งโปรเจค = หนึ่ง client</b> (Client ID = ชื่อโปรเจค) · OIDC Authorization Code + PKCE (S256) เท่านั้น</li>
+    <li>Keycloak กลางตัวเดียว แต่ <b>หนึ่งโปรเจค = สอง client</b> (<code>&lt;project&gt;</code> prod · <code>&lt;project&gt;-dev</code> dev + localhost) · OIDC Authorization Code + PKCE (S256) เท่านั้น</li>
     <li>ชื่อ cookie ต้องมี prefix จาก basePath และต้องตรงกันใน <code>lib/auth.ts</code>, <code>proxy.ts</code>, <code>lib/actions/auth.ts</code> · <code>BETTER_AUTH_URL</code> <b>บังคับ</b> (<code>z.url()</code>) ทุก environment</li>
     <li>ลำดับ guard ของทุก mutation: <b>session → permission → action → audit log</b> · guard ใน UI อย่างเดียวไม่พอ</li>
     <li>Permission ≠ scope: route ที่รับ empCode/owner id จากฝั่ง client ต้องเช็ค <code>lib/scope.ts</code> และตอบ <b>404</b> เมื่อไม่อยู่ในขอบเขต</li>
@@ -1640,7 +1640,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
       <tr><td><code>next.config</code></td><td><code>output: 'standalone'</code> · <code>deploymentId</code> · <code>basePath</code> (เมื่อใช้)</td></tr>
       <tr><td><code>docs/admin-handoff.md</code></td><td>ไฟล์ส่งทีม admin: ตารางภาพรวม + ตารางต่อระบบ (DB, โฟลเดอร์ server, Jenkins, GitHub, SonarQube, Keycloak, nginx, cron) + ตาราง "ส่งกลับ"</td></tr>
       <tr><td><code>docs/admin-db-setup.sql</code> (แยก server: <code>-prod.sql</code> + <code>-dev.sql</code>)</td><td>script ตาราง A ให้ DBA รันใน SSMS โหมด SQLCMD — สร้าง login + database (<code>Thai_CI_AS</code>, RCSI, Recovery FULL) + <code>db_owner</code> + <code>dbcreator</code> (ค่า default: ไฟล์เดียว prod+dev) · รหัสผ่านเป็น <code>CHANGE_ME</code> เสมอ DBA แทนค่าตอนรัน · ไม่เปิด SQLCMD Mode หรือยังไม่แทนค่า → หยุด ไม่สร้างอะไร</td></tr>
-      <tr><td><code>.env</code> · <code>.env.dev</code> (ในเครื่อง)</td><td>ให้ <code>docker compose</code> ทดสอบในเครื่องได้ — ค่าจริง ห้าม commit</td></tr>
+      <tr><td><code>.env</code> · <code>.env.dev</code> (ในเครื่อง)</td><td>ให้ <code>docker compose</code> ทดสอบในเครื่องได้ — ค่าจริง ห้าม commit · skill เติมให้ครบ (secret สร้างแยกทุกไฟล์, URL/basePath/ชื่อแอป/Client ID ตาม env) เหลือ <code>CHANGE_ME</code> แค่ค่าที่ admin ส่งกลับ</td></tr>
       <tr><td><code>app/api/cron/&lt;job&gt;/route.ts</code></td><td>[CRON] หนึ่ง route ต่องาน (<code>POST</code> เท่านั้น)</td></tr>
       <tr><td><code>.claude/rules/ugt-nextjs-ci.md</code></td><td>กฎที่โหลดเองเมื่อแตะไฟล์ CI</td></tr>
     </tbody>
@@ -1870,7 +1870,7 @@ npx prisma migrate dev --name add-attachments &amp;&amp; npx prisma generate</pr
     <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg></span>อาการที่เจอบ่อย</h3>
     <details class="acc"><summary>port 3100 / 8180 / 8125 ถูกใช้อยู่</summary><div class="body"><p><b>สาเหตุ:</b> port ผูกกับ redirect URI ของ realm <code>smoke</code><br><b>วิธีแก้:</b> ปิดโปรแกรมที่ใช้ port นั้น แล้วเรียกใหม่ — skill รายงานแล้วหยุด ไม่เปลี่ยน port เอง</p></div></details>
     <details class="acc"><summary>service <code>migrate</code> ล้มตอน up</summary><div class="body"><p><b>สาเหตุ:</b> migration หรือ image build พังจริง<br><b>วิธีแก้:</b> นับเป็น FAIL ข้อแรก — deploy จริงจะพังแบบเดียวกัน</p></div></details>
-    <details class="acc"><summary>live บน localhost แล้ว Keycloak ปฏิเสธ <code>redirect_uri</code></summary><div class="body"><p><b>สาเหตุ:</b> client ของ dev อนุญาตแค่ URL ที่ deploy<br><b>วิธีแก้:</b> ทดสอบกับ dev URL ที่ deploy แล้ว (<code>env-ready.mjs --url</code>) — ข้อนี้เป็น BLOCKED ไม่ใช่สิ่งที่ต้องหาทางอ้อม</p></div></details>
+    <details class="acc"><summary>live บน localhost แล้ว Keycloak ปฏิเสธ <code>redirect_uri</code></summary><div class="body"><p><b>สาเหตุ:</b> client <code>&lt;project&gt;-dev</code> ยังไม่มี redirect URI ของ localhost (admin-handoff ตาราง G บรรทัดที่ 2)<br><b>วิธีแก้:</b> ขอ admin เพิ่ม หรือทดสอบกับ dev URL ที่ deploy แล้ว (<code>env-ready.mjs --url</code>) — ข้อนี้เป็น BLOCKED ไม่ใช่สิ่งที่ต้องหาทางอ้อม</p></div></details>
     <details class="acc"><summary>อัปโหลดล้มทุกไฟล์ใน container</summary><div class="body"><p><b>สาเหตุ:</b> โปรเจคเปิดสแกนไวรัส <code>[SCAN]</code> แต่ stack ทดสอบไม่มี ClamAV (fail closed)<br><b>วิธีแก้:</b> copy service <code>clamav</code> + <code>CLAMAV_*</code> จาก <code>docker-compose.dev.yml</code> เข้า smoke file</p></div></details>
   </div>
 </section>
@@ -3125,7 +3125,7 @@ vendor/bin/phpunit</pre>
           <td><code>auth.md</code></td>
           <td>ตัวตน, login, RBAC, audit</td>
           <td><ul>
-            <li>Keycloak กลางตัวเดียว · <b>OIDC client หนึ่งตัวต่อโปรเจค</b> · Authorization Code + PKCE (S256) เท่านั้น</li>
+            <li>Keycloak กลางตัวเดียว · <b>OIDC client สองตัวต่อโปรเจค (prod / -dev)</b> · Authorization Code + PKCE (S256) เท่านั้น</li>
             <li>session อายุ <b>8 ชั่วโมง</b> ต่ออายุเมื่อเหลือ <b>30 นาที</b></li>
             <li>permission เป็น <code>resource:action</code> · ลำดับ guard: session → permission → action → audit log</li>
             <li>audit บังคับ: <code>login.success</code> · <code>login.failed</code> · <code>logout</code> · <code>logout.sso</code></li>

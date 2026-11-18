@@ -138,9 +138,12 @@ Ask all of these in one interview round before doing anything — one
 message, or back-to-back AskUserQuestion calls (≤4 per call):
 
 1. **Which login methods?** SSO / LDAP / Local (default: SSO only)
-2. **Deployed under a basePath / shared domain?** If yes → what basePath (e.g. `/__BASE_PATH__`)
-3. **[If SSO] Does a Keycloak client exist yet?**
-   - exists → request `KEYCLOAK_ISSUER` / `CLIENT_ID` / `CLIENT_SECRET`
+2. **Domain + basePath?** domain (org default `https://ugtweb.ube.co.th`), basePath
+   (org default `/<project>` prod, `/<project>-dev` dev) — these fill `BETTER_AUTH_URL`,
+   `KEYCLOAK_ISSUER` = `<domain>/keycloak/realms/ugt` and the client IDs in every real
+   env file (`ugt-nextjs-database-setup` `references/env-files.md`)
+3. **[If SSO] Do the Keycloak clients (`<project>` + `<project>-dev`) exist yet?**
+   - exist → request each client's `CLIENT_SECRET` (issuer + IDs are derived)
    - not yet → follow `references/keycloak-client.md` (the redirect URI must
      be known before requesting) — and **render the request as a project file
      `docs/admin-handoff.md`** (Thai, real values, settings table + exact

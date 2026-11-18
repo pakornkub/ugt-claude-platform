@@ -154,8 +154,10 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
 1. **Project name** (kebab-case) → becomes image/container/credential/sonar key
    + display name
 2. **Host ports** — prod / dev (e.g. 3000 / 3001)
-3. **basePath?** (deployed under a reverse-proxy subpath?) — if yes, get the
-   prod/dev paths + full app URLs
+3. **Domain + basePath** — domain (org default `https://ugtweb.ube.co.th`) and
+   basePath (org default `/<project>` prod, `/<project>-dev` dev) → derive
+   `__APP_URL_PROD__` = `<domain>/<project>`, `__APP_URL_DEV__` = `<domain>/<project>-dev`;
+   ask for full URLs only when the app is not under a basePath
 4. **Database?** — Prisma present → keep the [DB] sections (migrate step +
    builder image); absent → cut them. **DB = yes → three more, for
    `docs/admin-db-setup*.sql`** (§4.6 — the DBA runs it instead of clicking through SSMS):
@@ -313,8 +315,27 @@ neither ever committed**:
 
 | File | Copy of | Add/override |
 | --- | --- | --- |
-| `.env` | `.env.local` | `APP_PORT=__PORT_PROD__` |
-| `.env.dev` | `.env.local` | `APP_PORT=__PORT_DEV__` + point `DATABASE_URL` at the dev DB if it differs |
+| `.env` | `.env.local` | prod column of the table below |
+| `.env.dev` | `.env.local` | dev column of the table below |
+
+**Fill every derivable value — never hand the user a file of defaults to fix.**
+The full per-file table is `ugt-nextjs-database-setup` `references/env-files.md`;
+in short (`D` = domain, org default `https://ugtweb.ube.co.th` · `P` = project):
+
+| Key | `.env` | `.env.dev` |
+| --- | --- | --- |
+| `NEXT_PUBLIC_BASE_PATH` / `NEXT_PUBLIC_APP_URL` | `/P` · `D/P` | `/P-dev` · `D/P-dev` |
+| `NEXT_PUBLIC_APP_NAME` | display name | display name + ` (DEV)` |
+| `APP_PORT` · `DATABASE_URL` | `__PORT_PROD__` · prod DB | `__PORT_DEV__` · dev DB |
+| `BETTER_AUTH_SECRET` · `CRON_SECRET` `[CRON]` | generated — its own value | generated — its own value |
+| `BETTER_AUTH_URL` · `BETTER_AUTH_TRUSTED_ORIGINS` | `D` | `D` |
+| `KEYCLOAK_ISSUER` · `KEYCLOAK_CLIENT_ID` | `D/keycloak/realms/ugt` · `P` | same issuer · `P-dev` |
+
+Generate each secret separately (`openssl rand -base64 32`, or on Windows
+without openssl `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`)
+— copying `.env.local`'s secret into `.env` would let a dev session cookie
+unlock prod. Only what the admin returns stays `CHANGE_ME` (DB login/password,
+`KEYCLOAK_CLIENT_SECRET`).
 
 Run with `docker compose up` (reads `.env` automatically) and
 `docker compose -f docker-compose.dev.yml --env-file .env.dev up`
