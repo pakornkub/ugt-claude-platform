@@ -41,7 +41,10 @@ table. Each skill fills **its own keys in every file that already exists**.
   never unlock prod sessions). `openssl rand -base64 32`; no `openssl`
   (stock Windows) →
   `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
-  Never leave the `CHANGE_ME_min_32_chars…` dummy in a real file.
+  Never leave the `CHANGE_ME_min_32_chars…` dummy in a real file. **No shell**
+  (the command cannot run) → keep the dummy and list the command per file under
+  "ยังไม่ได้รัน" — never type a made-up "random" string: a secret a model writes
+  by hand is guessable.
 - `BETTER_AUTH_URL` / `BETTER_AUTH_TRUSTED_ORIGINS` are the bare origin — **no
   basePath** (cookie-name trap, `ugt-nextjs-auth-setup` `references/auth-flows.md`).
 - `NEXT_PUBLIC_*` in `.env` / `.env.dev` mirror what the Jenkinsfile bakes in as

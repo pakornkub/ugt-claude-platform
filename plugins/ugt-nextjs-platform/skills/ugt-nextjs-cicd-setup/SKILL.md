@@ -334,7 +334,9 @@ in short (`D` = domain, org default `https://ugtweb.ube.co.th` · `P` = project)
 Generate each secret separately (`openssl rand -base64 32`, or on Windows
 without openssl `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`)
 — copying `.env.local`'s secret into `.env` would let a dev session cookie
-unlock prod. Only what the admin returns stays `CHANGE_ME` (DB login/password,
+unlock prod. **No shell → keep the `CHANGE_ME` dummy and list the command per
+file under "ยังไม่ได้รัน"; never type a "random" secret yourself** (guessable —
+eval 2026-11-18 caught one). Only what the admin returns stays `CHANGE_ME` (DB login/password,
 `KEYCLOAK_CLIENT_SECRET`).
 
 Run with `docker compose up` (reads `.env` automatically) and
