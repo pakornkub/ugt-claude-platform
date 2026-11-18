@@ -26,13 +26,22 @@
    ไม่ต้องสร้างตาราง — pipeline รัน migration ตอน deploy
    ============================================================================= */
 
+SET NOEXEC OFF; -- ล้างค่าที่ค้างจากการรันผิดโหมดครั้งก่อนใน query window เดียวกัน
+GO
+
 :setvar LoginName "__LOGIN_NAME__"
 :setvar LoginPassword ""
 -- รหัสผ่านห้ามมีเครื่องหมาย ' (single quote)
 :on error exit
+GO
 
-IF N'$(LoginName)' = N'' OR N'$(LoginPassword)' = N''
-    RAISERROR(N'กรอก :setvar LoginName และ LoginPassword ก่อนรัน', 16, 1);
+-- ด่านกันรันผิดโหมด: SQLCMD Mode ปิด → $(...) ไม่ถูกแทนค่าและ SSMS รัน batch ถัดไปต่อ
+-- (ไม่มีด่านนี้จะได้ login ชื่อ "$(LoginName)" รหัส "$(LoginPassword)" จริง) → NOEXEC หยุดทุก batch ที่เหลือ
+IF LEFT(N'$(LoginName)', 2) = N'$' + N'(' OR N'$(LoginName)' = N'' OR N'$(LoginPassword)' = N''
+BEGIN
+    RAISERROR(N'หยุด: เปิด Query → SQLCMD Mode และกรอก :setvar LoginName / LoginPassword ก่อนรัน — ยังไม่มีอะไรถูกสร้าง', 16, 1);
+    SET NOEXEC ON;
+END
 GO
 
 USE master;
