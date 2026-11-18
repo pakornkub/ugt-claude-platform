@@ -160,13 +160,15 @@ chown ให้ตรง UID ใน container (idempotent); admin เตรี�
    builder image); absent → cut them. **DB = yes → three more, for
    `docs/admin-db-setup*.sql`** (§4.6 — the DBA runs it instead of clicking through SSMS):
    - 4a. **SQL login name** of the project owner — known → goes into `:setvar LoginName`;
-     unknown → leave it `""`, the DBA picks it by the org naming rule and returns it
-   - 4b. **prod and dev on the same SQL Server?** — same → one `admin-db-setup.sql`
-     (`[SAME]`); separate → `admin-db-setup-prod.sql` + `admin-db-setup-dev.sql`
-     (`[SPLIT]`, `dbcreator` only in the dev file)
-   - 4c. **Rights in both databases** — `db_datareader` · `db_datawriter` · `db_ddladmin` ·
-     `GRANT EXECUTE` (`[RWX]`, org default, มติ 2026-11-16) or `db_owner` (`[OWNER]`,
-     simpler; DBA's call)
+     unknown → leave it `CHANGE_ME`, the DBA picks it by the org naming rule and returns it
+   - 4b. **prod and dev on the same SQL Server?** — same (**org default**, also when not
+     answered) → one `admin-db-setup.sql` (`[SAME]`); only when the user says separate →
+     `admin-db-setup-prod.sql` + `admin-db-setup-dev.sql` (`[SPLIT]`, `dbcreator` only in the dev file)
+   - 4c. **Rights in both databases** — `db_owner` (`[OWNER]`, **org default** มติ 2026-11-18 —
+     also for "ค่ามาตรฐาน" / not answered) or, only when the user asks for it, `db_datareader` ·
+     `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` (`[RWX]`)
+   - The default render (`[SAME]` + `[OWNER]`) is the ugt-rd-laboratory script: one file,
+     `db_owner` in both databases, `dbcreator`, `DEFAULT_DATABASE` = dev
    - 4d. **SQL Server version** → compatibility level (`2019` = `150`, org default ·
      `2022` = `160`; older than 2019 → ask, `150` fails there). The other database settings
      are fixed, not asked: `Thai_CI_AS` · Read Committed Snapshot ON · Recovery FULL
@@ -233,7 +235,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | `__REPO_URL__` | URL ของ git repo |
 | `__JENKINS_HOST__` | โฮสต์ Jenkins ขององค์กร |
 | `__DB_NAME_PROD__` / `__DB_NAME_DEV__` | ชื่อ database — จากคำตอบ database-setup; ไม่รู้ → เสนอ `<ชื่อระบบ>` / `<ชื่อระบบ>_DEV` จากชื่อโปรเจค (`ugt-rd-laboratory` → `UGT_RdLaboratory` / `UGT_RdLaboratory_DEV`) (ไม่มี shadow database — login ได้ `dbcreator` บน dev แทน) |
-| `__DB_ROLES__` | Q4c — `` `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` `` หรือ `` `db_owner` `` |
+| `__DB_ROLES__` | Q4c — `` `db_owner` `` (default) หรือ `` `db_datareader` · `db_datawriter` · `db_ddladmin` · `GRANT EXECUTE` `` |
 | `__COMPAT_LEVEL__` | Q4d — `150` (SQL Server 2019, default) · `160` (2022) — also in the SQL template |
 | `__LOGIN_NAME_HINT__` | Q4a — รู้ชื่อ → `` กรอกไว้แล้ว: `<ชื่อ>` ``; ไม่รู้ → `ตามมาตรฐานชื่อ login ขององค์กร` |
 | `__PROJECT_OWNER__` | เจ้าของโปรเจค — SQL login เป็นของคนนี้ ตัวเดียวใช้ทั้ง prod และ dev (admin สร้าง แล้วส่งชื่อกลับในตาราง "ส่งกลับ"); ไม่ได้บอก → ใช้ค่าเดียวกับ `__REQUESTER__` |
@@ -249,6 +251,7 @@ Names derived automatically from `__PROJECT_NAME__`: dev image/container =
 | --- | --- |
 | `__LOGIN_NAME__` | Q4a — ชื่อ login หรือ `CHANGE_ME` เมื่อยังไม่รู้ |
 | `__TARGET_SERVER__` | `SQL Server ที่มีทั้ง prod และ dev` (`[SAME]`) · `SQL Server prod` / `SQL Server dev` (`[SPLIT]` — คนละไฟล์) |
+| `__LOGIN_DEFAULT_DB__` | `__DB_NAME_DEV__` (`[SAME]` และไฟล์ `-dev`) · `__DB_NAME_PROD__` (ไฟล์ `-prod`) |
 
 ### 4.3 Adjust per interview answers
 

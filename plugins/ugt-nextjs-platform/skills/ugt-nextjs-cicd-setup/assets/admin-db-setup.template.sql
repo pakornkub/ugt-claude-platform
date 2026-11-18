@@ -1,10 +1,13 @@
 -- RENDER RULES (delete every line from here through END RENDER RULES in the rendered file):
 -- - Rendered together with docs/admin-handoff.md (SKILL.md §4.6), only when the project has [DB].
 -- - Substitute every __...__ (SKILL.md §4.2). `grep -n "__[A-Z]" docs/admin-db-setup*.sql` must find nothing.
--- - Interview Q4b — prod and dev on ONE SQL Server → render once to docs/admin-db-setup.sql keeping [PROD] and [DEV].
---   Separate servers → render twice: docs/admin-db-setup-prod.sql keeps [PROD] only,
+-- - Interview Q4b — prod and dev on ONE SQL Server (org default, also when unanswered) → render once to
+--   docs/admin-db-setup.sql keeping [PROD] and [DEV].
+--   Only when the user SAYS they are separate servers → render twice: docs/admin-db-setup-prod.sql keeps [PROD] only,
 --   docs/admin-db-setup-dev.sql keeps [DEV] only (so dbcreator lands on the dev server only).
--- - Interview Q4c — keep [OWNER] (db_owner) or [RWX] (db_datareader + db_datawriter + db_ddladmin + GRANT EXECUTE), never both.
+-- - Interview Q4c — keep [OWNER] (db_owner — org default, also for "ค่ามาตรฐาน"/unanswered) or, only when the user
+--   asks for it, [RWX] (db_datareader + db_datawriter + db_ddladmin + GRANT EXECUTE). Never both.
+-- - __LOGIN_DEFAULT_DB__ = __DB_NAME_DEV__ (one file, and the -dev file) · __DB_NAME_PROD__ (the -prod file).
 -- - A line ending in `-- [X]` belongs to X. A line that is only `-- [X]` heads a batch that runs through its GO.
 --   Kept → strip the tag (and the trailing spaces before it). Not kept → delete the line / the whole batch.
 -- - LoginName = the name from Q4a, or CHANGE_ME when unknown. LoginPassword stays "CHANGE_ME" ALWAYS — the DBA types it at run time;
@@ -22,6 +25,16 @@
      4. ปิดไฟล์โดยไม่ save — รหัสผ่านห้ามอยู่ในไฟล์ / ห้าม commit
    sqlcmd: :setvar ในไฟล์ชนะค่า -v เสมอ → ใช้ copy นอก repo ที่กรอก :setvar แล้ว
            sqlcmd -S <host> -E -i <copy>.sql  แล้วลบ copy ทิ้ง
+
+   ผลลัพธ์:
+     - database __DB_NAME_PROD__ (prod)  -- [PROD]
+     - database __DB_NAME_DEV__ (dev)  -- [DEV]
+       collation Thai_CI_AS · Is Read Committed Snapshot On = True · Recovery model = Full
+       · Compatibility level = __COMPAT_LEVEL__ · Containment type = None
+     - login SQL authentication 1 ตัว ใช้ทั้ง prod และ dev
+     - login เป็น db_owner ของ database ข้างบน  -- [OWNER]
+     - login ได้ db_datareader · db_datawriter · db_ddladmin · GRANT EXECUTE ใน database ข้างบน  -- [RWX]
+     - login อยู่ใน server role dbcreator (Prisma `migrate dev` สร้าง/ลบ shadow database ชั่วคราวเอง)  -- [DEV]
 
    ไม่ต้องสร้างตาราง — pipeline รัน migration ตอน deploy
    ============================================================================= */
@@ -73,6 +86,7 @@ GO
 IF SUSER_ID(N'$(LoginName)') IS NULL
     CREATE LOGIN [$(LoginName)]
         WITH PASSWORD = N'$(LoginPassword)',
+             DEFAULT_DATABASE = [__LOGIN_DEFAULT_DB__],
              CHECK_POLICY = ON,
              CHECK_EXPIRATION = OFF; -- login ของแอป: รหัสหมดอายุ = ระบบล่ม
 GO

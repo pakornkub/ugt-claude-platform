@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **cicd-setup: `docs/admin-db-setup.sql` ค่า default = ไฟล์เดียว + `db_owner` (มติ 2026-11-18 แทนข้อ 2 ของมติ 2026-11-16)** — 4.92.0 ไม่มี default ของ Q4b และตั้ง Q4c เป็น RWX → ตอบ "ค่ามาตรฐาน"/ไม่ได้ตอบได้ `-prod.sql` + `-dev.sql` และ `db_datareader`/`db_datawriter`/`db_ddladmin`/`GRANT EXECUTE` ไม่ตรงกับ script ต้นแบบของ ugt-rd-laboratory · ตอนนี้ไม่ได้ตอบ = prod/dev server เดียวกัน (`[SAME]`) + `db_owner` (`[OWNER]`) · แยก server / RWX ต้องสั่งเอง · template เพิ่ม `DEFAULT_DATABASE` (dev; ไฟล์ `-prod` = prod) และบล็อก "ผลลัพธ์" ที่หัวไฟล์ · eval grader `admin-db-setup-rwx` → `admin-db-setup-owner` · **โปรเจคที่ render ไปแล้ว**: render ใหม่ (§4.6) ถ้ายังไม่ได้ส่ง DBA · 2026-11-18
+
 ## 4.92.0 (2026-11-18)
 
 - **cicd-setup: ชื่อ database dev ที่เสนอเป็น `<ชื่อระบบ>_DEV` (เดิม `_Dev`)** — มาตรฐานองค์กร 2026-11-18 · โปรเจคที่ตั้งไว้แล้วไม่ต้องเปลี่ยน
