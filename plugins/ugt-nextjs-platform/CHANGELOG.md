@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.93.0 (2026-11-18)
+
 - **setup เติมค่าจริงลง `.env` / `.env.dev` / `.env.local` ให้ครบ ไม่ทิ้งค่า default ให้ผู้ใช้แก้เอง** (จากการทดสอบ 2026-11-18) — ตารางเดียวที่ `ugt-nextjs-database-setup` `references/env-files.md` (database/auth/cicd/full-setup ชี้มาที่นี่): `BETTER_AUTH_SECRET` (+ `CRON_SECRET`) สร้างใหม่ทุกไฟล์ (`openssl rand -base64 32` หรือ `node -e` บน Windows) · `BETTER_AUTH_URL`/`TRUSTED_ORIGINS` = domain (prod/dev) หรือ `http://localhost:3000` (local) · basePath `/P` · `/P-dev` · `/P-dev` · `NEXT_PUBLIC_APP_URL` `D/P` · `D/P-dev` · `http://localhost:3000/P-dev` · ชื่อแอป dev/local ต่อท้าย ` (DEV)` · `KEYCLOAK_ISSUER` = `<domain>/keycloak/realms/ugt` · `KEYCLOAK_CLIENT_ID` `P` / `P-dev` / `P-dev` · interview ถาม domain (default `https://ugtweb.ube.co.th`) แล้วคำนวณ URL แทนการถาม URL เต็ม · เหลือ `CHANGE_ME` แค่ค่าที่ admin ส่งกลับ
 - **Keycloak = 2 client ต่อโปรเจค** (`P` prod · `P-dev` dev + localhost redirect) — admin-handoff ตาราง G เป็นสองคอลัมน์, ตารางส่งกลับขอ secret 2 ตัว (ตัดแถว issuer — คำนวณจาก domain) · external-config-handoff / keycloak-client.md / web reference ตาม
 - **Jenkinsfile: dev build ได้ `NEXT_PUBLIC_APP_NAME` + ` (DEV)`** (`def appName` ต่อ branch) — `NEXT_PUBLIC_*` ฝังตอน build จึงต้องแก้ที่ build-arg ไม่ใช่แค่ `.env.dev` · jenkins-project-setup: credential อัปโหลด `.env` / `.env.dev` (เดิมเขียน `.env.production`/`.env.development`) · **โปรเจคเดิม**: แก้ Jenkinsfile 2 บรรทัด build-arg + ขอ client `-dev` จาก admin
