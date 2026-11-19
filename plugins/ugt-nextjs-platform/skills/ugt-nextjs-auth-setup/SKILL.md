@@ -33,6 +33,7 @@ symptom appears, and `auth-flows.md` / `login-flows.md` before changing a flow.
 | Static assets return `Unexpected token '<'` | `troubleshooting-session.md` §basePath and proxy.ts |
 | `npm ci` dies with `ERESOLVE` on Jenkins / in `docker build` only | `troubleshooting-upgrades.md` §Dependencies and schema |
 | Profile menu (sidebar footer ⋮) kills the page — `Base UI error #31` | `troubleshooting-upgrades.md` §Kit re-syncs |
+| Every page in the shell that hosts the admin menu 500s — `ADMIN_NAV_ITEMS.filter is not a function` | `troubleshooting-upgrades.md` §Kit re-syncs |
 | SSO button 404 `PROVIDER_NOT_FOUND`, health green — after one deploy only | `troubleshooting-sso.md` §Keycloak / genericOAuth |
 | SSO ends in `internal_server_error`, Prisma error on `Account.issuer` | `troubleshooting-upgrades.md` §Account.issuer |
 | Keycloak rejects the redirect URI | `troubleshooting-sso.md` §Keycloak / genericOAuth · `keycloak-client.md` |
@@ -404,7 +405,7 @@ sidebars.
 **mandatory in preserve mode**; `scripts/verify.mjs` fails when a layout
 with a nav exists and `<AdminNav>` is still rendered anywhere):
 
-1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav.tsx`) into the
+1. Merge `ADMIN_NAV_ITEMS` (exported from `components/admin-nav-items.ts` — a plain module, safe in a Server Component; never import it from the `'use client'` `admin-nav.tsx`) into the
    existing nav config — as a "จัดการระบบ" (`auth.adminNav.systemGroup`) group,
    or wherever the project's menu structure puts admin items. Keep the
    per-item permission filter: the items carry their `perm` key, so feed the

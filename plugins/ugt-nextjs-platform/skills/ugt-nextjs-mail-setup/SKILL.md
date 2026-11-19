@@ -188,7 +188,7 @@ database the next time anyone opens an admin page.
 
 The page ships in §4.2; two wires make it reachable:
 
-1. `components/admin-nav.tsx` (auth-setup) — add to `ADMIN_NAV_ITEMS`:
+1. `components/admin-nav-items.ts` (auth-setup) — add to `ADMIN_NAV_ITEMS`:
 
    ```ts
    { href: '/admin/mail-templates', labelKey: 'mailTemplates', icon: Mail, perm: PERMISSIONS.MAIL_TEMPLATES_MANAGE },
