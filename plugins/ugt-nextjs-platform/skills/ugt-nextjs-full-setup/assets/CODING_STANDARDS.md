@@ -15,5 +15,6 @@ standards" means all of these:
 | Per-module rules — database, auth, design, CI, mail, upload | `.claude/rules/ugt-nextjs-*.md` (each declares the paths it governs) |
 | Rules that break the build every time | `CLAUDE.md` § "Rules that break the build every time" |
 | Design agreement (tokens, kit components, layout) | `docs/DESIGN.md` |
+| Review policy — passes, what counts as Important, nit cap, what not to report | `REVIEW.md` |
 
 Project-specific additions go below this line.

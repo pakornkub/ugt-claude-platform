@@ -186,6 +186,11 @@ check('CODING_STANDARDS.md present on the mattpocock bundle', () => {
     : { ok: false, msg: "No CODING_STANDARDS.md — mattpocock's /code-review Standards axis reads only that file, so org rules are invisible to it; copy assets/CODING_STANDARDS.md (full-setup §4.5b)" };
 });
 
+check('REVIEW.md present (review policy)', () =>
+  has('REVIEW.md')
+    ? { ok: true }
+    : { ok: false, msg: 'No REVIEW.md — reviewers fall back to generic checks and report what the Quality Gate already enforces; copy assets/REVIEW.md (full-setup §4.5c)' });
+
 check('CLAUDE.md imports the knowledge index', () => {
   if (claudeMd === null) return { ok: false, msg: 'No CLAUDE.md' };
   return /@docs\/project-context\/00-index\.md/.test(claudeMd)

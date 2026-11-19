@@ -145,6 +145,17 @@ run on it; if not, run it first, then do the integration check (full
 test/lint suite) and update the board via `/ugt-handoff`.
 <!-- [/PIPELINE:mattpocock] -->
 
+## Code review
+
+- Root `REVIEW.md` is this repo's review policy (passes, what counts as
+  Important, nit cap, do-not-report list). Claude Code Review on GitHub reads
+  it by itself — **no other reviewer does**: whenever you dispatch or run a
+  review (a pipeline's code reviewer, `/code-review`, a review subagent), put
+  "read `REVIEW.md` first and follow it" into its prompt
+- The session or subagent that wrote a change never approves it — review
+  findings are advisory; a human merges
+- The same review finding twice → add a rule under `REVIEW.md` § Project-specific rules
+
 ## Where new knowledge goes
 
 - Work state (ค้างไหน คิวอะไร คำถามค้าง) → `.claude/state/handoff.md`

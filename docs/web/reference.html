@@ -151,8 +151,8 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.93.1</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.21.1</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.94.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.22.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
       <tr><td><code>ugt-python-platform</code></td><td>0.10.5</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.9</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
       <tr><td><code>ugt-devops-mcp</code></td><td>0.1.6</td><td>ไม่บังคับ ใช้ได้ทุก stack — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · แทนสคริปต์ <code>install-*-mcp.ps1</code> เดิม</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
@@ -292,6 +292,7 @@
       <tr><td><code>.claude/rules/ugt-nextjs-*.md</code></td><td>กฎที่โหลดเองเมื่อแตะไฟล์ที่เกี่ยว — ตัวช่วยลูกแต่ละตัวติดตั้งของตัวเอง ตัวนี้แค่ตรวจว่าครบ</td></tr>
       <tr><td><code>docs/project-context/</code></td><td>สารบัญความรู้ของโปรเจค (สร้างผ่าน <a href="#skill-ugt-context">ugt-context</a>) — 7 ไฟล์ หรือ 6 ไฟล์บน bundle mattpocock</td></tr>
       <tr><td><code>CODING_STANDARDS.md</code></td><td>เฉพาะ bundle mattpocock — ให้ <code>/code-review</code> มองเห็นกฎขององค์กร</td></tr>
+      <tr><td><code>REVIEW.md</code></td><td>ทุก bundle — กติกา review ของทีม (3 รอบ bug / security / กฎองค์กร · อะไรนับเป็น Important · ข้อติเล็กน้อยไม่เกิน 5 · ไม่รายงานสิ่งที่ Quality Gate ตรวจอยู่แล้ว) · Claude Code Review บน GitHub อ่านเอง ส่วน reviewer อื่นอ่านเพราะ block ugt ใน CLAUDE.md สั่งไว้ · สร้างครั้งเดียว ไม่ทับ</td></tr>
       <tr><td><code>.gitignore</code></td><td>เพิ่ม <code>.claude/logs/</code> — แต่ <code>.claude/state/</code> และ <code>docs/project-context/</code> ต้อง commit</td></tr>
       <tr><td><code>docs/admin-handoff.md</code></td><td>ไฟล์ส่งทีม admin (เขียนโดย cicd-setup หรือ auth-setup) — ตัวนี้ตรวจว่ามีและไม่มี <code>__...__</code> เหลือ</td></tr>
       <tr><td><code>docs/setup-finish.md</code></td><td>เกิดเฉพาะเมื่อจำเป็น: เก็บไฟล์ที่เขียนไม่ได้ และบรรทัด <code>⚠ deviation</code> ก่อนที่ <code>docs/project-context/</code> จะถูกสร้าง</td></tr>
@@ -387,7 +388,7 @@
     <li>CLAUDE.md import สถานะทีมและสารบัญความรู้</li>
     <li>ไฟล์ rule ทุกตัวมี <code>paths:</code> และมีครบตามโมดูลที่ติดตั้ง</li>
     <li>ไม่มีไฟล์ state รุ่น v2.x · <code>handoff.md</code> มีครบทุกหัวข้อและถูกอัปเดตแล้ว · <code>model-mode.md</code> มีโหมดที่ถูกต้อง</li>
-    <li>มี <code>docs/project-context/</code> · มี <code>CODING_STANDARDS.md</code> บน bundle mattpocock</li>
+    <li>มี <code>docs/project-context/</code> · มี <code>REVIEW.md</code> · มี <code>CODING_STANDARDS.md</code> บน bundle mattpocock</li>
     <li>ไม่มี secret หลุดเข้าไฟล์ state/ความรู้ · <code>.claude/settings.json</code> ประกาศ marketplace + plugin · <code>.gitignore</code> ignore logs แต่ commit state</li>
   </ul>
   <p>แล้วเดินเช็คด้วยมือ: <code>npm run build</code> ผ่าน · login ได้ทุกวิธีที่เปิด → เข้าหน้าที่ป้องกันได้ → logout ล้าง cookie · <code>/admin/setup</code> กดครั้งเดียวได้ Administrator · push <code>develop</code> แล้ว pipeline เขียวทุก stage</p>
@@ -3190,7 +3191,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.93.1</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.94.0</span></div></footer>
 
 <script>
 (() => {

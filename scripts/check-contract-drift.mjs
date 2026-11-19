@@ -235,6 +235,19 @@ const CHECKS = [
     },
   },
   {
+    // 4.94.0: REVIEW.md is only read natively by Claude Code Review — every
+    // other reviewer sees it because the CLAUDE-block says so. Pin the asset,
+    // the copy step, the verify check and the block instruction together.
+    name: 'Review policy: REVIEW.md seeded + every reviewer told to read it',
+    files: {
+      [`${CORE}/contracts/harness.md`]: [/`REVIEW\.md`/, /nit cap ≤ 5/],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/REVIEW.md`]: [/at most five Nits/, /## Do not report/],
+      [`${NEXT}/ugt-nextjs-full-setup/SKILL.md`]: [/assets\/REVIEW\.md/, /5c\. \*\*`REVIEW\.md`\*\*/],
+      [`${NEXT}/ugt-nextjs-full-setup/scripts/verify.mjs`]: [/has\('REVIEW\.md'\)/],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/## Code review/, /read `REVIEW\.md` first/, /never approves it/],
+    },
+  },
+  {
     // review 2026-09-01: the GLOSSARY.md/docs-adr vs docs/project-context
     // separation rule lives in three places — pin that each copy names all
     // three homes (wording may differ; the cross-reference must not vanish)

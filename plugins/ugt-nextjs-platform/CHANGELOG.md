@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 4.94.0 (2026-11-19)
+
+- **`REVIEW.md` กติกา review ของทีม (ทุก bundle)** — ตาม Anthropic "The AI-native SDLC playbook" (2026-08-21) ขั้น Deploy · full-setup §4.5c วาง `assets/REVIEW.md` ที่ root ครั้งเดียว ไม่ทับ: รีวิว 3 รอบ (bug → security → กฎองค์กร) · นิยาม Important · Always check (migration ลบ/เปลี่ยนชื่อคอลัมน์, route ไม่มี permission, เปลี่ยน behaviour ไม่มี test, ออกนอก plan) · ข้อติเล็กน้อยไม่เกิน 5 · ไม่รายงานสิ่งที่ ESLint/Prettier/tsc/Quality Gate/OWASP ตรวจอยู่แล้ว · รูปแบบตรงกับที่ Claude Code Review (GitHub app) อ่านเองจาก default branch ที่ protect
+- **CLAUDE-block หัวข้อใหม่ "Code review"** — reviewer อื่นนอกจาก Claude Code Review ไม่อ่าน `REVIEW.md` เอง (superpowers' code reviewer ได้แค่ template ของมัน, `/code-review` ในเครื่องอ่านแค่ CLAUDE.md) → ทุกครั้งที่สั่ง review ต้องใส่ "read `REVIEW.md` first" ใน prompt · session/subagent ที่เขียนโค้ดไม่ approve งานตัวเอง · finding ซ้ำสองครั้ง → เพิ่มกฎใน `REVIEW.md` · `CODING_STANDARDS.md` (mattpocock) ชี้ไป `REVIEW.md` ด้วย
+- verify.mjs เช็คว่ามี `REVIEW.md` · drift check ใหม่ "Review policy" ผูก asset/SKILL/verify/CLAUDE-block · เว็บ guide/reference ตาม
+- **โปรเจคเดิม**: รันขั้น harness ของ full-setup ใหม่ (วาง `REVIEW.md` + block ใหม่) หรือ copy `assets/REVIEW.md` เอง แล้วเพิ่มกฎเฉพาะโปรเจคใต้ § Project-specific rules
+
 ## 4.93.1 (2026-11-18)
 
 - **ห้ามพิมพ์ secret ใน env เอง** — eval module-auth-after-design เจอ agent ที่ไม่มี shell แต่งค่า `BETTER_AUTH_SECRET` ที่ดูสุ่มขึ้นมาเอง (เดาได้) · env-files.md / auth asset-map / cicd §4.5 / full-setup Q9: ต้องได้จากการรันคำสั่ง, ไม่มี shell → คง `CHANGE_ME` + ใส่คำสั่งใต้ "ยังไม่ได้รัน" · eval: grader ค่าใน `.env`/`.env.dev`/`.env.local` + `(DEV)` ใน Jenkinsfile (run-through-db-quality-ci 22/22) และ section 3 / client `-dev` / secret ไม่ถูกแต่ง (module-auth-after-design 14/14 หลังแก้)

@@ -281,6 +281,7 @@ out in full, `autoUpdate` included), keep going, and name that file in the close
 | `assets/state/model-mode.md` | `.claude/state/model-mode.md` | **create once, never overwrite** — afterwards owned by `/ugt-model-mode` |
 | (via `ugt-context` skill) | `docs/project-context/` (7 files — 6 on the mattpocock bundle, no `decisions.md`) | **create once** — afterwards owned by `/ugt-handoff` |
 | `assets/CODING_STANDARDS.md` | root `CODING_STANDARDS.md` | **mattpocock bundle only** — create once, never overwrite |
+| `assets/REVIEW.md` | root `REVIEW.md` | every bundle (and none) — create once, never overwrite |
 
 `.claude/rules/ugt-nextjs-*.md` files are NOT installed from here — each child
 skill ships its own rule in its `assets/rules/` and installs it as part of its
@@ -374,6 +375,10 @@ How:
    `/code-review` Standards axis looks only for `CODING_STANDARDS.md` /
    `CONTRIBUTING.md`; without this pointer it never sees `.claude/rules/` or
    `ugt-nextjs-clean-code`, and reviews against Fowler smells alone.
+5c. **`REVIEW.md`** (every bundle) — copy `assets/REVIEW.md` to the project
+   root if absent; an existing one is the team's, never touch it. It is the
+   review policy: Claude Code Review on GitHub reads it natively, and the
+   CLAUDE-block's "Code review" section makes every other reviewer read it.
 6. **`.gitignore`** — add `.claude/logs/` (audit logs are not committed), but
    **`.claude/state/` and `docs/project-context/` must be committed** — never
    ignore `.claude/` wholesale.
