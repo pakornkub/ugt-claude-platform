@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 4.96.0 (2026-11-19)
+
+- **CLAUDE-block ชี้ไป eval ของโปรเจค** (`ugt-eval` ใน ugt-core 2.23.0) — แถวใหม่ใน "Which skill, when": แก้ CLAUDE.md / `.claude/rules/` / REVIEW.md / hook หรือหลัง `/plugin update` → `node evals/claude/run.mjs` · หัวข้อ Code review: Claude พลาดเรื่องเดิมสองครั้ง → เพิ่ม eval case ด้วย · โปรเจคเดิม: re-apply บล็อก ugt
+
 ## 4.95.0 (2026-11-19)
 
 - **Hook บังคับกฎ (PreToolUse บน Write/Edit/MultiEdit)** — ตาม Anthropic "The AI-native SDLC playbook": skill/CLAUDE.md เป็นแค่คำแนะนำ กฎที่ต้องถูกบังคับเสมอต้องมีสิ่งที่ deterministic รองรับ · `hooks/hooks.json` + `scripts/guard-edits.mjs` มากับ plugin ไม่ต้องติดตั้งในโปรเจค (และไม่ติดข้อจำกัดเขียน `.claude/` ของ sandbox) · ทำงานเฉพาะโปรเจคที่ `CLAUDE.md` มี `<!-- ugt:start` · ตรวจแค่ข้อความใหม่ของ edit (โค้ดเดิมไม่โดนบล็อก) · พังเมื่อไรปล่อยผ่าน (fail open)

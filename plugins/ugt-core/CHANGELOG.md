@@ -1,5 +1,13 @@
 # Changelog — ugt-core
 
+## 2.23.0 (2026-11-19)
+
+- **skill ใหม่ `ugt-eval` — eval ของโปรเจคเอง** ตาม Anthropic "The AI-native SDLC playbook" (งานจริง 20–50 ชิ้น รันซ้ำทุกครั้งที่แก้ CLAUDE.md / skill / hook · incident ทุกครั้งเพิ่ม eval) · runner `evals/claude/run.mjs` (asset, Node ล้วน ไม่มี dependency) copy working tree ไป temp (ไม่เอาไฟล์ gitignore และ `evals/claude/`) แล้วรัน `claude -p` จริง จึงโหลด CLAUDE.md, rules, REVIEW.md และ plugin ระดับ user (skill + hook) ครบ · ตรวจแบบ deterministic: ไฟล์ contains/notContains/exists, คำตอบ, คำสั่ง exit 0 (`node_modules` ลิงก์จาก repo) · cap $2/case · exit 0/1/2
+- เหตุที่ไม่ใช้ `claude plugin eval`: target ที่ติดตั้งแล้วอ่าน eval ของ plugin เอง ไม่ใช่ของโปรเจค และ sandbox ไม่โหลด plugin ระดับ user (ทดสอบ 2026-11-19)
+- test 3 ชุดกับ `claude` ปลอม (`node --test plugins/ugt-core/scripts/eval-runner.test.mjs`) + รันสดกับ Claude จริง (haiku) บนโปรเจคทดสอบ: 3/3, $0.01
+- contract `harness.md`: แถว `evals/claude/` (runner = platform, case = ทีม, สร้างตอนใช้ `/ugt-eval` ครั้งแรก ไม่ใช่ full-setup)
+- ยังไม่มี: eval/trigger-eval ของตัว skill เอง · การรันใน Jenkins (ต้องมี CLI + API key บน agent — admin ตัดสิน)
+
 ## 2.22.0 (2026-11-19)
 
 - **contract `harness.md`: แถว `REVIEW.md`** — ทีมเป็นเจ้าของ, full-setup วางครั้งเดียว (ทุก bundle) ไม่ทับ · เนื้อหาเฉพาะพฤติกรรม review (รอบ, นิยาม Important, ข้อติ ≤ 5, สิ่งที่ไม่ต้องรายงาน) · context ของโปรเจคยังอยู่ `CLAUDE.md` · Claude Code Review อ่านเอง reviewer อื่นอ่านเพราะ CLAUDE-block สั่ง

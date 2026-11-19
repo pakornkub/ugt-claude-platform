@@ -20,11 +20,11 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | --- | --- | --- |
 | `ugt-nextjs-standard-superpowers` | 3.0.0 | **แนะนำ (pipeline auto)** — ติดตัวเดียวได้ครบทุกอย่างข้างล่าง พร้อม `superpowers` (กระบวนการพัฒนา: คิดก่อน → วางแผน → เขียนเทสต์ก่อน → review, ทำเองอัตโนมัติ), `frontend-design`, `skill-creator` |
 | `ugt-nextjs-standard-mattpocock` | 1.0.0 | **ทางเลือก (pipeline manual, token น้อยกว่า)** — ตัวเดียวกันแต่สลับ `superpowers` เป็น `mattpocock-skills` (`/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review` เรียกเองทีละคำสั่ง — ดูวิธีใช้ด้านล่าง) |
-| `ugt-nextjs-platform` | 4.95.0 | ตัวช่วย 12 เรื่องของงาน Next.js (ตารางถัดไป) |
+| `ugt-nextjs-platform` | 4.96.0 | ตัวช่วย 12 เรื่องของงาน Next.js (ตารางถัดไป) |
 | `ugt-python-platform` | 0.10.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.9 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-devops-mcp` | 0.1.6 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
-| `ugt-core` | 2.22.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
+| `ugt-core` | 2.23.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
 ทั้งหมด) · อยากคุมทุกขั้นตอนเองและประหยัด token กว่า → ใช้ `-mattpocock`
@@ -64,6 +64,7 @@ context ใหม่ที่อ่านโปรเจคซ้ำ) ส่ว�
 | `ugt-context` | สร้าง**สารบัญความรู้ของโปรเจค** (`docs/project-context/`) ครั้งแรก — สแกนโค้ดเดิมให้ด้วย | ตอนติดตั้ง หรือโปรเจคเดิมที่ยังไม่มี |
 | `ugt-model-mode` | เลือกความแรง (และค่าใช้จ่าย) ของ AI ตามความยากของงาน | `/ugt-model-mode god` / "โหมดประหยัด" |
 | `ugt-requirements` | อ่านโฟลเดอร์ requirement แล้วสรุปเป็นเอกสารภาษาไทยแยกตาม feature | เริ่มโปรเจคจากกอง requirement |
+| `ugt-eval` | **eval ของโปรเจคเอง**: งานจริงของโปรเจค 20–50 ชิ้น รันซ้ำด้วย Claude จริง (`claude -p`) บนสำเนาของ repo แล้วตรวจผลแบบไม่ใช้ AI ตัดสิน (ไฟล์ · คำตอบ · คำสั่ง) — พิสูจน์ว่าแก้ CLAUDE.md / rules / REVIEW.md / hook หรืออัปเดต plugin แล้ว Claude ยังทำงานของโปรเจคถูก | หลังแก้ CLAUDE.md หรือ `/plugin update` · "Claude พลาดเรื่องเดิมสองครั้ง" |
 | `ugt-contribute` | ยกกับดักที่พิสูจน์แล้วว่าเจอทุกโปรเจคจาก `troubleshooting.md` ขึ้นเป็น PR เข้ารีโปนี้ — เลือก skill เจ้าของ, เขียน entry + CHANGELOG ใต้ `## Unreleased` (ไม่เลือกเลขรุ่น — ผู้ดูแลตั้งตอน release), โชว์ diff ให้กดยืนยันก่อนเปิด PR แล้วลบต้นทางในโปรเจค | "ส่ง PR ไป platform" / "อันนี้เจอทุกโปรเจค" |
 
 ## ติดตั้ง (ครั้งเดียวต่อเครื่อง)

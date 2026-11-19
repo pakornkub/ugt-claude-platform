@@ -108,6 +108,7 @@ private key in a committed file — when it refuses, fix the edit, don't route a
 <!-- [/PIPELINE:mattpocock] -->
 | Write/edit `.ts`/`.tsx` files | `ugt-nextjs-clean-code` + `ugt-nextjs-pitfalls` load themselves via `paths` — no need to invoke |
 | Test the whole running system — after setup, or once the admin team is done | `/ugt-nextjs-system-test` — container mode (needs Docker) or live mode (dev only); it reports before fixing anything |
+| Changed CLAUDE.md, `.claude/rules/`, REVIEW.md or a hook · after `/plugin update` | `node evals/claude/run.mjs` — the project's real-task evals (`/ugt-eval` installs it and adds cases) |
 | Finish work / hand off the session | `/ugt-handoff` |
 
 <!-- [PIPELINE:superpowers] -->
@@ -160,6 +161,7 @@ test/lint suite) and update the board via `/ugt-handoff`.
 - The session or subagent that wrote a change never approves it — review
   findings are advisory; a human merges
 - The same review finding twice → add a rule under `REVIEW.md` § Project-specific rules
+  · the same Claude mistake twice → also an eval case (`/ugt-eval`) so it stays fixed
 
 ## Where new knowledge goes
 

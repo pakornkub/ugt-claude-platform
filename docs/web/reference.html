@@ -115,6 +115,7 @@
     <a href="#skill-ugt-requirements">ugt-requirements</a>
     <a href="#skill-ugt-model-mode">ugt-model-mode</a>
     <a href="#skill-ugt-contribute">ugt-contribute</a>
+    <a href="#skill-ugt-eval">ugt-eval</a>
     <div class="grp">Python / PHP</div>
     <a href="#skill-ugt-python-cicd-setup">ugt-python-cicd-setup</a>
     <a href="#skill-ugt-php-cicd-setup">ugt-php-cicd-setup</a>
@@ -151,8 +152,8 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.95.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
-      <tr><td><code>ugt-core</code></td><td>2.22.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.96.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-core</code></td><td>2.23.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
       <tr><td><code>ugt-python-platform</code></td><td>0.10.5</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.9</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
       <tr><td><code>ugt-devops-mcp</code></td><td>0.1.6</td><td>ไม่บังคับ ใช้ได้ทุก stack — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · แทนสคริปต์ <code>install-*-mcp.ps1</code> เดิม</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
@@ -2801,6 +2802,34 @@ node &lt;skill-dir&gt;/scripts/check-kit-freshness.mjs --json   # สำหร�
   </div>
 </section>
 
+<section id="skill-ugt-eval" class="skill">
+  <h2><code>ugt-eval</code></h2>
+  <p class="lead">eval ของโปรเจคเอง — งานจริงของโปรเจครันซ้ำด้วย Claude จริงทุกครั้งที่แก้ harness แล้วตรวจผลแบบไม่ใช้ AI ตัดสิน</p>
+  <p><span class="badge">ugt-core</span> <span class="badge">เรียกเอง</span> <span class="badge">ใหม่ 2.23</span></p>
+
+  <div class="prose">
+    <dl class="glance" aria-label="สรุปย่อ">
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>ใช้เมื่อ</dt><dd>แก้ CLAUDE.md / <code>.claude/rules/</code> / REVIEW.md / hook · หลัง <code>/plugin update</code> · Claude พลาดเรื่องเดิมสองครั้ง · แก้ incident แล้ว</dd></div>
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-listcheck"/></svg>ต้องมีก่อน</dt><dd>Node 18+ และ <code>claude</code> ใน PATH · repo เป็น git</dd></div>
+    <div><dt><svg class="ico" aria-hidden="true"><use href="#i-package"/></svg>ได้อะไร</dt><dd><code>evals/claude/run.mjs</code> + <code>cases/*.json</code> (ทีมเขียน) · ผลใน <code>results/</code> (gitignore)</dd></div>
+  </dl>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-workflow"/></svg></span>ทำงานยังไง</h3>
+    <p>แต่ละ case copy working tree ไป temp (ไม่เอาไฟล์ที่ gitignore เช่น <code>.env</code> และไม่เอา <code>evals/claude/</code> — agent จะไม่เห็นเกณฑ์ตรวจ) แล้วรัน <code>claude -p</code> จริง จึงโหลด CLAUDE.md, rules, REVIEW.md และ plugin ระดับ user (skill + hook) เหมือนตอนทำงานจริง จากนั้นตรวจ: ไฟล์มี/ไม่มีข้อความ (regex), คำตอบสุดท้าย, และคำสั่งที่ต้อง exit 0 (เช่น <code>npx vitest run …</code>)</p>
+    <pre><code>node evals/claude/run.mjs              # ทุก case
+node evals/claude/run.mjs env- auth-   # เฉพาะ case ที่ชื่อขึ้นต้นด้วย
+node evals/claude/run.mjs --keep       # เก็บสำเนาไว้ดู</code></pre>
+
+    <h3 class="sec-h"><span class="n"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span>กฎที่ห้ามพลาด</h3>
+    <ul>
+      <li>case มาจากเรื่องที่เกิดจริงเท่านั้น: พลาดซ้ำสองครั้ง · finding ซ้ำสองครั้ง · incident · กฎที่ทีมพึ่งพา</li>
+      <li>ตรวจแบบ deterministic เท่านั้น — case ที่ผ่านบ้างตกบ้างบนผลเดิมให้แก้หรือลบทิ้ง</li>
+      <li>regex ใน JSON ใช้ <code>[.]</code> แทน <code>\.</code> · <code>notContains</code> บนไฟล์ที่ไม่ถูกเขียนถือว่าผ่าน ให้คู่กับ <code>contains</code></li>
+      <li>ทุก case เสียเงินจริง (default ไม่เกิน $2/case) · การรันใน Jenkins ต้องมี CLI + API key บน agent — เป็นการตัดสินใจของ admin</li>
+    </ul>
+  </div>
+</section>
+
 <section id="skill-ugt-python-cicd-setup" class="skill">
   <h2><code>ugt-python-cicd-setup</code></h2>
   <p class="lead">ติดตั้ง CI/CD มาตรฐานองค์กรให้โปรเจค Python ที่มีอยู่แล้ว — Jenkins 10 stage + SonarQube + OWASP + Docker</p>
@@ -3192,7 +3221,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.95.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.96.0</span></div></footer>
 
 <script>
 (() => {

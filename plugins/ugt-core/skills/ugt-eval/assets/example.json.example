@@ -1,0 +1,13 @@
+{
+  "_about": "Copy to <name>.json and replace. One case = one real task from recent work, phrased the way a teammate would ask it. Checks are deterministic: files, the final answer, commands.",
+  "prompt": "เพิ่มตัวแปร SMTP_FROM ให้ระบบส่งเมลอ่านค่าได้",
+  "tools": ["Read", "Glob", "Grep", "Write", "Edit"],
+  "budgetUsd": 2,
+  "checks": [
+    { "file": "lib/env.ts", "contains": "SMTP_FROM" },
+    { "file": "lib/mail.ts", "notContains": "process[.]env[.]SMTP_FROM" },
+    { "file": ".env.example", "contains": "^SMTP_FROM=" },
+    { "answerNot": "ไม่สามารถ" },
+    { "run": "npx tsc --noEmit" }
+  ]
+}
