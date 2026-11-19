@@ -37,6 +37,7 @@ symptom appears, and `auth-flows.md` / `login-flows.md` before changing a flow.
 | SSO ends in `internal_server_error`, Prisma error on `Account.issuer` | `troubleshooting-upgrades.md` §Account.issuer |
 | Keycloak rejects the redirect URI | `troubleshooting-sso.md` §Keycloak / genericOAuth · `keycloak-client.md` |
 | Mailed reset link 404s | `troubleshooting-session.md` §basePath and proxy.ts |
+| Console CSP error "Executing inline script violates…" on every page, theme flashes on load | `troubleshooting-session.md` §basePath and proxy.ts |
 | Email OTP always "expired" / 400 `TWO_FACTOR_NOT_ENABLED` after a `better-auth` bump | `troubleshooting-upgrades.md` §twoFactor lockout columns |
 | SSO `unable_to_create_user` / `account_not_linked`, TLS errors, LDAP "Invalid username" on prod only | `troubleshooting-sso.md` |
 
@@ -263,6 +264,11 @@ exceptions:
 > copy the identical content to `middleware.ts` instead (rename the exported
 > `proxy` function to `middleware`; `export const config` stays as-is), or
 > upgrade Next first.
+>
+> **`proxy.ts` brings a nonce CSP** — if the root layout's `<ThemeProvider>`
+> does not get `nonce` from the `x-nonce` header yet, wire it now
+> (design-setup `references/root-layout.md` §Provider stack), or next-themes'
+> inline script is blocked on every page.
 
 Per-asset destinations and notes (which assets are method-, mail- or
 workflow-conditional, which shadcn/kit components each needs, DataTable mode

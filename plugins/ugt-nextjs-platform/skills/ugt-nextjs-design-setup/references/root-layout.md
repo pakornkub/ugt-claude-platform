@@ -62,6 +62,26 @@ when dark mode = มี) → **`TooltipProvider` (required — the mira styles'
 Tooltip does not self-wrap a provider; sidebar tooltips crash prerender
 without it; delay 0 per the agreement)** → children + `<Toaster richColors />`.
 
+**`ThemeProvider` needs the CSP nonce once `proxy.ts` exists** (auth-setup
+installs it with `script-src 'nonce-…' 'strict-dynamic'`, no `'unsafe-inline'`).
+next-themes renders an inline anti-flash script; without the nonce the browser
+blocks it on every page (console: `Executing inline script violates the
+following Content Security Policy directive`) and the theme flashes on load.
+`proxy.ts` forwards the nonce as the `x-nonce` request header — read it in the
+root layout and pass it through:
+
+```tsx
+import { headers } from 'next/headers';
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+  // … <ThemeProvider nonce={nonce}> …
+}
+```
+
+No `proxy.ts` yet (design-setup before auth-setup) → `nonce` is `undefined`
+and nothing changes; wire it now so auth-setup needs no second edit.
+
 ## DEV environment indicator
 
 **dev ต้องมองออกทันทีว่าไม่ใช่ prod** — สองตัวอยู่ host เดียวกัน ต่างกันแค่ basePath
