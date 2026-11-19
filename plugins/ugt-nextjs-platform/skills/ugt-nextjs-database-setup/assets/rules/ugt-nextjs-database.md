@@ -69,5 +69,7 @@ diff it produces drop+add and loses the column's data.
 ## Env
 
 - Never read `process.env` directly in app code — `import { env } from '@/lib/env'`
-  (exceptions: `lib/env.ts`, root `*.config.ts`, `instrumentation*.ts`, `sentry.*.config.ts`, test files)
+  (exceptions: `NEXT_PUBLIC_*` and `NODE_ENV`, which the build inlines · `lib/env.ts`, root `*.config.ts`,
+  `instrumentation*.ts`, `sentry.*.config.ts`, test files, `scripts/`, `prisma/` — the `ugt-nextjs-platform`
+  edit-guard hook enforces this list)
 - `.env.example` = committed placeholders only · `.env.local` = real values, never committed

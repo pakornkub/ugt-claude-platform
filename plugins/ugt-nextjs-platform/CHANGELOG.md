@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 4.95.0 (2026-11-19)
+
+- **Hook บังคับกฎ (PreToolUse บน Write/Edit/MultiEdit)** — ตาม Anthropic "The AI-native SDLC playbook": skill/CLAUDE.md เป็นแค่คำแนะนำ กฎที่ต้องถูกบังคับเสมอต้องมีสิ่งที่ deterministic รองรับ · `hooks/hooks.json` + `scripts/guard-edits.mjs` มากับ plugin ไม่ต้องติดตั้งในโปรเจค (และไม่ติดข้อจำกัดเขียน `.claude/` ของ sandbox) · ทำงานเฉพาะโปรเจคที่ `CLAUDE.md` มี `<!-- ugt:start` · ตรวจแค่ข้อความใหม่ของ edit (โค้ดเดิมไม่โดนบล็อก) · พังเมื่อไรปล่อยผ่าน (fail open)
+  - **บล็อก**: `url` ใน datasource ของ `schema.prisma` · อ่าน `process.env` ตรง ๆ ในโค้ดแอปเมื่อโปรเจคมี `lib/env.ts` แล้ว
+  - **ถามผู้ใช้ก่อน**: `$queryRawUnsafe` / `$executeRawUnsafe` · รหัสผ่านจริงใน connection string (`;password=`) หรือ private key ในไฟล์ที่ commit — ค่า placeholder (ALL_CAPS เช่น `CHANGE_ME`, `${VAR}`, `$VAR`, `<x>`, `__X__`) และไฟล์ `.env` / `.env.dev` / `.env.local` / test / `*.smoke.*` ผ่าน
+  - test 6 ชุด (`node --test plugins/ugt-nextjs-platform/scripts/guard-edits.test.mjs`) · สแกน asset ของ kit ทั้ง 191 ไฟล์ไม่โดน flag
+- **กฎ `process.env` ตรงกับของจริง** — kit อ่าน `NEXT_PUBLIC_*` / `NODE_ENV` ตรงโดยตั้งใจ (build ฝังค่า, `createEnv()` ข้ามการฝังใน client bundle) → CLAUDE-block และ rule `ugt-nextjs-database.md` เพิ่มข้อยกเว้นนี้ + `scripts/`, `prisma/` · drift check ใหม่ "Edit guard" ผูกรายการยกเว้นทั้งสามที่
+- ไม่ได้ทำ (ตั้งใจ): format/lint หลัง edit (husky + lint-staged ทำตอน commit อยู่แล้ว) · บล็อกการแก้ migration เดิม (ขั้น `--create-only` แล้วแก้ SQL ของ filtered unique index เป็น workflow ปกติ) · hard delete (ลบแถว join ได้ถูกต้อง)
+- **โปรเจคเดิม**: hook ทำงานทันทีหลัง `/plugin update` · re-apply บล็อก ugt ใน CLAUDE.md เพื่อได้ข้อความกฎใหม่
+
 ## 4.94.0 (2026-11-19)
 
 - **`REVIEW.md` กติกา review ของทีม (ทุก bundle)** — ตาม Anthropic "The AI-native SDLC playbook" (2026-08-21) ขั้น Deploy · full-setup §4.5c วาง `assets/REVIEW.md` ที่ root ครั้งเดียว ไม่ทับ: รีวิว 3 รอบ (bug → security → กฎองค์กร) · นิยาม Important · Always check (migration ลบ/เปลี่ยนชื่อคอลัมน์, route ไม่มี permission, เปลี่ยน behaviour ไม่มี test, ออกนอก plan) · ข้อติเล็กน้อยไม่เกิน 5 · ไม่รายงานสิ่งที่ ESLint/Prettier/tsc/Quality Gate/OWASP ตรวจอยู่แล้ว · รูปแบบตรงกับที่ Claude Code Review (GitHub app) อ่านเองจาก default branch ที่ protect

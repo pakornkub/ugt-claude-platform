@@ -248,6 +248,18 @@ const CHECKS = [
     },
   },
   {
+    // 4.95.0: the env exception list lives in three places and the guard hook
+    // enforces it — a list edited in one place only makes the hook deny what
+    // the rule allows (or the reverse).
+    name: 'Edit guard: hook wired + env exceptions agree with the rule text',
+    files: {
+      'plugins/ugt-nextjs-platform/hooks/hooks.json': [/"PreToolUse"/, /Write\|Edit\|MultiEdit/, /guard-edits\.mjs/],
+      'plugins/ugt-nextjs-platform/scripts/guard-edits.mjs': [/NEXT_PUBLIC_\|NODE_ENV/, /\^\(scripts\|prisma\)\\\//, /<!-- ugt:start/],
+      [`${NEXT}/ugt-nextjs-full-setup/assets/CLAUDE-block.md`]: [/PreToolUse hook/, /`NEXT_PUBLIC_\*` and `NODE_ENV`/, /`scripts\/`, `prisma\/`/],
+      [`${NEXT}/ugt-nextjs-database-setup/assets/rules/ugt-nextjs-database.md`]: [/`NEXT_PUBLIC_\*` and `NODE_ENV`/, /`scripts\/`, `prisma\/`/, /edit-guard hook/],
+    },
+  },
+  {
     // review 2026-09-01: the GLOSSARY.md/docs-adr vs docs/project-context
     // separation rule lives in three places — pin that each copy names all
     // three homes (wording may differ; the cross-reference must not vanish)

@@ -23,10 +23,15 @@ npm run test:coverage  # vitest + coverage (Quality Gate needs >= 60% on new cod
 
 ## Rules that break the build every time
 
+A PreToolUse hook from `ugt-nextjs-platform` blocks an edit that breaks the
+first two rules, and asks the user before raw-unsafe SQL or a real password /
+private key in a committed file — when it refuses, fix the edit, don't route around it.
+
 - `DATABASE_URL` lives in `prisma.config.ts` **only** — never put `url` in the
   `datasource` block of `schema.prisma`
 - Never read `process.env` directly in app code — always `import { env } from '@/lib/env'`
-  (exceptions: `lib/env.ts`, root `*.config.ts`, `instrumentation*.ts`, `sentry.*.config.ts`, test files)
+  (exceptions: `NEXT_PUBLIC_*` and `NODE_ENV`, which the build inlines · `lib/env.ts`, root `*.config.ts`,
+  `instrumentation*.ts`, `sentry.*.config.ts`, test files, `scripts/`, `prisma/`)
 - After every `schema.prisma` change: `npx prisma migrate dev` → **then always** `npx prisma generate`
 - New tables: `@@map("PascalCasePlural")` + every field `@map("PascalCase")` + full audit columns
   (`Id/CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/IsActive/IsDeleted`) · delete via `IsDeleted = 1`, never hard delete
