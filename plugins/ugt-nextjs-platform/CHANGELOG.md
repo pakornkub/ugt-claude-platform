@@ -33,6 +33,8 @@
 - verify.mjs เช็คว่ามี `REVIEW.md` · drift check ใหม่ "Review policy" ผูก asset/SKILL/verify/CLAUDE-block · เว็บ guide/reference ตาม
 - **โปรเจคเดิม**: รันขั้น harness ของ full-setup ใหม่ (วาง `REVIEW.md` + block ใหม่) หรือ copy `assets/REVIEW.md` เอง แล้วเพิ่มกฎเฉพาะโปรเจคใต้ § Project-specific rules
 
+- **CSP บล็อก script ของธีมทุกหน้า + ธีมกระพริบตอนโหลด** — `proxy.ts` (auth) ตั้ง `script-src 'nonce-…' 'strict-dynamic'` แต่ `ThemeProvider` (design) ไม่ได้รับ nonce → next-themes inline anti-flash script โดนบล็อก console error ทุกหน้า · root layout อ่าน `x-nonce` จาก `headers()` แล้วส่ง `<ThemeProvider nonce={nonce}>` · design `root-layout.md` §Provider stack + auth §5.2 note + แถว §basePath and proxy.ts · origin ugt-rd-laboratory · 2026-11-18
+
 ## 4.93.1 (2026-11-18)
 
 - **ห้ามพิมพ์ secret ใน env เอง** — eval module-auth-after-design เจอ agent ที่ไม่มี shell แต่งค่า `BETTER_AUTH_SECRET` ที่ดูสุ่มขึ้นมาเอง (เดาได้) · env-files.md / auth asset-map / cicd §4.5 / full-setup Q9: ต้องได้จากการรันคำสั่ง, ไม่มี shell → คง `CHANGE_ME` + ใส่คำสั่งใต้ "ยังไม่ได้รัน" · eval: grader ค่าใน `.env`/`.env.dev`/`.env.local` + `(DEV)` ใน Jenkinsfile (run-through-db-quality-ci 22/22) และ section 3 / client `-dev` / secret ไม่ถูกแต่ง (module-auth-after-design 14/14 หลังแก้)
