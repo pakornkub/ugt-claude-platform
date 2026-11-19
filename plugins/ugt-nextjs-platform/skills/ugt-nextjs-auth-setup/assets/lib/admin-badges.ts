@@ -1,8 +1,8 @@
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/lib/admin-badges.ts
-// kit-hash: 081e4e8566ef
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/lib/admin-badges.ts
+// kit-hash: 09cd5485d96f
 // installed by ugt-nextjs-auth-setup — server only (Prisma)
 //
-// ตัวเลขบนเมนู admin: key = `href` ของ ADMIN_NAV_ITEMS (components/admin-nav.tsx)
+// ตัวเลขบนเมนู admin: key = `href` ของ ADMIN_NAV_ITEMS (components/admin-nav-items.ts)
 // เรียกจาก layout ที่วาดเมนู — fallback `(admin)/layout.tsx` หรือ sidebar ของโปรเจคเอง
 // (SKILL.md §5.6) — แล้วส่งผลให้เมนูเป็น prop: ไฟล์นี้ใช้ใน Client Component ไม่ได้
 import { prisma } from '@/lib/prisma';

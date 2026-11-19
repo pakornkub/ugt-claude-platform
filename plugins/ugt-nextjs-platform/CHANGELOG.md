@@ -35,6 +35,8 @@
 
 - **CSP บล็อก script ของธีมทุกหน้า + ธีมกระพริบตอนโหลด** — `proxy.ts` (auth) ตั้ง `script-src 'nonce-…' 'strict-dynamic'` แต่ `ThemeProvider` (design) ไม่ได้รับ nonce → next-themes inline anti-flash script โดนบล็อก console error ทุกหน้า · root layout อ่าน `x-nonce` จาก `headers()` แล้วส่ง `<ThemeProvider nonce={nonce}>` · design `root-layout.md` §Provider stack + auth §5.2 note + แถว §basePath and proxy.ts · origin ugt-rd-laboratory · 2026-11-18
 
+- **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
+
 ## 4.93.1 (2026-11-18)
 
 - **ห้ามพิมพ์ secret ใน env เอง** — eval module-auth-after-design เจอ agent ที่ไม่มี shell แต่งค่า `BETTER_AUTH_SECRET` ที่ดูสุ่มขึ้นมาเอง (เดาได้) · env-files.md / auth asset-map / cicd §4.5 / full-setup Q9: ต้องได้จากการรันคำสั่ง, ไม่มี shell → คง `CHANGE_ME` + ใส่คำสั่งใต้ "ยังไม่ได้รัน" · eval: grader ค่าใน `.env`/`.env.dev`/`.env.local` + `(DEV)` ใน Jenkinsfile (run-through-db-quality-ci 22/22) และ section 3 / client `-dev` / secret ไม่ถูกแต่ง (module-auth-after-design 14/14 หลังแก้)
