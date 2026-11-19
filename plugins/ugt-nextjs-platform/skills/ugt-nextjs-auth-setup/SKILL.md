@@ -266,10 +266,8 @@ exceptions:
 > `proxy` function to `middleware`; `export const config` stays as-is), or
 > upgrade Next first.
 >
-> **`proxy.ts` brings a nonce CSP** — if the root layout's `<ThemeProvider>`
-> does not get `nonce` from the `x-nonce` header yet, wire it now
-> (design-setup `references/root-layout.md` §Provider stack), or next-themes'
-> inline script is blocked on every page.
+> **`proxy.ts` brings a nonce CSP** — pass `nonce` from the `x-nonce` header to the root layout's
+> `<ThemeProvider>` (design-setup `references/root-layout.md` §Provider stack) or next-themes' script is blocked on every page.
 
 Per-asset destinations and notes (which assets are method-, mail- or
 workflow-conditional, which shadcn/kit components each needs, DataTable mode
@@ -418,13 +416,9 @@ with a nav exists and `<AdminNav>` is still rendered anywhere):
    nav the result of `getUserPermissions()` and hide items the user lacks,
    exactly as `<AdminNav>` does.
 
-   Each item carries `labelKey` (e.g. `'users'`), not a resolved `label`
-   string — `t()` from next-intl's `useTranslations` only works inside a
-   component/hook body, so the exported array can't hold pre-translated
-   text. Resolve it yourself in whatever component renders the merged
-   sidebar (it already has hook context): `const t = useTranslations('auth.adminNav'); t(item.labelKey)`.
-   **Keep the badge**: the layout feeding the nav calls `getAdminNavBadges(perms)`
-   (`lib/admin-badges.ts`); render `<SidebarMenuBadge>` for a count > 0, as `<AdminNav>` does.
+   Items carry `labelKey`, not text — resolve it where the merged nav renders
+   (`useTranslations('auth.adminNav')` in a client component, `getTranslations` in a server one).
+   **Keep the badge**: `getAdminNavBadges(perms)` (`lib/admin-badges.ts`) → `<SidebarMenuBadge>` when > 0.
 2. In `app/(admin)/layout.tsx`, keep the guard (session →
    `syncPermissionsIfNeeded()` → permission check) but delete the shell —
    render `<PageShell>{children}</PageShell>` (`ui/page-shell`) so the pages sit
@@ -434,9 +428,8 @@ with a nav exists and `<AdminNav>` is still rendered anywhere):
    (nest the `(admin)` group under the shell's layout, or move the three admin
    pages under the project's protected route group with the guard preserved).
 
-**No shell yet** (fresh project only — never a project that already renders
-a menu): copy as-is — the (admin) layout wraps
-`SidebarProvider` + `<AdminNav>` (shadcn Sidebar with `NavUser` in the footer)
+**No shell yet** (fresh project only — never a project that already renders a menu): copy as-is —
+the (admin) layout wraps `SidebarProvider` + `<AdminNav>` (shadcn Sidebar with `NavUser` in the footer)
 and works out of the box. Requires the `sidebar` + `tooltip` components (§5.1
 installs them) and `TooltipProvider` in the root layout. When the project
 later grows its own shell, migrate as above — and remove this fallback so

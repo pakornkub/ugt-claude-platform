@@ -152,7 +152,7 @@
     <tbody>
       <tr><td><code>ugt-nextjs-standard-superpowers</code></td><td>3.0.0</td><td>bundle — ติดตัวเดียวได้ <code>ugt-nextjs-platform</code> + <code>superpowers</code> (pipeline คิด → วางแผน → TDD → review ทำเอง) + <code>frontend-design</code> + <code>skill-creator</code></td><td><span class="badge ok">แนะนำ</span></td></tr>
       <tr><td><code>ugt-nextjs-standard-mattpocock</code></td><td>1.0.0</td><td>bundle แบบเบา — สลับ <code>superpowers</code> เป็น <code>mattpocock-skills</code> (เรียกทีละคำสั่งเอง ใช้ token น้อยกว่า)</td><td><span class="badge">ทางเลือก</span></td></tr>
-      <tr><td><code>ugt-nextjs-platform</code></td><td>4.97.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
+      <tr><td><code>ugt-nextjs-platform</code></td><td>4.98.0</td><td>ความรู้มาตรฐานของงาน Next.js — ตัวช่วยติดตั้ง 8 ตัว + ตัวทดสอบทั้งระบบ + ตัวที่ทำงานเองระหว่างเขียนโค้ด</td><td><span class="badge ok">ใช้งานหลัก</span></td></tr>
       <tr><td><code>ugt-core</code></td><td>2.23.0</td><td>มาตรฐานกลางขององค์กร (contracts) + ระบบความจำทีม (handoff, context) — มาเองเมื่อติดตั้ง plugin ของ stack</td><td><span class="badge">มาเองอัตโนมัติ</span></td></tr>
       <tr><td><code>ugt-python-platform</code></td><td>0.10.5</td><td>เฉพาะส่วน deploy ของ Python (FastAPI / Flask / Django / batch) ขึ้น Jenkins + SonarQube + Docker</td><td><span class="badge warn">ยังไม่ผ่าน pilot</span></td></tr>
       <tr><td><code>ugt-php-platform</code></td><td>0.8.9</td><td>เฉพาะส่วน deploy ของ PHP (Laravel / CodeIgniter / PHP ล้วน / WordPress)</td><td><span class="badge warn">pilot deploy ผ่านแล้ว ยังไม่ tag</span></td></tr>
@@ -1198,6 +1198,18 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
     <p><b>สาเหตุ:</b> ใช้ <code>&lt;AdminNav&gt;</code> สำรองในโปรเจคที่มี shell อยู่แล้ว — ความผิดพลาดที่พบบ่อยที่สุด</p>
     <p><b>วิธีแก้:</b> merge <code>ADMIN_NAV_ITEMS</code> เข้าเมนูเดิม (§5.6) · verify ✘ เมื่อมี layout ที่มีเมนูแต่ยัง render <code>&lt;AdminNav&gt;</code></p>
   </div></details>
+  <details class="acc"><summary>หลัง merge เมนู admin ทุกหน้าใน shell พัง 500 (<code>ADMIN_NAV_ITEMS.filter is not a function</code>)</summary><div class="body">
+    <p><b>สาเหตุ:</b> shell ที่เป็น Server Component import <code>ADMIN_NAV_ITEMS</code> จากไฟล์ <code>'use client'</code> (<code>components/admin-nav.tsx</code>) — ได้ client reference ไม่ใช่ array</p>
+    <p><b>วิธีแก้:</b> import จาก <code>@/components/admin-nav-items</code> (plain module, ตั้งแต่ 4.98.0) · โปรเจคเดิม kit-sync <code>admin-nav.tsx</code> + copy <code>admin-nav-items.ts</code> แล้วเปลี่ยน import</p>
+  </div></details>
+  <details class="acc"><summary>console ขึ้น CSP error <code>Executing inline script violates…</code> ทุกหน้า และธีมกระพริบตอนโหลด</summary><div class="body">
+    <p><b>สาเหตุ:</b> <code>proxy.ts</code> ตั้ง CSP แบบ nonce แต่ <code>ThemeProvider</code> ไม่ได้รับ nonce — script กันกระพริบของ next-themes โดนบล็อก</p>
+    <p><b>วิธีแก้:</b> root layout อ่าน <code>(await headers()).get('x-nonce')</code> แล้วส่ง <code>&lt;ThemeProvider nonce={nonce}&gt;</code> (design <code>references/root-layout.md</code> §Provider stack)</p>
+  </div></details>
+  <details class="acc"><summary>แถบแท็บหน้า <code>/admin/users</code> มี scrollbar แนวตั้ง (ลูกศรขึ้นลง) โผล่ข้างขวา</summary><div class="body">
+    <p><b>สาเหตุ:</b> ตัวหุ้ม <code>overflow-x-auto</code> ทำให้ <code>overflow-y</code> เป็น <code>auto</code> ไปด้วย แถบสูงเกินกล่องนิดเดียวก็มี scrollbar</p>
+    <p><b>วิธีแก้:</b> ตัวหุ้มเป็น <code>scroll-thin -m-1 overflow-x-auto overflow-y-hidden p-1</code> (kit 4.98.0) · โปรเจคเดิม kit-sync หน้า users หรือแก้ div นั้นเอง</p>
+  </div></details>
   <details class="acc"><summary>หน้า admin ชิดขอบ sidebar และขอบขวา ไม่มีระยะห่าง</summary><div class="body">
     <p><b>สาเหตุ:</b> ตอน merge เปลี่ยนเป็น <code>{children}</code> เปล่า — เสีย <code>p-6</code> ของ shell สำรอง</p>
     <p><b>วิธีแก้:</b> render <code>&lt;PageShell&gt;{children}&lt;/PageShell&gt;</code> ใน <code>app/(admin)/layout.tsx</code></p>
@@ -1300,7 +1312,7 @@ node &lt;skill-dir&gt;/scripts/check-i18n.mjs</pre>
       <tr><td><code>prisma/schema.prisma</code> (วาง <code>schema-mail.prisma</code>)</td><td>model <code>AppSettings</code></td></tr>
       <tr><td><code>messages/mail.th.ts</code> · <code>mail.en.ts</code></td><td>catalog — ต้องลงทะเบียนใน <code>i18n/messages.ts</code></td></tr>
       <tr><td><code>.env.example</code> ส่วนที่ 4 · compose ทั้งสองไฟล์</td><td>ตัวแปร <code>SMTP_*</code> · uncomment บรรทัด <code>[MAIL]</code></td></tr>
-      <tr><td><code>lib/env.ts</code> · <code>lib/permissions.ts</code> · <code>components/admin-nav.tsx</code> · <code>app/(admin)/layout.tsx</code></td><td>ตัวแปร SMTP (optional) · สิทธิ์ <code>dev-mode:enable</code> + <code>mail-templates:manage</code> · เมนู "เทมเพลตอีเมล"</td></tr>
+      <tr><td><code>lib/env.ts</code> · <code>lib/permissions.ts</code> · <code>components/admin-nav-items.ts</code> · <code>app/(admin)/layout.tsx</code></td><td>ตัวแปร SMTP (optional) · สิทธิ์ <code>dev-mode:enable</code> + <code>mail-templates:manage</code> · เมนู "เทมเพลตอีเมล"</td></tr>
       <tr><td><code>.claude/rules/ugt-nextjs-mail.md</code></td><td>กฎที่โหลดเองเมื่อแตะไฟล์ mail</td></tr>
     </tbody>
   </table></div>
@@ -3222,7 +3234,7 @@ vendor/bin/phpunit</pre>
 </div><!-- /.with-toc -->
 </main>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.97.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.98.0</span></div></footer>
 
 <script>
 (() => {

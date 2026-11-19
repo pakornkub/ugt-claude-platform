@@ -3430,7 +3430,7 @@ export function AppNav({ children, footer }: Readonly&lt;{ children: React.React
   <div class="snip"><span class="label">TSX</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 &lt;Tabs defaultValue="all"&gt;
-  &lt;div className="-mx-1 overflow-x-auto px-1"&gt;   {/* แท็บยาวบนจอ 375px → เลื่อนแถบ ไม่ใช่ทั้งหน้า */}
+  &lt;div className="scroll-thin -m-1 overflow-x-auto overflow-y-hidden p-1"&gt;   {/* แท็บยาวบนจอ 375px → เลื่อนแถบ ไม่ใช่ทั้งหน้า · ขาด overflow-y-hidden = scrollbar แนวตั้งโผล่ */}
     &lt;TabsList&gt;
       &lt;TabsTrigger value="all"&gt;ทั้งหมด &lt;Badge variant="outline"&gt;{rows.length}&lt;/Badge&gt;&lt;/TabsTrigger&gt;
       &lt;TabsTrigger value="no-role"&gt;ยังไม่มีบทบาท &lt;Badge variant="outline"&gt;{noRole.length}&lt;/Badge&gt;&lt;/TabsTrigger&gt;
@@ -4125,7 +4125,7 @@ return (
   </main>
 </div>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.97.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.98.0</span></div></footer>
 
 <script>
 (function () {

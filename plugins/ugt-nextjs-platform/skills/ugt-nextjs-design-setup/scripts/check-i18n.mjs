@@ -137,6 +137,7 @@ const OPTIONAL_CONVERTED_FILES = [
   'components/admin-setup-form.tsx',
   'components/nav-user.tsx',
   'components/admin-nav.tsx',
+  'components/admin-nav-items.ts',
   'components/user-role-select.tsx',
   'lib/password-policy.ts',
   'lib/actions/auth.ts',

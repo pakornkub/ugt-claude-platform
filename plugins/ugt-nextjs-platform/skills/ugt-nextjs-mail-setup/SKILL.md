@@ -258,6 +258,9 @@ Run the script first (cwd = project root):
 node <skill-dir>/scripts/verify.mjs
 ```
 
+No shell in this session → say so, and the close-out's "run it yourself" list names this
+`verify.mjs` line (with its real path) next to `npm install` and `prisma migrate` — not only lint/test/build.
+
 - [ ] `npm run build` passes with no SMTP values set (env vars are optional)
 - [ ] Missing `SMTP_HOST` → `sendMail` throws, and nothing is sent to localhost
 - [ ] Tester **with** `dev-mode:enable`: mail arrives at their own address,

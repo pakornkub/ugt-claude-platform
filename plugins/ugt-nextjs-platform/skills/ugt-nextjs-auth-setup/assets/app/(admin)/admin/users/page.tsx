@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
-// kit-hash: 80bec346463e
+// kit: ugt-nextjs-platform 4.98.0 · ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+// kit-hash: f60169432add
 // app/(admin)/admin/users/page.tsx — server guard + fetch; the tables live in client components.
 // แท็บ: ทั้งหมด · ยังไม่มีบทบาท · ตั้งล่วงหน้า (รอเข้าระบบ) — `?tab=no-role|pending` เปิดแท็บนั้น
 // ตรง ๆ (ลิงก์ในเมลแจ้งแอดมินชี้ ?tab=no-role)
@@ -104,8 +104,10 @@ export default async function AdminUsersPage({
       {/* key: a soft navigation to another ?tab= (the admin mail link, a menu
           click) re-mounts the tabs so the URL wins over the previous local state */}
       <AdminUsersTabs key={activeTab} defaultValue={activeTab}>
-        {/* three labels + counts overflow a 375 px screen — scroll the strip, not the page */}
-        <div className="-mx-1 overflow-x-auto px-1">
+        {/* three labels + counts overflow a 375 px screen — scroll the strip, not the page.
+            overflow-x-auto turns overflow-y into auto too: without overflow-y-hidden a 1px-taller
+            strip grows a vertical scrollbar · -m-1 p-1 keeps the focus ring unclipped */}
+        <div className="scroll-thin -m-1 overflow-x-auto overflow-y-hidden p-1">
           <TabsList>
             <TabsTrigger value="all">
               {t('tabAll')}

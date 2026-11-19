@@ -1,5 +1,14 @@
 # Changelog — ugt-nextjs-platform
 
+## 4.98.0 (2026-11-19)
+
+- **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
+- **CSP บล็อก script ของธีมทุกหน้า + ธีมกระพริบตอนโหลด** — `proxy.ts` (auth) ตั้ง `script-src 'nonce-…' 'strict-dynamic'` แต่ `ThemeProvider` (design) ไม่ได้รับ nonce → next-themes inline anti-flash script โดนบล็อก console error ทุกหน้า · root layout อ่าน `x-nonce` จาก `headers()` แล้วส่ง `<ThemeProvider nonce={nonce}>` · design `root-layout.md` §Provider stack + auth §5.2 note + แถว §basePath and proxy.ts · origin ugt-rd-laboratory · 2026-11-18
+- **แถบแท็บหน้า `/admin/users` มี scrollbar แนวตั้งโผล่ข้างขวา** (ผู้ใช้เจอในแอปจริง) — ตัวหุ้ม `overflow-x-auto` ทำให้ `overflow-y` คำนวณเป็น `auto` ไปด้วย แถบสูงเกินกล่อง 1px ก็มีลูกศรเลื่อนขึ้นลง · ตัวหุ้มเป็น `scroll-thin -m-1 overflow-x-auto overflow-y-hidden p-1` (ไม่ตัด focus ring) · snippet แท็บใน design-preview แก้ตาม · asset: ugt-nextjs-auth-setup/app/(admin)/admin/users/page.tsx
+- เก็บตก merge PR 73/74: auth `SKILL.md` เกิน 500 บรรทัด → ย่อ note nonce §5.2 และคำอธิบาย `labelKey` §5.6 (รายละเอียดอยู่ใน comment ของ `admin-nav-items.ts`) · `check-i18n.mjs` ตรวจ `components/admin-nav-items.ts` (ไฟล์เสริม) · reference.html แถวเมนูของ mail ชี้ไฟล์ใหม่
+- mail-setup §7: ไม่มี shell → ข้อความปิดงานต้องมีบรรทัด `verify.mjs` คู่กับ `npm install` / `prisma migrate` — eval `close-out-honest` ตก 2 ใน 3 รอบเพราะ agent ให้แค่ lint/test/build (รอบนี้มี --keep-temp เลยเห็นข้อความจริง)
+- **โปรเจคเดิม**: `/ugt-nextjs-kit-sync` ดึง `admin-nav.tsx` + copy `admin-nav-items.ts` ใหม่ แล้วเปลี่ยน import `ADMIN_NAV_ITEMS` ใน shell/sidebar ของโปรเจคให้มาจาก `@/components/admin-nav-items` · ดึง `app/(admin)/admin/users/page.tsx` (หรือแก้ตัวหุ้มแท็บเอง) · root layout ส่ง `nonce` ให้ `ThemeProvider` ตาม design `root-layout.md` §Provider stack
+
 ## 4.97.0 (2026-11-19)
 
 - **ฟอร์มบทบาทใช้ `ui/settings-sheet`** — จากผู้ใช้เทียบสองแอป: แอปที่ติดตั้งจาก plugin หน้าตาไม่เหมือนแอปที่ใช้ settings-sheet เพราะ `role-form.tsx` (4.79.4) เขียนก่อนที่ settings-sheet จะเข้า kit (4.82.0) และไม่มีใครย้อนกลับมาแก้ · ตอนนี้ `RoleForm` วาดทั้งแผงด้วย `SettingsSheetContent` (xl) — หัวมีคำอธิบาย · section "ข้อมูลบทบาท" / "สิทธิ์" มีไอคอน + คำอธิบาย · ข้อความช่วยใต้ชื่อ/คำอธิบาย · ป้าย "เลือกแล้ว n / m" · footer ของ primitive · `RolesManager` ถือ open/close: ฟอร์มที่แก้แล้วหรือกำลังบันทึกจะไม่ปิดเมื่อกด Esc/คลิกนอกกรอบ (ตามกฎ DESIGN.md §4 ที่ฟอร์มเดิมไม่ได้ทำ) และพอปิดจบจะถอดฟอร์มออก เปิดรอบหน้าจึงไม่ค้างค่าที่พิมพ์ไว้ · ข้อความ: ย้าย `rolesManager.createTitle/editTitle` ไป `roleForm` + เพิ่ม 9 key
@@ -32,10 +41,6 @@
 - **CLAUDE-block หัวข้อใหม่ "Code review"** — reviewer อื่นนอกจาก Claude Code Review ไม่อ่าน `REVIEW.md` เอง (superpowers' code reviewer ได้แค่ template ของมัน, `/code-review` ในเครื่องอ่านแค่ CLAUDE.md) → ทุกครั้งที่สั่ง review ต้องใส่ "read `REVIEW.md` first" ใน prompt · session/subagent ที่เขียนโค้ดไม่ approve งานตัวเอง · finding ซ้ำสองครั้ง → เพิ่มกฎใน `REVIEW.md` · `CODING_STANDARDS.md` (mattpocock) ชี้ไป `REVIEW.md` ด้วย
 - verify.mjs เช็คว่ามี `REVIEW.md` · drift check ใหม่ "Review policy" ผูก asset/SKILL/verify/CLAUDE-block · เว็บ guide/reference ตาม
 - **โปรเจคเดิม**: รันขั้น harness ของ full-setup ใหม่ (วาง `REVIEW.md` + block ใหม่) หรือ copy `assets/REVIEW.md` เอง แล้วเพิ่มกฎเฉพาะโปรเจคใต้ § Project-specific rules
-
-- **CSP บล็อก script ของธีมทุกหน้า + ธีมกระพริบตอนโหลด** — `proxy.ts` (auth) ตั้ง `script-src 'nonce-…' 'strict-dynamic'` แต่ `ThemeProvider` (design) ไม่ได้รับ nonce → next-themes inline anti-flash script โดนบล็อก console error ทุกหน้า · root layout อ่าน `x-nonce` จาก `headers()` แล้วส่ง `<ThemeProvider nonce={nonce}>` · design `root-layout.md` §Provider stack + auth §5.2 note + แถว §basePath and proxy.ts · origin ugt-rd-laboratory · 2026-11-18
-
-- **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
 
 ## 4.93.1 (2026-11-18)
 

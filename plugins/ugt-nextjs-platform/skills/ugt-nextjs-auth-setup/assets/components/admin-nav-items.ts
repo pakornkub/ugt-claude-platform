@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/components/admin-nav-items.ts
+// kit: ugt-nextjs-platform 4.98.0 · ugt-nextjs-auth-setup/components/admin-nav-items.ts
 // kit-hash: 45a76386005f
 // components/admin-nav-items.ts — the admin menu data, in a PLAIN module (no
 // 'use client') so a Server Component shell can read it too. Imported from the
