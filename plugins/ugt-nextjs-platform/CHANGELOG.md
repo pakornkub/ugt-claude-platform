@@ -1,6 +1,16 @@
 # Changelog — ugt-nextjs-platform
 
-## Unreleased
+## 4.97.0 (2026-11-19)
+
+- **ฟอร์มบทบาทใช้ `ui/settings-sheet`** — จากผู้ใช้เทียบสองแอป: แอปที่ติดตั้งจาก plugin หน้าตาไม่เหมือนแอปที่ใช้ settings-sheet เพราะ `role-form.tsx` (4.79.4) เขียนก่อนที่ settings-sheet จะเข้า kit (4.82.0) และไม่มีใครย้อนกลับมาแก้ · ตอนนี้ `RoleForm` วาดทั้งแผงด้วย `SettingsSheetContent` (xl) — หัวมีคำอธิบาย · section "ข้อมูลบทบาท" / "สิทธิ์" มีไอคอน + คำอธิบาย · ข้อความช่วยใต้ชื่อ/คำอธิบาย · ป้าย "เลือกแล้ว n / m" · footer ของ primitive · `RolesManager` ถือ open/close: ฟอร์มที่แก้แล้วหรือกำลังบันทึกจะไม่ปิดเมื่อกด Esc/คลิกนอกกรอบ (ตามกฎ DESIGN.md §4 ที่ฟอร์มเดิมไม่ได้ทำ) และพอปิดจบจะถอดฟอร์มออก เปิดรอบหน้าจึงไม่ค้างค่าที่พิมพ์ไว้ · ข้อความ: ย้าย `rolesManager.createTitle/editTitle` ไป `roleForm` + เพิ่ม 9 key
+- **กฎ: ฟอร์มใน Sheet ทุกตัว = settings-sheet** ไม่นับจำนวนช่อง (เดิมเขียนไว้แค่แถว master ≥ 4 ช่อง ส่วนแถว checklist บอกแค่ "Sheet" ช่องโหว่นี้ทำให้ฟอร์มบทบาทหลุด) · `SheetContent` เปล่าใช้ได้เฉพาะ panel ที่ไม่ใช่ฟอร์ม และยังต้องกว้าง `xl`/`5xl` เท่านั้น · conventions.md, form-pages.md, DESIGN.template §4, rule `ugt-nextjs-design.md`, design-preview story Sheet (ภาพ + โค้ดตามของจริง) / Settings sheet
+- **`loading.tsx` ครบทุก route ของ kit** — กฎ "ทุก route มี loading.tsx" มีมาตั้งแต่ 4.88.0 แต่หน้า admin ของ auth/mail ไม่มีสักหน้า · ใหม่ 5 ไฟล์: `/admin/users` `/admin/roles` `/admin/audit-logs` `/admin/setup` (auth) + `/admin/mail-templates` (mail) · ประกอบจากชิ้นย่อยของ `ui/page-skeleton` ไม่ใช้ preset เพราะ preset ห่อ `PageShell` แต่ layout `(admin)` เป็นเจ้าของ padding อยู่แล้ว (preset = padding สองชั้น)
+- **audit log ดูรายละเอียดผ่าน `detail-dialog-shell`** แทน `Dialog` ดิบ — หัว = action (mono) · ผู้กระทำ · เวลา, JSON อยู่ใน `DetailSection` "ข้อมูลที่บันทึก" · ข้อความ `auditLogsTable.detailDialogTitle` → `detailSectionLabel`
+- **preview แม่แบบอีเมลกว้าง `5xl`** (1024px) แทน `max-w-2xl` (672px) ที่อยู่นอกสองขนาดของ kit — `xl` ไม่พอสำหรับ chrome อีเมล 760px · ยังเป็น `Sheet` เปล่าได้เพราะเป็น panel ไม่ใช่ฟอร์ม
+- `form-dialog.tsx`: comment บอก height default ผิด (`auto`) — ของจริงคือ `fluid`
+- **release gate `scripts/lint-kit-assets.mjs` เพิ่ม 3 กฎ (fail)**: `page.tsx` ไม่มี `loading.tsx` คู่ · ความกว้างบน `SheetContent` ที่ไม่ใช่ `max-w-xl`/`max-w-5xl` (รวมแบบมี `data-[side=…]:` ที่ verify.mjs มองไม่เห็น) · ฟอร์มใน `SheetContent` เปล่า — ตรวจข้ามไฟล์ด้วย (component ที่วางใน SheetContent แล้วไฟล์ของมันมี `<form>`/`handleSubmit`) · ทดสอบกับไฟล์เวอร์ชันก่อนแก้ จับได้ครบทั้ง 3 กรณี
+- ตรวจแล้ว: `tsc --noEmit` + eslint + `check-i18n.mjs` ผ่านบนสำเนา ugt-rd-laboratory ที่ใส่ไฟล์ใหม่ · **ยังไม่ได้เปิดดูบนจอจริง**
+- **โปรเจคเดิม**: `/ugt-nextjs-kit-sync` ดึง `role-form.tsx` `roles-manager.tsx` `audit-logs-table.tsx` `mail-templates-manager.tsx` + copy `loading.tsx` ใหม่ทั้ง 5 · merge key ใหม่ใน `messages/auth.*.ts` · ต้องมี `ui/settings-sheet` `ui/detail-dialog-shell` `ui/detail-section` `ui/page-skeleton` จาก design kit (≥ 4.88.0)
 
 ## 4.96.0 (2026-11-19)
 

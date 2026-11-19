@@ -2668,7 +2668,7 @@ export default function Loading() {
   <h2 class="sh">ทำ / อย่าทำ</h2>
   <div class="dd">
     <div class="do"><b class="t">ทำ</b><ul>
-      <li>ทุก route มี <code>loading.tsx</code> — preset ไม่ตรงก็ประกอบจากชิ้นย่อย (<code>SkeletonHeader</code> · <code>SkeletonTabs</code> · <code>SkeletonStatCards</code> · <code>SkeletonTableCard</code> · <code>SkeletonCard</code> · <code>SkeletonFields</code>)</li>
+      <li>ทุก route มี <code>loading.tsx</code> — preset ไม่ตรง หรือ layout ห่อ <code>PageShell</code> ให้หน้าอยู่แล้ว (preset ห่อซ้ำ = padding สองชั้น เช่นหน้า admin ของ auth-setup) ก็ประกอบจากชิ้นย่อย (<code>SkeletonHeader</code> · <code>SkeletonTabs</code> · <code>SkeletonStatCards</code> · <code>SkeletonTableCard</code> · <code>SkeletonCard</code> · <code>SkeletonFields</code>)</li>
       <li>จำนวนแท็บ/การ์ดตัวเลข/คอลัมน์/การ์ดฟอร์ม = ของหน้าจริง</li>
       <li>skeleton เฉพาะโหลดครั้งแรก (<code>isLoading</code>) — refetch เบื้องหลังคงเนื้อหาเดิมไว้บนจอ</li>
       <li><code>QueryLoading</code> ใน Dialog/Sheet ส่ง <code>card={false}</code></li>
@@ -3054,52 +3054,77 @@ const steps: ApprovalStep[] = [
 <section class="story" id="s-sheet" data-group="overlays" data-title="Sheet" data-th="แผงเลื่อนข้าง" data-kw="sheet drawer panel checklist แผง">
   <div class="story-head">
     <h1>Sheet <span>แผงเลื่อนจากขอบจอ</span></h1>
-    <p class="purpose">ฟอร์มที่มี list/checklist โตตามข้อมูล หรือ panel ที่เปิดค้างคู่เนื้อหา · body เลื่อนได้ ไม่ล้นจอ · ชิดขวา <b>2 ขนาดเท่านั้น</b>: <code>xl</code> 576px · <code>5xl</code> 1024px · มือถือเต็มจอ</p>
-    <div class="files"><code>components/ui/sheet.tsx</code> (shadcn) · ตัวอย่างจริง: <code>roles-manager.tsx</code> ของ auth-setup</div>
+    <p class="purpose">ฟอร์มที่มี list/checklist โตตามข้อมูล (นับว่า "ยาว" เสมอ) หรือ panel ที่เปิดค้างคู่เนื้อหา · body เลื่อนได้ ไม่ล้นจอ · <b>ฟอร์มใน Sheet ทุกตัว = <a href="#settings-sheet">Settings sheet</a></b> ไม่นับจำนวนช่อง — <code>SheetContent</code> เปล่าเฉพาะ panel ที่ไม่ใช่ฟอร์ม (preview) · ชิดขวา <b>2 ขนาดเท่านั้น</b>: <code>xl</code> 576px · <code>5xl</code> 1024px · มือถือเต็มจอ</p>
+    <div class="files"><code>components/ui/sheet.tsx</code> (shadcn) + <code>components/ui/settings-sheet.tsx</code> · ตัวอย่างจริง: <code>role-form.tsx</code> + <code>roles-manager.tsx</code> ของ auth-setup · preview อีเมล (<code>5xl</code>) ของ mail-setup</div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush"><div class="k-sheetwrap">
     <div class="k-sheet xl">
       <button class="k-btn v-ghost s-icon-sm k-dx" type="button" aria-label="ปิด" style="top:12px;right:12px"><svg class="i"><use href="#i-x"/></svg></button>
-      <div class="sh"><div class="k-dtitle">แก้ไขบทบาท</div></div>
-      <div class="sb">
-        <div class="k-field"><label class="k-label">ชื่อบทบาท<span class="k-req">*</span></label><input class="k-input" value="หัวหน้างาน"></div>
-        <div class="k-field"><label class="k-label">คำอธิบาย</label><input class="k-input" value="อนุมัติและดูข้อมูลทีมตัวเอง"></div>
-        <div class="col">
-          <div class="row" style="justify-content:space-between"><span class="k-label">สิทธิ์การใช้งาน</span><span class="k-badge b-default tnum">6 / 9</span></div>
-          <div style="border:1px solid var(--border-c);border-radius:var(--r-md);overflow:hidden">
-            <div class="row" style="gap:8px;padding:10px;border-bottom:1px solid var(--border-c);background:color-mix(in oklab,var(--muted) 40%,transparent);flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="เลือกทั้งกลุ่ม users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14 fw5" style="flex:1">Users</span><span class="t12 mut tnum">5 / 5</span></div>
-            <div class="col" style="gap:10px;padding:10px 10px 10px 36px">
-              <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="View Users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View Users</span><span class="mono mut">users:read</span></div>
-              <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="Edit Users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">Edit Users</span><span class="mono mut">users:update</span></div>
-            </div>
-            <div class="row" style="gap:8px;padding:10px;border-top:1px solid var(--border-c);border-bottom:1px solid var(--border-c);background:color-mix(in oklab,var(--muted) 40%,transparent);flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="mixed" aria-label="เลือกทั้งกลุ่ม leave"><svg class="i"><use href="#i-check"/></svg></button><span class="t14 fw5" style="flex:1">Leave</span><span class="t12 mut tnum">1 / 3</span></div>
-            <div class="col" style="gap:10px;padding:10px 10px 10px 36px">
-              <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="View Leave"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View Leave</span><span class="mono mut">leave:read</span></div>
-              <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="false" aria-label="View All"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View All</span><span class="mono mut">leave:read-all</span></div>
+      <div class="sh"><div class="k-dtitle">แก้ไขบทบาท</div><div class="k-ddesc">หัวหน้างาน</div></div>
+      <div class="ssb">
+        <section class="k-ssec">
+          <div class="hd"><span class="k-icotile"><svg class="i"><use href="#i-shield"/></svg></span><div><b>ข้อมูลบทบาท</b><span class="t12 mut">ชื่อและคำอธิบายที่แสดงตอนกำหนดบทบาทให้ผู้ใช้</span></div></div>
+          <div class="grid2">
+            <div class="k-field full"><label class="k-label" for="sh-name">ชื่อบทบาท<span class="k-req">*</span></label><input class="k-input" id="sh-name" value="หัวหน้างาน"><div class="k-fdesc">ชื่อต้องไม่ซ้ำกับบทบาทอื่น</div></div>
+            <div class="k-field full"><label class="k-label" for="sh-desc">คำอธิบาย</label><input class="k-input" id="sh-desc" value="อนุมัติและดูข้อมูลทีมตัวเอง"><div class="k-fdesc">อธิบายสั้น ๆ ว่าบทบาทนี้ใช้กับใคร</div></div>
+          </div>
+        </section>
+        <section class="k-ssec">
+          <div class="hd"><span class="k-icotile"><svg class="i"><use href="#i-list-checks"/></svg></span><div><b>สิทธิ์</b><span class="t12 mut">เลือกเมนูและการกระทำที่บทบาทนี้ทำได้</span></div></div>
+          <div class="grid2">
+            <div class="col full">
+              <div class="row" style="justify-content:space-between"><span class="k-label">สิทธิ์การใช้งาน</span><span class="k-badge b-default tnum">เลือกแล้ว 6 / 9</span></div>
+              <div style="border:1px solid var(--border-c);border-radius:var(--r-md);overflow:hidden">
+                <div class="row" style="gap:8px;padding:10px;border-bottom:1px solid var(--border-c);background:color-mix(in oklab,var(--muted) 40%,transparent);flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="เลือกทั้งกลุ่ม users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14 fw5" style="flex:1">Users</span><span class="t12 mut tnum">5 / 5</span></div>
+                <div class="col" style="gap:10px;padding:10px 10px 10px 36px">
+                  <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="View Users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View Users</span><span class="mono mut">users:read</span></div>
+                  <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="Edit Users"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">Edit Users</span><span class="mono mut">users:update</span></div>
+                </div>
+                <div class="row" style="gap:8px;padding:10px;border-top:1px solid var(--border-c);border-bottom:1px solid var(--border-c);background:color-mix(in oklab,var(--muted) 40%,transparent);flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="mixed" aria-label="เลือกทั้งกลุ่ม leave"><svg class="i"><use href="#i-check"/></svg></button><span class="t14 fw5" style="flex:1">Leave</span><span class="t12 mut tnum">1 / 3</span></div>
+                <div class="col" style="gap:10px;padding:10px 10px 10px 36px">
+                  <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="true" aria-label="View Leave"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View Leave</span><span class="mono mut">leave:read</span></div>
+                  <div class="row" style="flex-wrap:nowrap"><button class="k-check" type="button" role="checkbox" aria-checked="false" aria-label="View All"><svg class="i"><use href="#i-check"/></svg></button><span class="t14" style="flex:1">View All</span><span class="mono mut">leave:read-all</span></div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="k-sfoot"><button class="k-btn v-outline" type="button">ยกเลิก</button><button class="k-btn v-default" type="button">บันทึก</button></div>
+        </section>
       </div>
+      <div class="k-szfoot"><button class="k-btn v-outline" type="button">ยกเลิก</button><button class="k-btn v-default" type="button">บันทึก</button></div>
     </div>
   </div></div></div></div></div>
-  <p class="note">ชื่อสิทธิ์และ key ในภาพเป็นตัวอย่าง — ของจริงมาจาก <code>lib/permissions.ts</code> ของแต่ละโปรเจค</p>
+  <p class="note">ชื่อสิทธิ์และ key ในภาพเป็นตัวอย่าง — ของจริงมาจาก <code>lib/permissions.ts</code> ของแต่ละโปรเจค · ฟอร์มแก้แล้ว Esc/คลิกนอกกรอบไม่ปิด (ยกเลิก/✕ เท่านั้น)</p>
 
   <h2 class="sh">ใช้ยังไง</h2>
-  <div class="snip"><span class="label">TSX</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+  <div class="snip"><span class="label">TSX</span><button class="copy" type="button">คัดลอก</button><pre class="code"><code>// roles-manager.tsx — Sheet ถือ open + กันปิดทิ้งฟอร์มที่แก้แล้ว · RoleForm วาดทั้งแผง
+&lt;Sheet open={open} onOpenChange={(o, d) =&gt; {
+  if (!o &amp;&amp; dirty &amp;&amp; (d.reason === 'escape-key' || d.reason === 'outside-press')) return d.cancel();
+  setOpen(o);
+}}&gt;
+  &lt;RoleForm … /&gt;
+&lt;/Sheet&gt;
 
-&lt;Sheet open={open} onOpenChange={setOpen}&gt;
-  {/* ต้องเขียน data-[side=right]: — sm:max-w-* เปล่าแพ้ data-[side=right]:sm:max-w-sm ของ primitive (ค้าง 384px เงียบ ๆ) */}
-  &lt;SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl"&gt;
-    &lt;SheetHeader&gt;&lt;SheetTitle&gt;แก้ไขบทบาท&lt;/SheetTitle&gt;&lt;/SheetHeader&gt;
-    &lt;div className="flex-1 overflow-y-auto px-4 pt-4"&gt;{/* footer ของ RoleForm = sticky bottom-0 border-t */}&lt;RoleForm … /&gt;&lt;/div&gt;
-  &lt;/SheetContent&gt;
-&lt;/Sheet&gt;</code></pre></div>
+// role-form.tsx — header / body / footer อยู่ใน &lt;form&gt; เดียว (SettingsSheetContent ห่อให้ · xl = ค่าเริ่ม)
+&lt;SettingsSheetContent onSubmit={onSubmit}&gt;
+  &lt;SheetHeader&gt;&lt;SheetTitle&gt;แก้ไขบทบาท&lt;/SheetTitle&gt;&lt;SheetDescription&gt;{role.name}&lt;/SheetDescription&gt;&lt;/SheetHeader&gt;
+  &lt;SettingsSheetBody&gt;
+    &lt;SettingsSection icon={ShieldCheck} title="ข้อมูลบทบาท" description="…"&gt;
+      &lt;Field className="sm:col-span-2"&gt;…&lt;FieldDescription&gt;ชื่อต้องไม่ซ้ำกับบทบาทอื่น&lt;/FieldDescription&gt;&lt;/Field&gt;
+    &lt;/SettingsSection&gt;
+    &lt;SettingsSection icon={ListChecks} title="สิทธิ์" description="…"&gt;
+      &lt;div className="sm:col-span-2"&gt;{/* checklist */}&lt;/div&gt;
+    &lt;/SettingsSection&gt;
+  &lt;/SettingsSheetBody&gt;
+  &lt;SheetFooter&gt;&lt;Button variant="outline"&gt;ยกเลิก&lt;/Button&gt;&lt;Button type="submit"&gt;บันทึก&lt;/Button&gt;&lt;/SheetFooter&gt;
+&lt;/SettingsSheetContent&gt;
+
+// panel ที่ไม่ใช่ฟอร์ม (preview) เท่านั้นที่ใช้ SheetContent เปล่า — ยังต้อง xl / 5xl และเขียนแบบ data-[side=right]:
+&lt;SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-5xl"&gt;…&lt;/SheetContent&gt;</code></pre></div>
 
   <h2 class="sh">ทำ / อย่าทำ</h2>
   <div class="dd">
     <div class="do"><b class="t">ทำ</b><ul><li>หัวกลุ่มติ๊กครั้งเดียว = เลือก/เอาออกทั้งกลุ่ม · ครึ่ง = เลือกบางส่วน</li><li>ตัวเลขนับใช้ <code>Badge</code> + <code>tabular-nums</code></li><li><b>overlay คือการ์ด</b> — พื้นเนื้อหา <code>bg-popover</code> ตัดกับหน้าอยู่แล้ว แยกหมวดด้วยหัวข้อ + ระยะห่าง (<code>SettingsSheetBody</code> + <code>SettingsSection</code>) · DataTable / <code>QueryLoading</code> ข้างในส่ง <code>card={false}</code></li></ul></div>
-    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ใช้ Sheet แทน dialog กับฟอร์มสั้นที่ไม่มี list</li><li><code>SheetContent className="sm:max-w-md"</code> / <code>w-full</code> เปล่า — แพ้ class ของ primitive (verify เตือน) · ขนาดอื่นนอก xl/5xl</li><li>ห่อ <code>Card</code> หรือกล่องพื้นอ่อนแยกหมวดใน Dialog/Sheet — การ์ดซ้อนการ์ด · ยกเว้นชิ้นของ kit ที่ทำมาให้อยู่ใน dialog: <code>DetailSection</code> (รวม <a href="#approval-timeline">ApprovalTimeline</a>) และกล่องรายการใน <code>ReasonDialog</code></li><li>เปลี่ยนพื้น overlay เป็น <code>bg-background</code> — ไม่มีการ์ดให้ลอย เนื้อหาจมกับพื้น</li></ul></div>
+    <div class="dont"><b class="t">อย่าทำ</b><ul><li>ใช้ Sheet แทน dialog กับฟอร์มสั้นที่ไม่มี list</li><li>ฟอร์มใน <code>SheetContent</code> เปล่า + footer sticky ทำเอง — ฟอร์มใน Sheet = <code>SettingsSheetContent</code> เสมอ (บทเรียน 4.97.0: ฟอร์มบทบาทหน้าตาไม่เหมือนแอปที่ใช้ settings-sheet)</li><li><code>SheetContent className="sm:max-w-md"</code> / <code>w-full</code> เปล่า — แพ้ class ของ primitive (verify เตือน) · ขนาดอื่นนอก xl/5xl</li><li>ห่อ <code>Card</code> หรือกล่องพื้นอ่อนแยกหมวดใน Dialog/Sheet — การ์ดซ้อนการ์ด · ยกเว้นชิ้นของ kit ที่ทำมาให้อยู่ใน dialog: <code>DetailSection</code> (รวม <a href="#approval-timeline">ApprovalTimeline</a>) และกล่องรายการใน <code>ReasonDialog</code></li><li>เปลี่ยนพื้น overlay เป็น <code>bg-background</code> — ไม่มีการ์ดให้ลอย เนื้อหาจมกับพื้น</li></ul></div>
   </div>
 </section>
 
@@ -3107,7 +3132,7 @@ const steps: ApprovalStep[] = [
 <section class="story" id="s-settings-sheet" data-group="overlays" data-title="Settings sheet" data-th="Sheet ฟอร์มตั้งค่า/master" data-kw="settings sheet ตั้งค่า master record switch หน่วย suffix rule summary xl 5xl">
   <div class="story-head">
     <h1>Settings sheet <span>Sheet ฟอร์มตั้งค่า / master</span></h1>
-    <p class="purpose">แก้ 1 record ที่มี ≥ 4 ช่อง · ห่อ <code>&lt;form&gt;</code> เดียวทั้ง header/body/footer · section = กล่องไอคอน + หัวข้อ + คำอธิบาย · ช่องตัวเลขมีหน่วยท้ายช่อง + helper ที่มองเห็นเสมอ · พื้นตาม primitive ของ plugin</p>
+    <p class="purpose">ฟอร์มใน Sheet ทุกตัว — แก้ 1 record ที่มี ≥ 4 ช่อง หรือฟอร์มที่มี checklist โตตามข้อมูล (<a href="#sheet">Sheet</a>) · ห่อ <code>&lt;form&gt;</code> เดียวทั้ง header/body/footer · section = กล่องไอคอน + หัวข้อ + คำอธิบาย · ช่องตัวเลขมีหน่วยท้ายช่อง + helper ที่มองเห็นเสมอ · พื้นตาม primitive ของ plugin</p>
     <div class="files"><code>components/ui/settings-sheet.tsx</code> — <code>SettingsSheetContent</code> · <code>SettingsSheetBody</code> · <code>SettingsSection</code> · <code>SettingsNumberField</code> · <code>SettingsSwitchRow</code>/<code>Field</code> · <code>SettingsRuleSummary</code></div>
   </div>
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui flush"><div class="k-sheetwrap">
@@ -4080,7 +4105,7 @@ return (
       </div>
     </div>
   </div></div></div></div>
-  <p class="note">ไม่มีกรองรายคอลัมน์ — การกรองทั้งหมดอยู่ใน toolbar · ตัวเลือก action มาจากค่าที่มีจริงใน log · กดข้อความรายละเอียดเพื่อเปิด dialog</p>
+  <p class="note">ไม่มีกรองรายคอลัมน์ — การกรองทั้งหมดอยู่ใน toolbar · ตัวเลือก action มาจากค่าที่มีจริงใน log · กดข้อความรายละเอียดเพื่อเปิด <a href="#detail-dialog">detail dialog</a> (หัว = action · ผู้กระทำ · เวลา, JSON ใน <code>DetailSection</code>)</p>
 
   <h2 class="sh">Variants</h2>
   <div class="variants wide">
@@ -4100,7 +4125,7 @@ return (
   </main>
 </div>
 
-<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.96.0</span></div></footer>
+<footer class="site-foot"><div class="wrap"><span>UGT Claude Platform · IT Application</span><span>อัปเดตตาม ugt-nextjs-platform v4.97.0</span></div></footer>
 
 <script>
 (function () {

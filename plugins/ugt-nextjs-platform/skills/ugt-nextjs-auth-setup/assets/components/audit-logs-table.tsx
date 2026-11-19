@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
-// kit-hash: 3c9a30782b0b
+// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-auth-setup/components/audit-logs-table.tsx
+// kit-hash: bdfb96ec9f6b
 // components/audit-logs-table.tsx — client half of /admin/audit-logs:
 // DataTable โหมด server — ทุก filter/sort/page อยู่ใน URL ทั้งหมด แชร์ลิงก์แล้ว
 // เห็นหน้าเดียวกัน refresh ไม่หลุด · ช่องค้นหาเป็นของ DataTable (prop `serverSearch`
@@ -12,8 +12,10 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ColumnDef } from '@tanstack/react-table';
+import { ScrollText } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DetailDialogShell } from '@/components/ui/detail-dialog-shell';
+import { DetailSection } from '@/components/ui/detail-section';
 import {
   Select,
   SelectContent,
@@ -67,7 +69,11 @@ export function AuditLogsTable({
   const t = useTranslations('auth');
   const router = useRouter();
   const pathname = usePathname();
-  const [openDetail, setOpenDetail] = useState<string | null>(null);
+  // เก็บทั้งแถว: หัว dialog = action · ผู้กระทำ · เวลา (ไม่ใช่คำว่า "รายละเอียด" — detail-dialog-shell)
+  const [openRow, setOpenRow] = useState<AuditLogRow | null>(null);
+  // คงแถวล่าสุดไว้ระหว่าง animation ปิด (openRow → null) — ไม่งั้น dialog ว่างก่อนหายไป
+  const [shownRow, setShownRow] = useState(openRow);
+  if (openRow && openRow !== shownRow) setShownRow(openRow);
 
   // filter เปลี่ยน = เงื่อนไขใหม่ → กลับหน้า 1 เสมอ (ลบ page ทิ้ง ให้ server default)
   function applyFilters(next: Partial<{ q: string; action: string }>) {
@@ -102,7 +108,7 @@ export function AuditLogsTable({
             type="button"
             title={row.original.detail}
             className="block max-w-md cursor-pointer truncate text-left font-mono text-xs underline-offset-2 hover:underline"
-            onClick={() => setOpenDetail(row.original.detail)}
+            onClick={() => setOpenRow(row.original)}
           >
             {row.original.detail}
           </button>
@@ -148,21 +154,21 @@ export function AuditLogsTable({
         }
       />
 
-      <Dialog
-        open={openDetail !== null}
-        onOpenChange={(open) => {
-          if (!open) setOpenDetail(null);
-        }}
+      {/* ดูอย่างเดียว = detail-dialog-shell (DESIGN.md §4) ไม่มีโซนท้าย ปิดด้วย ✕ · JSON ทั้งก้อนเป็น
+          DetailSection เดียว ห่อบรรทัด (break-all) ใน dialog กว้าง md แทนการเลื่อนแนวนอน */}
+      <DetailDialogShell
+        open={openRow !== null}
+        onClose={() => setOpenRow(null)}
+        titleIcon={ScrollText}
+        title={<span className="font-mono">{shownRow?.action}</span>}
+        description={shownRow ? `${shownRow.userName} · ${formatDateTime(shownRow.createdAt)}` : undefined}
       >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t('auditLogsTable.detailDialogTitle')}</DialogTitle>
-          </DialogHeader>
-          <pre className="max-h-96 overflow-auto rounded-md bg-muted p-3 font-mono text-xs break-all whitespace-pre-wrap">
-            {prettyDetail(openDetail)}
+        <DetailSection label={t('auditLogsTable.detailSectionLabel')}>
+          <pre className="py-1.5 font-mono text-xs break-all whitespace-pre-wrap">
+            {prettyDetail(shownRow?.detail ?? null)}
           </pre>
-        </DialogContent>
-      </Dialog>
+        </DetailSection>
+      </DetailDialogShell>
     </>
   );
 }

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: a6a6b0b41c41
+// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: 009de2262cbd
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -139,8 +139,6 @@ export const authEn: AuthCatalog = {
     pageDescription: 'Every permission in the system is mapped to a role here',
     create: 'Create role',
     searchPlaceholder: 'Search roles...',
-    editTitle: 'Edit role',
-    createTitle: 'Create role',
     deleteConfirmTitle: 'Delete role "{name}"',
     deleteConfirmDescription: 'Users with this role will become "unassigned" and can only access general pages until given a new role',
     deleteConfirmButton: 'Delete role',
@@ -149,9 +147,19 @@ export const authEn: AuthCatalog = {
   roleForm: {
     editSuccess: 'Role updated',
     createSuccess: 'Role created',
+    editTitle: 'Edit role',
+    createTitle: 'Create role',
+    createDescription: 'Create a new role and choose its permissions',
+    sectionInfo: 'Role details',
+    sectionInfoDescription: 'Name and description shown when assigning this role to users',
+    sectionPermissions: 'Permissions',
+    sectionPermissionsDescription: 'Choose the menus and actions this role can use',
     nameLabel: 'Role name',
+    nameHint: 'Must be unique among roles',
     descriptionLabel: 'Description',
+    descriptionHint: 'A short note on who this role is for',
     permissionsLabel: 'Permissions',
+    selectedCount: '{selected} / {total} selected',
     selectGroupAria: 'Select all in {group}',
     cancel: 'Cancel',
     save: 'Save',
@@ -184,7 +192,7 @@ export const authEn: AuthCatalog = {
     colDetail: 'Detail',
     searchPlaceholder: 'Search by name or email...',
     allActions: 'All actions',
-    detailDialogTitle: 'Detail',
+    detailSectionLabel: 'Recorded data',
   },
   usersTable: {
     colName: 'Name',

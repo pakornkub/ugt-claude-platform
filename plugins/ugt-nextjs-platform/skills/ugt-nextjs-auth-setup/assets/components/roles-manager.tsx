@@ -1,19 +1,19 @@
 'use client';
-// kit: ugt-nextjs-platform 4.82.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
-// kit-hash: dc1c5cc61e98
+// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-auth-setup/components/roles-manager.tsx
+// kit-hash: ccd92da19d8d
 // components/roles-manager.tsx — interactive part of app/(admin)/admin/roles/page.tsx:
 // DataTable โหมด client (บทบาทมีไม่กี่แถว — DESIGN.md §4) + create/edit ใน Sheet
-// (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: panel ยาว = Sheet
-// ไม่ใช่ Dialog ที่สูงจน scroll ไม่ได้) + ลบผ่าน ConfirmActionDialog ตามข้อตกลง
+// (checklist สิทธิ์ยาวและโตตาม ALL_PERMISSIONS — บันได dialog §4: ฟอร์มใน Sheet =
+// ui/settings-sheet ซึ่ง RoleForm วาดทั้งแผง) + ลบผ่าน ConfirmActionDialog ตามข้อตกลง
 // (destructive ห้าม window.confirm) · ปุ่มแถวผ่าน IconAction + variant soft-*
 // ต้องมี org UI kit จาก ugt-nextjs-design-setup ก่อน — โปรเจคที่ไม่มี kit ดู SKILL.md §4
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet } from '@/components/ui/sheet';
 import { DataTable } from '@/components/ui/data-table';
 import { IconAction } from '@/components/ui/icon-action';
 import { ConfirmActionDialog } from '@/components/ui/confirm-action-dialog';
@@ -51,10 +51,20 @@ export function RolesManager({
 }>) {
   const t = useTranslations('auth.rolesManager');
   const tErrors = useTranslations('auth.errors');
-  const [openSheet, setOpenSheet] = useState<'create' | string | null>(null);
+  // open แยกจาก target: ตอนปิด target ยังอยู่จน animation ปิดจบ (onOpenChangeComplete) เนื้อหาจึงไม่หายกลางทาง
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetTarget, setSheetTarget] = useState<'create' | string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RoleRow | null>(null);
+  const guard = useRef({ dirty: false, busy: false });
+  const reportGuard = useCallback((state: { dirty: boolean; busy: boolean }) => {
+    guard.current = state;
+  }, []);
 
-  const editingRole = roles.find((r) => r.id === openSheet) ?? null;
+  const editingRole = roles.find((r) => r.id === sheetTarget) ?? null;
+  const openSheet = (target: 'create' | string) => {
+    setSheetTarget(target);
+    setSheetOpen(true);
+  };
 
   const columns: ColumnDef<RoleRow>[] = [
     {
@@ -101,7 +111,7 @@ export function RolesManager({
                     label={row.original.isSystem ? t('editSystemBlocked') : t('edit')}
                     tone="info"
                     disabled={row.original.isSystem}
-                    onClick={() => setOpenSheet(row.original.id)}
+                    onClick={() => openSheet(row.original.id)}
                   >
                     <Pencil className="size-4" strokeWidth={2} />
                   </IconAction>
@@ -134,7 +144,7 @@ export function RolesManager({
         </PageHeaderText>
         {canCreate && (
           <PageActions>
-            <Button onClick={() => setOpenSheet('create')}>
+            <Button onClick={() => openSheet('create')}>
               <Plus className="mr-2 size-4" strokeWidth={2} />
               {t('create')}
             </Button>
@@ -144,24 +154,37 @@ export function RolesManager({
 
       <DataTable id="admin-roles" columns={columns} data={roles} globalSearch filterPlaceholder={t('searchPlaceholder')} />
 
-      {/* Sheet ตัวเดียวคุมทั้ง create/edit จาก state — checklist สิทธิ์เลื่อนใน body ของ Sheet */}
-      <Sheet open={openSheet !== null} onOpenChange={(open) => !open && setOpenSheet(null)}>
-        <SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
-          <SheetHeader className="border-b">
-            <SheetTitle>{editingRole ? t('editTitle') : t('createTitle')}</SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pt-4">
-            {openSheet !== null && (
-              <RoleForm
-                key={editingRole?.id ?? 'create'}
-                allPermissions={allPermissions}
-                role={editingRole}
-                onSaved={() => setOpenSheet(null)}
-                onCancel={() => setOpenSheet(null)}
-              />
-            )}
-          </div>
-        </SheetContent>
+      {/* Sheet ตัวเดียวคุมทั้ง create/edit · RoleForm วาดทั้งแผง (SettingsSheetContent) ·
+          ฟอร์มแก้แล้ว/กำลังบันทึก = Esc/คลิกนอกกรอบไม่ปิด ปิดได้ด้วยยกเลิก/✕ ที่ตั้งใจกด (DESIGN.md §4) */}
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open, details) => {
+          if (open) return;
+          const { dirty, busy } = guard.current;
+          const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+          if (busy || (dirty && dismissal)) {
+            details.cancel();
+            return;
+          }
+          setSheetOpen(false);
+        }}
+        // RoleForm อยู่นอก popup (ถือ useForm) — ปิดจบแล้วถอดทิ้ง เปิดรอบหน้าได้ฟอร์มใหม่ ไม่ค้างค่าที่พิมพ์ทิ้งไว้
+        onOpenChangeComplete={(open) => {
+          if (open) return;
+          setSheetTarget(null);
+          guard.current = { dirty: false, busy: false };
+        }}
+      >
+        {sheetTarget !== null && (
+          <RoleForm
+            key={editingRole?.id ?? 'create'}
+            allPermissions={allPermissions}
+            role={editingRole}
+            onSaved={() => setSheetOpen(false)}
+            onCancel={() => setSheetOpen(false)}
+            onGuardChange={reportGuard}
+          />
+        )}
       </Sheet>
 
       {/* destructive = ConfirmActionDialog เสมอ (DESIGN.md §4) — ห้าม window.confirm */}

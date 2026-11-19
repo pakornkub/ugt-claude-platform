@@ -79,7 +79,10 @@ beautification skill. The short version that catches 90% of violations:
   (single column, one card per section) · one master/settings record with
   ≥ 4 fields → `SettingsSheetContent` (`ui/settings-sheet`, `xl` or `5xl` only) · ≤ 3 fields in one go →
   `FormDialog` · confirm only → `ConfirmActionDialog`. A list/checklist that
-  **grows with data** is never a fixed-height Dialog. One primary button per
+  **grows with data** is never a fixed-height Dialog. **Every form in a Sheet
+  is a `SettingsSheetContent`**, whatever its field count — a bare
+  `SheetContent` is only for a panel that is not a form (preview, big filter
+  set), still `xl`/`5xl` wide. One primary button per
   dialog; dirty forms confirm before closing. The overlay is the card:
   no `Card` (or tinted section boxes) inside a Dialog/Sheet — group with
   headings + spacing, keep the primitive's `bg-popover` surface (kit pieces built

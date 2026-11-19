@@ -18,10 +18,18 @@ Walk it top to bottom; the first row that fits wins.
 Edge rows (same ladder, `conventions.md` §Dialog ladder):
 
 - **A list or checklist that grows with data counts as long, always** — even if
-  it is short today. A dialog has a fixed height; data does not. → Sheet (its body
-  scrolls) or a full page. Lesson of 4.25.0: a "3-field" role form plus a
-  permission checklist was put in a Dialog and overflowed the screen.
-- A panel kept open beside the content (big filter set, preview) → Sheet.
+  it is short today. A dialog has a fixed height; data does not. → the same
+  settings-sheet kit as the master row (`SettingsSheetContent` · `SettingsSection` with
+  the checklist at `sm:col-span-2` · `SheetFooter`), or a full page. Lesson of 4.25.0:
+  a "3-field" role form plus a permission checklist was put in a Dialog and
+  overflowed the screen. Lesson of 4.97.0: the role form then moved to a bare
+  `SheetContent` + hand-made footer, which no rule caught — **every form in a
+  Sheet uses `ui/settings-sheet`**, whatever its field count (real example:
+  auth-setup `role-form.tsx`).
+- A panel kept open beside the content (big filter set, preview) → plain `Sheet`
+  — the only Sheet that is not a settings-sheet, because it is not a form. Width is
+  still `xl` or `5xl`, written `data-[side=right]:sm:max-w-xl|5xl` (real example:
+  mail-setup's template preview at `5xl`).
 - Read-only detail → `detail-dialog-shell` (no footer).
 - Never a dialog over a dialog — the one exception is a single AlertDialog
   confirm on top of a form (e.g. "discard changes?").

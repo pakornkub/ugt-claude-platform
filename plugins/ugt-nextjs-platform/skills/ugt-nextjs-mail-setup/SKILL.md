@@ -111,7 +111,8 @@ Assets mirror their destination — copy the tree, then substitute:
 | `assets/lib/types/mail-templates.ts` | `lib/types/mail-templates.ts` |
 | `assets/lib/actions/admin-mail-templates.ts` | `lib/actions/admin-mail-templates.ts` — needs auth-setup installed (guard + audit) |
 | `assets/app/(admin)/admin/mail-templates/page.tsx` | `app/(admin)/admin/mail-templates/page.tsx` — inside auth-setup's `(admin)` group so its guard + permission sync apply |
-| `assets/components/mail-templates-manager.tsx` | `components/mail-templates-manager.tsx` — needs the design kit (`ConfirmActionDialog`, `page-shell`, `textarea` from the base set) |
+| `assets/app/(admin)/admin/mail-templates/loading.tsx` | `app/(admin)/admin/mail-templates/loading.tsx` — route skeleton from `ui/page-skeleton` parts (header + template list + editor card); not a `*PageSkeleton` preset, which wraps `PageShell` while the `(admin)` layout already owns the padding |
+| `assets/components/mail-templates-manager.tsx` | `components/mail-templates-manager.tsx` — needs the design kit (`ConfirmActionDialog`, `page-shell`, `textarea` from the base set) · preview = plain `Sheet` (a panel kept open beside the form, not a form) at the kit's `5xl` width — the 760px email chrome doesn't fit `xl` |
 | `assets/prisma/schema-mail.prisma` | paste INTO `prisma/schema.prisma` |
 | `assets/env.example` | fill section **4. Mail** of `.env.example` in place (+ real values in `.env.local`) — canonical layout, never append at the bottom · uncomment the `[MAIL]` lines in both compose files |
 | `assets/rules/ugt-nextjs-mail.md` | `.claude/rules/ugt-nextjs-mail.md` (whole-file overwritable) |

@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.81.0 · ugt-nextjs-design-setup/ui/form-dialog.tsx
-// kit-hash: 5127d84c2494
+// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-design-setup/ui/form-dialog.tsx
+// kit-hash: 055e22a69192
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -26,8 +26,8 @@ type HeightVariant = keyof typeof heightVariants;
  * for border-separated header/footer with a scrollable body.
  *
  * Pass `height` to control the dialog's vertical sizing:
- * - 'auto'  (default): small dialogs where content determines height
- * - 'fluid': medium/large dialogs that need scroll (max-h-[85vh])
+ * - 'fluid' (default): medium/large dialogs that need scroll (max-h-[85vh])
+ * - 'auto':  small dialogs where content determines height — pass it explicitly
  * - 'fill':  XL full-height dialogs (h-[90vh])
  */
 function FormDialogContent({

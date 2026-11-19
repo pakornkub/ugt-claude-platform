@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.86.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
-// kit-hash: 152e8ee8313d
+// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit-hash: ae3638a553fa
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.
 export const authTh = {
@@ -135,8 +135,6 @@ export const authTh = {
     pageDescription: 'สิทธิ์ทั้งหมดของระบบจับคู่เข้ากับบทบาทที่หน้านี้',
     create: 'สร้างบทบาท',
     searchPlaceholder: 'ค้นหาบทบาท...',
-    editTitle: 'แก้ไขบทบาท',
-    createTitle: 'สร้างบทบาท',
     deleteConfirmTitle: 'ลบบทบาท "{name}"',
     deleteConfirmDescription: 'ผู้ใช้ที่มีบทบาทนี้จะกลายเป็น "ไม่มีบทบาท" และใช้งานได้เฉพาะหน้าทั่วไปจนกว่าจะได้รับบทบาทใหม่',
     deleteConfirmButton: 'ลบบทบาท',
@@ -145,9 +143,19 @@ export const authTh = {
   roleForm: {
     editSuccess: 'แก้ไขบทบาทแล้ว',
     createSuccess: 'สร้างบทบาทแล้ว',
+    editTitle: 'แก้ไขบทบาท',
+    createTitle: 'สร้างบทบาท',
+    createDescription: 'สร้างบทบาทใหม่และกำหนดสิทธิ์',
+    sectionInfo: 'ข้อมูลบทบาท',
+    sectionInfoDescription: 'ชื่อและคำอธิบายที่แสดงตอนกำหนดบทบาทให้ผู้ใช้',
+    sectionPermissions: 'สิทธิ์',
+    sectionPermissionsDescription: 'เลือกเมนูและการกระทำที่บทบาทนี้ทำได้',
     nameLabel: 'ชื่อบทบาท',
+    nameHint: 'ชื่อต้องไม่ซ้ำกับบทบาทอื่น',
     descriptionLabel: 'คำอธิบาย',
+    descriptionHint: 'อธิบายสั้น ๆ ว่าบทบาทนี้ใช้กับใคร',
     permissionsLabel: 'สิทธิ์การใช้งาน',
+    selectedCount: 'เลือกแล้ว {selected} / {total}',
     selectGroupAria: 'เลือกทั้งกลุ่ม {group}',
     cancel: 'ยกเลิก',
     save: 'บันทึก',
@@ -180,7 +188,7 @@ export const authTh = {
     colDetail: 'รายละเอียด',
     searchPlaceholder: 'ค้นหาชื่อผู้ใช้หรืออีเมล...',
     allActions: 'ทุก action',
-    detailDialogTitle: 'รายละเอียด',
+    detailSectionLabel: 'ข้อมูลที่บันทึก',
   },
   usersTable: {
     colName: 'ชื่อ',

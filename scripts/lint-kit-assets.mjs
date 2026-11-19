@@ -34,11 +34,23 @@
 //   - native `title=` on <Button>/<IconAction> — the kit's Tooltip is the
 //     label carrier; the browser tooltip is unthemed, ~1s late and never
 //     appears on touch (same 4.38.0 tiptap report)
+//   - `page.tsx` without a sibling `loading.tsx` — every route ships a skeleton
+//     (DESIGN.md §6 route loading). Added 4.97.0: the auth/mail admin pages had
+//     none since the rule was written, and nothing checked
+//   - a width on <SheetContent> other than max-w-xl / max-w-5xl — the kit has two
+//     Sheet widths only (มติ A11). Added 4.97.0 after the mail preview shipped
+//     `data-[side=right]:sm:max-w-2xl`, which the verify.mjs bare-width warning
+//     can't see (it only flags widths WITHOUT the data-[side] prefix)
+//   - a form inside a bare <SheetContent> — a <form>/onSubmit in the block, or a
+//     component rendered there whose own file has one (cross-file: the 4.79.4
+//     role form lived in role-form.tsx, rendered inside roles-manager's
+//     SheetContent). Every form in a Sheet is SettingsSheetContent (4.97.0)
+//   (assets/ui/ is exempt from the Sheet rules — the primitives define them)
 // WARN rules (reported, exit 0):
 //   - `<h1` — pages compose PageTitle from ui/page-shell, not raw headings
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join, relative, sep } from 'node:path';
 
 const ROOT = process.cwd();
 
@@ -89,6 +101,11 @@ function* walk(dir) {
 const failures = [];
 const warnings = [];
 let scanned = 0;
+// สำหรับกฎข้ามไฟล์ (ฟอร์มใน SheetContent): ชื่อ component ที่ export → ไฟล์นั้นมี <form> ไหม
+const formComponents = new Map();
+const sheetBlocks = [];
+const SHEET_WIDTHS = new Set(['max-w-xl', 'max-w-5xl']);
+const HAS_FORM = /<form[\s>]|\bonSubmit\s*=|handleSubmit\s*\(/;
 
 for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
   const skillsDir = join(ROOT, 'plugins', pluginDir, 'skills');
@@ -111,6 +128,28 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
       // eslint-disable-next-line no-control-regex
       if (/[\0\x01-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(raw)) {
         failures.push(`${rel} — raw control byte(s) in source (file reads as binary → invisible to every grep-based gate)`);
+      }
+      if (rel.endsWith('/page.tsx') && !existsSync(join(dirname(file), 'loading.tsx'))) {
+        failures.push(`${rel} — no sibling loading.tsx (every route ships a skeleton from ui/page-skeleton, DESIGN.md §6)`);
+      }
+      const isUi = /\/assets\/ui\//.test(rel);
+      for (const m of body.matchAll(/export\s+(?:default\s+)?function\s+([A-Z]\w*)/g)) {
+        formComponents.set(m[1], { rel, hasForm: HAS_FORM.test(body) });
+      }
+      if (!isUi) {
+        for (const tag of openingTags(body, 'SheetContent')) {
+          const widths = [...tag.matchAll(/(?:^|[\s"'`:])((?:[a-z0-9-]+:|data-\[[^\]]+\]:)*max-w-[\w[\]-]+)/g)]
+            .map((x) => x[1])
+            .filter((token) => !SHEET_WIDTHS.has(token.replace(/^(?:[a-z0-9-]+:|data-\[[^\]]+\]:)+/, '')));
+          if (widths.length) {
+            failures.push(
+              `${rel} — Sheet width ${widths.join(' ')} (two widths only: xl 576px / 5xl 1024px, written data-[side=right]:sm:max-w-xl|5xl — มติ A11)`
+            );
+          }
+        }
+        for (const m of body.matchAll(/<SheetContent\b[\s\S]*?<\/SheetContent>/g)) {
+          sheetBlocks.push({ rel, block: m[0] });
+        }
       }
       if (/\basChild\b/.test(body)) {
         failures.push(`${rel} — asChild (Radix; Base UI ignores it — use render={<... />})`);
@@ -190,6 +229,20 @@ for (const pluginDir of readdirSync(join(ROOT, 'plugins'))) {
         warnings.push(`${rel} — raw <h1> (pages compose PageTitle from ui/page-shell)`);
       }
     }
+  }
+}
+
+// ฟอร์มใน SheetContent เปล่า — ในบล็อกเอง หรือ component ที่วางในบล็อกแล้วไฟล์ของมันมีฟอร์ม
+for (const { rel, block } of sheetBlocks) {
+  const inner = block.replace(/^<SheetContent\b[^>]*>/, '');
+  const viaComponent = [...inner.matchAll(/<([A-Z]\w*)/g)]
+    .map((m) => formComponents.get(m[1]) && { name: m[1], ...formComponents.get(m[1]) })
+    .find((c) => c?.hasForm);
+  if (HAS_FORM.test(inner) || viaComponent) {
+    const where = viaComponent ? ` (<${viaComponent.name}> from ${viaComponent.rel})` : '';
+    failures.push(
+      `${rel} — form inside a bare <SheetContent>${where} (every form in a Sheet is SettingsSheetContent from ui/settings-sheet — bare SheetContent is for non-form panels only)`
+    );
   }
 }
 
