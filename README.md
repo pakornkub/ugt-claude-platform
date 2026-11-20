@@ -9,8 +9,11 @@ Next.js ที่ทีมสร้าง (รวมถึงโปรเจค�
 Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรับ
 **เฉพาะส่วน deploy** (ยังไม่ผ่าน pilot) · stack อื่นนอกนั้นยังไม่รองรับ
 
-> 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [`docs/web/design-preview.html`](docs/web/design-preview.html)
-> (เปิดด้วย browser ได้เลย ไม่ต้องติดตั้งอะไร) — สี ปุ่ม ตาราง ฟอร์ม สถานะ light/dark
+> 🌐 **เว็บเอกสาร**: <https://pakornkub.github.io/ugt-claude-platform/web/> — คู่มือ, reference,
+> cheatsheet, slides (สร้างจาก `docs/web/` บน `main` อัตโนมัติทุกครั้งที่ push)
+>
+> 👀 **อยากเห็นก่อนว่าหน้าตาแอปจะออกมาแบบไหน** → เปิด [design preview](https://pakornkub.github.io/ugt-claude-platform/web/design-preview.html)
+> (หรือไฟล์ [`docs/web/design-preview.html`](docs/web/design-preview.html) ในเครื่อง) — สี ปุ่ม ตาราง ฟอร์ม สถานะ light/dark
 > รวมถึงหน้า admin ที่ติดมากับระบบ login (ผู้ใช้/บทบาท-สิทธิ์/audit) —
 > ทุกอย่างเรนเดอร์จากไฟล์ token จริงที่ plugin ติดตั้ง
 
