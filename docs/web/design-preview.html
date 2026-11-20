@@ -976,7 +976,7 @@
     <div class="k-nav" data-nav="users"><svg class="i"><use href="#i-users"/></svg><span class="trunc">ผู้ใช้งาน</span><span class="mb">1</span></div>
     <div class="k-nav" data-nav="roles"><svg class="i"><use href="#i-shield"/></svg><span class="trunc">บทบาทและสิทธิ์</span></div>
     <div class="k-nav" data-nav="audit"><svg class="i"><use href="#i-scroll"/></svg><span class="trunc">บันทึกกิจกรรม</span></div>
-    <div class="k-side-foot"><div class="k-navuser"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span class="who"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@ube.co.th</span></span><svg class="i" style="font-size:16px"><use href="#i-more-v"/></svg></div></div>
+    <div class="k-side-foot"><div class="k-navuser"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span class="who"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@example.com</span></span><svg class="i" style="font-size:16px"><use href="#i-more-v"/></svg></div></div>
   </aside>
 </template>
 <!-- site-header สร้างจาก data-crumb="กลุ่ม|สีจุด|หน้า|ส่วนลึก…" (JS buildHeaders) — บ้าน › ●กลุ่ม › หน้า · มือถือเหลือ ●หน้าปัจจุบัน -->
@@ -2165,7 +2165,7 @@ toolbarFilters={
     <div class="vcell"><div class="ui stack"><table class="k-table"><thead><tr>
       <th><span class="k-hc"><svg class="i grip"><use href="#i-grip"/></svg>ชื่อ<span class="flt"><svg class="i"><use href="#i-filter"/></svg></span></span></th>
       <th><span class="k-hc"><svg class="i grip"><use href="#i-grip"/></svg>อีเมล<span class="flt"><svg class="i"><use href="#i-filter"/></svg></span></span></th></tr></thead>
-      <tbody><tr><td>วิภา สุขใจ</td><td>wipa@ube.co.th</td></tr></tbody></table></div>
+      <tbody><tr><td>วิภา สุขใจ</td><td>wipa@example.com</td></tr></tbody></table></div>
       <div class="cap"><b>client (ค่าเริ่มต้น)</b>จุดจับลาก → ชื่อคอลัมน์ → ไอคอนกรวยเปิด popover กรองเฉพาะคอลัมน์</div></div>
     <div class="vcell"><div class="ui stack"><div class="k-pop" style="width:224px;padding:12px;display:flex;flex-direction:column;gap:8px"><input class="k-input" placeholder="ค่าที่ต้องการกรอง..." value="ลาพักร้อน"><div class="row" style="flex-wrap:nowrap"><button class="k-btn v-outline" type="button" style="flex:1">ล้าง</button><button class="k-btn v-default" type="button" style="flex:1">กรอง</button></div></div></div>
       <div class="cap"><b>filter popover</b>Enter = กรอง · กรองแล้วไอคอนในหัวคอลัมน์เป็นสี primary</div></div>
@@ -2694,7 +2694,7 @@ export default function Loading() {
       <div class="fh"><div class="k-dtitle">เพิ่มผู้ใช้ local</div><div class="k-ddesc">บัญชี SSO/AD ไม่ต้องเพิ่ม — เกิดเองเมื่อเจ้าตัวเข้าสู่ระบบครั้งแรก · บัญชี local ใช้อีเมลโดเมนองค์กรไม่ได้ แล้วค่อยกำหนดบทบาทจากตาราง</div></div>
       <div class="fb">
         <div class="k-field"><label class="k-label">ชื่อ<span class="k-req">*</span></label><input class="k-input" value="ผู้ตรวจสอบ QA"></div>
-        <div class="k-field"><label class="k-label">อีเมล<span class="k-req">*</span></label><input class="k-input" value="qa.tester@partner.co.th"></div>
+        <div class="k-field"><label class="k-label">อีเมล<span class="k-req">*</span></label><input class="k-input" value="qa.tester@example.org"></div>
         <div class="k-field"><label class="k-label">รหัสผ่านตั้งต้น<span class="k-req">*</span></label><input class="k-input" type="password" value="Passw0rd!"><div class="k-fdesc">อย่างน้อย 8 ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข</div></div>
         <div class="k-field"><label class="k-label">บทบาท</label><button class="k-select" type="button">ยังไม่กำหนด<svg class="i"><use href="#i-chev-d"/></svg></button></div>
       </div>
@@ -2915,7 +2915,7 @@ import { FormDialogBody, FormDialogContent, FormDialogFooter, FormDialogHeader }
       <div class="ff"><button class="k-btn v-outline reject" type="button"><svg class="i"><use href="#i-x"/></svg>ไม่อนุมัติ</button><button class="k-btn v-success" type="button"><svg class="i"><use href="#i-check"/></svg>อนุมัติ</button></div>
     </div></div>
       <div class="cap"><b>footer={…}</b>มีโซนท้ายเฉพาะเมื่อมี action — ปฏิเสธ (outline ขอบแดง) ซ้าย · อนุมัติ (success) ขวา</div></div>
-    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="k-drow"><span class="dl"><svg class="i"><use href="#i-mail"/></svg>อีเมล</span><span class="dv">somchai@ube.co.th</span></div><div class="k-drow"><span class="dl">ลาไปแล้ว</span><span class="dv tnum">0</span></div></section></div>
+    <div class="vcell"><div class="ui stack"><section class="k-dsec"><div class="k-drow"><span class="dl"><svg class="i"><use href="#i-mail"/></svg>อีเมล</span><span class="dv">somchai@example.com</span></div><div class="k-drow"><span class="dl">ลาไปแล้ว</span><span class="dv tnum">0</span></div></section></div>
       <div class="cap"><b>DetailSection ไม่มีหัว · DetailRow icon</b>ค่า <code>0</code> แสดง · ค่าว่าง (<code>null</code>/<code>''</code>) = ซ่อนทั้งแถว · section ที่ทุกแถวว่างซ่อนตัวเอง</div></div>
   </div>
 
@@ -3508,10 +3508,10 @@ export const metadata: Metadata = { title: `${DEV_PREFIX}Leave Portal` };
   <div class="canvas"><div class="canvas-stage"><div class="frame"><div class="ui">
     <div class="row" style="align-items:flex-end;gap:16px">
       <div style="width:220px;background:var(--sidebar);border-radius:var(--r-lg);padding:8px;box-shadow:0 0 0 1px var(--hair)">
-        <div class="k-navuser" style="background:var(--sidebar-accent)"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span class="who"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@ube.co.th</span></span><svg class="i" style="font-size:16px"><use href="#i-more-v"/></svg></div>
+        <div class="k-navuser" style="background:var(--sidebar-accent)"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span class="who"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@example.com</span></span><svg class="i" style="font-size:16px"><use href="#i-more-v"/></svg></div>
       </div>
       <div class="k-pop k-menu" style="min-width:224px">
-        <div class="row" style="padding:6px 4px;flex-wrap:nowrap"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span style="display:grid;line-height:1.25;min-width:0"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@ube.co.th</span></span></div>
+        <div class="row" style="padding:6px 4px;flex-wrap:nowrap"><span class="k-ava k-avatar" style="background:var(--cat-4)">สจ</span><span style="display:grid;line-height:1.25;min-width:0"><span class="t14 fw5 trunc">สมชาย ใจดี</span><span class="t12 mut trunc">somchai@example.com</span></span></div>
         <div class="k-msep"></div>
         <div class="k-mi focus"><svg class="i"><use href="#i-user-circle"/></svg>บัญชีผู้ใช้</div>
         <div class="k-mi"><svg class="i"><use href="#i-key"/></svg>เปลี่ยนรหัสผ่าน</div>
@@ -3534,7 +3534,7 @@ export const metadata: Metadata = { title: `${DEV_PREFIX}Leave Portal` };
         </div>
         <div style="padding:20px 24px 24px">
           <dl style="border:1px solid var(--border-c);border-radius:var(--r-lg);background:var(--card);font-size:14px">
-            <div class="row" style="padding:10px 14px;gap:16px;flex-wrap:nowrap;border-bottom:1px solid var(--border-c)"><svg class="i mut" style="font-size:16px"><use href="#i-mail"/></svg><dt class="mut">อีเมล</dt><dd style="margin-left:auto;font-weight:500">somchai@ube.co.th</dd></div>
+            <div class="row" style="padding:10px 14px;gap:16px;flex-wrap:nowrap;border-bottom:1px solid var(--border-c)"><svg class="i mut" style="font-size:16px"><use href="#i-mail"/></svg><dt class="mut">อีเมล</dt><dd style="margin-left:auto;font-weight:500">somchai@example.com</dd></div>
             <div class="row" style="padding:10px 14px;gap:16px;flex-wrap:nowrap;border-bottom:1px solid var(--border-c)"><svg class="i mut" style="font-size:16px"><use href="#i-users"/></svg><dt class="mut">รหัสพนักงาน</dt><dd style="margin-left:auto;font-weight:500">91226</dd></div>
             <div class="row" style="padding:10px 14px;gap:16px;flex-wrap:nowrap"><svg class="i mut" style="font-size:16px"><use href="#i-key"/></svg><dt class="mut">วิธี Login ล่าสุด</dt><dd style="margin-left:auto;font-weight:500">SSO (Keycloak)</dd></div>
           </dl>
@@ -3978,14 +3978,14 @@ return (
                 <th><span class="k-hc"><svg class="i grip"><use href="#i-grip"/></svg>วิธีเข้าสู่ระบบ<span class="flt"><svg class="i"><use href="#i-filter"/></svg></span></span></th>
                 <th>บทบาท</th><th>รหัสผ่าน</th></tr></thead>
               <tbody>
-                <tr><td>สมชาย ใจดี</td><td>somchai@ube.co.th</td><td><span class="k-badge b-outline">sso</span></td><td><button class="k-select w-48" type="button" disabled>Administrator<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
-                <tr><td>วิภา สุขใจ</td><td>wipa@ube.co.th</td><td><span class="k-badge b-outline">ldap</span></td><td><button class="k-select w-48" type="button">หัวหน้างาน<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
-                <tr><td>ธนา ใหม่มาก</td><td>thana.m@ube.co.th</td><td><span class="k-badge b-outline">sso</span></td><td><button class="k-select w-48" type="button">ไม่มีบทบาท<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
-                <tr><td>ผู้ตรวจสอบ QA</td><td>qa.tester@partner.co.th</td><td><span class="k-badge b-outline">local</span></td><td><button class="k-select w-48" type="button">Tester<svg class="i"><use href="#i-chev-d"/></svg></button></td><td><button class="k-btn s-icon t-info" type="button" aria-label="ตั้งรหัสผ่าน"><svg class="i"><use href="#i-key"/></svg></button></td></tr>
+                <tr><td>สมชาย ใจดี</td><td>somchai@example.com</td><td><span class="k-badge b-outline">sso</span></td><td><button class="k-select w-48" type="button" disabled>Administrator<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
+                <tr><td>วิภา สุขใจ</td><td>wipa@example.com</td><td><span class="k-badge b-outline">ldap</span></td><td><button class="k-select w-48" type="button">หัวหน้างาน<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
+                <tr><td>ธนา ใหม่มาก</td><td>thana.m@example.com</td><td><span class="k-badge b-outline">sso</span></td><td><button class="k-select w-48" type="button">ไม่มีบทบาท<svg class="i"><use href="#i-chev-d"/></svg></button></td><td></td></tr>
+                <tr><td>ผู้ตรวจสอบ QA</td><td>qa.tester@example.org</td><td><span class="k-badge b-outline">local</span></td><td><button class="k-select w-48" type="button">Tester<svg class="i"><use href="#i-chev-d"/></svg></button></td><td><button class="k-btn s-icon t-info" type="button" aria-label="ตั้งรหัสผ่าน"><svg class="i"><use href="#i-key"/></svg></button></td></tr>
               </tbody></table></div>
             <div class="k-dt-cards">
-              <div class="k-mcard"><div class="mh">วิภา สุขใจ</div><dl><div><dt>อีเมล</dt><dd>wipa@ube.co.th</dd></div><div><dt>วิธีเข้าสู่ระบบ</dt><dd><span class="k-badge b-outline">ldap</span></dd></div><div><dt>บทบาท</dt><dd><button class="k-select w-48" type="button">หัวหน้างาน<svg class="i"><use href="#i-chev-d"/></svg></button></dd></div></dl></div>
-              <div class="k-mcard"><div class="mh">ผู้ตรวจสอบ QA</div><dl><div><dt>อีเมล</dt><dd>qa.tester@partner.co.th</dd></div><div><dt>วิธีเข้าสู่ระบบ</dt><dd><span class="k-badge b-outline">local</span></dd></div><div><dt>บทบาท</dt><dd><button class="k-select w-48" type="button">Tester<svg class="i"><use href="#i-chev-d"/></svg></button></dd></div></dl><div class="acts"><button class="k-btn s-icon t-info" type="button" aria-label="ตั้งรหัสผ่าน"><svg class="i"><use href="#i-key"/></svg></button></div></div>
+              <div class="k-mcard"><div class="mh">วิภา สุขใจ</div><dl><div><dt>อีเมล</dt><dd>wipa@example.com</dd></div><div><dt>วิธีเข้าสู่ระบบ</dt><dd><span class="k-badge b-outline">ldap</span></dd></div><div><dt>บทบาท</dt><dd><button class="k-select w-48" type="button">หัวหน้างาน<svg class="i"><use href="#i-chev-d"/></svg></button></dd></div></dl></div>
+              <div class="k-mcard"><div class="mh">ผู้ตรวจสอบ QA</div><dl><div><dt>อีเมล</dt><dd>qa.tester@example.org</dd></div><div><dt>วิธีเข้าสู่ระบบ</dt><dd><span class="k-badge b-outline">local</span></dd></div><div><dt>บทบาท</dt><dd><button class="k-select w-48" type="button">Tester<svg class="i"><use href="#i-chev-d"/></svg></button></dd></div></dl><div class="acts"><button class="k-btn s-icon t-info" type="button" aria-label="ตั้งรหัสผ่าน"><svg class="i"><use href="#i-key"/></svg></button></div></div>
             </div>
             <div class="k-dt-foot"><div class="range">1–4 จาก 4</div><div class="pg"><div class="rpp">แถวต่อหน้า <button class="k-select s-sm w-20" type="button">10<svg class="i"><use href="#i-chev-d"/></svg></button></div><div class="pgx">หน้า 1 จาก 1</div><div class="btns"><button class="k-btn v-outline s-icon lg" type="button" aria-label="ไปหน้าแรก" disabled><svg class="i"><use href="#i-chevs-l"/></svg></button><button class="k-btn v-outline s-icon" type="button" aria-label="ไปหน้าก่อน" disabled><svg class="i"><use href="#i-chev-l"/></svg></button><button class="k-btn v-outline s-icon" type="button" aria-label="ไปหน้าถัดไป" disabled><svg class="i"><use href="#i-chev-r"/></svg></button><button class="k-btn v-outline s-icon lg" type="button" aria-label="ไปหน้าสุดท้าย" disabled><svg class="i"><use href="#i-chevs-r"/></svg></button></div></div></div>
           </div>
@@ -4092,7 +4092,7 @@ return (
                 <th><span class="k-hc"><svg class="i grip"><use href="#i-grip"/></svg>รายละเอียด</span></th></tr></thead>
               <tbody>
                 <tr><td class="tnum">10/08/2026 14:02</td><td>สมชาย ใจดี</td><td class="mono">users.create</td><td><span class="mono trunc" style="display:block;max-width:220px">{"targetId":"cm9x…","authType":"local"}</span></td></tr>
-                <tr><td class="tnum">10/08/2026 13:47</td><td>ผู้ตรวจสอบ QA</td><td class="mono">password.change</td><td><span class="mono trunc" style="display:block;max-width:220px">{"ip":"10.2.14.8"}</span></td></tr>
+                <tr><td class="tnum">10/08/2026 13:47</td><td>ผู้ตรวจสอบ QA</td><td class="mono">password.change</td><td><span class="mono trunc" style="display:block;max-width:220px">{"ip":"192.0.2.14"}</span></td></tr>
                 <tr><td class="tnum">10/08/2026 09:15</td><td>วิภา สุขใจ</td><td class="mono">login.success</td><td>-</td></tr>
               </tbody></table></div>
             <div class="k-dt-cards">
