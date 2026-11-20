@@ -746,7 +746,7 @@
   .canvas-bar .tools{display:flex;flex-wrap:wrap;gap:8px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--bg)}
   .seg button{font:inherit;font-size:12.5px;padding:4px 12px;border:0;background:none;color:var(--ink-soft);cursor:pointer}
-  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
   .canvas-stage{padding:32px;background:var(--bg-soft);background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:16px 16px}
   .frame{margin:0 auto;max-width:100%;container-type:inline-size;container-name:canvas;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line),0 10px 30px -18px rgb(0 0 0/.35);transition:max-width .25s ease}
   body[data-vp="mobile"] .canvas:not([data-novp]) .frame{max-width:390px}
@@ -773,8 +773,8 @@
   .snip+.snip{margin-top:14px}
   .snip pre.code{padding-top:40px;font-size:13px;white-space:pre;margin:0}
   .snip .label{position:absolute;left:14px;top:10px;font-size:12px;color:var(--code-dim);font-family:var(--font)}
-  .copy{position:absolute;top:8px;right:8px;font:inherit;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid #4b5268;background:transparent;color:var(--code-ink);cursor:pointer}
-  .copy:hover{background:#2a2f45}
+  .copy{position:absolute;top:8px;right:8px;font:inherit;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid #52524e;background:transparent;color:var(--code-ink);cursor:pointer}
+  .copy:hover{background:#2e2e2e}
   .say-row{margin-top:10px}
   .dd{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .dd>div{border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:14px 16px;font-size:14.5px}
