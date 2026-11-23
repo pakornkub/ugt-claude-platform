@@ -124,6 +124,8 @@ CREATE UNIQUE NONCLUSTERED INDEX [UX_HolidayLists_Year_NotDeleted]
   won't drop it either
 - Caveat: the next `migrate dev` may warn about drift — always inspect the diff
   before applying
+- The predicate takes only simple comparisons joined by `AND` (see §6) — no `NOT IN`,
+  `OR`, `LIKE` or functions
 
 **Option B — enforce at the application layer** (what the reference project chose):
 
@@ -182,3 +184,23 @@ messages.
 
 4. To rename existing DB objects into convention → use the `sp_rename`
    technique from section 3
+
+## 6. Filtered index `WHERE` takes only simple comparisons — `NOT IN` fails at deploy
+
+**Symptom.** A hand-written migration with `CREATE UNIQUE INDEX … WHERE [Status] NOT IN (REJECTED,CANCELLED)` fails on `migrate deploy` with `P3018` / `Database error code: 102` / `Incorrect syntax near NOT`. Every later deploy against that database fails too.
+
+**Root cause.** SQL Server accepts only simple predicates in a filtered index `WHERE`: `=`, `<>`, `IN (…)`, `IS [NOT] NULL`, joined by `AND`. `NOT IN`, `OR`, `LIKE` and functions are rejected at parse time. The batch fails as a whole, so no index is created, and `_prisma_migrations` records the migration as failed.
+
+**Fix.** Write the exclusion with `<>` and `AND`:
+
+```sql
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Requests_Source_Active]
+  ON [dbo].[Requests]([EmpCode], [RequestDate])
+  WHERE [Source] = AUTO AND [Status] <> REJECTED AND [Status] <> CANCELLED;
+```
+
+Before merge, parse-check every hand-written DDL without running it:
+`SET NOEXEC ON; <DDL>; SET NOEXEC OFF;`. If a shared database already recorded the failed migration,
+run `npx prisma migrate resolve --rolled-back <migration_name>`, then push the fixed file.
+
+**Origin.** ugt-hrms · 2026-11-22

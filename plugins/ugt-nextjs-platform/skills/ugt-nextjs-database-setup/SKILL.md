@@ -9,7 +9,7 @@ description: >
   across a linked server, a stored-procedure call that times out (mssql
   15-second default), a raw GROUP BY failing with error 8120, setting up type-safe env validation, or debugging MSSQL
   migration problems (column renames that would drop data, filtered unique
-  indexes Prisma can't express, `url` in the wrong place breaking generate),
+  indexes Prisma can't express, `Incorrect syntax near 'NOT'` in a filtered index, `url` in the wrong place breaking generate),
   or `next build` panicking on Windows over `powershell-utils` (Turbopack
   bundling the mssql driver).
   Load it before touching `prisma/schema.prisma` even for a one-field change —
@@ -243,6 +243,7 @@ Mandatory pattern: **sanitize before parameterize, always**; call SPs with
 | `` $executeRaw`EXEC usp_X ${a}, ${b}` `` (parameterized) | `$executeRawUnsafe` with user input |
 | GROUP BY a computed fragment → compute it once in a derived table, group by its column name (raw-sql §7) | Interpolate the same `Prisma.sql` fragment in SELECT and GROUP BY — fresh parameters each time → error 8120 |
 | existing store found → migrate (§4b) or say plainly the app still runs on it | install Prisma beside SQLite/mock data and report "ต่อ database แล้ว" |
+| Filtered index `WHERE [Status] <> 'REJECTED' AND [Status] <> 'CANCELLED'` (simple comparisons joined by AND) → migrations §6 | `NOT IN` / `OR` / `LIKE` / functions in a filtered index predicate — error 102 fails the whole migration batch (`Incorrect syntax near 'NOT'`) |
 
 ## Verification Checklist
 
