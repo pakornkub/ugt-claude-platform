@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.97.0 · ugt-nextjs-auth-setup/messages/auth.en.ts
-// kit-hash: 009de2262cbd
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/messages/auth.en.ts
+// kit-hash: d21cb6cb5336
 import type { authTh } from './auth.th';
 
 // Named alias (rather than an inline mapped type on `authEn` itself) so
@@ -199,6 +199,7 @@ export const authEn: AuthCatalog = {
     colEmail: 'Email',
     colAuthMethod: 'Sign-in method',
     colRole: 'Role',
+    noRole: 'No role',
     colPassword: 'Password',
     searchPlaceholder: 'Search by name or email...',
   },
