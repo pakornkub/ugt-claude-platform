@@ -84,7 +84,8 @@ Built into the component; never restyle it per page.
   (`data-slot="data-table-mobile-row"`, `border-b` · last row none · selected
   = `bg-muted` like a selected `TableRow`). The first data column is the row
   heading, the rest are label/value pairs (`meta.mobileLabel` when the
-  header isn't a string), the `actions` cell sits at the row's foot, the
+  header isn't a string — **a column with a JSX header and no `meta.mobileLabel`
+  renders with an empty label**, so always set it), the `actions` cell sits at the row's foot, the
   `select` checkbox leads the heading. Replaces the 2026-08-21 card-per-row
   layout, which put a card inside the card and spent the height on borders.
 - **Toolbar rows go full width, in this order**: navigation (search box →

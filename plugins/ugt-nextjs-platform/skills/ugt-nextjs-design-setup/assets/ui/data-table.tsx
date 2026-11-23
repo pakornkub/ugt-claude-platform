@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/data-table.tsx
-// kit-hash: d398e13aa3f1
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit-hash: 0f5c0665bc50
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,
 // default on). A page that used to wrap <DataTable> in its own <Card> now shows
@@ -214,7 +214,8 @@ function mobileLabel<TData>(column: Column<TData, unknown>): string {
   const { header, meta } = column.columnDef;
   if (meta?.mobileLabel) return meta.mobileLabel;
   if (typeof header === 'string') return header;
-  return column.id;
+  // no label rather than the raw column id ("time") — a JSX header needs `meta.mobileLabel`
+  return '';
 }
 
 /** คีย์คอลัมน์แบบเดียวกับที่ TanStack สร้าง id อัตโนมัติ (accessorKey แทนจุดด้วย _) */

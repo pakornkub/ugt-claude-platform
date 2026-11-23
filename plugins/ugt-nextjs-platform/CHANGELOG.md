@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **DataTable บนมือถือโชว์ id คอลัมน์ดิบ ("time") เป็นป้าย** — `mobileLabel()` ใน `ui/data-table.tsx` fallback เป็น `column.id` เมื่อ header เป็น JSX และไม่มี `meta.mobileLabel` → การ์ดมือถือขึ้นชื่อ id · fallback เป็นสตริงว่าง + `references/datatable.md` §Mobile บอกว่าคอลัมน์ header JSX ต้องใส่ `meta.mobileLabel` · origin ugt-hrms · 2026-11-18 · asset: ugt-nextjs-design-setup/assets/ui/data-table.tsx
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
