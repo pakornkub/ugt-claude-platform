@@ -83,6 +83,14 @@ Write the **left** column by default — the right one is what SonarQube flags.
   point there; that is what the named sequential helper is for.
 - **S3735 vs S9383**: `void someAsyncCall()` is the intended way to drop a
   promise — S3735 does not fire on a promise operand.
+- **S7735 (negated condition) — never "flip" a comparison**: `!(x > 0) || …`
+  → `x <= 0 || …` is **not** equivalent when `x` can be `undefined`/`null`/`NaN`
+  (`!(undefined > 0)` is `true`, `undefined <= 0` is `false`), so every record
+  missing the field is silently rejected — and the file's own tests pass because
+  their fixtures set the field. Name the comparison and negate the variable:
+  `const required = x > 0; return !required || start >= minStart;`. After any
+  Sonar-only rewrite in a services/actions file, run the **whole** test suite,
+  not just the touched file — the broken caller lives in another file.
 
 **Component / type rules:**
 
