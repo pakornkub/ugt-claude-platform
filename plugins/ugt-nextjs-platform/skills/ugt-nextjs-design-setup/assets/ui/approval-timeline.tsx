@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.88.0 · ugt-nextjs-design-setup/ui/approval-timeline.tsx
-// kit-hash: 1cb8f750a95c
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/approval-timeline.tsx
+// kit-hash: ea62e89e1d24
 // source: ugt-hrms components/ui/approval-timeline.tsx — re-built as a data-in component on the kit DetailSection by ugt-nextjs-design-setup
 // มติ ugt-hrms DESIGN §10 2026-10-28 "การ์ดสถานะการอนุมัติเป็นเส้นเวลาเดียวกันทุก dialog" (แบบ A)
 import * as React from 'react';
@@ -127,7 +127,7 @@ export function ApprovalTimeline({
                   )}
                 >
                   {step.event === 'decision' && step.level ? (
-                    <span className="text-[11px] font-semibold tabular-nums">{step.level}</span>
+                    <span className="text-[0.6875rem] font-semibold tabular-nums">{step.level}</span>
                   ) : (
                     <Icon className="size-3" strokeWidth={2.5} aria-hidden="true" />
                   )}

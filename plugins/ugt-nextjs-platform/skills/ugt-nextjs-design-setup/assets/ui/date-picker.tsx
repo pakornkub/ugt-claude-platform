@@ -1,5 +1,5 @@
-// kit: ugt-nextjs-platform 4.87.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
-// kit-hash: 96ff523bf427
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit-hash: 2eaec4a9c4c2
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
 
@@ -135,7 +135,7 @@ export function DatePicker({
         />
       </div>
       {hasHolidays && (
-        <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[0.6875rem] text-muted-foreground">
           <span className="size-2 rounded-full bg-status-red" /> {t('holidayLegend')}
         </div>
       )}

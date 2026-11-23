@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **จอกว้างขยายทั้งแอปตามความกว้างจอ (fluid root font)** — จอ 1920/2K ตัวหนังสือดูเล็ก เหลือขอบว่างสองข้าง เพราะฐานฟอนต์คงที่ 16px · `globals.tokens.css` ตั้ง `html { font-size: clamp(100%, 50% + 0.52vw, 125%) }` (≤1536px เท่าเดิม · 1920 ≈ 112% · ≥2300 = 125% · ใช้ % เพื่อเคารพฟอนต์ที่ผู้ใช้ตั้งในเบราว์เซอร์ · breakpoint ไม่เลื่อน) · **ถอด `2xl:text-sm` ของตาราง** (ซ้อนกับการโตทั้งแอปจะโตสองต่อ) — `primitive-edits.md` ไม่แก้ `table.tsx` แล้ว · DESIGN.template กฎใหม่: ขนาด/ระยะเป็น rem ห้าม `text-[Npx]`/`w-[Npx]`/`h-[Npx]` (เส้น border/ring/rounded เป็น px ได้) · kit `approval-timeline`/`date-picker` `text-[11px]` → rem · verify.mjs เลิกบังคับ `2xl:text-sm` · rejected: ขยาย cap เนื้อหาอย่างเดียว · CSS `zoom` บน body (ตำแหน่ง popover/tooltip ของ Radix เพี้ยน) · เกิน 125% · **โปรเจคเดิม**: `sync ข้อตกลง design` — เพิ่ม clamp ใน `html`, ถอด `2xl:text-sm` ที่ `ui/table.tsx`, แปลง px ใน className เป็น rem · origin ugt-hrms · 2026-11-23 · asset: ugt-nextjs-design-setup/assets/globals.tokens.css, ugt-nextjs-design-setup/assets/ui/approval-timeline.tsx, ugt-nextjs-design-setup/assets/ui/date-picker.tsx
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx

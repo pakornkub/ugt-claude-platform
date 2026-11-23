@@ -263,7 +263,7 @@ different size — is the field bug this step exists to prevent.
    registry button doesn't ship it — build breaks without it)** — then
    `assets/ui/primitive-edits.md` to `card.tsx` / `table.tsx` / `dialog.tsx` /
    `sheet.tsx` / `alert-dialog.tsx` (Card elevation + CardHeading pt · table
-   `2xl:text-sm` · dialog 3 zones with `cta` footers — class-string edits only;
+   no table edit (fluid root font replaces `2xl:text-sm`) · dialog 3 zones with `cta` footers — class-string edits only;
    button first, the footers use `cta`). The two `.md` recipes are not copied.
    Never overwrite an existing same-name file silently — diff and ask.
    Also copy `assets/brand/` → `public/brand/` (company logos as tintable

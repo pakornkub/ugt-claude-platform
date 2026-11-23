@@ -662,7 +662,6 @@ check('button.tsx carries the sanctioned variants (button-variants.md)', () => {
 check('Card · table · dialog zones · text fields carry the sanctioned edits (primitive-edits.md)', () => {
   const wants = [
     ['card', [[/shadow-xs/, 'shadow-xs'], [/ring-border/, 'ring-border'], [/data-slot=card-heading\]\]:pt-0/, 'has-[>[data-slot=card-heading]]:pt-0']]],
-    ['table', [[/2xl:text-sm/, '2xl:text-sm on <table>']]],
     // มติ 2026-10-18: text fields 16px below md — Safari zooms the page on focus under 16px
     ['input', [[/(^|[\s"'])text-base[\s"']/, 'text-base (16px on phones, iOS zoom)']]],
     ['textarea', [[/(^|[\s"'])text-base[\s"']/, 'text-base (16px on phones, iOS zoom)']]],

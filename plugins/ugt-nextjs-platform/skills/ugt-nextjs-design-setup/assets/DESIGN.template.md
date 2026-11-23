@@ -131,15 +131,19 @@
 ## 2. Typography
 
 - **__FONT__** ผ่าน `next/font` · mono = Geist Mono ·
-  ฐาน html 16px ไม่ override
+  ฐาน `html { font-size: clamp(100%, 50% + 0.52vw, 125%) }` (`globals.css`) — ≤1536px = 16px เท่าเดิม ·
+  1920 ≈ 18px · ≥2300 = 20px · ขนาด/ระยะ/ความกว้างทุกอย่างต้องเป็น **rem** (คลาส Tailwind ปกติ) —
+  **ห้าม `text-[Npx]` / `w-[Npx]` / `h-[Npx]`** ใช้ `text-[0.625rem]` แทน (px ไม่โตตาม) · เส้น
+  `border`/`ring`/`rounded-[Npx]` เป็น px ได้ · ใช้ `%` ไม่ใช่ `px` เพื่อเคารพฟอนต์ที่ผู้ใช้ตั้งในเบราว์เซอร์ ·
+  breakpoint ไม่เลื่อน · ห้ามใช้ CSS `zoom` บน body (ตำแหน่ง popover/tooltip ของ Radix เพี้ยน) ·
+  ไม่ขยายเกิน 125%
 - **ห้ามวางข้อความไทยใน `font-mono`** — ฟอนต์ mono ไม่มี glyph ไทย · ครอบ `font-mono tabular-nums` เฉพาะตัวเลข/รหัส
   (ป้ายไทยใช้ฟอนต์ UI) — ugt-nextjs-pitfalls `ui-rendering.md` §1
 - น้ำหนัก 400/500 · 600 เฉพาะหัวข้อ (หน้า · การ์ด · dialog · section) และตัวเลข KPI ·
   Title: `text-2xl font-semibold tracking-tight` ไม่มีไอคอนนำ
 - **ห้าม uppercase eyebrow กับข้อความไทย** (ไทยไม่มี case + tracking ทำสระลอย)
-- ตาราง `text-xs 2xl:text-sm` (12px → 14px ตั้งแต่จอ ≥1536px — หัวและเนื้อขยายพร้อมกัน ·
-  มติ 2026-10-16 B10 = ข้อยกเว้นเดียวของกฎ "ทุก breakpoint เท่ากัน" ฝั่งตัวอักษร) ตั้งที่ราก
-  `ui/table.tsx` จุดเดียว (sanctioned edit) — ห้าม override ราย cell · ตัวเลขชิดขวา tabular
+- ตาราง `text-xs` (12px · จอกว้างโตตาม root font-size ทั้งแอป — ห้ามใส่ `2xl:text-sm` ซ้ำ จะโตสองต่อ ·
+  แทนมติ 2026-10-16 B10) ตั้งที่ราก `ui/table.tsx` จุดเดียว — ห้าม override ราย cell · ตัวเลขชิดขวา tabular
 
 ## 3. Layout & app shell
 
@@ -250,8 +254,8 @@
   โปรเจคเดิมที่ตอบข้อ 9 = "ยึดของเดิม" บันทึกค่าที่วัดจริงแทน เช่น
   "control 48px `h-12` · `text-base` · radius 8px — อ้างมติในส่วน 10" และ rebase
   `components/ui/*` ตาม §Scale bridge ของ skill) — ทุก breakpoint เท่ากัน
-  ไม่ bump บนมือถือ · ข้อยกเว้นที่ตกลงแล้วมีสามจุดเท่านั้น: ปุ่ม `size="cta"` (§0 ข้อ 4) ·
-  ตัวอักษรตาราง `2xl:text-sm` (§2) · ช่องพิมพ์ (`input`/`textarea`) 16px ใต้ `md` กัน iOS ซูมหน้า (มติ 2026-10-18)
+  ไม่ bump บนมือถือ · ข้อยกเว้นที่ตกลงแล้วมีสองจุดเท่านั้น: ปุ่ม `size="cta"` (§0 ข้อ 4) ·
+  ช่องพิมพ์ (`input`/`textarea`) 16px ใต้ `md` กัน iOS ซูมหน้า (มติ 2026-10-18)
 - **กฎสเกล**: control ทุกตัวในฟอร์มเดียวกันสูงเท่ากันเสมอ · เปลี่ยนขนาดได้ที่
   `components/ui/*` ต้นทางเท่านั้น — ห้าม override ขนาดรายหน้า/รายจุด
 - เลือก control: ≤5 = RadioGroup · 6–15 = Select · >15/ค้นหา = Combobox ·
