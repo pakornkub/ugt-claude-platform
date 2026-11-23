@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **DataTable บนมือถือโชว์ id คอลัมน์ดิบ ("time") เป็นป้าย** — `mobileLabel()` ใน `ui/data-table.tsx` fallback เป็น `column.id` เมื่อ header เป็น JSX และไม่มี `meta.mobileLabel` → การ์ดมือถือขึ้นชื่อ id · fallback เป็นสตริงว่าง + `references/datatable.md` §Mobile บอกว่าคอลัมน์ header JSX ต้องใส่ `meta.mobileLabel` · origin ugt-hrms · 2026-11-18 · asset: ugt-nextjs-design-setup/assets/ui/data-table.tsx
+- **จอกว้างขยายทั้งแอปตามความกว้างจอ (fluid root font)** — จอ 1920/2K ตัวหนังสือดูเล็ก เหลือขอบว่างสองข้าง เพราะฐานฟอนต์คงที่ 16px · `globals.tokens.css` ตั้ง `html { font-size: clamp(100%, 50% + 0.52vw, 125%) }` (≤1536px เท่าเดิม · 1920 ≈ 112% · ≥2300 = 125% · ใช้ % เพื่อเคารพฟอนต์ที่ผู้ใช้ตั้งในเบราว์เซอร์ · breakpoint ไม่เลื่อน) · **ถอด `2xl:text-sm` ของตาราง** (ซ้อนกับการโตทั้งแอปจะโตสองต่อ) — `primitive-edits.md` ไม่แก้ `table.tsx` แล้ว · DESIGN.template กฎใหม่: ขนาด/ระยะเป็น rem ห้าม `text-[Npx]`/`w-[Npx]`/`h-[Npx]` (เส้น border/ring/rounded เป็น px ได้) · kit `approval-timeline`/`date-picker` `text-[11px]` → rem · verify.mjs เลิกบังคับ `2xl:text-sm` · rejected: ขยาย cap เนื้อหาอย่างเดียว · CSS `zoom` บน body (ตำแหน่ง popover/tooltip ของ Radix เพี้ยน) · เกิน 125% · **โปรเจคเดิม**: `sync ข้อตกลง design` — เพิ่ม clamp ใน `html`, ถอด `2xl:text-sm` ที่ `ui/table.tsx`, แปลง px ใน className เป็น rem · origin ugt-hrms · 2026-11-23 · asset: ugt-nextjs-design-setup/assets/globals.tokens.css, ugt-nextjs-design-setup/assets/ui/approval-timeline.tsx, ugt-nextjs-design-setup/assets/ui/date-picker.tsx
 
 ## 4.98.0 (2026-11-19)
 

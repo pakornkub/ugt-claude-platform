@@ -257,7 +257,11 @@
   }
   html {
     @apply font-sans;
-    /* base 16px — never overridden; density comes from base-mira (h-7 controls, text-xs tables) */
+    /* Fluid root size (มติ 2026-11-23): everything is rem, so the whole app scales with the screen.
+       ≤1536px = 100% (unchanged) · 1920 ≈ 112% · ≥2300 = 125%. Use %, not px, so a browser font
+       setting is still respected. Breakpoints don't shift (media queries read the browser default).
+       Density still comes from base-mira (h-7 controls, text-xs tables). */
+    font-size: clamp(100%, 50% + 0.52vw, 125%);
   }
 }
 

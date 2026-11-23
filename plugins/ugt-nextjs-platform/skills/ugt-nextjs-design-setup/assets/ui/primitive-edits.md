@@ -25,11 +25,11 @@ string ของ `className` ที่ระบุด้านล่าง (ม�
 รายหน้า · หัวการ์ดเองคือ kit component `ui/card-heading.tsx` (ไม่ใช่ฟังก์ชันใน card.tsx — แยกไฟล์
 เพื่อให้ `ugt-nextjs-kit-sync` อัปเดตได้)
 
-## `components/ui/table.tsx` — ตัวอักษรตาราง (B10)
+## `components/ui/table.tsx` — ตัวอักษรตาราง
 
-`Table` (`<table data-slot="table">`): เดิม `"w-full caption-bottom text-xs"` →
-**`"w-full caption-bottom text-xs 2xl:text-sm"`** (12px → 14px ตั้งแต่ 1536px — หัวและเนื้อขยายพร้อมกัน ·
-ห้าม override ราย cell)
+`Table` (`<table data-slot="table">`): คง **`"w-full caption-bottom text-xs"`** ตามที่ base-mira ให้มา — **ไม่ต้องแก้**
+(เดิมมติ 2026-10-16 B10 เพิ่ม `2xl:text-sm` · เลิกแล้วเมื่อ root font-size โตตามจอ — ใส่ซ้ำจะโตสองต่อ ·
+ถ้าโปรเจคเดิมมี `2xl:text-sm` ให้ถอดออก · ห้าม override ราย cell)
 
 ## `components/ui/input.tsx` · `textarea.tsx` — ช่องพิมพ์ 16px บนมือถือ (มติ 2026-10-18)
 
