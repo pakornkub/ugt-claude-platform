@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **ตารางผู้ใช้ `/admin/users` กรองตามบทบาทได้** — เดิมมีแต่ช่องค้นหารวม · คอลัมน์บทบาท (ไม่มี accessor) ตั้ง `meta.filterOptions` (ไม่มีบทบาท + ทุกบทบาทจาก `roles`) + `meta.filterValueOf: (u) => u.roleId ?? NO_ROLE` ให้ DataTable โหมด client ติ๊กเลือกที่หัวคอลัมน์ได้ · key ใหม่ `auth.usersTable.noRole` (th/en) · asset-map อัปเดต · origin ugt-hrms · 2026-11-23 · asset: ugt-nextjs-auth-setup/components/users-table.tsx, ugt-nextjs-auth-setup/messages/auth.th.ts, ugt-nextjs-auth-setup/messages/auth.en.ts
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx

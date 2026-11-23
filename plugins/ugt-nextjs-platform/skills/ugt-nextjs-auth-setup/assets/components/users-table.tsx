@@ -1,6 +1,6 @@
 'use client';
-// kit: ugt-nextjs-platform 4.79.0 · ugt-nextjs-auth-setup/components/users-table.tsx
-// kit-hash: ba68df884916
+// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/components/users-table.tsx
+// kit-hash: 20858c80f63a
 // components/users-table.tsx — client half of /admin/users: column defs ต้องเป็น
 // client code จึงแยกจาก page ที่ทำ guard + fetch · DataTable โหมด client
 // (master data ทั้งชุด — DESIGN.md §4) · ต้องมี org UI kit จาก
@@ -12,6 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { UserRoleSelect } from '@/components/user-role-select';
 // [METHOD: LOCAL] — ลบ import + คอลัมน์รหัสผ่านด้านล่างเมื่อไม่ได้เปิด local login
 import { SetPasswordDialog } from '@/components/admin-user-actions';
+
+// Base UI Select/ตัวกรองถือว่า value="" คือ "ยังไม่เลือก" — ใช้ค่าคงที่แทน "ไม่มีบทบาท" (ดู ugt-nextjs-pitfalls)
+const NO_ROLE = '__none__';
 
 type RoleOption = { id: string; name: string };
 type UserRow = {
@@ -51,7 +54,16 @@ export function UsersTable({
     {
       id: 'role',
       header: t('usersTable.colRole'),
-      meta: { mobileLabel: t('usersTable.colRole') },
+      meta: {
+        mobileLabel: t('usersTable.colRole'),
+        // กรองหัวคอลัมน์ด้วยการติ๊กบทบาท — คอลัมน์นี้ไม่มี accessor จึงต้องบอกค่าที่เทียบเอง
+        // (DataTable โหมด client เท่านั้น)
+        filterValueOf: (u: UserRow) => u.roleId ?? NO_ROLE,
+        filterOptions: [
+          { value: NO_ROLE, label: t('usersTable.noRole') },
+          ...roles.map((r) => ({ value: r.id, label: r.name })),
+        ],
+      },
       cell: ({ row }) => (
         <UserRoleSelect
           userId={row.original.id}
