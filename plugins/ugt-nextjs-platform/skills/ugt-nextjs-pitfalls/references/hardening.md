@@ -148,4 +148,38 @@ await prisma.$transaction(async (tx) => {
 must be `?? null`. When approving many rows, write them one by one inside the
 interactive transaction (raise its `timeout`): a lost row rolls the whole batch
 back and no email goes out.
+## 8. Every export of a `'use server'` file is a public endpoint — `_name` is not "internal"
+
+**Symptom.** An internal batch writer (`_runAnnualQuotaBatch`,
+`_runCarryForwardCutoff`) exported from a `'use server'` file so a cron route
+could import it — anyone with a session cookie (or none) could trigger it,
+because it had no permission check. Found in an audit, not by a user. The same
+audit found 14 exported read actions with no session check at all.
+**Root cause.** Next.js turns **every** export of a `'use server'` module into a
+Server Action reachable by a client POST. A leading underscore, a "private"
+JSDoc or the fact that only a route imports it changes nothing. (Auth-setup
+`auth-flows.md` already covers the sibling rule that such files may only export
+async functions, and `form-validation.md` says an action is a public endpoint —
+this is the consequence for functions that were never meant to be actions.)
+**Fix.**
+
+- A writer that has no guard of its own lives in `lib/services/*` (no
+  `'use server'`). The cron route and the guarded action both import from
+  there; the action adds session → permission → audit around it.
+- Every exported **read** action calls `requireSession()` (at least) before
+  touching the DB — reads leak data too.
+- Pin it with tests: one that reads the actions file and asserts the internal
+  names are not exported, one that runs every read action with a null session
+  and a prisma mock that throws on any access.
+
+```ts
+// lib/actions/leave-balance.ts  ('use server')  → only guarded exports
+// lib/services/leave-quota-batch.ts (no directive) → runAnnualQuotaBatchUnchecked
+it('lib/actions/leave-balance.ts exports no unchecked batch writer', () => {
+  const src = readFileSync('lib/actions/leave-balance.ts', 'utf8');
+  expect(src).toMatch(/^'use server'/);
+  expect(src).not.toMatch(/export\s+(async\s+)?function\s+(_run|\w+Unchecked)/);
+});
+```
+
 **Origin.** ugt-hrms · 2026-11-22

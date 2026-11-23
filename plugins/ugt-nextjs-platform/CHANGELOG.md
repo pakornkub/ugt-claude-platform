@@ -9,6 +9,7 @@
 - **หลัง migration เพิ่มคอลัมน์ ชื่อใน view กลายเป็นตัวเลข แล้วหน้าพัง (`e.trim is not a function`)** — symptom: ค่าคอลัมน์ใหม่เหลื่อมไปชื่อคอลัมน์เดิมท้าย view ไม่มี SQL error → cause: view `SELECT r.*` เก็บรายการคอลัมน์ตอนสร้าง ADD COLUMN ไม่ขยายให้ → fix: `EXEC sp_refreshview` ใน migration เดียวกับที่ ADD COLUMN + เทสสแกน migration · origin ugt-hrms · 2026-11-18
 - **กรองด้วย `?? undefined` ใน Prisma แล้วได้ทุกแถว** — symptom: กฎเฉพาะตำแหน่งใช้กับคนที่ไม่มีตำแหน่ง ไม่มี error → cause: branch `{ key: undefined }` ถูกตัดทิ้งเป็น `{}` ที่จับทุกแถว → fix: แยก branch ชัดเจนหรือใช้ `null` แล้วเทสตัว where กับ fixture · origin ugt-hrms · 2026-10-08
 - **`update({ where: { id, status } })` ไม่ใช่ guard — กดอนุมัติ/ยกเลิกซ้ำผ่านทั้งคู่** — Prisma บน SQL Server ทำ SELECT แล้ว UPDATE โดยไม่เช็คจำนวนแถวของ UPDATE → ผู้แพ้ race ไปต่อ (หักโควต้าซ้ำ · เมล "จ่ายแล้ว" ให้ใบที่ถูกปฏิเสธ) · `updateMany({ where: { id, status, approvalStep ?? null } })` ใน interactive `$transaction` + เช็ค `count === 1` (โยน P2025) + ผลข้างเคียงอยู่ใน tx เดียวกัน · hardening §8 · origin ugt-hrms · 2026-11-22
+- **ฟังก์ชันภายในที่ `export` จากไฟล์ `'use server'` ใครก็เรียกได้** — ทุก export ของไฟล์ `'use server'` คือ Server Action สาธารณะ (ขึ้นต้น `_` ไม่ช่วย) · writer ภายในที่ cron import ไม่มี permission check · read action 14 ตัวไม่เช็ค session · writer ที่ไม่มี guard ย้ายไป `lib/services/*` · ทุก read action เรียก `requireSession()` · เทสยืนยันว่าชื่อภายในไม่ถูก export · hardening §8 · origin ugt-hrms · 2026-11-22
 
 ## 4.98.0 (2026-11-19)
 

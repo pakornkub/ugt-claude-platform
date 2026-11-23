@@ -56,6 +56,7 @@ appears.
 | A link to `/page#section` from another page lands at the top though the URL has the hash ("กดลิงก์แล้วไม่เลื่อนไปหัวข้อ") | Next scrolled while the route’s `loading.tsx` skeleton was up — the id did not exist yet | ui-rendering |
 | The "เกิดข้อผิดพลาด" error screen is in a system font, unstyled; a sidebar/NavUser error skipped the group's `error.tsx` | `global-error.tsx` replaces the root `<html>` — no `next/font` variable classes, no `globals.css` unless it imports them | ui-rendering |
 | Double-click approve/cancel passes twice (quota deducted twice, email for a rejected request) though the code checks status | `update({ where: { id, status } })` is SELECT + UPDATE on SQL Server and never checks the row count — use `updateMany` + `count === 1` in an interactive `$transaction` | hardening |
+| An internal function exported from a `'use server'` file (cron helper, `_name`) can be triggered by anyone; read actions with no session check | every export of a `'use server'` module is a public Server Action — move unguarded writers to `lib/services/*`, `requireSession()` in every read action, test the exports | hardening |
 
 ## Which reference, when
 
