@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **กรองด้วย `?? undefined` ใน Prisma แล้วได้ทุกแถว** — symptom: กฎเฉพาะตำแหน่งใช้กับคนที่ไม่มีตำแหน่ง ไม่มี error → cause: branch `{ key: undefined }` ถูกตัดทิ้งเป็น `{}` ที่จับทุกแถว → fix: แยก branch ชัดเจนหรือใช้ `null` แล้วเทสตัว where กับ fixture · origin ugt-hrms · 2026-10-08
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx

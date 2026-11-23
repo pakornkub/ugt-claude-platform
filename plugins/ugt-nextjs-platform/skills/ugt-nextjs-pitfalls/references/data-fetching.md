@@ -170,3 +170,25 @@ A cheap guard that keeps this from coming back: a test that scans `app/` +
 `components/` and fails on any `router.refresh()` not written as
 `start…(() => router.refresh())`.
 **Origin.** ugt-hrms (RT-078) · 2026-11-11
+
+## 7. `?? undefined` in a Prisma filter matches every row
+
+**Symptom.** A rule written for one position applies to people who have no position: the filter that should narrow returns every row, the higher-priority position-specific rule wins, and nothing errors. A unit test that mocks `findMany` with fixed rows still passes.
+
+**Root cause.** `where: { OR: [{ positionCode: null }, { positionCode: employee.positionCode ?? undefined }] }` — when `positionCode` is missing, the second branch becomes `{ positionCode: undefined }`. Prisma drops `undefined` keys, so that branch is `{}`, and `{}` matches every row. `undefined` means "no condition", not "empty value".
+
+**Fix.** Branch explicitly; never let `undefined` stand in for "no value" inside a filter you mean to narrow:
+
+```ts
+const positionScope: Prisma.RuleWhereInput[] = employee.positionCode
+  ? [{ positionCode: null }, { positionCode: employee.positionCode }]
+  : [{ positionCode: null }];
+
+const rules = await prisma.allowanceRule.findMany({
+  where: { IsActive: true, OR: positionScope },
+});
+```
+
+Test the `where` itself: evaluate it against fixture rows (undefined keys dropped, as Prisma does) and assert which rows match. A mock `findMany` that returns fixed rows cannot catch this class of bug.
+
+**Origin.** ugt-hrms (RT-058) · 2026-10-08

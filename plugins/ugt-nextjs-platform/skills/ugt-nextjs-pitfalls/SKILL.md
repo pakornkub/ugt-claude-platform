@@ -8,7 +8,7 @@ description: >
   พ.ศ., stale UI after save ("บันทึกแล้วหน้าไม่อัปเดต"), no loading while the new data arrives
   ("กดแล้วไม่มี loading"), fetch 404 only in
   production, "Maximum update depth exceeded", "หน้า 1 จาก 0", Select crashing
-  on an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), form
+  on an empty value, wrong table row selected ("ติ๊กแถวนึงได้อีกแถว"), a filter that returns every row ("กรองแล้วได้ทุกแถว" — `?? undefined` in a Prisma `where`), form
   passes validation but save rejects ("ฟอร์มผ่านแต่บันทึกไม่ได้"), code edits not
   showing ("แก้โค้ดแล้วหน้าไม่เปลี่ยน"), a form open across a deploy that can't
   save ("ส่งข้อมูลไม่ได้หลัง deploy", `Server Action … was not found`), React
@@ -45,6 +45,7 @@ appears.
 | Select crashes on an empty value | `<SelectItem value="">` — empty is the "not selected" sentinel | Quick Rules (below) |
 | Select shows an id / `__none__` instead of the label after choosing | Base UI `<SelectValue>` renders the raw value unless the root gets `items` | form-validation |
 | Ticking one table row selects a different one ("ติ๊กแถวนึงได้อีกแถว") | selection riding on row index, no `getRowId` | data-fetching |
+| A filter that should narrow returns every row — a position-specific rule applies to people with no position, no error ("กรองแล้วได้ทุกแถว") | `?? undefined` in a Prisma `where`: Prisma drops the key, the branch becomes `{}` and matches all rows; mock-based tests pass | data-fetching §7 |
 | Form passes validation but is rejected at save ("ฟอร์มผ่านแต่บันทึกไม่ได้") | client Zod schema and Server Action schema drifted apart | form-validation |
 | A page open across a deploy fails every Server Action ("ส่งข้อมูลไม่ได้หลัง deploy", `UnrecognizedActionError` + `POST … 409`); refresh fixes it but loses the typed form | action ids change per build; catch `unstable_isUnrecognizedActionError`, keep a read-once draft, offer a reload (deploy half: cicd-setup `version-skew.md`) | version-skew |
 | Code edits not showing in the browser while the file on disk is correct ("แก้โค้ดแล้วหน้าไม่เปลี่ยน") | stale `.next` dev cache | Quick Rules (below) |
@@ -88,6 +89,7 @@ upstream library docs.
 | Log-and-rethrow in DB helpers; check `response.ok` before `.json()` | `catch { return []; }` — masks schema/connection errors as "no data" |
 | `'use no memo'` first line inside every `useReactTable` component | Assume React Compiler handles TanStack Table |
 | Pass `getRowId` (real id) to any selectable table | Let selection ride on row index — wrong rows selected after a data swap |
+| Branch a Prisma filter explicitly (build the `OR` from real conditions) or use `null` for "no position" | `?? undefined` in a filter — `undefined` means no condition, so the filter matches every row (data-fetching §7) |
 | Invalidate React Query with **prefix** keys (`['feature']`) | Specific keys captured in stale `useCallback` closures |
 | Reset state on prop change with the render-phase compare pattern (react.dev) | `useEffect` + `setState` — blocked by `react-hooks/set-state-in-effect` anyway |
 | Tailwind v4: `bg-linear-to-*`, config in CSS only | `bg-gradient-to-*` / adding `tailwind.config.ts` |
