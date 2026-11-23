@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **แก้ Sonar "negated condition" ด้วยการพลิกเครื่องหมายเปรียบเทียบทำให้ record ที่ไม่มีฟิลด์ถูกตีตกทั้งหมด** — `!(x > 0) || …` → `x <= 0 || …` ไม่เท่ากันเมื่อ `x` เป็น `undefined`/`null`/`NaN` (`!(undefined > 0)` = true, `undefined <= 0` = false) · เทสของไฟล์ที่แก้ผ่านหมด พังเฉพาะผู้เรียกในไฟล์อื่น (Jenkins Unit Tests ตก) · เก็บผลเปรียบเทียบไว้ในตัวแปรชื่อมีความหมายแล้วปฏิเสธตัวแปร (`const required = x > 0; !required || …`) + รันเทสทั้งชุดหลังแก้ Sonar ใน services/actions · clean-code §1 "Rows people over-apply" · origin ugt-hrms · 2026-11-02
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
