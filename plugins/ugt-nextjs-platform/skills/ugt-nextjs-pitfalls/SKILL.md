@@ -53,6 +53,7 @@ appears.
 | A replaced image/file in `public/` still shows the old version after deploy ("เปลี่ยนรูปแล้วยังเห็นรูปเก่า") | same file name = same URL; proxy/image/browser caches key on the URL | ui-rendering |
 | React #418 / "Hydration failed" on every page, only on narrow screens | a hook (`useIsMobile`) read `window`/`matchMedia` during the first render | ui-rendering |
 | A link to `/page#section` from another page lands at the top though the URL has the hash ("กดลิงก์แล้วไม่เลื่อนไปหัวข้อ") | Next scrolled while the route’s `loading.tsx` skeleton was up — the id did not exist yet | ui-rendering |
+| The "เกิดข้อผิดพลาด" error screen is in a system font, unstyled; a sidebar/NavUser error skipped the group's `error.tsx` | `global-error.tsx` replaces the root `<html>` — no `next/font` variable classes, no `globals.css` unless it imports them | ui-rendering |
 
 ## Which reference, when
 
@@ -63,14 +64,14 @@ appears.
 | Write a form's submit handler / Server Action error path (a page left open across a deploy) | `references/version-skew.md` |
 | Guard a route/action, build a batch/cron job, shape a DTO, pre-fill an edit form | `references/hardening.md` |
 | Build or change a form, add a validation rule, write the Server Action it submits to | `references/form-validation.md` |
-| Put numbers/codes in `font-mono`, pass `className` size/flex into a kit control, replace a file in `public/`, write a hook that reads the window/viewport/storage, link to a `#section` on another page | `references/ui-rendering.md` |
+| Put numbers/codes in `font-mono`, pass `className` size/flex into a kit control, replace a file in `public/`, write `global-error.tsx`, write a hook that reads the window/viewport/storage, link to a `#section` on another page | `references/ui-rendering.md` |
 
 Symptom → likely file: date wrong by 1 day / hours → dates-timezones · stale UI
 after save, infinite render loop, prod-only 404 → data-fetching · save fails
 only on a tab opened before a deploy → version-skew · a user seeing
 another user's rows, a cron wiping data early → hardening · the screen draws
 wrong while the code looks right (glyphs, heights, stale images, hydration
-#418) → ui-rendering.
+#418, error screen fonts) → ui-rendering.
 
 ## Quick Rules — DO / DON'T
 

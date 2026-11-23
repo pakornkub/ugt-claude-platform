@@ -1,6 +1,6 @@
 # UI rendering — what the browser actually draws
 
-Five traps where the code looks right and the screen is wrong. None throws an
+Six traps where the code looks right and the screen is wrong. None throws an
 exception except §4, and that one only in the console.
 
 ## 1. Thai text inside `font-mono` renders garbled
@@ -178,3 +178,50 @@ fixes the problem, but then every slow load shows no skeleton.
 does not prove that the page scrolled.
 
 **Origin.** ugt-hrms (RT-067) · 2026-11-02
+
+## 6. The error screen ("เกิดข้อผิดพลาด") renders in a system font — `global-error.tsx` has no fonts or CSS
+
+**Symptom.** After a crash the app shows the root error screen ("เกิดข้อผิดพลาด /
+ลองใหม่") in the browser's fallback font, not Inter / Noto Sans Thai, and
+without the app's tokens (colors, `antialiased`) — it looks like a different site.
+
+**Root cause.** `app/global-error.tsx` **replaces the root layout's `<html>`
+entirely**, so it gets neither the `next/font` CSS-variable classes from
+`app/layout.tsx` nor, unless it imports it, `globals.css`. Which crashes land
+there is easy to misjudge: an error thrown by a **client component inside a
+route-group layout** (sidebar, `NavUser`, header in `(app)/layout.tsx`) is
+outside that group's `error.tsx` — an error boundary catches only what renders
+*below* it — so it falls through to `global-error`.
+
+**Fix.** Put the font loaders in one module, import it from both files, and
+import `globals.css` in `global-error.tsx`:
+
+```ts
+// app/font-variables.ts — the only place the fonts are created
+import { Inter, Noto_Sans_Thai, Geist_Mono } from 'next/font/google'; // or next/font/local
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const notoSansThai = Noto_Sans_Thai({ subsets: ['thai'], variable: '--font-noto-sans-thai' });
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
+export const fontVariables = `${inter.variable} ${notoSansThai.variable} ${geistMono.variable}`;
+```
+
+```tsx
+// app/layout.tsx:        <html lang="th" className={fontVariables}>
+// app/global-error.tsx:
+'use client';
+import { fontVariables } from './font-variables';
+import './globals.css';
+// …<html lang="th" className={fontVariables}><body className="antialiased">…</body></html>
+```
+
+Keep `global-error` free of providers and next-intl hooks (the provider stack
+is not mounted there) — plain markup, hard-coded text. Do not create the fonts
+twice: two `next/font` calls produce two hashed class names and two font downloads.
+
+**How to check.** Throw from a client component in the group layout (temporarily
+in `NavUser`) and open the error screen — the font must match the app. The most
+common real trigger is a tab left open across a deploy; the deploy half of that
+is `ugt-nextjs-cicd-setup` `version-skew.md` (`deploymentId`) — this entry only
+fixes how the error screen looks.
+
+**Origin.** ugt-hrms (RT-085) · 2026-11-19

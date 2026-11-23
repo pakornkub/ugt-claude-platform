@@ -45,6 +45,8 @@ Record it as a มติ in DESIGN.md §10 so nobody switches back to Google.
 workaround — `ugt-nextjs-cicd-setup` `docker-deploy.md` §A.)
 **Origin.** ugt-hrms · 2026-11-02
 
+**`app/global-error.tsx` replaces this `<html>`** — create the fonts in one module (`app/font-variables.ts`) imported by both files and import `globals.css` in `global-error` too, or the error screen falls back to a system font (ugt-nextjs-pitfalls `ui-rendering.md` §6).
+
 `<html lang="th">` → `<html lang={locale}>` เมื่อ ภาษา = th+en (อ่าน locale
 ด้วย `getLocale()` จาก `next-intl/server` ใน RootLayout ซึ่งเป็น Server
 Component อยู่แล้ว) — `lang` ที่ไม่ตรงภาษาจริงทำให้ screen reader อ่านผิดภาษา
