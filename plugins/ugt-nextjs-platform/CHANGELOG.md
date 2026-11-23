@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **หลัง migration เพิ่มคอลัมน์ ชื่อใน view กลายเป็นตัวเลข แล้วหน้าพัง (`e.trim is not a function`)** — symptom: ค่าคอลัมน์ใหม่เหลื่อมไปชื่อคอลัมน์เดิมท้าย view ไม่มี SQL error → cause: view `SELECT r.*` เก็บรายการคอลัมน์ตอนสร้าง ADD COLUMN ไม่ขยายให้ → fix: `EXEC sp_refreshview` ใน migration เดียวกับที่ ADD COLUMN + เทสสแกน migration · origin ugt-hrms · 2026-11-18
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx

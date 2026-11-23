@@ -182,3 +182,22 @@ messages.
 
 4. To rename existing DB objects into convention → use the `sp_rename`
    technique from section 3
+
+## 6. Adding a column to a table a `SELECT *` view reads — refresh the view in the same migration
+
+**Symptom.** After a migration adds columns to a table, a page that reads a view written as `SELECT r.*, hr.FullNameThai AS RequesterNameTh …` breaks with no SQL error: values of the new columns show up under the view's old trailing names (a name shows as a number), and the page crashes once a row has the new columns non-null (`e.trim is not a function`). Rows where the new columns are null look correct, so the bug shows only after the first real use.
+
+**Root cause.** SQL Server fixes a view's column list when the view is created. `SELECT r.*` is expanded once; a later `ALTER TABLE … ADD` does not extend it, so the values shift positionally into the old trailing aliases. Nothing errors, and a unit test that mocks the query cannot see it.
+
+**Fix.** Refresh every view that reads the table, in the same migration that adds the column:
+
+```sql
+ALTER TABLE [dbo].[OTPlanRequests] ADD [PlanOtMinutes] INT NULL;
+EXEC sp_refreshview 'dbo.vwOTPlanApproval';
+```
+
+Quick check after deploy: `SELECT TOP 1 RequesterNameTh FROM dbo.vwOTPlanApproval WHERE PlanOtMinutes IS NOT NULL`
+must return a name, not a number. Stronger: add a test that scans `prisma/migrations/` and fails when a migration
+adds a column to a table that a view reads, without a matching `sp_refreshview` in that migration or a later one.
+
+**Origin.** ugt-hrms · 2026-11-18
