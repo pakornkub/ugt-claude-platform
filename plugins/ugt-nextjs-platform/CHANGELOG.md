@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **หน้า error (global-error) ใช้ฟอนต์ระบบ ไม่ตรงกับแอป** — `app/global-error.tsx` แทนที่ `<html>` ของ root layout ทั้งหมด จึงไม่ได้ class ตัวแปร `next/font` และไม่มี `globals.css` · error จาก client component ใน layout ของ route group (sidebar/NavUser) ไม่ถูก `error.tsx` ของกลุ่มจับ ตกมาที่ global-error · ย้าย font loader ไปโมดูลเดียว (`app/font-variables.ts`) ให้ root layout กับ global-error import ร่วมกัน + global-error import `globals.css` · pitfalls `ui-rendering.md` §6 + แถว symptom · root-layout.md ชี้ไป · ครึ่ง `deploymentId` อยู่ใน cicd-setup `version-skew.md` แล้ว · origin ugt-hrms · 2026-11-19
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
