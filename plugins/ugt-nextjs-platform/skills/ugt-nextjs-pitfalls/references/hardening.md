@@ -107,3 +107,45 @@ Models hardcode UI strings constantly — enforce on every feature:
 - [ ] A new namespace is also registered in `i18n/messages.ts` — copied but
       unregistered means every `t()` in it renders its raw key path on screen
 - [ ] No literal `{`/`}` in any message (see Quick Rules — ICU)
+
+## 8. A status check in `update({ where })` is not a guard — double-click wins twice
+
+**Symptom.** Approve / reject / cancel flows ("อ่านสถานะ → ตรวจ → เขียน") let
+two near-simultaneous requests both through: quota deducted twice, an override
+written for a request that was just cancelled, a "paid" email sent for a claim
+someone else rejected.
+**Root cause.** `prisma.x.update({ where: { id, status: 'PENDING' } })` looks
+atomic but is not on SQL Server: with a non-unique key in `where` Prisma issues
+a `SELECT` then an `UPDATE` and never checks the UPDATE's own row count, so the
+loser of the race proceeds as if it had written. `updateMany` without reading
+`count` guards nothing either, and the array form `$transaction([...])` cannot
+roll back on `count === 0`. (Found in ugt-hrms by simulating a driver adapter in
+a test.)
+**Fix.** Put every field the decision was based on in an `updateMany` `where`,
+inside an interactive transaction, assert `count === 1`, and keep the side
+effects in that same transaction (or run them only after the guarded write
+succeeded). Throw a P2025-shaped error so one handler maps it to a "not
+pending" message:
+
+```ts
+export function oneRow(res: { count: number }): void {
+  if (res.count === 0) throw Object.assign(new Error('lost race'), { code: 'P2025' });
+}
+
+await prisma.$transaction(async (tx) => {
+  oneRow(
+    await tx.leaveRequest.updateMany({
+      where: { id, status: 'PENDING', approvalStep: step ?? null }, // ?? null, never undefined
+      data: { status: 'APPROVED' },
+    })
+  );
+  await tx.leaveBalance.upsert(/* quota deduction — rolled back if the guard threw */);
+});
+// catch (e) { if (isRecordNotFound(e)) return { error: t('notPending') }; throw e; }
+```
+
+`undefined` in a Prisma `where` means "no filter" — nullable fields (`approvalStep`)
+must be `?? null`. When approving many rows, write them one by one inside the
+interactive transaction (raise its `timeout`): a lost row rolls the whole batch
+back and no email goes out.
+**Origin.** ugt-hrms · 2026-11-22

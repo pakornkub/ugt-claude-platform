@@ -55,6 +55,7 @@ appears.
 | React #418 / "Hydration failed" on every page, only on narrow screens | a hook (`useIsMobile`) read `window`/`matchMedia` during the first render | ui-rendering |
 | A link to `/page#section` from another page lands at the top though the URL has the hash ("กดลิงก์แล้วไม่เลื่อนไปหัวข้อ") | Next scrolled while the route’s `loading.tsx` skeleton was up — the id did not exist yet | ui-rendering |
 | The "เกิดข้อผิดพลาด" error screen is in a system font, unstyled; a sidebar/NavUser error skipped the group's `error.tsx` | `global-error.tsx` replaces the root `<html>` — no `next/font` variable classes, no `globals.css` unless it imports them | ui-rendering |
+| Double-click approve/cancel passes twice (quota deducted twice, email for a rejected request) though the code checks status | `update({ where: { id, status } })` is SELECT + UPDATE on SQL Server and never checks the row count — use `updateMany` + `count === 1` in an interactive `$transaction` | hardening |
 
 ## Which reference, when
 
