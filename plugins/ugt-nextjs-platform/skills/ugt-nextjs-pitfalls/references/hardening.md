@@ -148,7 +148,10 @@ await prisma.$transaction(async (tx) => {
 must be `?? null`. When approving many rows, write them one by one inside the
 interactive transaction (raise its `timeout`): a lost row rolls the whole batch
 back and no email goes out.
-## 8. Every export of a `'use server'` file is a public endpoint — `_name` is not "internal"
+
+**Origin.** ugt-hrms · 2026-11-22
+
+## 9. Every export of a `'use server'` file is a public endpoint — `_name` is not "internal"
 
 **Symptom.** An internal batch writer (`_runAnnualQuotaBatch`,
 `_runCarryForwardCutoff`) exported from a `'use server'` file so a cron route

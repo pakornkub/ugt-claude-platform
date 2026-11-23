@@ -210,7 +210,8 @@ check('Tokens from มติ 2026-10-16 present (status-violet · cat-1..8 · re
 
 check('layout.tsx wires the agreed font via next/font', () => {
   if (!hasIn('app', 'layout.tsx')) return { ok: false, msg: 'No app/layout.tsx' };
-  const l = readIn('app', 'layout.tsx');
+  // fonts may live in app/font-variables.ts, shared with global-error.tsx (pitfalls ui-rendering §6)
+  const l = readIn('app', 'layout.tsx') + (hasIn('app', 'font-variables.ts') ? readIn('app', 'font-variables.ts') : '');
   const kept = keptFont();
   if (kept) {
     return /from ['"]next\/font\/(google|local)['"]/.test(l)

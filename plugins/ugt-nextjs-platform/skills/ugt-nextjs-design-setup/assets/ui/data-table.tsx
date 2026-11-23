@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/data-table.tsx
+// kit: ugt-nextjs-platform 4.99.0 · ugt-nextjs-design-setup/ui/data-table.tsx
 // kit-hash: 0f5c0665bc50
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit, full option set)
 // MIGRATION (4.26.0): this component now renders its own §3 card (prop `card`,

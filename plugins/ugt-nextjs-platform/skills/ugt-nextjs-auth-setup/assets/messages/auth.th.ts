@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-auth-setup/messages/auth.th.ts
+// kit: ugt-nextjs-platform 4.99.0 · ugt-nextjs-auth-setup/messages/auth.th.ts
 // kit-hash: d1d3360e98a8
 // Thai catalog for ugt-nextjs-auth-setup. Keys must match auth.en.ts exactly —
 // scripts/check-i18n.mjs fails the build when they drift.

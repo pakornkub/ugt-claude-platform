@@ -1,4 +1,4 @@
-// kit: ugt-nextjs-platform unreleased · ugt-nextjs-design-setup/ui/date-picker.tsx
+// kit: ugt-nextjs-platform 4.99.0 · ugt-nextjs-design-setup/ui/date-picker.tsx
 // kit-hash: 2eaec4a9c4c2
 // source: ugt-hrms — installed by ugt-nextjs-design-setup (org UI kit)
 'use client';
