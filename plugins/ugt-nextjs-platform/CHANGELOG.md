@@ -1,5 +1,9 @@
 # Changelog — ugt-nextjs-platform
 
+## Unreleased
+
+- **ฟังก์ชันภายในที่ `export` จากไฟล์ `'use server'` ใครก็เรียกได้** — ทุก export ของไฟล์ `'use server'` คือ Server Action สาธารณะ (ขึ้นต้น `_` ไม่ช่วย) · writer ภายในที่ cron import ไม่มี permission check · read action 14 ตัวไม่เช็ค session · writer ที่ไม่มี guard ย้ายไป `lib/services/*` · ทุก read action เรียก `requireSession()` · เทสยืนยันว่าชื่อภายในไม่ถูก export · hardening §8 · origin ugt-hrms · 2026-11-22
+
 ## 4.98.0 (2026-11-19)
 
 - **หน้าใน shell ที่รวมเมนู admin พัง 500 ทั้งหมด** — `ADMIN_NAV_ITEMS` อยู่ในไฟล์ `'use client'` (`components/admin-nav.tsx`) · shell ที่เป็น Server Component (merge §5.6 แบบ preserve mode, กรองด้วย perms + `getTranslations`) import ไปได้ client reference ไม่ใช่ array → `.filter is not a function` ทุกหน้า `/admin/*` และหน้าของ shell นั้น · ย้ายข้อมูลไป `components/admin-nav-items.ts` (plain module) · auth §5.6 / mail §4.5 ชี้ไฟล์ใหม่ · แถว §Kit re-syncs · origin ugt-rd-laboratory · 2026-11-18 · asset: ugt-nextjs-auth-setup/components/admin-nav-items.ts, ugt-nextjs-auth-setup/components/admin-nav.tsx
