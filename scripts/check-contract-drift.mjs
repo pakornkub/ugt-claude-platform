@@ -333,6 +333,7 @@ const VERSION_SOURCES = [
   'ugt-php-platform',
   'ugt-python-platform',
   'ugt-devops-mcp',
+  'ugt-gemini-media',
 ];
 const versionCheck = { name: 'Doc versions match plugin.json (README.md + docs/web/index.html + reference.html)', files: {} };
 try {
