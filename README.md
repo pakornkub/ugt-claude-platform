@@ -27,6 +27,7 @@ Keycloak (SSO) · Jenkins + SonarQube + Docker — Python / PHP รองรั�
 | `ugt-python-platform` | 0.10.5 — ยังไม่ผ่าน pilot (ยังไม่ tag) | Deploy Python (FastAPI/Flask/Django/batch) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-php-platform` | 0.8.9 — pilot ที่สอง (ugt-bd-forecast) deploy ผ่านแล้ว 2026-09-03 **แต่ยังไม่ tag** | Deploy PHP (Laravel/CodeIgniter/legacy/WordPress) ขึ้น Jenkins+SonarQube+Docker ตามมาตรฐานองค์กร — เฉพาะ delivery pipeline เท่านั้น ยังไม่มี database/auth |
 | `ugt-devops-mcp` | 0.1.6 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude อ่าน Jenkins (สถานะ build, stage ที่พัง, console log) และ SonarQube (issue, Quality Gate) ได้เอง · อ่านอย่างเดียว · ถาม URL + token ตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
+| `ugt-gemini-media` | 0.1.0 — ยังไม่ผ่าน pilot (ยังไม่ tag) | **ไม่บังคับ ใช้ได้ทุก stack** — ให้ Claude สร้างเสียงพูด (`.wav` ไทย/อังกฤษ) และสร้าง/แต่งรูปด้วย Gemini · ถาม Gemini API key ส่วนตัวตอนเปิดใช้ (วิธีติดตั้งด้านล่าง) |
 | `ugt-core` | 2.23.0 | มาตรฐานกลางขององค์กร (ฐานข้อมูล, ระบบส่งงาน, ตัวตน, **ดีไซน์**) + ระบบความจำของทีม — มาเองไม่ต้องติดตั้ง |
 
 **เลือก bundle ไหน?** ไม่แน่ใจ → ใช้ `-superpowers` (ระบบทำงานเองอัตโนมัติ
@@ -135,6 +136,29 @@ claude mcp remove sonarqube -s user
 `SONARQUBE_URL`/`TOKEN`) ใน System Properties → Environment Variables → User variables ·
 `SONAR_HOST_URL`/`SONAR_TOKEN` (สคริปต์บางรุ่นใช้ชื่อนี้) ลบเฉพาะถ้าไม่ได้รัน
 sonar-scanner ในเครื่อง — scanner ใช้ชื่อเดียวกัน · โฟลเดอร์ `~/.claude/mcp-servers/` ลบได้
+
+### (ไม่บังคับ) ให้ Claude สร้างเสียงพูดและรูปด้วย Gemini
+
+```
+/plugin install ugt-gemini-media@ugt
+```
+
+ตอนเปิดใช้จะถาม **Gemini API key ส่วนตัว** (สร้างที่ https://aistudio.google.com/apikey) ·
+ทุกครั้งที่เรียกจะเสียค่าใช้จ่ายจากบัญชีของ key นั้น (ยกเว้น `process_image` ที่ทำงานในเครื่อง) ·
+key เก็บที่เดียวกับ `ugt-devops-mcp` (ไม่อยู่ใน env var) · แก้ค่าทีหลัง: `/plugin` → `ugt-gemini-media` → configure
+
+- `gemini-tts` → tool `speak` · สั่งน้ำเสียงในข้อความได้ เช่น "พูดด้วยน้ำเสียงนุ่มนวล: …" ·
+  เสียงชาย เช่น `Charon`, `Algieba`, `Iapetus` · เสียงหญิง เช่น `Kore`, `Aoede`, `Leda` ·
+  ไฟล์บันทึกที่ `~/gemini-tts/` ถ้าไม่ระบุ `output_path`
+- `gemini-image` → `generate_image` (สร้างรูป · เสียเงิน) + `process_image` (ครอป/ย่อ/ลบพื้นหลังในเครื่อง · ฟรี) ·
+  ครั้งแรกที่เปิด `npx` ต้องดาวน์โหลดแพ็กเกจ — ถ้า `/mcp` ขึ้น failed รอบแรก ให้ restart Claude Code อีกครั้ง
+
+**เคยติดตั้งเองด้วย `claude mcp add` หรือสคริปต์** → ลบของเดิมก่อน ไม่งั้น tool ขึ้นซ้ำสองชุด แล้ว restart Claude Code:
+
+```
+claude mcp remove gemini-tts -s user
+claude mcp remove gemini-image -s user
+```
 
 <details>
 <summary>ทางเลือกอื่น: copy ไฟล์ตรง ๆ (ไม่ต้องแตะ marketplace แต่ update เองทุกครั้ง)</summary>

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ugt-gemini-media",
+  "displayName": "UGT Gemini Media MCP",
+  "version": "0.1.0",
+  "description": "Optional, any stack: Gemini MCP servers for text-to-speech (gemini-tts: speak → .wav, Thai + English) and image generation/processing (gemini-image). Asks for one personal Gemini API key when the plugin is enabled; the key is kept with Claude Code's own login secrets, not in env vars. Every call is billed to that key.",
+  "author": { "name": "UGT DX Team" },
+  "keywords": ["gemini", "tts", "image", "mcp"],
+  "userConfig": {
+    "gemini_api_key": {
+      "type": "string",
+      "title": "Gemini API key",
+      "description": "https://aistudio.google.com/apikey — your own key; usage is billed to it",
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "gemini-tts": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/gemini-tts.cjs"],
+      "env": {
+        "GEMINI_API_KEY": "${user_config.gemini_api_key}",
+        "NODE_USE_SYSTEM_CA": "1"
+      }
+    },
+    "gemini-image": {
+      "command": "npx",
+      "args": ["-y", "@jimothy-snicket/gemini-image-mcp@0.6.2"],
+      "env": {
+        "GEMINI_API_KEY": "${user_config.gemini_api_key}",
+        "NODE_USE_SYSTEM_CA": "1"
+      }
+    }
+  }
+}
